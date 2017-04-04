@@ -11,5 +11,5 @@
 
 | プラグイン     | 使い方    | 必要プラグイン |説明  |
 |:-----------|:-----------:|:-------------|:-------------|
-| [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js) | |-------------| ツリー型のスキル習得システム |
+| [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js) | [日本語](FTKR_SkillTreeSystem.ja.md)|-------------| ツリー型のスキル習得システム |
 | [FTKR_STS_CustomWindow](FTKR_STS_CustomWindow.js) | | [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js) | スキル習得画面のレイアウトを変更する|
