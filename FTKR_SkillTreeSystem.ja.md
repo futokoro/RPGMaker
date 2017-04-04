@@ -57,9 +57,11 @@
 
 スキルツリーは、以下のノートタグで設定を行います。
 
+```
 <Set Sts Data>
 code
 </Set Sts Data>
+```
 
 [code に使用できる項目]
 skill: x1,x2,...
@@ -91,9 +93,11 @@ eval部は、ダメージ計算式のように、計算式を入力すること�
 
 ![スキルの設定](image/FTKR_SkillTreeSystem_v1_6_0_N02_img003.jpg)
 
+```
 <Set Sts Data>
 code
 </Set Sts Data>
+```
 
 [code に使用できる項目]
 skill: y1,y2,...
@@ -159,9 +163,11 @@ eval部は、ダメージ計算式のように、計算式を入力すること�
 
 ![スキルツリーの登録](image/FTKR_SkillTreeSystem_v1_6_0_N02_img003.jpg)
 
+```
 <Set Sts Data>
 code
 </Set Sts Data>
+```
 
 [code に使用できる項目]
 TreeType: x1,x2,...
@@ -186,4 +192,5 @@ Init Sp: x
 [The MIT License (MIT)](https://opensource.org/licenses/mit-license.php)
 
 
+#
 [トップページに戻る](README.ja.md)
