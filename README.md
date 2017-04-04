@@ -11,5 +11,5 @@
 
 | plugin     | document    | required | description  |
 |:-----------|:-----------:|:-------------|:-------------|
-| [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js) | |:-------------| Tree-type Skill Learning System |
+| [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js) | |-------------| Tree-type Skill Learning System |
 | [FTKR_STS_CustomWindow](FTKR_STS_CustomWindow.js) | | [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js) | Change the window layout of Tree-type Skill Learning System |
