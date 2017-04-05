@@ -74,6 +74,7 @@ STS スキルツリー画面表示
 `Get Level Up Sp`
 
 レベルアップ時の入手SPを eval で設定します。
+
 ![GetLevelUpSp](image/FTKR_SkillTreeSystem_n01_008.png)
 
 #### eval の値について
