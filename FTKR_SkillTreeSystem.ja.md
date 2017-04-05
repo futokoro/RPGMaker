@@ -10,13 +10,13 @@
 
 本プラグインにより、スキル習得システムの専用画面を表示し、視覚的にスキルを習得することができるようになります。
 
-![スキルツリー画面](image/FTKR_SkillTreeSystem_n01_001.jpg)
+![スキルツリー画面](image/FTKR_SkillTreeSystem_n01_001.png)
 
 専用画面は、以下の方法で表示できます。
 
 1. プラグインパラメータ<Show Skill Command>が 1 の時にメニュー画面のコマンドから表示
 
-![メニュー画面](image/FTKR_SkillTreeSystem_n01_002.jpg)
+![メニュー画面](image/FTKR_SkillTreeSystem_n01_002.png)
 
 2. プラグインコマンドを実行
 ```
