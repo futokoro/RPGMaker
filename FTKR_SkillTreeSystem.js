@@ -3374,6 +3374,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 };
 
 Game_Interpreter.prototype.setNum = function(data) {
+	if (!data) return 0;
     if (data.match(/v\[(\d+)\]/i)) {
         return $gameVariables.value(Number(RegExp.$1));
     } else if (data.match(/(\d+)/i)) {
