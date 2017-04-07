@@ -21,7 +21,7 @@
     2. [スキルの設定](#スキルの設定)
     3. [スキルツリーをアクターとクラスに登録する](#スキルツリーをアクターとクラスに登録する)
     4. [スキルツリーの初期化](#スキルツリーの初期化)
-4. [レイアウトの変更](#レイアウトの変更)
+4. [レイアウトの設定](#レイアウトの設定)
     1. [スキルツリーの表示設定](#スキルツリーの表示設定)
     2. [スキル表示設定](#スキル表示設定)
     3. [ウィンドウの表示設定](#ウィンドウの表示設定)
@@ -61,6 +61,15 @@
 コマンド「スキル習得」の表示は、プラグインパラメータ`Command Name`で変更できます。
 
 ![CommandName](image/FTKR_SkillTreeSystem_n01_004.png)
+
+また、以下のプラグインパラメータでメニュー欄への表示の有無をスイッチで制御できます。
+
+`Skill Menue Switch ID`
+
+0 を指定した場合は、この機能は無効です。
+1 以上の値を設定した場合、そのIDのスイッチが ON 状態の時にメニューに表示します。
+
+![CommandName](image/FTKR_SkillTreeSystem_n01_014.png)
 
 ### プラグインコマンドを実行
 以下のプラグインコマンドを実行することで、画面を表示します。
@@ -153,7 +162,6 @@ Max count: x
 
 ![DefaultMaxCount](image/FTKR_SkillTreeSystem_n01_006.png)
 
-
 #### 習得回数の取得
 スキルの習得回数は、以下のプラグインコマンドで取得できます。
 ```
@@ -189,6 +197,12 @@ eval式に対して、以下のコードを使用できます。
  * 1 - 確認する
  * 0 - 確認しない
 
+![EnableConfirmation](image/FTKR_SkillTreeSystem_n01_010.png)
+
+確認する場合は、スキル習得実行時に下のウィンドウを表示します。
+
+![確認画面](image/FTKR_SkillTreeSystem_n01_009.png)
+
 ### スキル習得時のSEの設定
 
 スキル習得時に鳴らすSEは種類、音量、ピッチ、位相を変更可能です。
@@ -210,6 +224,8 @@ SEのピッチを変更します。
 
 SEの位相を変更します。
 
+![確認画面](image/FTKR_SkillTreeSystem_n01_011.png)
+
 ### 変数およびスイッチの操作機能
 
 以下のプラグインパラメータを設定することで、スキル習得時のアクターとスキルの
@@ -222,6 +238,8 @@ SEの位相を変更します。
 `<Learned Skill Var ID>`
 
 習得したスキルのIDを格納する変数IDを指定します。
+
+![確認画面](image/FTKR_SkillTreeSystem_n01_012.png)
 
 [目次に戻る](#目次)
 
@@ -236,6 +254,8 @@ SEの位相を変更します。
 * 0 - リセットしない
 
 リセットしない場合、スキルを忘れてもスキルツリーでは習得済みの状態のままになります。スキルを再習得するためには、ツリーのリセットまたは初期化が必要になります。
+
+![確認画面](image/FTKR_SkillTreeSystem_n01_013.png)
 
 [目次に戻る](#目次)
 
@@ -552,7 +572,7 @@ STS 初期化 アクター(x) ツリータイプ(y)
 
 [目次に戻る](#目次)
 
-## レイアウトの変更
+## レイアウトの設定
 
 ## スキルツリーの表示設定
 
@@ -560,18 +580,45 @@ STS 初期化 アクター(x) ツリータイプ(y)
 
 `<Skill Tree Max Cols>`
 
-スキルを横に並べられる最大数の設定
+スキルを横に並べられる最大数の設定します。
+
+![画像](image/FTKR_SkillTreeSystem_n04_006.png)
 
 `<Skill Tree Height Space>`
 
-スキルの縦の間隔
+スキルの縦の間隔を指定します。
+
+![画像](image/FTKR_SkillTreeSystem_n04_007.png)
 
 `<Draw Line Type>`
 
-スキル間の線の引き方
+スキル間の線の引き方を指定します。
 * 1 - カギ線
 * 0 - 直線
 
+![画像](image/FTKR_SkillTreeSystem_n04_002.png)
+
+`<Tree Line Thick>`
+
+ツリーの線の太さを指定します。
+
+![画像](image/FTKR_SkillTreeSystem_n04_003.png)
+
+`<Add Frame To Line>`
+
+ツリーの線に黒枠を付けるかどうか指定します。
+* 1 - 付ける
+* 0 - 付けない
+
+![画像](image/FTKR_SkillTreeSystem_n04_004.png)
+
+`<Fit Line Color To Frame>`
+
+スキル間の線の色を枠の色に合わせるか指定します。
+* 1 - 合わせる
+* 0 - 合わせない
+
+![画像](image/FTKR_SkillTreeSystem_n04_005.png)
 
 [目次に戻る](#目次)
 
@@ -580,7 +627,7 @@ STS 初期化 アクター(x) ツリータイプ(y)
 スキルの表示は、以下で構成します。
 1. スキル枠
 2. スキルアイコン
-3. スキルテキスト
+3. スキルテキスト(デフォルトでは非表示)
 4. スキルカウント枠(習得回数)
 
 ![スキル表示設定](image/FTKR_SkillTreeSystem_n04_001.png)
@@ -590,19 +637,25 @@ STS 初期化 アクター(x) ツリータイプ(y)
 スキル枠には、以下の3種類の項目があります。
 以下のプラグインパラメータで設定を変えることができます。
 
-#### スキル枠サイズ
+#### スキル枠の基本設定
 
-以下スキル表示の基礎となる枠のサイズで、スキルツリーウィンドウの
-カーソルサイズでもあります。
+以下のプラグインパラメータで、枠線の表示と、サイズを設定します。
+
+`<Enabled Skill Frame>`
+
+枠表示を有効にするか設定します。
+* 1 - 有効 (デフォルト)
+* 0 - 無効
 
 `<Skill Frame Width>`
 
-枠の幅
+枠の幅を指定します。
 
 `<Skill Frame Height>`
 
-枠の高さ
+枠の高さを指定します。
 
+![画像](image/FTKR_SkillTreeSystem_n04_017.png)
 
 #### スキル枠線色
 
@@ -611,45 +664,21 @@ STS 初期化 アクター(x) ツリータイプ(y)
 
 `<Frame Color isLearned>`
 
-習得済みスキル
+習得済みスキルの枠線の色を指定します。
 
 `<Frame Color isLearn OK>`
 
-習得可能なスキル
+習得可能なスキルの枠線の色を指定します。
 
 `<Frame Color isReqSkill NG>`
 
-必要スキル未修得のスキル
+必要スキル未修得のスキルの枠線の色を指定します。
 
 `<Frame Color isRequired NG>`
 
-必要コストまたはパラメータ不足のスキル
+必要コストまたは習得条件未達のスキルの枠線の色を指定します。
 
-
-#### スキル枠の表示設定
-
-以下のプラグインパラメータで、枠を表示できます。
-
-`<Enabled Skill Frame>`
-
-枠表示を有効にするか設定します。
-* 0 - 無効
-* 1 - 有効
-
-FTKR_DisplayCommandFrame.js がある場合、以下のプラグインパラメータで
-スキル枠の表示タイプを変更できます。
-
-`<Skill Frame Type>`
-
-スキル枠の表示タイプを設定します
-* 0 - 非表示
-
-スキル枠の表示タイプを画像有り(3~5)に設定した場合、アクターのタグで設定した
-`<image index>`および`<image index on cursor>`の画像番号が有効になります。
-
-表示タイプや、画像番号等については、FTKR_DisplayCommandFrame.jsの
-ヘルプを参照してください。
-
+![画像](image/FTKR_SkillTreeSystem_n04_020.png)
 
 ### スキルアイコンの設定
 
@@ -663,6 +692,7 @@ FTKR_DisplayCommandFrame.js がある場合、以下のプラグインパラメ�
 
 スキル枠左上を原点としたアイコンのY座標
 
+![画像](image/FTKR_SkillTreeSystem_n04_018.png)
 
 ### スキルテキストの設定
 
@@ -690,6 +720,8 @@ FTKR_DisplayCommandFrame.js がある場合、以下のプラグインパラメ�
 
 スキル枠左上を原点としたスキル名のY座標
 
+![画像](image/FTKR_SkillTreeSystem_n04_019.png)
+
 ### スキルカウント枠の設定
 
 スキルの複数取得回数機能を有効にした場合の表示内容を設定できます。
@@ -713,6 +745,8 @@ FTKR_DisplayCommandFrame.js がある場合、以下のプラグインパラメ�
 
 カウント枠の太さ
 
+![画像](image/FTKR_SkillTreeSystem_n04_023.png)
+
 #### カウント枠の表示位置
 
 以下のパラメータで、表示位置を調整できます。
@@ -725,6 +759,7 @@ FTKR_DisplayCommandFrame.js がある場合、以下のプラグインパラメ�
 
 スキル枠右上を原点としたカウント枠のX座標
 
+![画像](image/FTKR_SkillTreeSystem_n04_024.png)
 
 #### カウント枠の表示内容
 
@@ -734,13 +769,15 @@ FTKR_DisplayCommandFrame.js がある場合、以下のプラグインパラメ�
 
 %1で習得回数を表示します。制御文字を使用できます。
 
-`<Count Frame Offset X>`
+`<Skill Count Offset X>`
 
 カウント枠に対する習得回数のX座標
 
-`<Count Frame Offset Y>`
+`<Skill Count Offset Y>`
 
 カウント枠に対する習得回数のX座標
+
+![画像](image/FTKR_SkillTreeSystem_n04_025.png)
 
 `<Skill Learned Icon>`
 
@@ -748,23 +785,7 @@ FTKR_DisplayCommandFrame.js がある場合、以下のプラグインパラメ�
 このアイコンは、複数習得回数機能を有効にしない場合でも
 スキルを習得すると表示します。
 
-FTKR_DisplayCommandFrame.js がある場合、以下のプラグインパラメータで
-カウント枠の表示タイプを変更できます。
-
-`<Count Frame Type>`
-
-カウント枠の表示タイプを設定します
-* 0 - 非表示
-
-カウント枠の表示タイプを画像有り(3~5)に設定した場合、以下の
-プラグインパラメータでカウント枠の画像番号を設定できます。
-
-`<Default Frame Image Index>`
-
-カウント枠の画像番号を設定します
-
-表示タイプや、画像番号等については、FTKR_DisplayCommandFrame.jsの
-ヘルプを参照してください。
+![画像](image/FTKR_SkillTreeSystem_n04_022.png)
 
 [目次に戻る](#目次)
 
@@ -795,9 +816,11 @@ FTKR_CustomSimpleActorStatus.jsのヘルプを参照してください。
 
 `<Skill Status Title Format>`
 
-デフォルトで "「スキル名」のスキル情報" と表示しいる部分の設定です。
+デフォルトで "[スキル名]のスキル情報" と表示しいる部分の設定です。
 %1 を記述した箇所がアクター名に、%2 がスキル名に換わります。
 制御文字が使えます。
+
+![画像](image/FTKR_SkillTreeSystem_n04_008.png)
 
 ### 習得コストウィンドウの表示設定
 
@@ -808,11 +831,15 @@ FTKR_CustomSimpleActorStatus.jsのヘルプを参照してください。
 デフォルトで "習得コスト" と表示しいる部分の設定です。
 制御文字が使えます。
 
+![画像](image/FTKR_SkillTreeSystem_n04_009.png)
+
 `<Cost Item Format>`
 
 デフォルトで、アイコンの後の "SP" 等と表示している部分の設定です。
 %1 を記述した箇所が コスト名 に換わります。
 制御文字が使えます。
+
+![画像](image/FTKR_SkillTreeSystem_n04_010.png)
 
 `<Cost Number Format>`
 
@@ -822,11 +849,15 @@ FTKR_CustomSimpleActorStatus.jsのヘルプを参照してください。
 文字列に記述した %1 が コスト値、%2 が 手持ちの値に換わります。
 文字列には制御文字は使用できません。
 
+![画像](image/FTKR_SkillTreeSystem_n04_011.png)
+
 ### 前提スキルウィンドウの表示設定
 
 以下のプラグインパラメータで、表示内容を変更します。
 
 `<Preskill Title Format>`
+
+![画像](image/FTKR_SkillTreeSystem_n04_012.png)
 
 デフォルトで "前提スキル" と表示しいる部分の設定です。
 制御文字が使えます。
@@ -836,6 +867,8 @@ FTKR_CustomSimpleActorStatus.jsのヘルプを参照してください。
 デフォルトで、前提スキル名を表示している部分の設定です。
 %1 を記述した箇所が スキル名 に換わります。
 制御文字が使えます。
+
+![画像](image/FTKR_SkillTreeSystem_n04_013.png)
 
 ### 確認ウィンドウの表示設定
 
@@ -847,15 +880,21 @@ FTKR_CustomSimpleActorStatus.jsのヘルプを参照してください。
 %1 を記述した箇所がアクター名に、%2 がスキル名に換わります。
 制御文字が使えます。
 
+![画像](image/FTKR_SkillTreeSystem_n04_014.png)
+
 `<Confirmation Ok Format>`
 
 デフォルトで、"実行する" を表示している部分の設定です。
 制御文字は使えません。
 
+![画像](image/FTKR_SkillTreeSystem_n04_015.png)
+
 `<Confirmation Cancel Format>`
 
 デフォルトで、"実行しない" を表示している部分の設定です。
 制御文字は使えません。
+
+![画像](image/FTKR_SkillTreeSystem_n04_016.png)
 
 ## その他の機能
 

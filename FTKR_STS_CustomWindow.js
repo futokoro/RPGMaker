@@ -3,8 +3,8 @@
 // FTKR_STS_CustomWindow.js
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/03/31
-// 最終更新日 : 2017/04/01
-// バージョン : v1.0.1
+// 最終更新日 : 2017/04/07
+// バージョン : v1.0.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.STS.CW = FTKR.STS.CW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.1 ツリー型スキル習得システム(v1.6)用 ウィンドウレイアウト変更プラグイン
+ * @plugindesc v1.0.2 ツリー型スキル習得システム(v1.6)用 ウィンドウレイアウト変更プラグイン
  * @author フトコロ
  *
  * @param --ツリータイプウィンドウの設定(Tree Types Window)--
@@ -174,6 +174,11 @@ FTKR.STS.CW = FTKR.STS.CW || {};
  * @param --コストウィンドウの設定(Cost Window)--
  * @default 
  *
+ * @param Always Display Cost
+ * @desc コストに常に表示するか。
+ *  1 - 表示する, 0 - 表示しない
+ * @default 1
+ *
  * @param Cost Position X
  * @desc コストウィンドウの左上のX座標を指定します。
  * (参考値：デフォルト画面幅サイズ = 816)
@@ -209,6 +214,11 @@ FTKR.STS.CW = FTKR.STS.CW || {};
  *
  * @param --前提スキルウィンドウの設定(Pre Skill Window)--
  * @default 
+ *
+ * @param Always Display Preskill
+ * @desc 前提スキルに常に表示するか。
+ *  1 - 表示する, 0 - 表示しない
+ * @default 0
  *
  * @param Preskill Position X
  * @desc 前提スキルウィンドウの左上のX座標を指定します。
@@ -401,6 +411,9 @@ FTKR.STS.CW = FTKR.STS.CW || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.2 - 2017/04/07 : 機能追加
+ *    1. コストウィンドウと前提スキルウィンドウの常時表示設定を移動。
+ * 
  * v1.0.1 - 2017/04/01 : 不具合修正、機能追加
  *    1. プラグインパラメータ<Tree Types Max Cols>の値が取得できていなかった
  *       不具合を修正。
@@ -419,6 +432,9 @@ if(Imported.FTKR_STS) {
 // プラグイン パラメータ
 //=============================================================================
 FTKR.STS.CW.parameters = PluginManager.parameters('FTKR_STS_CustomWindow');
+
+FTKR.STS.CW.alwaysDispCost = Number(FTKR.STS.CW.parameters['Always Display Cost'] || 0);
+FTKR.STS.CW.alwaysDispPreskill = Number(FTKR.STS.CW.parameters['Always Display Preskill'] || 0);
 
 //背景設定
 FTKR.STS.CW.background = {
@@ -606,6 +622,25 @@ Scene_STS.prototype.refreshActor = function() {
             this._contents.move(bgi.offsetX, bgi.offsetY);
         }
     }
+    if(!FTKR.STS.CW.alwaysDispCost)this._stsCostWindow.hide();
+    this._stsPreskillWindow.show();
+    if(!FTKR.STS.CW.alwaysDispPreskill) this._stsPreskillWindow.hide();
+};
+
+FTKR.STS.CW.Scene_STS_stsConfHide = Scene_STS.prototype.stsConfHide;
+Scene_STS.prototype.stsConfHide = function() {
+    FTKR.STS.CW.Scene_STS_stsConfHide.call(this);
+    this._stsPreskillWindow.show();
+    if(!FTKR.STS.CW.alwaysDispCost) this._stsCostWindow.hide();
+    if(!FTKR.STS.CW.alwaysDispPreskill) this._stsPreskillWindow.hide();
+};
+
+FTKR.STS.CW.Scene_STS_stsConfShow = Scene_STS.prototype.stsConfShow;
+Scene_STS.prototype.stsConfShow = function() {
+    FTKR.STS.CW.Scene_STS_stsConfShow.call(this);
+    this._stsPreskillWindow.hide();
+    if(!FTKR.STS.CW.alwaysDispCost) this._stsCostWindow.show();
+    if(!FTKR.STS.CW.alwaysDispPreskill) this._stsPreskillWindow.show();
 };
 
 //=============================================================================

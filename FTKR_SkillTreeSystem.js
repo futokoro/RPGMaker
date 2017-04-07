@@ -44,16 +44,6 @@ FTKR.STS = FTKR.STS || {};
  *  1 - 確認する, 0 - 確認しない
  * @default 1
  *
- * @param Always Display Cost
- * @desc コストに常に表示するか。
- *  1 - 表示する, 0 - 表示しない
- * @default 1
- *
- * @param Always Display Preskill
- * @desc 前提スキルに常に表示するか。
- *  1 - 表示する, 0 - 表示しない
- * @default 0
- *
  * @param Reset When Forgotten Skill
  * @desc スキルを忘れた時にツリーをリセットするか
  * 1 - リセットする, 0 - リセットしない
@@ -1176,6 +1166,7 @@ FTKR.STS = FTKR.STS || {};
  * v1.6.3 - 2017/04/07 : 機能追加、ヘルプファイルと合体。
  *    1. タグに日本語表記版を追加。
  *    2. FTKR_SkillTreeSystem_helpの内容を追記。
+ *    3. 習得コストと前提スキルウィンドウの常時表示設定の変更機能を削除。
  * 
  * v1.6.2 - 2017/04/02 : 不具合修正、機能追加
  *    1. レベルアップ時に入手するSPが正しく加算されない不具合を修正。
@@ -1296,8 +1287,6 @@ FTKR.STS.showCommand = Number(FTKR.STS.parameters['Show Skill Command'] || 0);
 FTKR.STS.commandName = String(FTKR.STS.parameters['Command Name'] || 'スキル習得');
 FTKR.STS.menuSwitchId = Number(FTKR.STS.parameters['Skill Menu Switch ID'] || 0);
 FTKR.STS.enableConf = Number(FTKR.STS.parameters['Enable Confirmation'] || 0);
-FTKR.STS.alwaysDispCost = Number(FTKR.STS.parameters['Always Display Cost'] || 0);
-FTKR.STS.alwaysDispPreskill = Number(FTKR.STS.parameters['Always Display Preskill'] || 0);
 FTKR.STS.learnedActorVarID = Number(FTKR.STS.parameters['Learned Actor Var ID'] || 0);
 FTKR.STS.learnedSkillVarID = Number(FTKR.STS.parameters['Learned Skill Var ID'] || 0);
 FTKR.STS.resetWhenForgottenSkill = Number(FTKR.STS.parameters['Reset When Forgotten Skill'] || 0);
@@ -2142,7 +2131,8 @@ Window_Base.prototype.drawCssActorSp = function(actor, x, y, width) {
 
 //アクター名、スキル名が使用できるタイトル文を表示する関数
 Window_Base.prototype.drawStsDescTitle = function(format, x, y, width, skill) {
-    var params = [this._actor._name, skill.name];
+    var name = skill ? skill.name : '';
+    var params = [this._actor._name, name];
     this.drawFormatTextEx(format, x, y, params, width);
 };
 
@@ -2928,16 +2918,18 @@ Window_StsCost.prototype.refresh = function() {
 };
 
 Window_StsCost.prototype.drawAllCost = function() {
-  if (this._actor && this._skillId) {
-    var skill = this._actor.stsSkill(this._skillId);
+  if (this._actor) {
+    var skill = this._skillId ? actor.stsSkill(this._skillId) : null;
     var width = this.width - this.padding * 2;
     var y = this.lineHeight();
     this.drawStsDescTitle(FTKR.STS.cost.titleFormat, 0, 0, width, skill);
-    for (var i = 0; i< 3; i++) {
-      var cost = skill.sts.costs[i];
-      if (cost) {
-        if (FTKR.STS.sp.hideCost0 && cost.type === 'sp' && (!cost.value || Number(cost.value) === 0)) continue;
-        this.drawStsCost(cost, 0, y*(1+i), width);
+    if (this._skillId) {
+      for (var i = 0; i< 3; i++) {
+        var cost = skill.sts.costs[i];
+        if (cost) {
+          if (FTKR.STS.sp.hideCost0 && cost.type === 'sp' && (!cost.value || Number(cost.value) === 0)) continue;
+          this.drawStsCost(cost, 0, y*(1+i), width);
+        }
       }
     }
   }
@@ -2999,19 +2991,21 @@ Window_StsPreskill.prototype.refresh = function() {
 };
 
 Window_StsPreskill.prototype.drawAllPreskill = function(index) {
-  if (this._actor && this._skillId && this._tTypeId) {
+  if (this._actor) {
     var actor = this._actor;
-    var skill = actor.stsSkill(this._skillId);
+    var skill = this._skillId ? actor.stsSkill(this._skillId) : null;
     var width = this.width - this.padding * 2;
     var y = this.lineHeight();
     this.drawStsDescTitle(FTKR.STS.preskill.titleFormat, 0, 0, width, skill);
-    var preskillIds = actor.getPreskillId(this._skillId, this._tTypeId);
-    for (var i = 0; i< preskillIds.length; i++) {
-      var preskill = actor.stsSkill(preskillIds[i]);
-      if (preskill) {
-        this.changePaintOpacity(actor.isStsLearnedSkill(preskill.id));
-        this.drawFormatTextEx(FTKR.STS.preskill.itemFormat, 0, y*(1+i), [preskill.name], width);
-        this.changePaintOpacity(1);
+    if (this._skillId && this._tTypeId) {
+      var preskillIds = actor.getPreskillId(this._skillId, this._tTypeId);
+      for (var i = 0; i< preskillIds.length; i++) {
+        var preskill = actor.stsSkill(preskillIds[i]);
+        if (preskill) {
+          this.changePaintOpacity(actor.isStsLearnedSkill(preskill.id));
+          this.drawFormatTextEx(FTKR.STS.preskill.itemFormat, 0, y*(1+i), [preskill.name], width);
+          this.changePaintOpacity(1);
+        }
       }
     }
   }
@@ -3217,10 +3211,9 @@ Scene_STS.prototype.refreshActor = function() {
   }
   var csw = this._stsCostWindow;
   csw.setActor(actor);
-  if(!FTKR.STS.alwaysDispCost) csw.hide();
   var psw = this._stsPreskillWindow;
   psw.setActor(actor);
-  if(!FTKR.STS.alwaysDispPreskill) psw.hide();
+  psw.hide();
 };
 
 Scene_STS.prototype.onActorChange = function() {
@@ -3288,15 +3281,13 @@ Scene_STS.prototype.onConfirmationCancel = function() {
 Scene_STS.prototype.stsConfHide = function() {
   this._stsConfWindow.hide();
   this._stsConfTitleWindow.hide();
-  if(!FTKR.STS.alwaysDispCost) this._stsCostWindow.hide();
-  if(!FTKR.STS.alwaysDispPreskill) this._stsPreskillWindow.hide();
+  this._stsPreskillWindow.hide();
 };
 
 Scene_STS.prototype.stsConfShow = function() {
   this._stsConfWindow.show();
   this._stsConfTitleWindow.show();
-  if(!FTKR.STS.alwaysDispCost) this._stsCostWindow.show();
-  if(!FTKR.STS.alwaysDispPreskill) this._stsPreskillWindow.show();
+  this._stsPreskillWindow.show();
 };
 
 //=============================================================================
