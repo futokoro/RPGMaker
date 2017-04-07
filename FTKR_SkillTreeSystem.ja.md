@@ -587,10 +587,14 @@ STS 初期化 アクター(x) ツリータイプ(y)
 `<Draw Line Type>`
 
 スキル間の線の引き方を指定します。
-* 1 - カギ線
+* 1 - カギ線(デフォルト)
 * 0 - 直線
 
 ![画像](image/FTKR_SkillTreeSystem_n04_002.png)
+
+直線にした場合、スキルツリーは下のようになります。
+
+![画像](image/FTKR_SkillTreeSystem_n04_021.png)
 
 `<Tree Line Thick>`
 
@@ -598,19 +602,31 @@ STS 初期化 アクター(x) ツリータイプ(y)
 
 ![画像](image/FTKR_SkillTreeSystem_n04_003.png)
 
+下の図は、左側が太さ 2 (デフォルト)、右側が太さ 4 です。
+図のように、枠線の太さも変わります。
+
+![画像](image/FTKR_SkillTreeSystem_n04_026.png)
+
 `<Add Frame To Line>`
 
 ツリーの線に黒枠を付けるかどうか指定します。
 * 1 - 付ける
-* 0 - 付けない
+* 0 - 付けない(デフォルト)
 
 ![画像](image/FTKR_SkillTreeSystem_n04_004.png)
+
+下の図は、左側が黒枠無し(デフォルト)、右側が黒枠有りです。
+分かりやすくするため、線の太さを4にしています。
+
+![画像](image/FTKR_SkillTreeSystem_n04_027.png)
 
 `<Fit Line Color To Frame>`
 
 スキル間の線の色を枠の色に合わせるか指定します。
-* 1 - 合わせる
+* 1 - 合わせる(デフォルト)
 * 0 - 合わせない
+
+合わせないにした場合は、スキル間の線の色は白になります。
 
 ![画像](image/FTKR_SkillTreeSystem_n04_005.png)
 
@@ -792,6 +808,8 @@ STS 初期化 アクター(x) ツリータイプ(y)
 * 名前
 * レベル
 * SP値
+
+![画像](image/FTKR_SkillTreeSystem_n04_028.png)
 
 拡張プラグインのFTKR_CustomSimpleActorStatus.jsがある場合、
 プラグインパラメータ`<ステータスの表示設定/Actor Status Layout>`以下の

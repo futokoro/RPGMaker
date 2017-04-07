@@ -2919,7 +2919,7 @@ Window_StsCost.prototype.refresh = function() {
 
 Window_StsCost.prototype.drawAllCost = function() {
   if (this._actor) {
-    var skill = this._skillId ? actor.stsSkill(this._skillId) : null;
+    var skill = this._skillId ? this._actor.stsSkill(this._skillId) : null;
     var width = this.width - this.padding * 2;
     var y = this.lineHeight();
     this.drawStsDescTitle(FTKR.STS.cost.titleFormat, 0, 0, width, skill);
