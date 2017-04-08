@@ -29,3 +29,9 @@
 | [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js) | [マニュアル](FTKR_SkillTreeSystem.ja.md) | [v1.6.3](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillTreeSystem.js) | なし | ツリー型のスキル習得システム |
 | [FTKR_STS_CustomWindow](FTKR_STS_CustomWindow.js) | 未作成 | [v1.0.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_STS_CustomWindow.js) | [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js) | スキルツリー習得画面のレイアウトを変更する |
 | [FTKR_SkillCounter](FTKR_SkillCounter.js) | 未作成 | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillCounter.js) | なし | 相手のスキルに対抗して効果を変える |
+
+## アイテム系 プラグイン
+
+| プラグイン | マニュアル | ダウンロード | 必須プラグイン | 説明 |
+|:-----------|:-----------:|:-------------|:-------------|:-------------|
+| [FTKR_ItemCompositionSystem](FTKR_ItemCompositionSystem.js) | 未作成 | [v0.9.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ItemCompositionSystem.js) | なし | アイテム合成システム |

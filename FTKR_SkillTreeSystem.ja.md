@@ -39,7 +39,7 @@
 
 また、アクター毎にスキル習得時に使用できるスキルポイント(SP)を実装します。
 
-![スキルツリー画面](image/FTKR_SkillTreeSystem_n01_001.png)
+![スキルツリー画面](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n01_001.png)
 
 [目次に戻る](#目次)
 
@@ -52,15 +52,15 @@
 
 プラグインパラメータ`Show Skill Command`が 1 であることを確認してください。（デフォルトで設定済み）
 
-![ShowSkillCommand](image/FTKR_SkillTreeSystem_n01_003.png)
+![ShowSkillCommand](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n01_003.png)
 
 この状態の時に、メニュー画面にコマンド「スキル習得」が表示します。
 
-![メニュー画面](image/FTKR_SkillTreeSystem_n01_002.png)
+![メニュー画面](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n01_002.png)
 
 コマンド「スキル習得」の表示は、プラグインパラメータ`Command Name`で変更できます。
 
-![CommandName](image/FTKR_SkillTreeSystem_n01_004.png)
+![CommandName](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n01_004.png)
 
 また、以下のプラグインパラメータでメニュー欄への表示の有無をスイッチで制御できます。
 
@@ -69,7 +69,7 @@
 0 を指定した場合は、この機能は無効です。
 1 以上の値を設定した場合、そのIDのスイッチが ON 状態の時にメニューに表示します。
 
-![CommandName](image/FTKR_SkillTreeSystem_n01_014.png)
+![CommandName](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n01_014.png)
 
 ### プラグインコマンドを実行
 以下のプラグインコマンドを実行することで、画面を表示します。
@@ -94,7 +94,7 @@ STS スキルツリー画面表示
 
 レベルアップ時の入手SPを eval で設定します。
 
-![GetLevelUpSp](image/FTKR_SkillTreeSystem_n01_008.png)
+![GetLevelUpSp](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n01_008.png)
 
 #### eval の値について
 eval部は、ダメージ計算式のように、計算式を入力することで、固定値以外の値を
@@ -148,7 +148,7 @@ STS 加算 Sp(v[1]) アクター(2)
 
 複数回習得機能を有効にするかどうか設定します。
 
-![EnabledSkillCount](image/FTKR_SkillTreeSystem_n01_005.png)
+![EnabledSkillCount](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n01_005.png)
 
 #### 最大習得回数の設定
 スキルのタグに以下を追加することで、スキルの習得回数を設定できます。
@@ -160,7 +160,7 @@ Max count: x
 スキルを x 回習得できるようにする。
 このタグがない場合は、プラグインパラメータ`Default Max Count`の設定値に従います。
 
-![DefaultMaxCount](image/FTKR_SkillTreeSystem_n01_006.png)
+![DefaultMaxCount](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n01_006.png)
 
 #### 習得回数の取得
 スキルの習得回数は、以下のプラグインコマンドで取得できます。
@@ -197,11 +197,11 @@ eval式に対して、以下のコードを使用できます。
  * 1 - 確認する
  * 0 - 確認しない
 
-![EnableConfirmation](image/FTKR_SkillTreeSystem_n01_010.png)
+![EnableConfirmation](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n01_010.png)
 
 確認する場合は、スキル習得実行時に下のウィンドウを表示します。
 
-![確認画面](image/FTKR_SkillTreeSystem_n01_009.png)
+![確認画面](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n01_009.png)
 
 ### スキル習得時のSEの設定
 
@@ -224,7 +224,7 @@ SEのピッチを変更します。
 
 SEの位相を変更します。
 
-![確認画面](image/FTKR_SkillTreeSystem_n01_011.png)
+![確認画面](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n01_011.png)
 
 ### 変数およびスイッチの操作機能
 
@@ -239,7 +239,7 @@ SEの位相を変更します。
 
 習得したスキルのIDを格納する変数IDを指定します。
 
-![確認画面](image/FTKR_SkillTreeSystem_n01_012.png)
+![確認画面](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n01_012.png)
 
 [目次に戻る](#目次)
 
@@ -255,7 +255,7 @@ SEの位相を変更します。
 
 リセットしない場合、スキルを忘れてもスキルツリーでは習得済みの状態のままになります。スキルを再習得するためには、ツリーのリセットまたは初期化が必要になります。
 
-![確認画面](image/FTKR_SkillTreeSystem_n01_013.png)
+![確認画面](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n01_013.png)
 
 [目次に戻る](#目次)
 
@@ -269,14 +269,14 @@ SEの位相を変更します。
 スキルツリーを作成するために、まず「武器タイプ」にスキルツリー用のタイプを作成してください。
 武器タイプ名を「スキルツリー」などと付けると、分かりやすくなると思います。
 
-![スキルツリーIDの登録](image/FTKR_SkillTreeSystem_n02_001.png)
+![スキルツリーIDの登録](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n02_001.png)
 
 ### スキルツリーの作成
 
 スキルツリーは、データベースの武器に作成します。
 作成した武器のIDが、後述のツリータイプIDになります。
 
-![スキルツリーの設定1](image/FTKR_SkillTreeSystem_n02_005.png)
+![スキルツリーの設定1](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n02_005.png)
 
 スキルツリーとして設定が必要なデータは以下の通りです。
 
@@ -285,7 +285,7 @@ SEの位相を変更します。
 3. 武器のアイコンがスキルツリーのアイコンとして画面に表示します。
 4. メモ欄にスキルツリー用のノートタグを追加してください。
 
-![スキルツリーの設定2](image/FTKR_SkillTreeSystem_n02_002.png)
+![スキルツリーの設定2](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n02_002.png)
 
 スキルツリーは、以下のノートタグで設定を行います。
 ```
@@ -330,7 +330,7 @@ eval部は、ダメージ計算式のように、計算式を入力すること�
 スキルツリーを作成した後に、ツリーを構成するスキルの設定を行います。
 ツリーを構成させる各スキルのメモ欄にスキル用のノートタグを追加してください。
 
-![スキルの設定](image/FTKR_SkillTreeSystem_n02_003.png)
+![スキルの設定](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n02_003.png)
 
 スキルは、以下のノートタグで設定を行います。
 ```
@@ -452,7 +452,7 @@ eval部は、ダメージ計算式のように、計算式を入力すること�
 
 アクターまたはクラスのメモ欄にノートタグを追加してください。
 
-![スキルツリーの登録](image/FTKR_SkillTreeSystem_n02_004.png)
+![スキルツリーの登録](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n02_004.png)
 
 アクターとクラスは、以下のノートタグで設定を行います。
 
@@ -576,13 +576,13 @@ STS 初期化 アクター(x) ツリータイプ(y)
 
 スキルを横に並べられる最大数の設定します。
 
-![画像](image/FTKR_SkillTreeSystem_n04_006.png)
+![画像](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_006.png)
 
 `<Skill Tree Height Space>`
 
 スキルの縦の間隔を指定します。
 
-![画像](image/FTKR_SkillTreeSystem_n04_007.png)
+![画像](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_007.png)
 
 `<Draw Line Type>`
 
@@ -590,22 +590,22 @@ STS 初期化 アクター(x) ツリータイプ(y)
 * 1 - カギ線(デフォルト)
 * 0 - 直線
 
-![画像](image/FTKR_SkillTreeSystem_n04_002.png)
+![画像](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_002.png)
 
 直線にした場合、スキルツリーは下のようになります。
 
-![画像](image/FTKR_SkillTreeSystem_n04_021.png)
+![画像](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_021.png)
 
 `<Tree Line Thick>`
 
 ツリーの線の太さを指定します。
 
-![画像](image/FTKR_SkillTreeSystem_n04_003.png)
+![画像](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_003.png)
 
 下の図は、左側が太さ 2 (デフォルト)、右側が太さ 4 です。
 図のように、枠線の太さも変わります。
 
-![画像](image/FTKR_SkillTreeSystem_n04_026.png)
+![画像](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_026.png)
 
 `<Add Frame To Line>`
 
@@ -613,12 +613,12 @@ STS 初期化 アクター(x) ツリータイプ(y)
 * 1 - 付ける
 * 0 - 付けない(デフォルト)
 
-![画像](image/FTKR_SkillTreeSystem_n04_004.png)
+![画像](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_004.png)
 
 下の図は、左側が黒枠無し(デフォルト)、右側が黒枠有りです。
 分かりやすくするため、線の太さを4にしています。
 
-![画像](image/FTKR_SkillTreeSystem_n04_027.png)
+![画像](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_027.png)
 
 `<Fit Line Color To Frame>`
 
@@ -628,7 +628,7 @@ STS 初期化 アクター(x) ツリータイプ(y)
 
 合わせないにした場合は、スキル間の線の色は白になります。
 
-![画像](image/FTKR_SkillTreeSystem_n04_005.png)
+![画像](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_005.png)
 
 [目次に戻る](#目次)
 
@@ -640,7 +640,7 @@ STS 初期化 アクター(x) ツリータイプ(y)
 3. スキルテキスト(デフォルトでは非表示)
 4. スキルカウント枠(習得回数)
 
-![スキル表示設定](image/FTKR_SkillTreeSystem_n04_001.png)
+![スキル表示設定](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_001.png)
 
 ### スキル枠の設定
 
@@ -665,7 +665,7 @@ STS 初期化 アクター(x) ツリータイプ(y)
 
 枠の高さを指定します。
 
-![画像](image/FTKR_SkillTreeSystem_n04_017.png)
+![画像](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_017.png)
 
 #### スキル枠線色
 
@@ -688,7 +688,7 @@ STS 初期化 アクター(x) ツリータイプ(y)
 
 必要コストまたは習得条件未達のスキルの枠線の色を指定します。
 
-![画像](image/FTKR_SkillTreeSystem_n04_020.png)
+![画像](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_020.png)
 
 ### スキルアイコンの設定
 
@@ -702,7 +702,7 @@ STS 初期化 アクター(x) ツリータイプ(y)
 
 スキル枠左上を原点としたアイコンのY座標
 
-![画像](image/FTKR_SkillTreeSystem_n04_018.png)
+![画像](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_018.png)
 
 ### スキルテキストの設定
 
@@ -730,7 +730,7 @@ STS 初期化 アクター(x) ツリータイプ(y)
 
 スキル枠左上を原点としたスキル名のY座標
 
-![画像](image/FTKR_SkillTreeSystem_n04_019.png)
+![画像](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_019.png)
 
 ### スキルカウント枠の設定
 
@@ -755,7 +755,7 @@ STS 初期化 アクター(x) ツリータイプ(y)
 
 カウント枠の太さ
 
-![画像](image/FTKR_SkillTreeSystem_n04_023.png)
+![画像](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_023.png)
 
 #### カウント枠の表示位置
 
@@ -769,7 +769,7 @@ STS 初期化 アクター(x) ツリータイプ(y)
 
 スキル枠右上を原点としたカウント枠のX座標
 
-![画像](image/FTKR_SkillTreeSystem_n04_024.png)
+![画像](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_024.png)
 
 #### カウント枠の表示内容
 
@@ -787,7 +787,7 @@ STS 初期化 アクター(x) ツリータイプ(y)
 
 カウント枠に対する習得回数のX座標
 
-![画像](image/FTKR_SkillTreeSystem_n04_025.png)
+![画像](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_025.png)
 
 `<Skill Learned Icon>`
 
@@ -795,7 +795,7 @@ STS 初期化 アクター(x) ツリータイプ(y)
 このアイコンは、複数習得回数機能を有効にしない場合でも
 スキルを習得すると表示します。
 
-![画像](image/FTKR_SkillTreeSystem_n04_022.png)
+![画像](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_022.png)
 
 [目次に戻る](#目次)
 
@@ -809,7 +809,7 @@ STS 初期化 アクター(x) ツリータイプ(y)
 * レベル
 * SP値
 
-![画像](image/FTKR_SkillTreeSystem_n04_028.png)
+![画像](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_028.png)
 
 拡張プラグインのFTKR_CustomSimpleActorStatus.jsがある場合、
 プラグインパラメータ`<ステータスの表示設定/Actor Status Layout>`以下の
@@ -832,7 +832,7 @@ FTKR_CustomSimpleActorStatus.jsのヘルプを参照してください。
 %1 を記述した箇所がアクター名に、%2 がスキル名に換わります。
 制御文字が使えます。
 
-![画像](image/FTKR_SkillTreeSystem_n04_008.png)
+![画像](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_008.png)
 
 ### 習得コストウィンドウの表示設定
 
@@ -843,7 +843,7 @@ FTKR_CustomSimpleActorStatus.jsのヘルプを参照してください。
 デフォルトで "習得コスト" と表示しいる部分の設定です。
 制御文字が使えます。
 
-![画像](image/FTKR_SkillTreeSystem_n04_009.png)
+![画像](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_009.png)
 
 `<Cost Item Format>`
 
@@ -851,7 +851,7 @@ FTKR_CustomSimpleActorStatus.jsのヘルプを参照してください。
 %1 を記述した箇所が コスト名 に換わります。
 制御文字が使えます。
 
-![画像](image/FTKR_SkillTreeSystem_n04_010.png)
+![画像](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_010.png)
 
 `<Cost Number Format>`
 
@@ -861,7 +861,7 @@ FTKR_CustomSimpleActorStatus.jsのヘルプを参照してください。
 文字列に記述した %1 が コスト値、%2 が 手持ちの値に換わります。
 文字列には制御文字は使用できません。
 
-![画像](image/FTKR_SkillTreeSystem_n04_011.png)
+![画像](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_011.png)
 
 ### 前提スキルウィンドウの表示設定
 
@@ -869,7 +869,7 @@ FTKR_CustomSimpleActorStatus.jsのヘルプを参照してください。
 
 `<Preskill Title Format>`
 
-![画像](image/FTKR_SkillTreeSystem_n04_012.png)
+![画像](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_012.png)
 
 デフォルトで "前提スキル" と表示しいる部分の設定です。
 制御文字が使えます。
@@ -880,7 +880,7 @@ FTKR_CustomSimpleActorStatus.jsのヘルプを参照してください。
 %1 を記述した箇所が スキル名 に換わります。
 制御文字が使えます。
 
-![画像](image/FTKR_SkillTreeSystem_n04_013.png)
+![画像](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_013.png)
 
 ### 確認ウィンドウの表示設定
 
@@ -892,21 +892,21 @@ FTKR_CustomSimpleActorStatus.jsのヘルプを参照してください。
 %1 を記述した箇所がアクター名に、%2 がスキル名に換わります。
 制御文字が使えます。
 
-![画像](image/FTKR_SkillTreeSystem_n04_014.png)
+![画像](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_014.png)
 
 `<Confirmation Ok Format>`
 
 デフォルトで、"実行する" を表示している部分の設定です。
 制御文字は使えません。
 
-![画像](image/FTKR_SkillTreeSystem_n04_015.png)
+![画像](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_015.png)
 
 `<Confirmation Cancel Format>`
 
 デフォルトで、"実行しない" を表示している部分の設定です。
 制御文字は使えません。
 
-![画像](image/FTKR_SkillTreeSystem_n04_016.png)
+![画像](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_016.png)
 
 ## その他の機能
 
