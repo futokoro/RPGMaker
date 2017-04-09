@@ -3,8 +3,8 @@
 // FTKR_SkillExpansion.js
 // 作成者     : フトコロ
 // 作成日     : 2017/02/18
-// 最終更新日 : 2017/04/04
-// バージョン : v1.3.1
+// 最終更新日 : 2017/04/09
+// バージョン : v1.3.2
 //=======↑本プラグインを改変した場合でも、この欄は消さないでください↑===============
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.SEP = FTKR.SEP || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.3.1 スキル拡張プラグイン
+ * @plugindesc v1.3.2 スキル拡張プラグイン
  * @author フトコロ
  *
  * @param Elements Damage Calc
@@ -630,6 +630,9 @@ FTKR.SEP = FTKR.SEP || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.3.2 - 2017/04/09 : 不具合修正
+ *    1. アイテム使用時にエラーになる不具合を修正。
  * 
  * v1.3.1 - 2017/04/04 : 一部処理見直し、ヘルプ修正
  *    1. 本プラグインの機能を一部アイテムにも適用できるように処理見直し。
@@ -1520,7 +1523,7 @@ Game_Action.prototype.getSkill = function(skillId) {
 
 Game_Action.prototype.itemDamage = function() {
     var item = this._item.sepObject(this.subject());
-    return item && item.damages[this._damageId];
+    return item && item.hasOwnProperty('damages') ? item.damages[this._damageId] : item.damage;
 };
 
 //書き換え
