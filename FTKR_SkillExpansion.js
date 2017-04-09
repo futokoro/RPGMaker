@@ -4,7 +4,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2017/02/18
 // 最終更新日 : 2017/04/09
-// バージョン : v1.3.2
+// バージョン : v1.3.3
 //=======↑本プラグインを改変した場合でも、この欄は消さないでください↑===============
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.SEP = FTKR.SEP || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.3.2 スキル拡張プラグイン
+ * @plugindesc v1.3.3 スキル拡張プラグイン
  * @author フトコロ
  *
  * @param Elements Damage Calc
@@ -630,6 +630,10 @@ FTKR.SEP = FTKR.SEP || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.3.3 - 2017/04/09 : 不具合修正
+ *    1. ダメージが設定されていない場合の例外処理を追加。
+ *    2. 使用者が設定されていない場合の例外処理を追加。
  * 
  * v1.3.2 - 2017/04/09 : 不具合修正
  *    1. アイテム使用時にエラーになる不具合を修正。
@@ -1358,6 +1362,7 @@ Game_Actor.prototype.evalEnabledFormula = function(formula, skill) {
         if (isNaN(value)) value = false;
         return value;
     } catch (e) {
+        console.log(e);
         return false;
     }
 };
@@ -1510,6 +1515,7 @@ Game_Action.prototype.initialize = function(subject, forcing) {
     this._targetSepEffect = null;
 };
 
+//書き換え
 FTKR.SEP.Game_Action_item = Game_Action.prototype.item;
 Game_Action.prototype.item = function() {
     if (!this.itemDamage()) return FTKR.SEP.Game_Action_item.call(this);
@@ -1523,12 +1529,20 @@ Game_Action.prototype.getSkill = function(skillId) {
 
 Game_Action.prototype.itemDamage = function() {
     var item = this._item.sepObject(this.subject());
-    return item && item.hasOwnProperty('damages') ? item.damages[this._damageId] : item.damage;
+    if (item && item.hasOwnProperty('damages')) {
+        return item.damages[this._damageId];
+    } else if (item && item.damage && this._item.isSkill()) {
+        return item.damage;
+    } else {
+        return false;
+    }
 };
 
 //書き換え
+FTKR.SEP.Game_Action_setSkill = Game_Action.prototype.setSkill;
 Game_Action.prototype.setSkill = function(skillId) {
-    this._item.setObject(this.getSkill(skillId));
+    this.subject() ? this._item.setObject(this.getSkill(skillId)) :
+        FTKR.SEP.Game_Action_setSkill.call(this, skillId);
 };
 
 //書き換え
@@ -1589,6 +1603,11 @@ Game_Action.prototype.sepDamageIdApply = function(target) {
     this._damageId = 0;
 };
 
+if(Imported.FTKR_EID) {
+Game_Action.prototype.eidDamageIdApply = function(target) {
+};
+}
+
 /*-------------------------------------------------------------
   成功判定の修正
 -------------------------------------------------------------*/
@@ -1613,6 +1632,7 @@ Game_Action.prototype.evalSuccessRate = function(base, target, sepRepeats) {
         if (isNaN(value)) value = 0;
         return value;
     } catch (e) {
+        console.log(e);
         return 0;
     }
 };
@@ -1687,6 +1707,7 @@ Game_Action.prototype.evalEffectValue = function(formula, effect) {
         if (isNaN(value)) value = 0;
         return value;
     } catch (e) {
+        console.log(e);
         return 0;
     }
 };
@@ -1711,14 +1732,14 @@ Game_Action.prototype.evalSepDamageFormula = function(target) {
         var a = this.subject();
         var b = target;
         var v = $gameVariables._data;
-        var skill = this._item.sepObject(this.subject());
-        var d = skill.damages[this._damageId];
+        var d = this.itemDamage();
         var rct = BattleManager._repeatCount;
         var sign = ([3, 4].contains(item.damage.type) ? -1 : 1);
         var value = Math.max(eval(item.damage.formula), 0) * sign;
         if (isNaN(value)) value = 0;
         return value;
     } catch (e) {
+        console.log(e);
         return 0;
     }
 };
@@ -1736,8 +1757,10 @@ Game_Action.prototype.applyCritical = function(damage) {
 /*-------------------------------------------------------------
   属性有効度の計算の修正
 -------------------------------------------------------------*/
-//書き換え
+
+FTKR.SEP.Game_Action_calcElementRate = Game_Action.prototype.calcElementRate;
 Game_Action.prototype.calcElementRate = function(target) {
+    if (!this.itemDamage()) return FTKR.SEP.Game_Action_calcElementRate.call(this, target);
     var elementIds = this.isElementIds(this.itemDamage());
     switch (FTKR.SEP.elementDamageCalc) {
         case 1:
@@ -1925,6 +1948,7 @@ Game_BattlerBase.prototype.evalUsedCostValue = function(skill, formula) {
         if (isNaN(value)) value = 0;
         return value;
     } catch (e) {
+        console.log(e);
         return 0;
     }
 };
@@ -1957,7 +1981,11 @@ Game_Battler.prototype.gainTp = function(value) {
 //=============================================================================
 
 Game_Item.prototype.sepObject = function(subject) {
-    return this.isSkill() ? subject.getSkill(this._itemId) : $dataItems[this._itemId];
+    if (this.isSkill()) {
+        return subject ? subject.getSkill(this._itemId) : $dataSkills[this._itemId];
+    } else {
+        return this.object();
+    }
 };
 
 //=============================================================================
@@ -1982,6 +2010,7 @@ Game_Enemy.prototype.evalEnabledFormula = function(formula, skill) {
         if (isNaN(value)) value = false;
         return value;
     } catch (e) {
+        console.log(e);
         return false;
     }
 };

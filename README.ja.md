@@ -30,7 +30,7 @@
 
 | プラグイン | マニュアル | ダウンロード | 必須プラグイン | 説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
-| [FTKR_SkillExpansion](FTKR_SkillExpansion.js) | 未作成 | [v1.3.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillExpansion.js) | なし | スキルの仕様を拡張する |
+| [FTKR_SkillExpansion](FTKR_SkillExpansion.js) | 未作成 | [v1.3.3](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillExpansion.js) | なし | スキルの仕様を拡張する |
 | [FTKR_SEP_ShowSkillStatus](FTKR_SEP_ShowSkillStatus.js) | 未作成 | [v1.4.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SEP_ShowSkillStatus.js) | [FTKR_SkillExpansion](FTKR_SkillExpansion.js) | スキル画面の表示を拡張する |
 | [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js) | [マニュアル](FTKR_SkillTreeSystem.ja.md) | [v1.6.3](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillTreeSystem.js) | なし | ツリー型のスキル習得システム |
 | [FTKR_STS_CustomWindow](FTKR_STS_CustomWindow.js) | 未作成 | [v1.0.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_STS_CustomWindow.js) | [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js) | スキルツリー習得画面のレイアウトを変更する |
