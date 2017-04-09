@@ -19,11 +19,17 @@
 | [FTKR_ExEscapeCharacters](FTKR_ExEscapeCharacters.js) | 未作成 | [v1.0.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExEscapeCharacters.js) | なし | 制御文字を追加する |
 | [FTKR_ExMessageWindow](FTKR_ExMessageWindow.js) | 未作成 | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExMessageWindow.js) | なし | 一度に複数のメッセージウィンドウを表示する |
 
-## スキル系 プラグイン
+## アイテム・スキル系 共通プラグイン
 
 | プラグイン | マニュアル | ダウンロード | 必須プラグイン | 説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_ItemSelfVariables](FTKR_ItemSelfVariables.js) | 未作成 | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ItemSelfVariables.js) | なし | アイテムとスキルにセルフ変数を追加する |
+| [FTKR_ExItemDamage](FTKR_ExItemDamage.js) | 未作成 | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExItemDamage.js) | なし | アイテムとスキルのダメージ処理を拡張する |
+
+## スキル系 プラグイン
+
+| プラグイン | マニュアル | ダウンロード | 必須プラグイン | 説明 |
+|:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_SkillExpansion](FTKR_SkillExpansion.js) | 未作成 | [v1.3.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillExpansion.js) | なし | スキルの仕様を拡張する |
 | [FTKR_SEP_ShowSkillStatus](FTKR_SEP_ShowSkillStatus.js) | 未作成 | [v1.4.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SEP_ShowSkillStatus.js) | [FTKR_SkillExpansion](FTKR_SkillExpansion.js) | スキル画面の表示を拡張する |
 | [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js) | [マニュアル](FTKR_SkillTreeSystem.ja.md) | [v1.6.3](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillTreeSystem.js) | なし | ツリー型のスキル習得システム |
