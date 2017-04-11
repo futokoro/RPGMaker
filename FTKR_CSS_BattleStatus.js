@@ -37,12 +37,12 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  * @param Actor Status Text1
  * @desc Text1部に表示するステータスを指定します。
  * 詳細はヘルプ参照
- * @default face
+ * @default name
  * 
  * @param Actor Status Text2
  * @desc Text2部に表示するステータスを指定します。
  * 詳細はヘルプ参照
- * @default name
+ * @default state
  * 
  * @param Actor Status Text3
  * @desc Text3部に表示するステータスを指定します。
@@ -51,7 +51,7 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  * 
  * @param Actor Status Space
  * @desc 各Textの間隔を指定します。
- * @default 0,20,50,0
+ * @default 0,5,5,0
  * 
  * @param Actor Status Space In Text
  * @desc Text内で複数表示する場合の間隔を指定します。
@@ -60,7 +60,7 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  * @param Actor Status Width Rate
  * @desc Text1~Text3の表示幅の比率を指定します。
  * 詳細はヘルプ参照
- * @default 2,2,3
+ * @default 1,1,3
  *
  * @param Display Face Scale
  * @desc アクターの顔画像を表示スケールを設定します
@@ -136,6 +136,8 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  */
 //=============================================================================
 
+if (Imported.FTKR_CSS) {
+
 //=============================================================================
 // プラグイン パラメータ
 //=============================================================================
@@ -188,3 +190,5 @@ Window_BattleStatus.prototype.drawItem = function(index) {
     var lss = FTKR.CSS.BS.simpleStatus;
     this.drawCssActorStatus(index, actor, rect.x, rect.y, rect.width, rect.height, lss);
 };
+
+};//TKR_CustomSimpleActorStatus.jsが必要
