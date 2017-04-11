@@ -11,29 +11,25 @@
 以下の項目の順でプラグインの使い方を説明します。
 1. [概要](#概要)
 2. [基本設定](#基本設定)
-    1. [アイテム合成画面を表示する](#アイテム合成画面を表示する)
-    2. [アイテムを合成する](#アイテムを合成する)
-    3. [アイテム合成時の設定](#アイテム合成時の設定)
-3. [アイテムとレシピの設定](#アイテムとレシピの設定)
-    1. [合成カテゴリーの設定](#合成カテゴリーの設定)
-    2. [アイテムの設定](#アイテムの設定)
-    3. [レシピの設定](#レシピの設定)
-4. [レイアウトの設定](#レイアウトの設定)
-    1. [合成コマンドの表示設定](#合成コマンドの表示設定)
-5. [プラグインコマンド](#プラグインコマンド)
+    1. [レイアウトについて](#レイアウトについて)
+    2. [表示できるステータス](#表示できるステータス)
+3. [簡易ステータス画面の設定](#簡易ステータス画面の設定)
+4. [詳細ステータス画面の設定](#詳細ステータス画面の設定)
+5. [ステータスの設定](#ステータスの設定)
 * [プラグインの更新履歴](#プラグインの更新履歴)
+* [拡張プラグイン](#拡張プラグイン)
 * [ライセンス](#ライセンス)
 
 ## 概要
 
 本プラグインを実装することで、メニューや、スキル画面で表示するアクターのステータス表示のレイアウトを変更できます。
 
-![スキルツリー画面](image/FTKR_ItemCompositSystem/n01_001.png)
+![スキルツリー画面](image/FTKR_CustomSimpleActorStatus/n01_001.png)
 
 [目次に戻る](#目次)
 
 ## 基本設定
-## アイテム合成画面を表示する
+## レイアウトについて
 
 専用画面は、以下の方法で表示できます。
 
@@ -41,15 +37,15 @@
 
 プラグインパラメータ`Enabled Show Command`が 1 であることを確認してください。（デフォルトで設定済み）
 
-![ShowSkillCommand](image/FTKR_ItemCompositSystem/n01_010.png)
+![ShowSkillCommand](image/FTKR_CustomSimpleActorStatus/n01_010.png)
 
 この状態の時に、メニュー画面にコマンド「アイテム合成」が表示します。
 
-![メニュー画面](image/FTKR_ItemCompositSystem/n01_001.png)
+![メニュー画面](image/FTKR_CustomSimpleActorStatus/n01_001.png)
 
 コマンド「アイテム合成」の表示は、プラグインパラメータ`Command Name`で変更できます。
 
-![CommandName](image/FTKR_ItemCompositSystem/n01_011.png)
+![CommandName](image/FTKR_CustomSimpleActorStatus/n01_011.png)
 
 また、以下のプラグインパラメータでメニュー欄への表示の有無をスイッチで制御できます。
 
@@ -58,7 +54,7 @@
 0 を指定した場合は、この機能は無効です。
 1 以上の値を設定した場合、そのIDのスイッチが ON 状態の時にメニューに表示します。
 
-![CommandName](image/FTKR_ItemCompositSystem/n01_012.png)
+![CommandName](image/FTKR_CustomSimpleActorStatus/n01_012.png)
 
 ### プラグインコマンドを実行
 以下のプラグインコマンドを実行することで、画面を表示します。
@@ -69,18 +65,18 @@ STS アイテム合成画面表示
 
 [目次に戻る](#目次)
 
-## アイテムを合成する
+## 表示できるステータス
 
-### 素材から選んでアイテムを合成する
+### 素材から選んで表示できるステータス
 
 合成画面では、下の図のように「アイテム」「武器」「防具」の分類で手持ちのアイテムを表示します。
 
-![画像](image/FTKR_ItemCompositSystem/n01_003.png)
+![画像](image/FTKR_CustomSimpleActorStatus/n01_003.png)
 
 アイテムを選択すると、合成素材に使用する員数を入力します。
 入力が終わると、左下の合成アイテムのスロットにアイテムが移動します。
 
-![画像](image/FTKR_ItemCompositSystem/n01_004.png)
+![画像](image/FTKR_CustomSimpleActorStatus/n01_004.png)
 
 合成する素材が決まったら、「合成を行う」コマンドを実行します。
 確認画面の有無は、プラグインパラメータで設定できます。
@@ -88,28 +84,28 @@ STS アイテム合成画面表示
 この合成は、レシピを知らなくても実行可能です。
 レシピの素材と合っていれば、レシピの有無の関係なく、成功すれば合成アイテムを入手できます。
 
-![画像](image/FTKR_ItemCompositSystem/n01_005.png)
+![画像](image/FTKR_CustomSimpleActorStatus/n01_005.png)
 
 合成実行後は、下の図のような合成結果が表示します。
 
-![画像](image/FTKR_ItemCompositSystem/n01_006.png)
+![画像](image/FTKR_CustomSimpleActorStatus/n01_006.png)
 
-### レシピから選んでアイテムを合成する
+### レシピから選んで表示できるステータス
 
 素材から選ぶだけでなく、レシピから選んで合成することもできます。
 コマンド「レシピから選ぶ」を選択すると、右側のアイテム欄が覚えているレシピの表示に変わります。
 
-![画像](image/FTKR_ItemCompositSystem/n01_007.png)
+![画像](image/FTKR_CustomSimpleActorStatus/n01_007.png)
 
 レシピを選択すると、生成する数の設定画面に映ります。
 このとき、レシピの素材アイテムが表示します。
 
-![画像](image/FTKR_ItemCompositSystem/n01_008.png)
+![画像](image/FTKR_CustomSimpleActorStatus/n01_008.png)
 
 数の設定が終わると、レシピの素材アイテムがまとめて合成アイテムスロットに移ります。
 また、レシピを覚えているため、右側の合成情報に合成時の詳細が表示します。
 
-![画像](image/FTKR_ItemCompositSystem/n01_009.png)
+![画像](image/FTKR_CustomSimpleActorStatus/n01_009.png)
 
 合成実行後については、素材から選ぶ場合と変わりはありません。
 なお、下の図のように、合成結果には「成功」だけでなく「大成功」や「失敗」「消失」があります。
@@ -117,7 +113,7 @@ STS アイテム合成画面表示
 図のレシピの場合、大成功時にアイテムランクが上がるように設定しています。
 そのため、成功時に「ポーション」だったものが、大成功では「ハイポーション」に変わります。
 
-![画像](image/FTKR_ItemCompositSystem/n01_016.png)
+![画像](image/FTKR_CustomSimpleActorStatus/n01_016.png)
 
 [目次に戻る](#目次)
 
@@ -131,15 +127,15 @@ STS アイテム合成画面表示
  * 1 - 確認する
  * 0 - 確認しない
 
-![EnableConfirmation](image/FTKR_ItemCompositSystem/n01_014.png)
+![EnableConfirmation](image/FTKR_CustomSimpleActorStatus/n01_014.png)
 
 確認する場合は、アイテム合成実行時に下のウィンドウを表示します。
 
-![確認画面](image/FTKR_ItemCompositSystem/n01_005.png)
+![確認画面](image/FTKR_CustomSimpleActorStatus/n01_005.png)
 
 [目次に戻る](#目次)
 
-## アイテムとレシピの設定
+## 簡易ステータス画面の設定
 ## 合成カテゴリーの設定
 
 合成カテゴリーを使用することで、より柔軟なレシピを作成することができます。
@@ -152,13 +148,13 @@ STS アイテム合成画面表示
 
 設定した武器タイプIDは、プラグインパラメータ`Category Type ID`に設定してください。
 
-![スキルツリーIDの登録](image/FTKR_ItemCompositSystem/n02_001.png)
+![スキルツリーIDの登録](image/FTKR_CustomSimpleActorStatus/n02_001.png)
 
 ### 合成カテゴリーの作成
 
 合成カテゴリーは、データベースの武器に作成します。
 
-![スキルツリーの設定1](image/FTKR_ItemCompositSystem/n02_004.png)
+![スキルツリーの設定1](image/FTKR_CustomSimpleActorStatus/n02_004.png)
 
 合成カテゴリーとして設定が必要なデータは以下の通りです。
 
@@ -167,7 +163,7 @@ STS アイテム合成画面表示
 3. 武器のアイコンが合成カテゴリーのアイコンとして画面に表示します。
 4. メモ欄に合成カテゴリー用のノートタグを追加してください。
 
-![スキルツリーの設定2](image/FTKR_ItemCompositSystem/n02_005.png)
+![スキルツリーの設定2](image/FTKR_CustomSimpleActorStatus/n02_005.png)
 
 合成カテゴリーは、以下のノートタグで設定を行います。
 
@@ -197,7 +193,7 @@ STS アイテム合成画面表示
 合成に使用するために、アイテムの設定を行います。
 アイテムのメモ欄に合成用のノートタグを追加してください。
 
-![スキルの設定](image/FTKR_ItemCompositSystem/n02_003.png)
+![スキルの設定](image/FTKR_CustomSimpleActorStatus/n02_003.png)
 
 #### 合成カテゴリーの設定
 以下のノートタグで、カテゴリーを設定できます。
@@ -316,7 +312,7 @@ STS アイテム合成画面表示
 
 [目次に戻る](#目次)
 
-## レイアウトの設定
+## 詳細ステータス画面の設定
 
 ## 合成コマンドの表示設定
 
@@ -334,7 +330,7 @@ STS アイテム合成画面表示
  * slot   : 素材スロットのアイテムを戻すコマンド
  * end    : 合成を止めるコマンド
 
-![画像](image/FTKR_ItemCompositSystem/n03_001.png)
+![画像](image/FTKR_CustomSimpleActorStatus/n03_001.png)
 
 [目次に戻る](#目次)
 

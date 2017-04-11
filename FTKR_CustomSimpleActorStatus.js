@@ -1643,7 +1643,6 @@ Window_Base.prototype.drawCssActorLevel = function(actor, x, y, width) {
 
 //アクターのステートアイコンの表示関数
 Window_Base.prototype.drawCssActorIcons = function(actor, x, y, width, line) {
-    if (line) 
     var icons = actor.allIcons().slice();
     var num = icons.length;
     var iw = Window_Base._iconWidth;
