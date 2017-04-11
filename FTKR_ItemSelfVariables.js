@@ -1,11 +1,11 @@
-//=======↓本プラグインを改変した場合でも、この欄は消さないでください↓===============
+//=============================================================================
 // アイテムやスキルにセルフ変数を実装するプラグイン
 // FTKR_ItemSelfVariables.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/26
-// 最終更新日 : 
-// バージョン : v1.0.0
-//=======↑本プラグインを改変した場合でも、この欄は消さないでください↑===============
+// 最終更新日 : 2017/04/14
+// バージョン : v1.0.1
+//=============================================================================
 
 var Imported = Imported || {};
 Imported.FTKR_ISV = true;
@@ -13,8 +13,9 @@ Imported.FTKR_ISV = true;
 var FTKR = FTKR || {};
 FTKR.ISV = FTKR.ISV || {};
 
+//=============================================================================
 /*:
- * @plugindesc v1.0.0 アイテムやスキルにセルフ変数を実装するプラグイン
+ * @plugindesc v1.0.1 アイテムやスキルにセルフ変数を実装するプラグイン
  * @author フトコロ
  *
  * @param Self Variables Number
@@ -86,6 +87,14 @@ FTKR.ISV = FTKR.ISV || {};
  *    :セーブ時にセルフ変数を保存するか指定します。
  *    :保存しない場合、ゲーム起動毎にリセットします。
  *    :この設定は、アイテム、武器、防具、スキル共通です。
+ * 
+ * 
+ * 以下の、ノートタグをアイテム(武器・防具含む)やスキルのメモ欄に追記すると
+ * 初期値を設定できます。
+ * 
+ * <ISV IV[x]: y>
+ * <ISV セルフ変数[x]: y>
+ *    :セルフ変数ID x の初期値を y に設定します。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -187,26 +196,20 @@ FTKR.ISV = FTKR.ISV || {};
  * 
  * 
  *-----------------------------------------------------------------------------
- * 本プラグインを使用するに当たって    ☆重要☆
+ * 本プラグインのライセンスについて(License)
  *-----------------------------------------------------------------------------
- * 1.本プラグインは改変可です。
- *   ただし、一番始めに記載した作成者等の欄は残してください。
- * 
- * 2.本プラグインを使用するに当たって、ゲーム中にライセンス表示することは
- *   必須ではありません。ただ、どこかReadme等にでも記載して頂けると嬉しいです。
- * 
- * 3.本プラグインを使用する、または改変するに当たって、私フトコロに許可を取る
- *   ことや、連絡することは必要ありません。
- * 
- * 4.本プラグインは、有料ゲームに使用して構いません。
- *   ただし、改変した場合でも、プラグイン単体で販売することは止めてください。
- *   
- * 5.本プラグインは、年齢制限のあるゲームに使用して構いません。
+ * 本プラグインはMITライセンスのもとで公開しています。
+ * This plugin is released under the MIT License.
  * 
  * 
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.1 - 2017/04/14 : 機能追加
+ *    1. セルフ変数の初期値を設定する機能追加。
+ *    2. セルフ変数に文字列を代入できる機能を追加。
+ *    3. ライセンス変更。
  * 
  * v1.0.0 - 2017/03/26 : 初版作成
  * 
@@ -260,6 +263,18 @@ DataManager.setSelfVariables = function(group) {
         var obj = group[n];
         obj._selfVariables = new Game_IsvSelfVariables();
         obj._selfVariables.allReset(0);
+
+        var notedata = obj.note.split(/[\r\n]+/);
+
+        for (var i = 0; i < notedata.length; i++) {
+            var line = notedata[i];
+            if (line.match(/<ISV IV\[(\d+)\]:[ ]*(.+)>/i) ||
+                line.match(/<ISV セルフ変数\[(\d+)\]:[ ]*(.+)>/i)) {
+                var id = Number(RegExp.$1);
+                var value = RegExp.$2;
+                obj._selfVariables.setValue(id, value);
+            }
+        }
     }
 };
 
@@ -417,6 +432,9 @@ Game_IsvSelfVariables.prototype.value = function(variableId) {
 
 Game_IsvSelfVariables.prototype.setValue = function(variableId, value, code) {
     if (variableId > 0 && variableId < FTKR.ISV.selfVariablesNumber + 1) {
+        if (!isNaN(parseInt(value))) {
+            value = parseInt(value);
+        }
         this._data[variableId] = this.calcValue(this._data[variableId], value, code);
         this.onChange();
     }
@@ -451,7 +469,7 @@ Game_IsvSelfVariables.prototype.calcValue = function(value1, value2, code) {
 };
 
 Game_IsvSelfVariables.prototype.onChange = function() {
-    $gameMap.requestRefresh();
+    if($gameMap) $gameMap.requestRefresh();
 };
 
 //=============================================================================
@@ -507,7 +525,7 @@ Game_Interpreter.prototype.setSeflVariables = function(command, args) {
 Game_Interpreter.prototype.getSeflVariables = function(command, args) {
     var varId = this.setNum(args[0]);
     var itemId = this.setNum(args[2]);
-    var selfId = this.setNum(args[3]);
+    var selfId = this.setValue(args[3]);
     if (!varId || !itemId || !selfId) return this.showLog(command, args, [1,0,1,1]);
     var value = null;
     switch (true) {
@@ -541,6 +559,19 @@ Game_Interpreter.prototype.setNum = function(data) {
         return $gameVariables.value(Number(RegExp.$1));
     } else if (data.match(data2)) {
         return Number(RegExp.$1);
+    } else {
+        return 0;
+    }
+};
+
+Game_Interpreter.prototype.setValue = function(data) {
+    var data1 = /v\[(\d+)\]/i;
+    var data2 = /(.+)/i;
+    if (data.match(data1)) {
+        return $gameVariables.value(Number(RegExp.$1));
+    } else if (data.match(data2)) {
+        var value = RegExp.$1;
+        return isNaN(parseInt(value)) ? value : parseInt(value);
     } else {
         return 0;
     }

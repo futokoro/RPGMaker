@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2017/04/01
-// バージョン : v1.2.1
+// 最終更新日 : 2017/04/14
+// バージョン : v1.2.2
 //=======↑本プラグインを改変した場合でも、この欄は消さないでください↑===============
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.1 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v1.2.2 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @param --Simple status--
@@ -729,8 +729,12 @@ FTKR.CSS = FTKR.CSS || {};
  *    :
  *    :入力できるパラメータ名は、
  *    :face, chara, sv, name, class, nickname, hp, mp, tp, level, 
- *    :state, profile, param(x), custom(x), gauge(x), equip(x),
- *    :text(x)です。
+ *    :state, state2(x), profile, param(x), custom(x), gauge(x), 
+ *    :equip(x), text(x), imageです。
+ *    :
+ *    :state, state2(x) - 
+ *    : アクターが付与されているステートを並べて表示します。
+ *    : state は横に、state2(x)は縦にx行 並べます。
  *    :
  *    :profile - 
  *    : アクターのプロフィール文を表示します。
@@ -760,6 +764,9 @@ FTKR.CSS = FTKR.CSS || {};
  *    : 文字列 x を表示します。
  *    : 制御文字が使用できます。
  *    :
+ *    :image - 
+ *    : アクターのメモ欄で設定した画像を表示します。
+ *    :
  *    :カンマ(,)で区切って複数のパラメータを入力した場合は、
  *    :行を変えてそれぞれのパラメータを表示します。
  *    :表示に必要な行数は、 faceが4、charaとsvが2、それ以外が1行です。
@@ -770,6 +777,13 @@ FTKR.CSS = FTKR.CSS || {};
  *    :入力例)
  *    : class,[hp/mp],tp
  *    :  - 1行目にクラス名を表示し、2行目にHPとMPを表示、3行目にTPを表示する。
+ *    :
+ *    :波括弧{}を使用することで、括弧内のステータスをすべての列を使用して
+ *    :表示させることができます。
+ *    :入力例) Text1に以下を入力
+ *    : {name},hp,mp
+ *    :  - 1行目すべて(Text1~Text3の表示エリア)を使ってアクター名を表示し
+ *    :    2行目と3行目はText1の表示エリア内で表示します。
  * 
  * <Actor Status Space>
  *    :各Textの間隔をカンマ(,)で区切って指定します。単位はpixelです。
@@ -1002,6 +1016,10 @@ FTKR.CSS = FTKR.CSS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.2.2 - 2017/04/14 : 機能追加
+ *    1. 指定した画像を表示する機能を追加。
+ *    2. 複数列を跨いで表示させる機能を追加。
  * 
  * v1.2.1 - 2017/04/01 : 機能削除、機能追加
  *    1. ステータスのparam(x)に対してMV標準の制御文字を使用できる機能を削除。
@@ -1246,8 +1264,90 @@ Array.prototype.num = function() {
 }
 
 //=============================================================================
+// DataManager
+//=============================================================================
+
+FTKR.CSS.DatabaseLoaded = false;
+FTKR.CSS.DataManager_isDatabaseLoaded = DataManager.isDatabaseLoaded;
+DataManager.isDatabaseLoaded = function() {
+    if (!FTKR.CSS.DataManager_isDatabaseLoaded.call(this)) return false;
+    if (!FTKR.CSS.DatabaseLoaded) {
+        this.cssActorImageNotetags($dataActors);
+        FTKR.CSS.DatabaseLoaded = true;
+    }
+    return true;
+};
+
+DataManager.cssActorImageNotetags = function(group) {
+    var note1a = /<CSS 画像>/i;
+    var note1b = /<\/CSS 画像>/i;
+
+    for (var n = 1; n < group.length; n++) {
+        var obj = group[n];
+        var notedata = obj.note.split(/[\r\n]+/);
+
+        var setMode = 'none';
+        obj.cssData = '';
+        obj.cssbgi = {
+          name:'',
+          offsetX:0,
+          offsetY:0,
+          width:0,
+          height:0,
+        };
+        for (var i = 0; i < notedata.length; i++) {
+            var line = notedata[i];
+            if (note1a.test(line)) {
+                var text = '';
+                setMode = 'data';
+            } else if (note1b.test(line)) {
+                setMode = 'none';
+                obj.cssData = text;
+            } else if (setMode === 'data') {
+                text += line + ';';
+            }
+        }
+        this.setCssBgiData(obj);
+        obj.cssData = '';
+    }
+};
+
+DataManager.setCssBgiData = function(obj) {
+    var stsdata = obj.cssData;
+    if (stsdata) {
+        var case1 = /(?:BGI NAME):[ ]*(.+)/i;
+        var case2 = /(?:BGI OFFSET X):[ ]*(\d+)/i;
+        var case3 = /(?:BGI OFFSET Y):[ ]*(\d+)/i;
+        var case4 = /(?:BGI WIDTH):[ ]*(\d+)/i;
+        var case5 = /(?:BGI HEIGHT):[ ]*(\d+)/i;
+
+        var datas = stsdata.split(';');
+        for (var i = 0; i < datas.length; i++) {
+            var data = datas[i];
+            if(data.match(case1)) {
+                obj.cssbgi.name = String(RegExp.$1);
+            } else if(data.match(case2)) {
+                obj.cssbgi.offsetX = Number(RegExp.$1);
+            } else if(data.match(case3)) {
+                obj.cssbgi.offsetY = Number(RegExp.$1);
+            } else if(data.match(case4)) {
+                obj.cssbgi.width = Number(RegExp.$1);
+            } else if(data.match(case5)) {
+                obj.cssbgi.height = Number(RegExp.$1);
+            }
+        }
+    }
+};
+
+//=============================================================================
 // Game_Actor
 //=============================================================================
+
+FTKR.CSS.Game_Actor_setup = Game_Actor.prototype.setup;
+Game_Actor.prototype.setup = function(actorId) {
+    FTKR.CSS.Game_Actor_setup.call(this, actorId);
+    ImageManager.loadPicture(this.actor().cssbgi.name);
+};
 
 Game_Actor.prototype.getStateMotion = function() {
     var index = this.stateMotionIndex();
@@ -1322,9 +1422,9 @@ Window_Base.prototype.drawCssActorStatus = function(index, actor, x, y, width, h
     var axs = [];
     var status = [lss.text1.split(','), lss.text2.split(','), lss.text3.split(',')];
     for (var i = 0; i < 3; i++) {
-      aws[i] = (w - Math.sam(spc)) * wrs[i] / Math.sam(wrs);
-      axs[i] = i > 0 ? axs[i-1] + aws[i-1] + spc[i]: x + spc[0];
-      this.drawCssActorStatusText(index, actor, axs[i], y, aws[i], status[i], lss);
+        aws[i] = (w - Math.sam(spc)) * wrs[i] / Math.sam(wrs);
+        axs[i] = i > 0 ? axs[i-1] + aws[i-1] + spc[i]: x + spc[0];
+        this.drawCssActorStatusText(index, actor, axs[i], y, aws[i], status[i], lss);
     }
 };
 
@@ -1337,26 +1437,16 @@ Window_Base.prototype.drawCssActorStatusText = function(index, actor, x, y, widt
 };
 
 Window_Base.prototype.drawCssActorStatusBases = function(index, actor, x, y, width, status, lss) {
+    if (status.match(/\{(.+)\}/i)) {
+        status = RegExp.$1;
+        width = this.width - this.padding*2 - x;
+    }
     var statuses = status.match(/\[(.+)\]/i) ? RegExp.$1.split('/') : [status];
     var line = 0;
     var len = statuses.length;
     if (len > 1) width = (width - lss.spaceIn * (len - 1))/ len;
     statuses.forEach( function(element, i) {
         var dx = (width + lss.spaceIn) * i;
-        if (element.match(/\{(.+)\|(\d+)\|(\d+)\}/i) && Imported.FTKR_DCF) {
-            element = RegExp.$1;
-            var item = {
-                defInColor:Number(RegExp.$2),
-                opacity:Number(RegExp.$3),
-            };
-            var rect = {
-                x:x + dx,
-                y:y,
-                width:width,
-                height:this.lineHeight(),
-            };
-            this.drawInFrame(FTKR.DCF.frame, rect, false, item);
-        }
         line = Math.max(this.drawCssActorStatusBase(index, actor, x + dx, y, width, element, lss), line);
     },this);
     return line;
@@ -1382,6 +1472,9 @@ Window_Base.prototype.drawCssActorStatusBase = function(index, actor, x, y, widt
     } else if (status.match(/(?:text\()(.+)\)/i)) {
         var text = String(RegExp.$1);
         if (text) return this.drawCssText(actor, x, y, width, text);
+    } else if (status.match(/(?:state2\()(.+)\)/i)) {
+        var line = Number(RegExp.$1);
+        if (line) return this.drawCssActorIcons(actor, x, y, width, line);
     } else {
         switch (true) {
             case (/(?:face)/i).test(status):
@@ -1408,8 +1501,11 @@ Window_Base.prototype.drawCssActorStatusBase = function(index, actor, x, y, widt
                 return this.drawCssActorIcons(actor, x, y, width);
             case (/(?:profile)/i).test(status):
                 return this.drawCssProfile(actor, x, y, width);
+            case (/(?:image)/i).test(status):
+                return this.drawCssActorImage(actor, x, y, width);
         }
     }
+    return 1;
 };
 
 //表示エリア間のラインの表示関数
@@ -1428,14 +1524,14 @@ Window_Base.prototype.drawCssActorFace = function(actor, x, y, width, lss) {
     var dy = this.lineHeight();
     var line = lss.faceLine || Math.ceil(Window_Base._faceHeight / dy);
     this.changePaintOpacity(actor.isBattleMember());
-    this.drawCssFace(actor.faceName(), actor.faceIndex(), x, y, width, dy * line);
+    this.drawCssFace(actor.faceName(), actor.faceIndex(), x, y, width, dy * lss.faceLine);
     this.changePaintOpacity(true);
     return line;
 };
 
 Window_Base.prototype.drawCssFace = function(faceName, faceIndex, dx, dy, width, height) {
     var dh = height || Window_Base._faceHeight;
-    var dw = height || width || Window_Base._faceWidth;
+    var dw = width || Window_Base._faceWidth;
     dx = dx + (width - dw) / 2;
     var bitmap = ImageManager.loadFace(faceName);
     var sw = Window_Base._faceWidth;
@@ -1523,16 +1619,22 @@ Window_Base.prototype.drawCssActorLevel = function(actor, x, y, width) {
 };
 
 //アクターのステートアイコンの表示関数
-Window_Base.prototype.drawCssActorIcons = function(actor, x, y, width) {
+Window_Base.prototype.drawCssActorIcons = function(actor, x, y, width, line) {
+    if (line) 
     var icons = actor.allIcons().slice();
-    var len = icons.length;
+    var num = icons.length;
     var iw = Window_Base._iconWidth;
-    var diff = iw * len - width;
-    var offset = diff > 0 ? iw - diff / len : iw;
-    for (var i = 0; i < len; i++) {
-        this.drawIcon(icons[i], x + offset * i, y + 2);
+    var len = line ? line * this.lineHeight() : width;
+    var diff = iw * num + 2 - len;
+    var offset = diff > 0 ? iw - diff / num : iw;
+    for (var i = 0; i < num; i++) {
+        if(line) {
+            this.drawIcon(icons[i], x + 2, y + offset * i);
+        } else {
+            this.drawIcon(icons[i], x + offset * i, y + 2);
+        }
     }
-    return 1;
+    return line ? line : 1;
 };
 
 //アクターのHPの表示関数
@@ -1583,6 +1685,7 @@ Window_Base.prototype.drawCssActorParam = function(actor, x, y, width, paramId) 
 
 //カスタムパラメータの表示関数
 Window_Base.prototype.drawCssActorCustom = function(actor, x, y, width, custom) {
+    console.log(custom);
     var name = custom.name || '';
     var formula = custom.formula || '';
     var value = actor.evalCssCustomFormula(formula);
@@ -1651,6 +1754,30 @@ Window_Base.prototype.drawCssText = function(actor, x, y, width, text) {
     this.drawTextEx(text, x, y);
     this.resetTextColor();
     return 1;
+};
+
+//指定画像の表示関数
+Window_Base.prototype.drawCssActorImage = function(actor, x, y, width) {
+    console.log(actor.actor());
+    var dy = this.lineHeight();
+    var line = Math.ceil(actor.actor().cssbgi.height / dy);
+    this.changePaintOpacity(actor.isBattleMember());
+    this.drawCssImage(actor, x, y, width);
+    this.changePaintOpacity(true);
+    return line;
+};
+
+Window_Base.prototype.drawCssImage = function(actor, dx, dy, width) {
+    var bgi = actor.actor().cssbgi;
+    var dh = bgi.height;
+    var dw = bgi.width.clamp(0, width);
+    dx = dx + (width - dw) / 2;
+    var bitmap = ImageManager.loadPicture(bgi.name);
+    var sw = bgi.width;
+    var sh = bgi.height;
+    var sx = bgi.offsetX;
+    var sy = bgi.offsetY;
+    this.contents.blt(bitmap, sx, sy, sw, sh, dx, dy, dw, dh);
 };
 
 //=============================================================================
