@@ -10,7 +10,7 @@
 
 | プラグイン | マニュアル | ダウンロード | 必須プラグイン | 説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
-| [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) | 未作成 | [v1.2.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CustomSimpleActorStatus.js) | なし | 簡易ステータス表示を変更する |
+| [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) | 未作成 | [v1.2.3](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CustomSimpleActorStatus.js) | なし | 簡易ステータス表示を変更する |
 | [FTKR_CSS_BattleStatus](CSS_BattleStatus.js) | 未作成 | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_BattleStatus.js) | [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) | バトルステータス表示を変更する |
 | [FTKR_DisplayCommandFrame](FTKR_DisplayCommandFrame.js) | 未作成 | [v1.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_DisplayCommandFrame.js) | なし | コマンドに枠を付ける |
 
