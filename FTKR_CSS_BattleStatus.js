@@ -3,8 +3,8 @@
 // FTKR_CSS_BattleStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/11
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2017/04/12
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,9 +16,12 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 アクターのバトルステータス表示を変更するプラグイン
+ * @plugindesc v1.0.1 アクターのバトルステータス表示を変更するプラグイン
  * @author フトコロ
  *
+ * @param --ウィンドウ設定--
+ * @desc 
+ * 
  * @param Number Visible Rows
  * @desc ステータスウィンドウの縦の行数
  * @default 4
@@ -30,6 +33,23 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  * @param Font Size
  * @desc フォントサイズ
  * @default 28
+ * 
+ * @param Window Padding
+ * @desc ウィンドウの周囲の余白
+ * @default 18
+ * 
+ * @param Window Line Height
+ * @desc ウィンドウ内の1行の高さ
+ * @default 36
+ * 
+ * @param Window Opacity
+ * @desc ウィンドウ内の背景の透明度
+ * @default 192
+ * 
+ * @param Hide Window Frame
+ * @desc ウィンドウ枠を非表示にするか
+ * 1 - 非表示にする、0 - 表示する
+ * @default 0
  * 
  * @param --レイアウト設定--
  * @desc 
@@ -74,6 +94,8 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  * 本プラグインを実装することで、バトル画面で表示するアクターの
  * ステータス表示のレイアウトを変更できます。
  * 
+ * また、バトル画面のステータスウィンドウの設定を変更できます。
+ * 
  * 
  *-----------------------------------------------------------------------------
  * 設定方法
@@ -116,7 +138,43 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  * 
  * <Font Size>
  *    :ウィンドウ内のフォントサイズを変更します。
- *    :デフォルトは 28 です。
+ *    :デフォルトは 28 です。(単位はpixel)
+ * 
+ * <Window Padding>
+ *    :ウィンドウの周囲の余白を変更します。
+ *    :デフォルトは 18 です。(単位はpixel)
+ * 
+ * <Window Line Height>
+ *    :ウィンドウ内の1行の高さを変更します。
+ *    :デフォルトは 36 です。(単位はpixel)
+ * 
+ * <Window Opacity>
+ *    :ウィンドウ内の背景の透明度を変更します。
+ *    :デフォルトは 192 です。
+ *    :0 - 透明、255 - 不透明
+ * 
+ * <Hide Window Frame>
+ *    :ウィンドウ枠を非表示にするか指定します。
+ *    :1 - 非表示にする、0 - 表示する
+ *    :デフォルトは表示します。
+ * 
+ * 
+ * ＜ウィンドウの高さ＞
+ * ウィンドウの高さは、以下の計算式で算出します。
+ *    [ウィンドウ高さ] ＝ [縦の行数] × [1行の高さ] + [余白のサイズ] × 2
+ * 
+ * 
+ * ＜フォントサイズと行の高さ＞
+ * 基本的に、下の大小関係になるように設定しましょう。
+ *    フォントサイズ ＜ 1行の高さ
+ * 
+ * 
+ * ＜ウィンドウを消す方法＞
+ * 以下の設定にすると、ウィンドウ枠とウィンドウの背景が消えて
+ * アクターのステータスだけを表示します。
+ * 
+ * <Window Opacity>     : 0
+ * <Hide Window Frame>  : 1
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -130,13 +188,14 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.1 - 2017/04/12 : 機能追加
+ *    1. ウィンドウの余白と1行の高さ、透明度、枠の有無を変更する機能を追加。
+ * 
  * v1.0.0 - 2017/04/11 : 初版作成
  * 
  *-----------------------------------------------------------------------------
  */
 //=============================================================================
-
-if (Imported.FTKR_CSS) {
 
 //=============================================================================
 // プラグイン パラメータ
@@ -147,6 +206,10 @@ FTKR.CSS.BS.window = {
     numVisibleRows:Number(FTKR.CSS.BS.parameters['Number Visible Rows'] || 0),
     maxCols:Number(FTKR.CSS.BS.parameters['Number Max Cols'] || 0),
     fontSize:Number(FTKR.CSS.BS.parameters['Font Size'] || 0),
+    padding:Number(FTKR.CSS.BS.parameters['Window Padding'] || 0),
+    lineHeight:Number(FTKR.CSS.BS.parameters['Window Line Height'] || 0),
+    opacity:Number(FTKR.CSS.BS.parameters['Window Opacity'] || 0),
+    hideFrame:Number(FTKR.CSS.BS.parameters['Hide Window Frame'] || 0),
 };
 
 //簡易ステータスオブジェクト
@@ -162,33 +225,65 @@ FTKR.CSS.BS.simpleStatus = {
 
 //=============================================================================
 // Window_BattleStatus
+// バトル画面のステータスウィンドウの表示クラス
 //=============================================================================
+
 //書き換え
+//ウィンドウの行数
 Window_BattleStatus.prototype.numVisibleRows = function() {
     return FTKR.CSS.BS.window.numVisibleRows;
 };
 
 //書き換え
+//ウィンドウに横に並べるアクター数
 Window_BattleStatus.prototype.maxCols = function() {
     return FTKR.CSS.BS.window.maxCols;
 };
 
 //書き換え
+//ウィンドウに横に並べるアクターの表示間隔
+//ステータスレイアウト側で変更できるのでここでは 0 とする。
 Window_BattleStatus.prototype.spacing = function() {
     return 0;
 };
 
 //書き換え
+//ウィンドウのフォントサイズ
 Window_BattleStatus.prototype.standardFontSize = function() {
     return FTKR.CSS.BS.window.fontSize;
 };
 
 //書き換え
-Window_BattleStatus.prototype.drawItem = function(index) {
-    var actor = $gameParty.battleMembers()[index];
-    var rect = this.itemRectForText(index);
-    var lss = FTKR.CSS.BS.simpleStatus;
-    this.drawCssActorStatus(index, actor, rect.x, rect.y, rect.width, rect.height, lss);
+//ウィンドウに周囲の余白サイズ
+Window_BattleStatus.prototype.standardPadding = function() {
+    return FTKR.CSS.BS.window.padding;
 };
 
+//書き換え
+//ウィンドウ内の1行の高さ
+Window_BattleStatus.prototype.lineHeight = function() {
+    return FTKR.CSS.BS.window.lineHeight;
+};
+
+//書き換え
+//ウィンドウの背景の透明度
+Window_BattleStatus.prototype.standardBackOpacity = function() {
+    return FTKR.CSS.BS.window.opacity;
+};
+
+//書き換え
+//ウィンドウ枠の表示
+Window_BattleStatus.prototype._refreshFrame = function() {
+    if (!FTKR.CSS.BS.window.hideFrame) Window.prototype._refreshFrame.call(this);
+};
+
+//書き換え
+//アクター1人分のステータス表示
+if (Imported.FTKR_CSS) {
+  Window_BattleStatus.prototype.drawItem = function(index) {
+      var actor = $gameParty.battleMembers()[index];
+      var rect = this.itemRectForText(index);
+      var lss = FTKR.CSS.BS.simpleStatus;
+      this.drawCssActorStatus(index, actor, rect.x, rect.y, rect.width, rect.height, lss);
+  };
 };//TKR_CustomSimpleActorStatus.jsが必要

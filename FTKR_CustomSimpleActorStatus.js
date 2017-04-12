@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2017/04/11
-// バージョン : v1.2.3
+// 最終更新日 : 2017/04/12
+// バージョン : v1.2.4
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.3 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v1.2.4 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @param --Simple status--
@@ -1037,6 +1037,8 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  *
+ * v1.2.4 - 2017/04/12 : 顔画像の縦横のサイズを合わせるように修正
+ * 
  * v1.2.3 - 2017/04/11 : ヘルプ修正
  * 
  * v1.2.2 - 2017/04/11 : 機能追加
@@ -1277,6 +1279,20 @@ Math.percent = function(dec) {
   var int = +(dec + '').replace('.', '');
   var diffdec = 2 - decnum;
   return diffdec ? int * Math.pow(10, diffdec) : int;
+}
+
+Number.prototype._getDec = function() {
+    var list = (this + '').split('.');
+    return list[1] !== undefined && list[1].length > 0 ? list[1].length : 0;
+};
+
+// 少数で表現された数値をパーセント表示の数値に変換する (例:0.5 を 50 に変換)
+Number.prototype.percent = function(dec) {
+    dec = dec || 0;
+    var decnum = this._getDec();
+    var int = +(this + '').replace('.', '');
+    var diffdec = 2 + dec - decnum;
+    return Math.floor(int * Math.pow(10, diffdec)) / Math.pow(10, dec);
 }
 
 //配列の要素を、すべて数値に変換する。
@@ -1553,8 +1569,9 @@ Window_Base.prototype.drawCssActorFace = function(actor, x, y, width, lss) {
 };
 
 Window_Base.prototype.drawCssFace = function(faceName, faceIndex, dx, dy, width, height) {
-    var dh = height || Window_Base._faceHeight;
-    var dw = width || Window_Base._faceWidth;
+    var len = Math.min(width, height);
+    var dh = len || Window_Base._faceHeight;
+    var dw = len || Window_Base._faceWidth;
     dx = dx + (width - dw) / 2;
     var bitmap = ImageManager.loadFace(faceName);
     var sw = Window_Base._faceWidth;
@@ -1744,6 +1761,7 @@ Game_Actor.prototype.evalCssCustomFormula = function(formula) {
         if (isNaN(value)) value = 0;
         return value;
     } catch (e) {
+        console.log(e);
         return 0;
     }
 };
