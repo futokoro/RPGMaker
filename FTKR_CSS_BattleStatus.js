@@ -30,6 +30,10 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  * @desc アクターを横に並べる数
  * @default 1
  * 
+ * @param Cursol Line Number
+ * @desc カーソル高さの行数
+ * @default 1
+ * 
  * @param Font Size
  * @desc フォントサイズ
  * @default 28
@@ -136,6 +140,10 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  *    :ウィンドウ内でアクターを横に並べる数を変更します。
  *    :デフォルトは 1 です。
  * 
+ * <Cursol Line Number>
+ *    :カーソルの高さを何行分にするか設定します。
+ *    :デフォルトは 1 です。
+ * 
  * <Font Size>
  *    :ウィンドウ内のフォントサイズを変更します。
  *    :デフォルトは 28 です。(単位はpixel)
@@ -190,6 +198,7 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  * 
  * v1.0.1 - 2017/04/12 : 機能追加
  *    1. ウィンドウの余白と1行の高さ、透明度、枠の有無を変更する機能を追加。
+ *    2. カーソル高さを変更する機能を追加。
  * 
  * v1.0.0 - 2017/04/11 : 初版作成
  * 
@@ -210,6 +219,7 @@ FTKR.CSS.BS.window = {
     lineHeight:Number(FTKR.CSS.BS.parameters['Window Line Height'] || 0),
     opacity:Number(FTKR.CSS.BS.parameters['Window Opacity'] || 0),
     hideFrame:Number(FTKR.CSS.BS.parameters['Hide Window Frame'] || 0),
+    cursolHeight:Number(FTKR.CSS.BS.parameters['Cursol Line Number'] || 0),
 };
 
 //簡易ステータスオブジェクト
@@ -238,6 +248,12 @@ Window_BattleStatus.prototype.numVisibleRows = function() {
 //ウィンドウに横に並べるアクター数
 Window_BattleStatus.prototype.maxCols = function() {
     return FTKR.CSS.BS.window.maxCols;
+};
+
+//書き換え
+//カーソルの高さ
+Window_BattleStatus.prototype.itemHeight = function() {
+    return this.lineHeight() * FTKR.CSS.BS.window.cursolHeight;
 };
 
 //書き換え
