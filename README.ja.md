@@ -3,8 +3,8 @@
 ## パラメータ系 プラグイン
 | プラグイン | マニュアル | ダウンロード | 必須プラグイン | 説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
-| [FTKR_AddOriginalParameters](FTKR_AddOriginalParameters.js) | [作成中](#FTKR_AddOriginalParameters.ja.md) | [v1.1.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AddOriginalParameters.js) | なし | オリジナルパラメータを追加する |
-| [FTKR_SearchPartyParam](FTKR_SearchPartyParam.js) | [あり](#FTKR_SearchPartyParam.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SearchPartyParam.js) | なし | パーティー内のパラメータに関するスクリプトを実装する |
+| [FTKR_AddOriginalParameters](FTKR_AddOriginalParameters.js) | [仮版](FTKR_AddOriginalParameters.ja.md) | [v1.1.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AddOriginalParameters.js) | なし | オリジナルパラメータを追加する |
+| [FTKR_SearchPartyParam](FTKR_SearchPartyParam.js) | [あり](FTKR_SearchPartyParam.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SearchPartyParam.js) | なし | パーティー内のパラメータに関するスクリプトを実装する |
 
 ## メニュー系 プラグイン
 
@@ -12,7 +12,7 @@
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) | [あり](FTKR_CustomSimpleActorStatus.ja.md) | [v1.2.4](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CustomSimpleActorStatus.js) | なし | 簡易ステータス表示を変更する |
 | [FTKR_CSS_BattleStatus](CSS_BattleStatus.js) | [あり](FTKR_CSS_BattleStatus.ja.md) | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_BattleStatus.js) | [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) | バトルステータス表示を変更する |
-| [FTKR_DisplayCommandFrame](FTKR_DisplayCommandFrame.js) | [作成中](#FTKR_DisplayCommandFrame.ja.md) | [v1.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_DisplayCommandFrame.js) | なし | コマンドに枠を付ける |
+| [FTKR_DisplayCommandFrame](FTKR_DisplayCommandFrame.js) | [仮版](FTKR_DisplayCommandFrame.ja.md) | [v1.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_DisplayCommandFrame.js) | なし | コマンドに枠を付ける |
 
 ## メッセージ系 プラグイン
 
