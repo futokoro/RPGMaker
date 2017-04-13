@@ -3,8 +3,8 @@
 // FTKR_ItemConpositionSystem.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/08
-// 最終更新日 : 
-// バージョン : v0.9.0
+// 最終更新日 : 2017/04/13
+// バージョン : v0.9.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ICS = FTKR.ICS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v0.9.0 アイテム合成システム
+ * @plugindesc v0.9.1 アイテム合成システム
  * @author フトコロ
  *
  * @param --基本設定--
@@ -421,6 +421,7 @@ FTKR.ICS = FTKR.ICS || {};
  *    :アイテムのカテゴリーを、'カテゴリー名'に設定します。
  *    :レシピに特定のアイテムではなく、カテゴリーを指定すると、
  *    :同じカテゴリーのアイテムであればどれでも使用できるようになります。
+ *    :なおすべてのアイテムは、デフォルトカテゴリーが設定されます。
  * 
  * <ICS ランク: x>
  *    :アイテムのランクを、x に設定します。
@@ -429,6 +430,10 @@ FTKR.ICS = FTKR.ICS || {};
  *    :ランク 0 のアイテムは、ランク計算には使いません。
  *    :このタグを設定しない場合は、ランク 0 と見なします。
  * 
+ * <ICS 合成アイテム>
+ *    :このタグをつけたアイテムは、以下のように扱います。
+ *    : 1. このアイテムのカテゴリー設定は無効です。
+ * 
  * <ICS レシピ>
  * 内容
  * </ICS レシピ>
@@ -436,6 +441,20 @@ FTKR.ICS = FTKR.ICS || {};
  *    :内容については後述します。
  *    :複数のタグを入力することで、一つのアイテムに対して複数のレシピを
  *    :設定できます。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * デフォルトカテゴリーについて
+ *-----------------------------------------------------------------------------
+ * 「合成アイテム」タグをつけたアイテム以外には、デフォルトカテゴリーが
+ * 設定されています。
+ * 
+ * 分類がアイテムの場合は、「アイテム」カテゴリー
+ * 武器の場合は「武器」カテゴリー、防具の場合は「防具」カテゴリーです。
+ * 
+ * これらのカテゴリーをレシピに設定すると、その分類のアイテムが
+ * すべて対象になります。
+ * 例えば武器カテゴリーならすべての武器が対象になります。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -614,6 +633,12 @@ FTKR.ICS = FTKR.ICS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v0.9.1 - 2017/04/13 : 不具合修正、機能追加
+ *    1. 起動できないエラーを修正
+ *    2. 投入したアイテムが何のレシピにも該当しない場合に、合成結果が消失に
+ *       なるように処理を追加。
+ *    2. デフォルトカテゴリーとして「アイテム」「武器」「防具」追加
+ * 
  * v0.9.0 - 2017/04/08 : 試作版公開
  * 
  *-----------------------------------------------------------------------------
@@ -748,7 +773,7 @@ Window_Base.SUCCESS_CORRECTION_CATEGORY = 2;
 Window_Base.SUCCESS_CORRECTION_NUMBER = 3;
 Window_Base.SUCCESS_CORRECTION_ITEM = 4;
 
-Window_Base.SUCCESS_MAX_RATE = Math.limit(FTKR.ICS.success.maxRate, 0, 10000);
+Window_Base.SUCCESS_MAX_RATE = FTKR.ICS.success.maxRate.clamp(0, 10000);
 
 //=============================================================================
 // Array
@@ -818,14 +843,6 @@ if (!Array.prototype.findIndex) {
 }
 
 //=============================================================================
-// Math
-//=============================================================================
-
-Math.limit = function(value, lowerlimit, upperlimit) {
-  return Math.min(Math.max(value, lowerlimit), upperlimit);
-}
-
-//=============================================================================
 // DataManager
 //=============================================================================
 
@@ -838,6 +855,7 @@ DataManager.isDatabaseLoaded = function() {
         this.icsCompositionNotetags($dataItems);
         this.icsCompositionNotetags($dataWeapons);
         this.icsCompositionNotetags($dataArmors);
+
         FTKR.ICS.DatabaseLoaded = true;
     }
     return true;
@@ -895,12 +913,6 @@ DataManager.icsCompositionNotetags = function(group) {
             var case1j = /<ICS カテゴリー:[ ]*(.+)>/i;
             var case2 = /<ICS RANK:[ ]*(\d+)>/i;
             var case2j = /<ICS ランク:[ ]*(\d+)>/i;
-            var case3 = /<ICS ITEM>/i;
-            var case3j = /<ICS アイテム>/i;
-            var case4 = /<ICS WEAPON>/i;
-            var case4j = /<ICS 武器>/i;
-            var case5 = /<ICS ARMOR>/i;
-            var case5j = /<ICS 防具>/i;
             var case6a = /<ICS RECIPES>/i;
             var case6aj = /<ICS レシピ>/i;
             var case6b = /<\/ICS RECIPES>/i;
@@ -1016,6 +1028,18 @@ DataManager.itemDataClass = function(item) {
     }
 };
 
+DataManager.convertDefaultCategory = function(category) {
+    if (category.match(/^アイテム$/i) || category.match(/^ITEM$/i)) {
+        return 'item';
+    } else if (category.match(/^武器$/i) || category.match(/^WEAPON$/i)) {
+        return 'weapon';
+    } else if (category.match(/^防具$/i) || category.match(/^ARMOR$/i)) {
+        return 'armor';
+    } else {
+        return category;
+    }
+}
+
 DataManager.convertItem = function(dataClass, itemId) {
     if (!itemId) return null;
     switch (dataClass) {
@@ -1077,8 +1101,11 @@ DataManager.convertCategoryItem = function(item, rank) {
 
 DataManager.searchCategoryItems = function(datas, category) {
     return datas.filter( function(item) {
-        return item && item.ics.category() === category;
-    });
+        if (!item) return false;
+        var notComp = (/<ICS 合成アイテム>/i).test(item.note);
+        return !notComp && (item.ics.category() === category ||
+            this.itemDataClass(item) === this.convertDefaultCategory(category));
+    },this);
 };
 
 DataManager.searchCategoryAllItems = function(category) {
@@ -1251,17 +1278,37 @@ Game_Material.prototype.item = function() {
 };
 
 Game_Material.prototype.matchMaterial = function(material) {
-    var results = [
-        this.category(),
-        this.category() === material.category(),
-        this.dataClass() === material.dataClass(),
-        this.itemId() === material.itemId(),
-    ];
-    return (results[0] && results[1]) || (!results[0] && results[2] && results[3]);
+    return (this.category() && this.matchMaterialCategory(material)) ||
+        (!this.category() && this.matchDataClass(material) && this.matchItemId(material));
 };
 
 Game_Material.prototype.lowerMaterialNumber = function(material) {
     return this.matchMaterial(material) && this.number() <= material.number();
+};
+
+Game_Material.prototype.matchMaterialCategory = function(material) {
+    return this.matchCategory(material.dataClass(), material.category());
+};
+
+Game_Material.prototype.matchCategory = function(dataClass, category) {
+    var arg = this.category();
+    if (arg.match(/^アイテム$/i) || arg.match(/^ITEM$/i)) {
+        return 'item' === dataClass;
+    } else if (arg.match(/^武器$/i) || arg.match(/^WEAPON$/i)) {
+        return 'weapon' === dataClass;
+    } else if (arg.match(/^防具$/i) || arg.match(/^ARMOR$/i)) {
+        return 'armor' === dataClass;
+    } else {
+        return this.category() === category;
+    }
+};
+
+Game_Material.prototype.matchDataClass = function(material) {
+    return this.dataClass() === material.dataClass();
+};
+
+Game_Material.prototype.matchItemId = function(material) {
+    return this.itemId() === material.itemId();
 };
 
 //=============================================================================
@@ -1313,55 +1360,67 @@ Game_Party.prototype.recipes = function() {
     return this._recipes;
 };
 
+//レシピを覚えていたら、レシピ番号を返す
 Game_Party.prototype.hasRecipe = function(dataClass, itemId, typeId) {
     return this._recipes.findIndex(function (recipe) {
         return recipe && recipe.matchRecipe(dataClass, itemId, typeId);
     });
 };
 
+//レシピを追加する
 Game_Party.prototype.addRecipe = function(dataClass, itemId, typeId) {
     if (this.hasRecipe(dataClass, itemId, typeId) < 0) {
         this._recipes.push(new Game_IcsRecipeBook(dataClass, itemId, typeId));
     }
 };
 
+//レシピを削除する
 Game_Party.prototype.reduceRecipe = function(dataClass, itemId, typeId) {
     var index = this.hasRecipe(dataClass, itemId, typeId);
     if (index > 0) this._recipes.splice(index, 1);
 };
 
+//指定した素材とカテゴリーが同じ手持ちアイテムのリストを返す
 Game_Party.prototype.someCategoryAllItems = function(material) {
     return this.allItems().filter( function(item) {
-        return item.ics.category() === material.category();
+        var notComp = (/<ICS 合成アイテム>/i).test(item.note);
+        return !notComp && material.matchCategory(DataManager.itemDataClass(item), item.ics.category());
     });
 };
 
+//指定した素材を必要数以上もっているか
+//持っている場合、そのアイテムデータを返す
 Game_Party.prototype.matchCategoryItem = function(material) {
     return this.someCategoryAllItems(material).find( function(item) {
         return this.numItems(item) >= material.number();
     },this);
 };
 
+//指定したレシピと製作員数に必要なアイテムを持っているか
 Game_Party.prototype.hasAllMaterials = function(recipe, number) {
     return recipe.materials().every( function(material) {
         return material && this.hasMaterial(material, number);
     },this);
 };
 
+//指定した素材と製作員数に必要なアイテムを持っているか
 Game_Party.prototype.hasMaterial = function(material, number) {
     return this.hasCategoryMaterial(material, number) || this.hasNonCategoryMaterial(material, number);
 };
 
+//カテゴリ指定の素材と製作員数に必要なアイテムを持っているか
 Game_Party.prototype.hasCategoryMaterial = function(material, number) {
     return material.category() && this.someCategoryAllItems(material).some( function(item) {
         return this.numItems(item) >= material.number() * number;
     },this);
 };
 
+//カテゴリ指定ではない素材と製作員数に必要なアイテムを持っているか
 Game_Party.prototype.hasNonCategoryMaterial = function(material, number) {
     return !material.category() && this.numItems(material.item()) >= material.number() * number;
 };
 
+//指定したアイテムと製作員数に必要なアイテムを持っているか
 Game_Party.prototype.hasRequiredRecipeMaterials = function(item, number) {
     number = number || 1;
     return item && item.ics.recipes().some( function(recipe) {
@@ -1369,6 +1428,7 @@ Game_Party.prototype.hasRequiredRecipeMaterials = function(item, number) {
     },this);
 };
 
+//指定したアイテムを最大で何個まで製作できるか
 Game_Party.prototype.hasMaxRequiredRecipeMaterials = function(item) {
     var number = 1;
     while(this.hasRequiredRecipeMaterials(item, number)) {
@@ -1829,8 +1889,8 @@ Window_IcsCompsiState.prototype.refresh = function() {
     if (comp) {
         var number = this.compositionNumber(comp);
         var has = $gameParty.hasRecipe(DataManager.itemDataClass(comp.item), comp.item.id, comp.typeId);
-        console.log(has);
-        if (has > 0) {
+//        console.log(has);
+        if (has > 0 && number) {
             var recipe = comp.item.ics.recipe(comp.typeId);
             this.drawText('成功', 0, 0, w/2);
             var success = recipe.difficulty().success;
@@ -1865,8 +1925,9 @@ Window_IcsCompsiState.prototype.refresh = function() {
                 totalRank += rank;
             }
         });
-        comp.rank = totalRank / rankNum;
-        console.log('composit data', comp, 'number', number);
+        comp.rank = rankNum ? totalRank / rankNum : 1;
+        comp.slots = this._slotMaterials;
+//        console.log('composit data', comp, 'number', number);
         this._comp = comp;
         this._number = number;
     } else {
@@ -1883,7 +1944,8 @@ Window_IcsCompsiState.prototype.compositionsItem = function() {
     return comps.length ? this.maxRequireMaterials() : null;
 };
 
-//材料と比較
+//指定したアイテムのリストの中に、合成材料とレシピが合っているアイテムのリストを返す
+//また、合っているアイテムのレシピ情報を this._comps に加える
 Window_IcsCompsiState.prototype.checkMaterials = function(datas) {
     return datas.filter( function(item) {
         if (item) {
@@ -1895,6 +1957,9 @@ Window_IcsCompsiState.prototype.checkMaterials = function(datas) {
     },this);
 };
 
+//指定したアイテムのレシピと合成材料が合っているか判定し
+//合っていれば、アイテムと合致したレシピとそのレシピのIDを返す
+//合っていなければ null を返す
 Window_IcsCompsiState.prototype.matchRecipeMaterials = function(item) {
     var typeId = 0;
     var recipes = item.ics.recipes().filter( function(recipe, t) {
@@ -1907,14 +1972,24 @@ Window_IcsCompsiState.prototype.matchRecipeMaterials = function(item) {
     return recipes.length ? {item:item, recipe:recipes[0], typeId:typeId,} : null;
 };
 
+//指定したアイテムのレシピの中で、合成素材と合っているものがあるか判定
 Window_IcsCompsiState.prototype.hasMaterials = function(materials) {
-    return materials.every(function(material, t) {
-        return this.hasMaterial(material);
+    slotMaterials = this._slotMaterials.clone();
+    var result = materials.every(function(material) {
+        var index = this.hasMaterial(material, slotMaterials);
+        if (index > -1) {
+            slotMaterials.splice(index, 1);
+            return true;
+        } else {
+            return false;
+        }
     },this);
+    return result;
 };
 
-Window_IcsCompsiState.prototype.hasMaterial = function(material) {
-    return this._slotMaterials.some( function(slotMaterial, t) {
+//指定したレシピ素材と合成素材が合っているか判定
+Window_IcsCompsiState.prototype.hasMaterial = function(material, slotMaterials) {
+    return slotMaterials.findIndex( function(slotMaterial) {
         return material.lowerMaterialNumber(slotMaterial);
     },this);
 };
@@ -1941,6 +2016,7 @@ Window_IcsCompsiState.prototype.maxRequireMaterials = function() {
 Window_IcsCompsiState.prototype.compositionNumber = function(composit) {
     var rates = [];
     var rate = 0;
+//    console.log(this._slotMaterials);
     var recipe = composit.item.ics.recipe(composit.typeId);
     recipe.materials().forEach( function(material, i) {
         rates[i] = 0;
@@ -1950,6 +2026,7 @@ Window_IcsCompsiState.prototype.compositionNumber = function(composit) {
         },this);
         if (i) rate = Math.min(rates[i], rates[i-1]);
     },this);
+//    console.log('recipe num:', recipe.number(), 'rate:', rate, 'rates:', rates);
     return recipe.number() * rate;
 };
 
@@ -2423,9 +2500,12 @@ Scene_ICS.prototype.onNumberOk = function() {
     SoundManager.playOk();
     var number = this._numberWindow.number();
     if (this._itemWindow._showResipe) {
-        var items = this.item().ics.recipe(this._itemWindow.typeId()).materials().map( function(material) {
+        var recipe = this.item().ics.recipe(this._itemWindow.typeId());
+//        console.log(recipe);
+        var items = recipe.materials().map( function(material) {
             return material.item();
         },this);
+//        console.log(items);
         items.forEach( function(item) {
             this.setSlotItem(item, number);
         },this);
@@ -2443,7 +2523,7 @@ Scene_ICS.prototype.setSlotItem = function(item, number) {
         return slot && slot.item() === item;
     },this);
     if (compsiSlot.length) {
-        console.log(compsiSlot);
+//        console.log(compsiSlot);
         compsiSlot[0]._number += number;
     } else {
         csw._slots[csw._itemCount] = new Game_Material('', DataManager.itemDataClass(item), item.id, number);
@@ -2500,21 +2580,26 @@ Scene_ICS.prototype.onConfirmationOk = function() {
 //合成実行処理
 Scene_ICS.prototype.composition = function(sound) {
     var composit = this._compositionStateWindow;
-    var item = composit._comp.item;
-    var typeId = composit._comp.typeId;
-    var getItem = {
-        item:this.convertCategoryItem(composit._comp),
-        number:composit._number,
-    };
-    var judg = this.successJudg(item, typeId);
-    console.log('composit', composit);
-    console.log('getBaseItem', getItem, judg);
-    if (this.successApply(judg, getItem, item.ics.recipe(typeId), sound) && composit._learnRecipe) {
-        $gameParty.addRecipe(DataManager.itemDataClass(item), item.id, typeId);
+    var comp = composit._comp;
+    var item = comp.item;
+    var typeId = comp.typeId;
+//    console.log('composit', comp);
+    if (item) {
+        var getItem = {
+            item:this.convertCategoryItem(comp),
+            number:composit._number,
+        };
+        var judg = this.successJudg(item, typeId);
+//        console.log('getBaseItem', getItem, judg);
+        if (this.successApply(judg, getItem, item.ics.recipe(typeId), sound) && composit._learnRecipe) {
+            $gameParty.addRecipe(DataManager.itemDataClass(item), item.id, typeId);
+        }
+//        console.log('getItem', getItem);
+        $gameParty.gainItem(getItem.item, getItem.number);
+        this._resultWindow.setResult(judg, getItem.item, getItem.number);
+    } else {
+        this._resultWindow.setResult('lost', null, 0);
     }
-    console.log('getItem', getItem);
-    $gameParty.gainItem(getItem.item, getItem.number);
-    this._resultWindow.setResult(judg, getItem.item, getItem.number);
     this._resultWindow.show();
     this._resultConfWindow.show();
     this._resultConfWindow.actSelect(0);
@@ -2546,7 +2631,7 @@ Scene_ICS.prototype.successApply = function(judg, getItem, recipe, sound) {
             success = false;
             break;
     }
-    console.log('correct', correct);
+//    console.log('correct', correct);
     this.setCorrection(correct, getItem);
     return success;
 };
@@ -2567,7 +2652,7 @@ Scene_ICS.prototype.successCorrection = function(success) {
 
 Scene_ICS.prototype.calcBaseRate = function(difficulty, param) {
     var max = Window_Base.SUCCESS_MAX_RATE;
-    var baseRate = Math.limit(FTKR.ICS.success.baseRate, 0, max);
+    var baseRate = FTKR.ICS.success.baseRate.clamp(0, max);
     var upRate = Math.max(FTKR.ICS.success.upRate, 0);
     var downRate = Math.min(FTKR.ICS.success.downRate, 0);
     var diff = difficulty - param;
@@ -2621,8 +2706,8 @@ Scene_ICS.prototype.successJudg = function(item, typeId) {
     var difficulty = recipe.difficulty();
     var rate = param ? this.calcSuccessRate(difficulty, param) :
         difficulty;
-    var great = Math.limit(rate.great, 0, max);
-    var success = Math.limit(rate.success, 0, max - great);
+    var great = rate.great.clamp(0, max);
+    var success = rate.success.clamp(0, max - great);
     if (!this.calcSuccessRequired(item, typeId)) {
         great = 0;
         success = 0;
@@ -2632,10 +2717,10 @@ Scene_ICS.prototype.successJudg = function(item, typeId) {
         great = 0;
     }
     var failure = recipe.failure() ? 
-        Math.limit(rate.failure, 0, max - great - success) : 0;
+        rate.failure.clamp(0, max - great - success) : 0;
     var lost = Math.max(max - great - success - failure, 0);
     var rand = Math.random() * max + 1;
-    console.log('great', great, 'success', success, 'failure', failure, 'lost', lost, 'rand', rand);
+//    console.log('great', great, 'success', success, 'failure', failure, 'lost', lost, 'rand', rand);
     if (rand <= great) {
         return 'great';
     } else if (rand <= great + success) {
