@@ -3,8 +3,8 @@
 // FTKR_ItemConpositionSystem.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/08
-// 最終更新日 : 2017/04/13
-// バージョン : v0.9.1
+// 最終更新日 : 2017/04/14
+// バージョン : v0.9.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ICS = FTKR.ICS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v0.9.1 アイテム合成システム
+ * @plugindesc v0.9.2 アイテム合成システム
  * @author フトコロ
  *
  * @param --基本設定--
@@ -446,15 +446,14 @@ FTKR.ICS = FTKR.ICS || {};
  *-----------------------------------------------------------------------------
  * デフォルトカテゴリーについて
  *-----------------------------------------------------------------------------
- * 「合成アイテム」タグをつけたアイテム以外には、デフォルトカテゴリーが
- * 設定されています。
- * 
+ * すべてのアイテムは、デフォルトカテゴリーが設定されています。
  * 分類がアイテムの場合は、「アイテム」カテゴリー
  * 武器の場合は「武器」カテゴリー、防具の場合は「防具」カテゴリーです。
  * 
- * これらのカテゴリーをレシピに設定すると、その分類のアイテムが
- * すべて対象になります。
- * 例えば武器カテゴリーならすべての武器が対象になります。
+ * これらのカテゴリーをレシピに設定すると、例えば武器カテゴリーなら
+ * すべての武器が対象になります。
+ * 
+ * ただし、「合成アイテム」タグをつけたアイテムは、設定が除外されます。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -486,6 +485,10 @@ FTKR.ICS = FTKR.ICS || {};
  * <ICS 防具>
  *    :合成カテゴリーの分類を設定します。
  *    :設定しない場合は、アイテムと見なします。
+ * 
+ * <ICS 特殊合成>
+ *    :合成結果が通常の合成と変わります。
+ *    :詳しくは特殊合成を参照してください。
  * 
  * <ICS レシピ>
  * 内容
@@ -566,6 +569,40 @@ FTKR.ICS = FTKR.ICS || {};
  * 
  * 
  *-----------------------------------------------------------------------------
+ * 特殊合成について
+ *-----------------------------------------------------------------------------
+ * 合成カテゴリーに特殊合成タグを設定すると、この特殊合成になります。
+ * 通常の合成とは異なり、合成仕様が変わります。
+ * 
+ * 素材に使用できるアイテム分類は「武器」および「防具」だけです。
+ * 
+ * 1. レシピの一つ目に設定した素材をベースアイテムとします。
+ * 2. レシピの二つ目以降に設定した素材を付加アイテムとします。
+ *    なお、「合成アイテム」タグをつけたアイテムは除きます。
+ * 3. 合成してできるアイテムは、以下の仕様のオリジナルアイテムです。
+ *    このアイテムはデータベース上に無いアイテムです。
+ * 4. 特殊合成は、レシピから選ぶことはできません。
+ * 5. 特殊合成は、ランク変更、カテゴリー変更、アイテム変更は選べません。
+ * 
+ * ＜オリジナルアイテムの仕様＞
+ * 1. アイテム分類および基本設定は、ベースアイテムと同じです。
+ * 
+ * 2. 合成により、付加アイテムの能力値、または特徴をベースアイテムに付与します。
+ * 
+ * 3. 付与する能力の数は、生成数に従います。
+ *    生成数が 0 以下の場合は、何も付与しません。
+ * 
+ * 4. ベースアイテムと同じ見た目ですが、ベースアイテムとは別物です。
+ *    アイテムIDが異なりますので、武器・防具の所持数を取得する場合に
+ *    別アイテムとして数えます。
+ * 
+ * 5. オリジナルアイテムの名前は、「ベースアイテム名(+合成回数)」になります。
+ *    例）ベースアイテムがショートソードで、合成回数が1回の場合
+ *        ショートソード(+1)
+ *        になります。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
  * 合成コマンドの表示順について
  *-----------------------------------------------------------------------------
  * 合成コマンドで表示するコマンドの表示項目と順番は
@@ -632,6 +669,9 @@ FTKR.ICS = FTKR.ICS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+
+ * v0.9.2 - 2017/04/14 : 機能追加
+ *    1. 特殊合成を追加。
  * 
  * v0.9.1 - 2017/04/13 : 不具合修正、機能追加
  *    1. 起動できないエラーを修正
@@ -775,6 +815,45 @@ Window_Base.SUCCESS_CORRECTION_ITEM = 4;
 
 Window_Base.SUCCESS_MAX_RATE = FTKR.ICS.success.maxRate.clamp(0, 10000);
 
+FTKR.ICS.DATABASE_ITEMS_NUMBER = 0;
+FTKR.ICS.DATABASE_WEAPONS_NUMBER = 0;
+FTKR.ICS.DATABASE_ARMORS_NUMBER = 0;
+
+//配列を複製する
+function copyArray(arr) {
+    var newArr = [];
+    arr.forEach(function(data, prop) {
+        if (data instanceof Object) {
+            if (data instanceof Array) {
+                newArr[prop] = copyArray(data);
+            } else {
+                newArr[prop] = copyObject(data);
+            }
+        } else {
+            newArr[prop] = data;
+        }
+    });
+    return newArr;
+};
+
+//オブジェクトを複製する
+function copyObject(obj) {
+    var newObj = {};
+    Object.getOwnPropertyNames(obj).forEach(function(prop) {
+        var data = obj[prop];
+        if (data instanceof Object) {
+            if (data instanceof Array) {
+                newObj[prop] = copyArray(data);
+            } else {
+                newObj[prop] = copyObject(data);
+            }
+        } else {
+            newObj[prop] = data;
+        }
+    });
+    return newObj;
+};
+
 //=============================================================================
 // Array
 //=============================================================================
@@ -855,7 +934,9 @@ DataManager.isDatabaseLoaded = function() {
         this.icsCompositionNotetags($dataItems);
         this.icsCompositionNotetags($dataWeapons);
         this.icsCompositionNotetags($dataArmors);
-
+        FTKR.ICS.DATABASE_ITEMS_NUMBER = $dataItems.length;
+        FTKR.ICS.DATABASE_WEAPONS_NUMBER = $dataWeapons.length;
+        FTKR.ICS.DATABASE_ARMORS_NUMBER = $dataArmors.length;
         FTKR.ICS.DatabaseLoaded = true;
     }
     return true;
@@ -922,6 +1003,7 @@ DataManager.icsCompositionNotetags = function(group) {
             var setMode = 'none';
             obj.icsDatas = [];
             obj.ics = new Game_Composit();
+            obj.compositCount = 0;
 
             for (var i = 0; i < notedata.length; i++) {
                 var line = notedata[i];
@@ -1009,6 +1091,35 @@ DataManager.setIcsRecipes = function(obj) {
             obj.ics.addRecipe(recipe);
         }
         obj.icsDatas = [];
+    }
+};
+
+FTKR.ICS.DataManager_makeSaveContents = DataManager.makeSaveContents;
+DataManager.makeSaveContents = function() {
+    var contents = FTKR.ICS.DataManager_makeSaveContents.call(this);
+    if (FTKR.ICS.DATABASE_ITEMS_NUMBER < $dataItems.length) {
+        contents.icsItemDatas = $dataItems.slice(FTKR.ICS.DATABASE_ITEMS_NUMBER);
+    }
+    if (FTKR.ICS.DATABASE_WEAPONS_NUMBER < $dataWeapons.length) {
+        contents.icsWeaponDatas = $dataWeapons.slice(FTKR.ICS.DATABASE_WEAPONS_NUMBER);
+    }
+    if (FTKR.ICS.DATABASE_ARMORS_NUMBER < $dataArmors.length) {
+        contents.icsArmorDatas = $dataArmors.slice(FTKR.ICS.DATABASE_ARMORS_NUMBER);
+    }
+    return contents;
+};
+
+FTKR.ICS.DataManager_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function(contents) {
+    FTKR.ICS.DataManager_extractSaveContents.call(this, contents);
+    if (contents.icsItemDatas) {
+        $dataItems = $dataItems.concat(contents.icsItemDatas);
+    }
+    if (contents.icsWeaponDatas) {
+        $dataWeapons = $dataWeapons.concat(contents.icsWeaponDatas);
+    }
+    if (contents.icsArmorDatas) {
+        $dataArmors = $dataArmors.concat(contents.icsArmorDatas);
     }
 };
 
@@ -1941,6 +2052,7 @@ Window_IcsCompsiState.prototype.refresh = function() {
 Window_IcsCompsiState.prototype.compositionsItem = function() {
     var comps = this.checkMaterials($dataItems).concat(
           this.checkMaterials($dataWeapons), this.checkMaterials($dataArmors));
+//    if (comps.length) console.log(comps);
     return comps.length ? this.maxRequireMaterials() : null;
 };
 
@@ -2577,6 +2689,11 @@ Scene_ICS.prototype.onConfirmationOk = function() {
     }
 };
 
+Scene_ICS.prototype.isSpecialComp = function(item) {
+    return item && item.wtypeId === FTKR.ICS.basic.categoryId &&
+        (/<ICS 特殊合成>/i).test(item.note);
+}
+
 //合成実行処理
 Scene_ICS.prototype.composition = function(sound) {
     var composit = this._compositionStateWindow;
@@ -2595,6 +2712,36 @@ Scene_ICS.prototype.composition = function(sound) {
             $gameParty.addRecipe(DataManager.itemDataClass(item), item.id, typeId);
         }
 //        console.log('getItem', getItem);
+        if (this.isSpecialComp(item) && judg !== 'lost') {
+            var baseItem = comp.slots[0].item();
+            var addItem = comp.slots[1].item();
+//            console.log('特殊合成');
+//            console.log('ベースアイテム:', baseItem.name);
+            var number = getItem.number;
+            var newItem = copyObject(baseItem);
+            newItem.ics = new Game_Composit();
+            if(!newItem.compositCount) newItem.baseName = newItem.name;
+            newItem.compositCount += 1 + addItem.compositCount;
+            newItem.name = newItem.baseName + '(+' + newItem.compositCount + ')';
+            if(DataManager.isWeapon(baseItem)) {
+                newItem.id = $dataWeapons.length;
+                this.setItemTraits(newItem, addItem, number);
+                $dataWeapons.push(newItem);
+            } else if (DataManager.isArmor(baseItem)){
+                newItem.id = $dataArmors.length;
+                this.setItemTraits(newItem, addItem, number);
+                $dataArmors.push(newItem);
+            } else {
+                newItem = null;
+            }
+//            console.log('アイテムID', newItem.id);
+            getItem.item = newItem;
+            getItem.number = 1;
+        }
+        if (judg === 'lost') {
+            getItem.item = null;
+            getItem.number = 0;
+        }
         $gameParty.gainItem(getItem.item, getItem.number);
         this._resultWindow.setResult(judg, getItem.item, getItem.number);
     } else {
@@ -2603,6 +2750,28 @@ Scene_ICS.prototype.composition = function(sound) {
     this._resultWindow.show();
     this._resultConfWindow.show();
     this._resultConfWindow.actSelect(0);
+};
+
+Scene_ICS.prototype.setItemTraits = function(baseItem, addItem, number) {
+    var traits = addItem.params.map(function(param, i){
+        return {type:'param', data:{id:i, value:param}};
+    }).filter(function(trait) {
+        return trait.data.value;
+    });
+    traits = traits.concat(addItem.traits.map(function(trait) {
+        if(trait) return {type:'trait', data:trait};
+    }));
+    for(var i = 0; i < number; i++) {
+        var num = Math.floor(Math.random() * (traits.length - 1));
+        var add = traits[num];
+        if (add.type === 'param') {
+            baseItem.params[add.data.id] += add.data.value;
+        } else if (add.type === 'trait') {
+            baseItem.traits.push(add.data);
+        }
+        traits.splice(num, 1);
+    }
+    return baseItem;
 };
 
 Scene_ICS.prototype.convertCategoryItem = function(composit) {
