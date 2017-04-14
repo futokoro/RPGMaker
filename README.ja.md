@@ -3,7 +3,7 @@
 ## パラメータ系 プラグイン
 | プラグイン | マニュアル | ダウンロード | 必須プラグイン | 説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
-| [FTKR_AddOriginalParameters](FTKR_AddOriginalParameters.js) | [あり](FTKR_AddOriginalParameters.ja.md) | [v1.1.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AddOriginalParameters.js) | なし | オリジナルパラメータを追加する |
+| [FTKR_AddOriginalParameters](FTKR_AddOriginalParameters.js) | [あり](FTKR_AddOriginalParameters.ja.md) | [v1.1.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AddOriginalParameters.js) | なし | オリジナルパラメータを追加する |
 | [FTKR_SearchPartyParam](FTKR_SearchPartyParam.js) | [あり](FTKR_SearchPartyParam.ja.md) | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SearchPartyParam.js) | なし | パーティー内のパラメータに関するスクリプトを実装する |
 
 ## メニュー系 プラグイン

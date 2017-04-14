@@ -1,11 +1,11 @@
-//=======↓本プラグインを改変した場合でも、この欄は消さないでください↓===============
+//=============================================================================
 // オリジナルのパラメータを追加するプラグイン
 // FTKR_AddOriginalParameters.js
 // 作成者     : フトコロ
 // 作成日     : 2017/02/16
-// 最終更新日 : 2017/03/23
-// バージョン : v1.1.1
-//=======↑本プラグインを改変した場合でも、この欄は消さないでください↑===============
+// 最終更新日 : 2017/04/14
+// バージョン : v1.1.2
+//=============================================================================
 
 var Imported = Imported || {};
 Imported.FTKR_AOP = true;
@@ -15,7 +15,7 @@ FTKR.AOP = FTKR.AOP || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.1 オリジナルのパラメータを追加するプラグイン
+ * @plugindesc v1.1.2 オリジナルのパラメータを追加するプラグイン
  * @author フトコロ
  *
  * @param Use Param Num
@@ -321,10 +321,10 @@ FTKR.AOP = FTKR.AOP || {};
  *      :対象のエネミーのパラメータ x (または'code')を、y に設定します。
  * 
  * 
- * [アイテム、スキル]
+ * [アクター、スキル]
  * <AOP Param x Get: y(%)>
  * <AOP 'code' Get: y(%)>
- *      :アイテムまたはスキルを使用すると、対象者のパラメータ x 
+ *      :アクターまたはスキルを使用すると、対象者のパラメータ x 
  *      :(または'code')の現在値に y 加算します。
  *      :y に負の数字を入れた場合、減算します。
  *      :y に'%'を付けた場合、パラメータ x (または'code')の最大値の
@@ -375,6 +375,49 @@ FTKR.AOP = FTKR.AOP || {};
  * 
  * 
  *-----------------------------------------------------------------------------
+ * プラグインコマンド
+ *-----------------------------------------------------------------------------
+ * 以下のプラグインコマンドを使用できます。
+ * 
+ * 1. パラメータの変更
+ * 指定したアクターIDのパラメータ(最大値)を変更します。
+ * 
+ * AOP_パラメータ変更 アクター(x) コード名 演算方法 値
+ * AOP_set_Parameters Actor(x) code CALCTYPE value
+ * 
+ * x にはアクターIDを代入してください。
+ * コード名には、プラグインパラメータで設定したコード名、または
+ * パラメータIDを代入してください。
+ * 演算方法には、代入(=)、加算(+)、減算(-)、積算(*)、除算(/)、剰余(%)を
+ * 代入してください。
+ * アクターID、パラメータID、代入する値には、ゲーム内変数を指定できます。
+ * ゲーム内変数を使用する場合は、数値の変わりに v[n] を入力してください。
+ * 
+ * 入力例)
+ * AOP_パラメータ変更 アクター(1) str 代入 v[5]
+ * AOP_set_Parameters actor(1) str = v[5]
+ *    :アクターID1 のパラメータ str にゲーム内変数ID5 の値を代入する
+ * 
+ * 
+ * 2. パラメータの取得
+ * 指定したアクターIDのパラメータ(最大値)を、ゲーム内変数に代入します。
+ * 
+ * AOP_パラメータ取得 ゲーム内変数ID アクター(x) コード名
+ * AOP_GET_Parameters variableId Actor(x) code
+ * 
+ * x にはアクターIDを代入してください。
+ * コード名には、プラグインパラメータで設定したコード名、または
+ * パラメータIDを代入してください。
+ * ゲーム内変数ID、アクターID、パラメータIDには、ゲーム内変数を指定できます。
+ * ゲーム内変数を使用する場合は、数値の変わりに v[n] を入力してください。
+ * 
+ * 入力例)
+ * AOP_パラメータ取得 5 アクター(1) str
+ * AOP_GET_Parameters 5 actor(1) str
+ *    :アクターID1 のパラメータ str の値を ゲーム内変数ID5 に代入する
+ * 
+ * 
+ *-----------------------------------------------------------------------------
  * その他の設定
  *-----------------------------------------------------------------------------
  * 1. オリジナルパラメータの最大値は、プラグインパラメータ<Max Param>または、
@@ -386,27 +429,18 @@ FTKR.AOP = FTKR.AOP || {};
  * 
  * 
  *-----------------------------------------------------------------------------
- * 本プラグインを使用するに当たって    ☆重要☆
+ * 本プラグインのライセンスについて(License)
  *-----------------------------------------------------------------------------
- * 1.本プラグインは改変可です。
- *   ただし、一番始めに記載した作成者等の欄は残してください。
- * 
- * 2.本プラグインを使用するに当たって、ゲーム中にライセンス表示することは
- *   必須ではありません。ただ、どこかゲーム外のReadme等にでも記載して頂けると
- *   うれしいです。
- * 
- * 3.本プラグインを使用する、または改変するに当たって、私フトコロに許可を取る
- *   ことや、連絡することは必要ありません。
- * 
- * 4.本プラグインは、有料ゲームに使用することは構いません。
- *   ただし、改変した場合でも、プラグイン単体で販売することは止めてください。
- *   
- * 5.本プラグインは、年齢制限のあるゲームに使用することは構いません。
+ * 本プラグインはMITライセンスのもとで公開しています。
+ * This plugin is released under the MIT License.
  * 
  * 
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.1.2 - 2017/04/14 : 機能追加
+ *    1. プラグインコマンドを追加。
  * 
  * v1.1.1 - 2017/03/23 : 不具合修正
  *    1. <Parameter 6>以降のコードが使用できない不具合を修正。
@@ -684,9 +718,9 @@ DataManager.getParamId = function(text) {
     FTKR.AOP.params.forEach( function(param, i) {
         if (param.current === text || param.code === text) {
             paramId = i;
-        } else if (text.match(/(?:param)[ ](\d+)/i)) {
+        } else if (text.match(/(?:param)[ ](\d+)/i) || text.match(/(\d+)/i)) {
             paramId = Number(RegExp.$1);
-        } 
+        }
     });
     return paramId;
 };
@@ -765,6 +799,12 @@ Game_Actor.prototype.aopParamItemGrow = function(paramId) {
 
 Game_Actor.prototype.aopParamBase = function(paramId) {
     return this.aopActorParamBase(paramId) + this.aopClassParamBase(paramId);
+};
+
+Game_Actor.prototype.setAopParamBase = function(paramId, value) {
+    if (paramId > -1 && FTKR.AOP.useParamNum > paramId ) {
+        this.actor().aopParams[paramId] = value;
+    }
 };
 
 Game_Actor.prototype.aopActorParamBase = function(paramId) {
@@ -957,3 +997,88 @@ Game_BattlerBase.prototype.refresh = function() {
     };
 };
 
+//=============================================================================
+// Game_Interpreter
+//=============================================================================
+
+var _AOP_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function(command, args) {
+    _AOP_Game_Interpreter_pluginCommand.call(this, command, args);
+    if (/AOP_/i.test(command)) {
+        command = command.replace(/AOP_/i, '');
+        switch (true) {
+            case /パラメータ変更/i.test(command):
+            case /set_Parameters/i.test(command):
+                this.setAopParams(command, args);
+                break;
+            case /パラメータ取得/i.test(command):
+            case /get_Parameters/i.test(command):
+                this.getAopParams(command, args);
+                break;
+        }
+    }
+};
+
+Game_Interpreter.prototype.setAopParams = function(command, args) {
+    var actor = this.setActor(args[0]);
+    if(!actor) return;
+    var paramId = DataManager.getParamId(args[1]);
+    actor.setAopParamBase(paramId, this.calcValue(actor.aopParamBase(paramId), this.setNum(args[3]), args[2]))
+};
+
+Game_Interpreter.prototype.getAopParams = function(command, args) {
+    var varId = this.setNum(args[0]);
+    var actor = this.setActor(args[1]);
+    if(!varId || !actor) return;
+    $gameVariables.setValue(varId, actor.aopParam(DataManager.getParamId(args[2])));
+};
+
+Game_Interpreter.prototype.setActor = function(arg) {
+    var case1 = /ACTOR\((.+)\)/i;
+    var case1j = /アクター\((.+)\)/i;
+    if (arg.match(case1) || arg.match(case1j)) {
+        return $gameActors.actor(this.setNum(RegExp.$1));
+    } else {
+        return false;
+    }
+};
+
+Game_Interpreter.prototype.calcValue = function(value1, value2, code) {
+    switch (code) {
+    case '加算':
+    case '+':
+        return value1 + value2;
+    case '減算':
+    case '-':
+        return value1 - value2;
+    case '積算':
+    case '×':
+    case '*':
+        return value1 * value2;
+    case '除算':
+    case '／':
+    case '/':
+        return value1 / value2;
+    case '剰余':
+    case '％':
+    case '%':
+        return value1 % value2;
+    case '代入':
+    case '＝':
+    case '=':
+    default:
+        return value2;
+    }
+};
+
+Game_Interpreter.prototype.setNum = function(data) {
+    var data1 = /v\[(\d+)\]/i;
+    var data2 = /(\d+)/i;
+    if (data.match(data1)) {
+        return $gameVariables.value(Number(RegExp.$1));
+    } else if (data.match(data2)) {
+        return Number(RegExp.$1);
+    } else {
+        return 0;
+    }
+};
