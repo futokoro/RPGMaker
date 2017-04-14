@@ -25,7 +25,7 @@
 
 | プラグイン | マニュアル | ダウンロード | 必須プラグイン | 説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
-| [FTKR_ItemSelfVariables](FTKR_ItemSelfVariables.js) | [作成中](#FTKR_ItemSelfVariables.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ItemSelfVariables.js) | なし | アイテムとスキルにセルフ変数を追加する |
+| [FTKR_ItemSelfVariables](FTKR_ItemSelfVariables.js) | [あり](FTKR_ItemSelfVariables.ja.md) | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ItemSelfVariables.js) | なし | アイテムとスキルにセルフ変数を追加する |
 
 ## スキル系 プラグイン
 
@@ -35,7 +35,7 @@
 | [FTKR_SEP_ShowSkillStatus](FTKR_SEP_ShowSkillStatus.js) | [作成中](#FTKR_SEP_ShowSkillStatus.ja.md) | [v1.4.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SEP_ShowSkillStatus.js) | [FTKR_SkillExpansion](FTKR_SkillExpansion.js) | スキル画面の表示を拡張する |
 | [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js) | [あり](FTKR_SkillTreeSystem.ja.md) | [v1.6.3](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillTreeSystem.js) | なし | ツリー型のスキル習得システム |
 | [FTKR_STS_CustomWindow](FTKR_STS_CustomWindow.js) | [作成中](#FTKR_STS_CustomWindow.ja.md) | [v1.0.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_STS_CustomWindow.js) | [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js) | スキルツリー習得画面のレイアウトを変更する |
-| [FTKR_SkillCounter](FTKR_SkillCounter.js) | [作成中](#FTKR_SkillCounter.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillCounter.js) | なし | 相手のスキルに対抗して効果を変える |
+| [FTKR_SkillCounter](FTKR_SkillCounter.js) | [あり](FTKR_SkillCounter.ja.md) | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillCounter.js) | なし | 相手のスキルに対抗して効果を変える |
 | [FTKR_SkillUpgradeSystem_Core](FTKR_SkillUpgradeSystem_Core.js) | [作成中](#FTKR_SkillUpgradeSystem_Core.ja.md) | [v1.4.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillUpgradeSystem_Core.js) | [FTKR_SkillExpansion](FTKR_SkillExpansion.js) | スキル強化システム |
 | [FTKR_SkillUpgradeSystem_Window](FTKR_SkillUpgradeSystem_Window.js) | [作成中](#FTKR_SkillUpgradeSystem_Window.ja.md) | [v1.4.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillUpgradeSystem_Window.js) | [FTKR_SkillExpansion](FTKR_SkillExpansion.js) <br>[FTKR_SEP_ShowSkillStatus](FTKR_SEP_ShowSkillStatus.js) <br> [FTKR_SkillUpgradeSystem_Core](FTKR_SkillUpgradeSystem_Core.js) | スキル強化システムの専用画面を実装する |
 
