@@ -30,6 +30,7 @@
 | [FTKR_ExItemConfig_Effect](FTKR_ExItemConfig_Effect.js) | 未作成 | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExItemConfig_Effect.js) | なし | アイテムとスキルの使用効果を拡張する |
 | [FTKR_ExItemConfig_Activate](FTKR_ExItemConfig_Activate.js) | 未作成 | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExItemConfig_Activate.js) | なし | アイテムとスキルの発動設定を拡張する |
 | [FTKR_ExItemConfig_Required](FTKR_ExItemConfig_Required.js) | 未作成 | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExItemConfig_Required.js) | なし | アイテムとスキルの使用条件を拡張する |
+
 注意）FTKR_ExItemConfig_* と FTKR_SkillExpansion は組み合わせて使用できません。
 
 ## スキル系 プラグイン
