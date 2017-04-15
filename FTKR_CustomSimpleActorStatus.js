@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2017/04/12
-// バージョン : v1.2.4
+// 最終更新日 : 2017/04/15
+// バージョン : v1.2.5
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.4 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v1.2.5 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @param --Simple status--
@@ -1037,6 +1037,10 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  *
+ * v1.2.5 - 2017/04/15 : 機能追加
+ *    1. ステートアイコンの表示位置を微調整
+ *    2. 行の高さに合わせてステートアイコンサイズを自動調整する機能を追加。
+ * 
  * v1.2.4 - 2017/04/12 : 顔画像の縦横のサイズを合わせるように修正
  * 
  * v1.2.3 - 2017/04/11 : ヘルプ修正
@@ -1663,17 +1667,31 @@ Window_Base.prototype.drawCssActorIcons = function(actor, x, y, width, line) {
     var icons = actor.allIcons().slice();
     var num = icons.length;
     var iw = Window_Base._iconWidth;
-    var len = line ? line * this.lineHeight() : width;
-    var diff = iw * num + 2 - len;
-    var offset = diff > 0 ? iw - diff / num : iw;
+    var scale = Math.min(Math.max(this.lineHeight() - 4, 0) / iw, 1);
+    iw = iw * scale;
+    var len = line ? (line - 1) * this.lineHeight() : width - iw - 4;
+    var diff = num > 1 ? len / (num - 1) : 0;
+    var offset = diff < iw ? diff : iw;
     for (var i = 0; i < num; i++) {
         if(line) {
-            this.drawIcon(icons[i], x + 2, y + offset * i);
+            this.drawCssIcon(icons[i], x + 2, y + 2 + offset * i, scale);
         } else {
-            this.drawIcon(icons[i], x + offset * i, y + 2);
+            this.drawCssIcon(icons[i], x + 2 + offset * i, y + 2, scale);
         }
     }
     return line ? line : 1;
+};
+
+//アイコンの表示スケールを指定できる表示関数
+Window_Base.prototype.drawCssIcon = function(iconIndex, x, y, scale, auto) {
+    scale = scale || 1;
+    var bitmap = ImageManager.loadSystem('IconSet');
+    var pw = Window_Base._iconWidth;
+    var ph = Window_Base._iconHeight;
+    if (auto) scale = Math.min(Math.max(this.lineHeight() - 4, 0) / pw, 1);
+    var sx = iconIndex % 16 * pw;
+    var sy = Math.floor(iconIndex / 16) * ph;
+    this.contents.blt(bitmap, sx, sy, pw, ph, x, y, pw * scale, ph * scale);
 };
 
 //アクターのHPの表示関数
@@ -1770,7 +1788,7 @@ Game_Actor.prototype.evalCssCustomFormula = function(formula) {
 Window_Base.prototype.drawCssActorEquip = function(actor, x, y, width, equipId) {
     var equip = actor.equips()[equipId];
     if (equip) {
-        this.drawIcon(equip.iconIndex, x, y);
+        this.drawCssIcon(equip.iconIndex, x, y, 1, true);
         var iw = Window_Base._iconWidth + 4;
         this.resetTextColor();
         this.drawText(equip.name, x + iw, y, width - iw);
@@ -1800,7 +1818,7 @@ Window_Base.prototype.drawCssText = function(actor, x, y, width, text) {
 Window_Base.prototype.drawCssActorImage = function(actor, x, y, width) {
     console.log(actor.actor());
     var dy = this.lineHeight();
-    var line = Math.ceil(actor.actor().cssbgi.height / dy);
+    var line = Math.ceil(actor.actor().cssbgi.height / dy) || 1;
     this.changePaintOpacity(actor.isBattleMember());
     this.drawCssImage(actor, x, y, width);
     this.changePaintOpacity(true);
@@ -1809,14 +1827,14 @@ Window_Base.prototype.drawCssActorImage = function(actor, x, y, width) {
 
 Window_Base.prototype.drawCssImage = function(actor, dx, dy, width) {
     var bgi = actor.actor().cssbgi;
-    var dh = bgi.height;
-    var dw = bgi.width.clamp(0, width);
+    var dh = bgi.height || this.lineHeight();
+    var dw = bgi.width.clamp(0, width) || width;
     dx = dx + (width - dw) / 2;
     var bitmap = ImageManager.loadPicture(bgi.name);
-    var sw = bgi.width;
-    var sh = bgi.height;
-    var sx = bgi.offsetX;
-    var sy = bgi.offsetY;
+    var sw = bgi.width || dh;
+    var sh = bgi.height || dw;
+    var sx = bgi.offsetX || 0;
+    var sy = bgi.offsetY || 0;
     this.contents.blt(bitmap, sx, sy, sw, sh, dx, dy, dw, dh);
 };
 
