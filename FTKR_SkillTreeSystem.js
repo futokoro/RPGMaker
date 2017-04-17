@@ -3,8 +3,8 @@
 // FTKR_SkillTreeSystem.js
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/02/25
-// 最終更新日 : 2017/04/07
-// バージョン : v1.6.3
+// 最終更新日 : 2017/04/17
+// バージョン : v1.6.4
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.6.3 ツリー型スキル習得システム
+ * @plugindesc v1.6.4 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -528,6 +528,9 @@ FTKR.STS = FTKR.STS || {};
  * 2.スキルBの派生スキルにスキルCを登録
  * ⇒この場合、スキルCを習得するために、スキルAとスキルBをどちらも
  *   習得しなければいけない
+ * 
+ * show: eval
+ *    :スキルの表示条件を eval に設定します。
  * 
  * required: eval
  *    :スキルの習得条件を eval に設定します。
@@ -1163,6 +1166,11 @@ FTKR.STS = FTKR.STS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.6.4 - 2017/04/17 : 不具合修正、機能追加
+ *    1. stsCount()を計算式に入れたスキルを敵が使うと正しく計算できない
+ *       不具合を修正。
+ *    2. スキルの表示条件を設定する機能を追加。
+ * 
  * v1.6.3 - 2017/04/07 : 機能追加、ヘルプファイルと合体。
  *    1. タグに日本語表記版を追加。
  *    2. FTKR_SkillTreeSystem_helpの内容を追記。
@@ -1616,6 +1624,7 @@ DataManager.stsTreeDataNotetags = function(group) {
             maxCount:FTKR.STS.defaultMaxCount,
             pIndex:0,
             pCIndex:0,
+            show:'',
         };
         obj.sts.costs.push(this.setCost('sp', 0, FTKR.STS.sp.defaultReq));
 
@@ -1666,6 +1675,8 @@ DataManager.setStsData = function(obj) {
         var case8j = /枠画像番号:[ ]*(\d+)/i;
         var case9 = /(?:Image INDEX ON CURSOR):[ ]*(\d+)/i;
         var case9j = /カーソル枠画像番号:[ ]*(\d+)/i;
+        var case10 = /(?:SHOW):[ ]*(.+)/i;
+        var case10j = /表示条件:[ ]*(.+)/i;
 
         var datas = stsdata.split(';');
         for (var i = 0; i < datas.length; i++) {
@@ -1698,6 +1709,8 @@ DataManager.setStsData = function(obj) {
                 obj.sts.pIndex = Number(RegExp.$1);
             } else if(data.match(case9) || data.match(case9j)) {
                 obj.sts.pCIndex = Number(RegExp.$1);
+            } else if (data.match(case10) || data.match(case10j)) {
+                obj.sts.show = String(RegExp.$1);
             }
         }
         obj.sts.data = '';
@@ -1972,6 +1985,13 @@ Game_Actor.prototype.getTreeDatas = function(treeType) {
   return tree ? this.getSkillTree(tree) : [false];
 };
 
+Game_Actor.prototype.isShowItem = function(item, tree) {
+    return this.evalStsFormula(item.sts.show, true, false) &&
+        this.getPreskillId(item.id, tree.id).every(function(skillId){
+            return this.evalStsFormula(this.stsSkill(skillId).sts.show, true, false);
+        },this);
+};
+
 Game_Actor.prototype.getSkillTree = function(tree) {
     var results = [];
     var list = tree.sts.skillIds;
@@ -1984,17 +2004,22 @@ Game_Actor.prototype.getSkillTree = function(tree) {
                 results.push(null);
             } else {
                 var item = this.stsSkill(id);
-                var skillIds = this.getDevSkillId(item, tree);
-                var data = { id:id, next:skillIds, x:i, y:count };
-                for (var t = 0; t < results.length; t++) {
-                    var next = results[t];
-                    if (!next) continue;
-                    if (next.id === data.id) {
-                        results.splice(t, 1, null);
+                if (this.evalStsFormula(item.sts.show, true, false)) {
+//                if (this.isShowItem(item, tree)) {
+                    var skillIds = this.getDevSkillId(item, tree);
+                    var data = { id:id, next:skillIds, x:i, y:count };
+                    for (var t = 0; t < results.length; t++) {
+                        var next = results[t];
+                        if (!next) continue;
+                        if (next.id === data.id) {
+                            results.splice(t, 1, null);
+                        }
                     }
+                    results.push(data);
+                    nextlist.addExceptForDup(data.next);
+                } else {
+                    results.push(null);
                 }
-                results.push(data);
-                nextlist.addExceptForDup(data.next);
             }
         }
         if (!nextlist.length) break;
@@ -2016,6 +2041,7 @@ Game_Actor.prototype.getDevSkillId = function(item, tree) {
     return skillIds;
 };
 
+//前提スキルのIDリストを取得
 Game_Actor.prototype.getPreskillId = function(skillId, tTypeId) {
     var results = [];
     var tree = $dataWeapons[tTypeId];
@@ -2083,6 +2109,10 @@ Game_Action.prototype.itemEffectClearTree = function(target, effect) {
 
 Game_Enemy.prototype.stsSp = function() {
     return this.enemy().note.match(/<(?:STS GET SP):[ ]*(\d+)>/i) ? Number(RegExp.$1) : 0;
+};
+
+Game_Enemy.prototype.stsCount = function(skillId) {
+    return 0;
 };
 
 //=============================================================================
@@ -2483,12 +2513,7 @@ Window_SkillTree.prototype.isPayCostOk = function(item) {
 };
 
 Window_SkillTree.prototype.isReqSkillOk = function(item) {
-    var reqItems = this._data.filter( function(data) {
-        return data && data.next && data.next.contains(item.id);
-    });
-    return !reqItems.filter( function(data) {
-        return data && !this._actor.isStsLearnedSkill(data.id);
-    },this).length;
+    return this._actor.isReqSkillOk(item.id, this._tTypeId);
 };
 
 Window_SkillTree.prototype.isReqParamOk = function(item) {
@@ -3374,7 +3399,6 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 };
 
 Game_Interpreter.prototype.setNum = function(data) {
-	if (!data) return 0;
     if (data.match(/v\[(\d+)\]/i)) {
         return $gameVariables.value(Number(RegExp.$1));
     } else if (data.match(/(\d+)/i)) {
