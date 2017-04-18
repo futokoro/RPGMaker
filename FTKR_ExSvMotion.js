@@ -96,13 +96,11 @@ FTKR.ESM = FTKR.ESM || {};
  * 
  * @param Motion 6 name
  * @desc モーション6のコードを設定します。
- * デフォルト walk
- * @default walk
+ * @default 
  * 
  * @param Motion 6 Condition
  * @desc モーション6の状態を設定します。
- * デフォルト input
- * @default input
+ * @default 
  * 
  * @param --モーション7 設定--
  * @default
@@ -131,11 +129,13 @@ FTKR.ESM = FTKR.ESM || {};
  * 
  * @param Motion 9 name
  * @desc モーション9のコードを設定します。
- * @default 
+ * デフォルト walk
+ * @default walk
  * 
  * @param Motion 9 Condition
  * @desc モーション9の状態を設定します。
- * @default 
+ * デフォルト input
+ * @default input
  * 
  * 
  * @help
