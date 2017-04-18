@@ -3,8 +3,8 @@
 // FTKR_ItemSelfVariables.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/26
-// 最終更新日 : 2017/04/18
-// バージョン : v1.1.0
+// 最終更新日 : 2017/04/14
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,72 +15,47 @@ FTKR.ISV = FTKR.ISV || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.0 アイテムやスキルにセルフ変数を実装するプラグイン
+ * @plugindesc v1.0.1 アイテムやスキルにセルフ変数を実装するプラグイン
  * @author フトコロ
  *
- * @param --セーブ設定--
+ * @param Self Variables Number
+ * @desc 使用するセルフ変数の数を設定する
+ * @default 1
+ *
+ * @param --Enabled Setting--
  * @desc 
  * 
+ * @param Enabled Item
+ * @desc アイテムでセルフ変数を使用するか
+ * 0 - 使用しない, 1 - 使用する
+ * @default 0
+ *
+ * @param Enabled Weapon
+ * @desc 武器でセルフ変数を使用するか
+ * 0 - 使用しない, 1 - 使用する
+ * @default 0
+ *
+ * @param Enabled Armor
+ * @desc 防具でセルフ変数を使用するか
+ * 0 - 使用しない, 1 - 使用する
+ * @default 0
+ *
+ * @param Enabled Skill
+ * @desc スキルでセルフ変数を使用するか
+ * 0 - 使用しない, 1 - 使用する
+ * @default 0
+ *
  * @param Enabled Save
  * @desc セーブ時にセルフ変数を保存するか
  * 0 - 保存しない, 1 - 保存する
- * @default 0
- *
- * @param --アイテム設定--
- * @desc 
- * 
- * @param Item Number
- * @desc アイテムで使用するセルフ変数の数を設定する
- * @default 0
- *
- * @param --武器設定--
- * @desc 
- * 
- * @param Weapon Number
- * @desc 武器で使用するセルフ変数の数を設定する
- * @default 0
- *
- * @param --防具設定--
- * @desc 
- * 
- * @param Armor Number
- * @desc 防具で使用するセルフ変数の数を設定する
- * @default 0
- *
- * @param --スキル設定--
- * @desc 
- * 
- * @param Skill Number
- * @desc スキルで使用するセルフ変数の数を設定する
- * @default 0
- *
- * @param --アクター設定--
- * @desc 
- * 
- * @param Actor Number
- * @desc アクターで使用するセルフ変数の数を設定する
- * @default 0
- *
- * @param --エネミー設定--
- * @desc 
- * 
- * @param Enemy Number
- * @desc エネミーで使用するセルフ変数の数を設定する
  * @default 0
  *
  * @help 
  *-----------------------------------------------------------------------------
  * 概要
  *-----------------------------------------------------------------------------
- * 本プラグインを実装することで、以下の対象にセーブ時に記録し値の操作が
- * 可能な、セルフ変数を実装することができます。
- * 
- * 1. アイテム
- * 2. 武器
- * 3. 防具
- * 4. スキル
- * 5. アクター
- * 6. エネミー
+ * 本プラグインを実装することで、アイテム(武器・防具含む)やスキルに、
+ * セーブ時に記録し値の操作が可能な、セルフ変数を実装することができます。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -97,8 +72,16 @@ FTKR.ISV = FTKR.ISV || {};
  *-----------------------------------------------------------------------------
  * 以下の、プラグインパラメータで設定を変更します。
  * 
- * <*** Number>
- *    :使用するセルフ変数の数を個別に設定します。
+ * <Self Variables Number>
+ *    :使用するセルフ変数の数を設定します。
+ *    :この設定は、アイテム、武器、防具、スキル共通です。
+ * 
+ * <Enabled Item>
+ * <Enabled Weapon>
+ * <Enabled Armor>
+ * <Enabled Skill>
+ *    :アイテム、武器、防具、スキルのそれぞれでセルフ変数を使用するかを
+ *    :個別に指定します。
  * 
  * <Enabled Save>
  *    :セーブ時にセルフ変数を保存するか指定します。
@@ -106,8 +89,8 @@ FTKR.ISV = FTKR.ISV || {};
  *    :この設定は、アイテム、武器、防具、スキル共通です。
  * 
  * 
- * 以下の、ノートタグをアイテム(武器・防具含む)やスキル、アクターのメモ欄に
- * 追記すると初期値を設定できます。
+ * 以下の、ノートタグをアイテム(武器・防具含む)やスキルのメモ欄に追記すると
+ * 初期値を設定できます。
  * 
  * <ISV IV[x]: y>
  * <ISV セルフ変数[x]: y>
@@ -119,8 +102,7 @@ FTKR.ISV = FTKR.ISV || {};
  *-----------------------------------------------------------------------------
  * セルフ変数に対して、以下のスクリプトコマンドを使用できます。
  * なお、item(x)の部分は、武器は'weapon(x)'、防具は'armor(x)'、
- * スキルは'skill(x)'、アクターは'actor(x)'、エネミーは'enemy(x)'に
- * 変えてください。
+ * スキルは'skill(x)'に変えてください。
  * 
  * １．セルフ変数の値の取得
  * $gameSelfVariables.item(x).value(y)
@@ -152,7 +134,7 @@ FTKR.ISV = FTKR.ISV || {};
  * ４．セルフ変数の初期化
  * $gameSelfVariables.item(x).allReset(value)
  *    :アイテムID x のすべてのセルフ変数に value を代入します。
- *    :このときの'すべて'とは、<*** Number>で設定した数を指します。
+ *    :このときの'すべて'とは、<Item Self Variables>で設定した数を指します。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -168,7 +150,7 @@ FTKR.ISV = FTKR.ISV || {};
  * ISV_SET_SELF_VARIABLES ITEMTYPE itemId selfVariableId CALCTYPE value
  * 
  * アイテムタイプには、アイテム(item)、武器(weapon)、防具(armor)、
- * スキル(skill)、アクター(actor)、エネミー(enemy)を代入してください。
+ * スキル(skill)を代入してください。
  * 演算方法には、代入(=)、加算(+)、減算(-)、積算(*)、除算(/)、剰余(%)を
  * 代入してください。
  * アイテムID、セルフ変数ID、代入する値には、ゲーム内変数を指定できます。
@@ -187,7 +169,7 @@ FTKR.ISV = FTKR.ISV || {};
  * ISV_GET_SELF_VARIABLES variableId ITEMTYPE itemId selfVariableId
  * 
  * アイテムタイプには、アイテム(item)、武器(weapon)、防具(armor)、
- * スキル(skill)、アクター(actor)、エネミー(enemy)を代入してください。
+ * スキル(skill)を代入してください。
  * ゲーム内変数ID、アイテムID、セルフ変数IDには、ゲーム内変数を指定できます。
  * ゲーム内変数を使用する場合は、数値の変わりに v[n] を入力してください。
  * 
@@ -224,10 +206,6 @@ FTKR.ISV = FTKR.ISV || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
- * v1.1.0 - 2017/04/18 : 仕様変更、機能追加
- *    1. 使用するセルフ変数の数を、アイテムやスキル毎に設定できるように変更。
- *    2. アクターとエネミーにセルフ変数を追加。
- * 
  * v1.0.1 - 2017/04/14 : 機能追加
  *    1. セルフ変数の初期値を設定する機能追加。
  *    2. セルフ変数に文字列を代入できる機能を追加。
@@ -245,15 +223,12 @@ FTKR.ISV = FTKR.ISV || {};
 //=============================================================================
 FTKR.ISV.parameters = PluginManager.parameters('FTKR_ItemSelfVariables');
 
+FTKR.ISV.selfVariablesNumber = Number(FTKR.ISV.parameters['Self Variables Number'] || 0);
+FTKR.ISV.enabledItem = Number(FTKR.ISV.parameters['Enabled Item'] || 0);
+FTKR.ISV.enabledWeapon = Number(FTKR.ISV.parameters['Enabled Weapon'] || 0);
+FTKR.ISV.enabledArmor = Number(FTKR.ISV.parameters['Enabled Armor'] || 0);
+FTKR.ISV.enabledSkill = Number(FTKR.ISV.parameters['Enabled Skill'] || 0);
 FTKR.ISV.enabledSave = Number(FTKR.ISV.parameters['Enabled Save'] || 0);
-FTKR.ISV.number = {
-    item:Number(FTKR.ISV.parameters['Item Number'] || 0),
-    weapon:Number(FTKR.ISV.parameters['Weapon Number'] || 0),
-    armor:Number(FTKR.ISV.parameters['Armor Number'] || 0),
-    skill:Number(FTKR.ISV.parameters['Skill Number'] || 0),
-    actor:Number(FTKR.ISV.parameters['Actor Number'] || 0),
-    enemy:Number(FTKR.ISV.parameters['Enemy Number'] || 0),
-};
 
 //=============================================================================
 // Array
@@ -274,23 +249,19 @@ FTKR.ISV.DataManager_isDatabaseLoaded = DataManager.isDatabaseLoaded;
 DataManager.isDatabaseLoaded = function() {
     if (!FTKR.ISV.DataManager_isDatabaseLoaded.call(this)) return false;
     if (!FTKR.ISV.DatabaseLoaded) {
-        var isv = FTKR.ISV.number;
-        if (isv.item) this.setSelfVariables($dataItems, isv.item);
-        if (isv.weapon) this.setSelfVariables($dataWeapons, isv.weapon);
-        if (isv.armor) this.setSelfVariables($dataArmors, isv.armor);
-        if (isv.skill) this.setSelfVariables($dataSkills, isv.skill);
-        if (isv.actor) this.setSelfVariables($dataActors, isv.actor);
-        if (isv.enemy) this.setSelfVariables($dataEnemies, isv.enemy);
+        if (FTKR.ISV.enabledItem) this.setSelfVariables($dataItems);
+        if (FTKR.ISV.enabledWeapon) this.setSelfVariables($dataWeapons);
+        if (FTKR.ISV.enabledArmor) this.setSelfVariables($dataArmors);
+        if (FTKR.ISV.enabledSkill) this.setSelfVariables($dataSkills);
         FTKR.ISV.DatabaseLoaded = true;
     }
     return true;
 };
 
-DataManager.setSelfVariables = function(group, number) {
+DataManager.setSelfVariables = function(group) {
     for (var n = 1; n < group.length; n++) {
         var obj = group[n];
-        
-        obj._selfVariables = new Game_IsvSelfVariables(number);
+        obj._selfVariables = new Game_IsvSelfVariables();
         obj._selfVariables.allReset(0);
 
         var notedata = obj.note.split(/[\r\n]+/);
@@ -317,24 +288,17 @@ FTKR.ISV.DataManager_makeSaveContents = DataManager.makeSaveContents;
 DataManager.makeSaveContents = function() {
     var contents = FTKR.ISV.DataManager_makeSaveContents.call(this);
     if (FTKR.ISV.enabledSave) {
-        var isv = FTKR.ISV.number;
-        if (isv.item) {
+        if (FTKR.ISV.enabledItem) {
             contents.iepItemSelf = $dataItems.setIsv();
         }
-        if (isv.weapon) {
+        if (FTKR.ISV.enabledWeapon) {
             contents.iepWeaponSelf = $dataWeapons.setIsv();
         }
-        if (isv.armor) {
+        if (FTKR.ISV.enabledArmor) {
             contents.iepArmorSelf = $dataArmors.setIsv();
         }
-        if (isv.skill) {
+        if (FTKR.ISV.enabledSkill) {
             contents.iepSkillSelf = $dataSkills.setIsv();
-        }
-        if (isv.actor) {
-            contents.iepActorSelf = $dataActors.setIsv();
-        }
-        if (isv.enemy) {
-            contents.iepEnemySelf = $dataEnemies.setIsv();
         }
     }
     return contents;
@@ -344,35 +308,24 @@ FTKR.ISV.DataManager_extractSaveContents = DataManager.extractSaveContents;
 DataManager.extractSaveContents = function(contents) {
     FTKR.ISV.DataManager_extractSaveContents.call(this, contents);
     if (FTKR.ISV.enabledSave) {
-        var isv = FTKR.ISV.number;
-        if(isv.item) {
+        if(FTKR.ISV.enabledItem) {
             $dataItems.forEach( function(item, i) {
                 if(item) item._selfVariables = contents.iepItemSelf[i];
             });
         }
-        if(isv.weapon) {
+        if(FTKR.ISV.enabledWeapon) {
             $dataWeapons.forEach( function(item, i) {
                 if(item) item._selfVariables = contents.iepWeaponSelf[i];
             });
         }
-        if(isv.armor) {
+        if(FTKR.ISV.enabledArmor) {
             $dataArmors.forEach( function(item, i) {
                 if(item) item._selfVariables = contents.iepArmorSelf[i];
             });
         }
-        if(isv.skill) {
+        if(FTKR.ISV.enabledSkill) {
             $dataSkills.forEach( function(item, i) {
                 if(item) item._selfVariables = contents.iepSkillSelf[i];
-            });
-        }
-        if(isv.actor) {
-            $dataActors.forEach( function(item, i) {
-                if(item) item._selfVariables = contents.iepActorSelf[i];
-            });
-        }
-        if(isv.enemy) {
-            $dataEnemies.forEach( function(item, i) {
-                if(item) item._selfVariables = contents.iepEnemySelf[i];
             });
         }
     }
@@ -382,11 +335,6 @@ DataManager.extractSaveContents = function(contents) {
 // Game_Action
 //=============================================================================
 
-FTKR.ISV.Game_Action_apply = Game_Action.prototype.apply;
-Game_Action.prototype.apply = function(target) {
-    FTKR.ISV.Game_Action_apply.call(this, target);
-};
-
 //書き換え
 Game_Action.prototype.evalDamageFormula = function(target) {
     try {
@@ -394,12 +342,11 @@ Game_Action.prototype.evalDamageFormula = function(target) {
         var a = this.subject();
         var b = target;
         var v = $gameVariables._data;
-        var av = a._selfVariables._data;
         var iv = item._selfVariables._data;
         var sign = ([3, 4].contains(item.damage.type) ? -1 : 1);
         var value = Math.max(eval(item.damage.formula), 0) * sign;
-        if (isNaN(value)) value = 0;
-        return value;
+		if (isNaN(value)) value = 0;
+		return value;
     } catch (e) {
         return 0;
     }
@@ -414,7 +361,7 @@ function Game_IsvItems() {
 }
 
 Game_IsvItems.prototype.initialize = function() {
-    this._data = [[],[],[],[],[],[]];
+    this._data = [[],[],[],[]];
 };
 
 Game_IsvItems.prototype.item = function(itemId) {
@@ -457,26 +404,6 @@ Game_IsvItems.prototype.skill = function(itemId) {
     return null;
 };
 
-Game_IsvItems.prototype.actor = function(itemId) {
-    if ($dataActors[itemId]) {
-        if (!this._data[4][itemId]) {
-            this._data[4][itemId] = $dataActors[itemId];
-        }
-        return this._data[4][itemId]._selfVariables;
-    }
-    return null;
-};
-
-Game_IsvItems.prototype.enemy = function(itemId) {
-    if ($dataEnemies[itemId]) {
-        if (!this._data[5][itemId]) {
-            this._data[5][itemId] = $dataEnemies[itemId];
-        }
-        return this._data[5][itemId]._selfVariables;
-    }
-    return null;
-};
-
 //=============================================================================
 // Game_IsvSelfVariables
 //=============================================================================
@@ -485,9 +412,8 @@ function Game_IsvSelfVariables() {
     this.initialize.apply(this, arguments);
 }
 
-Game_IsvSelfVariables.prototype.initialize = function(number) {
+Game_IsvSelfVariables.prototype.initialize = function() {
     this.clear();
-    this._number = number || 1;
 };
 
 Game_IsvSelfVariables.prototype.clear = function() {
@@ -495,7 +421,7 @@ Game_IsvSelfVariables.prototype.clear = function() {
 };
 
 Game_IsvSelfVariables.prototype.allReset = function(value) {
-    for (var i = 0; i < this._number + 1; i++) {
+    for (var i = 0; i < FTKR.ISV.selfVariablesNumber + 1; i++) {
         this._data[i] = value;
     }
 };
@@ -505,7 +431,7 @@ Game_IsvSelfVariables.prototype.value = function(variableId) {
 };
 
 Game_IsvSelfVariables.prototype.setValue = function(variableId, value, code) {
-    if (variableId > 0 && variableId < this._number + 1) {
+    if (variableId > 0 && variableId < FTKR.ISV.selfVariablesNumber + 1) {
         if (!isNaN(parseInt(value))) {
             value = parseInt(value);
         }
@@ -590,14 +516,6 @@ Game_Interpreter.prototype.setSeflVariables = function(command, args) {
         case /skill/i.test(args[0]):
             $gameSelfVariables.skill(itemId).setValue(selfId, value, args[3]);
             break;
-        case /アクター/.test(args[0]):
-        case /actor/i.test(args[0]):
-            $gameSelfVariables.actor(itemId).setValue(selfId, value, args[3]);
-            break;
-        case /エネミー/.test(args[0]):
-        case /enemy/i.test(args[0]):
-            $gameSelfVariables.enemy(itemId).setValue(selfId, value, args[3]);
-            break;
         default:
             this.showLog(command, args, [1,0,0,0,0]);
             break;
@@ -626,14 +544,6 @@ Game_Interpreter.prototype.getSeflVariables = function(command, args) {
         case /スキル/.test(args[1]):
         case /skill/i.test(args[1]):
             value = $gameSelfVariables.skill(itemId).value(selfId);
-            break;
-        case /アクター/.test(args[1]):
-        case /actor/i.test(args[1]):
-            value = $gameSelfVariables.actor(itemId).value(selfId);
-            break;
-        case /エネミー/.test(args[1]):
-        case /enemy/i.test(args[1]):
-            value = $gameSelfVariables.enemy(itemId).value(selfId);
             break;
         default:
             this.showLog(command, args, [0,1,0,0]);
