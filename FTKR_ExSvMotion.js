@@ -158,10 +158,10 @@ FTKR.ESM = FTKR.ESM || {};
  *-----------------------------------------------------------------------------
  * アクターの以下の状態におけるモーション設定します。
  * 
- *  input  : 入力中
+ *  input  : コマンド入力中
  *  chant  : 詠唱中
  *  guard  : 防御中/防御待機中
- *  state* : ステート付加中 (*)がステートモーション番号
+ *  state* : ステート付加中( * がステートモーション番号)(例:state4)
  * 
  * モーションは、モーション1～モーション9まで設定できます。
  * 数字が大きい方が、モーションの優先度が高くなります。
@@ -174,6 +174,7 @@ FTKR.ESM = FTKR.ESM || {};
  * 
  * <Motion * Condition>
  *    :モーションの状態。上記の4種類から設定してください。
+ *    :ステートモーションに設定したモーションは、ループします。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -183,7 +184,9 @@ FTKR.ESM = FTKR.ESM || {};
  * 設定できます。
  * 
  * <ESM モーション: x>
+ * <ESM MOTION: x>
  *    :ステートモーション番号を x に設定します。
+ *    :タグで設定しない場合は、基本設定の[SV]モーションの設定に従います。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -233,6 +236,14 @@ FTKR.ESM.motion = {
     ],
 };
 
+if (!Array.prototype.checkMeta) {
+Array.prototype.checkMeta = function(obj) {
+    return obj.meta ? this.some(function(meta) {
+        return obj.meta[meta];
+    }) : false;
+};
+}
+
 //=============================================================================
 // Game_BattlerBase
 //=============================================================================
@@ -241,8 +252,7 @@ FTKR.ESM.motion = {
 Game_BattlerBase.prototype.stateMotionIndex = function() {
     var states = this.states();
     if (states.length > 0) {
-        var motion = states[0].meta[('esm モーション').toUpperCase()] ||
-            states[0].meta[('esm motion').toUpperCase()];
+        var motion = ['ESM モーション', 'ESM MOTION'].checkMeta(states[0]);
         return motion ? Number(motion) : states[0].motion;
     } else {
         return 0;
@@ -253,9 +263,30 @@ Game_BattlerBase.prototype.stateMotionIndex = function() {
 // Sprite_Actor
 //=============================================================================
 
+FTKR.ESM.Sprite_Actor_initMembers = Sprite_Actor.prototype.initMembers;
+Sprite_Actor.prototype.initMembers = function() {
+    FTKR.ESM.Sprite_Actor_initMembers.call(this);
+    this._motionloop = false;
+};
+
 //書き換え
 Sprite_Actor.prototype.motionSpeed = function() {
     return FTKR.ESM.motion.speed;
+};
+
+//書き換え
+Sprite_Actor.prototype.updateMotionCount = function() {
+    if (this._motion && ++this._motionCount >= this.motionSpeed()) {
+        if (this._motionloop || this._motion.loop) {
+            this._pattern = (this._pattern + 1) % 4;
+        } else if (this._pattern < 2) {
+            this._pattern++;
+        } else {
+            this._motionloop = false;
+            this.refreshMotion();
+        }
+        this._motionCount = 0;
+    }
 };
 
 //書き換え
@@ -269,6 +300,7 @@ Sprite_Actor.prototype.refreshMotion = function() {
         var index = this.checkConditions();
         if (index) {
             this.startMotion(FTKR.ESM.motion.state[index].name);
+            this._motionloop = true;
         } else if (actor.isDying()) {
             this.startMotion('dying');
         } else if (actor.isUndecided()) {
@@ -295,7 +327,7 @@ Sprite_Actor.prototype.checkCondition = function(condition) {
         return stateMotion === Number(RegExp.$1);
     } 
     switch(true) {
-        case /imput/i.test(condition):
+        case /input/i.test(condition):
             return actor.isInputting() || actor.isActing();
         case /guard/i.test(condition):
             return actor.isGuard() || actor.isGuardWaiting();

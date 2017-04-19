@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2017/04/19
-// バージョン : v1.3.0
+// 最終更新日 : 2017/04/15
+// バージョン : v1.2.5
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.3.0 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v1.2.5 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @param --Simple status--
@@ -201,28 +201,6 @@ FTKR.CSS = FTKR.CSS || {};
  * @desc ステートモーションを有効にするか設定します
  * 0 - 無効, 1 - 有効
  * @default 1
- * 
- * @param --State Setting--
- * @default
- * 
- * @param Animation Wait
- * @desc ステートアイコンの切り替え時間を指定します
- * デフォルトは40
- * @default 40
- * 
- * @param Enable Overlap
- * @desc ステートアイコンの重なり表示を有効にする
- * 1 - 有効にする, 0 - 無効にする
- * @default 0
- * 
- * @param Overlap Rate
- * @desc アイコンの重なりを許容する比率を設定します。
- * @default 0.5
- * 
- * @param Enable Auto Scale
- * @desc 行の高さに合わせてアイコンサイズを調整するか
- * 1 - 有効にする, 0 - 無効にする
- * @default 0
  * 
  * @param --Custom Param 0--
  * @default
@@ -754,8 +732,9 @@ FTKR.CSS = FTKR.CSS || {};
  *    :state, state2(x), profile, param(x), custom(x), gauge(x), 
  *    :equip(x), text(x), imageです。
  *    :
- *    :state, state(x), state2(x) - 
+ *    :state, state2(x) - 
  *    : アクターが付与されているステートを並べて表示します。
+ *    : state は横に、state2(x)は縦にx行 並べます。
  *    :
  *    :profile - 
  *    : アクターのプロフィール文を表示します。
@@ -957,40 +936,6 @@ FTKR.CSS = FTKR.CSS || {};
  * 
  * 
  *-----------------------------------------------------------------------------
- * ステートの設定 [ state/state2(x) ]
- *-----------------------------------------------------------------------------
- * プラグインパラメータ<Actor Status Text*>にて、'state'を入力した場合
- * アクターのステートを表示します。
- * 
- * state     - 横に並べられるだけ表示します。
- * state2(x) - 縦に x 行分表示します。
- * 
- * 並べきれないアイコンは、切り替え時間に合わせて表示が替わります。
- * 
- * 
- * 以下のパラメータで設定を変更できます。
- * 
- * <Animation Wait>
- *    :ステートアイコンの切り替え時間を指定します。
- * 
- * <Enable Overlap>
- *    :ステートアイコンの重なり表示を有効にする。
- *    :0 - 無効, 1 - 有効
- *    :有効にすると、アイコンを重ねて表示させることで
- *    :一度に表示できるアイコン数を増やします。
- * 
- * <Overlap Rate>
- *    :ステートアイコンの重なり表示を有効にした場合に、
- *    :アイコンサイズの重なりの許容できる比率を指定します。
- *    : 0 ~ 1 の値を設定してください。
- * 
- * <Enable Auto Scale>
- *    :行の高さに合わせてアイコンサイズを縮小するか。
- *    :0 - 無効, 1 - 有効
- *    :アイコンサイズ以上に拡大はしません。
- * 
- * 
- *-----------------------------------------------------------------------------
  * カスタムパラメータの設定 [ custom(x) ]
  *-----------------------------------------------------------------------------
  * プラグインパラメータ<Actor Status Text*>にて、'custom(x)'を入力した場合
@@ -1091,10 +1036,7 @@ FTKR.CSS = FTKR.CSS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
- * 
- * v1.3.0 - 2017/04/19 : 機能変更
- *    1. ステートアイコンの表示仕様を変更。
- * 
+ *
  * v1.2.5 - 2017/04/15 : 機能追加
  *    1. ステートアイコンの表示位置を微調整
  *    2. 行の高さに合わせてステートアイコンサイズを自動調整する機能を追加。
@@ -1219,12 +1161,6 @@ FTKR.CSS.cssStatus = {
         motion:String(FTKR.CSS.parameters['Sv Image Motion'] || ''),
         loop:Number(FTKR.CSS.parameters['Sv Motion Loop'] || 0),
         state:Number(FTKR.CSS.parameters['Enabled State Motion'] || 0),
-    },
-    state:{
-        wait:Number(FTKR.CSS.parameters['Animation Wait'] || 0),
-        overlap:Number(FTKR.CSS.parameters['Enable Overlap'] || 0),
-        autoScale:Number(FTKR.CSS.parameters['Enable Auto Scale'] || 0),
-        rate:Number(FTKR.CSS.parameters['Overlap Rate'] || 0),
     },
     customs:[
         {name:String(FTKR.CSS.parameters['Custom 0 Display Name'] || ''),
@@ -1474,7 +1410,6 @@ FTKR.CSS.Window_Base_initialize = Window_Base.prototype.initialize;
 Window_Base.prototype.initialize = function(x, y, width, height) {
     FTKR.CSS.Window_Base_initialize.call(this, x, y, width, height);
     this.sprite = [];
-    this._stateIconSprite = [];
 };
 
 /*-------------------------------------------------------------
@@ -1582,7 +1517,7 @@ Window_Base.prototype.drawCssActorStatusBase = function(index, actor, x, y, widt
         if (text) return this.drawCssText(actor, x, y, width, text);
     } else if (status.match(/(?:state2\()(.+)\)/i)) {
         var line = Number(RegExp.$1);
-        if (line) return this.drawCssActorIcons(index, actor, x, y, width, line, true);
+        if (line) return this.drawCssActorIcons(actor, x, y, width, line);
     } else {
         switch (true) {
             case (/(?:face)/i).test(status):
@@ -1606,7 +1541,7 @@ Window_Base.prototype.drawCssActorStatusBase = function(index, actor, x, y, widt
             case (/(?:class)/i).test(status):
                 return this.drawCssActorClass(actor, x, y, width);
             case (/(?:state)/i).test(status):
-                return this.drawCssActorIcons(index, actor, x, y, width);
+                return this.drawCssActorIcons(actor, x, y, width);
             case (/(?:profile)/i).test(status):
                 return this.drawCssProfile(actor, x, y, width);
             case (/(?:image)/i).test(status):
@@ -1627,9 +1562,7 @@ Window_Status.prototype.drawCssHorzLine = function(y, horz) {
     return 1;
 };
 
-//------------------------------------------------------------------------
 //アクターの顔画像の表示関数
-//------------------------------------------------------------------------
 Window_Base.prototype.drawCssActorFace = function(actor, x, y, width, lss) {
     var dy = this.lineHeight();
     var line = lss.faceLine || Math.ceil(Window_Base._faceHeight / dy);
@@ -1652,9 +1585,7 @@ Window_Base.prototype.drawCssFace = function(faceName, faceIndex, dx, dy, width,
     this.contents.blt(bitmap, sx, sy, sw, sh, dx, dy, dw, dh);
 };
 
-//------------------------------------------------------------------------
 //アクターの歩行キャラの表示関数
-//------------------------------------------------------------------------
 Window_Base.prototype.drawCssActorChara = function(actor, x, y, width, chara) {
     var dy = this.lineHeight();
     var line = Math.ceil(chara.height / dy);
@@ -1677,9 +1608,7 @@ Window_Base.prototype.drawCssChara = function(faceName, index, dx, dy, width, he
     this.contents.blt(bitmap, sx, sy, sw, sh, dx, dy, dw, dh);
 };
 
-//------------------------------------------------------------------------
 //アクターのSV戦闘キャラの表示関数
-//------------------------------------------------------------------------
 Window_Base.prototype.drawCssActorSvChara = function(index, actor, x, y, width, svChara) {
     var dy = this.lineHeight();
     var line = Math.ceil(svChara.height / dy);
@@ -1692,44 +1621,37 @@ Window_Base.prototype.drawCssActorSvChara = function(index, actor, x, y, width, 
 Window_Base.prototype.drawCssSvChara = function(index, actor, dx, dy, width, height, svChara) {
     if (this.sprite[index]) this.removeChild(this.sprite[index]);
     this.sprite[index] = new Sprite_Actor(actor);
-    this.addChild(this.sprite[index]);
     this.sprite[index].setHome(dx + width / 2, dy + height + Window_Base.SV_SHADOW_HEIGHT / 4);
     this.sprite[index].startMove(0,0,0);
     var stateMotion = actor.getStateMotion();
     var motion = svChara.state && stateMotion ? stateMotion : svChara.motion;
     this.sprite[index].startMotion(motion);
+    this.sprite[index]._motion.loop = svChara.loop;
+    this.addChild(this.sprite[index]);
 };
 
-//------------------------------------------------------------------------
 //アクターの名前の表示関数
-//------------------------------------------------------------------------
 Window_Base.prototype.drawCssActorName = function(actor, x, y, width) {
     this.changeTextColor(this.hpColor(actor));
     this.drawText(actor.name(), x, y, width);
     return 1;
 };
 
-//------------------------------------------------------------------------
 //アクターのクラス名の表示関数
-//------------------------------------------------------------------------
 Window_Base.prototype.drawCssActorClass = function(actor, x, y, width) {
     this.resetTextColor();
     this.drawText(actor.currentClass().name, x, y, width);
     return 1;
 };
 
-//------------------------------------------------------------------------
 //アクターの二つ名の表示関数
-//------------------------------------------------------------------------
 Window_Base.prototype.drawCssActorNickname = function(actor, x, y, width) {
     this.resetTextColor();
     this.drawText(actor.nickname(), x, y, width);
     return 1;
 };
 
-//------------------------------------------------------------------------
 //アクターのレベルの表示関数
-//------------------------------------------------------------------------
 Window_Base.prototype.drawCssActorLevel = function(actor, x, y, width) {
     var value = actor.level;
     var tw = this.textWidth(String(value));
@@ -1740,51 +1662,24 @@ Window_Base.prototype.drawCssActorLevel = function(actor, x, y, width) {
     return 1;
 };
 
-//------------------------------------------------------------------------
 //アクターのステートアイコンの表示関数
-//------------------------------------------------------------------------
-Window_Base.prototype.drawCssActorIcons = function(index, actor, x, y, width, line) {
-    var css = FTKR.CSS.cssStatus.state;
+Window_Base.prototype.drawCssActorIcons = function(actor, x, y, width, line) {
+    var icons = actor.allIcons().slice();
+    var num = icons.length;
     var iw = Window_Base._iconWidth;
-    if (!this._stateIconSprite[index]) {
-        this._stateIconSprite[index] = [];
-    }
-    if(css.autoScale) {
-        var scale = this.iconScale();
-        iw = iw * scale;
-    }
-    var maxlen = line ? this.lineHeight() * line : width;
-    var offset = iw
-    if(css.overlap) {
-        var iconlen = actor.allIcons().length;
-        var diff = Math.min((maxlen - iw - 4) / iconlen, iw * css.rate);
-        offset = diff && diff < iw ? diff : iw;
-    }
-
-    var showNum = Math.min(Math.floor((maxlen - 4) / offset));
-
-    for (var i = 0; i < showNum; i++) {
-        var sprite = this._stateIconSprite[index][i];
-        if (sprite) this.removeChild(sprite);
-        sprite = new Sprite_CssStateIcon(i, showNum);
-        this.addChild(sprite);
-        sprite.setup(actor);
-        sprite.move(x + this.padding, y + this.padding);
-        sprite.offsetMove(offset * i, line);
-        if(css.autoScale) sprite.setScale(scale);
+    var scale = Math.min(Math.max(this.lineHeight() - 4, 0) / iw, 1);
+    iw = iw * scale;
+    var len = line ? (line - 1) * this.lineHeight() : width - iw - 4;
+    var diff = num > 1 ? len / (num - 1) : 0;
+    var offset = diff < iw ? diff : iw;
+    for (var i = 0; i < num; i++) {
+        if(line) {
+            this.drawCssIcon(icons[i], x + 2, y + 2 + offset * i, scale);
+        } else {
+            this.drawCssIcon(icons[i], x + 2 + offset * i, y + 2, scale);
+        }
     }
     return line ? line : 1;
-};
-
-Window_Base.prototype.iconOverlapOffset = function(iw, number, width, vartical) {
-    var len = vartical ? (number - 1) * this.lineHeight() + 4 : width - iw - 4;
-    var diff = number > 1 ? len / (number - 1) : 0;
-    return diff < iw ? diff : iw;
-};
-
-Window_Base.prototype.iconScale = function() {
-    var iw = Window_Base._iconWidth;
-    return Math.min(Math.max(this.lineHeight() - 4, 0) / iw, 1);
 };
 
 //アイコンの表示スケールを指定できる表示関数
@@ -1799,9 +1694,7 @@ Window_Base.prototype.drawCssIcon = function(iconIndex, x, y, scale, auto) {
     this.contents.blt(bitmap, sx, sy, pw, ph, x, y, pw * scale, ph * scale);
 };
 
-//------------------------------------------------------------------------
 //アクターのHPの表示関数
-//------------------------------------------------------------------------
 Window_Base.prototype.drawCssActorHp = function(actor, x, y, width) {
     var color1 = this.hpGaugeColor1();
     var color2 = this.hpGaugeColor2();
@@ -1813,9 +1706,7 @@ Window_Base.prototype.drawCssActorHp = function(actor, x, y, width) {
     return 1;
 };
 
-//------------------------------------------------------------------------
 //アクターのMPの表示関数
-//------------------------------------------------------------------------
 Window_Base.prototype.drawCssActorMp = function(actor, x, y, width) {
     var color1 = this.mpGaugeColor1();
     var color2 = this.mpGaugeColor2();
@@ -1827,9 +1718,7 @@ Window_Base.prototype.drawCssActorMp = function(actor, x, y, width) {
     return 1;
 };
 
-//------------------------------------------------------------------------
 //アクターのTPの表示関数
-//------------------------------------------------------------------------
 Window_Base.prototype.drawCssActorTp = function(actor, x, y, width) {
     var color1 = this.tpGaugeColor1();
     var color2 = this.tpGaugeColor2();
@@ -1841,9 +1730,7 @@ Window_Base.prototype.drawCssActorTp = function(actor, x, y, width) {
     return 1;
 };
 
-//------------------------------------------------------------------------
 //パラメータの表示関数
-//------------------------------------------------------------------------
 Window_Base.prototype.drawCssActorParam = function(actor, x, y, width, paramId) {
     if (paramId < 0 && paramId > 7) return 0;
     this.changeTextColor(this.systemColor());
@@ -1853,9 +1740,7 @@ Window_Base.prototype.drawCssActorParam = function(actor, x, y, width, paramId) 
     return 1;
 };
 
-//------------------------------------------------------------------------
 //カスタムパラメータの表示関数
-//------------------------------------------------------------------------
 Window_Base.prototype.drawCssActorCustom = function(actor, x, y, width, custom) {
     console.log(custom);
     var name = custom.name || '';
@@ -1868,9 +1753,7 @@ Window_Base.prototype.drawCssActorCustom = function(actor, x, y, width, custom) 
     return 1;
 };
 
-//------------------------------------------------------------------------
 //カスタムゲージの表示関数
-//------------------------------------------------------------------------
 Window_Base.prototype.drawCssActorGauge = function(actor, x, y, width, gauge) {
     if (!gauge.name || !gauge.current || !gauge.max) return 0;
     var color1 = this.textColor(gauge.color1);
@@ -1901,9 +1784,7 @@ Game_Actor.prototype.evalCssCustomFormula = function(formula) {
     }
 };
 
-//------------------------------------------------------------------------
 //装備の表示関数
-//------------------------------------------------------------------------
 Window_Base.prototype.drawCssActorEquip = function(actor, x, y, width, equipId) {
     var equip = actor.equips()[equipId];
     if (equip) {
@@ -1915,9 +1796,7 @@ Window_Base.prototype.drawCssActorEquip = function(actor, x, y, width, equipId) 
     return 1;
 };
 
-//------------------------------------------------------------------------
 //プロフィールの表示関数
-//------------------------------------------------------------------------
 Window_Base.prototype.drawCssProfile = function(actor, x, y, width) {
     var texts = actor.profile().split('\n');
     var dy = this.lineHeight();
@@ -1927,9 +1806,7 @@ Window_Base.prototype.drawCssProfile = function(actor, x, y, width) {
     return texts.length;
 };
 
-//------------------------------------------------------------------------
 //テキストの表示関数
-//------------------------------------------------------------------------
 Window_Base.prototype.drawCssText = function(actor, x, y, width, text) {
     this.changeTextColor(this.systemColor());
     this.drawTextEx(text, x, y);
@@ -1937,9 +1814,7 @@ Window_Base.prototype.drawCssText = function(actor, x, y, width, text) {
     return 1;
 };
 
-//------------------------------------------------------------------------
 //指定画像の表示関数
-//------------------------------------------------------------------------
 Window_Base.prototype.drawCssActorImage = function(actor, x, y, width) {
     console.log(actor.actor());
     var dy = this.lineHeight();
@@ -2018,58 +1893,3 @@ Window_Status.prototype.refresh = function() {
     }
 };
 
-//=============================================================================
-// Sprite_CssStateIcon
-//=============================================================================
-
-function Sprite_CssStateIcon() {
-    this.initialize.apply(this, arguments);
-}
-
-Sprite_CssStateIcon.prototype = Object.create(Sprite_StateIcon.prototype);
-Sprite_CssStateIcon.prototype.constructor = Sprite_CssStateIcon;
-
-Sprite_CssStateIcon.prototype.initialize = function(index, showNum) {
-    Sprite_StateIcon.prototype.initialize.call(this);
-    this._index = index;
-    this._showNum = showNum;
-};
-
-Sprite_CssStateIcon._iconWidth  = 32;
-Sprite_CssStateIcon._iconHeight = 32;
-
-Sprite_CssStateIcon.prototype.initMembers = function() {
-    this._battler = null;
-    this._animationCount = 0;
-    this._animationIndex = 0;
-};
-
-Sprite_CssStateIcon.prototype.updateIcon = function() {
-    var icons = [];
-    if (this._battler && this._battler.isAlive()) {
-        icons = this._battler.allIcons();
-    }
-    if (icons.length > 0) {
-        this._animationIndex++;
-        if (this._animationIndex >= Math.ceil(icons.length / this._showNum)) {
-            this._animationIndex = 0;
-        }
-        this._iconIndex = icons[this._animationIndex * this._showNum + this._index];
-    } else {
-        this._animationIndex = 0;
-        this._iconIndex = 0;
-    }
-};
-
-Sprite_CssStateIcon.prototype.animationWait = function() {
-    return FTKR.CSS.cssStatus.state.wait;
-};
-
-Sprite_CssStateIcon.prototype.setScale = function(scale) {
-    this.scale._x *= scale;
-    this.scale._y *= scale;
-};
-
-Sprite_CssStateIcon.prototype.offsetMove = function(offset, vartical) {
-    !vartical ? this.x += offset : this.y += offset;
-};

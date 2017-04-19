@@ -3,8 +3,8 @@
 // FTKR_ExVariablesChange.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/18
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2017/04/19
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EVC = FTKR.EVC || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 変数の操作を拡張するプラグイン
+ * @plugindesc v1.0.1 変数の操作を拡張するプラグイン
  * @author フトコロ
  *
  *
@@ -85,13 +85,13 @@ FTKR.EVC = FTKR.EVC || {};
  * 固定値以外の値を使用することができます。以下のコードを使用できます。
  *  s[x]    - スイッチID x の値を意味します。
  *  v[x]    - 変数ID x の値を意味します。
- *  av[x]   - アクターのセルフ変数ID x の値を意味します。(*1)(*2)
- *  iv[x]   - アイテムのセルフ変数ID x の値を意味します。(*1)(*3)
+ *  av[x]   - 使用者のセルフ変数ID x の値を意味します。(*1)
+ *  bv[x]   - 対象者のセルフ変数ID x の値を意味します。(*1)
+ *  iv[x]   - アイテムのセルフ変数ID x の値を意味します。(*1)(*2)
  *  number  - 購入・売却・増減時のアイテム数を意味します。
  * 
  * (*1) セルフ変数を使用する場合は、FTKR_ItemSelfVariables.jsが必要です。
- * (*2) アクターとは、スキルまたはアイテムを使用したアクターのことです。
- * (*3) アイテムとは、使用したスキルまたはアイテム、購入・売却したアイテムの
+ * (*2) アイテムとは、使用したスキルまたはアイテム、購入・売却したアイテムの
  *      ことです。
  * 
  * 
@@ -121,6 +121,8 @@ FTKR.EVC = FTKR.EVC || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.1 - 2017/04/19 : 不具合修正
  * 
  * v1.0.0 - 2017/04/18 : 初版作成
  * 
@@ -178,7 +180,7 @@ DataManager.evcChangeVariables = function(formula, obj, subject, target, number)
             if(Imported.FTKR_ISV) {
                 if (subject && subject._selfVariables) var av = subject._selfVariables._data;
                 if (target && target._selfVariables) var bv = target._selfVariables._data;
-                var iv = obj._selfVariables._data;
+                if (obj && obj._selfVariables) var iv = obj._selfVariables._data;
             }
             eval(evals[i]);
             continue;
@@ -196,6 +198,7 @@ DataManager.evcChangeVariables = function(formula, obj, subject, target, number)
 
 FTKR.EVC.Game_Action_apply = Game_Action.prototype.apply;
 Game_Action.prototype.apply = function(target) {
+    console.log('apply');
     FTKR.EVC.Game_Action_apply.call(this, target);
     DataManager.evcVariablesNoteTags(['使用時', 'USE'], this.item(), this.subject(), target);
     var result = target.result();
@@ -236,6 +239,6 @@ Game_Party.prototype.gainItem = function(item, amount, includeEquip) {
 
 FTKR.EVC.Scene_Shop_doSell = Scene_Shop.prototype.doSell;
 Scene_Shop.prototype.doSell = function(number) {
-    DataManager.evcVariablesNoteTags(['売却時', 'SELL'], this._item, null, number);
+    DataManager.evcVariablesNoteTags(['売却時', 'SELL'], this._item, null, null, number);
     FTKR.EVC.Scene_Shop_doSell.call(this, number);
 };
