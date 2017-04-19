@@ -83,13 +83,11 @@ FTKR.ESM = FTKR.ESM || {};
  * 
  * @param Motion 5 name
  * @desc モーション5のコードを設定します。
- * デフォルト dead
- * @default dead
+ * @default 
  * 
  * @param Motion 5 Condition
  * @desc モーション5の状態を設定します。
- * デフォルト state3
- * @default state3
+ * @default 
  * 
  * @param --モーション6 設定--
  * @default
@@ -118,11 +116,13 @@ FTKR.ESM = FTKR.ESM || {};
  * 
  * @param Motion 8 name
  * @desc モーション8のコードを設定します。
- * @default 
+ * デフォルト dead
+ * @default dead
  * 
  * @param Motion 8 Condition
  * @desc モーション8の状態を設定します。
- * @default 
+ * デフォルト state3
+ * @default state3
  * 
  * @param --モーション9 設定--
  * @default
@@ -162,6 +162,11 @@ FTKR.ESM = FTKR.ESM || {};
  *  chant  : 詠唱中
  *  guard  : 防御中/防御待機中
  *  state* : ステート付加中( * がステートモーション番号)(例:state4)
+ * 
+ * ステートモーション番号の 1 ~ 3は、基本設定で選べる以下の状態を示します。
+ *    1 - 状態異常
+ *    2 - 睡眠
+ *    3 - 戦闘不能
  * 
  * モーションは、モーション1～モーション9まで設定できます。
  * 数字が大きい方が、モーションの優先度が高くなります。
