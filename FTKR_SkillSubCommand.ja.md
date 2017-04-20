@@ -75,7 +75,7 @@ s[1]
 
 以下のプラグインパラメータで設定します。
 
-`<ustom1 Format>`
+`<Custom1 Format>`
 サブコマンドで表示するコマンド名を設定してください。
 
 `<Custom1 EventID>`
