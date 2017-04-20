@@ -3,7 +3,7 @@
 # [FTKR_SkillSubCommand](FTKR_SkillSubCommand.js) プラグイン
 
 スキル画面にサブコマンドを追加するプラグインです。<br>
-本プラグインは、FTKR_SkillExpansion.jsと組み合わせて使用できません。
+本プラグインは、FTKR_SkillExpansion.js および SEP_ShowSkillStatus.jsと組み合わせて使用できません。
 
 ダウンロード: [FTKR_SkillSubCommand.js](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillSubCommand.js)
 
