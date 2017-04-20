@@ -612,7 +612,8 @@ code
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.3.0](FTKR_CustomSimpleActorStatus.js) | 2017/04/19 | ステートアイコンの表示仕様を変更 |
+| [ver1.3.1](FTKR_CustomSimpleActorStatus.js) | 2017/04/21 | FTKR_ExSvMotion.jsに対応 |
+| ver1.3.0 | 2017/04/19 | ステートアイコンの表示仕様を変更 |
 | [ver1.2.5](/archive/FTKR_CustomSimpleActorStatus_1.2.5.js) | 2017/04/15 | ステートアイコンの表示位置を微調整 <br> 行の高さに合わせてステートアイコンのサイズを調整する機能を追加 |
 | ver1.2.4 | 2017/04/12 | 顔画像の拡大縮小処理修正 |
 | ver1.2.3 | 2017/04/11 | ヘルプ修正 |
@@ -626,6 +627,7 @@ code
 
 * [FTKR_CSS_BattleStatus](FTKR_CSS_BattleStatus.ja.md) - バトル画面のステータスレイアウトを変更できます
 * [FTKR_AddOriginalParameters](FTKR_AddOriginalParameters.ja.md) - カスタムパラメータやカスタムゲージに使用可能なアクターのオリジナルパラメータを作成できます
+* [FTKR_ExSvMotion.js](FTKR_ExSvMotion.ja.md) - ステート付加時のモーションを追加・変更できます。
 
 ## ライセンス
 

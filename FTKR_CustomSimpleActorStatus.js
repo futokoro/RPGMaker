@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2017/04/19
-// バージョン : v1.3.0
+// 最終更新日 : 2017/04/21
+// バージョン : v1.3.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.3.0 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v1.3.1 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @param --Simple status--
@@ -1092,6 +1092,9 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.3.1 - 2017/04/21 : 機能追加
+ *    1. FTKR_ExSvMotion.jsで設定したモーションを表示できるように変更。
+ * 
  * v1.3.0 - 2017/04/19 : 機能変更
  *    1. ステートアイコンの表示仕様を変更。
  * 
@@ -1458,12 +1461,16 @@ Game_Actor.prototype.setup = function(actorId) {
 
 Game_Actor.prototype.getStateMotion = function() {
     var index = this.stateMotionIndex();
-    switch (index) {
-        case 1: return 'abnormal';
-        case 2: return 'sleep';
-        case 3: return 'dead';
+    if(Imported.FTKR_ESM) {
+        return this.getEsmMotion();
+    } else {
+        switch (index) {
+            case 1: return 'abnormal';
+            case 2: return 'sleep';
+            case 3: return 'dead';
+        }
+        return '';
     }
-    return '';
 };
 
 //=============================================================================

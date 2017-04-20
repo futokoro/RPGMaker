@@ -3,8 +3,8 @@
 // FTKR_ExSvMotion.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/19
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2017/04/21
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ESM = FTKR.ESM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 SVキャラのモーションを拡張するプラグイン
+ * @plugindesc v1.0.1 SVキャラのモーションを拡張するプラグイン
  * @author フトコロ
  *
  * @param --基本設定--
@@ -83,11 +83,13 @@ FTKR.ESM = FTKR.ESM || {};
  * 
  * @param Motion 5 name
  * @desc モーション5のコードを設定します。
- * @default 
+ * デフォルト dead
+ * @default dead
  * 
  * @param Motion 5 Condition
  * @desc モーション5の状態を設定します。
- * @default 
+ * デフォルト state3
+ * @default state3
  * 
  * @param --モーション6 設定--
  * @default
@@ -116,13 +118,11 @@ FTKR.ESM = FTKR.ESM || {};
  * 
  * @param Motion 8 name
  * @desc モーション8のコードを設定します。
- * デフォルト dead
- * @default dead
+ * @default 
  * 
  * @param Motion 8 Condition
  * @desc モーション8の状態を設定します。
- * デフォルト state3
- * @default state3
+ * @default 
  * 
  * @param --モーション9 設定--
  * @default
@@ -163,11 +163,6 @@ FTKR.ESM = FTKR.ESM || {};
  *  guard  : 防御中/防御待機中
  *  state* : ステート付加中( * がステートモーション番号)(例:state4)
  * 
- * ステートモーション番号の 1 ~ 3は、基本設定で選べる以下の状態を示します。
- *    1 - 状態異常
- *    2 - 睡眠
- *    3 - 戦闘不能
- * 
  * モーションは、モーション1～モーション9まで設定できます。
  * 数字が大きい方が、モーションの優先度が高くなります。
  * 
@@ -204,6 +199,9 @@ FTKR.ESM = FTKR.ESM || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.1 - 2017/04/21 : 不具合修正
+ *    1. ステートのタグ設定が正しく読み取れない不具合を修正。
  * 
  * v1.0.0 - 2017/04/19 : 初版作成
  * 
@@ -243,7 +241,7 @@ FTKR.ESM.motion = {
 
 if (!Array.prototype.checkMeta) {
 Array.prototype.checkMeta = function(obj) {
-    return obj.meta ? this.some(function(meta) {
+    return obj.meta ? this.map(function(meta) {
         return obj.meta[meta];
     }) : false;
 };
@@ -258,9 +256,48 @@ Game_BattlerBase.prototype.stateMotionIndex = function() {
     var states = this.states();
     if (states.length > 0) {
         var motion = ['ESM モーション', 'ESM MOTION'].checkMeta(states[0]);
-        return motion ? Number(motion) : states[0].motion;
+        return motion.length ? Number(motion[0]) : states[0].motion;
     } else {
         return 0;
+    }
+};
+
+Game_BattlerBase.prototype.checkConditions = function() {
+    for(var i = 9; i > 0; i--) {
+        if(this.checkCondition(FTKR.ESM.motion.state[i].condition)) {
+            return i;
+        }
+    }
+    return 0;
+};
+
+Game_BattlerBase.prototype.checkCondition = function(condition) {
+    var stateMotion = this.stateMotionIndex();
+    if (condition.match(/state(\d+)/i)) {
+        return stateMotion === Number(RegExp.$1);
+    } 
+    switch(true) {
+        case /input/i.test(condition):
+            return this.isInputting() || this.isActing();
+        case /guard/i.test(condition):
+            return this.isGuard() || this.isGuardWaiting();
+        case /chant/i.test(condition):
+            return this.isChanting();
+        default:
+            return false;
+    };
+};
+
+Game_BattlerBase.prototype.getEsmMotion = function() {
+    var index = this.checkConditions();
+    if (index) {
+        return FTKR.ESM.motion.state[index].name;
+    } else if (this.isDying()) {
+        return 'dying';
+    } else if (this.isUndecided()) {
+        return 'walk';
+    } else {
+        return 'wait';
     }
 };
 
@@ -300,45 +337,9 @@ Sprite_Actor.prototype.refreshMotion = function() {
     var motionGuard = Sprite_Actor.MOTIONS['guard'];
     if (actor) {
         if (this._motion === motionGuard && !BattleManager.isInputting()) {
-                return;
+            return;
         }
-        var index = this.checkConditions();
-        if (index) {
-            this.startMotion(FTKR.ESM.motion.state[index].name);
-            this._motionloop = true;
-        } else if (actor.isDying()) {
-            this.startMotion('dying');
-        } else if (actor.isUndecided()) {
-            this.startMotion('walk');
-        } else {
-            this.startMotion('wait');
-        }
+        this.startMotion(actor.getEsmMotion());
+        this._motionloop = true;
     }
-};
-
-Sprite_Actor.prototype.checkConditions = function() {
-    for(var i = 9; i > 0; i--) {
-        if(this.checkCondition(FTKR.ESM.motion.state[i].condition)) {
-            return i;
-        }
-    }
-    return 0;
-};
-
-Sprite_Actor.prototype.checkCondition = function(condition) {
-    var actor = this._actor;
-    var stateMotion = actor.stateMotionIndex();
-    if (condition.match(/state(\d+)/i)) {
-        return stateMotion === Number(RegExp.$1);
-    } 
-    switch(true) {
-        case /input/i.test(condition):
-            return actor.isInputting() || actor.isActing();
-        case /guard/i.test(condition):
-            return actor.isGuard() || actor.isGuardWaiting();
-        case /chant/i.test(condition):
-            return actor.isChanting();
-        default:
-            return false;
-    };
 };
