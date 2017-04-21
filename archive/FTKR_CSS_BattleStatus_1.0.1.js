@@ -1,10 +1,10 @@
 //=============================================================================
-// バトル画面のステータス表示を変更するプラグイン
+// アクターのバトルステータス表示を変更するプラグイン
 // FTKR_CSS_BattleStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/11
-// 最終更新日 : 2017/04/21
-// バージョン : v1.1.0
+// 最終更新日 : 2017/04/12
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,47 +16,11 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.0 バトル画面のステータス表示を変更するプラグイン
+ * @plugindesc v1.0.1 アクターのバトルステータス表示を変更するプラグイン
  * @author フトコロ
- *
- * @param --レイアウト設定--
- * @desc 
- * 
- * @param Actor Status Text1
- * @desc Text1部に表示するステータスを指定します。
- * 詳細はヘルプ参照
- * @default name
- * 
- * @param Actor Status Text2
- * @desc Text2部に表示するステータスを指定します。
- * 詳細はヘルプ参照
- * @default state
- * 
- * @param Actor Status Text3
- * @desc Text3部に表示するステータスを指定します。
- * 詳細はヘルプ参照
- * @default [hp/mp/tp]
- * 
- * @param Actor Status Space
- * @desc 各Textの間隔を指定します。
- * @default 0,5,5,0
- * 
- * @param Actor Status Space In Text
- * @desc Text内で複数表示する場合の間隔を指定します。
- * @default 5
- * 
- * @param Actor Status Width Rate
- * @desc Text1~Text3の表示幅の比率を指定します。
- * 詳細はヘルプ参照
- * @default 1,1,3
  *
  * @param --ウィンドウ設定--
  * @desc 
- * 
- * @param Enabled Custom Window
- * @desc ウィンドウのレイアウト変更機能を使うか。
- * 0 - 無効, 1 - 有効
- * @default 0
  * 
  * @param Number Visible Rows
  * @desc ステータスウィンドウの縦の行数
@@ -90,6 +54,42 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  * @desc ウィンドウ枠を非表示にするか
  * 1 - 非表示にする、0 - 表示する
  * @default 0
+ * 
+ * @param --レイアウト設定--
+ * @desc 
+ * 
+ * @param Actor Status Text1
+ * @desc Text1部に表示するステータスを指定します。
+ * 詳細はヘルプ参照
+ * @default name
+ * 
+ * @param Actor Status Text2
+ * @desc Text2部に表示するステータスを指定します。
+ * 詳細はヘルプ参照
+ * @default state
+ * 
+ * @param Actor Status Text3
+ * @desc Text3部に表示するステータスを指定します。
+ * 詳細はヘルプ参照
+ * @default [hp/mp/tp]
+ * 
+ * @param Actor Status Space
+ * @desc 各Textの間隔を指定します。
+ * @default 0,5,5,0
+ * 
+ * @param Actor Status Space In Text
+ * @desc Text内で複数表示する場合の間隔を指定します。
+ * @default 5
+ * 
+ * @param Actor Status Width Rate
+ * @desc Text1~Text3の表示幅の比率を指定します。
+ * 詳細はヘルプ参照
+ * @default 1,1,3
+ *
+ * @param Display Face Scale
+ * @desc アクターの顔画像を表示スケールを設定します
+ * 標準は 4 で、それ以外の場合に画像を拡大縮小します
+ * @default 4
  * 
  * @help
  *-----------------------------------------------------------------------------
@@ -130,10 +130,6 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  * バトルステータスウィンドウの設定
  *-----------------------------------------------------------------------------
  * 以下のプラグインパラメータで設定できます。
- * 
- * <Enabled Custom Window>
- *    :バトル画面のウィンドウ変更機能を使うか指定します。
- *    :0 - 無効, 1 - 有効
  * 
  * <Number Visible Rows>
  *    :ステータスウィンドウの縦の行数を変更します。
@@ -200,10 +196,6 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
- * v1.1.0 - 2017/04/21 : 機能変更
- *    1. FTKR_CustomSimpleActorStatus.jsのv1.4.0に対応
- *    2. ウィンドウのレイアウト変更のON/OFF機能を追加。
- * 
  * v1.0.1 - 2017/04/12 : 機能追加
  *    1. ウィンドウの余白と1行の高さ、透明度、枠の有無を変更する機能を追加。
  *    2. カーソル高さを変更する機能を追加。
@@ -220,7 +212,6 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
 FTKR.CSS.BS.parameters = PluginManager.parameters('FTKR_CSS_BattleStatus');
 
 FTKR.CSS.BS.window = {
-    enabled:Number(FTKR.CSS.BS.parameters['Enabled Custom Window'] || 0),
     numVisibleRows:Number(FTKR.CSS.BS.parameters['Number Visible Rows'] || 0),
     maxCols:Number(FTKR.CSS.BS.parameters['Number Max Cols'] || 0),
     fontSize:Number(FTKR.CSS.BS.parameters['Font Size'] || 0),
@@ -239,14 +230,13 @@ FTKR.CSS.BS.simpleStatus = {
     space:String(FTKR.CSS.BS.parameters['Actor Status Space'] || ''),
     spaceIn:Number(FTKR.CSS.BS.parameters['Actor Status Space In Text'] || 0),
     widthRate:String(FTKR.CSS.BS.parameters['Actor Status Width Rate'] || ''),
+    faceLine:Number(FTKR.CSS.BS.parameters['Display Face Scale'] || 0),
 };
 
 //=============================================================================
 // Window_BattleStatus
 // バトル画面のステータスウィンドウの表示クラス
 //=============================================================================
-
-if(FTKR.CSS.BS.window.enabled) {
 
 //書き換え
 //ウィンドウの行数
@@ -303,8 +293,6 @@ Window_BattleStatus.prototype._refreshFrame = function() {
     if (!FTKR.CSS.BS.window.hideFrame) Window.prototype._refreshFrame.call(this);
 };
 
-}//ウィンドウカスタム有効
-
 //書き換え
 //アクター1人分のステータス表示
 if (Imported.FTKR_CSS) {
@@ -314,4 +302,4 @@ if (Imported.FTKR_CSS) {
       var lss = FTKR.CSS.BS.simpleStatus;
       this.drawCssActorStatus(index, actor, rect.x, rect.y, rect.width, rect.height, lss);
   };
-};//FTKR_CustomSimpleActorStatus.jsが必要
+};//TKR_CustomSimpleActorStatus.jsが必要

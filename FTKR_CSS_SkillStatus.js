@@ -1,22 +1,22 @@
 //=============================================================================
-// バトル画面のステータス表示を変更するプラグイン
-// FTKR_CSS_BattleStatus.js
+// スキル画面のステータス表示を変更するプラグイン
+// FTKR_CSS_SkillStatus.js
 // 作成者     : フトコロ
-// 作成日     : 2017/04/11
-// 最終更新日 : 2017/04/21
-// バージョン : v1.1.0
+// 作成日     : 2017/04/21
+// 最終更新日 : 
+// バージョン : v1.0.0
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.FTKR_CSS_BS = true;
+Imported.FTKR_CSS_SS = true;
 
 var FTKR = FTKR || {};
 FTKR.CSS = FTKR.CSS || {};
-FTKR.CSS.BS = FTKR.CSS.BS || {};
+FTKR.CSS.SS = FTKR.CSS.SS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.0 バトル画面のステータス表示を変更するプラグイン
+ * @plugindesc v1.0.0 スキル画面のステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @param --レイアウト設定--
@@ -62,14 +62,6 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  * @desc ステータスウィンドウの縦の行数
  * @default 4
  * 
- * @param Number Max Cols
- * @desc アクターを横に並べる数
- * @default 1
- * 
- * @param Cursol Line Number
- * @desc カーソル高さの行数
- * @default 1
- * 
  * @param Font Size
  * @desc フォントサイズ
  * @default 28
@@ -95,10 +87,10 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  *-----------------------------------------------------------------------------
  * 概要
  *-----------------------------------------------------------------------------
- * 本プラグインを実装することで、バトル画面で表示するアクターの
+ * 本プラグインを実装することで、スキル画面で表示するアクターの
  * ステータス表示のレイアウトを変更できます。
  * 
- * また、バトル画面のステータスウィンドウの設定を変更できます。
+ * また、スキル画面のステータスウィンドウの設定を変更できます。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -114,9 +106,9 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  * 
  * 
  *-----------------------------------------------------------------------------
- * アクターのバトルステータス表示の設定
+ * アクターのスキルステータス表示の設定
  *-----------------------------------------------------------------------------
- * プラグインパラメータの設定により、バトル画面で表示する
+ * プラグインパラメータの設定により、スキル画面で表示する
  * ステータスの表示レイアウトを変更することができます。
  * 
  * 各パラメータの意味と、設定方法は、
@@ -127,26 +119,18 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  * 
  * 
  *-----------------------------------------------------------------------------
- * バトルステータスウィンドウの設定
+ * ステータスウィンドウの設定
  *-----------------------------------------------------------------------------
  * 以下のプラグインパラメータで設定できます。
  * 
  * <Enabled Custom Window>
- *    :バトル画面のウィンドウ変更機能を使うか指定します。
+ *    :スキル画面のウィンドウ変更機能を使うか指定します。
  *    :0 - 無効, 1 - 有効
  * 
  * <Number Visible Rows>
  *    :ステータスウィンドウの縦の行数を変更します。
  *    :デフォルトは4行です。
  *    :この値を変えても、コマンドウィンドウのサイズは変わりません。
- * 
- * <Number Max Cols>
- *    :ウィンドウ内でアクターを横に並べる数を変更します。
- *    :デフォルトは 1 です。
- * 
- * <Cursol Line Number>
- *    :カーソルの高さを何行分にするか設定します。
- *    :デフォルトは 1 です。
  * 
  * <Font Size>
  *    :ウィンドウ内のフォントサイズを変更します。
@@ -200,118 +184,94 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
- * v1.1.0 - 2017/04/21 : 機能変更
- *    1. FTKR_CustomSimpleActorStatus.jsのv1.4.0に対応
- *    2. ウィンドウのレイアウト変更のON/OFF機能を追加。
- * 
- * v1.0.1 - 2017/04/12 : 機能追加
- *    1. ウィンドウの余白と1行の高さ、透明度、枠の有無を変更する機能を追加。
- *    2. カーソル高さを変更する機能を追加。
- * 
- * v1.0.0 - 2017/04/11 : 初版作成
+ * v1.0.0 - 2017/04/21 : 初版作成
  * 
  *-----------------------------------------------------------------------------
  */
 //=============================================================================
 
+if (Imported.FTKR_CSS) {
+
 //=============================================================================
 // プラグイン パラメータ
 //=============================================================================
-FTKR.CSS.BS.parameters = PluginManager.parameters('FTKR_CSS_BattleStatus');
+FTKR.CSS.SS.parameters = PluginManager.parameters('FTKR_CSS_SkillStatus');
 
-FTKR.CSS.BS.window = {
-    enabled:Number(FTKR.CSS.BS.parameters['Enabled Custom Window'] || 0),
-    numVisibleRows:Number(FTKR.CSS.BS.parameters['Number Visible Rows'] || 0),
-    maxCols:Number(FTKR.CSS.BS.parameters['Number Max Cols'] || 0),
-    fontSize:Number(FTKR.CSS.BS.parameters['Font Size'] || 0),
-    padding:Number(FTKR.CSS.BS.parameters['Window Padding'] || 0),
-    lineHeight:Number(FTKR.CSS.BS.parameters['Window Line Height'] || 0),
-    opacity:Number(FTKR.CSS.BS.parameters['Window Opacity'] || 0),
-    hideFrame:Number(FTKR.CSS.BS.parameters['Hide Window Frame'] || 0),
-    cursolHeight:Number(FTKR.CSS.BS.parameters['Cursol Line Number'] || 0),
+FTKR.CSS.SS.window = {
+    enabled:Number(FTKR.CSS.SS.parameters['Enabled Custom Window'] || 0),
+    numVisibleRows:Number(FTKR.CSS.SS.parameters['Number Visible Rows'] || 0),
+    maxCols:Number(FTKR.CSS.SS.parameters['Number Max Cols'] || 0),
+    fontSize:Number(FTKR.CSS.SS.parameters['Font Size'] || 0),
+    padding:Number(FTKR.CSS.SS.parameters['Window Padding'] || 0),
+    lineHeight:Number(FTKR.CSS.SS.parameters['Window Line Height'] || 0),
+    opacity:Number(FTKR.CSS.SS.parameters['Window Opacity'] || 0),
+    hideFrame:Number(FTKR.CSS.SS.parameters['Hide Window Frame'] || 0),
+    cursolHeight:Number(FTKR.CSS.SS.parameters['Cursol Line Number'] || 0),
 };
 
 //簡易ステータスオブジェクト
-FTKR.CSS.BS.simpleStatus = {
-    text1:String(FTKR.CSS.BS.parameters['Actor Status Text1'] || ''),
-    text2:String(FTKR.CSS.BS.parameters['Actor Status Text2'] || ''),
-    text3:String(FTKR.CSS.BS.parameters['Actor Status Text3'] || ''),
-    space:String(FTKR.CSS.BS.parameters['Actor Status Space'] || ''),
-    spaceIn:Number(FTKR.CSS.BS.parameters['Actor Status Space In Text'] || 0),
-    widthRate:String(FTKR.CSS.BS.parameters['Actor Status Width Rate'] || ''),
+FTKR.CSS.SS.simpleStatus = {
+    text1:String(FTKR.CSS.SS.parameters['Actor Status Text1'] || ''),
+    text2:String(FTKR.CSS.SS.parameters['Actor Status Text2'] || ''),
+    text3:String(FTKR.CSS.SS.parameters['Actor Status Text3'] || ''),
+    space:String(FTKR.CSS.SS.parameters['Actor Status Space'] || ''),
+    spaceIn:Number(FTKR.CSS.SS.parameters['Actor Status Space In Text'] || 0),
+    widthRate:String(FTKR.CSS.SS.parameters['Actor Status Width Rate'] || ''),
 };
 
 //=============================================================================
-// Window_BattleStatus
-// バトル画面のステータスウィンドウの表示クラス
+// Window_SkillStatus
+// スキル画面のステータスウィンドウの表示クラス
 //=============================================================================
 
-if(FTKR.CSS.BS.window.enabled) {
+//書き換え
+Window_SkillStatus.prototype.refresh = function() {
+    this.contents.clear();
+    if (this._actor) {
+        var w = this.width - this.padding * 2;
+        var h = this.height - this.padding * 2;
+        this.drawCssActorStatus(0, this._actor, 0, 0, w, h);
+    }
+};
+
+if(FTKR.CSS.SS.window.enabled) {
 
 //書き換え
 //ウィンドウの行数
 Window_BattleStatus.prototype.numVisibleRows = function() {
-    return FTKR.CSS.BS.window.numVisibleRows;
-};
-
-//書き換え
-//ウィンドウに横に並べるアクター数
-Window_BattleStatus.prototype.maxCols = function() {
-    return FTKR.CSS.BS.window.maxCols;
-};
-
-//書き換え
-//カーソルの高さ
-Window_BattleStatus.prototype.itemHeight = function() {
-    return this.lineHeight() * FTKR.CSS.BS.window.cursolHeight;
-};
-
-//書き換え
-//ウィンドウに横に並べるアクターの表示間隔
-//ステータスレイアウト側で変更できるのでここでは 0 とする。
-Window_BattleStatus.prototype.spacing = function() {
-    return 0;
+    return FTKR.CSS.SS.window.numVisibleRows;
 };
 
 //書き換え
 //ウィンドウのフォントサイズ
 Window_BattleStatus.prototype.standardFontSize = function() {
-    return FTKR.CSS.BS.window.fontSize;
+    return FTKR.CSS.SS.window.fontSize;
 };
 
 //書き換え
 //ウィンドウに周囲の余白サイズ
 Window_BattleStatus.prototype.standardPadding = function() {
-    return FTKR.CSS.BS.window.padding;
+    return FTKR.CSS.SS.window.padding;
 };
 
 //書き換え
 //ウィンドウ内の1行の高さ
 Window_BattleStatus.prototype.lineHeight = function() {
-    return FTKR.CSS.BS.window.lineHeight;
+    return FTKR.CSS.SS.window.lineHeight;
 };
 
 //書き換え
 //ウィンドウの背景の透明度
 Window_BattleStatus.prototype.standardBackOpacity = function() {
-    return FTKR.CSS.BS.window.opacity;
+    return FTKR.CSS.SS.window.opacity;
 };
 
 //書き換え
 //ウィンドウ枠の表示
 Window_BattleStatus.prototype._refreshFrame = function() {
-    if (!FTKR.CSS.BS.window.hideFrame) Window.prototype._refreshFrame.call(this);
+    if (!FTKR.CSS.SS.window.hideFrame) Window.prototype._refreshFrame.call(this);
 };
 
 }//ウィンドウカスタム有効
 
-//書き換え
-//アクター1人分のステータス表示
-if (Imported.FTKR_CSS) {
-  Window_BattleStatus.prototype.drawItem = function(index) {
-      var actor = $gameParty.battleMembers()[index];
-      var rect = this.itemRectForText(index);
-      var lss = FTKR.CSS.BS.simpleStatus;
-      this.drawCssActorStatus(index, actor, rect.x, rect.y, rect.width, rect.height, lss);
-  };
-};//FTKR_CustomSimpleActorStatus.jsが必要
+};//TKR_CustomSimpleActorStatus.jsが必要

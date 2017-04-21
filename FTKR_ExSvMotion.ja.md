@@ -39,10 +39,7 @@ SVキャラのモーションを変更します。
 * 3 - 戦闘不能
 
 `<Motion * Name>`<br>
-`<Motion * Condition>`で設定したアクターの状態の時に表示するモーションのコードを以下の中から指定してください。<br>
- walk, wait, chant, guard, damage, evade, thrust, swing,
- missile, skill, spell, item, escape, victory, dying,
- abnormal, sleep, dead<br>
+`<Motion * Condition>`で設定したアクターの状態の時に表示するモーションの[コード名](Code_List.ja.md#モーション)を指定してください。<br>
 ステートモーションに設定したモーションは、ループします。
 
 ## ステートモーションの設定

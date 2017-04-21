@@ -3,8 +3,8 @@
 // FTKR_ExMessageWindow.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/28
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2017/04/02
+// バージョン : v1.0.2
 //=======↑本プラグインを改変した場合でも、この欄は消さないでください↑===============
 
 var Imported = Imported || {};
@@ -14,7 +14,7 @@ var FTKR = FTKR || {};
 FTKR.EMW = FTKR.EMW || {};
 
 /*:
- * @plugindesc v1.0.0 メッセージウィンドウを拡張するプラグイン
+ * @plugindesc v1.0.2 メッセージウィンドウを拡張するプラグイン
  * @author フトコロ
  *
  * @help 
@@ -24,8 +24,9 @@ FTKR.EMW = FTKR.EMW || {};
  * 文章の表示等に使用できる制御文字に、以下の制御文字を追加します。
  * 
  * 1. サブウィンドウで文章の表示
- * \SUBA[表示位置, 文章(, 顔画像ファイル名, 顔画像番号)]
- * \SUBB[表示位置, 文章(, 顔画像ファイル名, 顔画像番号)]
+ * \SUBA[表示位置, 文章, 顔画像ファイル名, 顔画像番号)]
+ * \SUBB[表示位置, 文章, 顔画像ファイル名, 顔画像番号)]
+ * \SUBW[ウィンドウ番号, 顔画像設定, ウィンドウ設定, 表示位置, 文章]
  *    :サブAとサブBのウィンドウは同時に表示できます。
  *    :この制御文字は、文章の表示時にのみ使用できます。
  * 
@@ -41,15 +42,30 @@ FTKR.EMW = FTKR.EMW || {};
  * 「サブウィンドウで文章の表示」機能
  *-----------------------------------------------------------------------------
  * 以下の制御文字で画像を表示できます。
+ * 顔画像ファイル名と顔画像番号の入力方式はどちらを使用しても同じ結果になります。
  * 
- * \SUBA[表示位置, 文章(, 顔画像ファイル名, 顔画像番号)]
+ * \SUBA[表示位置, 文章, 顔画像ファイル名, 顔画像番号]
+ * \SUBA[表示位置, 文章, 顔画像ファイル名(顔画像番号)]
+ * 
  * \SUBB[表示位置, 文章(, 顔画像ファイル名, 顔画像番号)]
+ * \SUBB[表示位置, 文章, 顔画像ファイル名(顔画像番号)]
+ * 
+ * \SUBW[ウィンドウ番号, 顔画像ファイル名(顔画像番号), 背景設定, 表示位置, 文章]
+ * 
+ * ウィンドウ番号
+ *    :表示するサブウィンドウの番号を指定します。
+ *    : 0 - サブウィンドウA
+ *    : 1 - サブウィンドウB
+ *    :後述するスクリプトで指定するウィンドウ番号と同じ意味です。
  * 
  * 表示位置
  *    :画面内でサブウィンドウを表示する位置を指定します。
- *    : 0 - 画面上部
- *    : 1 - 画面中央
- *    : 2 - 画面下部
+ *    : 0 または 上 - 画面上部
+ *    : 1 または 中 - 画面中央
+ *    : 2 または 下 - 画面下部
+ *    : 左         - 画面左寄せ
+ *    : 右         - 画面左寄せ
+ *    : 「左上」のように組み合わせて指定できます。
  * 
  * 文章
  *    :サブウィンドウに表示する文章を記載します。
@@ -57,14 +73,32 @@ FTKR.EMW = FTKR.EMW || {};
  * 
  * 顔画像ファイル名
  *    :表示させたい顔画像のファイル名を指定します。
+ *    :入力しない場合は表示しません。
  * 
  * 顔画像番号
  *    :顔画像ファイル内の何番目の画像を表示するか指定します。
+ *    :入力しない場合は0番目を表示します。
+ * 
+ * 背景設定
+ *    :背景設定は、以下の数字または文字で指定します。
+ *    : 0 または ウィンドウ
+ *    : 1 または 暗くする
+ *    : 2 または 透明 
+ *    :空欄の場合は、ウィンドウタイプになります。
  * 
  * 入力例)
+ *    \SUBA[上,こんにちは]
+ *      画面上部に、サブウィンドウAに「こんにちは」を表示します。
+ * 
  *    \SUBA[0,こんにちは,Actor1,2]
+ *    \SUBA[上,こんにちは,Actor1(2)]
  *      画面上部に、Actor1.pngの2番目の顔画像付きで
  *      サブウィンドウAに「こんにちは」を表示します。
+ * 
+ *    \SUBW[0, Actor1(2), 暗くする, 上, こんにちは]
+ *      画面上部に、Actor1.pngの2番目の顔画像付きでサブウィンドウ0番を
+ *      「こんにちは」という内容で表示します。
+ *      背景設定は「暗くする」になります。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -99,7 +133,8 @@ FTKR.EMW = FTKR.EMW || {};
  * サブウィンドウに制御文字を使用したい場合は、スクリプトで表示内容を設定する
  * 必要があります。
  * 
- * 以下のスクリプトコマンドを、文章を表示するコマンドの前に実行してください。
+ * 以下のスクリプトコマンドを、文章を表示するイベントコマンドの前に
+ * 実行してください。
  * 
  * $gameSubMessage.add(ウィンドウ番号,'表示内容')
  * 
@@ -116,7 +151,42 @@ FTKR.EMW = FTKR.EMW || {};
  * 
  * 
  * 入力例)アイコンID76を、サブウィンドウAに表示させる場合
- * $gameSubMessage.add(0,'これでアイコン\\I[76]を表示します')
+ * ◆スクリプト：$gameSubMessage.add(0,'これでアイコン\\I[76]を表示します')
+ * ◆文章：Actor1(1),ウィンドウ,下
+ * ：   ：サブウィンドウでアイコンを表示させます。
+ * ：   ：\SUBA[0,ここは2行目です,Actor1,2]
+ * ◆
+ * この場合、
+ * 1.メインウィンドウに「サブウィンドウでアイコンを表示させます。」が表示
+ * 2.画面上部にサブウィンドウAが表示
+ * 3.サブウィンドウAに
+ * 「これでアイコン***を表示します
+ * 　ここは2行目です」
+ * が表示し、入力待ち
+ * ⇒***の部分にアイコンを表示します。
+ * 3の結果のように、スクリプトで入力した文章の次の行に、
+ * 制御文字で入力した文章を表示します。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * サブウィンドウのサイズを変更したい場合
+ *-----------------------------------------------------------------------------
+ * サブウィンドウのサイズを変更したい場合は、以下のスクリプトを
+ * 文章を表示するイベントコマンドの前に実行してください。
+ * 
+ * $gameSubMessage.setWindowSize(ウィンドウ番号, ウィンドウ幅, 行数)
+ * 
+ * ウィンドウ番号
+ *    :表示するサブウィンドウに合わせて、以下の数値を指定してください。
+ *    :0 - サブウィンドウA
+ *    :1 - サブウィンドウB
+ * 
+ * ウィンドウ幅
+ *    :ウィンドウの横幅を、画面サイズと同じ幅を100として百分率で
+ *    :指定してください。
+ * 
+ * 行数
+ *    :ウィンドウの高さを、表示できる行数で指定してください。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -140,6 +210,12 @@ FTKR.EMW = FTKR.EMW || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.2 - 2017/04/02 : 機能追加
+ *    1. サブウィンドウの表示位置を日本語で指定できる機能を追加。
+ *    2. サブウィンドウ表示用の制御文字を追加。
+ * 
+ * v1.0.1 - 2017/03/30 : ヘルプ修正
  * 
  * v1.0.0 - 2017/03/28 : 初版作成
  * 
@@ -185,6 +261,8 @@ Game_SubMessage.prototype.initMembers = function() {
     this._scrollMode = [false,false];
     this._scrollSpeed = [2,2];
     this._scrollNoFast = [false,false];
+    this._windowWidthRate = [100,100];
+    this._windowHeightLines = [4,4];
 };
 
 Game_SubMessage.prototype.clear = function(index) {
@@ -196,6 +274,8 @@ Game_SubMessage.prototype.clear = function(index) {
     this._scrollMode[index] = false;
     this._scrollSpeed[index] = 2;
     this._scrollNoFast[index] = false;
+    this._windowWidthRate[index] = 100;
+    this._windowHeightLines[index] = 4;
 };
 
 Game_SubMessage.prototype.faceName = function(index) {
@@ -231,6 +311,16 @@ Game_SubMessage.prototype.scrollSpeed = function(index) {
 Game_SubMessage.prototype.scrollNoFast = function(index) {
     index = index || 0;
     return this._scrollNoFast[index];
+};
+
+Game_SubMessage.prototype.windowWidthRate = function(index) {
+    index = index || 0;
+    return this._windowWidthRate[index];
+};
+
+Game_SubMessage.prototype.windowHeightLines = function(index) {
+    index = index || 0;
+    return this._windowHeightLines[index];
 };
 
 Game_SubMessage.prototype.add = function(index, text) {
@@ -279,6 +369,11 @@ Game_SubMessage.prototype.allText = function(index) {
     });
 };
 
+Game_SubMessage.prototype.setWindowSize = function(index, widthRate, heightLines) {
+    this._windowWidthRate[index] = widthRate;
+    this._windowHeightLines[index] = heightLines;
+};
+
 //=============================================================================
 // Window_Base
 //=============================================================================
@@ -291,7 +386,6 @@ Window_Base.prototype.obtainEscapeEmwParam = function(textState) {
         eec = eec.map( function(elm, i) {
             return isNaN(parseInt(elm)) ? elm : parseInt(elm);
         });
-        console.log(eec);
         return eec;
     } else {
         return '';
@@ -324,10 +418,16 @@ FTKR.EMW.Window_Message_processEscapeCharacter = Window_Message.prototype.proces
 Window_Message.prototype.processEscapeCharacter = function(code, textState) {
     switch (code) {
     case 'SUBA':
-        if(this._subMessageWindow1) this._subMessageWindow1.startMessage(this.obtainEscapeEmwParam(textState));
+        this._subMessageWindow1.startMessage(this.obtainEscapeEmwParam(textState));
         break;
     case 'SUBB':
-        if(this._subMessageWindow2) this._subMessageWindow2.startMessage(this.obtainEscapeEmwParam(textState));
+        this._subMessageWindow2.startMessage(this.obtainEscapeEmwParam(textState));
+        break;
+    case 'SUBW':
+        var params = this.obtainEscapeEmwParam(textState);
+        var window = !params[0] ? this._subMessageWindow1 : this._subMessageWindow2;
+        window.setBackground(params[2]);
+        window.startMessage([params[3],params[4],params[1]]);
         break;
     default:
         FTKR.EMW.Window_Message_processEscapeCharacter.call(this, code, textState);
@@ -366,6 +466,11 @@ Window_SubMessage.prototype.initialize = function(messageWindow, index) {
     this.deactivate();
 };
 
+Window_SubMessage.prototype.initMembers = function() {
+    Window_Message.prototype.initMembers.call(this);
+    this._positionX = 1;
+};
+
 Window_SubMessage.prototype.update = function() {
     this.checkToNotClose();
     Window_Base.prototype.update.call(this);
@@ -393,12 +498,17 @@ Window_SubMessage.prototype.canStart = function() {
 
 Window_SubMessage.prototype.startMessage = function(args) {
     if(args) {
-        var positionType = args[0] >= 0 ? args[0] : this._positionType;
-        $gameSubMessage.setPositionType(this._index, positionType);
-        if(args[1]) $gameSubMessage.add(this._index, args[1]);
-        if(args[2]) {
-            var faceName = args[2].replace(' ','');
-            var faceIndex = args[3] || 0;
+        this.setPositionX(args[0].replace(' ',''));
+        $gameSubMessage.setPositionType(this._index, this.convertPositionType(args[0]));
+        if(args[1] && args[1].match(/^[ ]*(.+)/)) $gameSubMessage.add(this._index, RegExp.$1);
+        if(args[2] && !/^[ ]*なし/.test(args[2])) {
+            if (args[2].match(/^[ ]*(.+)\((\d+)\)/)) {
+                var faceName = RegExp.$1;
+                var faceIndex = Number(RegExp.$2);
+            } else {
+                var faceName = args[2].replace(' ','');
+                var faceIndex = Number(args[3]) || 0;
+            }
             $gameSubMessage.setFaceImage(this._index, faceName, faceIndex);
         }
     }
@@ -412,9 +522,65 @@ Window_SubMessage.prototype.startMessage = function(args) {
     this.activate();
 };
 
+Window_SubMessage.prototype.convertPositionType = function(arg) {
+    switch (arg) {
+        case 0:
+        case '上':
+            return 0;
+        case 1:
+        case '中':
+            return 1;
+        case 2:
+        case '下':
+            return 2;
+        default:
+            return this._positionType;
+    }
+};
+
+Window_SubMessage.prototype.convertPositionX = function(arg) {
+    if (/左/.test(arg)) {
+        arg.replace(/左/, '');
+        return 0;
+    } else if (/右/.test(arg)) {
+        arg.replace(/右/, '');
+        return 2;
+    }
+    return 1;
+};
+
+Window_SubMessage.prototype.setPositionX = function(arg) {
+    this._positionX = this.convertPositionX(arg);
+};
+
+Window_SubMessage.prototype.setBackground = function(arg) {
+    if (arg.match(/^[ ]*(.+)/)) {
+        var type = RegExp.$1;
+        $gameSubMessage.setBackground(this._index, this.convertBackgroundType(type));
+    }
+};
+
+Window_SubMessage.prototype.convertBackgroundType = function(arg) {
+    switch (arg) {
+        case 1:
+        case '暗くする':
+            return 1;
+        case 2:
+        case '透明':
+            return 2;
+        case 'ウィンドウ':
+        case 0:
+        default:
+            return 0;
+    }
+};
+
 Window_SubMessage.prototype.updatePlacement = function() {
     this._positionType = $gameSubMessage.positionType(this._index);
     this.y = this._positionType * (Graphics.boxHeight - this.height) / 2;
+    this.width = Graphics.boxWidth * $gameSubMessage.windowWidthRate(this._index) / 100;
+    this.height = this.fittingHeight($gameSubMessage.windowHeightLines(this._index));
+    this.x = this._positionX * (Graphics.boxWidth - this.width) / 2;
 };
 
 Window_SubMessage.prototype.updateBackground = function() {

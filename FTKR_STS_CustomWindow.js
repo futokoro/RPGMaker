@@ -3,8 +3,8 @@
 // FTKR_STS_CustomWindow.js
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/03/31
-// 最終更新日 : 2017/04/07
-// バージョン : v1.0.2
+// 最終更新日 : 2017/04/21
+// バージョン : v1.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.STS.CW = FTKR.STS.CW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.2 ツリー型スキル習得システム(v1.6)用 ウィンドウレイアウト変更プラグイン
+ * @plugindesc v1.1.0 ツリー型スキル習得システム(v1.6)用 ウィンドウレイアウト変更プラグイン
  * @author フトコロ
  *
  * @param --ツリータイプウィンドウの設定(Tree Types Window)--
@@ -312,6 +312,9 @@ FTKR.STS.CW = FTKR.STS.CW || {};
  * @desc 背景に使用する画像ファイル名を指定します。
  * 画像ファイルは/img/systemに保存すること
  * @default 
+ * @require 1
+ * @dir img/system/
+ * @type file
  * 
  * @help
  *-----------------------------------------------------------------------------
@@ -385,13 +388,18 @@ FTKR.STS.CW = FTKR.STS.CW || {};
  * また、以下のタグをアクターのメモ欄に追記することで、背景にアクターの
  * 立ち絵を表示できます。
  * 
- * <Set Sts Data>
+ * <STS_画像:ImageName>
  * code
- * </Set Sts Data>
+ * </STS_画像>
+ * 
+ * または
+ * 
+ * <STS_IMAGE:ImageName>
+ * code
+ * </STS_IMAGE>
+ *    :ImageName - 背景に表示させたい画像名を入力します。(*1)
  * 
  * [code に使用できる項目]
- * Bgi Name: ImageName
- *    :背景に表示させたい画像名を入力します。(*1)
  * Bgi offset X: n
  *    :ウィンドウ左上を原点として画像左上のX座標を入力します。
  * Bgi offset Y: n
@@ -410,6 +418,10 @@ FTKR.STS.CW = FTKR.STS.CW || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.1.0 - 2017/04/21 : 機能変更
+ *    1. 背景画像ディプロイメント対応
+ *    2. アクター立ち絵のディプロイメント対応ため、タグ変更
  * 
  * v1.0.2 - 2017/04/07 : 機能追加
  *    1. コストウィンドウと前提スキルウィンドウの常時表示設定を移動。
@@ -536,8 +548,10 @@ DataManager.isDatabaseLoaded = function() {
 };
 
 DataManager.stsBgiDataNotetags = function(group) {
-    var note1a = /<(?:SET STS DATA)>/i;
-    var note1b = /<\/(?:SET STS DATA)>/i;
+    var note1a = /<STS_IMAGE:(.+)>/i;
+    var note1aj = /<STS_画像:(.+)>/i;
+    var note1b = /<\/<STS_IMAGE>>/i;
+    var note1bj = /<\/<STS_画像>>/i;
 
     for (var n = 1; n < group.length; n++) {
         var obj = group[n];
@@ -551,10 +565,11 @@ DataManager.stsBgiDataNotetags = function(group) {
         };
         for (var i = 0; i < notedata.length; i++) {
             var line = notedata[i];
-            if (note1a.test(line)) {
+            if (line.match(note1a) || line.match(note1aj)) {
                 var text = '';
                 setMode = 'data';
-            } else if (note1b.test(line)) {
+                obj.sts.bgi.name = RegExp.$1;
+            } else if (note1b.test(line) || note1bj.test(line)) {
                 setMode = 'none';
                 obj.sts.data = text;
             } else if (setMode === 'data') {
@@ -568,16 +583,13 @@ DataManager.stsBgiDataNotetags = function(group) {
 DataManager.setStsBgiData = function(obj) {
     var stsdata = obj.sts.data;
     if (stsdata) {
-        var case1 = /(?:BGI NAME):[ ]*(.+)/i;
         var case2 = /(?:BGI OFFSET X):[ ]*(\d+)/i;
         var case3 = /(?:BGI OFFSET Y):[ ]*(\d+)/i;
 
         var datas = stsdata.split(';');
         for (var i = 0; i < datas.length; i++) {
             var data = datas[i];
-            if(data.match(case1)) {
-                obj.sts.bgi.name = String(RegExp.$1);
-            } else if(data.match(case2)) {
+            if(data.match(case2)) {
                 obj.sts.bgi.offsetX = Number(RegExp.$1);
             } else if(data.match(case3)) {
                 obj.sts.bgi.offsetY = Number(RegExp.$1);

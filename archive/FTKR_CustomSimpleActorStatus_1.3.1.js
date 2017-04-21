@@ -4,7 +4,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
 // 最終更新日 : 2017/04/21
-// バージョン : v1.4.0
+// バージョン : v1.3.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,16 +15,10 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.4.0 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v1.3.1 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
- * @noteParam CSS_画像
- * @noteRequire 1
- * @noteDir img/pictures/
- * @noteType file
- * @noteData actors
- * 
- * @param --簡易ステータス表示--
+ * @param --Simple status--
  * @default
  * 
  * @param Enabled Simple Status
@@ -60,56 +54,115 @@ FTKR.CSS = FTKR.CSS || {};
  * 詳細はヘルプ参照
  * @default 2,2,3
  *
- * @param --ステータスウィンドウ設定--
- * @default
- * 
- * @param Enabled Custom Window
- * @desc ウィンドウのレイアウト変更機能を使うか。
- * 0 - 無効, 1 - 有効
- * @default 0
- * 
- * @param Number Visible Rows
- * @desc ステータスウィンドウの縦の行数：デフォルト 16
- * @default 16
- * 
- * @param Number Max Cols
- * @desc アクターを横に並べる数：デフォルト 1
- * @default 1
- * 
- * @param Cursol Line Number
- * @desc カーソル高さの行数：デフォルト 4
+ * @param Display Face Scale
+ * @desc アクターの顔画像を表示スケールを設定します
+ * 標準は 4 で、それ以外の場合に画像を拡大縮小します
  * @default 4
  * 
- * @param Font Size
- * @desc フォントサイズ：デフォルト 28
- * @default 28
- * 
- * @param Window Padding
- * @desc ウィンドウの周囲の余白：デフォルト 18
- * @default 18
- * 
- * @param Window Line Height
- * @desc ウィンドウ内の1行の高さ：デフォルト 36
- * @default 36
- * 
- * @param Window Opacity
- * @desc ウィンドウ内の背景の透明度：デフォルト 192
- * @default 192
- * 
- * @param Hide Window Frame
- * @desc ウィンドウ枠を非表示にするか
- * 1 - 非表示にする、0 - 表示する
- * @default 0
- * 
- * @param --スキル画面の設定--
+ * @param --Detailed status--
  * @default
  * 
- * @param Enabled Skill Status
- * @desc スキル画面のステータスをメニュー画面と同じにするか。
+ * @param Enabled Detailed Status
+ * @desc 詳細ステータス画面のレイアウト変更機能を使うか。
  * 0 - 無効, 1 - 有効
- * @default 1
+ * @default 0
  * 
- * @param --歩行キャラの設定--
+ * @param DS Lines Number
+ * @desc 各表示エリアの行数を指定します。
+ * 詳細はヘルプ参照
+ * @default 1,4,6,2
+ * 
+ * @param DS Horz Line Color
+ * @desc 各表示エリア間の線色を指定します。
+ * -1 は非表示
+ * @default 0
+ * 
+ * @param DS Horz Line Thick
+ * @desc 各表示エリア間の線幅を指定します。
+ * @default 2
+ * 
+ * @param DS Horz Line Opacity
+ * @desc 各表示エリア間の線色の透明度を指定します。
+ * @default 48
+ * 
+ * @param DS Line0 Status
+ * @desc Line0部に表示するステータスを指定します。
+ * 詳細はヘルプ参照
+ * @default name;class;nickname
+ * 
+ * @param DS Space0
+ * @desc 各Textの間隔を指定します。
+ * @default 0,20,50,0
+ * 
+ * @param DS Space In Text0
+ * @desc Text内で複数表示する場合の間隔を指定します。
+ * @default 5
+ * 
+ * @param DS Width Rate0
+ * @desc Text1~Text3の表示幅の比率を指定します。
+ * 詳細はヘルプ参照
+ * @default 1,1,1
+ *
+ * @param DS Line1 Status
+ * @desc Line0部に表示するステータスを指定します。
+ * 詳細はヘルプ参照
+ * @default face;level,state,hp,mp;custom(0),custom(1),custom(2),custom(3)
+ * 
+ * @param DS Space1
+ * @desc 各Textの間隔を指定します。
+ * @default 0,20,50,0
+ * 
+ * @param DS Space In Text1
+ * @desc Text内で複数表示する場合の間隔を指定します。
+ * @default 5
+ * 
+ * @param DS Width Rate1
+ * @desc Text1~Text3の表示幅の比率を指定します。
+ * 詳細はヘルプ参照
+ * @default 2,2,3
+ *
+ * @param DS Line2 Status
+ * @desc Line0部に表示するステータスを指定します。
+ * 詳細はヘルプ参照
+ * @default param(2),param(3),param(4),param(5),param(6),param(7);;equip(0),equip(1),equip(2),equip(3),equip(4)
+ * 
+ * @param DS Space2
+ * @desc 各Textの間隔を指定します。
+ * @default 40,100,0,0
+ * 
+ * @param DS Space In Text2
+ * @desc Text内で複数表示する場合の間隔を指定します。
+ * @default 5
+ * 
+ * @param DS Width Rate2
+ * @desc Text1~Text3の表示幅の比率を指定します。
+ * 詳細はヘルプ参照
+ * @default 4,1,5
+ *
+ * @param DS Line3 Status
+ * @desc Line0部に表示するステータスを指定します。
+ * 詳細はヘルプ参照
+ * @default profile;;
+ * 
+ * @param DS Space3
+ * @desc 各Textの間隔を指定します。
+ * @default 0,20,50,0
+ * 
+ * @param DS Space In Text3
+ * @desc Text内で複数表示する場合の間隔を指定します。
+ * @default 5
+ * 
+ * @param DS Width Rate3
+ * @desc Text1~Text3の表示幅の比率を指定します。
+ * 詳細はヘルプ参照
+ * @default 1,0,0
+ *
+ * @param Display DS Face Scale
+ * @desc アクターの顔画像を表示スケールを設定します
+ * 標準は 4 で、それ以外の場合に画像を拡大縮小します
+ * @default 4
+ * 
+ * @param --Chara Setting--
  * @default
  * 
  * @param Chara Image Width
@@ -122,7 +175,7 @@ FTKR.CSS = FTKR.CSS || {};
  * デフォルトは48
  * @default 48
  * 
- * @param --SVキャラの設定--
+ * @param --Sv Setting--
  * @default
  * 
  * @param Sv Image Width
@@ -149,7 +202,7 @@ FTKR.CSS = FTKR.CSS || {};
  * 0 - 無効, 1 - 有効
  * @default 1
  * 
- * @param --ステートの設定--
+ * @param --State Setting--
  * @default
  * 
  * @param Animation Wait
@@ -170,9 +223,6 @@ FTKR.CSS = FTKR.CSS || {};
  * @desc 行の高さに合わせてアイコンサイズを調整するか
  * 1 - 有効にする, 0 - 無効にする
  * @default 0
- * 
- * @param --カスタムパラメータの設定--
- * @default
  * 
  * @param --Custom Param 0--
  * @default
@@ -413,9 +463,6 @@ FTKR.CSS = FTKR.CSS || {};
  * @desc Custom(19)の値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
- * 
- * @param --カスタムゲージの設定--
- * @default
  * 
  * @param --Gauge Param 0--
  * @default
@@ -674,7 +721,8 @@ FTKR.CSS = FTKR.CSS || {};
  * 本プラグインを実装することで、メニューや、スキル画面で表示するアクターの
  * ステータス表示のレイアウトを変更できます。
  * 
- * なお、この機能はプラグインパラメータで個別にON/OFFできます。
+ * v1.1以降、詳細ステータス画面のレイアウトも変更できます。
+ * なお、この機能はプラグインパラメータでON/OFFできます。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -691,13 +739,8 @@ FTKR.CSS = FTKR.CSS || {};
  * 簡易ステータスの表示レイアウトを変更することができます。
  * 
  * <Enabled Simple Status>
- *    :メニュー画面のレイアウト変更機能を使うか指定します。
+ *    :簡易ステータス画面のレイアウト変更機能を使うか指定します。
  *    :0 - 無効, 1 - 有効
- * 
- * <Enabled Skill Status>
- *    :スキル画面のレイアウト変更機能を使うか指定します。
- *    :0 - 無効, 1 - 有効
- * 
  * 
  * <Actor Status Text1>
  * <Actor Status Text2>
@@ -707,16 +750,11 @@ FTKR.CSS = FTKR.CSS || {};
  *    :各パラメータに入力したステータスが、それぞれの部位で表示します。
  *    :
  *    :入力できるパラメータ名は、
- *    :face(x), chara, sv, name, class, nickname, hp, mp, tp, level, 
+ *    :face, chara, sv, name, class, nickname, hp, mp, tp, level, 
  *    :state, state2(x), profile, param(x), custom(x), gauge(x), 
  *    :equip(x), text(x), imageです。
  *    :
- *    :face, face(x) -
- *    : 顔画像を表示します。
- *    : x を数値で指定すると、x行分に画像を拡大収縮して表示します。
- *    : デフォルトサイズは 4行分です。
- *    :
- *    :state, state2(x) - 
+ *    :state, state(x), state2(x) - 
  *    : アクターが付与されているステートを並べて表示します。
  *    :
  *    :profile - 
@@ -797,6 +835,79 @@ FTKR.CSS = FTKR.CSS || {};
  *    :標準は 4行 で、それ以外の場合に画像を拡大縮小します。
  *    :
  *    :3以下にすることで、表示に必要な行数を減らすことが出来ます。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * アクターの詳細ステータス表示の設定
+ *-----------------------------------------------------------------------------
+ * プラグインパラメータの設定により、ステータス画面で表示する表示レイアウトを
+ * 変更することができます。
+ * 
+ * <Enabled Detailed Status>
+ *    :詳細ステータス画面のレイアウト変更機能を使うか指定します。
+ *    :0 - 無効, 1 - 有効
+ * 
+ * <DS Lines Number>
+ *    :詳細ステータスウィンドウは、表示エリアを横に4分割で分けています。
+ *    :このパラメータで何行ごとに分割するかを、カンマ(,)で区切って指定します。
+ *    :入力例)
+ *    : 1,4,6,2
+ * 
+ * <DS Horz Line Color>
+ *    :表示エリア間のラインの線色を設定します。
+ *    :-1 はラインが無くなり、表示エリアがその分上にずれます。
+ * 
+ * <DS Horz Line Thick>
+ *    :表示エリア間のラインの線幅を設定します。
+ *    :幅を 0 にしても非表示になるだけで、表示エリアはずれません。
+ * 
+ * <DS Horz Line Opacity>
+ *    :表示エリア間のラインの線の透明度を設定します。
+ *    :透明度を 0 にしても非表示になるだけで、表示エリアはずれません。
+ * 
+ * <DS Line0 Status>
+ * <DS Line1 Status>
+ * <DS Line2 Status>
+ * <DS Line3 Status>
+ *    :横に4分割した表示エリアをそれぞれLine0 ~ Line3として、
+ *    :それぞれのエリアで表示するパラメータを設定します。
+ *    :
+ *    :セミコロン(;)を使用して、左側、中央、右側の表示内容を区切ります。
+ *    :<Actor Status>における、Text1(左側)、Text2(中央)、Text3(右側)に
+ *    :相当します。
+ *    :
+ *    :セミコロン(;)で区切った間の入力方式は、<Actor Status Text*>と同じです。
+ *    :入力例)
+ *    : name;class;level,hp,mp
+ *    : - 左側に name を表示します。
+ *    :   中央に class を表示します。
+ *    :   右側に level,hp,mp を縦に並べて表示します。
+ * 
+ * <DS Space0>
+ * <DS Space1>
+ * <DS Space2>
+ * <DS Space3>
+ *    :各Lineにおけるのテキストの間隔をカンマ(,)で区切って指定します。
+ *    :入力方式は、<Actor Status Space>と同じです。
+ * 
+ * <DS Space In Text0>
+ * <DS Space In Text1>
+ * <DS Space In Text2>
+ * <DS Space In Text3>
+ *    :各Lineにおける、複数のステータスを1つのテキスト内に表示した場合の
+ *    :間隔を指定します。
+ *    :入力方式は、<Actor Status Space In text>と同じです。
+ * 
+ * <DS Width Rate0>
+ * <DS Width Rate1>
+ * <DS Width Rate2>
+ * <DS Width Rate3>
+ *    :ウィンドウを3分割する場合に、Text1~Text3の表示エリアをどのような比率で
+ *    :確保するか設定します。
+ *    :入力方式は、<Actor Status Width Rate>と同じです。
+ * 
+ * <Display DS Face Scale>
+ *    :アクターの顔画像を表示スケールを設定します。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -946,14 +1057,14 @@ FTKR.CSS = FTKR.CSS || {};
  * 以下のタグをアクターのメモ欄に追記することで、指定した画像を表示する
  * ことができます。
  * 
- * <CSS_画像:ImageName>
+ * <CSS 画像>
  * code
- * </CSS_画像>
- *    :ImageName - 表示させたい画像名を入力します。(*1)
- * 
- * (*1)画像は、プロジェクトフォルダ内の/img/picture/に保存してください。
+ * </CSS 画像>
  * 
  * [code に使用できる項目]
+ * Bgi Name: ImageName
+ *    :表示させたい画像名を入力します。(*1)
+ * 
  * 以下のタグで、画像を四角に切り取って表示することができます。
  * Bgi offset X: n
  *    :画像ファイルを四角に切り取る時の左上のX座標を入力します。
@@ -966,68 +1077,8 @@ FTKR.CSS = FTKR.CSS || {};
  * 
  * Bgi height: n
  *    :画像ファイルを四角に切り取る時の高さを入力します。
- * 
- * 
- *-----------------------------------------------------------------------------
- * メニュー画面のステータスウィンドウの設定
- *-----------------------------------------------------------------------------
- * 以下のプラグインパラメータで設定できます。
- * 
- * <Enabled Custom Window>
- *    :メニュー画面のウィンドウ変更機能を使うか指定します。
- *    :0 - 無効, 1 - 有効
- * 
- * <Number Visible Rows>
- *    :ステータスウィンドウの縦の行数を変更します。
- *    :デフォルトは16行です。
- * 
- * <Number Max Cols>
- *    :ウィンドウ内でアクターを横に並べる数を変更します。
- *    :デフォルトは 1 です。
- * 
- * <Cursol Line Number>
- *    :カーソル(アクター１人分)の高さを何行分にするか設定します。
- *    :デフォルトは 4 です。
- * 
- * <Font Size>
- *    :ウィンドウ内のフォントサイズを変更します。
- *    :デフォルトは 28 です。(単位はpixel)
- * 
- * <Window Padding>
- *    :ウィンドウの周囲の余白を変更します。
- *    :デフォルトは 18 です。(単位はpixel)
- * 
- * <Window Line Height>
- *    :ウィンドウ内の1行の高さを変更します。
- *    :デフォルトは 36 です。(単位はpixel)
- * 
- * <Window Opacity>
- *    :ウィンドウ内の背景の透明度を変更します。
- *    :デフォルトは 192 です。
- *    :0 - 透明、255 - 不透明
- * 
- * <Hide Window Frame>
- *    :ウィンドウ枠を非表示にするか指定します。
- *    :1 - 非表示にする、0 - 表示する
- *    :デフォルトは表示します。
- * 
- * 
- * ＜ウィンドウの高さ＞
- * ウィンドウの高さは、以下の計算式で算出します。
- *    [ウィンドウ高さ] ＝ [縦の行数] × [1行の高さ] + [余白のサイズ] × 2
- * 
- * 
- * ＜フォントサイズと行の高さ＞
- * 基本的に、下の大小関係になるように設定しましょう。
- *    フォントサイズ ＜ 1行の高さ
- * 
- * 
- * ＜ウィンドウを消す方法＞
- * 以下の設定にすると、ウィンドウ枠とウィンドウの背景が消えて
- * アクターのステータスだけを表示します。
- * 
- * <Window Opacity>     : 0
- * <Hide Window Frame>  : 1
+* 
+ * (*1)画像は、プロジェクトフォルダ内の/img/picture/に保存してください。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -1041,16 +1092,8 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
- * v1.4.0 - 2017/04/21 : 仕様変更、機能追加
- *    1. 詳細ステータス画面の表示変更機能を拡張プラグインとして分離。
- *    2. スキル画面の表示変更機能を拡張プラグインとして分離。
- *    3. 顔画像の表示仕様を変更。
- *    4. カスタム画像をタグの仕様を変更し、ディプロイメントでカスタム画像を
- *       保存するように変更。
- *    5. メニュー画面の簡易ステータスウィンドウの設定変更機能を追加。
- * 
  * v1.3.1 - 2017/04/21 : 機能追加
- *    1. FTKR_ExSvMotion.jsに対応。
+ *    1. FTKR_ExSvMotion.jsで設定したモーションを表示できるように変更。
  * 
  * v1.3.0 - 2017/04/19 : 機能変更
  *    1. ステートアイコンの表示仕様を変更。
@@ -1119,7 +1162,7 @@ FTKR.CSS = FTKR.CSS || {};
 FTKR.CSS.parameters = PluginManager.parameters('FTKR_CustomSimpleActorStatus');
 
 FTKR.CSS.enabledSS = Number(FTKR.CSS.parameters['Enabled Simple Status'] || 0);
-FTKR.CSS.enabledSkill = Number(FTKR.CSS.parameters['Enabled Skill Status'] || 0);
+FTKR.CSS.enabledDS = Number(FTKR.CSS.parameters['Enabled Detailed Status'] || 0);
 
 //簡易ステータスオブジェクト
 FTKR.CSS.simpleStatus = {
@@ -1129,19 +1172,42 @@ FTKR.CSS.simpleStatus = {
     space:String(FTKR.CSS.parameters['Actor Status Space'] || ''),
     spaceIn:Number(FTKR.CSS.parameters['Actor Status Space In Text'] || 0),
     widthRate:String(FTKR.CSS.parameters['Actor Status Width Rate'] || ''),
+    faceLine:Number(FTKR.CSS.parameters['Display Face Scale'] || 0),
 };
 
-//ウィンドウ設定オブジェクト
-FTKR.CSS.window = {
-    enabled:Number(FTKR.CSS.parameters['Enabled Custom Window'] || 0),
-    numVisibleRows:Number(FTKR.CSS.parameters['Number Visible Rows'] || 0),
-    maxCols:Number(FTKR.CSS.parameters['Number Max Cols'] || 0),
-    fontSize:Number(FTKR.CSS.parameters['Font Size'] || 0),
-    padding:Number(FTKR.CSS.parameters['Window Padding'] || 0),
-    lineHeight:Number(FTKR.CSS.parameters['Window Line Height'] || 0),
-    opacity:Number(FTKR.CSS.parameters['Window Opacity'] || 0),
-    hideFrame:Number(FTKR.CSS.parameters['Hide Window Frame'] || 0),
-    cursolHeight:Number(FTKR.CSS.parameters['Cursol Line Number'] || 0),
+//詳細ステータスオブジェクト
+FTKR.CSS.detailedStatus = {
+    lineNum:String(FTKR.CSS.parameters['DS Lines Number'] || ''),
+    horz:{
+      thick:Number(FTKR.CSS.parameters['DS Horz Line Thick'] || 0),
+      color:Number(FTKR.CSS.parameters['DS Horz Line Color'] || 0),
+      opacity:Number(FTKR.CSS.parameters['DS Horz Line Opacity'] || 0),
+    },
+    line:[
+      String(FTKR.CSS.parameters['DS Line0 Status'] || ''),
+      String(FTKR.CSS.parameters['DS Line1 Status'] || ''),
+      String(FTKR.CSS.parameters['DS Line2 Status'] || ''),
+      String(FTKR.CSS.parameters['DS Line3 Status'] || ''),
+    ],
+    space:[
+      String(FTKR.CSS.parameters['DS Space0'] || ''),
+      String(FTKR.CSS.parameters['DS Space1'] || ''),
+      String(FTKR.CSS.parameters['DS Space2'] || ''),
+      String(FTKR.CSS.parameters['DS Space3'] || ''),
+    ],
+    spaceIn:[
+      Number(FTKR.CSS.parameters['DS Space In Text0'] || 0),
+      Number(FTKR.CSS.parameters['DS Space In Text1'] || 0),
+      Number(FTKR.CSS.parameters['DS Space In Text2'] || 0),
+      Number(FTKR.CSS.parameters['DS Space In Text3'] || 0),
+    ],
+    widthRate:[
+      String(FTKR.CSS.parameters['DS Width Rate0'] || ''),
+      String(FTKR.CSS.parameters['DS Width Rate1'] || ''),
+      String(FTKR.CSS.parameters['DS Width Rate2'] || ''),
+      String(FTKR.CSS.parameters['DS Width Rate3'] || ''),
+    ],
+    faceLine:Number(FTKR.CSS.parameters['Display DS Face Scale'] || 0),
 };
 
 //オリジナルステータス設定オブジェクト
@@ -1323,8 +1389,8 @@ DataManager.isDatabaseLoaded = function() {
 };
 
 DataManager.cssActorImageNotetags = function(group) {
-    var note1a = /<CSS_画像:(.+)>/i;
-    var note1b = /<\/CSS_画像>/i;
+    var note1a = /<CSS 画像>/i;
+    var note1b = /<\/CSS 画像>/i;
 
     for (var n = 1; n < group.length; n++) {
         var obj = group[n];
@@ -1341,8 +1407,7 @@ DataManager.cssActorImageNotetags = function(group) {
         };
         for (var i = 0; i < notedata.length; i++) {
             var line = notedata[i];
-            if (line.match(note1a)) {
-                obj.cssbgi.name = RegExp.$1;
+            if (note1a.test(line)) {
                 var text = '';
                 setMode = 'data';
             } else if (note1b.test(line)) {
@@ -1360,6 +1425,7 @@ DataManager.cssActorImageNotetags = function(group) {
 DataManager.setCssBgiData = function(obj) {
     var stsdata = obj.cssData;
     if (stsdata) {
+        var case1 = /(?:BGI NAME):[ ]*(.+)/i;
         var case2 = /(?:BGI OFFSET X):[ ]*(\d+)/i;
         var case3 = /(?:BGI OFFSET Y):[ ]*(\d+)/i;
         var case4 = /(?:BGI WIDTH):[ ]*(\d+)/i;
@@ -1368,7 +1434,9 @@ DataManager.setCssBgiData = function(obj) {
         var datas = stsdata.split(';');
         for (var i = 0; i < datas.length; i++) {
             var data = datas[i];
-            if(data.match(case2)) {
+            if(data.match(case1)) {
+                obj.cssbgi.name = String(RegExp.$1);
+            } else if(data.match(case2)) {
                 obj.cssbgi.offsetX = Number(RegExp.$1);
             } else if(data.match(case3)) {
                 obj.cssbgi.offsetY = Number(RegExp.$1);
@@ -1391,12 +1459,12 @@ Game_Actor.prototype.setup = function(actorId) {
     ImageManager.loadPicture(this.actor().cssbgi.name);
 };
 
-//ステートモーションを取得する
 Game_Actor.prototype.getStateMotion = function() {
+    var index = this.stateMotionIndex();
     if(Imported.FTKR_ESM) {
         return this.getEsmMotion();
     } else {
-        switch (this.stateMotionIndex()) {
+        switch (index) {
             case 1: return 'abnormal';
             case 2: return 'sleep';
             case 3: return 'dead';
@@ -1414,6 +1482,38 @@ Window_Base.prototype.initialize = function(x, y, width, height) {
     FTKR.CSS.Window_Base_initialize.call(this, x, y, width, height);
     this.sprite = [];
     this._stateIconSprite = [];
+};
+
+/*-------------------------------------------------------------
+アクターの詳細ステータスを表示する関数
+drawCssDetailedStatus(actor, x, y, width, dss)
+actor :アクターオブジェクト
+x     :x座標
+y     :y座標
+width :表示エリアの幅
+dss   :詳細ステータスオブジェクト
+-------------------------------------------------------------*/
+Window_Base.prototype.drawCssDetailedStatus = function(actor, x, y, width, dss) {
+    if (!dss) dss = FTKR.CSS.detailedStatus;
+    var lineHeight = this.lineHeight();
+    var lineNums = dss.lineNum.split(',').num();
+    var ays = []; var ahs = [];
+    for (var t = 0; t < 4; t++) {
+        var text = dss.line[t].split(';');
+        var lss = {
+            text1:text[0] || '',
+            text2:text[1] || '',
+            text3:text[2] || '',
+            space:dss.space[t],
+            spaceIn:dss.spaceIn[t],
+            widthRate:dss.widthRate[t],
+            faceLine:dss.faceLine,
+        };
+        ahs[t] = lineHeight * lineNums[t];
+        ays[t] = t > 0 ? ays[t-1] + ahs[t-1]: y;
+        this.drawCssActorStatus(0, actor, x, ays[t], width, ahs[t], lss);
+        ahs[t] += this.drawCssHorzLine(ays[t] + ahs[t]) * lineHeight;
+    }
 };
 
 /*-------------------------------------------------------------
@@ -1490,8 +1590,6 @@ Window_Base.prototype.drawCssActorStatusBase = function(index, actor, x, y, widt
     } else if (status.match(/(?:state2\()(.+)\)/i)) {
         var line = Number(RegExp.$1);
         if (line) return this.drawCssActorIcons(index, actor, x, y, width, line, true);
-    } else if (status.match(/(?:face\()(\d+)\)/i)) {
-        return this.drawCssActorFace(actor, x, y, width, lss, Number(RegExp.$1));
     } else {
         switch (true) {
             case (/(?:face)/i).test(status):
@@ -1525,16 +1623,27 @@ Window_Base.prototype.drawCssActorStatusBase = function(index, actor, x, y, widt
     return 1;
 };
 
+//表示エリア間のラインの表示関数
+Window_Status.prototype.drawCssHorzLine = function(y, horz) {
+    horz = horz || FTKR.CSS.detailedStatus.horz;
+    if (horz.color === -1) return 0;
+    var lineY = y + this.lineHeight() / 2 - 1;
+    this.contents.paintOpacity = horz.opacity;
+    this.contents.fillRect(0, lineY, this.contentsWidth(), horz.thick, this.textColor(horz.color));
+    this.contents.paintOpacity = 255;
+    return 1;
+};
+
 //------------------------------------------------------------------------
 //アクターの顔画像の表示関数
 //------------------------------------------------------------------------
-Window_Base.prototype.drawCssActorFace = function(actor, x, y, width, lss, scale) {
+Window_Base.prototype.drawCssActorFace = function(actor, x, y, width, lss) {
     var dy = this.lineHeight();
-    scale = scale || Math.ceil(Window_Base._faceHeight / dy);
+    var line = lss.faceLine || Math.ceil(Window_Base._faceHeight / dy);
     this.changePaintOpacity(actor.isBattleMember());
-    this.drawCssFace(actor.faceName(), actor.faceIndex(), x, y, width, dy * scale);
+    this.drawCssFace(actor.faceName(), actor.faceIndex(), x, y, width, dy * lss.faceLine);
     this.changePaintOpacity(true);
-    return scale;
+    return line;
 };
 
 Window_Base.prototype.drawCssFace = function(faceName, faceIndex, dx, dy, width, height) {
@@ -1755,6 +1864,7 @@ Window_Base.prototype.drawCssActorParam = function(actor, x, y, width, paramId) 
 //カスタムパラメータの表示関数
 //------------------------------------------------------------------------
 Window_Base.prototype.drawCssActorCustom = function(actor, x, y, width, custom) {
+    console.log(custom);
     var name = custom.name || '';
     var formula = custom.formula || '';
     var value = actor.evalCssCustomFormula(formula);
@@ -1838,6 +1948,7 @@ Window_Base.prototype.drawCssText = function(actor, x, y, width, text) {
 //指定画像の表示関数
 //------------------------------------------------------------------------
 Window_Base.prototype.drawCssActorImage = function(actor, x, y, width) {
+    console.log(actor.actor());
     var dy = this.lineHeight();
     var line = Math.ceil(actor.actor().cssbgi.height / dy) || 1;
     this.changePaintOpacity(actor.isBattleMember());
@@ -1861,7 +1972,6 @@ Window_Base.prototype.drawCssImage = function(actor, dx, dy, width) {
 
 //=============================================================================
 // Window_MenuStatus
-// メニュー画面のステータスウィンドウの表示クラス
 //=============================================================================
 
 FTKR.CSS.Window_MenuStatus_drawItemImage = Window_MenuStatus.prototype.drawItemImage;
@@ -1880,78 +1990,38 @@ Window_MenuStatus.prototype.drawItemStatus = function(index) {
     }
 };
 
-if(FTKR.CSS.window.enabled) {
-
-//書き換え
-//ウィンドウの行数
-Window_MenuStatus.prototype.numVisibleRows = function() {
-    return FTKR.CSS.window.numVisibleRows;
-};
-
-//書き換え
-//ウィンドウに横に並べるアクター数
-Window_MenuStatus.prototype.maxCols = function() {
-    return FTKR.CSS.window.maxCols;
-};
-
-//書き換え
-//カーソルの高さ
-Window_MenuStatus.prototype.itemHeight = function() {
-    return this.lineHeight() * FTKR.CSS.window.cursolHeight;
-};
-
-//書き換え
-//ウィンドウに横に並べるアクターの表示間隔
-//ステータスレイアウト側で変更できるのでここでは 0 とする。
-Window_MenuStatus.prototype.spacing = function() {
-    return 0;
-};
-
-//書き換え
-//ウィンドウのフォントサイズ
-Window_MenuStatus.prototype.standardFontSize = function() {
-    return FTKR.CSS.window.fontSize;
-};
-
-//書き換え
-//ウィンドウに周囲の余白サイズ
-Window_MenuStatus.prototype.standardPadding = function() {
-    return FTKR.CSS.window.padding;
-};
-
-//書き換え
-//ウィンドウ内の1行の高さ
-Window_MenuStatus.prototype.lineHeight = function() {
-    return FTKR.CSS.window.lineHeight;
-};
-
-//書き換え
-//ウィンドウの背景の透明度
-Window_MenuStatus.prototype.standardBackOpacity = function() {
-    return FTKR.CSS.window.opacity;
-};
-
-//書き換え
-//ウィンドウ枠の表示
-Window_MenuStatus.prototype._refreshFrame = function() {
-    if (!FTKR.CSS.window.hideFrame) Window.prototype._refreshFrame.call(this);
-};
-
-}//ウィンドウカスタム有効
-
 //=============================================================================
 // Window_SkillStatus
-// スキル画面のステータスウィンドウの表示クラス
 //=============================================================================
 
+FTKR.CSS.Window_SkillStatus_refresh = Window_SkillStatus.prototype.refresh;
 Window_SkillStatus.prototype.refresh = function() {
-    if(FTKR.CSS.enabledSkill) {
+    if (FTKR.CSS.enabledSS) {
         this.contents.clear();
         if (this._actor) {
             var w = this.width - this.padding * 2;
             var h = this.height - this.padding * 2;
             this.drawCssActorStatus(0, this._actor, 0, 0, w, h);
         }
+    } else {
+        FTKR.CSS.Window_SkillStatus_refresh.call(this);
+    }
+};
+
+//=============================================================================
+// Window_Status
+//=============================================================================
+
+FTKR.CSS.Window_Status_refresh = Window_Status.prototype.refresh;
+Window_Status.prototype.refresh = function() {
+    if (FTKR.CSS.enabledDS) {
+        this.contents.clear();
+        if (this._actor) {
+            var w = this.width - this.padding * 2;
+            this.drawCssDetailedStatus(this._actor, 0, 0, w);
+        }
+    } else {
+        FTKR.CSS.Window_Status_refresh.call(this);
     }
 };
 

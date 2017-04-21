@@ -1,11 +1,11 @@
 [トップページに戻る](README.ja.md)
 
-# [FTKR_CSS_BattleStatus](FTKR_CSS_BattleStatus.js) プラグイン
+# [FTKR_CSS_SkillStatus](FTKR_CSS_SkillStatus.js) プラグイン
 
-アクターのバトル画面のステータス表示を変更するプラグインです。<br>
+アクターのスキル画面のステータス表示を変更するプラグインです。<br>
 本プラグインは、[FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md)の拡張プラグインです。
 
-ダウンロード: [FTKR_CSS_BattleStatus.js](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_BattleStatus.js)
+ダウンロード: [FTKR_CSS_SkillStatus.js](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_SkillStatus.js)
 
 ## 目次
 
@@ -21,9 +21,9 @@
 
 ## 概要
 
-本プラグインを実装することで、バトル画面で表示するアクターのステータス表示のレイアウトを変更できます。
+本プラグインを実装することで、スキル画面で表示するアクターのステータス表示のレイアウトを変更できます。
 
-![画像](image/FTKR_CSS_BattleStatus/n01_001.png)
+![画像](image/FTKR_CSS_SkillStatus/n01_001.png)
 
 [目次に戻る](#目次)
 
@@ -33,9 +33,9 @@
 プラグイン管理画面で、以下の順の配置になるように登録してください。
 ```
 FTKR_CustomSimpleActorStatus.js
-FTKR_CSS_BattleStatus.js
+FTKR_CSS_SkillStatus.js
 ```
-![画像](image/FTKR_CSS_BattleStatus/n02_001.png)
+![画像](image/FTKR_CSS_SkillStatus/n02_001.png)
 
 [目次に戻る](#目次)
 
@@ -55,7 +55,7 @@ FTKR_CSS_BattleStatus.js
 ### 設定の有効化
 `Enabled Custom Window`
 
-バトル画面のステータスウィンドウ変更機能を使うか指定します。
+スキル画面のステータスウィンドウ変更機能を使うか指定します。
 * 0 - 無効(デフォルト)
 * 1 - 有効
 
@@ -65,18 +65,6 @@ FTKR_CSS_BattleStatus.js
 ステータスウィンドウの縦の行数を変更します。
 デフォルトは4行です。
 この値を変えても、コマンドウィンドウのサイズは変わりません。
-
-### アクターを横に並べる数
-`Number Max Cols`
-
-ウィンドウ内でアクターを横に並べる数を変更します。
-デフォルトは 1 です。
-
-### カーソル高さの行数
-`Cursol Line Number`
-
-カーソルの高さを何行分にするか設定します。
-デフォルトは 1 です。
 
 ### フォントサイズ
 `Font Size`
@@ -136,9 +124,7 @@ FTKR_CSS_BattleStatus.js
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.1.0](FTKR_CSS_BattleStatus.js) | 2017/04/21 | FTKR_CustomSimpleActorStatus.jsのv1.4.0に対応<brウィンドウのレイアウト変更のON/OFF機能を追加> |
-| [ver1.0.1](/archive/FTKR_CSS_BattleStatus.1.0.1_js) | 2017/04/12 | ウィンドウの余白と1行の高さ、透明度、枠の表示を変更する機能を追加 |
-| ver1.0.0 | 2017/04/11 | 初版作成 |
+| [ver1.0.0](FTKR_CSS_SkillStatus.js) | 2017/04/21 | 初版作成 |
 
 ## ライセンス
 
