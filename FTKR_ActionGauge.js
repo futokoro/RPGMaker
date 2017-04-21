@@ -346,7 +346,7 @@ Game_Interpreter.prototype.updateWaitMode = function() {
         waiting = $gameMap.hasGauge();
         break;
     default:
-        FTKR.ACG.Game_Interpreter_updateWaitMode.call(this);
+        waiting = FTKR.ACG.Game_Interpreter_updateWaitMode.call(this);
         break;
     }
     if (!waiting) {
