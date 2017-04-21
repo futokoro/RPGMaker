@@ -29,7 +29,7 @@ FTKR.CSS = FTKR.CSS || {};
  * 
  * @param Enabled Simple Status
  * @desc 簡易ステータス画面のレイアウト変更機能を使うか。
- * 0 - 無効, 1 - 有効
+ * 1 - 有効にする, 0 - 無効にする
  * @default 1
  * 
  * @param Actor Status Text1
@@ -65,7 +65,7 @@ FTKR.CSS = FTKR.CSS || {};
  * 
  * @param Enabled Custom Window
  * @desc ウィンドウのレイアウト変更機能を使うか。
- * 0 - 無効, 1 - 有効
+ * 1 - 有効にする, 0 - 無効にする
  * @default 0
  * 
  * @param Number Visible Rows
@@ -106,7 +106,7 @@ FTKR.CSS = FTKR.CSS || {};
  * 
  * @param Enabled Skill Status
  * @desc スキル画面のステータスをメニュー画面と同じにするか。
- * 0 - 無効, 1 - 有効
+ * 1 - 有効にする, 0 - 無効にする
  * @default 1
  * 
  * @param --歩行キャラの設定--
@@ -146,7 +146,7 @@ FTKR.CSS = FTKR.CSS || {};
  * 
  * @param Enabled State Motion
  * @desc ステートモーションを有効にするか設定します
- * 0 - 無効, 1 - 有効
+ * 1 - 有効にする, 0 - 無効にする
  * @default 1
  * 
  * @param --ステートの設定--
@@ -1036,6 +1036,9 @@ FTKR.CSS = FTKR.CSS || {};
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
+ * Copyright (c) 2017 Futokoro
+ * http://opensource.org/licenses/mit-license.php
+ * 
  * 
  *-----------------------------------------------------------------------------
  * 変更来歴
@@ -1323,7 +1326,7 @@ DataManager.isDatabaseLoaded = function() {
 };
 
 DataManager.cssActorImageNotetags = function(group) {
-    var note1a = /<CSS_画像:(.+)>/i;
+    var note1a = /<CSS_画像:[ ]*(.+)>/i;
     var note1b = /<\/CSS_画像>/i;
 
     for (var n = 1; n < group.length; n++) {
@@ -1652,13 +1655,7 @@ Window_Base.prototype.drawCssActorIcons = function(index, actor, x, y, width, li
         iw = iw * scale;
     }
     var maxlen = line ? this.lineHeight() * line : width;
-    var offset = iw
-    if(css.overlap) {
-        var iconlen = actor.allIcons().length;
-        var diff = Math.min((maxlen - iw - 4) / iconlen, iw * css.rate);
-        offset = diff && diff < iw ? diff : iw;
-    }
-
+    var offset = css.overlap ? this.getOverlapValue(actor, iw, maxlen, css) : iw;
     var showNum = Math.min(Math.floor((maxlen - 4) / offset));
 
     for (var i = 0; i < showNum; i++) {
@@ -1672,6 +1669,12 @@ Window_Base.prototype.drawCssActorIcons = function(index, actor, x, y, width, li
         if(css.autoScale) sprite.setScale(scale);
     }
     return line ? line : 1;
+};
+
+Window_Base.prototype.getOverlapValue = function(actor, iw, maxlen, css) {
+    var iconlen = actor.allIcons().length;
+    var diff = Math.max((maxlen - iw - 4) / iconlen, iw * css.rate);
+    return diff && diff < iw ? diff : iw;
 };
 
 Window_Base.prototype.iconOverlapOffset = function(iw, number, width, vartical) {
@@ -1701,13 +1704,7 @@ Window_Base.prototype.drawCssIcon = function(iconIndex, x, y, scale, auto) {
 //アクターのHPの表示関数
 //------------------------------------------------------------------------
 Window_Base.prototype.drawCssActorHp = function(actor, x, y, width) {
-    var color1 = this.hpGaugeColor1();
-    var color2 = this.hpGaugeColor2();
-    this.drawGauge(x, y, width, actor.hpRate(), color1, color2);
-    this.changeTextColor(this.systemColor());
-    this.drawText(TextManager.hpA, x, y, 44);
-    this.drawCurrentAndMax(actor.hp, actor.mhp, x, y, width,
-                           this.hpColor(actor), this.normalColor());
+    this.drawActorHp(actor, x, y, width);
     return 1;
 };
 
@@ -1715,13 +1712,7 @@ Window_Base.prototype.drawCssActorHp = function(actor, x, y, width) {
 //アクターのMPの表示関数
 //------------------------------------------------------------------------
 Window_Base.prototype.drawCssActorMp = function(actor, x, y, width) {
-    var color1 = this.mpGaugeColor1();
-    var color2 = this.mpGaugeColor2();
-    this.drawGauge(x, y, width, actor.mpRate(), color1, color2);
-    this.changeTextColor(this.systemColor());
-    this.drawText(TextManager.mpA, x, y, 44);
-    this.drawCurrentAndMax(actor.mp, actor.mmp, x, y, width,
-                           this.mpColor(actor), this.normalColor());
+    this.drawActorMp(actor, x, y, width);
     return 1;
 };
 
@@ -1729,13 +1720,7 @@ Window_Base.prototype.drawCssActorMp = function(actor, x, y, width) {
 //アクターのTPの表示関数
 //------------------------------------------------------------------------
 Window_Base.prototype.drawCssActorTp = function(actor, x, y, width) {
-    var color1 = this.tpGaugeColor1();
-    var color2 = this.tpGaugeColor2();
-    this.drawGauge(x, y, width, actor.tpRate(), color1, color2);
-    this.changeTextColor(this.systemColor());
-    this.drawText(TextManager.tpA, x, y, 44);
-    this.changeTextColor(this.tpColor(actor));
-    this.drawText(actor.tp, x + width - 64, y, 64, 'right');
+    this.drawActorTp(actor, x, y, width);
     return 1;
 };
 
@@ -1970,6 +1955,7 @@ Sprite_CssStateIcon.prototype.initialize = function(index, showNum) {
     Sprite_StateIcon.prototype.initialize.call(this);
     this._index = index;
     this._showNum = showNum;
+    this.contents = new Bitmap(32, 32);
 };
 
 Sprite_CssStateIcon._iconWidth  = 32;
@@ -2009,4 +1995,14 @@ Sprite_CssStateIcon.prototype.setScale = function(scale) {
 
 Sprite_CssStateIcon.prototype.offsetMove = function(offset, vartical) {
     !vartical ? this.x += offset : this.y += offset;
+};
+
+Sprite_CssStateIcon.prototype.update = function() {
+    Sprite.prototype.update.call(this);
+    this._animationCount++;
+    if (this._animationCount >= this.animationWait()) {
+        this.updateIcon();
+        this.updateFrame();
+        this._animationCount = 0;
+    }
 };

@@ -214,6 +214,9 @@ FTKR.SPP = FTKR.SPP || {};
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
+ * Copyright (c) 2017 Futokoro
+ * http://opensource.org/licenses/mit-license.php
+ * 
  * 
  *-----------------------------------------------------------------------------
  * 変更来歴
