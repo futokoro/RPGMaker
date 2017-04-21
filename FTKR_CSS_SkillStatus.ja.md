@@ -35,7 +35,6 @@
 FTKR_CustomSimpleActorStatus.js
 FTKR_CSS_SkillStatus.js
 ```
-![画像](image/FTKR_CSS_SkillStatus/n02_001.png)
 
 [目次に戻る](#目次)
 
