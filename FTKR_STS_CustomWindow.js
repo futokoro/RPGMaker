@@ -3,8 +3,8 @@
 // FTKR_STS_CustomWindow.js
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/03/31
-// 最終更新日 : 2017/04/21
-// バージョン : v1.1.0
+// 最終更新日 : 2017/04/22
+// バージョン : v1.1.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.STS.CW = FTKR.STS.CW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.0 ツリー型スキル習得システム(v1.6)用 ウィンドウレイアウト変更プラグイン
+ * @plugindesc v1.1.1 ツリー型スキル習得システム(v1.6)用 ウィンドウレイアウト変更プラグイン
  * @author フトコロ
  *
  * @param --ツリータイプウィンドウの設定(Tree Types Window)--
@@ -422,6 +422,10 @@ FTKR.STS.CW = FTKR.STS.CW || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.1 - 2017/04/22 : 不具合修正
+ *    1. ウィンドウサイズを変更した際に、コンテンツエリアが変わっていない
+ *       不具合を修正。
+ * 
  * v1.1.0 - 2017/04/21 : 機能変更
  *    1. 背景画像ディプロイメント対応
  *    2. アクター立ち絵のディプロイメント対応ため、タグ変更
@@ -669,14 +673,23 @@ Window_Base.prototype.setWubdiwLayout = function(layout) {
     this.height = layout.height === -1 ? Graphics.boxHeight - this.y : layout.height;
 };
 
+Window_Base.prototype.getWindowLayout = function(layout) {
+    return {
+        x:layout.posiX,
+        y:layout.posiY,
+        width:layout.width === -1 ? Graphics.boxWidth - layout.posiX : layout.width,
+        height:layout.height === -1 ? Graphics.boxHeight - layout.posiY : layout.height,
+    };
+};
+
 //=============================================================================
 // Window_TreeType
 //=============================================================================
 
 FTKR.STS.CW.Window_TreeType_initialize = Window_TreeType.prototype.initialize;
 Window_TreeType.prototype.initialize = function(x, y, width, height) {
-    FTKR.STS.CW.Window_TreeType_initialize.call(this, x, y, width, height);
-    this.setWubdiwLayout(FTKR.STS.CW.treeTypes);
+    var layout = this.getWindowLayout(FTKR.STS.CW.treeTypes);
+    FTKR.STS.CW.Window_TreeType_initialize.call(this, layout.x, layout.y, layout.width, layout.height);
 };
 
 Window_TreeType.prototype.itemHeightSpace = function() {
@@ -733,8 +746,8 @@ Window_TreeType.prototype.itemRect = function(index) {
 
 FTKR.STS.CW.Window_SkillTree_initialize = Window_SkillTree.prototype.initialize;
 Window_SkillTree.prototype.initialize = function(x, y, width, height) {
-    FTKR.STS.CW.Window_SkillTree_initialize.call(this, x, y, width, height);
-    this.setWubdiwLayout(FTKR.STS.CW.skillTree);
+    var layout = this.getWindowLayout(FTKR.STS.CW.skillTree);
+    FTKR.STS.CW.Window_SkillTree_initialize.call(this, layout.x, layout.y, layout.width, layout.height);
 };
 
 Window_SkillTree.prototype.standardBackOpacity = function() {
@@ -755,8 +768,8 @@ Window_SkillTree.prototype._refreshFrame = function() {
 
 FTKR.STS.CW.Window_StsSkillStatus_initialize = Window_StsSkillStatus.prototype.initialize;
 Window_StsSkillStatus.prototype.initialize = function(x, y, width, height) {
-    FTKR.STS.CW.Window_StsSkillStatus_initialize.call(this, x, y, width, height);
-    this.setWubdiwLayout(FTKR.STS.CW.skillStatus);
+    var layout = this.getWindowLayout(FTKR.STS.CW.skillStatus);
+    FTKR.STS.CW.Window_StsSkillStatus_initialize.call(this, layout.x, layout.y, layout.width, layout.height);
 };
 
 Window_StsSkillStatus.prototype.standardBackOpacity = function() {
@@ -777,8 +790,8 @@ Window_StsSkillStatus.prototype._refreshFrame = function() {
 
 FTKR.STS.CW.Window_StsActorStatus_initialize = Window_StsActorStatus.prototype.initialize;
 Window_StsActorStatus.prototype.initialize = function(x, y, width, height) {
-    FTKR.STS.CW.Window_StsActorStatus_initialize.call(this, x, y, width, height);
-    this.setWubdiwLayout(FTKR.STS.CW.actorStatus);
+    var layout = this.getWindowLayout(FTKR.STS.CW.actorStatus);
+    FTKR.STS.CW.Window_StsActorStatus_initialize.call(this, layout.x, layout.y, layout.width, layout.height);
 };
 
 Window_StsActorStatus.prototype.standardBackOpacity = function() {
@@ -799,8 +812,8 @@ Window_StsActorStatus.prototype._refreshFrame = function() {
 
 FTKR.STS.CW.Window_StsCost_initialize = Window_StsCost.prototype.initialize;
 Window_StsCost.prototype.initialize = function(x, y, width, height) {
-    FTKR.STS.CW.Window_StsCost_initialize.call(this, x, y, width, height);
-    this.setWubdiwLayout(FTKR.STS.CW.cost);
+    var layout = this.getWindowLayout(FTKR.STS.CW.cost);
+    FTKR.STS.CW.Window_StsCost_initialize.call(this, layout.x, layout.y, layout.width, layout.height);
 };
 
 Window_StsCost.prototype.standardBackOpacity = function() {
@@ -821,8 +834,8 @@ Window_StsCost.prototype._refreshFrame = function() {
 
 FTKR.STS.CW.Window_StsPreskill_initialize = Window_StsPreskill.prototype.initialize;
 Window_StsPreskill.prototype.initialize = function(x, y, width, height) {
-    FTKR.STS.CW.Window_StsPreskill_initialize.call(this, x, y, width, height);
-    this.setWubdiwLayout(FTKR.STS.CW.preskill);
+    var layout = this.getWindowLayout(FTKR.STS.CW.preskill);
+    FTKR.STS.CW.Window_StsPreskill_initialize.call(this, layout.x, layout.y, layout.width, layout.height);
 };
 
 Window_StsPreskill.prototype.standardBackOpacity = function() {
@@ -843,8 +856,8 @@ Window_StsPreskill.prototype._refreshFrame = function() {
 
 FTKR.STS.CW.Window_StsConfTitle_initialize = Window_StsConfTitle.prototype.initialize;
 Window_StsConfTitle.prototype.initialize = function(x, y, width, height) {
-    FTKR.STS.CW.Window_StsConfTitle_initialize.call(this, x, y, width, height);
-    this.setWubdiwLayout(FTKR.STS.CW.confTitle);
+    var layout = this.getWindowLayout(FTKR.STS.CW.confTitle);
+    FTKR.STS.CW.Window_StsConfTitle_initialize.call(this, layout.x, layout.y, layout.width, layout.height);
 };
 
 Window_StsConfTitle.prototype.standardBackOpacity = function() {
