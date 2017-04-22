@@ -4,7 +4,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2017/02/21
 // 最終更新日 : 2017/04/23
-// バージョン : v1.0.2
+// バージョン : v1.0.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.SCT = FTKR.SCT || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.2 相手のスキルに対抗して効果を変えるプラグイン
+ * @plugindesc v1.0.3 相手のスキルに対抗して効果を変えるプラグイン
  * @author フトコロ
  *
  * @help 
@@ -179,6 +179,8 @@ FTKR.SCT = FTKR.SCT || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.3 - 2017/04/23 : 不具合修正
+ *
  * v1.0.2 - 2017/04/23 : 機能追加
  * 
  * v1.0.1 - 2017/04/14 : 微修正
@@ -209,7 +211,7 @@ FTKR.Utility = FTKR.Utility || {};
 FTKR.Utility.getItemMetaSplit = function(subject, target, item, metacode) {
     var values = [];
     if (item) {
-        var enable = DataManager.evalSctFormula(item, target, subject);
+        var enable = DataManager.evalSctFormula(item, subject, target);
         if (enable) {
             var metaReg = eval('/<' + metacode + ':[ ]*(.+)>/i');
             if(item.note.match(metaReg)) {
@@ -265,6 +267,7 @@ DataManager.evalSctFormula = function(obj, subject, target) {
         var v = $gameVariables._data;
         var value = eval(formula);
         if (isNaN(value)) value = false;
+        console.log(subject, target, value);
         return value;
     } catch (e) {
         console.log(e);
