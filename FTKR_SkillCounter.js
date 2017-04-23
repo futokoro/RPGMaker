@@ -4,7 +4,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2017/02/21
 // 最終更新日 : 2017/04/23
-// バージョン : v1.0.3
+// バージョン : v1.0.4
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.SCT = FTKR.SCT || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.3 相手のスキルに対抗して効果を変えるプラグイン
+ * @plugindesc v1.0.4 相手のスキルに対抗して効果を変えるプラグイン
  * @author フトコロ
  *
  * @help 
@@ -48,19 +48,33 @@ FTKR.SCT = FTKR.SCT || {};
  * ここでの無効化とは、「命中しなかった」ことを意味します。
  * 
  * 対象:アクター、クラス、装備、ステート、エネミー
- * <InvalidSkillId: x1,x2,...>    :スキルIDが x1,x2,.. のスキルを
- *                                :無効化します。
+ * <InvalidSkillId: x>
+ * <スキルID無効化: x>
+ *    :スキルIDが x のスキルを無効化します。
  * 
- * <InvalidSkillType: x1,x2,...>  :スキルタイプが x1,x2,.. のスキルを
- *                                :無効化します。
+ * <InvalidSkillType: x>
+ * <スキルタイプ無効化: x>
+ *    :スキルタイプが x のスキルを無効化します。
  * 
- * <InvalidDamageType: x1,x2,...> :ダメージタイプが x1,x2,.. のスキルを
- *                                :無効化します。
+ * <InvalidDamageType: x>
+ * <ダメージタイプ無効化: x>
+ *    :ダメージタイプが x のスキルを無効化します。
  * 
- * <InvalidElementId: x1,x2,...>  :属性が x1,x2,.. のスキルを無効化します。
+ * <InvalidElementId: x>
+ * <属性無効化: x>
+ *    :属性が x のスキルを無効化します。
  * 
- * <InvalidHitType: x1,x2,...>    :ヒットタイプが x1,x2,.. のスキルを
- *                                :無効化します。
+ * <InvalidHitType: x>
+ * <命中タイプ無効化: x>
+ *    :ヒットタイプが x のスキルを無効化します。
+ * 
+ * 例）
+ * <スキルID無効化: 10>
+ *    :スキルID 10 のスキルを無効化
+ * 
+ * なお、以下のようにカンマ(,)を使って複数の条件を指定することができます。
+ * <スキルID無効化: 10,11>
+ *    :スキルID 10 と 11 のスキルを無効化
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -69,15 +83,29 @@ FTKR.SCT = FTKR.SCT || {};
  * スキルのパラメータを指定して、その条件に合うスキルを吸収します。
  * 
  * 対象:アクター、クラス、装備、ステート、エネミー
- * <DrainSkillId: x1,x2,...>    :スキルIDが x1,x2,.. のスキルを吸収します。
+ * <DrainSkillId: x>
+ * <スキルID吸収: x>
+ *    :スキルIDが x のスキルを吸収します。
  * 
- * <DrainSkillType: x1,x2,...>  :スキルタイプが x1,x2,.. のスキルを
- *                              :吸収します。
+ * <DrainSkillType: x>
+ * <スキルタイプ吸収: x>
+ *    :スキルタイプが x のスキルを吸収します。
  * 
- * <DrainElementId: x1,x2,...>  :属性が x1,x2,.. のスキルを吸収します。
+ * <DrainElementId: x>
+ * <属性吸収: x>
+ *   :属性が x のスキルを吸収します。
  * 
- * <DrainHitType: x1,x2,...>    :ヒットタイプが x1,x2,.. のスキルを
- *                              :吸収します。
+ * <DrainHitType: x>
+ * <命中タイプ吸収: x>
+ *    :ヒットタイプが x のスキルを吸収します。
+ * 
+ * 例）
+ * <スキルID吸収: 10>
+ *    :スキルID 10 のスキルを吸収
+ * 
+ * なお、以下のようにカンマ(,)を使って複数の条件を指定することができます。
+ * <スキルID吸収: 10,11>
+ *    :スキルID 10 と 11 のスキルを吸収
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -86,19 +114,33 @@ FTKR.SCT = FTKR.SCT || {};
  * スキルのパラメータを指定して、その条件に合うスキルを反射します。
  * 
  * 対象:アクター、クラス、装備、ステート、エネミー
- * <ReflectionSkillId: x1,x2,...>    :スキルIDが x1,x2,.. のスキルを
- *                                   :反射します。
+ * <ReflectionSkillId: x>
+ * <スキルID反射: x>
+ *    :スキルIDが x のスキルを反射します。
  * 
- * <ReflectionSkillType: x1,x2,...>  :スキルタイプが x1,x2,.. のスキルを
- *                                   :反射します。
+ * <ReflectionSkillType: x>
+ * <スキルタイプ反射: x>
+ *    :スキルタイプが x のスキルを反射します。
  * 
- * <ReflectionDamageType: x1,x2,...> :ダメージタイプが x1,x2,.. のスキルを
- *                                   :反射します。
+ * <ReflectionDamageType: x>
+ * <ダメージタイプ反射: x>
+ *    :ダメージタイプが x のスキルを反射します。
  * 
- * <ReflectionElementId: x1,x2,...>  :属性が x1,x2,.. のスキルを反射します。
+ * <ReflectionElementId: x>
+ * <属性反射: x>
+ *    :属性が x のスキルを反射します。
  * 
- * <ReflectionHitType: x1,x2,...>    :ヒットタイプが x1,x2,.. のスキルを
- *                                   :反射します。
+ * <ReflectionHitType: x>
+ * <命中タイプ反射: x>
+ *    :ヒットタイプが x のスキルを反射します。
+ * 
+ * 例）
+ * <スキルID反射: 10>
+ *    :スキルID 10 のスキルを反射
+ * 
+ * なお、以下のようにカンマ(,)を使って複数の条件を指定することができます。
+ * <スキルID反射: 10,11>
+ *    :スキルID 10 と 11 のスキルを反射
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -108,20 +150,26 @@ FTKR.SCT = FTKR.SCT || {};
  * 使用できます。
  * 
  * 対象:アクター、クラス、装備、ステート、エネミー
- * <ReversDamage: type>   :受けた'type'のダメージ(吸収含む)を回復に変えます。
- *                        :type に使用できるコードは、以下です。
- *                        : Hp - Hp系のダメージを回復にします。
- *                        : Mp - Mp系のダメージを回復にします。
+ * <ReversDamage: type>
+ * <ダメージ反転: type>
+ *    :受けた'type'のダメージ(吸収含む)を回復に変えます。
+ *    :type に使用できるコードは、以下です。
+ *    : Hp - Hp系のダメージを回復にします。
+ *    : Mp - Mp系のダメージを回復にします。
  * 入力例)
- * <ReversDamage: Hp,Mp>  : HpダメージとMpダメージを両方回復にします。
+ * <ReversDamage: Hp,Mp>
+ *    : HpダメージとMpダメージを両方回復にします。
  * 
  * 
- * <ReversRecover: type>  :受けた'type'の回復をダメージに変えます。
- *                        :type に使用できるコードは、以下です。
- *                        : Hp - Hp系の回復をダメージにします。
- *                        : Mp - Mp系の回復をダメージにします。
+ * <ReversRecover: type>
+ * <回復反転: type>
+ *   :受けた'type'の回復をダメージに変えます。
+ *    :type に使用できるコードは、以下です。
+ *    : Hp - Hp系の回復をダメージにします。
+ *    : Mp - Mp系の回復をダメージにします。
  * 入力例)
- * <ReversRecover: Hp,Mp> : Hp回復とMp回復を両方ダメージにします。
+ * <ReversRecover: Hp,Mp>
+ *    : Hp回復とMp回復を両方ダメージにします。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -179,6 +227,8 @@ FTKR.SCT = FTKR.SCT || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.4 - 2017/04/23 : 日本語タグ追加、ヘルプ修正、内部処理見直し
+ * 
  * v1.0.3 - 2017/04/23 : 不具合修正
  *
  * v1.0.2 - 2017/04/23 : 機能追加
@@ -203,45 +253,92 @@ Array.prototype.numOrStr = function() {
     });
 };
 
-//=============================================================================
-// Utility
-//=============================================================================
-FTKR.Utility = FTKR.Utility || {};
-
-FTKR.Utility.getItemMetaSplit = function(subject, target, item, metacode) {
-    var values = [];
-    if (item) {
-        var enable = DataManager.evalSctFormula(item, subject, target);
-        if (enable) {
-            var metaReg = eval('/<' + metacode + ':[ ]*(.+)>/i');
-            if(item.note.match(metaReg)) {
-                var result = (RegExp.$1).replace(/\s/g, "");
-                values = result.split(',').numOrStr();
-            }
-        }
-    }
-    return values;
+//文字列の配列を<codeTitle>text</codeTitle>用の正規表現オブジェクトの配列に変換する
+Array.prototype.convertEntrapmentRegArray = function() {
+    return this.map(function(str) {
+        return {
+            a:new RegExp('<' + str + '>', 'i'),
+            b:new RegExp('<\/' + str + '>', 'i')
+        };
+    });
 };
 
-FTKR.Utility.getItemsMetaSplitTotal = function(subject, target, items, metacode) {
-    var values = [];
+//正規表現オブジェクトの配列とdataをテストする
+Array.prototype.testRegs = function(data, prop) {
+    return this.some(function(reg) {
+        return prop ? reg[prop].test(data) : reg.test(data);
+    });
+};
+
+//objのメモ欄から <metacode: x> の値を読み取って配列で返す
+var readSplitMeta = function(obj, metacode) {
+    var metaReg = new RegExp('<' + metacode + ':[ ]*(.+)>', 'i');
+    if(obj.note.match(metaReg)) {
+        var result = (RegExp.$1).replace(/\s/g, "");
+        return result.split(',').numOrStr();
+    }
+    return [];
+};
+
+// <codeTitle>text</codeTitle>の形式のメタデータを読み取ってtextを返す
+var readEntrapmentCodeToText = function(obj, codeTitles) {
+    notes = codeTitles.convertEntrapmentRegArray();
+    var notedata = obj.note.split(/[\r\n]+/);
+    var setMode = 'none';
+
+    for (var i = 0; i < notedata.length; i++) {
+        var line = notedata[i];
+        if (notes.testRegs(line, 'a')) {
+            var text = '';
+            setMode = 'read';
+        } else if (notes.testRegs(line, 'b')) {
+            setMode = 'none';
+        } else if (setMode === 'read') {
+            text += line + ';';
+        }
+    }
+    return text;
+};
+
+// textを条件式に使える状態に変換する
+var convertTextToConditions = function(text) {
+    var result = '';
+    if (text) {
+        var datas = text.split(';');
+        datas.forEach(function(data, i) {
+            result += data;
+            if (datas[i+1]) result += ')&&(';
+        });
+        result = '(' + result + ')';
+    }
+    return result;
+};
+
+//=============================================================================
+// Game_Action
+//=============================================================================
+
+DataManager.getItemMetaSplit = function(subject, target, item, metacode) {
+    return item && this.evalSctFormula(item, subject, target) ?
+        readSplitMeta(item, metacode) : [];
+};
+
+DataManager.getItemsMetaSplitTotal = function(subject, target, items, metacode) {
     var result = [];
     items.forEach( function(item) {
-        values = this.getItemMetaSplit(subject, target, item, metacode);
-        if(values.length > 0) Array.prototype.push.apply(result,values);
+        Array.prototype.push.apply(result, this.getItemMetaSplit(subject, target, item, metacode));
     },this);
     return result;
 };
 
-//targetが持つ、metacodeで指定したタグの値を配列(String型)にして返す
-FTKR.Utility.getItemsMetaArray = function(subject, target, metacode) {
+//targetが持つ、metacodeで指定したタグの値を配列にして返す
+DataManager.getItemsMetaArray = function(subject, target, metacode) {
     var result = [];
     if(target.isActor()) {
         return result.concat(
             this.getItemMetaSplit(subject, target, target.actor(), metacode),
             this.getItemMetaSplit(subject, target, $dataClasses[target.actor().classId], metacode),
             this.getItemsMetaSplitTotal(subject, target, target.equips(), metacode),
-            this.getItemsMetaSplitTotal(subject, target, target.skills(), metacode),
             this.getItemsMetaSplitTotal(subject, target, target.states(), metacode)
         );
     } else if(target.isEnemy()) {
@@ -253,12 +350,12 @@ FTKR.Utility.getItemsMetaArray = function(subject, target, metacode) {
     return result;
 };
 
-//=============================================================================
-// Game_Action
-//=============================================================================
+DataManager.convertSctEnableConditions = function(obj) {
+    return convertTextToConditions(readEntrapmentCodeToText(obj, ['SCT 有効条件', 'SCT ENABLE']));
+};
 
 DataManager.evalSctFormula = function(obj, subject, target) {
-    var formula = this.getSctEnableFormula(obj);
+    var formula = this.convertSctEnableConditions(obj);
     if (!formula) return true;
     try {
         var a = subject;
@@ -267,7 +364,6 @@ DataManager.evalSctFormula = function(obj, subject, target) {
         var v = $gameVariables._data;
         var value = eval(formula);
         if (isNaN(value)) value = false;
-        console.log(subject, target, value);
         return value;
     } catch (e) {
         console.log(e);
@@ -275,63 +371,29 @@ DataManager.evalSctFormula = function(obj, subject, target) {
     }
 };
 
-DataManager.getSctEnableFormula = function(obj) {
-    var note1a = /<SCT 有効条件>/i;
-    var note1aj = /<SCT ENABLE>/i;
-    var note1b = /<\/SCT 有効条件>/i;
-    var note1bj = /<\/SCT ENABLE>/i;
-
-    var notedata = obj.note.split(/[\r\n]+/);
-    var setMode = 'none';
-
-    for (var i = 0; i < notedata.length; i++) {
-        var line = notedata[i];
-        if (line.match(note1a) || line.match(note1aj)) {
-            var text = '';
-            setMode = 'anydata';
-        } else if (note1b.test(line) || note1bj.test(line)) {
-            setMode = 'none';
-        } else if (setMode === 'anydata') {
-            text += line + ';';
-        }
-    }
-    return this.makeSctEnableData(text);
-};
-
-DataManager.makeSctEnableData = function(text) {
-    var result = '';
-    if (text) {
-        var datas = text.split(';');
-        result += '(';
-        for (var i = 0; i < datas.length; i++) {
-            var data = datas[i];
-            if (data.match(/(.+)/i)) {
-                result += RegExp.$1;
-                if (datas[i+1]) result += ')&&(';
-            }
-        }
-        result += ')';
-    }
-    return result;
-};
-
 //=============================================================================
 // Game_Action
 //=============================================================================
+
+Game_Action.prototype.checkSkillData = function(target, metacodes, data) {
+    return metacodes.some(function(metacode){
+        return DataManager.getItemsMetaArray(this.subject(), target, metacode).contains(data);
+    },this);
+};
 
 //------------------------------------------------------------------------
 // スキルのパラメータと対象のメタデータを比較
 //------------------------------------------------------------------------
 Game_Action.prototype.sctSkillId = function(target, skill, metacode) {
-    return this.isSkill() && FTKR.Utility.getItemsMetaArray(this.subject(), target, metacode).contains(skill.id);
+    return this.isSkill() && this.checkSkillData(target, metacode, skill.id);
 };
 
 Game_Action.prototype.sctSkillType = function(target, skill, metacode) {
-    return this.isSkill() && FTKR.Utility.getItemsMetaArray(this.subject(), target, metacode).contains(skill.stypeId);
+    return this.isSkill() && this.checkSkillData(target, metacode, skill.stypeId);
 };
 
 Game_Action.prototype.sctDamageType = function(target, damage, metacode) {
-    return FTKR.Utility.getItemsMetaArray(this.subject(), target, metacode).contains(damage.type);
+    return this.checkSkillData(target, metacode, damage.type);
 };
 
 Game_Action.prototype.sctElementId = function(target, damage, metacode) {
@@ -339,13 +401,13 @@ Game_Action.prototype.sctElementId = function(target, damage, metacode) {
     if(!attackElements.length) attackElements = [];
     var elementIds = damage.elementId < 0 ? attackElements : [damage.elementId];
     var eflag = elementIds.filter( function(eid) {
-        return FTKR.Utility.getItemsMetaArray(this.subject(), target, metacode).contains(eid);
+        return this.checkSkillData(target, metacode, eid);
     },this);
     return eflag.length ? true : false;
 };
 
 Game_Action.prototype.sctHitType = function(target, skill, metacode) {
-    return FTKR.Utility.getItemsMetaArray(this.subject(), target, metacode).contains(skill.hitType);
+    return this.checkSkillData(target, metacode, skill.hitType);
 };
 
 //------------------------------------------------------------------------
@@ -358,11 +420,11 @@ Game_Action.prototype.itemHit = function(target) {
 };
 
 Game_Action.prototype.checkMetaInvalid = function(target, skill) {
-    return this.sctSkillId(target, skill, 'InvalidSkillId') ||
-        this.sctSkillType(target, skill, 'InvalidSkillType') ||
-        this.sctDamageType(target, skill.damage, 'InvalidDamageType') ||
-        this.sctElementId(target, skill.damage, 'InvalidElementId') ||
-        this.sctHitType(target, skill, 'InvalidHitType');
+    return this.sctSkillId(target, skill, ['InvalidSkillId', 'スキルID無効化']) ||
+        this.sctSkillType(target, skill, ['InvalidSkillType', 'スキルタイプ無効化']) ||
+        this.sctDamageType(target, skill.damage, ['InvalidDamageType', 'ダメージタイプ無効化']) ||
+        this.sctElementId(target, skill.damage, ['InvalidElementId', '属性無効化']) ||
+        this.sctHitType(target, skill, ['InvalidHitType', '命中タイプ無効化']);
 };
 
 //------------------------------------------------------------------------
@@ -375,28 +437,21 @@ Game_Action.prototype.executeDamage = function(target, value) {
 };
 
 Game_Action.prototype.sctReversDamageType = function(target, value) {
-    if (this.isHpRecover()) {
-        if (FTKR.Utility.getItemsMetaArray(this.subject(), target, 'ReversRecover').contains('Hp')) value *= -1;
-    } else if (this.isHpEffect()) {
-        if (FTKR.Utility.getItemsMetaArray(this.subject(), target, 'ReversDamage').contains('Hp') || this.checkMetaDrain(target, this.item())) {
-            value *= -1;
-        }
-    }
-    if (this.isMpRecover()) {
-        if (FTKR.Utility.getItemsMetaArray(this.subject(), target, 'ReversRecover').contains('Mp')) value *= -1;
-    } else if (this.isMpEffect()) {
-        if (FTKR.Utility.getItemsMetaArray(this.subject(), target, 'ReversDamage').contains('Mp') || this.checkMetaDrain(target, this.item())) {
-            value *= -1;
-        }
-    }
-    return value;
+    return this.checkReversDamageType(target) ? value * -1 : value;
+};
+
+Game_Action.prototype.checkReversDamageType = function(target) {
+    return (this.isHpRecover() && this.checkSkillData(target, ['ReversRecover', '回復反転'], 'Hp')) ||
+        (this.isHpEffect() && (this.checkSkillData(target, ['ReversDamage', 'ダメージ反転'], 'Hp') || this.checkMetaDrain(target, this.item()))) ||
+        (this.isMpRecover() && this.checkSkillData(target, ['ReversRecover', '回復反転'], 'Mp')) ||
+        (this.isMpEffect() && (this.checkSkillData(target, ['ReversDamage', 'ダメージ反転'], 'Mp') || this.checkMetaDrain(target, this.item())));
 };
 
 Game_Action.prototype.checkMetaDrain = function(target, skill) {
-    return this.sctSkillId(target, skill, 'DrainSkillId') ||
-        this.sctSkillType(target, skill, 'DrainSkillType') ||
-        this.sctElementId(target, skill.damage, 'DrainElementId') ||
-        this.sctHitType(target, skill, 'DrainHitType');
+    return this.sctSkillId(target, skill, ['DrainSkillId', 'スキルID吸収']) ||
+        this.sctSkillType(target, skill, ['DrainSkillType', 'スキルタイプ吸収']) ||
+        this.sctElementId(target, skill.damage, ['DrainElementId', '属性吸収']) ||
+        this.sctHitType(target, skill, ['DrainHitType', '命中タイプ吸収']);
 };
 
 //------------------------------------------------------------------------
@@ -408,9 +463,9 @@ Game_Action.prototype.itemMrf = function(target) {
 };
 
 Game_Action.prototype.checkMetaReflection = function(target, skill) {
-    return this.sctSkillId(target, skill, 'ReflectionSkillId') ||
-        this.sctSkillType(target, skill, 'ReflectionSkillType') ||
-        this.sctDamageType(target, skill.damage, 'ReflectionDamageType') ||
-        this.sctElementId(target, skill.damage, 'ReflectionElementId') ||
-        this.sctHitType(target, skill, 'ReflectionHitType');
+    return this.sctSkillId(target, skill, ['ReflectionSkillId', 'スキルID反射']) ||
+        this.sctSkillType(target, skill, ['ReflectionSkillType', 'スキルタイプ反射']) ||
+        this.sctDamageType(target, skill.damage, ['ReflectionDamageType', 'ダメージタイプ反射']) ||
+        this.sctElementId(target, skill.damage, ['ReflectionElementId', '属性反射']) ||
+        this.sctHitType(target, skill, ['ReflectionHitType', '命中タイプ反射']);
 };
