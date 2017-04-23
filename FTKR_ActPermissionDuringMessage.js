@@ -85,11 +85,10 @@ FTKR.EMW = FTKR.EMW || {};
  *-----------------------------------------------------------------------------
  * 1. 文章の表示の強制終了
  * 
- * EMW_メッセージウィンドウ強制クローズ
+ * EMW_メッセージウィンドウ強制クローズ デフォルト
  * EMW_メッセージウィンドウ強制クローズ Id
  * 
  * 表示されているメッセージウィンドウを強制的に閉じます。
- * Id を指定しない場合は、デフォルトのメッセージウィンドウを閉じます。
  * 
  * 
  * 2. 文章を表示するウィンドウを指定
@@ -165,7 +164,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
                 this._windowId = 0;
                 break;
             case /メッセージウィンドウ強制クローズ/i.test(command):
-                !args[0] ? $gameMessage.terminate() :
+                args[0] === 'デフォルト' ? $gameMessage.terminate() :
                     $gameMessageEx.window(Number(args[0])).terminate();
                 break;
         }
