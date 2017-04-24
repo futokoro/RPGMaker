@@ -47,7 +47,7 @@
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_ExEscapeCharacters](FTKR_ExEscapeCharacters.js) | [仮版](FTKR_ExEscapeCharacters.ja.md) | [v1.0.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExEscapeCharacters.js) | 2017/03/28 | 制御文字を追加する |
 | [FTKR_ExMessageWindow](FTKR_ExMessageWindow.js) | [仮版](FTKR_ExMessageWindow.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExMessageWindow.js) | 2017/03/28 | 一度に複数のメッセージウィンドウを表示する |
-| [FTKR_ActPermissionDuringMessage](FTKR_ActPermissionDuringMessage.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ActPermissionDuringMessage.js) | 2017/04/23 | メッセージ表示中にプレイヤーの行動を許可する |
+| [FTKR_ExMessageWindow2](FTKR_ExMessageWindow2.js) | 作成中 | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExMessageWindow2.js) | 2017/04/24 | メッセージの表示を拡張する |
 
 [目次に戻る](#目次)
 
