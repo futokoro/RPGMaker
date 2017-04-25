@@ -3,8 +3,8 @@
 // FTKR_AddOriginalParameters.js
 // 作成者     : フトコロ
 // 作成日     : 2017/02/16
-// 最終更新日 : 2017/04/14
-// バージョン : v1.1.2
+// 最終更新日 : 2017/04/25
+// バージョン : v1.1.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.AOP = FTKR.AOP || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.2 オリジナルのパラメータを追加するプラグイン
+ * @plugindesc v1.1.3 オリジナルのパラメータを追加するプラグイン
  * @author フトコロ
  *
  * @param Use Param Num
@@ -442,6 +442,9 @@ FTKR.AOP = FTKR.AOP || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.3 - 2017/04/25 : 不具合修正
+ *    1. ステートに設定したパラメータの変更設定が反映されない不具合を修正。
+ * 
  * v1.1.2 - 2017/04/14 : 機能追加
  *    1. プラグインコマンドを追加。
  * 
@@ -790,13 +793,9 @@ Game_Actor.prototype.aopParamGrow = function(paramId) {
 
 Game_Actor.prototype.aopParamItemGrow = function(paramId) {
     var value = 0;
-    var equips = this.equips();
-    for (var i = 0; i < equips.length; i++) {
-        var item = equips[i];
-        if (item) {
-            value += item.aopParamGrows[paramId];
-        }
-    }
+    this.equips().forEach(function(equip) {
+        if (equip) value += equip.aopParamGrows[paramId];
+    });
     return value;
 };
 
@@ -820,25 +819,29 @@ Game_Actor.prototype.aopClassParamBase = function(paramId) {
 
 Game_Actor.prototype.aopParamPlus = function(paramId) {
     var value = Game_Battler.prototype.aopParamPlus.call(this, paramId);
-    var equips = this.equips();
-    for (var i = 0; i < equips.length; i++) {
-        var item = equips[i];
-        if (item) {
-            value += item.aopParams[paramId];
-        }
-    }
+    return value + this.aopParamPlusEquips(paramId);
+};
+
+Game_Actor.prototype.aopParamPlusEquips = function(paramId) {
+    var value = 0;
+    this.equips().forEach(function(equip) {
+        if (equip) value += equip.aopParams[paramId];
+    });
     return value;
 };
 
 Game_Actor.prototype.aopParamRate = function(paramId) {
     var value = Game_Battler.prototype.aopParamRate.call(this, paramId);
-    var equips = this.equips();
-    for (var i = 0; i < equips.length; i++) {
-        var item = equips[i];
-        if (item) {
-            value *= Math.abs(item.aopParamRates[paramId]) / 100;
+    return value * this.aopParamRateEquips(paramId);
+};
+
+Game_Actor.prototype.aopParamRateEquips = function(paramId) {
+    var value = 1;
+    this.equips().forEach(function(equip) {
+        if (equip) {
+            value *= Math.abs(equip.aopParamRates[paramId]) / 100;
         }
-    }
+    });
     return value;
 };
 
@@ -972,11 +975,29 @@ Game_BattlerBase.prototype.aopParamMin = function(paramId) {
 };
 
 Game_BattlerBase.prototype.aopParamPlus = function(paramId) {
-    return this._aopParamPlus[paramId];
+    return this._aopParamPlus[paramId] + this.aopParamPlusStates(paramId);
+};
+
+Game_BattlerBase.prototype.aopParamPlusStates = function(paramId) {
+    var value = 0;
+    this.states().forEach(function(state){
+        if (state) value += state.aopParams[paramId];
+    });
+    return value;
 };
 
 Game_BattlerBase.prototype.aopParamRate = function(paramId) {
-    return this.traitsPi(Game_BattlerBase.TRAIT_AOPPARAM, paramId);
+    return this.traitsPi(Game_BattlerBase.TRAIT_AOPPARAM, paramId) * this.aopParamRateStates(paramId);
+};
+
+Game_BattlerBase.prototype.aopParamRateStates = function(paramId) {
+    var value = 1;
+    this.states().forEach(function(state){
+        if (state) {
+            value *= Math.abs(state.aopParamRates[paramId]) / 100;
+        }
+    });
+    return value;
 };
 
 Game_BattlerBase.prototype.aopParamBuffRate = function(paramId) {
