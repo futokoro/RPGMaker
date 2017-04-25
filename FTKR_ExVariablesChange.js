@@ -3,8 +3,8 @@
 // FTKR_ExVariablesChange.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/18
-// 最終更新日 : 2017/04/19
-// バージョン : v1.0.1
+// 最終更新日 : 2017/04/25
+// バージョン : v1.0.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EVC = FTKR.EVC || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.1 変数の操作を拡張するプラグイン
+ * @plugindesc v1.0.2 変数の操作を拡張するプラグイン
  * @author フトコロ
  *
  *
@@ -125,6 +125,9 @@ FTKR.EVC = FTKR.EVC || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.2 - 2017/04/25 : 不具合修正
+ *    1. 対象者のセルフ変数が正しく反映されない不具合を修正。
+ * 
  * v1.0.1 - 2017/04/19 : 不具合修正
  * 
  * v1.0.0 - 2017/04/18 : 初版作成
@@ -152,7 +155,7 @@ Array.prototype.someTexts = function(str) {
 // DataManager
 //=============================================================================
 
-DataManager.evcVariablesNoteTags = function(conditions, obj, subject, number) {
+DataManager.evcVariablesNoteTags = function(conditions, obj, subject, target, number) {
     var case1a = /<EVC (.+)>/i;
     var case1b = /<\/EVC (.+)>/i;
 
@@ -170,7 +173,7 @@ DataManager.evcVariablesNoteTags = function(conditions, obj, subject, number) {
             formula += line + ';';
         }
     }
-    this.evcChangeVariables(formula, obj, subject, number);
+    this.evcChangeVariables(formula, obj, subject, target, number);
 };
 
 DataManager.evcChangeVariables = function(formula, obj, subject, target, number) {
