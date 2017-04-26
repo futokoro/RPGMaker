@@ -224,8 +224,8 @@ var readEntrapmentCodeToText = function(obj, codeTitles) {
 var convertEntrapmentRegArray = function(header, codeTitles) {
     return codeTitles.map(function(str) {
         return {
-            a:new RegExp('<' + header + '_' + str + '>', 'i'),
-            b:new RegExp('<\/' + header + '_' + str + '>', 'i')
+            a:new RegExp('<' + header + ' ' + str + '>', 'i'),
+            b:new RegExp('<\/' + header + ' ' + str + '>', 'i')
         };
     });
 };
