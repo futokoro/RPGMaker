@@ -3,8 +3,8 @@
 // FTKR_ExSvMotion.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/19
-// 最終更新日 : 2017/04/25
-// バージョン : v1.1.0
+// 最終更新日 : 2017/04/26
+// バージョン : v1.1.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,17 +15,9 @@ FTKR.ESM = FTKR.ESM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.0 SVキャラのモーションを拡張するプラグイン
+ * @plugindesc v1.1.1 SVキャラのモーションを拡張するプラグイン
  * @author フトコロ
  *
- * @param --基本設定--
- * @default
- * 
- * @param Motion Speed
- * @desc モーションスピードを設定します
- * デフォルト 12
- * @default 12
- * 
  * @param --行動モーションの設定--
  * @default
  * 
@@ -351,6 +343,19 @@ FTKR.ESM = FTKR.ESM || {};
  * @desc カスタムモーション8のループするモーションのコードを設定します。
  * @default 
  * 
+ * @param -- デバッグ 設定--
+ * @default
+ * 
+ * @param Output Motion Log
+ * @desc モーションスプライト情報をログに出力する機能
+ * 1 - 有効にする, 0 - 無効にする
+ * @default 0
+ * 
+ * @param Output Motion Pattern Log
+ * @desc モーションスプライトのパターン更新情報をログに出力する機能
+ * 1 - 有効にする, 0 - 無効にする
+ * @default 0
+ * 
  * @help
  *-----------------------------------------------------------------------------
  * 概要
@@ -364,6 +369,9 @@ FTKR.ESM = FTKR.ESM || {};
  *-----------------------------------------------------------------------------
  * 1.「プラグインマネージャー(プラグイン管理)」に、本プラグインを追加して
  *    ください。
+ * 
+ * 2. YEP_BattleEngineCoreと組み合わせて使用する場合は、
+ *    当プラグインをYEP_BattleEngineCoreよりも下にしてください。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -466,6 +474,8 @@ FTKR.ESM = FTKR.ESM || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.1 - 2017/04/26 : YEP_BattleEngineCoreに対応
+ * 
  * v1.1.0 - 2017/04/25 : 仕様変更、機能追加
  *    1. 攻撃等の行動モーションを変更する機能を追加。
  *    2. 状態モーションに、戦闘勝利、逃走、瀕死時のモーションを追加。
@@ -487,7 +497,10 @@ FTKR.ESM = FTKR.ESM || {};
 FTKR.ESM.parameters = PluginManager.parameters('FTKR_ExSvMotion');
 
 FTKR.ESM.motion = {
-    speed:Number(FTKR.ESM.parameters['Motion Speed'] || 0),
+    debug:{
+        enable:Number(FTKR.ESM.parameters['Output Motion Log'] || 0),
+        pattern:Number(FTKR.ESM.parameters['Output Motion Pattern Log'] || 0),
+    },
     basic:{
         damage:String(FTKR.ESM.parameters['Damage Motion'] || ''),
         evade:String(FTKR.ESM.parameters['Evade Motion'] || ''),
@@ -568,9 +581,14 @@ Array.prototype.checkMeta = function(obj) {
 //=============================================================================
 
 //書き換え
+FTKR.ESM.Game_Battler_requestMotion = Game_Battler.prototype.requestMotion;
 Game_Battler.prototype.requestMotion = function(motionType) {
-    var motion = FTKR.ESM.motion.basic[motionType];
-    this._motionType = motion ? motion : motionType;
+    if (Imported.YEP_BattleEngineCore) {
+        FTKR.ESM.Game_Battler_requestMotion.call(this);
+    } else {
+        var motion = FTKR.ESM.motion.basic[motionType];
+        this._motionType = motion ? motion : motionType;
+    }
 };
 
 //書き換え
@@ -646,7 +664,30 @@ Game_BattlerBase.prototype.getEsmMotion = function() {
 };
 
 //=============================================================================
+// Sprite_Weapon
+// 武器のSVスプライトを修正
+//=============================================================================
+
+FTKR.ESM.Sprite_Weapon_setup = Sprite_Weapon.prototype.setup;
+Sprite_Weapon.prototype.setup = function(weaponImageId) {
+    FTKR.ESM.Sprite_Weapon_setup.call(this, weaponImageId);
+    this.consoleLog_weaponMotion('setup');
+};
+
+Sprite_Weapon.prototype.consoleLog_weaponMotion = function(text) {
+    if (FTKR.ESM.motion.debug.enable && this._weaponImageId) {
+    console.log('********************************************');
+    console.log('Weapon Motion <', text, '>');
+    console.log('---------------------------');
+    console.log('ImageID :', this._weaponImageId);
+    console.log('pattern :', this._pattern);
+    console.log('********************************************');
+    }
+};
+
+//=============================================================================
 // Sprite_Actor
+// アクターのSVスプライトを修正
 //=============================================================================
 
 FTKR.ESM.Sprite_Actor_initMembers = Sprite_Actor.prototype.initMembers;
@@ -680,22 +721,18 @@ Sprite_Actor.ESM_MOTIONS = {
 };
 
 //書き換え
-Sprite_Actor.prototype.motionSpeed = function() {
-    return FTKR.ESM.motion.speed;
-};
-
-//書き換え
 Sprite_Actor.prototype.updateMotionCount = function() {
     if (this.motion() && ++this._motionCount >= this.motionSpeed()) {
         // ループする場合
         if (this._motionIndex && this.motions().length <= 1) {
             this._pattern = (this._pattern + 1) % 4;
+            this.consoleLog_ActorMotion('pattern')
         // ループしない場合 パターンを増やす
         } else if (this._pattern < 2) {
             this._pattern++;
+            this.consoleLog_ActorMotion('pattern')
         // ループしない場合 パターンをリセット
         } else {
-            this._pattern = 0;
             this.refreshMotion();
         }
         this._motionCount = 0;
@@ -711,16 +748,20 @@ Sprite_Actor.prototype.refreshMotion = function() {
             return;
         }
         var condition = actor.getEsmMotion();
-//        console.log('motionType', this._motionType, 'condition', condition);
+        this.consoleLog_ActorMotion('refresh', [condition])
         if (this._motionType === condition) {
+            if (!this._index && !this._pattern) {
             //index の更新
-            if (!this.lastMotionType()) {
+            } else if (!this.lastMotionType()) {
+                this._pattern = 0;
                 this._index++;
             //motionIndex の更新、index のリセット
             } else {
                 if (!this._motionIndex) this._motionIndex = 1;
                 this._index = 0;
+                this._pattern = 0;
             }
+            this.consoleLog_ActorMotion('data')
         //condition の更新
         } else {
             this._motionIndex = 0;
@@ -748,22 +789,62 @@ Sprite_Actor.prototype.updateFrame = function() {
 //書き換え
 Sprite_Actor.prototype.startMotion = function(motionType) {
     if (this._motionType !== motionType) {
-//        console.log('start motion', motionType);
-        this._motionType = motionType;
-        if (motionType.match(/custom(\d+)/)) {
-            var newMotions = FTKR.ESM.motion.custom[Number(RegExp.$1)];
-        } else {
-            var newMotions = Sprite_Actor.ESM_MOTIONS[motionType];
+        this.setNewMotion(motionType);
+    }
+};
+
+Sprite_Actor.prototype.setNewMotion = function(motionType) {
+    if (!motionType) motionType = this._actor.getEsmMotion();
+    this._motionType = motionType;
+    if (motionType.match(/custom(\d+)/)) {
+        var newMotions = FTKR.ESM.motion.custom[Number(RegExp.$1)];
+    } else {
+        var newMotions = Sprite_Actor.ESM_MOTIONS[motionType];
+    }
+    this._motionTypes = newMotions.map(function(motions) {
+        return motions.split(',');
+    });
+    this._motionIndex = this.motionTypes()[0][0] ? 0 : 1;
+    this._motionCount = 0;
+    this._pattern = 0;
+    this._index = 0;
+    this.consoleLog_ActorMotion('start')
+    this.consoleLog_ActorMotion('data')
+};
+
+
+Sprite_Actor.prototype.consoleLog_ActorMotion = function(type, datas) {
+    if (FTKR.ESM.motion.debug.enable) {
+        if (!FTKR.ESM.motion.debug.pattern && type === 'pattern') return;
+        console.log('********************************************');
+        console.log('Actor motion <', type, '>');
+        console.log('---------------------------');
+        switch (type) {
+        case 'start':
+        console.log('Input Motion   :', this._motionType);
+        console.log('motionTypes[0] : ' + this.motionTypes()[0]);
+        console.log('motionTypes[1] : ' + this.motionTypes()[1]);
+        break;
+        case 'refresh':
+        console.log('motionType :', this._motionType);
+        console.log('condition  :', datas[0]);
+        if (this._motionType !== datas[0]) {
+        console.log('⇒ Start Motion');
         }
-        this._motionTypes = newMotions.map(function(motions) {
-            return motions.split(',');
-        });
-        this._motionIndex = this.motionTypes()[0][0] ? 0 : 1;
-        this._motionCount = 0;
-        this._pattern = 0;
-        this._index = 0;
-//        console.log('first motion', this.motionName());
-//        console.log('motionTypes', this.motionTypes()[0], this.motionTypes()[1]);
+        break;
+        case 'data':
+        console.log('Motion Name :', this.motionName());
+        console.log('motionIndex :', this._motionIndex);
+        console.log('index       :', this._index);
+        break;
+        case 'pattern':
+        console.log('Motion Name :', this.motionName());
+        console.log('motionIndex :', this._motionIndex);
+        console.log('index       :', this._index);
+        console.log('pattern     :', this._pattern);
+        break;
+        }
+        console.log('********************************************');
     }
 };
 
@@ -787,3 +868,25 @@ Sprite_Actor.prototype.lastMotionType = function() {
     return this.motionTypes().length <= this._index + 1;
 };
 
+//=============================================================================
+// YEP_BattleEngineCoreの修正
+//=============================================================================
+
+if (Imported.YEP_BattleEngineCore) {
+
+FTKR.ESM.Game_Battler_requestMotionRefresh = Game_Battler.prototype.requestMotionRefresh;
+Game_Battler.prototype.requestMotionRefresh = function() {
+    if (this._motionType) {
+        this.requestMotion(this._motionType);
+        this.clearMotion();
+        return;
+    }
+    FTKR.ESM.Game_Battler_requestMotionRefresh.call(this);
+};
+
+//書き換え
+Sprite_Actor.prototype.forceMotion = function(motionType) {
+    this.setNewMotion(motionType);
+};
+
+}//Imported.YEP_BattleEngineCore
