@@ -585,6 +585,13 @@ Array.prototype.checkMeta = function(obj) {
 // 基本モーションの設定を変更
 //=============================================================================
 
+FTKR.ESM.Game_Battler_onBattleStart = Game_Battler.prototype.onBattleStart;
+Game_Battler.prototype.onBattleStart = function() {
+    FTKR.ESM.Game_Battler_onBattleStart.call(this);
+    this._requestVictory = false;
+    this._requestEscape = false;
+};
+
 //書き換え
 FTKR.ESM.Game_Battler_requestMotion = Game_Battler.prototype.requestMotion;
 Game_Battler.prototype.requestMotion = function(motionType) {
