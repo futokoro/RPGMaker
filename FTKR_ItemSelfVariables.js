@@ -3,8 +3,8 @@
 // FTKR_ItemSelfVariables.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/26
-// 最終更新日 : 2017/04/18
-// バージョン : v1.1.0
+// 最終更新日 : 2017/04/26
+// バージョン : v1.1.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ISV = FTKR.ISV || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.0 アイテムやスキルにセルフ変数を実装するプラグイン
+ * @plugindesc v1.1.1 アイテムやスキルにセルフ変数を実装するプラグイン
  * @author フトコロ
  *
  * @param --セーブ設定--
@@ -227,6 +227,9 @@ FTKR.ISV = FTKR.ISV || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.1 - 2017/04/26 : 不具合修正
+ *    1. ダメージ計算式に例外処理を追加。
+ * 
  * v1.1.0 - 2017/04/18 : 仕様変更、機能追加
  *    1. 使用するセルフ変数の数を、アイテムやスキル毎に設定できるように変更。
  *    2. アクターとエネミーにセルフ変数を追加。
@@ -397,13 +400,15 @@ Game_Action.prototype.evalDamageFormula = function(target) {
         var a = this.subject();
         var b = target;
         var v = $gameVariables._data;
-        var av = a._selfVariables._data;
-        var iv = item._selfVariables._data;
+        if(a._selfVariables) var av = a._selfVariables._data;
+        if(b._selfVariables) var bv = b._selfVariables._data;
+        if(item._selfVariables) var iv = item._selfVariables._data;
         var sign = ([3, 4].contains(item.damage.type) ? -1 : 1);
         var value = Math.max(eval(item.damage.formula), 0) * sign;
         if (isNaN(value)) value = 0;
         return value;
     } catch (e) {
+        console.log(e);
         return 0;
     }
 };
