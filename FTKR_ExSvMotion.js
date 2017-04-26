@@ -3,8 +3,8 @@
 // FTKR_ExSvMotion.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/19
-// 最終更新日 : 2017/04/26
-// バージョン : v1.1.1
+// 最終更新日 : 2017/04/27
+// バージョン : v1.1.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ESM = FTKR.ESM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.1 SVキャラのモーションを拡張するプラグイン
+ * @plugindesc v1.1.2 SVキャラのモーションを拡張するプラグイン
  * @author フトコロ
  *
  * @param --行動モーションの設定--
@@ -474,6 +474,9 @@ FTKR.ESM = FTKR.ESM || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.2 - 2017/04/27 : 不具合修正
+ *    1. 状態モーション10 以降が反映されない不具合を修正。
+ * 
  * v1.1.1 - 2017/04/26 : YEP_BattleEngineCoreに対応
  * 
  * v1.1.0 - 2017/04/25 : 仕様変更、機能追加
@@ -567,6 +570,8 @@ FTKR.ESM.motion = {
     ],
 };
 
+Game_BattlerBase.ESM_MOTION_NUMBER = 16;
+
 if (!Array.prototype.checkMeta) {
 Array.prototype.checkMeta = function(obj) {
     return obj.meta ? this.map(function(meta) {
@@ -595,6 +600,7 @@ Game_Battler.prototype.requestMotion = function(motionType) {
 Game_Actor.prototype.performVictory = function() {
     if (this.canMove()) {
         this.requestMotion('');
+        this._requestVictory = true;
     }
 };
 
@@ -602,6 +608,7 @@ Game_Actor.prototype.performVictory = function() {
 Game_Actor.prototype.performEscape = function() {
     if (this.canMove()) {
         this.requestMotion('');
+        this._requestEscape = true;
     }
 };
 
@@ -621,7 +628,7 @@ Game_BattlerBase.prototype.stateMotionIndex = function() {
 };
 
 Game_BattlerBase.prototype.checkConditionAll = function() {
-    for(var i = 9; i > 0; i--) {
+    for(var i = Game_BattlerBase.ESM_MOTION_NUMBER; i > 0; i--) {
         if(this.checkCondition(FTKR.ESM.motion.state[i].condition)) {
             return i;
         }
@@ -642,9 +649,9 @@ Game_BattlerBase.prototype.checkCondition = function(condition) {
         case /chant/i.test(condition):
             return this.isChanting();
         case /victory/i.test(condition):
-            return $gameParty.inBattle() && $gameTroop.isAllDead();
+            return $gameParty.inBattle() && $gameTroop.isAllDead() && this._requestVictory;
         case /escape/i.test(condition):
-            return BattleManager.isEscaped();
+            return BattleManager.isEscaped() && this._requestEscape;
         case /dying/i.test(condition):
             return this.isDying();
         default:
@@ -828,6 +835,7 @@ Sprite_Actor.prototype.consoleLog_ActorMotion = function(type, datas) {
         case 'refresh':
         console.log('motionType :', this._motionType);
         console.log('condition  :', datas[0]);
+        console.log('motion num :', this.motions().length)
         if (this._motionType !== datas[0]) {
         console.log('⇒ Start Motion');
         }
@@ -865,7 +873,7 @@ Sprite_Actor.prototype.motionName = function() {
 };
 
 Sprite_Actor.prototype.lastMotionType = function() {
-    return this.motionTypes().length <= this._index + 1;
+    return this.motions().length === 1 || this.motions().length <= this._index + 1;
 };
 
 //=============================================================================
