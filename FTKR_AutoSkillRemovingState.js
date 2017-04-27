@@ -1,6 +1,6 @@
 //=============================================================================
 // ステート解除時に自動でスキルを発動させるプラグイン
-// FTKR_AutoSkillRemovingState.js
+// FTKR_AutoSkillInState.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/27
 // 最終更新日 : 
@@ -29,12 +29,13 @@ FTKR.ASS = FTKR.ASS || {};
  *-----------------------------------------------------------------------------
  * 概要
  *-----------------------------------------------------------------------------
- * ステート解除時に指定したスキルを自動で発動させます。
- * 以下のタグをステートのメモ欄に追記してください。
+ * 以下のタグをステートのメモ欄に追記すると、ステートを解除したターンの最後に
+ * 指定したスキルを自動で発動させます。
  * 
  * <ASS_解除発動: x>
  *    :x - スキルID
  * 
+ * ダメージでも自動解除でもどちらでも発動します。
  * なお、発動させるスキルの範囲は、全体またはランダムから選択してください。
  * 
  * 
@@ -68,7 +69,7 @@ FTKR.ASS = FTKR.ASS || {};
 //=============================================================================
 // プラグイン パラメータ
 //=============================================================================
-FTKR.ASS.parameters = PluginManager.parameters('FTKR_AutoSkillRemovingState');
+FTKR.ASS.parameters = PluginManager.parameters('FTKR_AutoSkillInState');
 
 //=============================================================================
 // BattleManager
@@ -151,6 +152,17 @@ BattleManager.endAutoSkill = function() {
 Game_Battler.prototype.removeStatesAuto = function(timing) {
     this.states().forEach(function(state) {
         if (this.isStateExpired(state.id) && state.autoRemovalTiming === timing) {
+            var skillId = Number(state.meta['ASS_解除発動']);
+            if (skillId) BattleManager._autoSkills.push({id:skillId, subject:this});
+            this.removeState(state.id);
+        }
+    }, this);
+};
+
+//書き換え
+Game_Battler.prototype.removeStatesByDamage = function() {
+    this.states().forEach(function(state) {
+        if (state.removeByDamage && Math.randomInt(100) < state.chanceByDamage) {
             var skillId = Number(state.meta['ASS_解除発動']);
             if (skillId) BattleManager._autoSkills.push({id:skillId, subject:this});
             this.removeState(state.id);
