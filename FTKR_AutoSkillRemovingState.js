@@ -3,8 +3,8 @@
 // FTKR_AutoSkillInState.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/27
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2017/04/28
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,12 +15,9 @@ FTKR.ASS = FTKR.ASS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 ステート解除時に自動でスキルを発動させるプラグイン
+ * @plugindesc v1.0.1 ステート解除時に自動でスキルを発動させるプラグイン
  * @author フトコロ
  *
- * @param ------
- * @default
- * 
  * @param 
  * @desc 
  * @default 
@@ -29,14 +26,27 @@ FTKR.ASS = FTKR.ASS || {};
  *-----------------------------------------------------------------------------
  * 概要
  *-----------------------------------------------------------------------------
- * 以下のタグをステートのメモ欄に追記すると、ステートを解除したターンの最後に
- * 指定したスキルを自動で発動させます。
+ * 以下のタグをステートのメモ欄に追記すると、ステートを解除(*1)したターンの最後に
+ * 指定したスキルを自動で発動(*2)させます。
  * 
  * <ASS_解除発動: x>
  *    :x - スキルID
  * 
- * ダメージでも自動解除でもどちらでも発動します。
- * なお、発動させるスキルの範囲は、全体またはランダムから選択してください。
+ * (*1) ステートの解除条件に設定した内容に従います。
+ * (*2) スキルの範囲が「敵単体」の場合は、「敵１体ランダム」になります。
+ * 
+ * 
+ * また、以下のタグを追記すると、解除時に最後にダメージを与えた相手(*3)を
+ * スキル発動のターゲットにします。
+ * 
+ * <ASS_リベンジターゲット>
+ * 
+ * (*3) ダメージ解除の場合は、ダメージを与えた相手です。
+ *      解除後にダメージを与えた相手は、ターゲットにしません。
+ * 
+ * 
+ * 解除時に誰にもダメージを与えられていない場合は、スキルの範囲設定に従い
+ * スキルを発動します。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -59,6 +69,8 @@ FTKR.ASS = FTKR.ASS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.1 - 2017/04/28 : ダメージを与えた相手にスキルを発動する機能追加
  * 
  * v1.0.0 - 2017/04/27 : 初版作成
  * 
@@ -124,7 +136,7 @@ BattleManager.startAutoSkillAction = function(autoSkill) {
     this._subject = subject;
     var action = new Game_Action(subject);
     action.setSkill(autoSkill.id);
-    var targets = action.makeTargets();
+    var targets = !!autoSkill.target ? [autoSkill.target] : action.makeTargets();
     this._phase = 'autoSkillAction';
     this._action = action;
     this._targets = targets;
@@ -148,12 +160,21 @@ BattleManager.endAutoSkill = function() {
     this._phase = 'autoSkill';
 };
 
+//=============================================================================
+// Game_Battler
+//=============================================================================
+
+FTKR.ASS.Game_Battler_initMembers = Game_Battler.prototype.initMembers;
+Game_Battler.prototype.initMembers = function() {
+    FTKR.ASS.Game_Battler_initMembers.call(this);
+    this._revenge = {id:-1,opponent:false};
+};
+
 //書き換え
 Game_Battler.prototype.removeStatesAuto = function(timing) {
     this.states().forEach(function(state) {
         if (this.isStateExpired(state.id) && state.autoRemovalTiming === timing) {
-            var skillId = Number(state.meta['ASS_解除発動']);
-            if (skillId) BattleManager._autoSkills.push({id:skillId, subject:this});
+            this.setAssAutoSkill(state);
             this.removeState(state.id);
         }
     }, this);
@@ -163,9 +184,55 @@ Game_Battler.prototype.removeStatesAuto = function(timing) {
 Game_Battler.prototype.removeStatesByDamage = function() {
     this.states().forEach(function(state) {
         if (state.removeByDamage && Math.randomInt(100) < state.chanceByDamage) {
-            var skillId = Number(state.meta['ASS_解除発動']);
-            if (skillId) BattleManager._autoSkills.push({id:skillId, subject:this});
+            this.setAssAutoSkill(state);
             this.removeState(state.id);
         }
     }, this);
+};
+
+Game_Battler.prototype.setAssAutoSkill = function(obj) {
+    var skillId = Number(obj.meta['ASS_解除発動']);
+    var target = obj.meta['ASS_リベンジターゲット'] ? this.revengeTarget() : null;
+    if (skillId) BattleManager._autoSkills.push({id:skillId, subject:this, target:target});
+};
+
+Game_Battler.prototype.revengeTarget = function() {
+    var revenge = this._revenge;
+    if (revenge.id === -1) return null;
+    if (revenge.opponent) {
+        return $gameTroop.members()[revenge.id];
+    } else {
+        return $gameParty.members()[revenge.id];
+    }
+};
+
+//=============================================================================
+// Game_Action
+//=============================================================================
+
+FTKR.ASS.Game_Action_apply = Game_Action.prototype.apply;
+Game_Action.prototype.apply = function(target) {
+    FTKR.ASS.Game_Action_apply.call(this, target);
+    var result = target.result();
+    if (result.isHit() && (result.hpDamage || result.mpDamage)) {
+        this.setRevengeTarget(target);
+    }
+};
+
+Game_Action.prototype.setRevengeTarget = function(target) {
+    var memberId = -1;
+    var subject = this.subject();
+    if (subject.isEnemy()) {
+        $gameTroop.members().forEach( function(member, i){
+            if (member === subject) memberId = i;
+        });
+    } else {
+        $gameParty.members().forEach( function(member, i){
+            if (member === subject) memberId = i;
+        });
+    }
+    target._revenge = {
+        id : memberId,
+        opponent : subject.isEnemy()
+    };
 };

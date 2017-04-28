@@ -3,8 +3,8 @@
 // FTKR_ExVariablesChange.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/18
-// 最終更新日 : 2017/04/26
-// バージョン : v1.0.3
+// 最終更新日 : 2017/04/28
+// バージョン : v1.0.4
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EVC = FTKR.EVC || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.3 変数の操作を拡張するプラグイン
+ * @plugindesc v1.0.4 変数の操作を拡張するプラグイン
  * @author フトコロ
  *
  *
@@ -76,6 +76,9 @@ FTKR.EVC = FTKR.EVC || {};
  * 変更ができます。
  * 
  * 対象：アイテム、スキル、アクター、エネミー、クラス、装備、ステート
+ * 
+ * なお、タグで設定した変数の計算が行われる順番は以下の通りです。
+ * アイテム/スキル ⇒ アクター/エネミー ⇒ クラス ⇒ 装備 ⇒ ステート
  * 
  * 1. 成功失敗問わずに使用すると実行
  * 
@@ -161,6 +164,9 @@ FTKR.EVC = FTKR.EVC || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.4 - 2017/04/28 : 不具合修正
+ *    1. アイテム増減時に例外処理を追加。
+ * 
  * v1.0.3 - 2017/04/26 : 機能追加
  *    1. ダメージ時の変数操作機能を追加
  *    2. アイテム・スキル使用時のタグ適用先を拡張。
@@ -181,16 +187,16 @@ FTKR.EVC = FTKR.EVC || {};
 //=============================================================================
 FTKR.EVC.parameters = PluginManager.parameters('FTKR_ExVariablesChange');
 
-//=============================================================================
-// 自作関数
-//=============================================================================
-
-FTKR.gameData = {
+FTKR.gameData = FTKR.gameData || {
     user   :null,
     target :null,
     item   :null,
     number :0,
 };
+
+//=============================================================================
+// 自作関数
+//=============================================================================
 
 var setGameData = function(user, target, item, number) {
     FTKR.gameData = {
@@ -277,7 +283,7 @@ var readItemsEntrapmentCodeArray = function(target, codeTitles) {
 //=============================================================================
 
 DataManager.variablesChangeNoteTags = function(codeTitles, item, target) {
-    this.variablesChangeItemNoteTags(codeTitles, item);
+    if(item) this.variablesChangeItemNoteTags(codeTitles, item);
     if(target) this.variablesChangeUnitNoteTags(codeTitles, target);
 };
 
@@ -311,7 +317,7 @@ DataManager.evcEvalsFormula = function(evals) {
             eval(evals[i]);
             continue;
         } catch (e) {
-            console.log(e);
+            console.error(e);
             continue;
         }
     }
@@ -344,17 +350,21 @@ Game_Action.prototype.evcVariablesChange = function(target) {
     var result = target.result();
     if (!result.used) return false;
     setGameData(this.subject(), target, this.item());
-    DataManager.variablesChangeNoteTags(['使用時', 'USE'], this.item(), this.subject());
+    this.variablesChangeItemNoteTags(['使用時', 'USE'], this.subject());
     if (result.isHit()) {
-        DataManager.variablesChangeNoteTags(['使用成功時', 'SUCCESS'], this.item(), this.subject());
+        this.variablesChangeItemNoteTags(['使用成功時', 'SUCCESS'], this.subject());
         if (result.hpDamage || result.mpDamage) {
-            DataManager.variablesChangeNoteTags(['与ダメージ時', 'DAMAGE'], this.item(), this.subject());
-            DataManager.variablesChangeNoteTags(['被ダメージ時', 'RECEIVE_DAM'], this.item(), target);
+            this.variablesChangeItemNoteTags(['与ダメージ時', 'DAMAGE'], this.subject());
+            this.variablesChangeItemNoteTags(['被ダメージ時', 'RECEIVE_DAM'], target);
         }
     } else {
-        DataManager.variablesChangeNoteTags(['使用失敗時', 'FAILURE'], this.item(), this.subject());
+        this.variablesChangeItemNoteTags(['使用失敗時', 'FAILURE'], this.subject());
     }
     return true;
+};
+
+Game_Action.prototype.variablesChangeItemNoteTags = function(codeTitles, target) {
+    DataManager.variablesChangeNoteTags(codeTitles, this.item(), target);
 };
 
 //=============================================================================
@@ -364,7 +374,7 @@ Game_Action.prototype.evcVariablesChange = function(target) {
 FTKR.EVC.Scene_Shop_doBuy = Scene_Shop.prototype.doBuy;
 Scene_Shop.prototype.doBuy = function(number) {
     setGameData(null, null, this._item, number);
-    DataManager.variablesChangeItemNoteTags(['購入時', 'BUY'], this._item);
+    DataManager.variablesChangeNoteTags(['購入時', 'BUY'], this._item);
     FTKR.EVC.Scene_Shop_doBuy.call(this, number);
 };
 
@@ -375,12 +385,12 @@ Scene_Shop.prototype.doBuy = function(number) {
 FTKR.EVC.Game_Party_gainItem = Game_Party.prototype.gainItem;
 Game_Party.prototype.gainItem = function(item, amount, includeEquip) {
     FTKR.EVC.Game_Party_gainItem.call(this, item, amount, includeEquip);
-    if(amount) {
+    if (this.itemContainer(item) && amount) {
         setGameData(null, null, item, amount);
         if (amount > 0) {
-            DataManager.variablesChangeItemNoteTags(['増加時', 'GAIN'], item);
+            DataManager.variablesChangeNoteTags(['増加時', 'GAIN'], item);
         } else if (amount < 0) {
-            DataManager.variablesChangeItemNoteTags(['減少時', 'LOSE'], item);
+            DataManager.variablesChangeNoteTags(['減少時', 'LOSE'], item);
         }
     }
 };
@@ -392,6 +402,6 @@ Game_Party.prototype.gainItem = function(item, amount, includeEquip) {
 FTKR.EVC.Scene_Shop_doSell = Scene_Shop.prototype.doSell;
 Scene_Shop.prototype.doSell = function(number) {
     setGameData(null, null, this._item, number);
-    DataManager.variablesChangeItemNoteTags(['売却時', 'SELL'], this._item);
+    DataManager.variablesChangeNoteTags(['売却時', 'SELL'], this._item);
     FTKR.EVC.Scene_Shop_doSell.call(this, number);
 };
