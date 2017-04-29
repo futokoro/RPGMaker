@@ -3,8 +3,8 @@
 // FTKR_ItemSelfVariables.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/26
-// 最終更新日 : 2017/04/26
-// バージョン : v1.1.1
+// 最終更新日 : 2017/04/29
+// バージョン : v1.1.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ISV = FTKR.ISV || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.1 アイテムやスキルにセルフ変数を実装するプラグイン
+ * @plugindesc v1.1.2 アイテムやスキルにセルフ変数を実装するプラグイン
  * @author フトコロ
  *
  * @param --セーブ設定--
@@ -201,7 +201,11 @@ FTKR.ISV = FTKR.ISV || {};
  * セルフ変数のダメージ計算式への適用
  *-----------------------------------------------------------------------------
  * セルフ変数は、アイテムおよびスキルのダメージ計算式に使用できます。
- * 計算式に、'iv[x]'と入力することで、セルフ変数ID x の値を参照します。
+ * 計算式に以下のコードを入力することで、セルフ変数ID x の値を参照します。
+ * 
+ *  av[x]   - 使用者のセルフ変数ID x の値を参照します。
+ *  bv[x]   - 対象者のセルフ変数ID x の値を参照します。
+ *  iv[x]   - 使用するアイテムまたはスキルのセルフ変数ID x の値を参照します。
  * 
  * 入力例）
  * a.atk * (4 + iv[1]) - b.def * 2
@@ -226,6 +230,8 @@ FTKR.ISV = FTKR.ISV || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.1.2 - 2017/04/29 : ダメージ計算式の処理を見直し
  * 
  * v1.1.1 - 2017/04/26 : 不具合修正
  *    1. ダメージ計算式に例外処理を追加。
@@ -259,6 +265,56 @@ FTKR.ISV.number = {
     skill:Number(FTKR.ISV.parameters['Skill Number'] || 0),
     actor:Number(FTKR.ISV.parameters['Actor Number'] || 0),
     enemy:Number(FTKR.ISV.parameters['Enemy Number'] || 0),
+};
+
+//=============================================================================
+// 自作関数(グローバル)
+//=============================================================================
+
+FTKR.gameData = FTKR.gameData || {
+    user   :null,
+    target :null,
+    item   :null,
+    number :0,
+};
+
+if (!FTKR.setGameData) {
+FTKR.setGameData = function(user, target, item, number) {
+    FTKR.gameData = {
+        user   :user || null,
+        target :target || null,
+        item   :item || null,
+        number :number || 0
+    };
+};
+}
+
+FTKR.evalFormula = function(formula) {
+    var datas = FTKR.gameData;
+    try {
+        var s = $gameSwitches._data;
+        var v = $gameVariables._data;
+        var a = datas.user;
+        var b = datas.target;
+        var item   = datas.item;
+        var number = datas.number;
+        if (a) {
+            var aData = a.isActor() ? a.actor() : a.enemy();
+            if (aData._selfVariables) var av = aData._selfVariables._data;
+        }
+        if (b) {
+            var result = b.result();
+            var bData = b.isActor() ? b.actor() : b.enemy();
+            if (bData._selfVariables) var bv = bData._selfVariables._data;
+        }
+        if (item && item._selfVariables) var iv = item._selfVariables._data;
+        var value = eval(formula);
+        if (isNaN(value)) value = 0;
+        return value;
+    } catch (e) {
+        console.error(e);
+        return 0;
+    }
 };
 
 //=============================================================================
@@ -388,29 +444,16 @@ DataManager.extractSaveContents = function(contents) {
 // Game_Action
 //=============================================================================
 
-FTKR.ISV.Game_Action_apply = Game_Action.prototype.apply;
-Game_Action.prototype.apply = function(target) {
-    FTKR.ISV.Game_Action_apply.call(this, target);
-};
-
 //書き換え
 Game_Action.prototype.evalDamageFormula = function(target) {
-    try {
-        var item = this.item();
-        var a = this.subject();
-        var b = target;
-        var v = $gameVariables._data;
-        if(a._selfVariables) var av = a._selfVariables._data;
-        if(b._selfVariables) var bv = b._selfVariables._data;
-        if(item._selfVariables) var iv = item._selfVariables._data;
+    var item = this.item();
+    FTKR.setGameData(this.subject(), target, item);
+    var value = FTKR.evalFormula(item.damage.formula);
+    if (value) {
         var sign = ([3, 4].contains(item.damage.type) ? -1 : 1);
-        var value = Math.max(eval(item.damage.formula), 0) * sign;
-        if (isNaN(value)) value = 0;
-        return value;
-    } catch (e) {
-        console.log(e);
-        return 0;
+        value = Math.max(value, 0) * sign;
     }
+    return value;
 };
 
 //=============================================================================

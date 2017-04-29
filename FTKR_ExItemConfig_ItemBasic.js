@@ -1,10 +1,10 @@
 //=============================================================================
-// アイテムの基本設定を拡張するプラグイン
+// アイテムやスキルの基本設定を拡張するプラグイン
 // FTKR_ExItemConfig_ItemBasic.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/14
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2017/04/29
+// バージョン : v1.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,20 +15,22 @@ FTKR.IEP = FTKR.IEP || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 アイテムの基本設定を拡張するプラグイン
+ * @plugindesc v1.1.0 アイテムやスキルの基本設定を拡張するプラグイン
  * @author フトコロ
  *
  * @help 
  *-----------------------------------------------------------------------------
  * 概要
  *-----------------------------------------------------------------------------
- * 本プラグインを実装することで、アイテム(武器・防具含む)に、以下の仕様を
- * 追加します。
+ * 本プラグインを実装することで、アイテム(武器・防具含む)やスキルに、
+ * 以下の仕様を追加します。
  * 
- * 1. アイテムの価格を数値以外を設定することができます。
+ * 1. 事前に複数の設定(名前、アイコン、説明文)を登録し、
+ *    ゲーム内で条件付けで表示を変えることができます。
  * 
- * 2. 事前に複数の設定を登録し、ゲーム内で条件付けでアイテムの設定を
- *    変えることができます。
+ * 2. アイテム・武器・防具の場合、価格も設定できます。
+ * 
+ * 3. アイテム・スキルの場合、使用可能時も設定できます。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -37,54 +39,68 @@ FTKR.IEP = FTKR.IEP || {};
  * 1.「プラグインマネージャー(プラグイン管理)」に、本プラグインを追加して
  *    ください。
  * 
+ * 2. FTKR_ItemSelfVariables.js と併用する場合は、本プラグインは、
+ *    FTKR_ItemSelfVariables.jsよりも下の位置になるように追加してください。
+ * 
+ * 3. 本プラグインは、FTKR_SkillExpansion.jsと組み合わせて使用できません。
+ * 
  * 
  *-----------------------------------------------------------------------------
- * アイテムの基本設定の変更
+ * 基本設定の変更
  *-----------------------------------------------------------------------------
- * アイテム(武器・防具含む)に以下のノートタグを追記することで、一つのアイテムに
- * 対して複数の基本設定を登録することができます。
+ * アイテム(武器・防具含む)やスキルに以下のノートタグを追記することで、
+ * 一つのアイテム・スキルに対して複数の基本設定を登録することができます。
  * 
  * データベース上の設定は、データID0 に登録されます。
- * データID0は、他のIDの適用条件が満たない場合に適用します。
+ * データID0は、他のIDの有効条件が満たない場合に適用します。
  * 
  * **********************************************************************
  * 注意：データIDを追加する場合は、必ずID1 から順番に追加してください。
  * **********************************************************************
  * 
- * <EIC 基本設定: x>   :データID x に対して code部の設定を登録します。
+ * <EIC 基本設定: x>
  * code
  * </EIC 基本設定>
+ * 
+ * または
+ * 
+ * <EIC Basic: x>
+ * code
+ * </EIC Basic>
+ *    :データID x に対して code部の設定を登録します。
  * 
  * [code部で設定できる項目]
  * 有効条件: 計算式
  * enabled: eval
- *    :データID x の適用条件を 計算式(eval) で設定します。
- *    :適用条件が複数のIDで重なった場合は、IDが大きい方を適用します。
- *    :適用条件を設定しない場合、常に有効になります。
+ *    :データID x の有効条件を 計算式(eval) で設定します。
+ *    :有効条件が複数のIDで重なった場合は、IDが大きい方を適用します。
+ *    :有効条件を設定しない場合、常に有効になります。
  * 
  * 以下のcodeは、設定しなかった場合、データベース上の設定を適用します。
  * 名前: アイテム名
- * name: アイテム名
- *    :アイテムの名前を'アイテム名'に変更します。
+ * name: ITEMNAME
+ *    :アイテム・スキルの名前を'アイテム名(ITEMNAME)'に変更します。
  * 
  * アイコン: y
  * icon: y
- *    :アイコンを y に変更します。
+ *    :アイコンIDを y に変更します。
  * 
+ * 説明: 説明文
+ * desc: DESCRIPTION
+ *    :アイテムの説明を'説明文(DESCRIPTION)'に変更します。
+ *    :制御文字を使用できます。
+ *    :二つ設定することで、説明文を2行に表示できます。
+ * 
+ * <アイテム・武器・防具用>
  * 価格: 計算式
  * price: eval
  *    :アイテムの価格を 計算式(eval) で設定した値に変更します。
  * 
- * 説明: 説明文
- * desc: 説明文
- *    :アイテムの説明を'説明文'に変更します。
- *    :制御文字を使用できます。
- *    :二つ設定することで、説明文を2行に表示できます。
- * 
+ * <アイテム・スキル用>
  * 使用可能時: 状況
- * used: 状況
+ * used: CONDITION
  *    :使用可能時の設定を'状況'に変更します。
- *    :'状況'には以下の文字または数字を入力します。
+ *    :'状況(CONDITION)'には以下の文字または数字を入力します。
  *    : 常時(0), バトル画面(1), メニュー画面(2), 使用不可(3) 
  * 
  * 
@@ -108,7 +124,6 @@ FTKR.IEP = FTKR.IEP || {};
  * 有効条件: !iv[1]
  * 名前: 何かのアイテム
  * アイコン: 160
- * 価格: 0
  * 説明: 何に使えるか不明なアイテム。
  * 説明: 鑑定するまで使用できない。
  * 使用可能時: 使用不可
@@ -129,6 +144,10 @@ FTKR.IEP = FTKR.IEP || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.0 - 2017/04/29 : 機能追加
+ *    1. スキルにも適用できるように変更。
+ *    2. FTKR_ItemSelfVariables の v1.1.0以降に対応。
+ * 
  * v1.0.0 - 2017/04/14 : 初版作成
  * 
  *-----------------------------------------------------------------------------
@@ -141,9 +160,115 @@ FTKR.IEP = FTKR.IEP || {};
 //=============================================================================
 FTKR.IEP.parameters = PluginManager.parameters('FTKR_ExItemConfig_ItemBasic');
 
+//=============================================================================
+// 自作関数(グローバル)
+//=============================================================================
+
+FTKR.gameData = FTKR.gameData || {
+    user   :null,
+    target :null,
+    item   :null,
+    number :0,
+};
+
+if (!FTKR.setGameData) {
+FTKR.setGameData = function(user, target, item, number) {
+    FTKR.gameData = {
+        user   :user || null,
+        target :target || null,
+        item   :item || null,
+        number :number || 0
+    };
+};
+}
+
+if (!FTKR.evalFormula) {
+FTKR.evalFormula = function(formula) {
+    var datas = FTKR.gameData;
+    try {
+        var s = $gameSwitches._data;
+        var v = $gameVariables._data;
+        var a = datas.user;
+        var b = datas.target;
+        var item   = datas.item;
+        var number = datas.number;
+        if (b) var result = b.result();
+        var value = eval(formula);
+        if (isNaN(value)) value = 0;
+        return value;
+    } catch (e) {
+        console.error(e);
+        return 0;
+    }
+};
+}
 
 //=============================================================================
-// DataManager
+// 自作関数(ローカル)
+//=============================================================================
+
+var readEntrapmentCodeToTextEx = function(obj, codeTitles) {
+    regs = convertEntrapmentRegArrayEx('EIC ', codeTitles);
+    var notedata = obj.note.split(/[\r\n]+/);
+    var setMode = 'none';
+    var results = [];
+
+    for (var i = 0; i < notedata.length; i++) {
+//        console.log(regs);
+        var line = notedata[i];
+        if (matchRegs(line, regs, 'start')) {
+            console.log(regs);
+            var data = {
+                id:RegExp.$1,
+                text:''
+            };
+            setMode = 'read';
+        } else if (matchRegs(line, regs, 'end')) {
+            setMode = 'none';
+            results.push(data);
+        } else if (setMode === 'read') {
+            console.log(line);
+            data.text += line + ';';
+        }
+    }
+    return results;
+};
+
+var convertTextToReg = function(text, header, footer) {
+    header = header || '';
+    footer = footer || '';
+    return new RegExp(header + text + ':[ ]*(.+)' + footer, 'i');
+};
+
+var convertRegs = function(metacodes) {
+    return metacodes.map(function(metacode){
+        return convertTextToReg(metacode);
+    });
+};
+
+var convertEntrapmentRegArrayEx = function(header, codeTitles) {
+    return codeTitles.map(function(codeTitle) {
+        return {
+            start:new RegExp('<' + header + codeTitle + ':[ ]*(.+)>', 'i'),
+            end  :new RegExp('<\/' + header + codeTitle + '>', 'i')
+        };
+    });
+};
+
+var matchRegs = function(data, regs, prop) {
+    return regs.some(function(reg){
+        return prop ? data.match(reg[prop]) : data.match(reg);
+    });
+};
+
+var matchTexts = function(data, texts, prop) {
+    return convertRegs(texts).some(function(reg){
+        return prop ? data.match(reg[prop]) : data.match(reg);
+    });
+};
+
+//=============================================================================
+// メタデータの読み取り
 //=============================================================================
 
 FTKR.IEP.DatabaseLoaded = false;
@@ -154,100 +279,69 @@ DataManager.isDatabaseLoaded = function() {
         this.iepDataNotetags($dataItems);
         this.iepDataNotetags($dataWeapons);
         this.iepDataNotetags($dataArmors);
+        this.iepDataNotetags($dataSkills);
         FTKR.IEP.DatabaseLoaded = true;
     }
     return true;
 };
 
 DataManager.iepDataNotetags = function(group) {
-    var note1a = /<(?:EIC BASIC):[ ]*(\d+)>/i;
-    var note1aj = /<(?:EIC 基本設定):[ ]*(\d+)>/i;
-    var note1b = /<\/(?:EIC BASIC)>/i;
-    var note1bj = /<\/(?:EIC 基本設定)>/i;
-
     for (var n = 1; n < group.length; n++) {
         var obj = group[n];
-        var notedata = obj.note.split(/[\r\n]+/);
-
-        var setMode = 'none';
-        var data = {};
-        obj.iepData = [];
         obj.iepDatas = [];
-        obj.iepDatas[0] = {
-            name:obj.name,
-            iconIndex:obj.iconIndex,
-            description:obj.description,
-            enabled:true,
-            price:obj.price,
-        };
-        if (obj.hasOwnProperty('occasion')) {
-            obj.iepDatas[0].occasion = obj.occasion;
-        }
-
-        for (var i = 0; i < notedata.length; i++) {
-            var line = notedata[i];
-            if (line.match(note1a) || line.match(note1aj)) {
-                data = { id:Number(RegExp.$1), text:'' };
-                setMode = 'anydata';
-            } else if (note1b.test(line) || note1bj.test(line)) {
-                setMode = 'none';
-                obj.iepData.push(data);
-            } else if (setMode === 'anydata') {
-                data.text += line + ';';
-            }
-        }
-        this.makeIepData(obj);
+        this.setIepData(obj);
+        var datas = readEntrapmentCodeToTextEx(obj, ['基本設定', 'BASIC']);
+        if (datas.length) console.log(datas);
+        this.readIepMetaDatas(obj, datas);
     }
 };
 
-DataManager.makeIepData = function(item) {
-    for (var t = 0; t < item.iepData.length; t++) {
-        var iepData = item.iepData[t];
-        if (iepData) {
-            var case1 = /(?:ENABLED):[ ]*(.+)/i;
-            var case1j = /(?:有効条件):[ ]*(.+)/i;
-            var case2 = /(?:NAME):[ ]*(.+)/i;
-            var case2j = /(?:名前):[ ]*(.+)/i;
-            var case3 = /(?:ICON):[ ]*(\d+)/i;
-            var case3j = /(?:アイコン):[ ]*(\d+)/i;
-            var case4 = /(?:DESC):[ ]*(.+)/i;
-            var case4j = /(?:説明):[ ]*(.+)/i;
-            var case5 = /(?:USED):[ ]*(.+)/i;
-            var case5j = /(?:使用可能時):[ ]*(.+)/i;
-            var case6 = /(?:PRICE):[ ]*(.+)/i;
-            var case6j = /(?:価格):[ ]*(.+)/i;
-
-            var dataId = iepData.id;
-            if (!item.iepDatas[dataId]) item.iepDatas[dataId] = {};
-            item.iepDatas[dataId].name = item.name;
-            item.iepDatas[dataId].iconIndex = item.iconIndex;
-            item.iepDatas[dataId].description = item.description;
-            item.iepDatas[dataId].price = item.price;
-            if (item.hasOwnProperty('occasion')) {
-                item.iepDatas[dataId].occasion = item.occasion;
-            }
-            var desc = '';
-            var datas = iepData.text.split(';');
-            for (var i = 0; i < datas.length; i++) {
-                var data = datas[i];
-                if (data.match(case1) || data.match(case1j)) {
-                    item.iepDatas[dataId].enabled = RegExp.$1;
-                } else if(data.match(case2) || data.match(case2j)) {
-                    item.iepDatas[dataId].name = RegExp.$1;
-                } else if(data.match(case3) || data.match(case3j)) {
-                    item.iepDatas[dataId].iconIndex = Number(RegExp.$1);
-                } else if(data.match(case4) || data.match(case4j)) {
-                    desc += RegExp.$1 + '\r\n';
-                } else if(data.match(case5) || data.match(case5j)) {
-                     item.iepDatas[dataId].occasion = this.occasion(RegExp.$1);
-                } else if(data.match(case6) || data.match(case6j)) {
-                    item.iepDatas[dataId].price = RegExp.$1;
-                }
-            }
-            if(desc) item.iepDatas[dataId].description = desc;
-        }
+DataManager.setIepData = function(obj, dataId) {
+    dataId = dataId || 0;
+    if (!obj.iepDatas[dataId]) obj.iepDatas[dataId] = {};
+    obj.iepDatas[dataId] = {
+        name        :obj.name,
+        iconIndex   :obj.iconIndex,
+        description :obj.description,
+        enabled     :true,
+    };
+    if (obj.hasOwnProperty('price')) {
+        obj.iepDatas[dataId].price = obj.price;
     }
-    item.iepData = [];
+    if (obj.hasOwnProperty('occasion')) {
+        obj.iepDatas[dataId].occasion = obj.occasion;
+    }
+};
+
+DataManager.readIepMetaDatas = function(obj, metaDatas) {
+    for (var t = 0; t < metaDatas.length; t++) {
+        var dataId = Number(metaDatas[t].id);
+        var datas = metaDatas[t].text.split(';');
+        this.setIepData(obj, dataId);
+        var desc = '';
+
+        for (var i = 0; i < datas.length; i++) {
+            var data = datas[i];
+            if (matchTexts(data, ['有効条件', 'ENABLED'])) {
+                obj.iepDatas[dataId].enabled = RegExp.$1;
+            } else if (matchTexts(data, ['名前', 'NAME'])) {
+                obj.iepDatas[dataId].name = RegExp.$1;
+            } else if (matchTexts(data, ['アイコン', 'ICON'])) {
+                obj.iepDatas[dataId].iconIndex = Number(RegExp.$1);
+            } else if (obj.hasOwnProperty('price') && 
+                    matchTexts(data, ['価格', 'PRICE'])
+                ) {
+                obj.iepDatas[dataId].price = RegExp.$1;
+            } else if (obj.hasOwnProperty('occasion') && 
+                    matchTexts(data, ['使用可能時', 'USED'])
+                ) {
+                obj.iepDatas[dataId].occasion = this.occasion(RegExp.$1);
+            } else if (matchTexts(data, ['説明', 'DESC'])) {
+                desc += RegExp.$1 + '\r\n';
+            }
+        }
+        if (desc) obj.iepDatas[dataId].description = desc;
+    }
 };
 
 DataManager.occasion = function(value) {
@@ -268,29 +362,41 @@ DataManager.occasion = function(value) {
     }
 };
 
-DataManager.evalEnabledFormula = function(formula, item) {
+//=============================================================================
+// アイテムデータの取得
+//=============================================================================
+
+DataManager.evalEnabledFormula = function(formula) {
     if (!formula) return true;
-    try {
-        var a = $gameActors._data;
-        var s = $gameSwitches._data;
-        var v = $gameVariables._data;
-        if(Imported.FTKR_ISV) var iv = item._selfVariables._data;
-        var value = eval(formula);
-        if (isNaN(value)) value = false;
-        return value;
-    } catch (e) {
-        return false;
-    }
+    return FTKR.evalFormula(formula);
+};
+
+DataManager.itemIepData = function(item, subject, target) {
+    FTKR.setGameData(subject, target, item);
+    var iepDatas = item.iepDatas.filter( function(data) {
+        return this.evalEnabledFormula(data.enabled);
+    },this);
+    return iepDatas.pop();
+};
+
+DataManager.itemIepPrice = function(item) {
+    FTKR.setGameData(null, null, item);
+    return Number(this.evalEnabledFormula(this.itemIepData(item).price));
+};
+
+Window_Base.prototype.itemIepData = function(item) {
+    var actor = this._actor ? this._actor : null;
+    return DataManager.itemIepData(item, actor);
 };
 
 //=============================================================================
-// Game_BattlerBase
+// アイテムの使用可能時の修正
 //=============================================================================
 
 FTKR.IEP.Game_BattlerBase_isOccasionOk = Game_BattlerBase.prototype.isOccasionOk;
 Game_BattlerBase.prototype.isOccasionOk = function(item) {
-    if (DataManager.isItem(item)) {
-        var iepItem = this.itemIepData(item);
+    if (item.iepDatas) {
+        var iepItem = DataManager.itemIepData(item, this);
         if ($gameParty.inBattle()) {
             return iepItem.occasion === 0 || iepItem.occasion === 1;
         } else {
@@ -301,44 +407,30 @@ Game_BattlerBase.prototype.isOccasionOk = function(item) {
     }
 };
 
-Game_BattlerBase.prototype.itemIepData = function(item) {
-    var iepDatas = item.iepDatas.filter( function(data) {
-        return DataManager.evalEnabledFormula(data.enabled, item);
-    },this);
-    return iepDatas.pop();
-};
-
 //=============================================================================
-// Window_Base
+// アイテムの名前・アイコン表示の修正
 //=============================================================================
 
 FTKR.IEP.Window_Base_drawItemName = Window_Base.prototype.drawItemName;
 Window_Base.prototype.drawItemName = function(item, x, y, width) {
     width = width || 312;
     if (item && item.iepDatas) {
-        var iconBoxWidth = Window_Base._iconWidth + 4;
+        var iw = Window_Base._iconWidth + 4;
         this.resetTextColor();
         this.drawIcon(this.itemIepData(item).iconIndex, x + 2, y + 2);
-        this.drawText(this.itemIepData(item).name, x + iconBoxWidth, y, width - iconBoxWidth);
+        this.drawText(this.itemIepData(item).name, x + iw, y, width - iw);
     } else {
         FTKR.IEP.Window_Base_drawItemName.call(this, item, x, y, width);
     }
 };
 
-Window_Base.prototype.itemIepData = function(item) {
-    var iepDatas = item.iepDatas.filter( function(data) {
-        return DataManager.evalEnabledFormula(data.enabled, item);
-    },this);
-    return iepDatas.pop();
-};
+//=============================================================================
+// アイテムの価格の修正
+//=============================================================================
 
 Window_Base.prototype.itemIepPrice = function(item) {
-    return Number(DataManager.evalEnabledFormula(this.itemIepData(item).price, item));
+    return DataManager.itemIepPrice(item);
 };
-
-//=============================================================================
-// アイテムの購入価格
-//=============================================================================
 
 //書き換え
 Window_ShopBuy.prototype.makeItemList = function() {
@@ -361,10 +453,6 @@ Window_ShopBuy.prototype.makeItemList = function() {
     }, this);
 };
 
-//=============================================================================
-// アイテムの売却価格
-//=============================================================================
-
 //書き換え
 Window_ShopSell.prototype.isEnabled = function(item) {
     return item && this.itemIepPrice(item) > 0;
@@ -372,22 +460,11 @@ Window_ShopSell.prototype.isEnabled = function(item) {
 
 //書き換え
 Scene_Shop.prototype.sellingPrice = function() {
-    return Math.floor(this.itemIepPrice(this._item) / 2);
-};
-
-Scene_Shop.prototype.itemIepData = function(item) {
-    var iepDatas = item.iepDatas.filter( function(data) {
-        return DataManager.evalEnabledFormula(data.enabled, item);
-    },this);
-    return iepDatas.pop();
-};
-
-Scene_Shop.prototype.itemIepPrice = function(item) {
-    return Number(DataManager.evalEnabledFormula(this.itemIepData(item).price, item));
+    return Math.floor(DataManager.itemIepPrice(this._item) / 2);
 };
 
 //=============================================================================
-// Window_Help
+// アイテムの説明表示の修正
 //=============================================================================
 
 FTKR.IEP.Window_Help_setItem = Window_Help.prototype.setItem;

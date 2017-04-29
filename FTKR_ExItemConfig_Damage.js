@@ -3,8 +3,8 @@
 // FTKR_ExItemConfig_Damage.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/14
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2017/04/29
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EID = FTKR.EID || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 アイテムとスキルのダメージ処理を拡張するプラグイン
+ * @plugindesc v1.0.1 アイテムとスキルのダメージ処理を拡張するプラグイン
  * @author フトコロ
  *
  * @param ---属性ダメージ計算---
@@ -233,6 +233,8 @@ FTKR.EID = FTKR.EID || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.1 - 2017/04/29 : FTKR_ItemSelfVariables の v1.1.0以降に対応
+ * 
  * v1.0.0 - 2017/04/14 : 初版公開
  * 
  *-----------------------------------------------------------------------------
@@ -249,6 +251,49 @@ FTKR.EID.elementDamageCalc = Number(FTKR.EID.parameters['Elements Damage Calc'] 
 FTKR.EID.defDamageRate = String(FTKR.EID.parameters['Damage Rate'] || '0');
 FTKR.EID.defCriticalRate = String(FTKR.EID.parameters['Critical Rate'] || '0');
 FTKR.EID.criticalForEach = Number(FTKR.EID.parameters['Critical For Each'] || 0);
+
+//=============================================================================
+// 自作関数(グローバル)
+//=============================================================================
+
+FTKR.gameData = FTKR.gameData || {
+    user   :null,
+    target :null,
+    item   :null,
+    number :0,
+};
+
+if (!FTKR.setGameData) {
+FTKR.setGameData = function(user, target, item, number) {
+    FTKR.gameData = {
+        user   :user || null,
+        target :target || null,
+        item   :item || null,
+        number :number || 0
+    };
+};
+}
+
+if (!FTKR.evalFormula) {
+FTKR.evalFormula = function(formula) {
+    var datas = FTKR.gameData;
+    try {
+        var s = $gameSwitches._data;
+        var v = $gameVariables._data;
+        var a = datas.user;
+        var b = datas.target;
+        var item   = datas.item;
+        var number = datas.number;
+        if (b) var result = b.result();
+        var value = eval(formula);
+        if (isNaN(value)) value = 0;
+        return value;
+    } catch (e) {
+        console.error(e);
+        return 0;
+    }
+};
+}
 
 //=============================================================================
 // DataManager
@@ -443,36 +488,21 @@ Game_Action.prototype.eidDamageIdApply = function(target) {
   ダメージ計算の修正
 -------------------------------------------------------------*/
 
-Game_Action.prototype.evalEidFormula = function(item, formula, target, type) {
-    try {
-        var a = this.subject();
-        var b = target;
-        var s = $gameSwitches._data;
-        var v = $gameVariables._data;
-        if(Imported.FTKR_ISV) var iv = item._selfVariables._data;
-        var sign = ([3, 4].contains(type) ? -1 : 1);
-        var value = Math.max(eval(formula), 0) * sign;
-        if (isNaN(value)) value = false;
-        return value;
-    } catch (e) {
-        console.log(e);
-        return false;
-    }
-};
-
 Game_Action.prototype.evalDamagesEnabled = function(item) {
+    FTKR.setGameData(this.subject(), null, item);
     var enabled = item.damages[this._damageId].enabled;
-    return !enabled ? true : this.evalEidFormula(item, enabled);
+    return !enabled ? true : FTKR.evalFormula(enabled);
 };
 
 //書き換え
 Game_Action.prototype.evalDamageFormula = function(target) {
-    var value = this.evalEidFormula(
-        this.item(),
-        this.item().damage.formula,
-        target,
-        this.item().damage.type
-    );
+    var item = this.item();
+    FTKR.setGameData(this.subject(), target, item);
+    var value = FTKR.evalFormula(item.damage.formula);
+    if (value) {
+        var sign = ([3, 4].contains(item.damage.type) ? -1 : 1);
+        value = Math.max(value, 0) * sign;
+    }
     return this.applyDamageRate(value);
 };
 
@@ -481,7 +511,8 @@ Game_Action.prototype.applyDamageRate = function(damage) {
 };
 
 Game_Action.prototype.itemDamageRate = function() {
-    return this.evalEidFormula(this.itemBase(), this.itemDamage().rate)
+    FTKR.gameData.item = this.itemBase();
+    return FTKR.evalFormula(this.itemDamage().rate)
 };
 
 //書き換え
@@ -490,7 +521,8 @@ Game_Action.prototype.applyCritical = function(damage) {
 };
 
 Game_Action.prototype.itemDamageCriticalRate = function() {
-    return this.evalEidFormula(this.itemBase(), this.itemDamage().criticalRate)
+    FTKR.gameData.item = this.itemBase();
+    return FTKR.evalFormula(this.itemDamage().criticalRate)
 };
 
 /*-------------------------------------------------------------

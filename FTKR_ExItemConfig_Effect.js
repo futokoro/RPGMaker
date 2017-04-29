@@ -3,8 +3,8 @@
 // FTKR_ExItemConfig_Effect.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/14
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2017/04/29
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EIE = FTKR.EIE || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 アイテムとスキルの使用効果を拡張するプラグイン
+ * @plugindesc v1.0.1 アイテムとスキルの使用効果を拡張するプラグイン
  * @author フトコロ
  *
  * @help
@@ -89,15 +89,13 @@ FTKR.EIE = FTKR.EIE || {};
  *  s[x]     - スイッチID x の状態を参照します。
  *  v[x]     - 変数ID x の値を参照します。
  *  iv[x]    - アイテムのセルフ変数ID x の値を参照します。(*1)
- *  hpDamage - Hpダメージ量を参照します。(*2)
- *  mpDamage - Mpダメージ量を参照します。(*2)
-* 
+ *  result  - スキル・アイテムを使用した結果を参照します。(*2)
+ *            result.hpDamage でHPダメージ量を取得します。
+ * 
+ * 
  * (*1) セルフ変数を使用する場合は、FTKR_ItemSelfVariables.jsが必要です。
  * (*2) FTKR_ExItemDamage.jsによってダメージIDを設定している場合は、
  *      設定した使用効果が発生するダメージIDのダメージ量を参照します。
- *      他のプラグインの計算式でダメージ量を参照したい場合は以下。
- *        Hpダメージ - b._result.hpDamage
- *        Mpダメージ - b._result.mpDamage
  * 
  * 
  * 設定例）
@@ -127,6 +125,9 @@ FTKR.EIE = FTKR.EIE || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.1 - 2017/04/29 : FTKR_ItemSelfVariables の v1.1.0以降に対応
+ *    1. ダメージ量の参照用コードを変更。
+ * 
  * v1.0.0 - 2017/04/14 : 初版公開
  * 
  *-----------------------------------------------------------------------------
@@ -138,6 +139,49 @@ FTKR.EIE = FTKR.EIE || {};
 // プラグイン パラメータ
 //=============================================================================
 FTKR.EIE.parameters = PluginManager.parameters('FTKR_ExItemConfig_Effect');
+
+//=============================================================================
+// 自作関数(グローバル)
+//=============================================================================
+
+FTKR.gameData = FTKR.gameData || {
+    user   :null,
+    target :null,
+    item   :null,
+    number :0,
+};
+
+if (!FTKR.setGameData) {
+FTKR.setGameData = function(user, target, item, number) {
+    FTKR.gameData = {
+        user   :user || null,
+        target :target || null,
+        item   :item || null,
+        number :number || 0
+    };
+};
+}
+
+if (!FTKR.evalFormula) {
+FTKR.evalFormula = function(formula) {
+    var datas = FTKR.gameData;
+    try {
+        var s = $gameSwitches._data;
+        var v = $gameVariables._data;
+        var a = datas.user;
+        var b = datas.target;
+        var item   = datas.item;
+        var number = datas.number;
+        if (b) var result = b.result();
+        var value = eval(formula);
+        if (isNaN(value)) value = 0;
+        return value;
+    } catch (e) {
+        console.error(e);
+        return 0;
+    }
+};
+}
 
 //=============================================================================
 // DataManager
@@ -270,26 +314,8 @@ Game_Action.prototype.applyItemEffect = function(target, effect) {
 };
 
 Game_Action.prototype.evalEffectEnabled = function(effect, target) {
-    return !effect.enabled ? true: evalEieFormula(effect.enabled, target);
-};
-
-Game_Action.prototype.evalEieFormula = function(formula, target) {
-    try {
-        var item = this.item();
-        var a = this.subject();
-        var b = target;
-        var s = $gameSwitches._data;
-        var v = $gameVariables._data;
-        var hpDamage = b._result.hpDamage;
-        var mpDamage = b._result.mpDamage;
-        if(Imported.FTKR_ISV) var iv = item._selfVariables._data;
-        var value = eval(formula);
-        if (isNaN(value)) value = false;
-        return value;
-    } catch (e) {
-        console.log(e);
-        return false;
-    }
+    FTKR.setGameData(this.subject(), target, this.item());
+    return !effect.enabled ? true: FTRK.evalFormula(effect.enabled);
 };
 
 Game_Action.prototype.changeTargetEffect = function(target, effect) {
@@ -319,6 +345,7 @@ Game_Action.prototype.changeTargetForRandom = function(isEnemy) {
 
 Game_Action.prototype.setSepEffectValue = function() {
     if(this.item()) {
+        FTKR.setGameData(this.subject(), this._target, this.item());
         this.item().effects.forEach(function(effect) {
             effect.value1 = this.setSepEffectValue1(effect);
             effect.value2 = this.setSepEffectValue2(effect);
@@ -327,11 +354,11 @@ Game_Action.prototype.setSepEffectValue = function() {
 };
 
 Game_Action.prototype.setSepEffectValue1 = function(effect) {
-    return effect.sepValue1 ? this.evalEieFormula(effect.sepValue1, this._target) : effect.baseValue1;
+    return effect.sepValue1 ? FTRK.evalFormula(effect.sepValue1) : effect.baseValue1;
 };
 
 Game_Action.prototype.setSepEffectValue2 = function(effect) {
-    return effect.sepValue2 ? this.evalEieFormula(effect.sepValue2, this._target) : effect.baseValue2;
+    return effect.sepValue2 ? FTRK.evalFormula(effect.sepValue2) : effect.baseValue2;
 };
 
 //=============================================================================

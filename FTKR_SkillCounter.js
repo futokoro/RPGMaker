@@ -3,8 +3,8 @@
 // FTKR_SkillCounter.js
 // 作成者     : フトコロ
 // 作成日     : 2017/02/21
-// 最終更新日 : 2017/04/23
-// バージョン : v1.0.5
+// 最終更新日 : 2017/04/29
+// バージョン : v1.0.6
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.SCT = FTKR.SCT || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.5 相手のスキルに対抗して効果を変えるプラグイン
+ * @plugindesc v1.0.6 相手のスキルに対抗して効果を変えるプラグイン
  * @author フトコロ
  *
  * @help 
@@ -260,6 +260,7 @@ FTKR.SCT = FTKR.SCT || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.6 - 2017/04/29 : 条件式にセルフ変数を使用できるように見直し。
  * v1.0.5 - 2017/04/23 : ヘルプ修正
  * v1.0.4 - 2017/04/23 : 日本語タグ追加、ヘルプ修正、内部処理見直し
  * v1.0.3 - 2017/04/23 : 不具合修正
@@ -275,6 +276,49 @@ FTKR.SCT = FTKR.SCT || {};
 // プラグイン パラメータ
 //=============================================================================
 FTKR.SCT.parameters = PluginManager.parameters('FTKR_SkillCounter.js');
+
+//=============================================================================
+// 自作関数(グローバル)
+//=============================================================================
+
+FTKR.gameData = FTKR.gameData || {
+    user   :null,
+    target :null,
+    item   :null,
+    number :0,
+};
+
+if (!FTKR.setGameData) {
+FTKR.setGameData = function(user, target, item, number) {
+    FTKR.gameData = {
+        user   :user || null,
+        target :target || null,
+        item   :item || null,
+        number :number || 0
+    };
+};
+}
+
+if (!FTKR.evalFormula) {
+FTKR.evalFormula = function(formula) {
+    var datas = FTKR.gameData;
+    try {
+        var s = $gameSwitches._data;
+        var v = $gameVariables._data;
+        var a = datas.user;
+        var b = datas.target;
+        var item   = datas.item;
+        var number = datas.number;
+        if (b) var result = b.result();
+        var value = eval(formula);
+        if (isNaN(value)) value = 0;
+        return value;
+    } catch (e) {
+        console.error(e);
+        return 0;
+    }
+};
+}
 
 //配列の中身が数字なら数値に変換する
 Array.prototype.numOrStr = function() {
@@ -348,33 +392,33 @@ var convertTextToConditions = function(text) {
 // Game_Action
 //=============================================================================
 
-DataManager.getItemMetaSplit = function(subject, target, item, metacode) {
-    return item && this.evalSctFormula(item, subject, target) ?
+DataManager.getItemMetaSplit = function(item, metacode) {
+    return item && this.evalSctFormula(item) ?
         readSplitMeta(item, metacode) : [];
 };
 
-DataManager.getItemsMetaSplitTotal = function(subject, target, items, metacode) {
+DataManager.getItemsMetaSplitTotal = function(items, metacode) {
     var result = [];
     items.forEach( function(item) {
-        Array.prototype.push.apply(result, this.getItemMetaSplit(subject, target, item, metacode));
+        Array.prototype.push.apply(result, this.getItemMetaSplit(item, metacode));
     },this);
     return result;
 };
 
 //targetが持つ、metacodeで指定したタグの値を配列にして返す
-DataManager.getItemsMetaArray = function(subject, target, metacode) {
+DataManager.getItemsMetaArray = function(target, metacode) {
     var result = [];
     if(target.isActor()) {
         return result.concat(
-            this.getItemMetaSplit(subject, target, target.actor(), metacode),
-            this.getItemMetaSplit(subject, target, $dataClasses[target.actor().classId], metacode),
-            this.getItemsMetaSplitTotal(subject, target, target.equips(), metacode),
-            this.getItemsMetaSplitTotal(subject, target, target.states(), metacode)
+            this.getItemMetaSplit(target.actor(), metacode),
+            this.getItemMetaSplit($dataClasses[target.actor().classId], metacode),
+            this.getItemsMetaSplitTotal(target.equips(), metacode),
+            this.getItemsMetaSplitTotal(target.states(), metacode)
         );
     } else if(target.isEnemy()) {
         return result.concat(
-            this.getItemMetaSplit(subject, target, target.enemy(), metacode),
-            this.getItemsMetaSplitTotal(subject, target, target.states(), metacode)
+            this.getItemMetaSplit(target.enemy(), metacode),
+            this.getItemsMetaSplitTotal(target.states(), metacode)
         );
     }
     return result;
@@ -387,18 +431,7 @@ DataManager.convertSctEnableConditions = function(obj) {
 DataManager.evalSctFormula = function(obj, subject, target) {
     var formula = this.convertSctEnableConditions(obj);
     if (!formula) return true;
-    try {
-        var a = subject;
-        var b = target;
-        var s = $gameSwitches._data;
-        var v = $gameVariables._data;
-        var value = eval(formula);
-        if (isNaN(value)) value = false;
-        return value;
-    } catch (e) {
-        console.log(e);
-        return false;
-    }
+    return FTKR.evalFormula(formula);
 };
 
 //=============================================================================
@@ -406,8 +439,9 @@ DataManager.evalSctFormula = function(obj, subject, target) {
 //=============================================================================
 
 Game_Action.prototype.checkSkillData = function(target, metacodes, data) {
+    FTKR.setGameData(this.subject(), target, this.item());
     return metacodes.some(function(metacode){
-        return DataManager.getItemsMetaArray(this.subject(), target, metacode).contains(data);
+        return DataManager.getItemsMetaArray(target, metacode).contains(data);
     },this);
 };
 

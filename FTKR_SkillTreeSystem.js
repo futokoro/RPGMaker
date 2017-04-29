@@ -3,8 +3,8 @@
 // FTKR_SkillTreeSystem.js
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/02/25
-// 最終更新日 : 2017/04/18
-// バージョン : v1.6.4
+// 最終更新日 : 2017/04/29
+// バージョン : v1.6.5
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.6.4 ツリー型スキル習得システム
+ * @plugindesc v1.6.5 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -1169,6 +1169,9 @@ FTKR.STS = FTKR.STS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.6.5 - 2017/04/29 : 機能追加
+ *    1. 計算式(eval)にセルフ変数を使用できるように見直し。
+ * 
  * v1.6.4 - 2017/04/18 : 不具合修正、機能追加
  *    1. stsCount()を計算式に入れたスキルを敵が使うと正しく計算できない
  *       不具合を修正。
@@ -1423,6 +1426,49 @@ Game_Action.EFFECT_RESET_TREE = 998;
 Game_Action.EFFECT_CLEAR_TREE = 997;
 
 FTKR.Utility = FTKR.Utility || {};
+
+//=============================================================================
+// 自作関数(グローバル)
+//=============================================================================
+
+FTKR.gameData = FTKR.gameData || {
+    user   :null,
+    target :null,
+    item   :null,
+    number :0,
+};
+
+if (!FTKR.setGameData) {
+FTKR.setGameData = function(user, target, item, number) {
+    FTKR.gameData = {
+        user   :user || null,
+        target :target || null,
+        item   :item || null,
+        number :number || 0
+    };
+};
+}
+
+if (!FTKR.evalFormula) {
+FTKR.evalFormula = function(formula) {
+    var datas = FTKR.gameData;
+    try {
+        var s = $gameSwitches._data;
+        var v = $gameVariables._data;
+        var a = datas.user;
+        var b = datas.target;
+        var item   = datas.item;
+        var number = datas.number;
+        if (b) var result = b.result();
+        var value = eval(formula);
+        if (isNaN(value)) value = 0;
+        return value;
+    } catch (e) {
+        console.error(e);
+        return 0;
+    }
+};
+}
 
 //=============================================================================
 // Bitmap
@@ -1761,6 +1807,7 @@ Game_Actor.prototype.setup = function(actorId) {
 FTKR.STS.Game_Actor_levelUp = Game_Actor.prototype.levelUp;
 Game_Actor.prototype.levelUp = function() {
     FTKR.STS.Game_Actor_levelUp.call(this);
+    FTKR.setGameData(this, null, null);
     this.getSp(this.evalStsFormula(FTKR.STS.sp.getLevelUp, 0, 0));
 };
 
@@ -1814,26 +1861,20 @@ Game_Actor.prototype.setStsUsedSp = function(skillId, value) {
 };
 
 Game_Actor.prototype.addStsUsedSp = function(skillId) {
-    var value = this.evalStsFormula(this.stsSkill(skillId).sts.costs[0].value, 0, 0);
+    var skill = this.stsSkill(skillId);
+    FTKR.setGameData(this, null, skill);
+    var value = this.evalStsFormula(skill.sts.costs[0].value, 0, 0);
     return this.setStsUsedSp(skillId, this.stsUsedSp(skillId) + value);
 };
 
 Game_Actor.prototype.evalStsFormula = function(formula, result1, result2) {
     if (!formula) return result1;
-    try {
-        var a = this;
-        var s = $gameSwitches._data;
-        var v = $gameVariables._data;
-        var value = Math.max(Math.floor(eval(formula)), result2);
-        if (isNaN(value)) value = result2;
-        return value;
-    } catch (e) {
-        return result2;
-    }
+    return Math.max(Math.floor(FTKR.evalFormula(formula)), result2);
 };
 
 Game_Actor.prototype.payLearnedCost = function(skillId) {
     var skill = this.stsSkill(skillId);
+    FTKR.setGameData(this, null, skill);
     this.payLearnedAnyCost(skill.sts.costs);
 };
 
@@ -1917,7 +1958,9 @@ Game_Actor.prototype.isStsLearnedOk = function(skillId) {
 };
 
 Game_Actor.prototype.isPayCostOk = function(skillId) {
-    var costs = this.stsSkill(skillId).sts.costs;
+    var skill = this.stsSkill(skillId);
+    FTKR.setGameData(this, null, skill);
+    var costs = skill.sts.costs;
     if (!costs.length) return true;
     return !costs.filter( function(cost) {
         return this.isPayCostNg(cost);
@@ -1925,7 +1968,9 @@ Game_Actor.prototype.isPayCostOk = function(skillId) {
 };
 
 Game_Actor.prototype.isReqParamOk = function(skillId) {
-    return this.evalStsFormula(this.stsSkill(skillId).sts.required, true, false);
+    var skill = this.stsSkill(skillId);
+    FTKR.setGameData(this, null, skill);
+    return this.evalStsFormula(skill.sts.required, true, false);
 };
 
 Game_Actor.prototype.stsLearnSkill = function(skillId) {
@@ -1977,6 +2022,8 @@ Game_Actor.prototype.resetTree = function(treeType) {
 
 Game_Actor.prototype.totalUsedSp = function(skill) {
     var totalSp = 0;
+    var skill = this.stsSkill(skillId);
+    FTKR.setGameData(this, null, skill);
     for (var c = 0; c < this.stsCount(skill.id); c++) {
         totalSp += this.evalStsFormula(skill.sts.costs[0].value, 0, 0);
     };
@@ -1989,9 +2036,12 @@ Game_Actor.prototype.getTreeDatas = function(treeType) {
 };
 
 Game_Actor.prototype.isShowItem = function(item, tree) {
+    FTKR.setGameData(this, null, item);
     return this.evalStsFormula(item.sts.show, true, false) &&
         this.getPreskillId(item.id, tree.id).every(function(skillId){
-            return this.evalStsFormula(this.stsSkill(skillId).sts.show, true, false);
+            var skill = this.stsSkill(skillId);
+            FTKR.gameData.item = skill;
+            return this.evalStsFormula(skill.sts.show, true, false);
         },this);
 };
 
@@ -2007,8 +2057,8 @@ Game_Actor.prototype.getSkillTree = function(tree) {
                 results.push(null);
             } else {
                 var item = this.stsSkill(id);
+                FTKR.setGameData(this, null, item);
                 if (this.evalStsFormula(item.sts.show, true, false)) {
-//                if (this.isShowItem(item, tree)) {
                     var skillIds = this.getDevSkillId(item, tree);
                     var data = { id:id, next:skillIds, x:i, y:count };
                     for (var t = 0; t < results.length; t++) {
@@ -2368,6 +2418,7 @@ Window_TreeType.prototype.item = function(index) {
 
 Window_TreeType.prototype.includes = function(weaponId) {
     var weapon = $dataWeapons[weaponId];
+    FTKR.setGameData(this._actor, null, weapon);
     return weapon && weapon.wtypeId === FTKR.STS.skillTreeId &&
         this._actor.evalStsFormula(weapon.sts.required, true, false);
 };
@@ -2955,8 +3006,9 @@ Window_StsCost.prototype.drawAllCost = function() {
       for (var i = 0; i< 3; i++) {
         var cost = skill.sts.costs[i];
         if (cost) {
-          if (FTKR.STS.sp.hideCost0 && cost.type === 'sp' && (!cost.value || Number(cost.value) === 0)) continue;
-          this.drawStsCost(cost, 0, y*(1+i), width);
+            FTKR.setGameData(this, null, skill);
+            if (FTKR.STS.sp.hideCost0 && cost.type === 'sp' && (!cost.value || Number(cost.value) === 0)) continue;
+            this.drawStsCost(cost, 0, y*(1+i), width);
         }
       }
     }
@@ -2964,17 +3016,17 @@ Window_StsCost.prototype.drawAllCost = function() {
 };
 
 Window_StsCost.prototype.drawStsCost = function(cost, x, y, width) {
-  var iw = Window_Base._iconWidth + 4;
-  width = width - iw;
-  this.drawIcon(this.setStsCost(cost).icon, x + 2, y + 2);
-  var params = [
-    this._actor.evalStsFormula(cost.value, 0, 0),
-    this.setStsCost(cost).base
-  ];
-  this.drawFormatTextEx(FTKR.STS.cost.itemFormat, x + iw, y, [this.setStsCost(cost).name]);
-  var num = FTKR.STS.cost.numberFormat.split(',');
-  this.changeTextColor(this.textColor(parseInt(num[0])));
-  this.drawStsFormatText(num[1], x, y, params, width + iw, 'right');
+    var iw = Window_Base._iconWidth + 4;
+    width = width - iw;
+    this.drawIcon(this.setStsCost(cost).icon, x + 2, y + 2);
+    var params = [
+        this._actor.evalStsFormula(cost.value, 0, 0),
+        this.setStsCost(cost).base
+    ];
+    this.drawFormatTextEx(FTKR.STS.cost.itemFormat, x + iw, y, [this.setStsCost(cost).name]);
+    var num = FTKR.STS.cost.numberFormat.split(',');
+    this.changeTextColor(this.textColor(parseInt(num[0])));
+    this.drawStsFormatText(num[1], x, y, params, width + iw, 'right');
 };
 
 //=============================================================================

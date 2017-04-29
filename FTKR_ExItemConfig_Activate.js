@@ -3,8 +3,8 @@
 // FTKR_ExItemConfig_Activate.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/14
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2017/04/29
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EIA = FTKR.EIA || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 アイテムとスキルの発動設定を拡張するプラグイン
+ * @plugindesc v1.0.1 アイテムとスキルの発動設定を拡張するプラグイン
  * @author フトコロ
  *
  * @param Enabled Repeat Failure
@@ -282,6 +282,8 @@ FTKR.EIA = FTKR.EIA || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.1 - 2017/04/29 : FTKR_ItemSelfVariables の v1.1.0以降に対応
+ * 
  * v1.0.0 - 2017/04/14 : 初版公開
  * 
  *-----------------------------------------------------------------------------
@@ -308,6 +310,49 @@ FTKR.EIA.customEva = {
     pFormula:String(FTKR.EIA.parameters['Physical Eva Formula'] || ''),
     mFormula:String(FTKR.EIA.parameters['Magical Eva Formula'] || ''),
 };
+
+//=============================================================================
+// 自作関数(グローバル)
+//=============================================================================
+
+FTKR.gameData = FTKR.gameData || {
+    user   :null,
+    target :null,
+    item   :null,
+    number :0,
+};
+
+if (!FTKR.setGameData) {
+FTKR.setGameData = function(user, target, item, number) {
+    FTKR.gameData = {
+        user   :user || null,
+        target :target || null,
+        item   :item || null,
+        number :number || 0
+    };
+};
+}
+
+if (!FTKR.evalFormula) {
+FTKR.evalFormula = function(formula) {
+    var datas = FTKR.gameData;
+    try {
+        var s = $gameSwitches._data;
+        var v = $gameVariables._data;
+        var a = datas.user;
+        var b = datas.target;
+        var item   = datas.item;
+        var number = datas.number;
+        if (b) var result = b.result();
+        var value = eval(formula);
+        if (isNaN(value)) value = 0;
+        return value;
+    } catch (e) {
+        console.error(e);
+        return 0;
+    }
+};
+}
 
 //=============================================================================
 // Number
@@ -448,27 +493,11 @@ BattleManager.invokeNormalAction = function(subject, target) {
 // Game_Action
 //=============================================================================
 
-Game_Action.prototype.evalEiaFormula = function(formula, target) {
-    try {
-        var item = this.item();
-        var a = this.subject();
-        var b = target;
-        var s = $gameSwitches._data;
-        var v = $gameVariables._data;
-        if(Imported.FTKR_ISV) var iv = item._selfVariables._data;
-        var value = eval(formula);
-        if (isNaN(value)) value = false;
-        return value;
-    } catch (e) {
-        console.log(e);
-        return false;
-    }
-};
-
 //書き換え
 Game_Action.prototype.numRepeats = function() {
+    FTKR.setGameData(this.subject(), null, this.item());
     var repeats = this.item().sepRepeats ?
-        this.evalEiaFormula(this.item().sepRepeats.count) :
+        FTRK.evalFormula(this.item().sepRepeats.count) :
         this.item().repeats;
     if (this.isAttack()) repeats += this.subject().attackTimesAdd();
     return Math.floor(repeats);
@@ -537,9 +566,10 @@ Game_Action.prototype.isActionFailure = function(target) {
 };
 
 Game_Action.prototype.itemSuccess = function(target) {
+    FTKR.setGameData(this.subject(), target, this.item());
     var repeats = this.item().sepRepeats;
     var result = repeats && repeats.successRate ?
-        this.evalEiaFormula(repeats.successRate, target) :
+        FTRK.evalFormula(repeats.successRate) :
         this.item().successRate * 0.01;
     return result;
 };
@@ -569,11 +599,12 @@ Game_Action.prototype.itemHitRate = function(target) {
 };
 
 Game_Action.prototype.itemCustomHitRate = function(formula, target) {
+    FTKR.setGameData(this.subject(), target, this.item());
     var repeats = this.item().sepRepeats;
     if (repeats && repeats.hitRate) {
-        return this.evalEiaFormula(repeats.hitRate, target);
+        return FTRK.evalFormula(repeats.hitRate);
     } else {
-        return this.evalEiaFormula(formula, target);
+        return FTRK.evalFormula(formula);
     }
 };
 
@@ -594,11 +625,12 @@ Game_Action.prototype.itemEva = function(target) {
 };
 
 Game_Action.prototype.itemCustomEvaRate = function(formula, target) {
+    FTKR.setGameData(this.subject(), target, this.item());
     var repeats = this.item().sepRepeats;
     if (repeats && repeats.evaRate) {
-        return this.evalEiaFormula(repeats.evaRate, target);
+        return FTRK.evalFormula(repeats.evaRate);
     } else {
-        return this.evalEiaFormula(formula, target);
+        return FTRK.evalFormula(formula);
     }
 };
 

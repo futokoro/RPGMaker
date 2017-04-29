@@ -3,8 +3,8 @@
 // FTKR_ExItemConfig_Required.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/14
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2017/04/29
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EIR = FTKR.EIR || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 アイテムとスキルの使用条件を拡張するプラグイン
+ * @plugindesc v1.0.1 アイテムとスキルの使用条件を拡張するプラグイン
  * @author フトコロ
  *
  * @help
@@ -113,6 +113,8 @@ FTKR.EIR = FTKR.EIR || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.1 - 2017/04/29 : FTKR_ItemSelfVariables の v1.1.0以降に対応
+ * 
  * v1.0.0 - 2017/04/14 : 初版公開
  * 
  *-----------------------------------------------------------------------------
@@ -124,6 +126,49 @@ FTKR.EIR = FTKR.EIR || {};
 // プラグイン パラメータ
 //=============================================================================
 FTKR.EIR.parameters = PluginManager.parameters('FTKR_ExItemConfig_Required');
+
+//=============================================================================
+// 自作関数(グローバル)
+//=============================================================================
+
+FTKR.gameData = FTKR.gameData || {
+    user   :null,
+    target :null,
+    item   :null,
+    number :0,
+};
+
+if (!FTKR.setGameData) {
+FTKR.setGameData = function(user, target, item, number) {
+    FTKR.gameData = {
+        user   :user || null,
+        target :target || null,
+        item   :item || null,
+        number :number || 0
+    };
+};
+}
+
+if (!FTKR.evalFormula) {
+FTKR.evalFormula = function(formula) {
+    var datas = FTKR.gameData;
+    try {
+        var s = $gameSwitches._data;
+        var v = $gameVariables._data;
+        var a = datas.user;
+        var b = datas.target;
+        var item   = datas.item;
+        var number = datas.number;
+        if (b) var result = b.result();
+        var value = eval(formula);
+        if (isNaN(value)) value = 0;
+        return value;
+    } catch (e) {
+        console.error(e);
+        return 0;
+    }
+};
+}
 
 //=============================================================================
 // DataManager
@@ -265,19 +310,8 @@ Game_Actor.prototype.isSkillRequiredParamOk = function(skill) {
 };
 
 Game_Actor.prototype.evalEirFormula = function(formula, item) {
-    if (!formula) return true;
-    try {
-        var a = this;
-        var s = $gameSwitches._data;
-        var v = $gameVariables._data;
-        if(Imported.FTKR_ISV) var iv = item._selfVariables._data;
-        var value = eval(formula);
-        if (isNaN(value)) value = false;
-        return value;
-    } catch (e) {
-        console.log(e);
-        return false;
-    }
+    FTKR.setGameData(this, null, item);
+    return !formula ? true : FTKR.evalFormula(formula);
 };
 
 //=============================================================================
