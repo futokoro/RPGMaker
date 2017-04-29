@@ -3,8 +3,8 @@
 // FTKR_EventSelfSwOperation.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/25
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2017/04/29
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ESO = FTKR.ESO || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 イベントのセルフスイッチを操作するプラグイン
+ * @plugindesc v1.0.1 イベントのセルフスイッチを操作するプラグイン
  * @author フトコロ
  *
  * @help 
@@ -62,6 +62,7 @@ FTKR.ESO = FTKR.ESO || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.1 - 2017/04/29 : 不具合修正
  * v1.0.0 - 2017/04/25 : 初版作成
  * 
  *-----------------------------------------------------------------------------
@@ -72,6 +73,13 @@ FTKR.ESO = FTKR.ESO || {};
 // プラグイン パラメータ
 //=============================================================================
 FTKR.ESO.parameters = PluginManager.parameters('FTKR_EventSelfSwReset');
+
+//配列の中身が数字なら数値に変換する
+Array.prototype.numOrStr = function() {
+    return this.map( function(elm, i) {
+        return isNaN(parseInt(elm)) ? elm : parseInt(elm);
+    });
+};
 
 //objのメモ欄から <metacode: x> の値を読み取って配列で返す
 var readSplitMeta = function(obj, metacode) {
@@ -121,7 +129,6 @@ Game_Interpreter.prototype.command201 = function() {
                     if (type.toUpperCase() === 'ALL') {
                         this.eventSelfSwReset(event.id);
                     } else {
-                        console.log(event.id, type);
                         this.eventSelfSwOFF(event.id, type);
                     }
                 },this);
