@@ -3,8 +3,8 @@
 // FTKR_AddOriginalParameters.js
 // 作成者     : フトコロ
 // 作成日     : 2017/02/16
-// 最終更新日 : 2017/04/25
-// バージョン : v1.1.3
+// 最終更新日 : 2017/04/30
+// バージョン : v1.1.4
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.AOP = FTKR.AOP || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.3 オリジナルのパラメータを追加するプラグイン
+ * @plugindesc v1.1.4 オリジナルのパラメータを追加するプラグイン
  * @author フトコロ
  *
  * @param Use Param Num
@@ -441,6 +441,9 @@ FTKR.AOP = FTKR.AOP || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.1.4 - 2017/04/30 : 不具合修正
+ *    1. 現在値を回復させるアイテムが最大値の状態でも使用可能な不具合を修正。
  * 
  * v1.1.3 - 2017/04/25 : 不具合修正
  *    1. ステートに設定したパラメータの変更設定が反映されない不具合を修正。
@@ -868,6 +871,17 @@ Game_Action.prototype.itemEffectGetAop = function(target, effect) {
     if (value !== 0) {
         target.gainCAop(effect.dataId, value);
         this.makeSuccess(target);
+    }
+};
+
+FTKR.AOP.Game_Action_testItemEffect = Game_Action.prototype.testItemEffect;
+Game_Action.prototype.testItemEffect = function(target, effect) {
+    switch (effect.code) {
+    case Game_Action.EFFECT_GET_AOP:
+        var paramId = effect.dataId;
+        return target._aop[paramId] < target.aopParam(paramId) || effect.value1 < 0 || effect.value2 < 0;
+    default:
+        return FTKR.AOP.Game_Action_testItemEffect.call(this, target, effect);
     }
 };
 
