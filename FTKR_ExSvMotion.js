@@ -808,10 +808,10 @@ Sprite_Battler.prototype.setNewMotion = function(battler, motionType) {
     this.consoleLog_BattlerMotion('data')
 };
 
-Sprite_Battler.prototype.esmUpdateMotionCount = function() {
+Sprite_Battler.prototype.esmUpdateMotionCount = function(battler) {
     if (this.motion() && ++this._motionCount >= this.motionSpeed()) {
         var frames = this.motionFrames();
-        var loopFrames = Imported.YED_SideviewBattler ? frames : frames + 1;
+        var loopFrames = Imported.YED_SideviewBattler && battler.isSideviewBattler() ? frames : frames + 1;
         // ループする場合
         if (this._motionIndex && this.motions().length <= 1) {
             this._pattern = (this._pattern + 1) % loopFrames;
@@ -897,7 +897,7 @@ Sprite_Battler.prototype.consoleLog_BattlerMotion = function(type, datas) {
 
 //書き換え
 Sprite_Actor.prototype.updateMotionCount = function() {
-    this.esmUpdateMotionCount();
+    this.esmUpdateMotionCount(this._actor);
 };
 
 //書き換え
@@ -952,7 +952,7 @@ if (Imported.YEP_X_AnimatedSVEnemies) {
 //書き換え
 Sprite_Enemy.prototype.updateMotionCount = function() {
     if (!this._svBattlerEnabled) return;
-    this.esmUpdateMotionCount();
+    this.esmUpdateMotionCount(this._enemy);
 };
 
 //書き換え
