@@ -811,9 +811,10 @@ Sprite_Battler.prototype.setNewMotion = function(battler, motionType) {
 Sprite_Battler.prototype.esmUpdateMotionCount = function() {
     if (this.motion() && ++this._motionCount >= this.motionSpeed()) {
         var frames = this.motionFrames();
+        var loopFrames = Imported.YED_SideviewBattler ? frames : frames + 1;
         // ループする場合
         if (this._motionIndex && this.motions().length <= 1) {
-            this._pattern = (this._pattern + 1) % frames;
+            this._pattern = (this._pattern + 1) % loopFrames;
             this.consoleLog_BattlerMotion('pattern')
         // ループしない場合 パターンを増やす
         } else if (this._pattern < frames - 1) {
