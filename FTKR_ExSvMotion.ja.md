@@ -147,7 +147,8 @@ victory ⇒ skill ⇒ item ⇒ walk ⇒ item ⇒ walk ⇒ ...
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.1.3](FTKR_ExSvMotion.js) | 2017/04/27 | requestMotion()に関する不具合修正<br>YED_SideviewBattlerに対応<br>YEP_X_AnimatedSVEnemiesに対応 |
+| [ver1.1.4](FTKR_ExSvMotion.js) | 2017/04/30 | YED_SideviewBattlerの対応が不十分だった箇所を修正 |
+| ver1.1.3 | 2017/04/27 | requestMotion()に関する不具合修正<br>YED_SideviewBattlerに対応<br>YEP_X_AnimatedSVEnemiesに対応 |
 | ver1.1.2 | 2017/04/27 | 状態モーション10以降が反映されない不具合修正 |
 | ver1.1.1 | 2017/04/26 | YEP_BattleEngineCoreに対応 |
 | ver1.1.0 | 2017/04/25 | 攻撃等の行動モーションを変更する機能を追加<br>状態モーションに、戦闘勝利、逃走、瀕死時のモーションを追加<br>状態モーションのデフォルト設定を見直し<br>複数のモーションを組み合わせて連続で表示する機能を追加 |

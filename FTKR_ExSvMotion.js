@@ -3,8 +3,8 @@
 // FTKR_ExSvMotion.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/19
-// 最終更新日 : 2017/04/27
-// バージョン : v1.1.3
+// 最終更新日 : 2017/04/30
+// バージョン : v1.1.4
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ESM = FTKR.ESM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.3 SVキャラのモーションを拡張するプラグイン
+ * @plugindesc v1.1.4 SVキャラのモーションを拡張するプラグイン
  * @author フトコロ
  *
  * @param --行動モーションの設定--
@@ -488,6 +488,10 @@ FTKR.ESM = FTKR.ESM || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.4 - 2017/04/30 : 不具合修正
+ *    1. YED_SideviewBattler側にモーションデータを正しく渡せていなかった
+ *       不具合を修正。
+ * 
  * v1.1.3 - 2017/04/27 : 不具合修正、機能追加
  *    1. requestMotion()に関する不具合修正。
  *    2. YED_SideviewBattlerのバトラーセットカスタムに対応。
@@ -869,13 +873,14 @@ Sprite_Battler.prototype.consoleLog_BattlerMotion = function(type, datas) {
         }
         break;
         case 'data':
-        console.log('Motion Name :', this.motionName());
-        console.log('motionIndex :', this._motionIndex);
-        console.log('index       :', this._index);
+        console.log('Motion Name  :', this.motionName());
+        console.log('Motion Index :', this.motion().index);
+        console.log('Type Index   :', this._motionIndex);
+        console.log('index        :', this._index);
         break;
         case 'pattern':
         console.log('Motion Name :', this.motionName());
-        console.log('motionIndex :', this._motionIndex);
+        console.log('Type Index  :', this._motionIndex);
         console.log('index       :', this._index);
         console.log('pattern     :', this._pattern);
         break;
@@ -974,12 +979,12 @@ if (Imported.YED_SideviewBattler) {
 
 //書き換え
 Sprite_Actor.prototype.getCurrentMotion = function() {
-    return this.motion();
+    return this._actor.getSideviewMotion(this.motionName());
 };
 
 //書き換え
 Sprite_Enemy.prototype.getCurrentMotion = function() {
-    return this.motion();
+    return this._enemy.getSideviewMotion(this.motionName());
 };
 
 }//Imported.ED_SideviewBattler
