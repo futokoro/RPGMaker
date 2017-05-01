@@ -4,7 +4,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2017/04/24
 // 最終更新日 : 2017/05/01
-// バージョン : v2.0.1
+// バージョン : v2.0.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EMW = FTKR.EMW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.0.1 一度に複数のメッセージウィンドウを表示するプラグイン
+ * @plugindesc v2.0.2 一度に複数のメッセージウィンドウを表示するプラグイン
  * @author フトコロ
  * 
  * @param Create ExWindow Number
@@ -324,6 +324,8 @@ FTKR.EMW = FTKR.EMW || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.0.2 - 2017/05/01 : 不具合修正
+ * 
  * v2.0.1 - 2017/05/01 : 機能追加、ヘルプ修正
  *    1. 強制終了コマンドに表示中の全ウィンドウIDを指定する機能を追加
  * 
@@ -386,9 +388,9 @@ Game_Interpreter.prototype.setMessageWindowId = function(args) {
     var windowId = Number(args[0] || 0);
     if (windowId >= 0 && windowId <= FTKR.EMW.exwindowNum) {
         this._windowId = windowId;
-        if (args[1] === '終了禁止' || args[1].toUpperCase() === 'NOEND') {
+        if (args[1] === '終了禁止' || args[1] && args[1].toUpperCase() === 'NOEND') {
             $gameMessageEx.window(windowId).prohibitClose();
-        } else if (args[1] === '終了許可' || args[1].toUpperCase() === 'CANCLOSE') {
+        } else if (args[1] === '終了許可' || args[1] && args[1].toUpperCase() === 'CANCLOSE') {
             $gameMessageEx.window(windowId).clear();
             $gameMessageEx.window(windowId).permitClose();
         }
@@ -396,7 +398,7 @@ Game_Interpreter.prototype.setMessageWindowId = function(args) {
 };
 
 Game_Interpreter.prototype.messageWindowTerminate = function(args) {
-    if (args[0] === 'すべて' || args[1].toUpperCase() === 'ALL') {
+    if (args[0] === 'すべて' || args[0] && args[0].toUpperCase() === 'ALL') {
         $gameMessageEx.windows().forEach( function(message){
             if (message.isBusyBase()) message.terminate();
         });
