@@ -4,7 +4,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2017/04/24
 // 最終更新日 : 2017/05/01
-// バージョン : v2.0.2
+// バージョン : v2.0.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EMW = FTKR.EMW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.0.2 一度に複数のメッセージウィンドウを表示するプラグイン
+ * @plugindesc v2.0.3 一度に複数のメッセージウィンドウを表示するプラグイン
  * @author フトコロ
  * 
  * @param Create ExWindow Number
@@ -67,10 +67,6 @@ FTKR.EMW = FTKR.EMW || {};
  * プラグインパラメータ<Create ExWindow Number>の設定で
  * ウィンドウIDを何番まで使用できるか決まります。
  * <設定値: 2> なら、ID0 ~ ID2 まで使用できます。
- * 
- * <設定値: 0> の場合は、マップ上のイベントの数のIDを使用できます。
- * また、自動的に文章を表示するイベントのIDと同じIDのメッセージウィンドウを
- * 使用します。
  * 
  * 
  * ＜ウィンドウIDの注意点＞
@@ -166,10 +162,6 @@ FTKR.EMW = FTKR.EMW || {};
  * 
  * 文章表示のイベントコマンドの前に、ウィンドウIDを指定するコマンドを
  * 実行してください。
- * 
- * なお、プラグインパラメータ<Create ExWindow Number>を 0 に設定した場合は
- * ウィンドウIDを指定する必要はありません。
- * 自動的にイベントIDと同じ番号のウィンドウIDを使用します。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -324,12 +316,13 @@ FTKR.EMW = FTKR.EMW || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.0.3 - 2017/05/01 : プラグインパラメータの不具合修正
+ *    1. <Create ExWindow Number>の設定値0の機能を削除
  * v2.0.2 - 2017/05/01 : 不具合修正
  * 
  * v2.0.1 - 2017/05/01 : 機能追加、ヘルプ修正
  *    1. 強制終了コマンドに表示中の全ウィンドウIDを指定する機能を追加
- * 
- * v2.0.0 - 2017/04/24 : 仕様全面見直し
+ * v2.0.0 - 2017/04/24 : v1から仕様全面見直し
  * 
  *-----------------------------------------------------------------------------
 */
@@ -369,14 +362,14 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
             case /メッセージウィンドウ終了禁止/i.test(command):
             case /MessageWindow_NoEnd/i.test(command):
                 var windowId = Number(args[0] || 0);
-                if (windowId >= 0 && windowId <= FTKR.EMW.exwindowNum) {
+                if (windowId >= 0) {
                     $gameMessageEx.window(windowId).prohibitClose();
                 }
                 break;
             case /メッセージウィンドウ終了許可/i.test(command):
             case /MessageWindow_CanClose/i.test(command):
                 var windowId = Number(args[0] || 0);
-                if (windowId >= 0 && windowId <= FTKR.EMW.exwindowNum) {
+                if (windowId >= 0) {
                     $gameMessageEx.window(windowId).permitClose();
                 }
                 break;
@@ -386,7 +379,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 Game_Interpreter.prototype.setMessageWindowId = function(args) {
     var windowId = Number(args[0] || 0);
-    if (windowId >= 0 && windowId <= FTKR.EMW.exwindowNum) {
+    if (windowId >= 0) {
         this._windowId = windowId;
         if (args[1] === '終了禁止' || args[1] && args[1].toUpperCase() === 'NOEND') {
             $gameMessageEx.window(windowId).prohibitClose();
@@ -404,7 +397,7 @@ Game_Interpreter.prototype.messageWindowTerminate = function(args) {
         });
     } else {
         var windowId = Number(args[0] || 0);
-        if (windowId >= 0 && windowId <= FTKR.EMW.exwindowNum) {
+        if (windowId >= 0) {
             var message = $gameMessageEx.window(windowId);
             if (message.isBusyBase()) message.terminate();
         }
@@ -595,7 +588,7 @@ Game_Interpreter.prototype.initialize = function(depth) {
 };
 
 Game_Interpreter.prototype.windowId = function() {
-    return !FTKR.EMW.exwindowNum ? this._eventId : this._windowId;
+    return this._windowId;
 };
 
 //------------------------------------------------------------------------
@@ -763,7 +756,6 @@ Game_MessageEx.prototype.initialize = function() {
 };
 
 Game_MessageEx.prototype.window = function(windowId) {
-    if (FTKR.EMW.exwindowNum < windowId) return undefined;
     if (!this._data[windowId]) {
         this._data[windowId] = new Game_Message();
     }
@@ -909,6 +901,7 @@ Window_ChoiceListEx.prototype = Object.create(Window_ChoiceList.prototype);
 Window_ChoiceListEx.prototype.constructor = Window_ChoiceListEx;
 
 Window_ChoiceListEx.prototype.initialize = function(messageWindow, windowId) {
+    console.log(windowId);
     this._windowId = windowId;
     this._gameMessage = $gameMessageEx.window(this._windowId);
     Window_ChoiceList.prototype.initialize.call(this, messageWindow);
@@ -1095,14 +1088,8 @@ Scene_Map.prototype.createAllWindows = function() {
 //プラグインパラメータで指定した数の拡張メッセージウィンドウを生成
 Scene_Map.prototype.createMessageExWindowAll = function() {
     this._messageExWindows = [];
-    if(!FTKR.EMW.exwindowNum) {
-        $gameMap.events().forEach(function(event){
-            this.createMessageExWindow(event._eventId);
-        },this);
-    } else {
-        for (var i = 1; i < FTKR.EMW.exwindowNum + 1; i++) {
-            this.createMessageExWindow(i);
-        }
+    for (var i = 1; i < FTKR.EMW.exwindowNum + 1; i++) {
+        this.createMessageExWindow(i);
     }
 };
 
