@@ -1157,7 +1157,7 @@ STS 削除 ツリータイプ(x) アクター(x)
 
 以下のプラグインを使用することで、本プラグインの機能を拡張できます。
 
-* [FTKR_STS_CustomWindow](FTKR_STS_CustomWindow.js) - レイアウト変更
+* [FTKR_STS_CustomWindow](FTKR_STS_CustomWindow.ja.md) - レイアウト変更
 * [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md) - アクターのステータス表示変更
 * [FTKR_DisplayCommandFrame](FTKR_DisplayCommandFrame.js) - スキル枠の表示変更
 
