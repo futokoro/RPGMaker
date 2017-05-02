@@ -3,8 +3,8 @@
 // FTKR_AutoSkillInState.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/27
-// 最終更新日 : 2017/04/28
-// バージョン : v1.0.1
+// 最終更新日 : 2017/05/02
+// バージョン : v1.0.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ASS = FTKR.ASS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.1 ステート解除時に自動でスキルを発動させるプラグイン
+ * @plugindesc v1.0.2 ステート解除時に自動でスキルを発動させるプラグイン
  * @author フトコロ
  *
  * @param 
@@ -70,8 +70,8 @@ FTKR.ASS = FTKR.ASS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.2 - 2017/05/02 : 例外処理を追加。
  * v1.0.1 - 2017/04/28 : ダメージを与えた相手にスキルを発動する機能追加
- * 
  * v1.0.0 - 2017/04/27 : 初版作成
  * 
  *-----------------------------------------------------------------------------
@@ -113,7 +113,7 @@ BattleManager.startTurn = function() {
 FTKR.ASS.BattleManager_endTurn = BattleManager.endTurn;
 BattleManager.endTurn = function() {
     FTKR.ASS.BattleManager_endTurn.call(this);
-    if (this._autoSkills.length) {
+    if (this._autoSkills && this._autoSkills.length) {
         this._phase = 'autoSkill'
     }
 };
@@ -167,7 +167,7 @@ BattleManager.endAutoSkill = function() {
 FTKR.ASS.Game_Battler_initMembers = Game_Battler.prototype.initMembers;
 Game_Battler.prototype.initMembers = function() {
     FTKR.ASS.Game_Battler_initMembers.call(this);
-    this._revenge = {id:-1,opponent:false};
+    this._revenge = {id:-1, opponent:false};
 };
 
 //書き換え
@@ -198,7 +198,7 @@ Game_Battler.prototype.setAssAutoSkill = function(obj) {
 
 Game_Battler.prototype.revengeTarget = function() {
     var revenge = this._revenge;
-    if (revenge.id === -1) return null;
+    if (!revenge || revenge.id === -1) return null;
     if (revenge.opponent) {
         return $gameTroop.members()[revenge.id];
     } else {
