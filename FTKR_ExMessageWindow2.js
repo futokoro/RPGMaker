@@ -3,8 +3,8 @@
 // FTKR_ExMessageWindow2.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/24
-// 最終更新日 : 2017/05/01
-// バージョン : v2.0.3
+// 最終更新日 : 2017/05/02
+// バージョン : v2.0.4
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EMW = FTKR.EMW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.0.3 一度に複数のメッセージウィンドウを表示するプラグイン
+ * @plugindesc v2.0.4 一度に複数のメッセージウィンドウを表示するプラグイン
  * @author フトコロ
  * 
  * @param Create ExWindow Number
@@ -64,9 +64,13 @@ FTKR.EMW = FTKR.EMW || {};
  * ID0 - MVデフォルトのメッセージウィンドウ
  * 
  * 
- * プラグインパラメータ<Create ExWindow Number>の設定で
- * ウィンドウIDを何番まで使用できるか決まります。
- * <設定値: 2> なら、ID0 ~ ID2 まで使用できます。
+ * ＜ウィンドウIDの使用できる数＞
+ * ウィンドウIDを何番まで使用できるかは以下の設定によります。
+ * 1. プラグインパラメータ<Create ExWindow Number>の設定
+ * 2. マップのメモ欄のタグ<EMW_生成数: x>または<EMW_NUMBER: x> の x値
+ * 
+ * マップデータのメモ欄の設定を優先します。
+ * 設定値が 2 なら、ID0 ~ ID2 まで使用できます。
  * 
  * 
  * ＜ウィンドウIDの注意点＞
@@ -302,6 +306,21 @@ FTKR.EMW = FTKR.EMW || {};
  *    :表示する文章や顔画像等の設定内容を初期化します。
  * 
  * 
+ * 6. ウィンドウの終了禁止
+ * $gameMessageEx.window(ウィンドウID).prohibitClose()
+ *    :指定したウィンドウIDを終了禁止設定にします。
+ * 
+ * 
+ * 7. ウィンドウの終了許可
+ * $gameMessageEx.window(ウィンドウID).permitClose()
+ *    :指定したウィンドウIDを終了許可設定にします。
+ * 
+ * 
+ * 8. ウィンドウの強制終了
+ * $gameMessageEx.window(ウィンドウID).terminate()
+ *    :指定したウィンドウIDを強制終了します。
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * 本プラグインのライセンスについて(License)
  *-----------------------------------------------------------------------------
@@ -315,6 +334,9 @@ FTKR.EMW = FTKR.EMW || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v2.0.4 - 2017/05/02 : 機能追加、スクリプト追加
+ *    1. マップメモ欄でウィンドウID生成数を設定するタグを追加
  * 
  * v2.0.3 - 2017/05/01 : プラグインパラメータの不具合修正
  *    1. <Create ExWindow Number>の設定値0の機能を削除
@@ -335,6 +357,16 @@ FTKR.EMW.parameters = PluginManager.parameters('FTKR_ExMessageWindow2');
 
 FTKR.EMW.exwindowNum = Number(FTKR.EMW.parameters['Create ExWindow Number'] || '');
 FTKR.EMW.nameWindows = [];
+
+//objのメモ欄から <metacode: x> の値を読み取って配列で返す
+var readObjectMeta = function(obj, metacodes) {
+    if (!obj) return false;
+    metacodes.some(function(metacode){
+        var metaReg = new RegExp('<' + metacode + ':[ ]*(.+)>', 'i');
+        return obj.note.match(metaReg);
+    }); 
+    return RegExp.$1 ? Number(RegExp.$1) : false;
+};
 
 //=============================================================================
 // プラグインコマンド
@@ -393,13 +425,12 @@ Game_Interpreter.prototype.setMessageWindowId = function(args) {
 Game_Interpreter.prototype.messageWindowTerminate = function(args) {
     if (args[0] === 'すべて' || args[0] && args[0].toUpperCase() === 'ALL') {
         $gameMessageEx.windows().forEach( function(message){
-            if (message.isBusyBase()) message.terminate();
+            message.terminate();
         });
     } else {
         var windowId = Number(args[0] || 0);
         if (windowId >= 0) {
-            var message = $gameMessageEx.window(windowId);
-            if (message.isBusyBase()) message.terminate();
+            $gameMessageEx.window(windowId).terminate();
         }
     }
 };
@@ -510,6 +541,7 @@ Game_Message.prototype.isTerminate = function() {
 }
 
 Game_Message.prototype.terminate = function() {
+    if (!this.isBusyBase()) return;
     this.permitClose();
     this._terminate = true;
     var message = this.windowMessageEx();
@@ -901,7 +933,6 @@ Window_ChoiceListEx.prototype = Object.create(Window_ChoiceList.prototype);
 Window_ChoiceListEx.prototype.constructor = Window_ChoiceListEx;
 
 Window_ChoiceListEx.prototype.initialize = function(messageWindow, windowId) {
-    console.log(windowId);
     this._windowId = windowId;
     this._gameMessage = $gameMessageEx.window(this._windowId);
     Window_ChoiceList.prototype.initialize.call(this, messageWindow);
@@ -1086,11 +1117,17 @@ Scene_Map.prototype.createAllWindows = function() {
 };
 
 //プラグインパラメータで指定した数の拡張メッセージウィンドウを生成
+//またはマップデータのメモ欄の設定を読み込む
 Scene_Map.prototype.createMessageExWindowAll = function() {
     this._messageExWindows = [];
-    for (var i = 1; i < FTKR.EMW.exwindowNum + 1; i++) {
+    var number = this.readMapMeta() || FTKR.EMW.exwindowNum;
+    for (var i = 1; i < number + 1; i++) {
         this.createMessageExWindow(i);
     }
+};
+
+Scene_Map.prototype.readMapMeta = function() {
+    return readObjectMeta($dataMap, ['EMW_生成数', 'EMW_NUMBER']);
 };
 
 //拡張メッセージウィンドウを生成
