@@ -119,6 +119,12 @@ used: 状況
 | --- | --- | --- |
 | [ver1.0.0](FTKR_ExItemConfig_ItemBasic.js) | 2017/04/14 | 初版公開 |
 
+## 拡張プラグイン
+
+以下のプラグインを使用することで、本プラグインの機能を拡張できます。
+
+* [FTKR_ExItemConfig_IB_SkillCost](FTKR_ExItemConfig_IB_SkillCost.ja.md) - スキルの消費コストを拡張します
+
 ## ライセンス
 
 本プラグインはMITライセンスのもとで公開しています。
