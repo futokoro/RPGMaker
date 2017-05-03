@@ -3,8 +3,8 @@
 // FTKR_ExVariablesChange.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/18
-// 最終更新日 : 2017/05/02
-// バージョン : v1.0.5
+// 最終更新日 : 2017/05/03
+// バージョン : v1.0.6
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EVC = FTKR.EVC || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.5 変数の操作を拡張するプラグイン
+ * @plugindesc v1.0.6 変数の操作を拡張するプラグイン
  * @author フトコロ
  *
  *
@@ -164,6 +164,10 @@ FTKR.EVC = FTKR.EVC || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.6 - 2017/05/03 : 不具合修正
+ *    1. 非ダメージ時を正しく処理できていない不具合を修正。
+ *    2. 計算式を正しく処理できていない不具合を修正。
+ * 
  * v1.0.5 - 2017/05/02 : 不具合修正
  *    1. アイテム増減時の処理の順番を変更。
  * 
@@ -212,8 +216,8 @@ FTKR.setGameData = function(user, target, item, number) {
 };
 }
 
-if (!FTKR.evalFormula) {
-FTKR.evalFormula = function(formula) {
+if (!FTKR.evalCalcFormula) {
+FTKR.evalCalcFormula = function(formula) {
     var datas = FTKR.gameData;
     try {
         var s = $gameSwitches._data;
@@ -223,12 +227,20 @@ FTKR.evalFormula = function(formula) {
         var item   = datas.item;
         var number = datas.number;
         if (b) var result = b.result();
-        var value = eval(formula);
-        if (isNaN(value)) value = 0;
-        return value;
+        if (Imported.FTKR_ISV) {
+            if (a) {
+                var aData = a.isActor() ? a.actor() : a.enemy();
+                if (aData._selfVariables) var av = aData._selfVariables._data;
+            }
+            if (b) {
+                var bData = b.isActor() ? b.actor() : b.enemy();
+                if (bData._selfVariables) var bv = bData._selfVariables._data;
+            }
+            if (item && item._selfVariables) var iv = item._selfVariables._data;
+        }
+        eval(formula);
     } catch (e) {
         console.error(e);
-        return 0;
     }
 };
 }
@@ -239,12 +251,10 @@ FTKR.evalFormula = function(formula) {
 
 // 挟み込み形式のメタデータを読み取ってtextを返す
 var readEntrapmentCodeToText = function(obj, codeTitles) {
-    if (!obj) return null;
     regs = convertEntrapmentRegArray('EVC', codeTitles);
     var notedata = obj.note.split(/[\r\n]+/);
     var setMode = 'none';
     var text = '';
-
     notedata.forEach( function(line) {
         if (testRegs(line, regs, 'a')) {
             setMode = 'read';
@@ -331,7 +341,7 @@ DataManager.variablesChangeUnitNoteTags = function(codeTitles, obj) {
 
 DataManager.evcEvalsFormula = function(evals) {
     for (var i = 0; i < evals.length; i++) {
-        FTKR.evalFormula(evals[i]);
+        FTKR.evalCalcFormula(evals[i]);
     }
     if($gameMap) $gameMap.requestRefresh();
 };
@@ -355,7 +365,6 @@ Game_Action.prototype.evcVariablesChange = function(target) {
         this.variablesChangeItemNoteTags(['使用成功時', 'SUCCESS'], this.subject());
         if (result.hpDamage || result.mpDamage) {
             this.variablesChangeItemNoteTags(['与ダメージ時', 'DAMAGE'], this.subject());
-            this.variablesChangeItemNoteTags(['被ダメージ時', 'RECEIVE_DAM'], target);
         }
     } else {
         this.variablesChangeItemNoteTags(['使用失敗時', 'FAILURE'], this.subject());
@@ -365,6 +374,25 @@ Game_Action.prototype.evcVariablesChange = function(target) {
 
 Game_Action.prototype.variablesChangeItemNoteTags = function(codeTitles, target) {
     DataManager.variablesChangeNoteTags(codeTitles, this.item(), target);
+};
+
+//=============================================================================
+// 被ダメージ時
+//=============================================================================
+
+FTKR.EVC.Game_Action_executeDamage = Game_Action.prototype.executeDamage;
+Game_Action.prototype.executeDamage = function(target, value) {
+    FTKR.EVC.Game_Action_executeDamage.call(this, target, value);
+    DataManager.variablesChangeItemNoteTags(['被ダメージ時', 'RECEIVE_DAM'], this.item());
+    if (this.isMpEffect()) {
+        DataManager.variablesChangeUnitNoteTags(['被ダメージ時', 'RECEIVE_DAM'], target);
+    }
+};
+
+FTKR.EVC.Game_Battler_onDamage = Game_Battler.prototype.onDamage;
+Game_Battler.prototype.onDamage = function(value) {
+    DataManager.variablesChangeUnitNoteTags(['被ダメージ時', 'RECEIVE_DAM'], this);
+    FTKR.EVC.Game_Battler_onDamage.call(this, value);
 };
 
 //=============================================================================

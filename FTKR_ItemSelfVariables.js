@@ -3,8 +3,8 @@
 // FTKR_ItemSelfVariables.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/26
-// 最終更新日 : 2017/04/29
-// バージョン : v1.1.2
+// 最終更新日 : 2017/05/03
+// バージョン : v1.1.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ISV = FTKR.ISV || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.2 アイテムやスキルにセルフ変数を実装するプラグイン
+ * @plugindesc v1.1.3 アイテムやスキルにセルフ変数を実装するプラグイン
  * @author フトコロ
  *
  * @param --セーブ設定--
@@ -231,6 +231,8 @@ FTKR.ISV = FTKR.ISV || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.3 - 2017/05/03 : 計算式の機能追加
+ * 
  * v1.1.2 - 2017/04/29 : ダメージ計算式の処理を見直し
  * 
  * v1.1.1 - 2017/04/26 : 不具合修正
@@ -314,6 +316,31 @@ FTKR.evalFormula = function(formula) {
     } catch (e) {
         console.error(e);
         return 0;
+    }
+};
+
+FTKR.evalCalcFormula = function(formula) {
+    var datas = FTKR.gameData;
+    try {
+        var s = $gameSwitches._data;
+        var v = $gameVariables._data;
+        var a = datas.user;
+        var b = datas.target;
+        var item   = datas.item;
+        var number = datas.number;
+        if (a) {
+            var aData = a.isActor() ? a.actor() : a.enemy();
+            if (aData._selfVariables) var av = aData._selfVariables._data;
+        }
+        if (b) {
+            var result = b.result();
+            var bData = b.isActor() ? b.actor() : b.enemy();
+            if (bData._selfVariables) var bv = bData._selfVariables._data;
+        }
+        if (item && item._selfVariables) var iv = item._selfVariables._data;
+        eval(formula);
+    } catch (e) {
+        console.error(e);
     }
 };
 
