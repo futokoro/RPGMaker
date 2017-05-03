@@ -1,6 +1,6 @@
 //=============================================================================
 // ステート解除時に自動でスキルを発動させるプラグイン
-// FTKR_AutoSkillInState.js
+// FTKR_AutoSkillRemovingState.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/27
 // 最終更新日 : 2017/05/03
@@ -91,7 +91,7 @@ FTKR.ASS = FTKR.ASS || {};
 //=============================================================================
 // プラグイン パラメータ
 //=============================================================================
-FTKR.ASS.parameters = PluginManager.parameters('FTKR_AutoSkillInState');
+FTKR.ASS.parameters = PluginManager.parameters('FTKR_AutoSkillRemovingState');
 
 //=============================================================================
 // BattleManager
