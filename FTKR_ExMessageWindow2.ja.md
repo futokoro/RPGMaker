@@ -406,6 +406,8 @@ EMW_MESSAGEWINDOW_SETSIZE Id WIDTH x LINES y
 * 幅 - 横幅 x をpixel単位で数値指定してください。
 * 行数 - 高さ y を行数単位で数値指定してください。
 
+一度ウィンドウが閉じると、この設定はリセットされます。
+
 例)
 ```
 EMW_メッセージウィンドウサイズ設定 1 幅 500 行数 2
@@ -425,6 +427,7 @@ EMW_MESSAGEWINDOW_SETPOSITION Id position
 * 右(rigth)  - 画面右寄せ
 
 設定しない場合は、左寄せで表示します。
+一度ウィンドウが閉じると、この設定はリセットされます。
 
 例)
 ```
