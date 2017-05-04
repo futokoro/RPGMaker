@@ -519,7 +519,8 @@ code
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.4.1](FTKR_CustomSimpleActorStatus.js) | 2017/04/25 | 逃走で戦闘終了するとSVキャラの表示位置が移動する不具合を修正 |
+| [ver1.4.2](FTKR_CustomSimpleActorStatus.js) | 2017/05/04 | カスタムパラメータとカスタムゲージにアクターのセルフ変数を適用 |
+| ver1.4.1 | 2017/04/25 | 逃走で戦闘終了するとSVキャラの表示位置が移動する不具合を修正 |
 | ver1.4.0 | 2017/04/21 | メニュー画面以外の表示変更機能を拡張プラグインとして分離<br>顔画像の表示仕様を変更<br>カスタム画像のタグの仕様を変更<br>メニュー画面の簡易ステータスウィンドウの設定変更機能を追加 |
 | [ver1.3.1](/archive/FTKR_CustomSimpleActorStatus_1.3.1.js) | 2017/04/21 | FTKR_ExSvMotion.jsに対応 |
 | ver1.3.0 | 2017/04/19 | ステートアイコンの表示仕様を変更 |
@@ -539,6 +540,7 @@ code
 * [FTKR_CSS_SkillStatus](FTKR_CSS_SkillStatus.ja.md) - スキル画面のステータスレイアウトを変更できます
 * [FTKR_AddOriginalParameters](FTKR_AddOriginalParameters.ja.md) - カスタムパラメータやカスタムゲージに使用可能なアクターのオリジナルパラメータを作成できます
 * [FTKR_ExSvMotion.js](FTKR_ExSvMotion.ja.md) - ステート付加時のモーションを追加・変更できます。
+* [FTKR_ItemSelfVariables.js](FTKR_ItemSelfVariables.ja.md) - アクターにセルフ変数を追加できます。
 
 ## ライセンス
 

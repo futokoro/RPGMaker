@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2017/04/25
-// バージョン : v1.4.1
+// 最終更新日 : 2017/05/04
+// バージョン : v1.4.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.4.1 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v1.4.2 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -1044,6 +1044,9 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.4.2 - 2017/05/04 : 機能追加
+ *    1. カスタムパラメータとカスタムゲージに、セルフ変数を適用。
+ * 
  * v1.4.1 - 2017/04/25 : 不具合修正
  *    1. 「逃げる」でバトルを終了した場合、ステータス上のSVキャラの
  *       表示位置がずれる不具合を修正。
@@ -1268,6 +1271,49 @@ FTKR.CSS.cssStatus = {
 
 //SV戦闘キャラ用の影画像の高さ
 Window_Base.SV_SHADOW_HEIGHT = 48;
+
+//=============================================================================
+// 自作関数(グローバル)
+//=============================================================================
+
+FTKR.gameData = FTKR.gameData || {
+    user   :null,
+    target :null,
+    item   :null,
+    number :0,
+};
+
+if (!FTKR.setGameData) {
+FTKR.setGameData = function(user, target, item, number) {
+    FTKR.gameData = {
+        user   :user || null,
+        target :target || null,
+        item   :item || null,
+        number :number || 0
+    };
+};
+}
+
+if (!FTKR.evalFormula) {
+FTKR.evalFormula = function(formula) {
+    var datas = FTKR.gameData;
+    try {
+        var s = $gameSwitches._data;
+        var v = $gameVariables._data;
+        var a = datas.user;
+        var b = datas.target;
+        var item   = datas.item;
+        var number = datas.number;
+        if (b) var result = b.result();
+        var value = eval(formula);
+        if (isNaN(value)) value = 0;
+        return value;
+    } catch (e) {
+        console.error(e);
+        return 0;
+    }
+};
+}
 
 //=============================================================================
 // 自作処理
@@ -1784,17 +1830,8 @@ Window_Base.prototype.drawCssActorGauge = function(actor, x, y, width, gauge) {
 
 Game_Actor.prototype.evalCssCustomFormula = function(formula) {
     if (!formula) return '';
-    try {
-        var a = this;
-        var s = $gameSwitches._data;
-        var v = $gameVariables._data;
-        var value = eval(formula);
-        if (isNaN(value)) value = 0;
-        return value;
-    } catch (e) {
-        console.log(e);
-        return 0;
-    }
+    FTKR.setGameData(this);
+    return FTKR.evalFormula(formula);
 };
 
 //------------------------------------------------------------------------
