@@ -703,11 +703,9 @@ Game_Message.prototype.isBusyBase = function() {
 
 FTKR.EMW.Game_Interpreter_command201 = Game_Interpreter.prototype.command201;
 Game_Interpreter.prototype.command201 = function() {
-    if (!$gameParty.inBattle() && !$gameMessage.isBusy()) {
-        $gameMessageEx.windows().forEach( function(message){
-            message.terminate();
-        });
-    }
+    $gameMessageEx.windows().forEach( function(message){
+        message.terminate();
+    });
     return FTKR.EMW.Game_Interpreter_command201.call(this);
 };
 
@@ -1308,6 +1306,7 @@ Scene_Map.prototype.readMapMeta = function() {
 Scene_Map.prototype.createMessageExWindow = function(windowId) {
     this._messageExWindows[windowId] = new Window_MessageEx(windowId);
     $gameMessageEx.window(windowId)._window_MessageEx = this._messageExWindows[windowId];
+    $gameMessageEx.window(windowId).terminate();
     this.addWindow(this._messageExWindows[windowId]);
     this._messageExWindows[windowId].subWindows().forEach(function(window) {
         this.addWindow(window);
