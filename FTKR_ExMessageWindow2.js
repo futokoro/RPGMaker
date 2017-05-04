@@ -3,8 +3,8 @@
 // FTKR_ExMessageWindow2.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/24
-// 最終更新日 : 2017/05/02
-// バージョン : v2.0.4
+// 最終更新日 : 2017/05/04
+// バージョン : v2.0.5
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EMW = FTKR.EMW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.0.4 一度に複数のメッセージウィンドウを表示するプラグイン
+ * @plugindesc v2.0.5 一度に複数のメッセージウィンドウを表示するプラグイン
  * @author フトコロ
  * 
  * @param Create ExWindow Number
@@ -265,6 +265,36 @@ FTKR.EMW = FTKR.EMW || {};
  * 指定したIDのウィンドウはメッセージ表示後に閉じるようになります。
  * 
  * 
+ * 6. メッセージウィンドウのサイズ設定(*1)
+ * 
+ * EMW_メッセージウィンドウサイズ設定 Id 幅 x 行数 y
+ * EMW_MESSAGEWINDOW_SETSIZE Id WIDTH x LINES y
+ * 
+ * 指定したIDのウィンドウのサイズを設定します。
+ * 幅 - 横幅 x をpixel単位で数値指定してください。
+ * 行数 - 高さ y を行数単位で数値指定してください。
+ * 
+ * 
+ * 7. メッセージウィンドウの表示位置設定(X座標)(*1)
+ * 
+ * EMW_メッセージウィンドウ位置設定 Id position
+ * EMW_MESSAGEWINDOW_SETPOSITION Id position
+ * 
+ * 指定したIDのウィンドウのX座標の表示位置 position を設定します。
+ * 表示したい位置に合わせて、以下の文字を指定してください。
+ *    左(left)   - 画面左寄せ
+ *    中(center) - 画面中央
+ *    右(rigth)  - 画面右寄せ
+ * 設定しない場合は、左寄せで表示します。
+ * 
+ * 例)
+ * EMW_メッセージウィンドウ位置設定 1 右
+ * EMW_MESSAGEWINDOW_SETPOSITION 1 right
+ * 
+ * 
+ * (*1) この設定は一度ウィンドウが閉じるとリセットします。
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * スクリプト
  *-----------------------------------------------------------------------------
@@ -276,11 +306,18 @@ FTKR.EMW = FTKR.EMW || {};
  * MVデフォルトのメッセージウィンドウ($gameMessage)と同じです。
  * 
  * 以下に、スクリプトの一例を示します。
+ * なお、これらの設定は一度文章を閉じるとリセットされます。
  * 
- * 1. 文章を表示
- * $gameMessageEx.window(ウィンドウID).add('文章')
+ * 1. 文章の表示
+ * $gameMessageEx.window(ウィンドウID).disp('文章')
+ *    :ウィンドウIDに'文章'を表示します。
  *    :'文章'には制御文字が使用できますが、この時は'\\v[1]'の用に
  *    :'\'記号を2つ使う必要があるので注意です。
+ *    :文章中に'\n'を追記すると、その部分で改行します。('\'は一つです)
+ * 
+ * $gameMessageEx.window(ウィンドウID).add('文章')
+ *    :ウィンドウIDに'文章'を追加します。
+ *    :このスクリプトを複数回連続して使うことで、複数行の文章を表示できます。
  * 
  * 
  * 2. 顔画像の設定
@@ -296,8 +333,15 @@ FTKR.EMW = FTKR.EMW || {};
  * 
  * 
  * 4. 表示位置の設定
+ * ＜Y座標＞
  * $gameMessageEx.window(ウィンドウID).setPositionType(位置番号)
  *    :位置番号 - 上(0) か 中(1) か 下(2) から選びます。
+ *    :          表示したい位置の番号を指定してください。
+ * 
+ * ＜X座標＞
+ * $gameMessageEx.window(ウィンドウID).setWindowX(位置番号)
+ *    :指定したウィンドウIDのX座標の位置を変更します。
+ *    :位置番号 - 左(0) か 中(1) か 右(2) から選びます。
  *    :          表示したい位置の番号を指定してください。
  * 
  * 
@@ -321,6 +365,14 @@ FTKR.EMW = FTKR.EMW || {};
  *    :指定したウィンドウIDを強制終了します。
  * 
  * 
+ * 9. ウィンドウのサイズ設定
+ * $gameMessageEx.window(ウィンドウID).setWindowSize(幅, 行数)
+ *    :指定したウィンドウIDのサイズを変更します。
+ *    :幅 - 横幅をpixel単位で数値指定してください。
+ *    :行数 - 高さを行数単位で数値指定してください。
+ *    :それぞれ、0 を指定するとデフォルトサイズを使用します。
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * 本プラグインのライセンスについて(License)
  *-----------------------------------------------------------------------------
@@ -334,6 +386,10 @@ FTKR.EMW = FTKR.EMW || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v2.0.5 - 2017/05/04 : プラグインコマンド、スクリプト追加
+ *    1. 文章表示用のスクリプト追加
+ *    2. ウィンドウのX座標位置とサイズを指定するコマンド追加
  * 
  * v2.0.4 - 2017/05/02 : 機能追加、スクリプト追加
  *    1. マップメモ欄でウィンドウID生成数を設定するタグを追加
@@ -366,6 +422,22 @@ var readObjectMeta = function(obj, metacodes) {
         return obj.note.match(metaReg);
     }); 
     return RegExp.$1 ? Number(RegExp.$1) : false;
+};
+
+var convertPositionX = function(text) {
+    switch(true){
+    case /左/.test(text):
+    case /left/i.test(text):
+        return 0;
+    case /中/.test(text):
+    case /center/i.test(text):
+        return 1;
+    case /右/.test(text):
+    case /right/i.test(text):
+        return 2;
+    default:
+        return parseInt(text);
+    }
 };
 
 //=============================================================================
@@ -405,6 +477,17 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
                     $gameMessageEx.window(windowId).permitClose();
                 }
                 break;
+            case /メッセージウィンドウサイズ設定/i.test(command):
+            case /MessageWindow_SetSize/i.test(command):
+                this.setMessageWindowSize(args);
+                break;
+            case /メッセージウィンドウ位置設定/i.test(command):
+            case /MessageWindow_SetPosition/i.test(command):
+                var windowId = Number(args[0] || 0);
+                if (windowId >= 0) {
+                    $gameMessageEx.window(windowId).setPositionX(args[1]);
+                }
+                break;
        }
     }
 };
@@ -435,11 +518,27 @@ Game_Interpreter.prototype.messageWindowTerminate = function(args) {
     }
 };
 
+Game_Interpreter.prototype.setMessageWindowSize = function(args) {
+    var windowId = Number(args[0] || 0);
+    if (windowId >= 0) {
+        if (args[1] === '幅' || args[1] && args[1].toUpperCase() === 'WIDTH') {
+            var width = Number(args[2]);
+        } else if (args[3] === '幅' || args[3] && args[3].toUpperCase() === 'WIDTH') {
+            var width = Number(args[4]);
+        }
+        if (args[1] === '行数' || args[1] && args[1].toUpperCase() === 'LINES') {
+            var heightLine = Number(args[2]);
+        } else if (args[3] === '行数' || args[3] && args[3].toUpperCase() === 'LINES') {
+            var heightLine = Number(args[4]);
+        }
+        $gameMessageEx.window(windowId).setWindowSize(width, heightLine);
+    }
+};
+
 //=============================================================================
 // メッセージ表示中でも行動可能にする処理を追加
 // \EMP  \DMP
 //=============================================================================
-
 //------------------------------------------------------------------------
 // Window_Message
 //------------------------------------------------------------------------
@@ -460,6 +559,66 @@ Window_Message.prototype.processEscapeCharacter = function(code, textState) {
     }
 };
 
+//------------------------------------------------------------------------
+// Game_Message
+//------------------------------------------------------------------------
+FTKR.EMW.Game_Message_clear = Game_Message.prototype.clear;
+Game_Message.prototype.clear = function() {
+    FTKR.EMW.Game_Message_clear.call(this);
+    this._canMovePlayer = false;
+    this._terminate = false;
+    this._lastText = false;
+    this._positionX = 0;
+    this._windowWidth = 0;
+    this._windowHeightLine = 0;
+};
+
+Game_Message.prototype.canMovePlayer = function() {
+    return this._canMovePlayer;
+};
+
+Game_Message.prototype.enabledCanMovePlayer = function() {
+    this._canMovePlayer = true;
+};
+
+Game_Message.prototype.disabledCanMovePlayer = function() {
+    this._canMovePlayer = false;
+};
+
+FTKR.EMW.Game_Message_isBusy = Game_Message.prototype.isBusy;
+Game_Message.prototype.isBusy = function() {
+    return this.canMovePlayer() || (!this.canClose() && this.isLastText()) ?
+        false : FTKR.EMW.Game_Message_isBusy.call(this);
+};
+
+//------------------------------------------------------------------------
+// Game_Interpreter
+//------------------------------------------------------------------------
+FTKR.EMW.Game_Interpreter_updateWaitMode = Game_Interpreter.prototype.updateWaitMode;
+Game_Interpreter.prototype.updateWaitMode = function() {
+    var waiting = false;
+    switch (this._waitMode) {
+    case 'messageEx':
+        waiting = $gameMessageEx.windows().some(function(message){
+            return message.isBusy();
+        });
+        break;
+    default:
+        waiting = FTKR.EMW.Game_Interpreter_updateWaitMode.call(this);
+        break;
+    }
+    if (!waiting) {
+        this._waitMode = '';
+    }
+    return waiting;
+};
+
+//=============================================================================
+// メッセージ表示用クラスの機能変更
+//=============================================================================
+//------------------------------------------------------------------------
+// 強制終了
+//------------------------------------------------------------------------
 //書き換え
 Window_Message.prototype.update = function() {
     this.checkToNotClose();
@@ -502,40 +661,6 @@ Window_Message.prototype.terminateMessage = function() {
     if ($gameMessage.canClose()) FTKR.EMW.Window_Message_terminateMessage.call(this);
 };
 
-//------------------------------------------------------------------------
-// Game_Message
-//------------------------------------------------------------------------
-FTKR.EMW.Game_Message_initialize = Game_Message.prototype.initialize;
-Game_Message.prototype.initialize = function() {
-    FTKR.EMW.Game_Message_initialize.call(this);
-    this._permissionClose = true;
-};
-
-FTKR.EMW.Game_Message_clear = Game_Message.prototype.clear;
-Game_Message.prototype.clear = function() {
-    FTKR.EMW.Game_Message_clear.call(this);
-    this._canMovePlayer = false;
-    this._terminate = false;
-    this._lastText = false;
-    this._positionX = 1;
-};
-
-Game_Message.prototype.windowMessageEx = function() {
-    return this._window_MessageEx;
-}
-
-Game_Message.prototype.canClose = function() {
-    return this._permissionClose;
-};
-
-Game_Message.prototype.permitClose = function() {
-    this._permissionClose = true;
-};
-
-Game_Message.prototype.prohibitClose = function() {
-    this._permissionClose = false;
-};
-
 Game_Message.prototype.isTerminate = function() {
     return this._terminate;
 }
@@ -551,17 +676,9 @@ Game_Message.prototype.terminate = function() {
     }
 }
 
-Game_Message.prototype.canMovePlayer = function() {
-    return this._canMovePlayer;
-};
-
-Game_Message.prototype.enabledCanMovePlayer = function() {
-    this._canMovePlayer = true;
-};
-
-Game_Message.prototype.disabledCanMovePlayer = function() {
-    this._canMovePlayer = false;
-};
+Game_Message.prototype.windowMessageEx = function() {
+    return this._window_MessageEx;
+}
 
 Game_Message.prototype.isLastText = function() {
     return this._lastText;
@@ -575,37 +692,73 @@ Game_Message.prototype.lastText = function() {
     this._lastText = true;
 };
 
-FTKR.EMW.Game_Message_isBusy = Game_Message.prototype.isBusy;
-Game_Message.prototype.isBusy = function() {
-    return this.canMovePlayer() || (!this.canClose() && this.isLastText()) ?
-        false : FTKR.EMW.Game_Message_isBusy.call(this);
-};
-
 Game_Message.prototype.isBusyBase = function() {
     return (this.hasText() || this.isChoice() ||
             this.isNumberInput() || this.isItemChoice());
 }
 
 //------------------------------------------------------------------------
-// Game_Interpreter
+// ウィンドウの終了禁止・許可
 //------------------------------------------------------------------------
-FTKR.EMW.Game_Interpreter_updateWaitMode = Game_Interpreter.prototype.updateWaitMode;
-Game_Interpreter.prototype.updateWaitMode = function() {
-    var waiting = false;
-    switch (this._waitMode) {
-    case 'messageEx':
-        waiting = $gameMessageEx.windows().some(function(message){
-            return message.isBusy();
-        });
-        break;
-    default:
-        waiting = FTKR.EMW.Game_Interpreter_updateWaitMode.call(this);
-        break;
+FTKR.EMW.Game_Message_initialize = Game_Message.prototype.initialize;
+Game_Message.prototype.initialize = function() {
+    FTKR.EMW.Game_Message_initialize.call(this);
+    this._permissionClose = true;
+};
+
+Game_Message.prototype.canClose = function() {
+    return this._permissionClose;
+};
+
+Game_Message.prototype.permitClose = function() {
+    this._permissionClose = true;
+};
+
+Game_Message.prototype.prohibitClose = function() {
+    this._permissionClose = false;
+};
+
+//------------------------------------------------------------------------
+// 文章表示
+//------------------------------------------------------------------------
+Game_Message.prototype.disp = function(text) {
+    this.clear();
+    this.add(text);
+}
+
+//------------------------------------------------------------------------
+// ウィンドウの位置サイズ変更
+//------------------------------------------------------------------------
+FTKR.EMW.Window_Message_updatePlacement = Window_Message.prototype.updatePlacement;
+Window_Message.prototype.updatePlacement = function() {
+    this.width = $gameMessage.windowWidth();
+    this.height = this.fittingHeight($gameMessage.windowHeightLine());
+    FTKR.EMW.Window_Message_updatePlacement.call(this);
+    if ($gameMessage.windowPositionX()) {
+        this._positionX = $gameMessage.windowPositionX();
+        this.x = this._positionX * (Graphics.boxWidth - this.width) / 2;
     }
-    if (!waiting) {
-        this._waitMode = '';
-    }
-    return waiting;
+};
+
+Game_Message.prototype.setWindowSize = function(width, heightLine) {
+    this._windowWidth = width;
+    this._windowHeightLine = heightLine;
+};
+
+Game_Message.prototype.windowWidth = function() {
+    return this._windowWidth || Graphics.boxWidth;
+};
+
+Game_Message.prototype.windowHeightLine = function() {
+    return this._windowHeightLine || 4;
+};
+
+Game_Message.prototype.setPositionX = function(positionX) {
+    this._positionX = convertPositionX(positionX);
+};
+
+Game_Message.prototype.windowPositionX = function() {
+    return this._positionX;
 };
 
 //=============================================================================
@@ -633,7 +786,6 @@ Game_Interpreter.prototype.command101 = function() {
         return FTKR.EMW.Game_Interpreter_command101.call(this);
     } else {
         if (!$gameMessageEx.window(windowId).isBusy()) {
-            $gameMessageEx.window(windowId).clear();
             $gameMessageEx.window(windowId).setFaceImage(this._params[0], this._params[1]);
             $gameMessageEx.window(windowId).setBackground(this._params[2]);
             $gameMessageEx.window(windowId).setPositionType(this._params[3]);
@@ -845,9 +997,16 @@ Window_MessageEx.prototype.updateConditions = function() {
 };
 
 Window_MessageEx.prototype.updatePlacement = function() {
+    this.width = this._gameMessage.windowWidth();
+    this.height = this.fittingHeight(this._gameMessage.windowHeightLine());
+    console.log(this.x, this.y, this.width, this.height);
     this._positionType = this._gameMessage.positionType();
     this.y = this._positionType * (Graphics.boxHeight - this.height) / 2;
     this._goldWindow.y = this.y > 0 ? 0 : Graphics.boxHeight - this._goldWindow.height;
+    console.log(this.x, this.y, this.width, this.height);
+    this._positionX = this._gameMessage.windowPositionX();
+    this.x = this._positionX * (Graphics.boxWidth - this.width) / 2;
+    console.log(this.x, this.y, this.width, this.height);
 };
 
 Window_MessageEx.prototype.updateBackground = function() {
