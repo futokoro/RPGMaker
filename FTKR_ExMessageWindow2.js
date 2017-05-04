@@ -387,8 +387,9 @@ FTKR.EMW = FTKR.EMW || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
- * v2.0.6 - 2017/05/04 : 機能変更
- *    1. ウィンドウのX座標位置とサイズの設定機能を見直し。
+ * v2.0.6 - 2017/05/04 : 機能追加
+ *    1. 場所移動時に、ウィンドウIDを強制終了させる機能を追加。
+ *    2. ウィンドウのX座標位置とサイズの設定機能を見直し。
  * 
  * v2.0.5 - 2017/05/04 : プラグインコマンド、スクリプト追加
  *    1. 文章表示用のスクリプト追加
@@ -699,6 +700,16 @@ Game_Message.prototype.isBusyBase = function() {
     return (this.hasText() || this.isChoice() ||
             this.isNumberInput() || this.isItemChoice());
 }
+
+FTKR.EMW.Game_Interpreter_command201 = Game_Interpreter.prototype.command201;
+Game_Interpreter.prototype.command201 = function() {
+    if (!$gameParty.inBattle() && !$gameMessage.isBusy()) {
+        $gameMessageEx.windows().forEach( function(message){
+            message.terminate();
+        });
+    }
+    return FTKR.EMW.Game_Interpreter_command201.call(this);
+};
 
 //------------------------------------------------------------------------
 // ウィンドウの終了禁止・許可
