@@ -4,7 +4,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2017/04/24
 // 最終更新日 : 2017/05/04
-// バージョン : v2.0.6
+// バージョン : v2.0.7
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EMW = FTKR.EMW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.0.6 一度に複数のメッセージウィンドウを表示するプラグイン
+ * @plugindesc v2.0.7 一度に複数のメッセージウィンドウを表示するプラグイン
  * @author フトコロ
  * 
  * @param Create ExWindow Number
@@ -387,6 +387,9 @@ FTKR.EMW = FTKR.EMW || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.0.7 - 2017/05/04 : 不具合修正
+ *    1. ウィンドウID0 が正しく動作しない不具合を修正。
+ * 
  * v2.0.6 - 2017/05/04 : 機能追加
  *    1. 場所移動時に、ウィンドウIDを強制終了させる機能を追加。
  *    2. ウィンドウのX座標位置とサイズの設定機能を見直し。
@@ -743,8 +746,12 @@ Game_Message.prototype.disp = function(text) {
 //------------------------------------------------------------------------
 FTKR.EMW.Window_Message_updatePlacement = Window_Message.prototype.updatePlacement;
 Window_Message.prototype.updatePlacement = function() {
-    this.width = $gameMessage.windowWidth();
-    this.height = this.fittingHeight($gameMessage.windowHeightLine());
+    if ($gameMessage.windowWidth()) {
+        this.width = $gameMessage.windowWidth();
+    }
+    if ($gameMessage.windowHeightLine()) {
+        this.height = this.fittingHeight($gameMessage.windowHeightLine());
+    }
     FTKR.EMW.Window_Message_updatePlacement.call(this);
     if ($gameMessage.windowPositionX()) {
         this._positionX = $gameMessage.windowPositionX();
@@ -862,7 +869,7 @@ FTKR.EMW.Game_Interpreter_setupChoices = Game_Interpreter.prototype.setupChoices
 Game_Interpreter.prototype.setupChoices = function(params) {
     var windowId = this.windowId();
     if (!windowId) {
-        FTKR.EMW.Game_Interpreter_setupChoices.call(this);
+        FTKR.EMW.Game_Interpreter_setupChoices.call(this, params);
     } else {
         var choices = params[0].clone();
         var cancelType = params[1];
@@ -903,7 +910,7 @@ FTKR.EMW.Game_Interpreter_setupNumInput = Game_Interpreter.prototype.setupNumInp
 Game_Interpreter.prototype.setupNumInput = function(params) {
     var windowId = this.windowId();
     if (!windowId) {
-        FTKR.EMW.Game_Interpreter_setupNumInput.call(this);
+        FTKR.EMW.Game_Interpreter_setupNumInput.call(this, params);
     } else {
         $gameMessageEx.window(windowId).setNumberInput(params[0], params[1]);
     }
@@ -931,7 +938,7 @@ FTKR.EMW.Game_Interpreter_setupItemChoice = Game_Interpreter.prototype.setupItem
 Game_Interpreter.prototype.setupItemChoice = function(params) {
     var windowId = this.windowId();
     if (!windowId) {
-        FTKR.EMW.Game_Interpreter_setupItemChoice.call(this);
+        FTKR.EMW.Game_Interpreter_setupItemChoice.call(this, params);
     } else {
         $gameMessageEx.window(windowId).setItemChoice(params[0], params[1] || 2);
     }
@@ -1292,6 +1299,9 @@ Scene_Map.prototype.createAllWindows = function() {
 //またはマップデータのメモ欄の設定を読み込む
 Scene_Map.prototype.createMessageExWindowAll = function() {
     this._messageExWindows = [];
+    this._messageExWindows[0] = this._messageWindow;
+    $gameMessageEx.window(0)._window_MessageEx = this._messageExWindows[0];
+    $gameMessageEx.window(0).terminate();
     var number = this.readMapMeta() || FTKR.EMW.exwindowNum;
     for (var i = 1; i < number + 1; i++) {
         this.createMessageExWindow(i);
