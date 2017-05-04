@@ -4,7 +4,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2017/04/24
 // 最終更新日 : 2017/05/04
-// バージョン : v2.0.5
+// バージョン : v2.0.6
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EMW = FTKR.EMW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.0.5 一度に複数のメッセージウィンドウを表示するプラグイン
+ * @plugindesc v2.0.6 一度に複数のメッセージウィンドウを表示するプラグイン
  * @author フトコロ
  * 
  * @param Create ExWindow Number
@@ -332,16 +332,9 @@ FTKR.EMW = FTKR.EMW || {};
  *    :          表示したい背景タイプの番号を指定してください。
  * 
  * 
- * 4. 表示位置の設定
- * ＜Y座標＞
+ * 4. 表示位置(Y座標)の設定
  * $gameMessageEx.window(ウィンドウID).setPositionType(位置番号)
  *    :位置番号 - 上(0) か 中(1) か 下(2) から選びます。
- *    :          表示したい位置の番号を指定してください。
- * 
- * ＜X座標＞
- * $gameMessageEx.window(ウィンドウID).setWindowX(位置番号)
- *    :指定したウィンドウIDのX座標の位置を変更します。
- *    :位置番号 - 左(0) か 中(1) か 右(2) から選びます。
  *    :          表示したい位置の番号を指定してください。
  * 
  * 
@@ -373,6 +366,13 @@ FTKR.EMW = FTKR.EMW || {};
  *    :それぞれ、0 を指定するとデフォルトサイズを使用します。
  * 
  * 
+ * 10. 表示位置(X座標)の設定
+ * $gameMessageEx.window(ウィンドウID).setWindowX(位置番号)
+ *    :指定したウィンドウIDのX座標の位置を変更します。
+ *    :位置番号 - 左(0) か 中(1) か 右(2) から選びます。
+ *    :          表示したい位置の番号を指定してください。
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * 本プラグインのライセンスについて(License)
  *-----------------------------------------------------------------------------
@@ -386,6 +386,9 @@ FTKR.EMW = FTKR.EMW || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v2.0.6 - 2017/05/04 : 機能変更
+ *    1. ウィンドウのX座標位置とサイズの設定機能を見直し。
  * 
  * v2.0.5 - 2017/05/04 : プラグインコマンド、スクリプト追加
  *    1. 文章表示用のスクリプト追加
@@ -746,11 +749,11 @@ Game_Message.prototype.setWindowSize = function(width, heightLine) {
 };
 
 Game_Message.prototype.windowWidth = function() {
-    return this._windowWidth || Graphics.boxWidth;
+    return this._windowWidth;
 };
 
 Game_Message.prototype.windowHeightLine = function() {
-    return this._windowHeightLine || 4;
+    return this._windowHeightLine;
 };
 
 Game_Message.prototype.setPositionX = function(positionX) {
@@ -997,16 +1000,17 @@ Window_MessageEx.prototype.updateConditions = function() {
 };
 
 Window_MessageEx.prototype.updatePlacement = function() {
-    this.width = this._gameMessage.windowWidth();
-    this.height = this.fittingHeight(this._gameMessage.windowHeightLine());
-    console.log(this.x, this.y, this.width, this.height);
+    if (this._gameMessage.windowWidth()) {
+        this.width = this._gameMessage.windowWidth();
+    }
+    if (this._gameMessage.windowHeightLine()) {
+        this.height = this.fittingHeight(this._gameMessage.windowHeightLine());
+    }
     this._positionType = this._gameMessage.positionType();
     this.y = this._positionType * (Graphics.boxHeight - this.height) / 2;
     this._goldWindow.y = this.y > 0 ? 0 : Graphics.boxHeight - this._goldWindow.height;
-    console.log(this.x, this.y, this.width, this.height);
     this._positionX = this._gameMessage.windowPositionX();
-    this.x = this._positionX * (Graphics.boxWidth - this.width) / 2;
-    console.log(this.x, this.y, this.width, this.height);
+    if (this._positionX) this.x = this._positionX * (Graphics.boxWidth - this.width) / 2;
 };
 
 Window_MessageEx.prototype.updateBackground = function() {
