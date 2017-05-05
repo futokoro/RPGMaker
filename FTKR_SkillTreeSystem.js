@@ -3,8 +3,8 @@
 // FTKR_SkillTreeSystem.js
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/02/25
-// 最終更新日 : 2017/04/29
-// バージョン : v1.6.5
+// 最終更新日 : 2017/05/05
+// バージョン : v1.6.6
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.6.5 ツリー型スキル習得システム
+ * @plugindesc v1.6.6 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -233,7 +233,11 @@ FTKR.STS = FTKR.STS || {};
  * @desc タイトルの表示内容を文字列で記述します。
  * %1 - アクター名, %2 - スキル名
  * @default \c[16][%2]のスキル情報
- *
+ * 
+ * @param Adjust Skill Desc Width
+ * @desc 説明文に制御文字が使えなくなる代わりに枠内に自動で納まるように調整する。(0 - 無効, 1 - 有効)
+ * @default 0
+ * 
  * @param --コストウィンドウの設定(Cost Window)--
  * @default 
  *
@@ -250,6 +254,11 @@ FTKR.STS = FTKR.STS || {};
  * @desc コスト数量の表示内容を'色番号,文字列'で記述します。
  *  %1 - コスト数量, %2 - コストの手持ち量
  * @default 17,%1(%2)
+ *
+ * @param Cost Number Width
+ * @desc コスト数量の表示幅を指定します。(pixel単位)
+ * 0 - 指定しない
+ * @default 0
  *
  * @param --前提スキルウィンドウの設定(Pre Skill Window)--
  * @default 
@@ -882,7 +891,12 @@ FTKR.STS = FTKR.STS || {};
  *    :%1 を記述した箇所がアクター名に、%2 がスキル名に換わります。
  *    :制御文字が使えます。
  * 
- *
+ * <Adjust Skill Desc Width>
+ *    :説明文に制御文字が使えなくなる代わりに、ウィンドウの枠内に
+ *    :自動で納まるように調整する機能です。
+ *    :0 - 無効、1 - 有効
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * 習得コストウィンドウの表示設定
  *-----------------------------------------------------------------------------
@@ -903,6 +917,11 @@ FTKR.STS = FTKR.STS || {};
  *    :一つ目の数値がコスト数値の色を表します。
  *    :文字列に記述した %1 が コスト値、%2 が 手持ちの値に換わります。
  *    :文字列には制御文字は使用できません。
+ * 
+ * <Cost Number Width>
+ *    :コスト数量の表示幅をpixel単位指定します。
+ *    :コスト数量の文字列が表示幅を超える場合は、自動で文字サイズを調整します。
+ *    :0 の場合は、幅を制限せずにそのまま表示します。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -1169,6 +1188,9 @@ FTKR.STS = FTKR.STS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.6.6 - 2017/05/05 : 機能追加
+ *    1. 説明文とコスト数値の幅調整機能を追加。
+ * 
  * v1.6.5 - 2017/04/29 : 機能追加
  *    1. 計算式(eval)にセルフ変数を使用できるように見直し。
  * 
@@ -1378,6 +1400,7 @@ FTKR.STS.actorStatus = {
 //スキルステータスウィンドウ設定
 FTKR.STS.skillStatus = {
   titleFormat:String(FTKR.STS.parameters['Skill Status Title Format'] || ''),
+  adjustWidth:Number(FTKR.STS.parameters['Adjust Skill Desc Width'] || 0),
 };
 //ツリータイプウィンドウ設定
 FTKR.STS.treeTypes = {
@@ -1388,6 +1411,7 @@ FTKR.STS.cost = {
   titleFormat:String(FTKR.STS.parameters['Cost Title Format'] || ''),
   itemFormat:String(FTKR.STS.parameters['Cost Item Format'] || ''),
   numberFormat:String(FTKR.STS.parameters['Cost Number Format'] || ''),
+  numberWidth:Number(FTKR.STS.parameters['Cost Number Width'] || 0),
 };
 //スキルツリーウィンドウ設定
 FTKR.STS.skillTree = {
@@ -2224,7 +2248,11 @@ Window_Base.prototype.drawStsDescription = function(x, y, width, skill) {
     var texts = this.getStsDesc(skill).split('\n');
     var dy = this.lineHeight();
     for (var i = 0; i < texts.length; i++) {
-        this.drawFormatTextEx(texts[i], x, y + dy * i, []);
+        if (FTKR.STS.skillStatus.adjustWidth) {
+            this.drawStsFormatText(texts[i], x, y + dy * i, [], width);
+        } else {
+            this.drawFormatTextEx(texts[i], x, y + dy * i, []);
+        }
     }
 };
 
@@ -2848,7 +2876,7 @@ Window_StsSkillStatus.prototype.drawSkillState = function(format) {
   if (this._actor && this._skillId) {
     var skill = this._actor.stsSkill(this._skillId);
     var y = this.lineHeight();
-    var width = this.width - this.textPadding() * 2;
+    var width = this.width - this.padding * 2;
     format ? this.drawStsDescTitle(format, 0, 0, width, skill) : y = 0;
     this.drawStsDescription(0, y, width, skill);
   }
@@ -3026,7 +3054,9 @@ Window_StsCost.prototype.drawStsCost = function(cost, x, y, width) {
     this.drawFormatTextEx(FTKR.STS.cost.itemFormat, x + iw, y, [this.setStsCost(cost).name]);
     var num = FTKR.STS.cost.numberFormat.split(',');
     this.changeTextColor(this.textColor(parseInt(num[0])));
-    this.drawStsFormatText(num[1], x, y, params, width + iw, 'right');
+    var numberWidth = FTKR.STS.cost.numberWidth || width + iw;
+    var diff = width + iw - numberWidth;
+    this.drawStsFormatText(num[1], x + diff, y, params, numberWidth, 'right');
 };
 
 //=============================================================================

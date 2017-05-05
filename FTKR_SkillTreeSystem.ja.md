@@ -893,6 +893,12 @@ FTKR_CustomSimpleActorStatus.jsのヘルプを参照してください。
 
 ![画像](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_008.png)
 
+`<Adjust Skill Desc Width>`
+
+説明文に制御文字が使えなくなる代わりに、ウィンドウの枠内に自動で納まるように調整する機能です。
+* 0 - 無効(デフォルト)
+* 1 - 有効
+
 ### 習得コストウィンドウの表示設定
 
 以下のプラグインパラメータで、表示内容を変更します。
@@ -921,6 +927,12 @@ FTKR_CustomSimpleActorStatus.jsのヘルプを参照してください。
 文字列には制御文字は使用できません。
 
 ![画像](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_011.png)
+
+`<Cost Number Width>`
+
+コスト数量の表示幅をpixel単位指定します。
+コスト数量の文字列が表示幅を超える場合は、自動で文字サイズを調整します。
+0 の場合は、幅を制限せずにそのまま表示します。
 
 ### 前提スキルウィンドウの表示設定
 
@@ -1148,7 +1160,9 @@ STS 削除 ツリータイプ(x) アクター(x)
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.6.4](FTKR_SkillTreeSystem.js) | 2017/04/18 | stsCount()を計算式に入れたスキルを敵が使うと正しく計算できない不具合を修正。<br> スキルの表示条件を設定する機能を追加。 |
+| [ver1.6.6](FTKR_SkillTreeSystem.js) | 2017/05/05 | 説明文とコスト数値の幅調整機能を追加。 |
+| ver1.6.5 | 2017/04/29 | FTKR_ItemSelfVariablesのセルフ変数に対応 |
+| ver1.6.4 | 2017/04/18 | stsCount()を計算式に入れたスキルを敵が使うと正しく計算できない不具合を修正。<br> スキルの表示条件を設定する機能を追加。 |
 | ver1.6.3 | 2017/04/07 | ヘルププラグインと統合 |
 | ver1.6.2 | 2017/04/02 | プラグイン内ヘルプ参照、[ツクマテ](http://tm.lucky-duet.com/viewtopic.php?f=5&t=3201)で公開 |
 | ver1.0.0 | 2017/02/25 | 初版作成、[ツクマテ](http://tm.lucky-duet.com/viewtopic.php?f=5&t=3201)で公開 |
