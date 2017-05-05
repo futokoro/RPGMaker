@@ -4,7 +4,7 @@
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/02/25
 // 最終更新日 : 2017/05/05
-// バージョン : v1.6.6
+// バージョン : v1.6.7
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.6.6 ツリー型スキル習得システム
+ * @plugindesc v1.6.7 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -1193,6 +1193,9 @@ FTKR.STS = FTKR.STS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.6.7 - 2017/05/05 : 不具合修正
+ *    1. スキルツリーの空欄設定が反映されない不具合を修正。
+ * 
  * v1.6.6 - 2017/05/05 : 機能追加
  *    1. 説明文とコスト数値の幅調整機能を追加。
  * 
@@ -1532,7 +1535,7 @@ Bitmap.prototype.drawFrame = function(x, y, width, height, thick, color) {
 //重複した要素を除いて、Array配列にlist配列の要素を加える。
 Array.prototype.addExceptForDup = function(list) {
     list.forEach( function(item) {
-        if (!this.contains(item)) this.push(item);
+        if (item === null || !this.contains(item)) this.push(item);
     },this);
 };
 
