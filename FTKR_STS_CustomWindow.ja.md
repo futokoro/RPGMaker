@@ -1,4 +1,4 @@
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)
 
 # [FTKR_STS_CustomWindow](FTKR_STS_CustomWindow.js) プラグイン
 
@@ -140,4 +140,4 @@ Bgi offset Y: n
 #
 [目次に戻る](#目次)
 
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)

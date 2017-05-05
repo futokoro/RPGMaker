@@ -1,4 +1,4 @@
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)
 
 # [FTKR_SkillExpansion](FTKR_SkillExpansion.js) プラグイン
 
@@ -733,4 +733,4 @@ a.isDebuffAffected(x)
 #
 [目次に戻る](#目次)
 
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)

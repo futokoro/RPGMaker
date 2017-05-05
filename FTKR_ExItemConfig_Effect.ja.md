@@ -1,4 +1,4 @@
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)
 
 # [FTKR_ExItemConfig_Effect](FTKR_ExItemConfig_Effect.js) プラグイン
 
@@ -116,4 +116,4 @@ Enabled: eval
 #
 [目次に戻る](#目次)
 
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)

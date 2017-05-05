@@ -1,4 +1,4 @@
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)
 
 # [FTKR_ExItemConfig_Activate](FTKR_ExItemConfig_Activate.js) プラグイン
 
@@ -221,4 +221,4 @@ Physical~ で物理タイプの回避率、Magical~ で魔法タイプの回避�
 #
 [目次に戻る](#目次)
 
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)

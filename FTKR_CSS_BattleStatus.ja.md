@@ -1,4 +1,4 @@
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)
 
 # [FTKR_CSS_BattleStatus](FTKR_CSS_BattleStatus.js) プラグイン
 
@@ -149,4 +149,4 @@ FTKR_CSS_BattleStatus.js
 #
 [目次に戻る](#目次)
 
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)

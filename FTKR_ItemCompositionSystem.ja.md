@@ -1,4 +1,4 @@
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)
 
 # [FTKR_ItemCompositionSystem](FTKR_ItemCompositionSystem.js) プラグイン
 
@@ -526,4 +526,4 @@ ICS レシピ削除 アイテム アイテムID レシピID
 #
 [目次に戻る](#目次)
 
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)

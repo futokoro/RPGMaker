@@ -1,4 +1,4 @@
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)
 
 # [FTKR_ItemSelfVariables](FTKR_ItemSelfVariables.js) プラグイン
 
@@ -206,4 +206,4 @@ ISV_GET_SELF_VARIABLES 5 weapon 10 1
 #
 [目次に戻る](#目次)
 
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)

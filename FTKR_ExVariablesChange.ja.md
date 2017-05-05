@@ -1,4 +1,4 @@
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)
 
 # [FTKR_ExVariablesChange](FTKR_ExVariablesChange.js) プラグイン
 
@@ -171,4 +171,4 @@ iv[2] += number
 #
 [目次に戻る](#目次)
 
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)

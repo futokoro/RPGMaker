@@ -1,4 +1,4 @@
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)
 
 # [FTKR_ExMessageWindow2](FTKR_ExMessageWindow2.js) プラグイン
 
@@ -459,4 +459,4 @@ EMW_MESSAGEWINDOW_SETPOSITION 1 right
 #
 [目次に戻る](#目次)
 
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)

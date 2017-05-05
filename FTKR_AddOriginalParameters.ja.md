@@ -1,4 +1,4 @@
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)
 
 # [FTKR_AddOriginalParameters](FTKR_AddOriginalParameters.js) プラグイン
 
@@ -296,4 +296,4 @@ AOP_パラメータ変更 アクター(1) str 代入 v[5]
 #
 [目次に戻る](#目次)
 
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)

@@ -1,4 +1,4 @@
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)
 
 # [FTKR_ExSvMotion](FTKR_ExSvMotion.js) プラグイン
 
@@ -164,4 +164,4 @@ victory ⇒ skill ⇒ item ⇒ walk ⇒ item ⇒ walk ⇒ ...
 #
 [目次に戻る](#目次)
 
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)

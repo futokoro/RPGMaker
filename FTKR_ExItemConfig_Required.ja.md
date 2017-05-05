@@ -1,4 +1,4 @@
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)
 
 # [FTKR_ExItemConfig_Required](FTKR_ExItemConfig_Required.js) プラグイン
 
@@ -104,4 +104,4 @@ Condition: eval
 #
 [目次に戻る](#目次)
 
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)

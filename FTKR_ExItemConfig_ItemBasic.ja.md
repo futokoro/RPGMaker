@@ -1,4 +1,4 @@
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)
 
 # [FTKR_ExItemConfig_ItemBasic](FTKR_ExItemConfig_ItemBasic.js) プラグイン
 
@@ -134,4 +134,4 @@ used: 状況
 #
 [目次に戻る](#目次)
 
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)

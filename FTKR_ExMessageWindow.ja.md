@@ -1,4 +1,4 @@
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)
 
 # [FTKR_ExMessageWindow](FTKR_ExMessageWindow.js) プラグイン
 
@@ -137,4 +137,4 @@ $gameSubMessage.add(0,'これでアイコン\\I[76]を表示します')
 #
 [目次に戻る](#目次)
 
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)

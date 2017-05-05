@@ -1,4 +1,4 @@
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)
 
 # [FTKR_SkillSubCommand](FTKR_SkillSubCommand.js) プラグイン
 
@@ -112,4 +112,4 @@ s[1]
 #
 [目次に戻る](#目次)
 
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)

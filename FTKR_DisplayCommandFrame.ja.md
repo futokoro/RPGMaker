@@ -1,4 +1,4 @@
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)
 
 # [FTKR_DisplayCommandFrame](FTKR_DisplayCommandFrame.js) プラグイン
 
@@ -235,4 +235,4 @@ MV標準では、以下のウィンドウが相当します。
 #
 [目次に戻る](#目次)
 
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)

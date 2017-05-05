@@ -1,4 +1,4 @@
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)
 
 # [FTKR_ExEscapeCharacters](FTKR_ExEscapeCharacters.js) プラグイン
 
@@ -135,4 +135,4 @@ MV標準の行の高さは 36 です。
 #
 [目次に戻る](#目次)
 
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)

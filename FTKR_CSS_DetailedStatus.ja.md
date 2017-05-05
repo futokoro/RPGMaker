@@ -1,4 +1,4 @@
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)
 
 # [FTKR_CSS_DetailedStatus](FTKR_CSS_DetailedStatus.js) プラグイン
 
@@ -164,4 +164,4 @@ face;level,state,hp,mp;custom(0),custom(1),custom(2),custom(3)
 #
 [目次に戻る](#目次)
 
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)

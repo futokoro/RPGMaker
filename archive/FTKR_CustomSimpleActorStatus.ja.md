@@ -1,4 +1,4 @@
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)
 
 # [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) プラグイン
 
@@ -638,4 +638,4 @@ code
 #
 [目次に戻る](#目次)
 
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)

@@ -1,4 +1,4 @@
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)
 
 # [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js) プラグイン
 
@@ -1185,4 +1185,4 @@ STS 削除 ツリータイプ(x) アクター(x)
 #
 [目次に戻る](#目次)
 
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)

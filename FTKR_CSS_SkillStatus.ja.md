@@ -1,4 +1,4 @@
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)
 
 # [FTKR_CSS_SkillStatus](FTKR_CSS_SkillStatus.js) プラグイン
 
@@ -134,4 +134,4 @@ FTKR_CSS_SkillStatus.js
 #
 [目次に戻る](#目次)
 
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)

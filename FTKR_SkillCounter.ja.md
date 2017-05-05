@@ -1,4 +1,4 @@
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)
 
 # [FTKR_SkillCounter](FTKR_SkillCounter.js) プラグイン
 
@@ -104,4 +104,4 @@ Hp回復とMp回復を両方ダメージにします。
 #
 [目次に戻る](#目次)
 
-[トップページに戻る](README.ja.md)
+[トップページに戻る](README.md)
