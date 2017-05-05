@@ -69,8 +69,7 @@ FTKR.EMD = FTKR.EMD || {};
 //=============================================================================
 FTKR.EMD.parameters = PluginManager.parameters('FTKR_ExMetaData');
 
-if (!FTKR.extractMetadata) {
-FTKR.extractMetadata = function(data, note) {
+var readMetadata = function(data, note) {
     var re = /<([^<>:]+)(:?)([^>]*)>/g;
     data.meta = data.meta || {};
     for (;;) {
@@ -86,18 +85,15 @@ FTKR.extractMetadata = function(data, note) {
         }
     }
 };
-}
 
-if (!FTKR.readPagesCommentMetadata) {
-FTKR.readPagesCommentMetadata = function(obj, pages) {
+var readPagesCommentMetadata = function(obj, pages) {
     for (var v = 0; v < pages[0].list.length; v++) {
         var list = pages[0].list[v];
         if (list && ([108, 408].contains(list.code))) {
-            FTKR.extractMetadata(obj, list.parameters[0]);
+            readMetadata(obj, list.parameters[0]);
         }
     }
 };
-}
 
 //=============================================================================
 // イベントのコメント欄のメタデータ取得
@@ -112,7 +108,7 @@ Game_Map.prototype.readEventsCommentMetadata = function() {
     for (var i = 1; i < $dataMap.events.length; i++ ) {
         var event = $dataMap.events[i];
         if(event && event.pages.length) {
-            FTKR.readPagesCommentMetadata(event, event.pages);
+            readPagesCommentMetadata(event, event.pages);
         }
     }
 };
@@ -137,7 +133,7 @@ DataManager.readCommentNotetags = function(group) {
         obj.meta = {};
         var pages = obj.pages;
         if (pages.length) {
-            FTKR.readPagesCommentMetadata(obj, pages);
+            readPagesCommentMetadata(obj, pages);
         }
     }
 };
