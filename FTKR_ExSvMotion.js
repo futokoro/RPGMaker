@@ -3,8 +3,8 @@
 // FTKR_ExSvMotion.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/19
-// 最終更新日 : 2017/04/30
-// バージョン : v1.1.4
+// 最終更新日 : 2017/05/06
+// バージョン : v1.1.5
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ESM = FTKR.ESM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.4 SVキャラのモーションを拡張するプラグイン
+ * @plugindesc v1.1.5 SVキャラのモーションを拡張するプラグイン
  * @author フトコロ
  *
  * @param --行動モーションの設定--
@@ -488,6 +488,10 @@ FTKR.ESM = FTKR.ESM || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.5 - 2017/05/06 : 不具合修正
+ *    1. ステートモーションタグが設定されていない場合に、ステートの
+ *       モーションを正しく反映できない不具合を修正。
+ * 
  * v1.1.4 - 2017/04/30 : 不具合修正
  *    1. YED_SideviewBattler側にモーションデータを正しく渡せていなかった
  *       不具合を修正。
@@ -597,13 +601,15 @@ FTKR.ESM.motion = {
 
 Game_BattlerBase.ESM_MOTION_NUMBER = 16;
 
-if (!Array.prototype.checkMeta) {
-Array.prototype.checkMeta = function(obj) {
-    return obj.meta ? this.map(function(meta) {
-        return obj.meta[meta];
-    }) : false;
+//objのメモ欄から <metacode: x> の値を読み取って配列で返す
+var readObjectMeta = function(obj, metacodes) {
+    if (!obj) return false;
+    metacodes.some(function(metacode){
+        var metaReg = new RegExp('<' + metacode + ':[ ]*(.+)>', 'i');
+        return obj.note.match(metaReg);
+    }); 
+    return RegExp.$1 ? Number(RegExp.$1) : false;
 };
-}
 
 //=============================================================================
 // 基本モーションの設定を変更
@@ -667,6 +673,7 @@ Game_BattlerBase.prototype.checkConditionAll = function() {
 
 Game_BattlerBase.prototype.checkCondition = function(condition) {
     var stateMotion = this.stateMotionIndex();
+//    console.log('condition', condition, 'stateMotion', stateMotion);
     if (condition.match(/state(\d+)/i)) {
         return stateMotion === Number(RegExp.$1);
     } 
@@ -696,7 +703,7 @@ Game_BattlerBase.prototype.stateMotionIndex = function() {
     }
     var states = this.states();
     if (states.length > 0) {
-        var motion = ['ESM モーション', 'ESM MOTION'].checkMeta(states[0]);
+        var motion = readObjectMeta(states[0], ['ESM モーション', 'ESM MOTION']);
         return motion.length ? Number(motion[0]) : states[0].motion;
     } else {
         return 0;
