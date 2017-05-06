@@ -3,8 +3,8 @@
 // FTKR_ExMessageWindow2.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/24
-// 最終更新日 : 2017/05/04
-// バージョン : v2.0.7
+// 最終更新日 : 2017/05/06
+// バージョン : v2.0.8
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EMW = FTKR.EMW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.0.7 一度に複数のメッセージウィンドウを表示するプラグイン
+ * @plugindesc v2.0.8 一度に複数のメッセージウィンドウを表示するプラグイン
  * @author フトコロ
  * 
  * @param Create ExWindow Number
@@ -23,6 +23,11 @@ FTKR.EMW = FTKR.EMW || {};
  * 0 - マップ上のイベントの数だけ生成します
  * @default 1
  *
+ * @param Scene Start Terminate
+ * @desc シーン開始時にウィンドウIDを強制終了する。
+ * 1 - 有効にする、0 - 無効にする。
+ * @default 1
+ * 
  * @help 
  *-----------------------------------------------------------------------------
  * 概要
@@ -209,6 +214,27 @@ FTKR.EMW = FTKR.EMW || {};
  * 
  * 
  *-----------------------------------------------------------------------------
+ * シーンが変わったときの挙動について
+ *-----------------------------------------------------------------------------
+ * シーンが変わったときの挙動は、以下の通りです。
+ * 
+ * 1. 場所移動
+ * 場所移動時に、すべてのウィンドウIDを強制終了します。
+ * 
+ * 
+ * 2. バトル および メニュー
+ * すべてのウィンドウIDが一旦閉じます。
+ * そのバトル終了またはメニューを閉じた後の処理は、
+ * プラグインパラメータ<Scene Start Terminate>の設定で変わります。
+ * 
+ * ＜有効の場合＞
+ * すべてのウィンドウIDを強制終了します。
+ * 
+ * ＜無効の場合＞
+ * 再度ウィンドウが開きます。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
  * プラグインコマンド
  *-----------------------------------------------------------------------------
  * 1. 文章の表示の強制終了
@@ -387,6 +413,9 @@ FTKR.EMW = FTKR.EMW || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.0.8 - 2017/05/06 : 機能追加
+ *    1. シーン開始時のウィンドウの挙動を設定する機能を追加。
+ * 
  * v2.0.7 - 2017/05/04 : 不具合修正
  *    1. ウィンドウID0 が正しく動作しない不具合を修正。
  * 
@@ -419,6 +448,7 @@ FTKR.EMW = FTKR.EMW || {};
 FTKR.EMW.parameters = PluginManager.parameters('FTKR_ExMessageWindow2');
 
 FTKR.EMW.exwindowNum = Number(FTKR.EMW.parameters['Create ExWindow Number'] || '');
+FTKR.EMW.sceneStartTerminate = Number(FTKR.EMW.parameters['Scene Start Terminate'] || '');
 FTKR.EMW.nameWindows = [];
 
 //objのメモ欄から <metacode: x> の値を読み取って配列で返す
@@ -1301,7 +1331,8 @@ Scene_Map.prototype.createMessageExWindowAll = function() {
     this._messageExWindows = [];
     this._messageExWindows[0] = this._messageWindow;
     $gameMessageEx.window(0)._window_MessageEx = this._messageExWindows[0];
-    $gameMessageEx.window(0).terminate();
+    FTKR.EMW.sceneStartTerminate ? $gameMessageEx.window(0).terminate() :
+        $gameMessageEx.window(0).firstText();
     var number = this.readMapMeta() || FTKR.EMW.exwindowNum;
     for (var i = 1; i < number + 1; i++) {
         this.createMessageExWindow(i);
@@ -1316,7 +1347,8 @@ Scene_Map.prototype.readMapMeta = function() {
 Scene_Map.prototype.createMessageExWindow = function(windowId) {
     this._messageExWindows[windowId] = new Window_MessageEx(windowId);
     $gameMessageEx.window(windowId)._window_MessageEx = this._messageExWindows[windowId];
-    $gameMessageEx.window(windowId).terminate();
+    FTKR.EMW.sceneStartTerminate ? $gameMessageEx.window(windowId).terminate() :
+        $gameMessageEx.window(windowId).firstText();
     this.addWindow(this._messageExWindows[windowId]);
     this._messageExWindows[windowId].subWindows().forEach(function(window) {
         this.addWindow(window);
