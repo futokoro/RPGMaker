@@ -3,8 +3,8 @@
 // FTKR_CSS_BattleStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/11
-// 最終更新日 : 2017/04/21
-// バージョン : v1.1.0
+// 最終更新日 : 2017/05/06
+// バージョン : v1.1.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.0 バトル画面のステータス表示を変更するプラグイン
+ * @plugindesc v1.1.1 バトル画面のステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @param --レイアウト設定--
@@ -59,31 +59,35 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  * @default 0
  * 
  * @param Number Visible Rows
- * @desc ステータスウィンドウの縦の行数
+ * @desc ステータスウィンドウの縦の行数：デフォルト 4
  * @default 4
  * 
  * @param Number Max Cols
- * @desc アクターを横に並べる数
+ * @desc アクターを横に並べる数：デフォルト 1
  * @default 1
  * 
  * @param Cursol Line Number
- * @desc カーソル高さの行数
+ * @desc カーソル高さの行数：デフォルト 1
  * @default 1
  * 
+ * @param Cursol Height Space
+ * @desc 縦のカーソル間隔：デフォルト 0
+ * @default 0
+ * 
  * @param Font Size
- * @desc フォントサイズ
+ * @desc フォントサイズ：デフォルト 28
  * @default 28
  * 
  * @param Window Padding
- * @desc ウィンドウの周囲の余白
+ * @desc ウィンドウの周囲の余白：デフォルト 18
  * @default 18
  * 
  * @param Window Line Height
- * @desc ウィンドウ内の1行の高さ
+ * @desc ウィンドウ内の1行の高さ：デフォルト 36
  * @default 36
  * 
  * @param Window Opacity
- * @desc ウィンドウ内の背景の透明度
+ * @desc ウィンドウ内の背景の透明度：デフォルト 192
  * @default 192
  * 
  * @param Hide Window Frame
@@ -148,6 +152,10 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  *    :カーソルの高さを何行分にするか設定します。
  *    :デフォルトは 1 です。
  * 
+ * <Cursol Height Space>
+ *    :縦のカーソル間隔を設定します。
+ *    :デフォルトは 0 です。(単位はpixel)
+ * 
  * <Font Size>
  *    :ウィンドウ内のフォントサイズを変更します。
  *    :デフォルトは 28 です。(単位はpixel)
@@ -203,6 +211,9 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.1 - 2017/05/06 : 機能追加
+ *    1. 縦のカーソル間隔を設定する機能を追加。
+ * 
  * v1.1.0 - 2017/04/21 : 機能変更
  *    1. FTKR_CustomSimpleActorStatus.jsのv1.4.0に対応
  *    2. ウィンドウのレイアウト変更のON/OFF機能を追加。
@@ -222,6 +233,7 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
 //=============================================================================
 FTKR.CSS.BS.parameters = PluginManager.parameters('FTKR_CSS_BattleStatus');
 
+//ウィンドウ設定オブジェクト
 FTKR.CSS.BS.window = {
     enabled:Number(FTKR.CSS.BS.parameters['Enabled Custom Window'] || 0),
     numVisibleRows:Number(FTKR.CSS.BS.parameters['Number Visible Rows'] || 0),
@@ -232,6 +244,7 @@ FTKR.CSS.BS.window = {
     opacity:Number(FTKR.CSS.BS.parameters['Window Opacity'] || 0),
     hideFrame:Number(FTKR.CSS.BS.parameters['Hide Window Frame'] || 0),
     cursolHeight:Number(FTKR.CSS.BS.parameters['Cursol Line Number'] || 0),
+    hspace:Number(FTKR.CSS.BS.parameters['Cursol Height Space'] || 0),
 };
 
 //簡易ステータスオブジェクト
@@ -305,6 +318,52 @@ Window_BattleStatus.prototype.standardBackOpacity = function() {
 Window_BattleStatus.prototype._refreshFrame = function() {
     if (!FTKR.CSS.BS.window.hideFrame) Window.prototype._refreshFrame.call(this);
 };
+
+Window_BattleStatus.prototype.itemHeightSpace = function() {
+    return FTKR.CSS.BS.window.hspace;
+};
+
+Window_BattleStatus.prototype.unitHeight = function() {
+    return this.itemHeight() + this.itemHeightSpace();
+};
+
+Window_BattleStatus.prototype.unitWidth = function() {
+    return this.itemWidth() + this.spacing();
+};
+
+if (FTKR.CSS.BS.window.hspace) {
+//書き換え
+Window_BattleStatus.prototype.maxPageRows = function() {
+    var pageHeight = this.height - this.padding * 2;
+    return Math.floor(pageHeight / this.unitHeight());
+};
+
+//書き換え
+Window_BattleStatus.prototype.topRow = function() {
+    return Math.floor(this._scrollY / this.unitHeight());
+};
+
+//書き換え
+Window_BattleStatus.prototype.setTopRow = function(row) {
+    var scrollY = row.clamp(0, this.maxTopRow()) * this.unitHeight();
+    if (this._scrollY !== scrollY) {
+        this._scrollY = scrollY;
+        this.refresh();
+        this.updateCursor();
+    }
+};
+
+//書き換え
+Window_BattleStatus.prototype.itemRect = function(index) {
+    var rect = new Rectangle();
+    var maxCols = this.maxCols();
+    rect.width = this.itemWidth();
+    rect.height = this.itemHeight();
+    rect.x = index % maxCols * this.unitWidth() - this._scrollX;
+    rect.y = Math.floor(index / maxCols) * this.unitHeight() - this._scrollY;
+    return rect;
+};
+}//FTKR.CSS.BS.window.hspace
 
 }//ウィンドウカスタム有効
 

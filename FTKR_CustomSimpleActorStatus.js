@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2017/05/04
-// バージョン : v1.4.2
+// 最終更新日 : 2017/05/06
+// バージョン : v1.4.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.4.2 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v1.4.3 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -79,6 +79,10 @@ FTKR.CSS = FTKR.CSS || {};
  * @param Cursol Line Number
  * @desc カーソル高さの行数：デフォルト 4
  * @default 4
+ * 
+ * @param Cursol Height Space
+ * @desc 縦のカーソル間隔：デフォルト 0
+ * @default 0
  * 
  * @param Font Size
  * @desc フォントサイズ：デフォルト 28
@@ -989,6 +993,10 @@ FTKR.CSS = FTKR.CSS || {};
  *    :カーソル(アクター１人分)の高さを何行分にするか設定します。
  *    :デフォルトは 4 です。
  * 
+ * <Cursol Height Space>
+ *    :縦のカーソル間隔を設定します。
+ *    :デフォルトは 0 です。(単位はpixel)
+ * 
  * <Font Size>
  *    :ウィンドウ内のフォントサイズを変更します。
  *    :デフォルトは 28 です。(単位はpixel)
@@ -1043,6 +1051,9 @@ FTKR.CSS = FTKR.CSS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.4.3 - 2017/05/06 : 機能追加
+ *    1. 縦のカーソル間隔を設定する機能を追加。
  * 
  * v1.4.2 - 2017/05/04 : 機能追加
  *    1. カスタムパラメータとカスタムゲージに、セルフ変数を適用。
@@ -1152,6 +1163,7 @@ FTKR.CSS.window = {
     opacity:Number(FTKR.CSS.parameters['Window Opacity'] || 0),
     hideFrame:Number(FTKR.CSS.parameters['Hide Window Frame'] || 0),
     cursolHeight:Number(FTKR.CSS.parameters['Cursol Line Number'] || 0),
+    hspace:Number(FTKR.CSS.parameters['Cursol Height Space'] || 0),
 };
 
 //オリジナルステータス設定オブジェクト
@@ -1604,8 +1616,10 @@ Window_Base.prototype.drawCssFace = function(faceName, faceIndex, dx, dy, width,
     var len = Math.min(width, height);
     var dh = len || Window_Base._faceHeight;
     var dw = len || Window_Base._faceWidth;
-    dx = dx + (width - dw) / 2;
+    dx = Math.floor(dx + (width - dw) / 2);
     var bitmap = ImageManager.loadFace(faceName);
+    var pw = Window_Base._faceWidth;
+    var ph = Window_Base._faceHeight;
     var sw = Window_Base._faceWidth;
     var sh = Window_Base._faceHeight;
     var sx = faceIndex % 4 * sw;
@@ -1972,6 +1986,52 @@ Window_MenuStatus.prototype.standardBackOpacity = function() {
 Window_MenuStatus.prototype._refreshFrame = function() {
     if (!FTKR.CSS.window.hideFrame) Window.prototype._refreshFrame.call(this);
 };
+
+Window_MenuStatus.prototype.itemHeightSpace = function() {
+    return FTKR.CSS.window.hspace;
+};
+
+Window_MenuStatus.prototype.unitHeight = function() {
+    return this.itemHeight() + this.itemHeightSpace();
+};
+
+Window_MenuStatus.prototype.unitWidth = function() {
+    return this.itemWidth() + this.spacing();
+};
+
+if (FTKR.CSS.window.hspace) {
+//書き換え
+Window_MenuStatus.prototype.maxPageRows = function() {
+    var pageHeight = this.height - this.padding * 2;
+    return Math.floor(pageHeight / this.unitHeight());
+};
+
+//書き換え
+Window_MenuStatus.prototype.topRow = function() {
+    return Math.floor(this._scrollY / this.unitHeight());
+};
+
+//書き換え
+Window_MenuStatus.prototype.setTopRow = function(row) {
+    var scrollY = row.clamp(0, this.maxTopRow()) * this.unitHeight();
+    if (this._scrollY !== scrollY) {
+        this._scrollY = scrollY;
+        this.refresh();
+        this.updateCursor();
+    }
+};
+
+//書き換え
+Window_MenuStatus.prototype.itemRect = function(index) {
+    var rect = new Rectangle();
+    var maxCols = this.maxCols();
+    rect.width = this.itemWidth();
+    rect.height = this.itemHeight();
+    rect.x = index % maxCols * this.unitWidth() - this._scrollX;
+    rect.y = Math.floor(index / maxCols) * this.unitHeight() - this._scrollY;
+    return rect;
+};
+}//FTKR.CSS.window.hspace
 
 }//ウィンドウカスタム有効
 
