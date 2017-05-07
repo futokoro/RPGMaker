@@ -3,8 +3,8 @@
 // FTKR_ExMessageWindow2.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/24
-// 最終更新日 : 2017/05/06
-// バージョン : v2.0.8
+// 最終更新日 : 2017/05/07
+// バージョン : v2.0.9
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EMW = FTKR.EMW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.0.8 一度に複数のメッセージウィンドウを表示するプラグイン
+ * @plugindesc v2.0.9 一度に複数のメッセージウィンドウを表示するプラグイン
  * @author フトコロ
  * 
  * @param Create ExWindow Number
@@ -222,10 +222,14 @@ FTKR.EMW = FTKR.EMW || {};
  * 場所移動時に、すべてのウィンドウIDを強制終了します。
  * 
  * 
- * 2. バトル および メニュー
+ * 2. バトル
+ * 戦闘開始時に、すべてのウィンドウIDを強制終了します。
+ * 
+ * 
+ * 3. メニュー
  * すべてのウィンドウIDが一旦閉じます。
- * そのバトル終了またはメニューを閉じた後の処理は、
- * プラグインパラメータ<Scene Start Terminate>の設定で変わります。
+ * メニューを閉じた後の処理は、プラグインパラメータの
+ * <Scene Start Terminate>の設定で変わります。
  * 
  * ＜有効の場合＞
  * すべてのウィンドウIDを強制終了します。
@@ -413,6 +417,11 @@ FTKR.EMW = FTKR.EMW || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.0.9 - 2017/05/07 : 不具合修正
+ *    1. 自動実行または並列処理による文章コマンドに対して、行動許可禁止の
+ *       機能が正しく動作していなかった不具合を修正。
+ *    2. バトル開始時にすべてのウィンドウIDを強制終了するように変更。
+ * 
  * v2.0.8 - 2017/05/06 : 機能追加
  *    1. シーン開始時のウィンドウの挙動を設定する機能を追加。
  * 
@@ -583,12 +592,10 @@ FTKR.EMW.Window_Message_processEscapeCharacter = Window_Message.prototype.proces
 Window_Message.prototype.processEscapeCharacter = function(code, textState) {
     switch (code) {
     case 'EMP':
-        !this._windowId ? $gameMessage.enabledCanMovePlayer() :
-            $gameMessageEx.window(this._windowId).enabledCanMovePlayer();
+        $gameMessageEx.window(this._windowId).enabledCanMovePlayer();
         break;
     case 'DMP':
-        !this._windowId ? $gameMessage.disabledCanMovePlayer() :
-            $gameMessageEx.window(this._windowId).disabledCanMovePlayer();
+        $gameMessageEx.window(this._windowId).disabledCanMovePlayer();
         break;
     default:
         FTKR.EMW.Window_Message_processEscapeCharacter.call(this, code, textState);
@@ -622,32 +629,21 @@ Game_Message.prototype.disabledCanMovePlayer = function() {
     this._canMovePlayer = false;
 };
 
-FTKR.EMW.Game_Message_isBusy = Game_Message.prototype.isBusy;
+//書き換え
 Game_Message.prototype.isBusy = function() {
-    return this.canMovePlayer() || (!this.canClose() && this.isLastText()) ?
-        false : FTKR.EMW.Game_Message_isBusy.call(this);
+    return $gameMessageEx.windows().some(function(message){
+            return message.isEmwBusy();
+    });
 };
 
-//------------------------------------------------------------------------
-// Game_Interpreter
-//------------------------------------------------------------------------
-FTKR.EMW.Game_Interpreter_updateWaitMode = Game_Interpreter.prototype.updateWaitMode;
-Game_Interpreter.prototype.updateWaitMode = function() {
-    var waiting = false;
-    switch (this._waitMode) {
-    case 'messageEx':
-        waiting = $gameMessageEx.windows().some(function(message){
-            return message.isBusy();
-        });
-        break;
-    default:
-        waiting = FTKR.EMW.Game_Interpreter_updateWaitMode.call(this);
-        break;
-    }
-    if (!waiting) {
-        this._waitMode = '';
-    }
-    return waiting;
+Game_Message.prototype.isEmwBusy = function() {
+    return this.canMovePlayer() || (!this.canClose() && this.isLastText()) ?
+        false : this.isBusyBase();
+};
+
+Game_Message.prototype.isBusyBase = function() {
+    return (this.hasText() || this.isChoice() ||
+            this.isNumberInput() || this.isItemChoice());
 };
 
 //=============================================================================
@@ -729,11 +725,7 @@ Game_Message.prototype.lastText = function() {
     this._lastText = true;
 };
 
-Game_Message.prototype.isBusyBase = function() {
-    return (this.hasText() || this.isChoice() ||
-            this.isNumberInput() || this.isItemChoice());
-}
-
+//場所移動コマンド
 FTKR.EMW.Game_Interpreter_command201 = Game_Interpreter.prototype.command201;
 Game_Interpreter.prototype.command201 = function() {
     $gameMessageEx.windows().forEach( function(message){
@@ -834,7 +826,7 @@ Game_Interpreter.prototype.command101 = function() {
     if (!windowId) {
         return FTKR.EMW.Game_Interpreter_command101.call(this);
     } else {
-        if (!$gameMessageEx.window(windowId).isBusy()) {
+        if (!$gameMessageEx.window(windowId).isEmwBusy()) {
             $gameMessageEx.window(windowId).setFaceImage(this._params[0], this._params[1]);
             $gameMessageEx.window(windowId).setBackground(this._params[2]);
             $gameMessageEx.window(windowId).setPositionType(this._params[3]);
@@ -854,7 +846,7 @@ Game_Interpreter.prototype.command101 = function() {
                 break;
             }
             this._index++;
-            this.setWaitMode('messageEx');
+            this.setWaitMode('message');
         }
         return false;
     }
@@ -886,10 +878,10 @@ Game_Interpreter.prototype.command102 = function() {
     if (!windowId) {
         return FTKR.EMW.Game_Interpreter_command102.call(this);
     } else {
-        if (!$gameMessageEx.window(windowId).isBusy()) {
+        if (!$gameMessageEx.window(windowId).isEmwBusy()) {
             this.setupChoices(this._params);
             this._index++;
-            this.setWaitMode('messageEx');
+            this.setWaitMode('message');
         }
         return false;
     }
@@ -927,10 +919,10 @@ Game_Interpreter.prototype.command103 = function() {
     if (!windowId) {
         return FTKR.EMW.Game_Interpreter_command103.call(this);
     } else {
-        if (!$gameMessageEx.window(windowId).isBusy()) {
+        if (!$gameMessageEx.window(windowId).isEmwBusy()) {
             this.setupNumInput(this._params);
             this._index++;
-            this.setWaitMode('messageEx');
+            this.setWaitMode('message');
         }
         return false;
     }
@@ -955,10 +947,10 @@ Game_Interpreter.prototype.command104 = function() {
     if (!windowId) {
         return FTKR.EMW.Game_Interpreter_command104.call(this);
     } else {
-        if (!$gameMessageEx.window(windowId).isBusy()) {
+        if (!$gameMessageEx.window(windowId).isEmwBusy()) {
             this.setupItemChoice(this._params);
             this._index++;
-            this.setWaitMode('messageEx');
+            this.setWaitMode('message');
         }
         return false;
     }
@@ -1353,6 +1345,17 @@ Scene_Map.prototype.createMessageExWindow = function(windowId) {
     this._messageExWindows[windowId].subWindows().forEach(function(window) {
         this.addWindow(window);
     }, this);
+};
+
+//マップシーンの終了処理
+FTKR.EMW.Scene_Map_terminate = Scene_Map.prototype.terminate;
+Scene_Map.prototype.terminate = function() {
+    FTKR.EMW.Scene_Map_terminate.call(this);
+    if (SceneManager.isNextScene(Scene_Battle)) {
+        $gameMessageEx.windows().forEach( function(message){
+            message.terminate();
+        });
+    }
 };
 
 //=============================================================================
