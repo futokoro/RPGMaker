@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2017/05/06
-// バージョン : v1.4.3
+// 最終更新日 : 2017/05/08
+// バージョン : v1.4.4
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.4.3 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v1.4.4 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -1052,6 +1052,9 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.4.4 - 2017/05/08 : 不具合修正
+ *    1. メニュー画面のアクターのスプライトが正しく更新されない不具合を修正。
+ * 
  * v1.4.3 - 2017/05/06 : 不具合修正、機能追加
  *    1. アクターを横に並べた時に、顔画像が正しく表示されない不具合を修正。
  *    2. 縦のカーソル間隔を設定する機能を追加。
@@ -1465,6 +1468,7 @@ FTKR.CSS.Game_Actor_setup = Game_Actor.prototype.setup;
 Game_Actor.prototype.setup = function(actorId) {
     FTKR.CSS.Game_Actor_setup.call(this, actorId);
     ImageManager.loadPicture(this.actor().cssbgi.name);
+    ImageManager.loadSvActor(this.battlerName());
 };
 
 //ステートモーションを取得する
@@ -1490,6 +1494,17 @@ Window_Base.prototype.initialize = function(x, y, width, height) {
     FTKR.CSS.Window_Base_initialize.call(this, x, y, width, height);
     this.sprite = [];
     this._stateIconSprite = [];
+};
+
+Window_Base.prototype.clearCssSprite = function(index) {
+    this.sprite[index].setBattler();
+    this._stateIconSprite[index].forEach( function(sprite){
+        sprite.setup();
+    });
+};
+
+Window_Base.prototype.showActorNum = function() {
+    return this.maxPageItems ? this.maxPageItems() : 1;
 };
 
 /*-------------------------------------------------------------
@@ -1666,14 +1681,20 @@ Window_Base.prototype.drawCssActorSvChara = function(index, actor, x, y, width, 
 };
 
 Window_Base.prototype.drawCssSvChara = function(index, actor, dx, dy, width, height, svChara) {
-    if (this.sprite[index]) this.removeChild(this.sprite[index]);
-    this.sprite[index] = new Sprite_Actor(actor);
-    this.addChild(this.sprite[index]);
-    this.sprite[index].setHome(dx + width / 2, dy + height + Window_Base.SV_SHADOW_HEIGHT / 4);
-    this.sprite[index].startMove(0,0,0);
+    index = index % this.showActorNum();
+    var sprite = this.sprite[index];
+    if (!sprite) {
+        sprite = new Sprite_Actor(actor);
+        this.addChild(sprite);
+        this.sprite[index] = sprite;
+    } else {
+        sprite.setBattler(actor);
+    }
+    sprite.setHome(dx + width / 2, dy + height + Window_Base.SV_SHADOW_HEIGHT / 4);
+    sprite.startMove(0,0,0);
     var stateMotion = actor.getStateMotion();
     var motion = svChara.state && stateMotion ? stateMotion : svChara.motion;
-    this.sprite[index].startMotion(motion);
+    sprite.startMotion(motion);
 };
 
 //------------------------------------------------------------------------
@@ -1722,6 +1743,7 @@ Window_Base.prototype.drawCssActorLevel = function(actor, x, y, width) {
 Window_Base.prototype.drawCssActorIcons = function(index, actor, x, y, width, line) {
     var css = FTKR.CSS.cssStatus.state;
     var iw = Window_Base._iconWidth;
+    index = index % this.showActorNum();
     if (!this._stateIconSprite[index]) {
         this._stateIconSprite[index] = [];
     }
@@ -1735,10 +1757,13 @@ Window_Base.prototype.drawCssActorIcons = function(index, actor, x, y, width, li
 
     for (var i = 0; i < showNum; i++) {
         var sprite = this._stateIconSprite[index][i];
-        if (sprite) this.removeChild(sprite);
-        sprite = new Sprite_CssStateIcon(i, showNum);
-        this.addChild(sprite);
-        sprite.setup(actor);
+        if (!sprite) {
+            sprite = new Sprite_CssStateIcon(i, showNum);
+            this.addChild(sprite);
+            this._stateIconSprite[index][i] = sprite;
+        } else {
+            sprite.setup(actor, showNum);
+        }
         sprite.move(x + this.padding, y + this.padding);
         sprite.offsetMove(offset * i, line);
         if(css.autoScale) sprite.setScale(scale);
@@ -1931,6 +1956,18 @@ Window_MenuStatus.prototype.drawItemStatus = function(index) {
     }
 };
 
+Window_MenuStatus.prototype.drawAllItems = function() {
+    var topIndex = this.topIndex();
+    for (var i = 0; i < this.maxPageItems(); i++) {
+        var index = topIndex + i;
+        if (index < this.maxItems()) {
+            this.drawItem(index);
+        } else {
+            this.clearCssSprite(index % this.maxPageItems());
+        }
+    }
+};
+
 if(FTKR.CSS.window.enabled) {
 
 //書き換え
@@ -2077,6 +2114,14 @@ Sprite_CssStateIcon.prototype.initMembers = function() {
     this._battler = null;
     this._animationCount = 0;
     this._animationIndex = 0;
+    this._iconIndex = 0;
+};
+
+Sprite_CssStateIcon.prototype.setup = function(battler, showNum) {
+    this.initMembers();
+    this._battler = battler;
+    this._showNum = showNum;
+    this.setFrame();
 };
 
 Sprite_CssStateIcon.prototype.updateIcon = function() {

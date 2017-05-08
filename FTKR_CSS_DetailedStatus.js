@@ -3,8 +3,8 @@
 // FTKR_CSS_DetailedStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/21
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2017/05/08
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,16 +15,11 @@ FTKR.CSS.DS = FTKR.CSS.DS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 詳細ステータス画面の表示内容を変更するプラグイン
+ * @plugindesc v1.0.1 詳細ステータス画面の表示内容を変更するプラグイン
  * @author フトコロ
  *
  * @param --詳細ステータスの表示設定--
  * @default
- * 
- * @param Enabled Detailed Status
- * @desc 詳細ステータス画面のレイアウト変更機能を使うか。
- * 0 - 無効, 1 - 有効
- * @default 0
  * 
  * @param DS Lines Number
  * @desc 各表示エリアの行数を指定します。
@@ -119,6 +114,38 @@ FTKR.CSS.DS = FTKR.CSS.DS || {};
  * @desc 各表示エリア間の線色の透明度を指定します。
  * @default 48
  * 
+ * @param --ウィンドウ設定--
+ * @desc 
+ * 
+ * @param Enabled Custom Window
+ * @desc ウィンドウのレイアウト変更機能を使うか。
+ * 0 - 無効, 1 - 有効
+ * @default 0
+ * 
+ * @param Number Visible Rows
+ * @desc ステータスウィンドウの縦の行数
+ * @default 16
+ * 
+ * @param Font Size
+ * @desc フォントサイズ
+ * @default 28
+ * 
+ * @param Window Padding
+ * @desc ウィンドウの周囲の余白
+ * @default 18
+ * 
+ * @param Window Line Height
+ * @desc ウィンドウ内の1行の高さ
+ * @default 36
+ * 
+ * @param Window Opacity
+ * @desc ウィンドウ内の背景の透明度
+ * @default 192
+ * 
+ * @param Hide Window Frame
+ * @desc ウィンドウ枠を非表示にするか
+ * 1 - 非表示にする、0 - 表示する
+ * @default 0
  * 
  * @help
  *-----------------------------------------------------------------------------
@@ -144,10 +171,6 @@ FTKR.CSS.DS = FTKR.CSS.DS || {};
  *-----------------------------------------------------------------------------
  * プラグインパラメータの設定により、ステータス画面で表示する表示レイアウトを
  * 変更することができます。
- * 
- * <Enabled Detailed Status>
- *    :詳細ステータス画面のレイアウト変更機能を使うか指定します。
- *    :0 - 無効, 1 - 有効
  * 
  * <DS Lines Number>
  *    :詳細ステータスウィンドウは、表示エリアを横に4分割で分けています。
@@ -217,6 +240,60 @@ FTKR.CSS.DS = FTKR.CSS.DS || {};
  * 
  * 
  *-----------------------------------------------------------------------------
+ * ステータスウィンドウの設定
+ *-----------------------------------------------------------------------------
+ * 以下のプラグインパラメータで設定できます。
+ * 
+ * <Enabled Custom Window>
+ *    :スキル画面のウィンドウ変更機能を使うか指定します。
+ *    :0 - 無効, 1 - 有効
+ * 
+ * <Number Visible Rows>
+ *    :ステータスウィンドウの縦の行数を変更します。
+ *    :デフォルトは16行です。
+ * 
+ * <Font Size>
+ *    :ウィンドウ内のフォントサイズを変更します。
+ *    :デフォルトは 28 です。(単位はpixel)
+ * 
+ * <Window Padding>
+ *    :ウィンドウの周囲の余白を変更します。
+ *    :デフォルトは 18 です。(単位はpixel)
+ * 
+ * <Window Line Height>
+ *    :ウィンドウ内の1行の高さを変更します。
+ *    :デフォルトは 36 です。(単位はpixel)
+ * 
+ * <Window Opacity>
+ *    :ウィンドウ内の背景の透明度を変更します。
+ *    :デフォルトは 192 です。
+ *    :0 - 透明、255 - 不透明
+ * 
+ * <Hide Window Frame>
+ *    :ウィンドウ枠を非表示にするか指定します。
+ *    :1 - 非表示にする、0 - 表示する
+ *    :デフォルトは表示します。
+ * 
+ * 
+ * ＜ウィンドウの高さ＞
+ * ウィンドウの高さは、以下の計算式で算出します。
+ *    [ウィンドウ高さ] ＝ [縦の行数] × [1行の高さ] + [余白のサイズ] × 2
+ * 
+ * 
+ * ＜フォントサイズと行の高さ＞
+ * 基本的に、下の大小関係になるように設定しましょう。
+ *    フォントサイズ ＜ 1行の高さ
+ * 
+ * 
+ * ＜ウィンドウを消す方法＞
+ * 以下の設定にすると、ウィンドウ枠とウィンドウの背景が消えて
+ * アクターのステータスだけを表示します。
+ * 
+ * <Window Opacity>     : 0
+ * <Hide Window Frame>  : 1
+ * 
+ * 
+ *-----------------------------------------------------------------------------
  * 本プラグインのライセンスについて(License)
  *-----------------------------------------------------------------------------
  * 本プラグインはMITライセンスのもとで公開しています。
@@ -229,6 +306,9 @@ FTKR.CSS.DS = FTKR.CSS.DS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.1 - 2017/05/08 : 機能追加、不要なパラメータを削除
+ *    1. ウィンドウの設定変更機能を追加。
  * 
  * v1.0.0 - 2017/04/21 : 初版作成
  * 
@@ -275,6 +355,18 @@ FTKR.CSS.DS.detailedStatus = {
       String(FTKR.CSS.DS.parameters['DS Width Rate2'] || ''),
       String(FTKR.CSS.DS.parameters['DS Width Rate3'] || ''),
     ],
+};
+
+FTKR.CSS.DS.window = {
+    enabled:Number(FTKR.CSS.DS.parameters['Enabled Custom Window'] || 0),
+    numVisibleRows:Number(FTKR.CSS.DS.parameters['Number Visible Rows'] || 0),
+    maxCols:Number(FTKR.CSS.DS.parameters['Number Max Cols'] || 0),
+    fontSize:Number(FTKR.CSS.DS.parameters['Font Size'] || 0),
+    padding:Number(FTKR.CSS.DS.parameters['Window Padding'] || 0),
+    lineHeight:Number(FTKR.CSS.DS.parameters['Window Line Height'] || 0),
+    opacity:Number(FTKR.CSS.DS.parameters['Window Opacity'] || 0),
+    hideFrame:Number(FTKR.CSS.DS.parameters['Hide Window Frame'] || 0),
+    cursolHeight:Number(FTKR.CSS.DS.parameters['Cursol Line Number'] || 0),
 };
 
 //=============================================================================
@@ -337,5 +429,45 @@ Window_Status.prototype.refresh = function() {
         this.drawCssDetailedStatus(this._actor, 0, 0, w);
     }
 };
+
+if(FTKR.CSS.SS.window.enabled) {
+
+//書き換え
+//ウィンドウの行数
+Window_Status.prototype.numVisibleRows = function() {
+    return FTKR.CSS.SS.window.numVisibleRows;
+};
+
+//書き換え
+//ウィンドウのフォントサイズ
+Window_Status.prototype.standardFontSize = function() {
+    return FTKR.CSS.SS.window.fontSize;
+};
+
+//書き換え
+//ウィンドウに周囲の余白サイズ
+Window_Status.prototype.standardPadding = function() {
+    return FTKR.CSS.SS.window.padding;
+};
+
+//書き換え
+//ウィンドウ内の1行の高さ
+Window_Status.prototype.lineHeight = function() {
+    return FTKR.CSS.SS.window.lineHeight;
+};
+
+//書き換え
+//ウィンドウの背景の透明度
+Window_Status.prototype.standardBackOpacity = function() {
+    return FTKR.CSS.SS.window.opacity;
+};
+
+//書き換え
+//ウィンドウ枠の表示
+Window_Status.prototype._refreshFrame = function() {
+    if (!FTKR.CSS.SS.window.hideFrame) Window.prototype._refreshFrame.call(this);
+};
+
+}//ウィンドウカスタム有効
 
 };//TKR_CustomSimpleActorStatus.jsが必要

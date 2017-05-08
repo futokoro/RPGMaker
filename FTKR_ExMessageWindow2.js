@@ -3,8 +3,8 @@
 // FTKR_ExMessageWindow2.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/24
-// 最終更新日 : 2017/05/07
-// バージョン : v2.0.9
+// 最終更新日 : 2017/05/08
+// バージョン : v2.0.10
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EMW = FTKR.EMW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.0.9 一度に複数のメッセージウィンドウを表示するプラグイン
+ * @plugindesc v2.0.10 一度に複数のメッセージウィンドウを表示するプラグイン
  * @author フトコロ
  * 
  * @param Create ExWindow Number
@@ -259,14 +259,26 @@ FTKR.EMW = FTKR.EMW || {};
  * 
  * 2. 文章を表示するウィンドウを指定
  * 
- * EMW_メッセージウィンドウ指定 Id (終了禁止/終了許可)
- * EMW_MESSAGEWINDOW_SET Id (NOEND/CANCLOSE)
+ * EMW_メッセージウィンドウ指定 Id (終了禁止/終了許可) (行動許可) (幅 x) (行数 y) (左/中/右)
+ * EMW_MESSAGEWINDOW_SET Id (NOEND/CANCLOSE) (CANMOVE) (WIDTH x) (LINES y) (LEFT/CENTER/RIGTH)
  * 
  * このコマンド以降に文章を表示する場合に使用する拡張ウィンドウの
  * メッセージウィンドウIDを指定します。
  * 
  * '終了禁止' または '終了許可' をつけると
  * IDの指定と合わせて、ウィンドウの開閉設定ができます。
+ * 
+ * '行動許可'をつけると、IDの指定と合わせて、
+ * ウィンドウの行動許可設定ができます。
+ * 
+ * '幅 x'をつけると、IDの指定と合わせて、
+ * ウィンドウの幅を x pixelに設定できます。
+ * 
+ * '行数 y'をつけると、IDの指定と合わせて、
+ * ウィンドウの高さを y 行分に設定できます。
+ * 
+ * '左' '中' または '右'をつけると、IDの指定と合わせて、
+ * ウィンドウのX座標の表示位置を設定できます。
  * 
  * 
  * 3. 文章を表示するウィンドウの指定をリセット
@@ -325,6 +337,14 @@ FTKR.EMW = FTKR.EMW || {};
  * EMW_MESSAGEWINDOW_SETPOSITION 1 right
  * 
  * 
+ * 8. メッセージウィンドウ表示中の行動許可(*1)
+ * 
+ * EMW_メッセージウィンドウ行動許可 Id
+ * EMW_MESSAGEWINDOW_CANMOVE Id
+ * 
+ * 指定したIDのウィンドウ表示中にプレイヤーの行動を許可します。
+ *  
+ * 
  * (*1) この設定は一度ウィンドウが閉じるとリセットします。
  * 
  * 
@@ -343,7 +363,7 @@ FTKR.EMW = FTKR.EMW || {};
  * 
  * 1. 文章の表示
  * $gameMessageEx.window(ウィンドウID).disp('文章')
- *    :ウィンドウIDに'文章'を表示します。
+ *    :ウィンドウIDの表示設定を初期化した後に、'文章'を表示します。
  *    :'文章'には制御文字が使用できますが、この時は'\\v[1]'の用に
  *    :'\'記号を2つ使う必要があるので注意です。
  *    :文章中に'\n'を追記すると、その部分で改行します。('\'は一つです)
@@ -406,6 +426,11 @@ FTKR.EMW = FTKR.EMW || {};
  *    :          表示したい位置の番号を指定してください。
  * 
  * 
+ * 11. ウィンドウ表示時の行動許可
+ * $gameMessageEx.window(ウィンドウID).enabledCanMovePlayer()
+ *    :指定したウィンドウIDの表示中にプレイヤーの行動を許可します。
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * 本プラグインのライセンスについて(License)
  *-----------------------------------------------------------------------------
@@ -419,6 +444,8 @@ FTKR.EMW = FTKR.EMW || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v2.0.10 - 2017/05/08 : プラグインコマンド追加
  * 
  * v2.0.9 - 2017/05/07 : 不具合修正
  *    1. 自動実行または並列処理による文章コマンドに対して、行動許可禁止の
@@ -477,16 +504,31 @@ var convertPositionX = function(text) {
     switch(true){
     case /左/.test(text):
     case /left/i.test(text):
+    case Number(text) === 0:
         return 0;
     case /中/.test(text):
     case /center/i.test(text):
+    case Number(text) === 1:
         return 1;
     case /右/.test(text):
     case /right/i.test(text):
+    case Number(text) === 2:
         return 2;
     default:
-        return parseInt(text);
+        return undefined;
     }
+};
+
+var someTextToRegs = function(test, regs) {
+    return regs.some( function(reg){
+        return test && (test === reg || test.toUpperCase() === reg);
+    });
+};
+
+var matchTextToRegs = function(test, regs) {
+    return regs.some( function(reg){
+        return test.match(reg);
+    });
 };
 
 //=============================================================================
@@ -496,48 +538,39 @@ var convertPositionX = function(text) {
 var _Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
     _Game_Interpreter_pluginCommand.call(this, command, args);
-    if (command.match(/EMW_(.+)/i)) {
-        command = RegExp.$1;
-        switch (true) {
-            case /メッセージウィンドウ指定/i.test(command):
-            case /MessageWindow_Set/i.test(command):
-                this.setMessageWindowId(args);
-                break;
-            case /メッセージウィンドウリセット/i.test(command):
-            case /MessageWindow_Reset/i.test(command):
-                this._windowId = 0;
-                break;
-            case /メッセージウィンドウ強制クローズ/i.test(command):
-            case /メッセージウィンドウ強制終了/i.test(command):
-            case /MessageWindow_Close/i.test(command):
-                this.messageWindowTerminate(args);
-                break;
-            case /メッセージウィンドウ終了禁止/i.test(command):
-            case /MessageWindow_NoEnd/i.test(command):
-                var windowId = Number(args[0] || 0);
-                if (windowId >= 0) {
-                    $gameMessageEx.window(windowId).prohibitClose();
-                }
-                break;
-            case /メッセージウィンドウ終了許可/i.test(command):
-            case /MessageWindow_CanClose/i.test(command):
-                var windowId = Number(args[0] || 0);
-                if (windowId >= 0) {
-                    $gameMessageEx.window(windowId).permitClose();
-                }
-                break;
-            case /メッセージウィンドウサイズ設定/i.test(command):
-            case /MessageWindow_SetSize/i.test(command):
-                this.setMessageWindowSize(args);
-                break;
-            case /メッセージウィンドウ位置設定/i.test(command):
-            case /MessageWindow_SetPosition/i.test(command):
-                var windowId = Number(args[0] || 0);
-                if (windowId >= 0) {
-                    $gameMessageEx.window(windowId).setPositionX(args[1]);
-                }
-                break;
-       }
+    if (!command.match(/EMW_(.+)/i)) return;
+    command = RegExp.$1;
+    if(!matchTextToRegs(command, [/メッセージウィンドウ(.+)/, /MessageWindow_(.+)/i])) return;
+    command = RegExp.$1;
+    switch (true) {
+    case someTextToRegs(command, ['指定', 'SET']):
+        this.setMessageWindowId(args);
+        break;
+    case someTextToRegs(command, ['リセット', 'RESET']):
+        this._windowId = 0;
+        break;
+    case someTextToRegs(command, ['強制クローズ', '強制終了', 'CLOSE']):
+        this.messageWindowTerminate(args);
+        break;
+    case someTextToRegs(command, ['終了禁止', 'NOEND']):
+        var windowId = Number(args[0] || 0);
+        if (windowId >= 0) $gameMessageEx.window(windowId).prohibitClose();
+        break;
+    case someTextToRegs(command, ['終了許可', 'CANCLOSE']):
+        var windowId = Number(args[0] || 0);
+        if (windowId >= 0) $gameMessageEx.window(windowId).permitClose();
+        break;
+    case someTextToRegs(command, ['サイズ設定', 'SETSIZE']):
+        this.setMessageWindowSize(args);
+        break;
+    case someTextToRegs(command, ['位置設定', 'SETPOSITION']):
+        var windowId = Number(args[0] || 0);
+        if (windowId >= 0) $gameMessageEx.window(windowId).setPositionX(args[1]);
+        break;
+    case someTextToRegs(command, ['行動許可', 'CANMOVE']):
+        var windowId = Number(args[0] || 0);
+        if (windowId >= 0) $gameMessageEx.window(windowId).enabledCanMovePlayer(args[1]);
+        break;
     }
 };
 
@@ -545,17 +578,34 @@ Game_Interpreter.prototype.setMessageWindowId = function(args) {
     var windowId = Number(args[0] || 0);
     if (windowId >= 0) {
         this._windowId = windowId;
-        if (args[1] === '終了禁止' || args[1] && args[1].toUpperCase() === 'NOEND') {
-            $gameMessageEx.window(windowId).prohibitClose();
-        } else if (args[1] === '終了許可' || args[1] && args[1].toUpperCase() === 'CANCLOSE') {
-            $gameMessageEx.window(windowId).clear();
-            $gameMessageEx.window(windowId).permitClose();
+        var width = 0, heightLine = 0;
+        for (var i = 1; i < args.length; i++) {
+            var arg = args[i];
+            if (someTextToRegs(arg, ['終了禁止', 'NOEND'])) {
+                $gameMessageEx.window(windowId).prohibitClose();
+            } else if (someTextToRegs(arg, ['終了許可', 'CANCLOSE'])) {
+                $gameMessageEx.window(windowId).clear();
+                $gameMessageEx.window(windowId).permitClose();
+            } else if (someTextToRegs(arg, ['行動許可', 'CANMOVE'])) {
+                $gameMessageEx.window(windowId).enabledCanMovePlayer();
+            } else if (someTextToRegs(arg, ['幅', 'WIDTH'])) {
+                i++;
+                width = Number(args[i]);
+            } else if (someTextToRegs(arg, ['行数', 'LINES'])) {
+                i++;
+                heightLine = Number(args[i]);
+            } else if (convertPositionX(arg) !== undefined) {
+                $gameMessageEx.window(windowId).setPositionX(arg);
+            }
+        }
+        if (width || heightLine) {
+            $gameMessageEx.window(windowId).setWindowSize(width, heightLine);
         }
     }
 };
 
 Game_Interpreter.prototype.messageWindowTerminate = function(args) {
-    if (args[0] === 'すべて' || args[0] && args[0].toUpperCase() === 'ALL') {
+    if (someTextToRegs(args[0], ['すべて', 'ALL'])) {
         $gameMessageEx.windows().forEach( function(message){
             message.terminate();
         });
@@ -570,26 +620,39 @@ Game_Interpreter.prototype.messageWindowTerminate = function(args) {
 Game_Interpreter.prototype.setMessageWindowSize = function(args) {
     var windowId = Number(args[0] || 0);
     if (windowId >= 0) {
-        if (args[1] === '幅' || args[1] && args[1].toUpperCase() === 'WIDTH') {
-            var width = Number(args[2]);
-        } else if (args[3] === '幅' || args[3] && args[3].toUpperCase() === 'WIDTH') {
-            var width = Number(args[4]);
-        }
-        if (args[1] === '行数' || args[1] && args[1].toUpperCase() === 'LINES') {
-            var heightLine = Number(args[2]);
-        } else if (args[3] === '行数' || args[3] && args[3].toUpperCase() === 'LINES') {
-            var heightLine = Number(args[4]);
+        var width = 0, heightLine = 0;
+        for (var i = 1; i < args.length; i++) {
+            var arg = args[i];
+            if (someTextToRegs(arg, ['幅', 'WIDTH'])) {
+                i++;
+                width = Number(args[i]);
+            } else if (someTextToRegs(arg, ['行数', 'LINES'])) {
+                i++;
+                heightLine = Number(args[i]);
+            }
         }
         $gameMessageEx.window(windowId).setWindowSize(width, heightLine);
     }
 };
 
 //=============================================================================
+// メッセージ表示用クラスの機能変更
+//=============================================================================
+
+FTKR.EMW.Game_Message_clear = Game_Message.prototype.clear;
+Game_Message.prototype.clear = function() {
+    FTKR.EMW.Game_Message_clear.call(this);
+    this._canMovePlayer = false;
+    this._terminate = false;
+    this._lastText = false;
+    this._positionX = 0;
+    this._windowWidth = 0;
+    this._windowHeightLine = 0;
+};
+
+//------------------------------------------------------------------------
 // メッセージ表示中でも行動可能にする処理を追加
 // \EMP  \DMP
-//=============================================================================
-//------------------------------------------------------------------------
-// Window_Message
 //------------------------------------------------------------------------
 FTKR.EMW.Window_Message_processEscapeCharacter = Window_Message.prototype.processEscapeCharacter;
 Window_Message.prototype.processEscapeCharacter = function(code, textState) {
@@ -604,20 +667,6 @@ Window_Message.prototype.processEscapeCharacter = function(code, textState) {
         FTKR.EMW.Window_Message_processEscapeCharacter.call(this, code, textState);
         break;
     }
-};
-
-//------------------------------------------------------------------------
-// Game_Message
-//------------------------------------------------------------------------
-FTKR.EMW.Game_Message_clear = Game_Message.prototype.clear;
-Game_Message.prototype.clear = function() {
-    FTKR.EMW.Game_Message_clear.call(this);
-    this._canMovePlayer = false;
-    this._terminate = false;
-    this._lastText = false;
-    this._positionX = 0;
-    this._windowWidth = 0;
-    this._windowHeightLine = 0;
 };
 
 Game_Message.prototype.canMovePlayer = function() {
@@ -649,9 +698,6 @@ Game_Message.prototype.isBusyBase = function() {
             this.isNumberInput() || this.isItemChoice());
 };
 
-//=============================================================================
-// メッセージ表示用クラスの機能変更
-//=============================================================================
 //------------------------------------------------------------------------
 // 強制終了
 //------------------------------------------------------------------------
@@ -726,15 +772,6 @@ Game_Message.prototype.firstText = function() {
 
 Game_Message.prototype.lastText = function() {
     this._lastText = true;
-};
-
-//場所移動コマンド
-FTKR.EMW.Game_Interpreter_command201 = Game_Interpreter.prototype.command201;
-Game_Interpreter.prototype.command201 = function() {
-    $gameMessageEx.windows().forEach( function(message){
-        message.terminate();
-    });
-    return FTKR.EMW.Game_Interpreter_command201.call(this);
 };
 
 //------------------------------------------------------------------------
@@ -1320,6 +1357,10 @@ Scene_Map.prototype.createAllWindows = function() {
     this.createMessageExWindowAll();
 };
 
+Scene_Map.prototype.readMapMeta = function() {
+    return readObjectMeta($dataMap, ['EMW_生成数', 'EMW_NUMBER']);
+};
+
 //プラグインパラメータで指定した数の拡張メッセージウィンドウを生成
 //またはマップデータのメモ欄の設定を読み込む
 Scene_Map.prototype.createMessageExWindowAll = function() {
@@ -1332,10 +1373,6 @@ Scene_Map.prototype.createMessageExWindowAll = function() {
     for (var i = 1; i < number + 1; i++) {
         this.createMessageExWindow(i);
     }
-};
-
-Scene_Map.prototype.readMapMeta = function() {
-    return readObjectMeta($dataMap, ['EMW_生成数', 'EMW_NUMBER']);
 };
 
 //拡張メッセージウィンドウを生成
@@ -1359,6 +1396,15 @@ Scene_Map.prototype.terminate = function() {
             message.terminate();
         });
     }
+};
+
+//場所移動コマンド
+FTKR.EMW.Game_Interpreter_command201 = Game_Interpreter.prototype.command201;
+Game_Interpreter.prototype.command201 = function() {
+    $gameMessageEx.windows().forEach( function(message){
+        message.terminate();
+    });
+    return FTKR.EMW.Game_Interpreter_command201.call(this);
 };
 
 //=============================================================================

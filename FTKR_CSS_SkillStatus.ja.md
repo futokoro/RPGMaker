@@ -123,7 +123,8 @@ FTKR_CSS_SkillStatus.js
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.0.0](FTKR_CSS_SkillStatus.js) | 2017/04/21 | 初版作成 |
+| [ver1.0.1](FTKR_CSS_SkillStatus.js) | 2017/05/08 | 不具合修正、デフォルト設定を変更 |
+| ver1.0.0 | 2017/04/21 | 初版作成 |
 
 ## ライセンス
 

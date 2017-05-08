@@ -3,8 +3,8 @@
 // FTKR_CSS_SkillStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/21
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2017/05/08
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.CSS.SS = FTKR.CSS.SS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 スキル画面のステータス表示を変更するプラグイン
+ * @plugindesc v1.0.1 スキル画面のステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @param --レイアウト設定--
@@ -25,21 +25,21 @@ FTKR.CSS.SS = FTKR.CSS.SS || {};
  * @param Actor Status Text1
  * @desc Text1部に表示するステータスを指定します。
  * 詳細はヘルプ参照
- * @default name
+ * @default face
  * 
  * @param Actor Status Text2
  * @desc Text2部に表示するステータスを指定します。
  * 詳細はヘルプ参照
- * @default state
+ * @default name,level,state
  * 
  * @param Actor Status Text3
  * @desc Text3部に表示するステータスを指定します。
  * 詳細はヘルプ参照
- * @default [hp/mp/tp]
+ * @default class,hp,mp
  * 
  * @param Actor Status Space
  * @desc 各Textの間隔を指定します。
- * @default 0,5,5,0
+ * @default 0,20,50,0
  * 
  * @param Actor Status Space In Text
  * @desc Text内で複数表示する場合の間隔を指定します。
@@ -48,7 +48,7 @@ FTKR.CSS.SS = FTKR.CSS.SS || {};
  * @param Actor Status Width Rate
  * @desc Text1~Text3の表示幅の比率を指定します。
  * 詳細はヘルプ参照
- * @default 1,1,3
+ * @default 2,2,3
  *
  * @param --ウィンドウ設定--
  * @desc 
@@ -187,6 +187,8 @@ FTKR.CSS.SS = FTKR.CSS.SS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.1 - 2017/05/08 : 不具合修正、デフォルト設定を変更。
+ * 
  * v1.0.0 - 2017/04/21 : 初版作成
  * 
  *-----------------------------------------------------------------------------
@@ -233,7 +235,7 @@ Window_SkillStatus.prototype.refresh = function() {
     if (this._actor) {
         var w = this.width - this.padding * 2;
         var h = this.height - this.padding * 2;
-        this.drawCssActorStatus(0, this._actor, 0, 0, w, h);
+        this.drawCssActorStatus(0, this._actor, 0, 0, w, h, FTKR.CSS.SS.simpleStatus);
     }
 };
 
