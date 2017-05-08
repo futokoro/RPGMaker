@@ -584,7 +584,6 @@ Game_Interpreter.prototype.setMessageWindowId = function(args) {
             if (someTextToRegs(arg, ['終了禁止', 'NOEND'])) {
                 $gameMessageEx.window(windowId).prohibitClose();
             } else if (someTextToRegs(arg, ['終了許可', 'CANCLOSE'])) {
-                $gameMessageEx.window(windowId).clear();
                 $gameMessageEx.window(windowId).permitClose();
             } else if (someTextToRegs(arg, ['行動許可', 'CANMOVE'])) {
                 $gameMessageEx.window(windowId).enabledCanMovePlayer();
