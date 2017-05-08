@@ -445,7 +445,7 @@ FTKR.EMW = FTKR.EMW || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
- * v2.0.10 - 2017/05/08 : プラグインコマンド追加
+ * v2.0.10 - 2017/05/08 : プラグインコマンド追加・修正
  * 
  * v2.0.9 - 2017/05/07 : 不具合修正
  *    1. 自動実行または並列処理による文章コマンドに対して、行動許可禁止の
@@ -1353,8 +1353,8 @@ DataManager.createGameObjects = function() {
 //マップ画面で拡張メッセージウィンドウを生成
 FTKR.EMW.Scene_Map_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function() {
-    FTKR.EMW.Scene_Map_createAllWindows.call(this);
     this.createMessageExWindowAll();
+    FTKR.EMW.Scene_Map_createAllWindows.call(this);
 };
 
 Scene_Map.prototype.readMapMeta = function() {
