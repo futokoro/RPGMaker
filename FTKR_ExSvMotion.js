@@ -3,8 +3,8 @@
 // FTKR_ExSvMotion.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/19
-// 最終更新日 : 2017/05/06
-// バージョン : v1.1.5
+// 最終更新日 : 2017/05/09
+// バージョン : v1.2.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,9 +15,15 @@ FTKR.ESM = FTKR.ESM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.5 SVキャラのモーションを拡張するプラグイン
+ * @plugindesc v1.2.0 SVキャラのモーションを拡張するプラグイン
  * @author フトコロ
  *
+ * @noteParam ESM_画像
+ * @noteRequire 1
+ * @noteDir img/sv_actors/
+ * @noteType file
+ * @noteData actors
+ * 
  * @param --行動モーションの設定--
  * @default
  * 
@@ -400,9 +406,29 @@ FTKR.ESM = FTKR.ESM || {};
  * モーションのコード
  * walk, wait, chant, guard, damage, evade, thrust, swing,
  * missile, skill, spell, item, escape, victory, dying,
- * abnormal, sleep, dead, custom*
+ * abnormal, sleep, dead, custom*, other*
  * 
- * custom* はカスタムモーションです。
+ * custom* はカスタムモーションです。(*は番号)
+ * 
+ * other* は別画像モーションです。(*は番号)
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * スキル・アイテムに個別でモーションを設定
+ *-----------------------------------------------------------------------------
+ * スキル、アイテムのメモ欄に以下のタグを設定すると、使用時のモーションを
+ * 変更することができます。
+ * 
+ * <ESM モーション: name>
+ * <ESM MOTION: name>
+ * 使用時のモーションを name に変更します。
+ * name にはモーションのコードを設定してください。
+ * 
+ * 
+ * <ESM 武器モーション>
+ * <ESM WEAPON_MOTION>
+ * このタグがあると、手持ちの武器付きのモーションになります。
+ * 
  * 
  *-----------------------------------------------------------------------------
  * カスタムモーションについて
@@ -420,11 +446,13 @@ FTKR.ESM = FTKR.ESM || {};
  *    :ここに設定したコードのモーションをループさせます。
  * 
  * モーションのコードは、カンマ(,)を使うことで複数入力できます。
+ * これらのパラメータに、custom* を使用することはできません。
  * 
  * 
  * モーションのループについて
  * <Custom * Loop>に設定したモーションをループさせます。
  * 複数のコードを入力した場合も、それらを順に表示してループします。
+ * 設定しない場合は、そのカスタムモーションはループしません。
  * 
  * 設定例)
  * <Custom * Non Loop> :victory, skill
@@ -433,6 +461,33 @@ FTKR.ESM = FTKR.ESM || {};
  * 
  * victory ⇒ skill ⇒ item ⇒ walk ⇒ item ⇒ walk ⇒ ...
  *                  |→ここからループ
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * 別画像モーションについて
+ *-----------------------------------------------------------------------------
+ * other* (* は数字)で指定するモーションは、本プラグインで新規に設定可能な
+ * アクター専用のモーションです。
+ * 
+ * データベースのアクターの「画像」設定で選択したSV戦闘キャラ画像以外の
+ * 画像を使用することができます。
+ * 
+ * 使用する画像は、アクターのメモ欄に以下のタグで設定します。
+ * 
+ * <ESM_画像:filename>
+ * <ESM_IMAGE:filename>
+ * 
+ * 画像ファイル filename.png は img/sv_actors/ に保存してください。
+ * 使用できる画像規格は、SV戦闘キャラ画像と同じです。
+ * 
+ * other*の *番号は、画像内のどの位置のモーションを使用するか設定する番号です。
+ * 3枚で1セットで左上のモーションを0番、一つ下を1番、一つ右を6番として数えます。
+ * other0 ~ other17 まで使用できます。
+ * 
+ * なお、各別画像モーション番号のループ設定は以下のとおりです。
+ * 0 ~ 3, 12 ~ 17 : ループする
+ * 4 ~ 11         : ループしない
+ * カスタムモーションに使用した場合は、カスタムモーションの設定に従います。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -455,7 +510,7 @@ FTKR.ESM = FTKR.ESM || {};
  *    :モーション名のコードを指定してください。
  *    : walk, wait, chant, guard, damage, evade, thrust, swing,
  *    : missile, skill, spell, item, escape, victory, dying,
- *    : abnormal, sleep, dead, custom*
+ *    : abnormal, sleep, dead, custom*, other*
  * 
  * <Motion * Condition>
  *    :モーションの状態。上記の4種類から設定してください。
@@ -487,6 +542,10 @@ FTKR.ESM = FTKR.ESM || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.2.0 - 2017/05/09 : 機能追加
+ *    1. 別のSV画像を使用したモーションを設定する機能を追加。
+ *    2. スキル・アイテムの使用モーションを個別に設定する機能を追加。
  * 
  * v1.1.5 - 2017/05/06 : 不具合修正
  *    1. ステートモーションタグが設定されていない場合に、ステートの
@@ -608,7 +667,16 @@ var readObjectMeta = function(obj, metacodes) {
         var metaReg = new RegExp('<' + metacode + ':[ ]*(.+)>', 'i');
         return obj.note.match(metaReg);
     }); 
-    return RegExp.$1 ? Number(RegExp.$1) : false;
+    return RegExp.$1 ? RegExp.$1 : false;
+};
+
+//objのメモ欄から <metacode> があるか真偽を返す
+var testObjectMeta = function(obj, metacodes) {
+    if (!obj) return false;
+    return metacodes.some(function(metacode){
+        var metaReg = new RegExp('<' + metacode + '>', 'i');
+        return metaReg.test(obj.note);
+    }); 
 };
 
 //=============================================================================
@@ -646,6 +714,37 @@ Game_Actor.prototype.performEscape = function() {
     }
 };
 
+//書き換え
+Game_Actor.prototype.performAction = function(action) {
+    Game_Battler.prototype.performAction.call(this, action);
+    if (action.isAttack()) {
+        this.performAttack();
+    } else if (action.isGuard()) {
+        this.requestMotion('guard');
+    } else if (action.isMagicSkill()) {
+        var motion = this.esmMotion(action.item(), 'spell');
+        this.requestMotion(motion);
+    } else if (action.isSkill()) {
+        var motion = this.esmMotion(action.item(), 'skill');
+        this.requestMotion(motion);
+    } else if (action.isItem()) {
+        var motion = this.esmMotion(action.item(), 'item');
+        this.requestMotion(motion);
+    }
+    if (motion && testObjectMeta(action.item(), ['ESM 武器モーション', 'ESM WEAPON_MOTION'])) {
+        var weapons = this.weapons();
+        var wtypeId = weapons[0] ? weapons[0].wtypeId : 0;
+        var attackMotion = $dataSystem.attackMotions[wtypeId];
+        if (attackMotion) {
+            this.startWeaponAnimation(attackMotion.weaponImageId);
+        }
+    }
+};
+
+Game_Actor.prototype.esmMotion = function(item, motion) {
+    return readObjectMeta(item, ['ESM モーション', 'ESM MOTION']) || motion;
+}
+
 //=============================================================================
 // バトラーの状態からモーション名を取得する
 // Game_BattlerBase
@@ -673,7 +772,6 @@ Game_BattlerBase.prototype.checkConditionAll = function() {
 
 Game_BattlerBase.prototype.checkCondition = function(condition) {
     var stateMotion = this.stateMotionIndex();
-//    console.log('condition', condition, 'stateMotion', stateMotion);
     if (condition.match(/state(\d+)/i)) {
         return stateMotion === Number(RegExp.$1);
     } 
@@ -704,7 +802,7 @@ Game_BattlerBase.prototype.stateMotionIndex = function() {
     var states = this.states();
     if (states.length > 0) {
         var motion = readObjectMeta(states[0], ['ESM モーション', 'ESM MOTION']);
-        return motion.length ? Number(motion[0]) : states[0].motion;
+        return motion ? Number(motion) : states[0].motion;
     } else {
         return 0;
     }
@@ -744,6 +842,7 @@ Sprite_Battler.prototype.initMembers = function() {
     this._motionTypes = [[],[]];
     this._motionType = '';
     this._index = 0;
+    this._otherFile = false;
 };
 
 Sprite_Battler.ESM_MOTIONS = {
@@ -767,8 +866,37 @@ Sprite_Battler.ESM_MOTIONS = {
     dead:     ['', 'dead'    ],
 };
 
+Sprite_Battler.ESM_MOTION_NAME = [
+    'walk',
+    'wait',
+    'chant',
+    'guard',
+    'damage',
+    'evade',
+    'thrust',
+    'swing',
+    'missile',
+    'skill',
+    'spell',
+    'item',
+    'escape',
+    'victory',
+    'dying',
+    'abnormal',
+    'sleep',
+    'dead'
+];
+
 Sprite_Battler.prototype.motion = function() {
-    return Sprite_Actor.MOTIONS[this.motionName()];
+    return Sprite_Actor.MOTIONS[this.convertOtherMotion(this.motionName())];
+};
+
+Sprite_Battler.prototype.convertOtherMotion = function(other) {
+    return other.match(/other(\d+)/) ? Sprite_Battler.ESM_MOTION_NAME[Number(RegExp.$1)] : other;
+};
+
+Sprite_Battler.prototype.isOtherMotion = function() {
+    return /other/i.test(this.motionName());
 };
 
 Sprite_Battler.prototype.motionTypes = function() {
@@ -798,8 +926,11 @@ Sprite_Battler.prototype.setNewMotion = function(battler, motionType) {
         motionType = battler.getEsmMotion();
     }
     this._motionType = motionType;
+    this._otherFile = false;
     if (motionType.match(/custom(\d+)/)) {
         var newMotions = FTKR.ESM.motion.custom[Number(RegExp.$1)];
+    } else if (motionType.match(/other(\d+)/)) {
+        var newMotions =[motionType, ''];
     } else {
         var newMotions = Sprite_Battler.ESM_MOTIONS[motionType];
     }
@@ -901,6 +1032,20 @@ Sprite_Battler.prototype.consoleLog_BattlerMotion = function(type, datas) {
 // Sprite_Actor
 // アクターのSVスプライトを修正
 //=============================================================================
+
+FTKR.ESM.Sprite_Actor_updateBitmap = Sprite_Actor.prototype.updateBitmap;
+Sprite_Actor.prototype.updateBitmap = function() {
+    if (this.isOtherMotion()) {
+        Sprite_Battler.prototype.updateBitmap.call(this);
+        var name = readObjectMeta(this._actor.actor(), ['ESM_画像', 'ESM_IMAGE']);
+        if (this._battlerName !== name) {
+            this._battlerName = name;
+            this._mainSprite.bitmap = ImageManager.loadSvActor(name);
+        }
+    } else {
+        FTKR.ESM.Sprite_Actor_updateBitmap.call(this);
+    }
+};
 
 //書き換え
 Sprite_Actor.prototype.updateMotionCount = function() {
