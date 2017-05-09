@@ -3,8 +3,8 @@
 // FTKR_SkillTreeSystem.js
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/02/25
-// 最終更新日 : 2017/05/05
-// バージョン : v1.6.7
+// 最終更新日 : 2017/05/09
+// バージョン : v1.7.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.6.7 ツリー型スキル習得システム
+ * @plugindesc v1.7.0 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -537,6 +537,9 @@ FTKR.STS = FTKR.STS || {};
  * 2.スキルBの派生スキルにスキルCを登録
  * ⇒この場合、スキルCを習得するために、スキルAとスキルBをどちらも
  *   習得しなければいけない
+ * 
+ * position: y
+ *    :スキルの表示位置を y 行目 に設定します。
  * 
  * show: eval
  *    :スキルの表示条件を eval に設定します。
@@ -1193,6 +1196,9 @@ FTKR.STS = FTKR.STS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.7.0 - 2017/05/09 : 機能追加
+ *    1. スキルのスキルツリー上の縦の表示位置を変更する機能を追加。
+ * 
  * v1.6.7 - 2017/05/05 : 不具合修正
  *    1. スキルツリーの空欄設定が反映されない不具合を修正。
  * 
@@ -1453,6 +1459,8 @@ FTKR.STS.icon = {
   var:Number(FTKR.STS.parameters['Cost Variables Icon'] || 0),
 };
 
+FTKR.STS.MAX_DEVSKILL_COUNT = 20;
+
 Game_Action.EFFECT_GET_SP = 999;
 Game_Action.EFFECT_RESET_TREE = 998;
 Game_Action.EFFECT_CLEAR_TREE = 997;
@@ -1706,6 +1714,7 @@ DataManager.stsTreeDataNotetags = function(group) {
             pIndex:0,
             pCIndex:0,
             show:'',
+            position:0,
         };
         obj.sts.costs.push(this.setCost('sp', 0, FTKR.STS.sp.defaultReq));
 
@@ -1758,6 +1767,8 @@ DataManager.setStsData = function(obj) {
         var case9j = /カーソル枠画像番号:[ ]*(\d+)/i;
         var case10 = /(?:SHOW):[ ]*(.+)/i;
         var case10j = /表示条件:[ ]*(.+)/i;
+        var case11 = /(?:POSITION):[ ]*(.+)/i;
+        var case11j = /表示位置:[ ]*(.+)/i;
 
         var datas = stsdata.split(';');
         for (var i = 0; i < datas.length; i++) {
@@ -1792,6 +1803,8 @@ DataManager.setStsData = function(obj) {
                 obj.sts.pCIndex = Number(RegExp.$1);
             } else if (data.match(case10) || data.match(case10j)) {
                 obj.sts.show = String(RegExp.$1);
+            } else if (data.match(case11) || data.match(case11j)) {
+                obj.sts.position = Number(RegExp.$1);
             }
         }
         obj.sts.data = '';
@@ -2082,28 +2095,35 @@ Game_Actor.prototype.getSkillTree = function(tree) {
     var list = tree.sts.skillIds;
     var nextlist = [];
     var count = 0;
-    while (count < 20) {
-        for (var i = 0; i < FTKR.STS.skillTree.maxCols; i++) {
+    while (count < FTKR.STS.MAX_DEVSKILL_COUNT) {
+        dupCount = 0;
+        for (var i = 0; i < FTKR.STS.skillTree.maxCols + dupCount; i++) {
             var id = list[i];
             if (!id) {
                 results.push(null);
             } else {
                 var item = this.stsSkill(id);
-                FTKR.setGameData(this, null, item);
-                if (this.evalStsFormula(item.sts.show, true, false)) {
-                    var skillIds = this.getDevSkillId(item, tree);
-                    var data = { id:id, next:skillIds, x:i, y:count };
-                    for (var t = 0; t < results.length; t++) {
-                        var next = results[t];
-                        if (!next) continue;
-                        if (next.id === data.id) {
-                            results.splice(t, 1, null);
-                        }
-                    }
-                    results.push(data);
-                    nextlist.addExceptForDup(data.next);
+                if (item.sts.position > count + 1) {
+                    list.push(null);
+                    results.forEach( function(result, t){
+                        if (result && result.id === id) results.splice(t,1);
+                    });
+                    nextlist.addExceptForDup([id]);
+                    dupCount++;
                 } else {
-                    results.push(null);
+                    FTKR.setGameData(this, null, item);
+                    if (this.evalStsFormula(item.sts.show, true)) {
+                        var skillIds = this.getDevSkillId(item, tree);
+                        var data = { id:id, next:skillIds, x:i - dupCount, y:count };
+//                        results.spliceDupSkill(data.id, data, true);
+                        results.forEach( function(result, t){
+                            if (result && result.id === data.id) results.splice(t, 1, null);
+                        });
+                        results.push(data);
+                        nextlist.addExceptForDup(data.next);
+                    } else {
+                        results.push(null);
+                    }
                 }
             }
         }
@@ -2113,6 +2133,17 @@ Game_Actor.prototype.getSkillTree = function(tree) {
         count++;
     }
     return results;
+};
+
+Array.prototype.spliceDupSkill = function(id, data) {
+    for (var t = 0; t < this.length; t++) {
+        var next = this[t];
+        if (!next) continue;
+        if (next.id === id) {
+            this.splice(t, 1, null);
+        }
+    }
+    this.push(data);
 };
 
 Game_Actor.prototype.getDevSkillId = function(item, tree) {
@@ -2638,7 +2669,6 @@ Window_SkillTree.prototype.drawItem = function(index) {
   var nextList = data.next;
   var skill = this._actor.stsSkill(data.id);
   var iw = Window_Base._iconWidth;
-
   if (skill) {
     this.changePaintOpacity(this.isShowItem(data));
     this.drawTreeLine(data, nextList, rx, ry, rw, rh);
