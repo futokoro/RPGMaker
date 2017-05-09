@@ -72,6 +72,10 @@ FTKR.ESM = FTKR.ESM || {};
  * デフォルト item
  * @default item
  * 
+ * @param Recovery Motion
+ * @desc HP回復時のモーションを設定します
+ * @default 
+ * 
  * @param Undecided Motion
  * @desc モーション画像が不明な場合に表示するモーションを設定します : デフォルト walk
  * @default walk
@@ -358,6 +362,29 @@ FTKR.ESM = FTKR.ESM || {};
  * @desc カスタムモーション8のループするモーションのコードを設定します。
  * @default 
  * 
+ * @param --カスタムコンディション 設定--
+ * @default
+ * 
+ * @param Custom Condition 1
+ * @desc カスタムコンディション1の条件を設定します。
+ * @default 
+ * 
+ * @param Custom Condition 2
+ * @desc カスタムコンディション2の条件を設定します。
+ * @default 
+ * 
+ * @param Custom Condition 3
+ * @desc カスタムコンディション3の条件を設定します。
+ * @default 
+ * 
+ * @param Custom Condition 4
+ * @desc カスタムコンディション4の条件を設定します。
+ * @default 
+ * 
+ * @param Custom Condition 5
+ * @desc カスタムコンディション5の条件を設定します。
+ * @default 
+ * 
  * @param -- デバッグ 設定--
  * @default
  * 
@@ -484,10 +511,7 @@ FTKR.ESM = FTKR.ESM || {};
  * 3枚で1セットで左上のモーションを0番、一つ下を1番、一つ右を6番として数えます。
  * other0 ~ other17 まで使用できます。
  * 
- * なお、各別画像モーション番号のループ設定は以下のとおりです。
- * 0 ~ 3, 12 ~ 17 : ループする
- * 4 ~ 11         : ループしない
- * カスタムモーションに使用した場合は、カスタムモーションの設定に従います。
+ * なお、各別画像モーションはループしません。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -501,7 +525,8 @@ FTKR.ESM = FTKR.ESM || {};
  *  state*  : ステート付加中( * がステートモーション番号)(例:state4)
  *  victory : 戦闘勝利中
  *  escape  : 逃走中
- *  dying   : 瀕死時
+ *  dying   : 瀕死時(残りHP25％以下)
+ *  custom* : カスタムコンディション(* は番号)(例:custom1)
  * 
  * モーションは、モーション1～モーション16まで設定できます。
  * 数字が大きい方が、モーションの優先度が高くなります。
@@ -513,7 +538,7 @@ FTKR.ESM = FTKR.ESM || {};
  *    : abnormal, sleep, dead, custom*, other*
  * 
  * <Motion * Condition>
- *    :モーションの状態。上記の4種類から設定してください。
+ *    :モーションの状態。上記の8種類から設定してください。
  *    :ステートモーションに設定したモーションは、ループします。
  * 
  * 
@@ -527,6 +552,22 @@ FTKR.ESM = FTKR.ESM || {};
  * <ESM MOTION: x>
  *    :ステートモーション番号を x に設定します。
  *    :タグで設定しない場合は、基本設定の[SV]モーションの設定に従います。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * カスタムコンディションの設定
+ *-----------------------------------------------------------------------------
+ * 状態モーションのプラグインパラメータ<Motion * Condition>に設定できる
+ * 独自条件を設定できます。
+ * 
+ * プラグインパラメータ<Custom Condition *> にJS条件式を入力してください。
+ * 
+ * [条件式 の値について]
+ * 条件式は、ダメージ計算式のように、計算式を入力することで、固定値以外の値を
+ * 使用することができます。以下のコードを使用できます。
+ *  a.param - 使用者のパラメータを参照します。(a.hit で使用者の命中率)
+ *  v[x]    - 変数ID x の値を参照します。
+ *  s[x]    - スイッチID x の値を参照します。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -546,6 +587,8 @@ FTKR.ESM = FTKR.ESM || {};
  * v1.2.0 - 2017/05/09 : 機能追加
  *    1. 別のSV画像を使用したモーションを設定する機能を追加。
  *    2. スキル・アイテムの使用モーションを個別に設定する機能を追加。
+ *    3. HP回復時のモーションを設定する機能を追加。
+ *    4. 状態モーションに独自条件を設定するカスタムコンディションの機能を追加。
  * 
  * v1.1.5 - 2017/05/06 : 不具合修正
  *    1. ステートモーションタグが設定されていない場合に、ステートの
@@ -601,6 +644,7 @@ FTKR.ESM.motion = {
         item:String(FTKR.ESM.parameters['Item Motion'] || ''),
         undecided:String(FTKR.ESM.parameters['Undecided Motion'] || ''),
         wait:String(FTKR.ESM.parameters['Wait Motion'] || ''),
+        recovery:String(FTKR.ESM.parameters['Recovery Motion'] || ''),
     },
     state:[
         {name:'', condition:'',},
@@ -656,6 +700,14 @@ FTKR.ESM.motion = {
         [String(FTKR.ESM.parameters['Custom 8 Non Loop'] || ''),
           String(FTKR.ESM.parameters['Custom 8 Loop'] || '')],
     ],
+    condition:[
+        '',
+        String(FTKR.ESM.parameters['Custom Condition 1'] || ''),
+        String(FTKR.ESM.parameters['Custom Condition 2'] || ''),
+        String(FTKR.ESM.parameters['Custom Condition 3'] || ''),
+        String(FTKR.ESM.parameters['Custom Condition 4'] || ''),
+        String(FTKR.ESM.parameters['Custom Condition 5'] || ''),
+    ],
 };
 
 Game_BattlerBase.ESM_MOTION_NUMBER = 16;
@@ -680,6 +732,49 @@ var testObjectMeta = function(obj, metacodes) {
 };
 
 //=============================================================================
+// 自作関数(グローバル)
+//=============================================================================
+
+FTKR.gameData = FTKR.gameData || {
+    user   :null,
+    target :null,
+    item   :null,
+    number :0,
+};
+
+if (!FTKR.setGameData) {
+FTKR.setGameData = function(user, target, item, number) {
+    FTKR.gameData = {
+        user   :user || null,
+        target :target || null,
+        item   :item || null,
+        number :number || 0
+    };
+};
+}
+
+if (!FTKR.evalFormula) {
+FTKR.evalFormula = function(formula) {
+    var datas = FTKR.gameData;
+    try {
+        var s = $gameSwitches._data;
+        var v = $gameVariables._data;
+        var a = datas.user;
+        var b = datas.target;
+        var item   = datas.item;
+        var number = datas.number;
+        if (b) var result = b.result();
+        var value = eval(formula);
+        if (isNaN(value)) value = 0;
+        return value;
+    } catch (e) {
+        console.error(e);
+        return 0;
+    }
+};
+}
+
+//=============================================================================
 // 基本モーションの設定を変更
 //=============================================================================
 
@@ -697,6 +792,11 @@ if (!Imported.YEP_BattleEngineCore) {
         this._motionType = motion ? motion : motionType;
     };
 }
+
+Game_Actor.prototype.performRecovery = function() {
+    Game_Battler.prototype.performRecovery.call(this);
+    this.requestMotion(FTKR.ESM.motion.basic.recovery);
+};
 
 //書き換え
 Game_Actor.prototype.performVictory = function() {
@@ -771,10 +871,12 @@ Game_BattlerBase.prototype.checkConditionAll = function() {
 };
 
 Game_BattlerBase.prototype.checkCondition = function(condition) {
-    var stateMotion = this.stateMotionIndex();
     if (condition.match(/state(\d+)/i)) {
+        var stateMotion = this.stateMotionIndex();
         return stateMotion === Number(RegExp.$1);
-    } 
+    } else if (condition.match(/custom(\d+)/i)) {
+        return this.evalEsmCondition(Number(RegExp.$1));
+    }
     switch(true) {
         case /input/i.test(condition):
             return this.isInputting() || this.isActing();
@@ -791,6 +893,11 @@ Game_BattlerBase.prototype.checkCondition = function(condition) {
         default:
             return false;
     };
+};
+
+Game_BattlerBase.prototype.evalEsmCondition = function(number) {
+    FTKR.setGameData(this, null, null);
+    return FTKR.evalFormula(FTKR.ESM.motion.condition[number]);
 };
 
 //書き換え
@@ -927,6 +1034,7 @@ Sprite_Battler.prototype.setNewMotion = function(battler, motionType) {
     }
     this._motionType = motionType;
     this._otherFile = false;
+    console.log(motionType);
     if (motionType.match(/custom(\d+)/)) {
         var newMotions = FTKR.ESM.motion.custom[Number(RegExp.$1)];
     } else if (motionType.match(/other(\d+)/)) {
