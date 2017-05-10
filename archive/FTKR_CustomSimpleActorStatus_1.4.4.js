@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2017/05/10
-// バージョン : v1.5.0
+// 最終更新日 : 2017/05/08
+// バージョン : v1.4.4
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.5.0 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v1.4.4 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -1052,9 +1052,6 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
- * v1.5.0 - 2017/05/10 : 機能追加
- *    1. FTKR_FacialImageDifference.jsに対応。
- * 
  * v1.4.4 - 2017/05/08 : 不具合修正
  *    1. メニュー画面のアクターのスプライトが正しく更新されない不具合を修正。
  * 
@@ -1497,7 +1494,6 @@ Window_Base.prototype.initialize = function(x, y, width, height) {
     FTKR.CSS.Window_Base_initialize.call(this, x, y, width, height);
     this.sprite = [];
     this._stateIconSprite = [];
-    this._faceSprite = [];
 };
 
 Window_Base.prototype.clearCssSprite = function(index) {
@@ -1627,23 +1623,23 @@ Window_Base.prototype.drawCssActorFace = function(actor, x, y, width, lss, scale
     var dy = this.lineHeight();
     scale = scale || Math.ceil(Window_Base._faceHeight / dy);
     this.changePaintOpacity(actor.isBattleMember());
-    this.drawCssFace(actor, x, y, width, dy * scale);
+    this.drawCssFace(actor.faceName(), actor.faceIndex(), x, y, width, dy * scale);
     this.changePaintOpacity(true);
     return scale;
 };
 
-Window_Base.prototype.drawCssFace = function(actor, dx, dy, width, height) {
+Window_Base.prototype.drawCssFace = function(faceName, faceIndex, dx, dy, width, height) {
     var len = Math.min(width, height);
     var dh = len || Window_Base._faceHeight;
     var dw = len || Window_Base._faceWidth;
     dx = Math.floor(dx + (width - dw) / 2);
-    var bitmap = ImageManager.loadFace(actor.faceName());
+    var bitmap = ImageManager.loadFace(faceName);
     var pw = Window_Base._faceWidth;
     var ph = Window_Base._faceHeight;
     var sw = Window_Base._faceWidth;
     var sh = Window_Base._faceHeight;
-    var sx = actor.faceIndex() % 4 * sw;
-    var sy = Math.floor(actor.faceIndex() / 4) * sh;
+    var sx = faceIndex % 4 * sw;
+    var sy = Math.floor(faceIndex / 4) * sh;
     this.contents.blt(bitmap, sx, sy, sw, sh, dx, dy, dw, dh);
 };
 
@@ -1694,9 +1690,7 @@ Window_Base.prototype.drawCssSvChara = function(index, actor, dx, dy, width, hei
     } else {
         sprite.setBattler(actor);
     }
-    var sx = Math.floor(dx + width / 2 + this.padding);
-    var sy = Math.floor(dy + height + this.padding);
-    sprite.setHome(sx, sy);
+    sprite.setHome(dx + width / 2, dy + height + Window_Base.SV_SHADOW_HEIGHT / 4);
     sprite.startMove(0,0,0);
     var stateMotion = actor.getStateMotion();
     var motion = svChara.state && stateMotion ? stateMotion : svChara.motion;
@@ -2152,8 +2146,8 @@ Sprite_CssStateIcon.prototype.animationWait = function() {
 };
 
 Sprite_CssStateIcon.prototype.setScale = function(scale) {
-    this.scale._x = scale;
-    this.scale._y = scale;
+    this.scale._x *= scale;
+    this.scale._y *= scale;
 };
 
 Sprite_CssStateIcon.prototype.offsetMove = function(offset, vartical) {

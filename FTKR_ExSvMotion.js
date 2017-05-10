@@ -3,8 +3,8 @@
 // FTKR_ExSvMotion.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/19
-// 最終更新日 : 2017/05/09
-// バージョン : v1.2.0
+// 最終更新日 : 2017/05/10
+// バージョン : v1.2.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ESM = FTKR.ESM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.0 SVキャラのモーションを拡張するプラグイン
+ * @plugindesc v1.2.1 SVキャラのモーションを拡張するプラグイン
  * @author フトコロ
  *
  * @noteParam ESM_画像
@@ -584,6 +584,9 @@ FTKR.ESM = FTKR.ESM || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.2.1 - 2017/05/10 : 不具合修正
+ *    1. FTKR_FacialImageDifference.jsに対応
+ * 
  * v1.2.0 - 2017/05/09 : 機能追加
  *    1. 別のSV画像を使用したモーションを設定する機能を追加。
  *    2. スキル・アイテムの使用モーションを個別に設定する機能を追加。
@@ -871,8 +874,8 @@ Game_BattlerBase.prototype.checkConditionAll = function() {
 };
 
 Game_BattlerBase.prototype.checkCondition = function(condition) {
+    var stateMotion = this.stateMotionIndex();
     if (condition.match(/state(\d+)/i)) {
-        var stateMotion = this.stateMotionIndex();
         return stateMotion === Number(RegExp.$1);
     } else if (condition.match(/custom(\d+)/i)) {
         return this.evalEsmCondition(Number(RegExp.$1));
@@ -907,6 +910,7 @@ Game_BattlerBase.prototype.stateMotionIndex = function() {
         return FTKR.ESM.Game_BattlerBase_stateMotionIndex.call(this);
     }
     var states = this.states();
+    console.log(states);
     if (states.length > 0) {
         var motion = readObjectMeta(states[0], ['ESM モーション', 'ESM MOTION']);
         return motion ? Number(motion) : states[0].motion;
@@ -999,7 +1003,7 @@ Sprite_Battler.prototype.motion = function() {
 };
 
 Sprite_Battler.prototype.convertOtherMotion = function(other) {
-    return other.match(/other(\d+)/) ? Sprite_Battler.ESM_MOTION_NAME[Number(RegExp.$1)] : other;
+    return other && other.match(/other(\d+)/) ? Sprite_Battler.ESM_MOTION_NAME[Number(RegExp.$1)] : other;
 };
 
 Sprite_Battler.prototype.isOtherMotion = function() {
@@ -1034,7 +1038,6 @@ Sprite_Battler.prototype.setNewMotion = function(battler, motionType) {
     }
     this._motionType = motionType;
     this._otherFile = false;
-    console.log(motionType);
     if (motionType.match(/custom(\d+)/)) {
         var newMotions = FTKR.ESM.motion.custom[Number(RegExp.$1)];
     } else if (motionType.match(/other(\d+)/)) {
@@ -1145,7 +1148,7 @@ FTKR.ESM.Sprite_Actor_updateBitmap = Sprite_Actor.prototype.updateBitmap;
 Sprite_Actor.prototype.updateBitmap = function() {
     if (this.isOtherMotion()) {
         Sprite_Battler.prototype.updateBitmap.call(this);
-        var name = readObjectMeta(this._actor.actor(), ['ESM_画像', 'ESM_IMAGE']);
+        var name = this.otherBattlerName();
         if (this._battlerName !== name) {
             this._battlerName = name;
             this._mainSprite.bitmap = ImageManager.loadSvActor(name);
@@ -1153,6 +1156,10 @@ Sprite_Actor.prototype.updateBitmap = function() {
     } else {
         FTKR.ESM.Sprite_Actor_updateBitmap.call(this);
     }
+};
+
+Sprite_Actor.prototype.otherBattlerName = function() {
+    return readObjectMeta(this._actor.actor(), ['ESM_画像', 'ESM_IMAGE']);
 };
 
 //書き換え
