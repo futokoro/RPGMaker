@@ -78,8 +78,9 @@ a.atk(4 + iv[1]) - b.def2
 他のプラグインと競合しており、短縮コードが使用できません。
 この場合は、短縮コードの替わりに、以下の表記に変えてください。
 * `iv[x]` ⇒ `item._seflVariables._data[x]`
-* `av[x]` ⇒ `a._seflVariables._data[x]`
-* `bv[x]` ⇒ `b._seflVariables._data[x]`
+* `av[x]` ⇒ `a.actor()._seflVariables._data[x]`
+* `bv[x]` ⇒ `b.actor()._seflVariables._data[x]`
+なお、使用者 や 対象者が エネミーの場合は、actor() を enemy() に変えてください。
 
 [目次に戻る](#目次)
 
