@@ -350,20 +350,20 @@ FTKR.EVC = FTKR.EVC || {};
 FTKR.EVC.parameters = PluginManager.parameters('FTKR_ExVariablesChange');
 
 FTKR.EVC.default = {
-    buy     :(FTKR.EVC.parameters['Buy'] || ''),
-    gain    :(FTKR.EVC.parameters['Gain'] || ''),
-    sell    :(FTKR.EVC.parameters['Sell'] || ''),
-    lose    :(FTKR.EVC.parameters['Lose'] || ''),
-    use     :(FTKR.EVC.parameters['Use'] || ''),
-    success :(FTKR.EVC.parameters['Success'] || ''),
-    failure :(FTKR.EVC.parameters['Failure'] || ''),
-    damage  :(FTKR.EVC.parameters['Damage'] || ''),
-    receive :(FTKR.EVC.parameters['Receive Damage'] || ''),
-    kill    :(FTKR.EVC.parameters['Kill'] || ''),
-    end     :(FTKR.EVC.parameters['Battle End'] || ''),
-    Victory :(FTKR.EVC.parameters['Battle Victory'] || ''),
-    escape  :(FTKR.EVC.parameters['Battle Escape'] || ''),
-    defeat  :(FTKR.EVC.parameters['Battle Defeat'] || ''),
+    buy     :String(FTKR.EVC.parameters['Buy'] || ''),
+    gain    :String(FTKR.EVC.parameters['Gain'] || ''),
+    sell    :String(FTKR.EVC.parameters['Sell'] || ''),
+    lose    :String(FTKR.EVC.parameters['Lose'] || ''),
+    use     :String(FTKR.EVC.parameters['Use'] || ''),
+    success :String(FTKR.EVC.parameters['Success'] || ''),
+    failure :String(FTKR.EVC.parameters['Failure'] || ''),
+    damage  :String(FTKR.EVC.parameters['Damage'] || ''),
+    receive :String(FTKR.EVC.parameters['Receive Damage'] || ''),
+    kill    :String(FTKR.EVC.parameters['Kill'] || ''),
+    end     :String(FTKR.EVC.parameters['Battle End'] || ''),
+    Victory :String(FTKR.EVC.parameters['Battle Victory'] || ''),
+    escape  :String(FTKR.EVC.parameters['Battle Escape'] || ''),
+    defeat  :String(FTKR.EVC.parameters['Battle Defeat'] || ''),
 };
 
 
@@ -509,8 +509,11 @@ DataManager.evcEvalsFormula = function(evals) {
 };
 
 DataManager.defaultVariablesChange = function(condition) {
-    var evals = (FTKR.EVC.default[condition]).split(';');
-    if(evals) DataManager.evcEvalsFormula(evals)
+    var eval = FTKR.EVC.default[condition];
+    if(eval) {
+        var evals = eval.split(';');
+        DataManager.evcEvalsFormula(evals);
+    }
 };
 
 //=============================================================================
