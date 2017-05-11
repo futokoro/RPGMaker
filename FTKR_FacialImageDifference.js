@@ -3,8 +3,8 @@
 // FTKR_FacialImageDifference.js
 // 作成者     : フトコロ
 // 作成日     : 2017/05/10
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2017/05/11
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.FID = FTKR.FID || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 アクターの状態によって顔画像を変えるプラグイン
+ * @plugindesc v1.0.1 アクターの状態によって顔画像を変えるプラグイン
  * @author フトコロ
  *
  * @noteParam FID_画像
@@ -23,6 +23,10 @@ FTKR.FID = FTKR.FID || {};
  * @noteDir img/face/
  * @noteType file
  * @noteData actors
+ * 
+ * @param Enable Animation
+ * @desc バトル画面で顔画像にダメージポップアップやアニメーションを表示させるか (0 - 無効, 1 - 有効)
+ * @default 0
  * 
  * @param --画像番号変更--
  * @desc 
@@ -196,6 +200,14 @@ FTKR.FID = FTKR.FID || {};
  * 必要に応じて、プラグインパラメータに値を設定してください。
  * 
  * 
+ * プラグインパラメータ<Enable Animation>を有効にすると、
+ * バトル中、ダメージポップアップやスキル等のアニメーションを
+ * 顔画像上に表示させることができます。
+ * 
+ * サイドビュー戦闘の場合、バトルフィールドのSVキャラには
+ * ダメージポップアップやアニメーションが表示しなくなります。
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * FTKR_CustomSimpleActorStatus と併用する場合
  *-----------------------------------------------------------------------------
@@ -251,6 +263,11 @@ FTKR.FID = FTKR.FID || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.1 - 2017/05/11 : 不具合修正、機能追加
+ *    1. フロントビュー戦闘で顔画像が表示しない不具合を修正。
+ *    2. 顔画像にダメージポップアップやアニメーションを表示する機能を追加
+ *    3. YEP_BattleEngineCoreに対応。
+ * 
  * v1.0.0 - 2017/05/10 : 初版作成
  * 
  *-----------------------------------------------------------------------------
@@ -261,6 +278,8 @@ FTKR.FID = FTKR.FID || {};
 // プラグイン パラメータ
 //=============================================================================
 FTKR.FID.parameters = PluginManager.parameters('FTKR_FacialImageDifference');
+
+FTKR.FID.enableAnimation = Number(FTKR.FID.parameters['Enable Animation'] || 0);
 
 //オリジナルステータス設定オブジェクト
 FTKR.FID.faces = {
@@ -356,24 +375,6 @@ Game_Party.prototype.requestMotionRefresh = function() {
 };
 
 //=============================================================================
-// ステートモーションを取得する
-//=============================================================================
-if (!Game_Actor.prototype.getStateMotion) {
-Game_Actor.prototype.getStateMotion = function() {
-    if(Imported.FTKR_ESM) {
-        return this.getEsmMotion();
-    } else {
-        switch (this.stateMotionIndex()) {
-            case 1: return 'abnormal';
-            case 2: return 'sleep';
-            case 3: return 'dead';
-        }
-        return 'wait';
-    }
-};
-}
-
-//=============================================================================
 // アクターの顔画像表示処理を修正
 //=============================================================================
 
@@ -403,7 +404,7 @@ Window_Base.prototype.drawCssFace = function(actor, dx, dy, width, height) {
         sprite = new Sprite_ActorFace(actor);
         this.addChild(sprite);
         this._faceSprite[index] = sprite;
-    } else {
+    } else if (sprite._actor !== actor){
         sprite.setBattler(actor);
     }
     var sx = Math.floor(dx + width / 2 + this.padding);
@@ -414,14 +415,12 @@ Window_Base.prototype.drawCssFace = function(actor, dx, dy, width, height) {
         var scale = (Math.min(width, height) || fh) / fh;
         sprite.setScale(scale);
     }
-    var stateMotion = actor.getStateMotion();
-    sprite.startMotion(stateMotion);
 };
 
 FTKR.FID.Window_Base_clearCssSprite = Window_Base.prototype.clearCssSprite;
 Window_Base.prototype.clearCssSprite = function(index) {
     FTKR.FID.Window_Base_clearCssSprite.call(this, index);
-    this._faceSprite[index].setBattler();
+    if (this._faceSprite[index]) this._faceSprite[index].setBattler();
 };
 
 //=============================================================================
@@ -463,14 +462,30 @@ Sprite_ActorFace.prototype.setBattler = function(battler) {
 };
 
 Sprite_ActorFace.prototype.update = function() {
-    Sprite_Battler.prototype.update.call(this);
+    Sprite_Base.prototype.update.call(this);
+    if (this._battler) {
+        this.updateMain();
+        if (FTKR.FID.enableAnimation) {
+            this.updateAnimation();
+            this.updateDamagePopup();
+            this.updateSelectionEffect();
+        }
+    } else {
+        this.bitmap = null;
+    }
+    if (Imported.YEP_BattleEngineCore) {
+        if (!this._postSpriteInitialized) this.postSpriteInitialize();
+    }
     if (this._actor) {
         this.updateMotion();
     }
 };
 
 Sprite_ActorFace.prototype.updateMain = function() {
-    Sprite_Battler.prototype.updateMain.call(this);
+      this.updateBitmap();
+      this.updateFrame();
+//    this.updateMove();
+//    this.updatePosition();
 };
 
 Sprite_ActorFace.prototype.setupMotion = function() {
@@ -510,6 +525,7 @@ Sprite_ActorFace.prototype.startMotion = function(motionType) {
     Sprite_Actor.prototype.startMotion.call(this, motionType);
     if (this._faceType !== motionType) {
         this._faceType = motionType;
+        if (Imported.FTKR_ESM) this.setNewMotion(this._actor, motionType);
     }
 };
 
@@ -522,10 +538,16 @@ Sprite_ActorFace.prototype.faceTypeIndex = function() {
 };
 
 Sprite_ActorFace.prototype.updateMotion = function() {
-    this.setupMotion();
-    if (this._actor.isMotionRefreshRequested()) {
-        this.refreshMotion();
-        this._actor.clearFace();
+    if (!Imported.YEP_BattleEngineCore) {
+        this.setupMotion();
+        if (this._actor.isFaceRefreshRequested()) {
+            this.refreshMotion();
+            this._actor.clearFace();
+        }
+    } else {
+        if (this._actor._faceType && this._motionType !== this._actor._faceType) {
+            this.startMotion(this._actor._faceType);
+        }
     }
     this.updateMotionCount();
 };
@@ -534,4 +556,38 @@ Sprite_ActorFace.prototype.setScale = function(scale) {
     this.scale._x = scale;
     this.scale._y = scale;
 };
+
+//------------------------------------------------------------------------
+// フロントビュー戦闘でも顔画像を表示させる
+//------------------------------------------------------------------------
+Sprite_ActorFace.prototype.updateVisibility = function() {
+    Sprite_Base.prototype.updateVisibility.call(this);
+    if (!this._battler) {
+        this.visible = false;
+    }
+};
+
+Sprite_ActorFace.prototype.setupAnimation = function() {
+    while (this._battler.isAnimationRequested()) {
+        var data = this._battler.shiftAnimation();
+        var animation = $dataAnimations[data.animationId];
+        var mirror = data.mirror;
+        var delay = animation.position === 3 ? 0 : data.delay;
+        this.startAnimation(animation, mirror, delay);
+    }
+};
+
+Sprite_ActorFace.prototype.setupDamagePopup = function() {
+    if (this._battler.isDamagePopupRequested()) {
+        var sprite = new Sprite_Damage();
+        sprite.x = this.x + this.damageOffsetX();
+        sprite.y = this.y + this.damageOffsetY();
+        sprite.setup(this._battler);
+        this._damages.push(sprite);
+        this.parent.addChild(sprite);
+        this._battler.clearDamagePopup();
+        this._battler.clearResult();
+    }
+};
+
 

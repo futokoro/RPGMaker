@@ -3,8 +3,8 @@
 // FTKR_ExSvMotion.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/19
-// 最終更新日 : 2017/05/10
-// バージョン : v1.2.1
+// 最終更新日 : 2017/05/11
+// バージョン : v1.2.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ESM = FTKR.ESM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.1 SVキャラのモーションを拡張するプラグイン
+ * @plugindesc v1.2.2 SVキャラのモーションを拡張するプラグイン
  * @author フトコロ
  *
  * @noteParam ESM_画像
@@ -584,6 +584,9 @@ FTKR.ESM = FTKR.ESM || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.2.2 - 2017/05/11 : 不要な記述を削除
+ *    1. 余計なログを出力する箇所を削除。
+ * 
  * v1.2.1 - 2017/05/10 : 不具合修正
  *    1. FTKR_FacialImageDifference.jsに対応
  * 
@@ -910,7 +913,6 @@ Game_BattlerBase.prototype.stateMotionIndex = function() {
         return FTKR.ESM.Game_BattlerBase_stateMotionIndex.call(this);
     }
     var states = this.states();
-    console.log(states);
     if (states.length > 0) {
         var motion = readObjectMeta(states[0], ['ESM モーション', 'ESM MOTION']);
         return motion ? Number(motion) : states[0].motion;
@@ -1037,6 +1039,7 @@ Sprite_Battler.prototype.setNewMotion = function(battler, motionType) {
         motionType = battler.getEsmMotion();
     }
     this._motionType = motionType;
+    battler._faceType = motionType;
     this._otherFile = false;
     if (motionType.match(/custom(\d+)/)) {
         var newMotions = FTKR.ESM.motion.custom[Number(RegExp.$1)];

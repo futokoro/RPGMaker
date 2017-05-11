@@ -3,8 +3,8 @@
 // FTKR_ExItemConfig_Effect.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/14
-// 最終更新日 : 2017/04/29
-// バージョン : v1.0.1
+// 最終更新日 : 2017/05/11
+// バージョン : v1.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EIE = FTKR.EIE || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.1 アイテムとスキルの使用効果を拡張するプラグイン
+ * @plugindesc v1.1.0 アイテムとスキルの使用効果を拡張するプラグイン
  * @author フトコロ
  *
  * @help
@@ -42,13 +42,14 @@ FTKR.EIE = FTKR.EIE || {};
  * 
  * 
  *-----------------------------------------------------------------------------
- * ダメージの設定
+ * 使用効果の設定
  *-----------------------------------------------------------------------------
- * スキルに以下のノートタグを追記することで、使用効果の設定を変更できます。
+ * アイテムおよびスキルのメモ欄に以下のノートタグを追記することで、
+ * 使用効果の設定を変更できます。
  * 
- * <EIC 使用効果ID: x>
+ * <EIC 使用効果: x>
  * code
- * </EIC 使用効果ID>
+ * </EIC 使用効果>
  *    :使用効果のId x に対して code部で記述した設定を反映します。
  *    :使用効果のIDは、使用効果欄に設定した順番に上から 0, 1,...となります。
  * 
@@ -89,13 +90,10 @@ FTKR.EIE = FTKR.EIE || {};
  *  s[x]     - スイッチID x の状態を参照します。
  *  v[x]     - 変数ID x の値を参照します。
  *  iv[x]    - アイテムのセルフ変数ID x の値を参照します。(*1)
- *  result  - スキル・アイテムを使用した結果を参照します。(*2)
+ *  result  - スキル・アイテムを使用した結果を参照します。
  *            result.hpDamage でHPダメージ量を取得します。
  * 
- * 
  * (*1) セルフ変数を使用する場合は、FTKR_ItemSelfVariables.jsが必要です。
- * (*2) FTKR_ExItemDamage.jsによってダメージIDを設定している場合は、
- *      設定した使用効果が発生するダメージIDのダメージ量を参照します。
  * 
  * 
  * 設定例）
@@ -103,12 +101,12 @@ FTKR.EIE = FTKR.EIE || {};
  * スイッチID1またはスイッチID2がONの時に、相手に与えたダメージの20%分、
  * 使用者が回復する効果が発生します。
  * 
- * <EIC 使用効果ID: 0>
+ * <EIC 使用効果: 0>
  * 対象: user
  * 内容1: 0
- * 内容2: hpDamage * 0.2
+ * 内容2: result.hpDamage * 0.2
  * 有効条件: s[1] && s[2]
- * </EIC 使用効果ID>
+ * </EIC 使用効果>
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -124,6 +122,8 @@ FTKR.EIE = FTKR.EIE || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.1.0 - 2017/05/11 : 不具合修正、タグ変更、ヘルプ修正
  * 
  * v1.0.1 - 2017/04/29 : FTKR_ItemSelfVariables の v1.1.0以降に対応
  *    1. ダメージ量の参照用コードを変更。
@@ -184,6 +184,61 @@ FTKR.evalFormula = function(formula) {
 }
 
 //=============================================================================
+// 自作関数(ローカル)
+//=============================================================================
+
+var readEntrapmentCodeToTextEx = function(obj, codeTitles) {
+    regs = convertEntrapmentRegArrayEx('EIC ', codeTitles);
+    var notedata = obj.note.split(/[\r\n]+/);
+    var setMode = 'none';
+    var results = [];
+
+    for (var i = 0; i < notedata.length; i++) {
+        var line = notedata[i];
+        if (matchRegs(line, regs, 'start')) {
+            var data = {
+                id:RegExp.$1,
+                text:''
+            };
+            setMode = 'read';
+        } else if (matchRegs(line, regs, 'end')) {
+            setMode = 'none';
+            results.push(data);
+        } else if (setMode === 'read') {
+            data.text += line + ';';
+        }
+    }
+    return results;
+};
+
+var convertRegs = function(metacodes) {
+    return metacodes.map(function(metacode){
+        return new RegExp(metacode + ':[ ]*(.+)', 'i');
+    });
+};
+
+var convertEntrapmentRegArrayEx = function(header, codeTitles) {
+    return codeTitles.map(function(codeTitle) {
+        return {
+            start:new RegExp('<' + header + codeTitle + ':[ ]*(.+)>', 'i'),
+            end  :new RegExp('<\/' + header + codeTitle + '>', 'i')
+        };
+    });
+};
+
+var matchRegs = function(data, regs, prop) {
+    return regs.some(function(reg){
+        return prop ? data.match(reg[prop]) : data.match(reg);
+    });
+};
+
+var matchTexts = function(data, texts, prop) {
+    return convertRegs(texts).some(function(reg){
+        return prop ? data.match(reg[prop]) : data.match(reg);
+    });
+};
+
+//=============================================================================
 // DataManager
 //=============================================================================
 
@@ -192,18 +247,57 @@ FTKR.EIE.DataManager_isDatabaseLoaded = DataManager.isDatabaseLoaded;
 DataManager.isDatabaseLoaded = function() {
     if (!FTKR.EIE.DataManager_isDatabaseLoaded.call(this)) return false;
     if (!FTKR.EIE.DatabaseLoaded) {
-        this.eieEffectIdNoteTags($dataSkills);
-        this.eieEffectIdNoteTags($dataItems);
+        this.eicEffectNotetags($dataSkills);
+        this.eicEffectNotetags($dataItems);
         FTKR.EIE.DatabaseLoaded = true;
     }
     return true;
 };
 
+DataManager.eicEffectNotetags = function(group) {
+    for (var n = 1; n < group.length; n++) {
+        var obj = group[n];
+        this.setEicEffectData(obj);
+        var datas = readEntrapmentCodeToTextEx(obj, ['使用効果', 'EFFECT']);
+        this.readEicEffectMetaDatas(obj, datas);
+    }
+};
+
+DataManager.setEicEffectData = function(obj) {
+    obj.effects.forEach( function(effect) {
+        effect.target = '';
+        effect.baseValue1 = effect.value1;
+        effect.baseValue2 = effect.value2;
+        effect.sepValue1 = '';
+        effect.sepValue2 = '';
+        effect.enabled = '';
+    });
+};
+
+DataManager.readEicEffectMetaDatas = function(obj, metaDatas) {
+    for (var t = 0; t < metaDatas.length; t++) {
+        var dataId = Number(metaDatas[t].id);
+        var datas = metaDatas[t].text.split(';');
+        for (var i = 0; i < datas.length; i++) {
+            var data = datas[i];
+            if (matchTexts(data, ['対象', 'TARGET'])) {
+                obj.effects[dataId].target = RegExp.$1;
+            } else if (matchTexts(data, ['内容1', 'VALUE1'])) {
+                obj.effects[dataId].sepValue1 = RegExp.$1;
+            } else if (matchTexts(data, ['内容2', 'VALUE2'])) {
+                obj.effects[dataId].sepValue2 = RegExp.$1;
+            } else if (matchTexts(data, ['有効条件', 'ENABLED'])) {
+                obj.effects[dataId].enabled = RegExp.$1;
+            }
+        }
+    }
+};
+/*
 DataManager.eieEffectIdNoteTags = function(group) {
-    var note1a = /<(?:EIC 使用効果ID):[ ]*(\d+)>/i;
-    var note1aj = /<(?:EIC EFFECTID):[ ]*(\d+)>/i;
-    var note1b = /<\/(?:EIC 使用効果ID)>/i;
-    var note1bj = /<\/(?:EIC EFFECTID)>/i;
+    var note1a = /<(?:EIC_使用効果):[ ]*(\d+)>/i;
+    var note1aj = /<(?:EIC_EFFECT):[ ]*(\d+)>/i;
+    var note1b = /<\/(?:EIC_使用効果)>/i;
+    var note1bj = /<\/(?:EIC_EFFECT)>/i;
 
     for (var n = 1; n < group.length; n++) {
         var obj = group[n];
@@ -278,7 +372,7 @@ DataManager.setSepEffects = function(item) {
         }
     }
 };
-
+*/
 //=============================================================================
 // BattleManager
 //=============================================================================
@@ -315,7 +409,7 @@ Game_Action.prototype.applyItemEffect = function(target, effect) {
 
 Game_Action.prototype.evalEffectEnabled = function(effect, target) {
     FTKR.setGameData(this.subject(), target, this.item());
-    return !effect.enabled ? true: FTRK.evalFormula(effect.enabled);
+    return !effect.enabled ? true: FTKR.evalFormula(effect.enabled);
 };
 
 Game_Action.prototype.changeTargetEffect = function(target, effect) {
@@ -354,11 +448,11 @@ Game_Action.prototype.setSepEffectValue = function() {
 };
 
 Game_Action.prototype.setSepEffectValue1 = function(effect) {
-    return effect.sepValue1 ? FTRK.evalFormula(effect.sepValue1) : effect.baseValue1;
+    return effect.sepValue1 ? FTKR.evalFormula(effect.sepValue1) : effect.baseValue1;
 };
 
 Game_Action.prototype.setSepEffectValue2 = function(effect) {
-    return effect.sepValue2 ? FTRK.evalFormula(effect.sepValue2) : effect.baseValue2;
+    return effect.sepValue2 ? FTKR.evalFormula(effect.sepValue2) : effect.baseValue2;
 };
 
 //=============================================================================

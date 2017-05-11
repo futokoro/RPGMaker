@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2017/05/10
-// バージョン : v1.5.0
+// 最終更新日 : 2017/05/11
+// バージョン : v1.5.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.5.0 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v1.5.1 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -152,6 +152,10 @@ FTKR.CSS = FTKR.CSS || {};
  * @desc ステートモーションを有効にするか設定します
  * 1 - 有効にする, 0 - 無効にする
  * @default 1
+ * 
+ * @param Enable Animation
+ * @desc バトル画面でSVキャラにダメージポップアップやアニメーションを表示させるか (0 - 無効, 1 - 有効)
+ * @default 0
  * 
  * @param --ステートの設定--
  * @default
@@ -1052,6 +1056,11 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.5.1 - 2017/05/11 : 不具合修正、機能追加
+ *    1. ステータスウィンドウに表示できる人数よりもパーティーが少ない場合に
+ *       エラーになる不具合を修正。
+ *    2. 表示したSVキャラの位置を固定するように変更。
+ * 
  * v1.5.0 - 2017/05/10 : 機能追加
  *    1. FTKR_FacialImageDifference.jsに対応。
  * 
@@ -1185,6 +1194,7 @@ FTKR.CSS.cssStatus = {
         motion:String(FTKR.CSS.parameters['Sv Image Motion'] || ''),
         loop:Number(FTKR.CSS.parameters['Sv Motion Loop'] || 0),
         state:Number(FTKR.CSS.parameters['Enabled State Motion'] || 0),
+        animation:Number(FTKR.CSS.parameters['Enable Animation'] || 0),
     },
     state:{
         wait:Number(FTKR.CSS.parameters['Animation Wait'] || 0),
@@ -1501,10 +1511,12 @@ Window_Base.prototype.initialize = function(x, y, width, height) {
 };
 
 Window_Base.prototype.clearCssSprite = function(index) {
-    this.sprite[index].setBattler();
-    this._stateIconSprite[index].forEach( function(sprite){
-        sprite.setup();
-    });
+    if (this.sprite[index]) {
+        this.sprite[index].setBattler();
+        this._stateIconSprite[index].forEach( function(sprite){
+            sprite.setup();
+        });
+    }
 };
 
 Window_Base.prototype.showActorNum = function() {
@@ -1698,9 +1710,13 @@ Window_Base.prototype.drawCssSvChara = function(index, actor, dx, dy, width, hei
     var sy = Math.floor(dy + height + this.padding);
     sprite.setHome(sx, sy);
     sprite.startMove(0,0,0);
-    var stateMotion = actor.getStateMotion();
-    var motion = svChara.state && stateMotion ? stateMotion : svChara.motion;
-    sprite.startMotion(motion);
+    sprite.stopMove();
+    if (!svChara.animation) sprite._animationNg = true;
+    if (!Imported.FTKR_ESM) {
+        var stateMotion = actor.getStateMotion();
+        var motion = svChara.state && stateMotion ? stateMotion : svChara.motion;
+        sprite.startMotion(motion);
+    }
 };
 
 //------------------------------------------------------------------------
@@ -2097,6 +2113,7 @@ Window_SkillStatus.prototype.refresh = function() {
 
 //=============================================================================
 // Sprite_CssStateIcon
+// ステートアイコン用のスプライト
 //=============================================================================
 
 function Sprite_CssStateIcon() {
@@ -2169,3 +2186,32 @@ Sprite_CssStateIcon.prototype.update = function() {
         this._animationCount = 0;
     }
 };
+
+//=============================================================================
+// Sprite_Battlerの修正
+// Sprite_Actorの修正
+//=============================================================================
+
+FTKR.CSS.Sprite_Battler_initMembers = Sprite_Battler.prototype.initMembers;
+Sprite_Battler.prototype.initMembers = function() {
+    FTKR.CSS.Sprite_Battler_initMembers.call(this);
+    this._canMove = true;
+};
+
+//------------------------------------------------------------------------
+// SV戦闘キャラの位置を変更できないようにする
+//------------------------------------------------------------------------
+Sprite_Actor.prototype.stopMove = function() {
+    this._canMove = false;
+};
+
+Sprite_Actor.prototype.canMove = function() {
+    return this._canMove;
+};
+
+FTKR.CSS.Sprite_Actor_updateTargetPosition = Sprite_Actor.prototype.updateTargetPosition;
+Sprite_Actor.prototype.updateTargetPosition = function() {
+    if (!this.canMove()) return;
+    FTKR.CSS.Sprite_Actor_updateTargetPosition.call(this);
+};
+

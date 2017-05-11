@@ -3,8 +3,8 @@
 // FTKR_ExVariablesChange.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/18
-// 最終更新日 : 2017/05/03
-// バージョン : v1.0.6
+// 最終更新日 : 2017/05/11
+// バージョン : v1.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,9 +15,73 @@ FTKR.EVC = FTKR.EVC || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.6 変数の操作を拡張するプラグイン
+ * @plugindesc v1.1.0 変数の操作を拡張するプラグイン
  * @author フトコロ
  *
+ * @param --アイテム増減時--
+ * @desc 
+ * 
+ * @param Buy
+ * @desc アイテム購入時の汎用処理
+ * @default 
+ *
+ * @param Gain
+ * @desc アイテム増加時の汎用処理
+ * @default 
+ *
+ * @param Sell
+ * @desc アイテム売却時の汎用処理
+ * @default 
+ *
+ * @param Lose
+ * @desc アイテム減少時の汎用処理
+ * @default 
+ *
+ * @param --アイテム使用時--
+ * @desc 
+ * 
+ * @param Use
+ * @desc アイテム・スキル使用時の汎用処理
+ * @default 
+ *
+ * @param Success
+ * @desc アイテム・スキル使用成功時の汎用処理
+ * @default 
+ *
+ * @param Failure
+ * @desc アイテム・スキル使用失敗時の汎用処理
+ * @default 
+ *
+ * @param Damage
+ * @desc アイテム・スキルを使用してダメージを与えた時の汎用処理
+ * @default 
+ *
+ * @param Receive Damage
+ * @desc アイテム・スキルを使用してダメージを受けた時の汎用処理
+ * @default 
+ *
+ * @param Kill
+ * @desc アイテム・スキルを使用してエネミーを討伐した時の汎用処理
+ * @default 
+ *
+ * @param --戦闘終了時--
+ * @desc 
+ * 
+ * @param Battle End
+ * @desc 戦闘終了時の汎用処理
+ * @default 
+ *
+ * @param Battle Victory
+ * @desc 戦闘勝利時の汎用処理
+ * @default 
+ *
+ * @param Battle Escape
+ * @desc 戦闘逃走時の汎用処理
+ * @default 
+ *
+ * @param Battle Defeat
+ * @desc 戦闘敗北時の汎用処理
+ * @default 
  *
  * @help 
  *-----------------------------------------------------------------------------
@@ -28,6 +92,7 @@ FTKR.EVC = FTKR.EVC || {};
  * 
  * 1. アイテム、武器、防具の増減時
  * 2. アイテム、スキルの使用時
+ * 3. 戦闘終了時
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -46,12 +111,14 @@ FTKR.EVC = FTKR.EVC || {};
  * 対象：アイテム、武器、防具
  * 
  * 1. ショップで購入した時に実行
+ *    :ショップで複数回購入した場合、その都度実行します。
  * <EVC 購入時>
  * 計算式
  * </EVC 購入時>
  * 
  * 
  * 2. ショップで売却した時に実行
+ *    :ショップで複数回売却した場合、その都度実行します。
  * <EVC 売却時>
  * 計算式
  * </EVC 売却時>
@@ -115,6 +182,74 @@ FTKR.EVC = FTKR.EVC || {};
  * </EVC 被ダメージ時>
  * 
  * 
+ * 6. ダメージを与えて敵を倒すと実行
+ * (アクターなら倒したとき、エネミーなら倒されたとき実行)
+ * 
+ * <EVC 討伐時>
+ * 計算式
+ * </EVC 討伐時>
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * 戦闘終了時
+ *-----------------------------------------------------------------------------
+ * ノートタグをメモ欄に追記すると以下の状況において、変数・スイッチの
+ * 変更ができます。
+ * 
+ * 対象：アクター、クラス、装備、ステート
+ * 
+ * なお、タグで設定した変数の計算が行われる順番は以下の通りです。
+ * アクター ⇒ クラス ⇒ 装備 ⇒ ステート
+ * 
+ * この処理は、戦闘に参加したアクターに対して実行します。
+ * 戦闘不能状態でも実行します。
+ * 
+ * 1. 戦闘が終了すると実行  :この処理は最後に実行します。
+ * 
+ * <EVC 戦闘終了時>
+ * 計算式
+ * </EVC 戦闘終了時>
+ * 
+ * 
+ * 2. 戦闘に勝利すると実行
+ * 
+ * <EVC 勝利時>
+ * 計算式
+ * </EVC 勝利時>
+ * 
+ * 
+ * 3. 戦闘に敗北すると実行
+ * 
+ * <EVC 敗北時>
+ * 計算式
+ * </EVC 敗北時>
+ * 
+ * 
+ * 4. 逃走で戦闘終了すると実行
+ * 
+ * <EVC 逃走時>
+ * 計算式
+ * </EVC 逃走時>
+ * 
+ * 
+ * なお、戦闘終了時の汎用処理には、セルフ変数は使用できません。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * プラグインパラメータの汎用処理について
+ *-----------------------------------------------------------------------------
+ * 各状況において、アイテムやアクター等のタグで設定しなくても
+ * 毎回実行する処理を規定できます。
+ * 
+ * この汎用処理は、アイテムやアクター等のタグによる処理の後に実行します。
+ * 
+ * 複数の計算を実行する場合は、以下のようにセミコロン(;)で計算式を
+ * 区切ってください。
+ * 
+ * 例)
+ * v[1] += 1; v[2] += 1
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * 計算式について
  *-----------------------------------------------------------------------------
@@ -150,6 +285,22 @@ FTKR.EVC = FTKR.EVC || {};
  * 購入したアイテムのセルフ変数ID2 に 購入数を加算します。
  * 
  * 
+ * ＜変数計算における注意点＞
+ * ゲーム内変数は、初期状態では 0 以外の不明な状態になっています。
+ * そのため、一度もゲーム内変数になんらかの値を代入していない場合、
+ * そのまま v[x] += 1 などと計算式を実行すると、正しく計算できません。
+ * 
+ * ゲーム内変数IDは、使用前に必ず初期化(0 を代入する)するか、
+ * 以下のように計算式に記入するようにしてください。
+ * 
+ * 例）変数ID10 に 1 を加算する場合
+ * if(!v[10]) v[10] = 0
+ * v[10] += 1
+ * 
+ * なお、FTKR_ItemSelfVariables.jsのセルフ変数は、ゲーム開始時に
+ * 必ず0を代入するようになっているため、上記の処置は不要です。
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * 本プラグインのライセンスについて(License)
  *-----------------------------------------------------------------------------
@@ -163,6 +314,10 @@ FTKR.EVC = FTKR.EVC || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.1.0 - 2017/05/11 : 機能追加
+ *    1. エネミー討伐時や戦闘終了時を追加。
+ *    2. プラグインパラメータで設定できる汎用計算処理を追加。
  * 
  * v1.0.6 - 2017/05/03 : 不具合修正
  *    1. 非ダメージ時を正しく処理できていない不具合を修正。
@@ -193,6 +348,24 @@ FTKR.EVC = FTKR.EVC || {};
 // プラグイン パラメータ
 //=============================================================================
 FTKR.EVC.parameters = PluginManager.parameters('FTKR_ExVariablesChange');
+
+FTKR.EVC.default = {
+    buy     :(FTKR.EVC.parameters['Buy'] || ''),
+    gain    :(FTKR.EVC.parameters['Gain'] || ''),
+    sell    :(FTKR.EVC.parameters['Sell'] || ''),
+    lose    :(FTKR.EVC.parameters['Lose'] || ''),
+    use     :(FTKR.EVC.parameters['Use'] || ''),
+    success :(FTKR.EVC.parameters['Success'] || ''),
+    failure :(FTKR.EVC.parameters['Failure'] || ''),
+    damage  :(FTKR.EVC.parameters['Damage'] || ''),
+    receive :(FTKR.EVC.parameters['Receive Damage'] || ''),
+    kill    :(FTKR.EVC.parameters['Kill'] || ''),
+    end     :(FTKR.EVC.parameters['Battle End'] || ''),
+    Victory :(FTKR.EVC.parameters['Battle Victory'] || ''),
+    escape  :(FTKR.EVC.parameters['Battle Escape'] || ''),
+    defeat  :(FTKR.EVC.parameters['Battle Defeat'] || ''),
+};
+
 
 //=============================================================================
 // 自作関数(グローバル)
@@ -227,17 +400,6 @@ FTKR.evalCalcFormula = function(formula) {
         var item   = datas.item;
         var number = datas.number;
         if (b) var result = b.result();
-        if (Imported.FTKR_ISV) {
-            if (a) {
-                var aData = a.isActor() ? a.actor() : a.enemy();
-                if (aData._selfVariables) var av = aData._selfVariables._data;
-            }
-            if (b) {
-                var bData = b.isActor() ? b.actor() : b.enemy();
-                if (bData._selfVariables) var bv = bData._selfVariables._data;
-            }
-            if (item && item._selfVariables) var iv = item._selfVariables._data;
-        }
         eval(formula);
     } catch (e) {
         console.error(e);
@@ -346,6 +508,11 @@ DataManager.evcEvalsFormula = function(evals) {
     if($gameMap) $gameMap.requestRefresh();
 };
 
+DataManager.defaultVariablesChange = function(condition) {
+    var evals = (FTKR.EVC.default[condition]).split(';');
+    if(evals) DataManager.evcEvalsFormula(evals)
+};
+
 //=============================================================================
 // 使用時
 //=============================================================================
@@ -361,13 +528,22 @@ Game_Action.prototype.evcVariablesChange = function(target) {
     if (!result.used) return false;
     FTKR.setGameData(this.subject(), target, this.item());
     this.variablesChangeItemNoteTags(['使用時', 'USE'], this.subject());
+    DataManager.defaultVariablesChange('use');
     if (result.isHit()) {
         this.variablesChangeItemNoteTags(['使用成功時', 'SUCCESS'], this.subject());
+        DataManager.defaultVariablesChange('success');
         if (result.hpDamage || result.mpDamage) {
             this.variablesChangeItemNoteTags(['与ダメージ時', 'DAMAGE'], this.subject());
+            DataManager.defaultVariablesChange('damage');
+            if (target.isEnemy() && target.hp <= 0) {
+                this.variablesChangeItemNoteTags(['討伐時', 'KILL'], this.subject());
+                DataManager.variablesChangeUnitNoteTags(['討伐時', 'KILL'], target)
+                DataManager.defaultVariablesChange('kill');
+            }
         }
     } else {
         this.variablesChangeItemNoteTags(['使用失敗時', 'FAILURE'], this.subject());
+        DataManager.defaultVariablesChange('failure');
     }
     return true;
 };
@@ -384,14 +560,16 @@ FTKR.EVC.Game_Action_executeDamage = Game_Action.prototype.executeDamage;
 Game_Action.prototype.executeDamage = function(target, value) {
     FTKR.EVC.Game_Action_executeDamage.call(this, target, value);
     DataManager.variablesChangeItemNoteTags(['被ダメージ時', 'RECEIVE_DAM'], this.item());
-    if (this.isMpEffect()) {
+    if (!this.isHpEffect()) {
         DataManager.variablesChangeUnitNoteTags(['被ダメージ時', 'RECEIVE_DAM'], target);
+        DataManager.defaultVariablesChange('receive');
     }
 };
 
 FTKR.EVC.Game_Battler_onDamage = Game_Battler.prototype.onDamage;
 Game_Battler.prototype.onDamage = function(value) {
     DataManager.variablesChangeUnitNoteTags(['被ダメージ時', 'RECEIVE_DAM'], this);
+    DataManager.defaultVariablesChange('receive');
     FTKR.EVC.Game_Battler_onDamage.call(this, value);
 };
 
@@ -403,6 +581,7 @@ FTKR.EVC.Scene_Shop_doBuy = Scene_Shop.prototype.doBuy;
 Scene_Shop.prototype.doBuy = function(number) {
     FTKR.setGameData(null, null, this._item, number);
     DataManager.variablesChangeNoteTags(['購入時', 'BUY'], this._item);
+    DataManager.defaultVariablesChange('buy');
     FTKR.EVC.Scene_Shop_doBuy.call(this, number);
 };
 
@@ -416,8 +595,10 @@ Game_Party.prototype.gainItem = function(item, amount, includeEquip) {
         FTKR.setGameData(null, null, item, amount);
         if (amount > 0) {
             DataManager.variablesChangeNoteTags(['増加時', 'GAIN'], item);
+            DataManager.defaultVariablesChange('gain');
         } else if (amount < 0) {
             DataManager.variablesChangeNoteTags(['減少時', 'LOSE'], item);
+            DataManager.defaultVariablesChange('lose');
         }
     }
     FTKR.EVC.Game_Party_gainItem.call(this, item, amount, includeEquip);
@@ -431,5 +612,58 @@ FTKR.EVC.Scene_Shop_doSell = Scene_Shop.prototype.doSell;
 Scene_Shop.prototype.doSell = function(number) {
     FTKR.setGameData(null, null, this._item, number);
     DataManager.variablesChangeNoteTags(['売却時', 'SELL'], this._item);
+    DataManager.defaultVariablesChange('sell');
     FTKR.EVC.Scene_Shop_doSell.call(this, number);
 };
+
+//=============================================================================
+// 戦闘終了時
+//=============================================================================
+
+FTKR.EVC.BattleManager_processVictory = BattleManager.processVictory;
+BattleManager.processVictory = function() {
+    $gameParty.members().forEach(function(member){
+        FTKR.setGameData(member);
+        DataManager.variablesChangeUnitNoteTags(['勝利時', 'VICTORY'], member);
+    });
+    FTKR.setGameData();
+    DataManager.defaultVariablesChange('victory');
+    FTKR.EVC.BattleManager_processVictory.call(this);
+};
+
+FTKR.EVC.BattleManager_processEscape = BattleManager.processEscape;
+BattleManager.processEscape = function() {
+    var success = FTKR.EVC.BattleManager_processEscape.call(this);
+    if (success) {
+        $gameParty.members().forEach(function(member){
+            FTKR.setGameData(member);
+            DataManager.variablesChangeUnitNoteTags(['逃走時', 'ESCAPE'], member);
+        });
+        FTKR.setGameData();
+        DataManager.defaultVariablesChange('escape');
+    }
+    return success;
+};
+
+FTKR.EVC.BattleManager_processDefeat = BattleManager.processDefeat;
+BattleManager.processDefeat = function() {
+    $gameParty.members().forEach(function(member){
+        FTKR.setGameData(member);
+        DataManager.variablesChangeUnitNoteTags(['敗北時', 'DEFEAT'], member);
+        DataManager.defaultVariablesChange('defeat');
+    });
+    FTKR.setGameData();
+    FTKR.EVC.BattleManager_processDefeat.call(this);
+};
+
+FTKR.EVC.BattleManager_endBattle = BattleManager.endBattle;
+BattleManager.endBattle = function(result) {
+    FTKR.EVC.BattleManager_endBattle.call(this, result);
+    $gameParty.members().forEach(function(member){
+        FTKR.setGameData(member);
+        DataManager.variablesChangeUnitNoteTags(['戦闘終了時', 'BATTLEEND'], member);
+    });
+    FTKR.setGameData();
+    DataManager.defaultVariablesChange('end');
+};
+

@@ -657,7 +657,8 @@ code
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.5.0](FTKR_CustomSimpleActorStatus.js) | 2017/05/10 | FTKR_FacialImageDifference.jsに対応 |
+| [ver1.5.1](FTKR_CustomSimpleActorStatus.js) | 2017/05/11 | F ステータスウィンドウに表示できる人数よりもパーティーが少ない場合にエラーになる不具合を修正 |
+| ver1.5.0 | 2017/05/10 | FTKR_FacialImageDifference.jsに対応 |
 | [ver1.4.4](/archive/FTKR_CustomSimpleActorStatus_1.4.4.js) | 2017/05/08 | メニュー画面のアクターのスプライトが正しく更新されない不具合を修正 |
 | ver1.4.3 | 2017/05/06 | アクターを横に並べた時に、顔画像が正しく表示されない不具合を修正<br>縦のカーソル間隔を設定する機能を追加 |
 | ver1.4.2 | 2017/05/04 | カスタムパラメータとカスタムゲージにアクターのセルフ変数を適用 |
