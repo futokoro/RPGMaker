@@ -132,7 +132,7 @@ $gameSelfVariables.item(x).clear()
 $gameSelfVariables.item(x).allReset(value)
 ```
 アイテムID x のすべてのセルフ変数に value を代入します。
-このときの'すべて'とは、`<Item Self Variables>`で設定した数を指します。
+このときの'すべて'とは、プラグインパラメータ`<Item Number>`で設定した数を指します。
 
 [目次に戻る](#目次)
 
