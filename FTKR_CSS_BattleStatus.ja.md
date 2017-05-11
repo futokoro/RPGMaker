@@ -208,7 +208,7 @@ FTKR_CSS_BattleStatus.js
 name,state,hp,mp
 ```
 
-## 空白エリアの設定変更
+#### 空白エリアの設定変更
 `Actor Status Space`の設定を変更します。<br>
 描画エリア2と3を削除するため、描画エリア1と2、描画エリア2と3の空白設定を 0 に変えます。
 ```
