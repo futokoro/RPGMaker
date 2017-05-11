@@ -149,8 +149,6 @@ $gameSelfVariables.item(x).allReset(value)
 * アクター(actor)
 * エネミー(enemy)
 
-プラグインコマンドの引数として指定する
-
 ### セルフ変数の変更
 指定したアイテムIDのセルフ変数を変更します。
 
