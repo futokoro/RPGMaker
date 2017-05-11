@@ -80,6 +80,7 @@ a.atk(4 + iv[1]) - b.def2
 * `iv[x]` ⇒ `item._seflVariables._data[x]`
 * `av[x]` ⇒ `a.actor()._seflVariables._data[x]`
 * `bv[x]` ⇒ `b.actor()._seflVariables._data[x]`
+
 なお、使用者 や 対象者が エネミーの場合は、actor() を enemy() に変えてください。
 
 [目次に戻る](#目次)
