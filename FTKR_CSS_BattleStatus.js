@@ -3,8 +3,8 @@
 // FTKR_CSS_BattleStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/11
-// 最終更新日 : 2017/05/06
-// バージョン : v1.1.1
+// 最終更新日 : 2017/05/11
+// バージョン : v1.1.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.1 バトル画面のステータス表示を変更するプラグイン
+ * @plugindesc v1.1.2 バトル画面のステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @param --レイアウト設定--
@@ -94,6 +94,34 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  * @desc ウィンドウ枠を非表示にするか
  * 1 - 非表示にする、0 - 表示する
  * @default 0
+ * 
+ * @param --アクターの位置設定--
+ * @desc 
+ * 
+ * @param Enable Custom Position
+ * @desc アクターの位置変更機能を使うか。
+ * 0 - 無効, 1 - 有効
+ * @default 0
+ * 
+ * @param Actor Position X
+ * @desc 先頭のアクターの位置のX座標
+ *  ( 標準 = 600 ,アクター1人分 = 32 )
+ * @default 600
+ *
+ * @param Actor Position Y
+ * @desc 先頭のアクターの位置のY座標
+ *  ( 標準 = 280 ,アクター1人分 = 48 )
+ * @default 280
+ *
+ * @param Diff Position X
+ * @desc 2番目以降のアクターのX座標のずれ
+ *  ( 標準 = 32 )
+ * @default 32
+ *
+ * @param Diff Position Y
+ * @desc 2番目以降のアクターのY座標のずれ
+ *  ( 標準 = 48 )
+ * @default 48
  * 
  * @help
  *-----------------------------------------------------------------------------
@@ -198,6 +226,23 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  * 
  * 
  *-----------------------------------------------------------------------------
+ * バトルフィールド上のアクターの位置設定
+ *-----------------------------------------------------------------------------
+ * 以下のプラグインパラメータで設定できます。
+ * 
+ * <Enable Custom Position>
+ *    :アクターの位置変更機能を使うか指定します。
+ *    :0 - 無効, 1 - 有効
+ * 
+ * <Actor Position *>
+ *    :先頭のアクターの位置を設定します。
+ * 
+ * <Diff Position *>
+ *    :2番目以降のアクターの位置を先頭のアクターから
+ *    :どの程度ずらすか設定します。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
  * 本プラグインのライセンスについて(License)
  *-----------------------------------------------------------------------------
  * 本プラグインはMITライセンスのもとで公開しています。
@@ -210,6 +255,9 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.1.2 - 2017/05/11 : 機能追加
+ *    1. バトル画面のSVキャラの初期位置変更機能追加。
  * 
  * v1.1.1 - 2017/05/06 : 機能追加
  *    1. 縦のカーソル間隔を設定する機能を追加。
@@ -255,6 +303,14 @@ FTKR.CSS.BS.simpleStatus = {
     space:String(FTKR.CSS.BS.parameters['Actor Status Space'] || ''),
     spaceIn:Number(FTKR.CSS.BS.parameters['Actor Status Space In Text'] || 0),
     widthRate:String(FTKR.CSS.BS.parameters['Actor Status Width Rate'] || ''),
+};
+
+FTKR.CSS.BS.position = {
+    enable:Number(FTKR.CSS.BS.parameters['Enable Custom Position'] || 0),
+    homeX:Number(FTKR.CSS.BS.parameters['Actor Position X'] || 0),
+    homeY:Number(FTKR.CSS.BS.parameters['Actor Position Y'] || 0),
+    diffX:Number(FTKR.CSS.BS.parameters['Diff Position X'] || 0),
+    diffY:Number(FTKR.CSS.BS.parameters['Diff Position Y'] || 0),
 };
 
 //=============================================================================
@@ -377,3 +433,20 @@ if (Imported.FTKR_CSS) {
       this.drawCssActorStatus(index, actor, rect.x, rect.y, rect.width, rect.height, lss);
   };
 };//FTKR_CustomSimpleActorStatus.jsが必要
+
+
+//=============================================================================
+// Sprite_Actor
+// バトルフィールド上のSVキャラの位置変更
+//=============================================================================
+FTKR.CSS.BS.Sprite_Actor_setActorHome = Sprite_Actor.prototype.setActorHome;
+Sprite_Actor.prototype.setActorHome = function(index) {
+    FTKR.CSS.BS.Sprite_Actor_setActorHome.call(this, index);
+    var pos = FTKR.CSS.BS.position;
+    if (pos.enable) {
+        var positionX = pos.homeX + index * pos.diffX;
+        var positionY = pos.homeY + index * pos.diffY;
+        this.setHome(positionX, positionY);
+    }
+};
+
