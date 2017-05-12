@@ -3,8 +3,8 @@
 // FTKR_SkillTreeSystem.js
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/02/25
-// 最終更新日 : 2017/05/09
-// バージョン : v1.7.0
+// 最終更新日 : 2017/05/12
+// バージョン : v1.7.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.7.0 ツリー型スキル習得システム
+ * @plugindesc v1.7.1 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -198,7 +198,7 @@ FTKR.STS = FTKR.STS || {};
  * 
  * @param Draw Line Type
  * @desc ツリーのスキル間の線の引き方
- * 1 - カギ線, 0 - 直線
+ * 0 - 直線, 1 - カギ線(A), 2 - カギ線(B)
  * @default 1
  * 
  * @param Tree Line Thick
@@ -538,8 +538,10 @@ FTKR.STS = FTKR.STS || {};
  * ⇒この場合、スキルCを習得するために、スキルAとスキルBをどちらも
  *   習得しなければいけない
  * 
- * position: y
+ * position: y(, z)
  *    :スキルの表示位置を y 行目 に設定します。
+ *    :z を追加することで、表示位置を空欄 z 個分右にずらします。
+ *    :横方向の表示位置を z 列目にするものではないことに注意。
  * 
  * show: eval
  *    :スキルの表示条件を eval に設定します。
@@ -1196,6 +1198,10 @@ FTKR.STS = FTKR.STS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.7.1 - 2017/05/12 : 機能追加
+ *    1. 縦の表示位置を変更する機能に横方向の位置を調整する機能を追加。
+ *    2. カギ線の表示タイプを追加。
+ * 
  * v1.7.0 - 2017/05/09 : 機能追加
  *    1. スキルのスキルツリー上の縦の表示位置を変更する機能を追加。
  * 
@@ -1715,6 +1721,7 @@ DataManager.stsTreeDataNotetags = function(group) {
             pCIndex:0,
             show:'',
             position:0,
+            diffX:0,
         };
         obj.sts.costs.push(this.setCost('sp', 0, FTKR.STS.sp.defaultReq));
 
@@ -1767,8 +1774,8 @@ DataManager.setStsData = function(obj) {
         var case9j = /カーソル枠画像番号:[ ]*(\d+)/i;
         var case10 = /(?:SHOW):[ ]*(.+)/i;
         var case10j = /表示条件:[ ]*(.+)/i;
-        var case11 = /(?:POSITION):[ ]*(.+)/i;
-        var case11j = /表示位置:[ ]*(.+)/i;
+        var case11 = /(?:POSITION):[ ]*(\d+(?:\s*,\s*\d+)*)/i;
+        var case11j = /表示位置:[ ]*(\d+(?:\s*,\s*\d+)*)/i;
 
         var datas = stsdata.split(';');
         for (var i = 0; i < datas.length; i++) {
@@ -1804,7 +1811,9 @@ DataManager.setStsData = function(obj) {
             } else if (data.match(case10) || data.match(case10j)) {
                 obj.sts.show = String(RegExp.$1);
             } else if (data.match(case11) || data.match(case11j)) {
-                obj.sts.position = Number(RegExp.$1);
+                var posis = JSON.parse('[' + RegExp.$1.match(/\d+/g) + ']');
+                obj.sts.position = Number(posis[0]);
+                if (posis[1]) obj.sts.diffX = Number(posis[1]);
             }
         }
         obj.sts.data = '';
@@ -2111,11 +2120,17 @@ Game_Actor.prototype.getSkillTree = function(tree) {
                     nextlist.addExceptForDup([id]);
                     dupCount++;
                 } else {
+                    var diffX = item.sts.diffX;
+                    if (diffX) {
+                        for (var d = 0; d < diffX; d++) {
+                            results.push(null);
+                            i++;
+                       }
+                    }
                     FTKR.setGameData(this, null, item);
                     if (this.evalStsFormula(item.sts.show, true)) {
                         var skillIds = this.getDevSkillId(item, tree);
                         var data = { id:id, next:skillIds, x:i - dupCount, y:count };
-//                        results.spliceDupSkill(data.id, data, true);
                         results.forEach( function(result, t){
                             if (result && result.id === data.id) results.splice(t, 1, null);
                         });
@@ -2133,17 +2148,6 @@ Game_Actor.prototype.getSkillTree = function(tree) {
         count++;
     }
     return results;
-};
-
-Array.prototype.spliceDupSkill = function(id, data) {
-    for (var t = 0; t < this.length; t++) {
-        var next = this[t];
-        if (!next) continue;
-        if (next.id === id) {
-            this.splice(t, 1, null);
-        }
-    }
-    this.push(data);
 };
 
 Game_Actor.prototype.getDevSkillId = function(item, tree) {
@@ -2718,6 +2722,7 @@ Window_SkillTree.prototype.drawSkillText = function(skill, x, y, width, color, s
   this.drawFormatTextEx(sts.format, x + stx, y + sts.offsetY, [skill.name]);
 };
 
+//スキルの習得回数を表示
 Window_SkillTree.prototype.drawSkillCount = function(skill, data, x, y, width, color){
   var actor = this._actor;
   var iw = Window_Base._iconWidth;
@@ -2753,27 +2758,35 @@ Window_SkillTree.prototype.drawSkillCount = function(skill, data, x, y, width, c
   }
 };
 
+//スキル間の派生線を表示
 Window_SkillTree.prototype.drawTreeLine = function(data, nextList, x, y, width, height) {
   if (nextList.length) {
-    var rw = width;
-    var rh = height;
-    var ic = {x:x + rw/2, y:y + rh};
+    var rw = width;   //スキル枠の幅
+    var rh = height;  //スキル枠の高さ
+    var ic = {x:x + rw/2, y:y + rh};//派生元座標
 
     for (var i = 0; i < nextList.length; i++) {
       var next = this.checkId(this._data, nextList[i])[0];
       if (next) {
         var color = FTKR.STS.lineColor ? this.setFrameColor(next) : 0;
-        var hs = this.itemHeightSpace();
-        var ncx = x + rw/2 + (rw + this.spacing()) * (next.x - data.x);
-        var ncy = y + (rh + hs) * (next.y - data.y);
+        var hs = this.itemHeightSpace();  //縦のスキル枠間の距離
+        var ncx = x + rw/2 + (rw + this.spacing()) * (next.x - data.x);//派生先X座標
+        var ncy = y + (rh + hs) * (next.y - data.y);//派生先Y座標
         var ccy = ncy - hs/2;
         var tlen = hs/2 * Math.code(next.x, data.x);
         var thick = FTKR.STS.treeLineThick;
         if (FTKR.STS.drawLineType) {
-          this.drawTreeLineBase(ic.x, ic.y, ic.x, ncy - hs, color, thick);
-          this.drawTreeLineBase(ic.x, ncy - hs, ic.x + tlen, ccy, color, thick);
-          this.drawTreeLineBase(ic.x + tlen, ccy, ncx - tlen, ccy, color, thick);
-          this.drawTreeLineBase(ncx - tlen, ccy, ncx, ncy, color, thick);
+          if (FTKR.STS.drawLineType === 2) {
+            this.drawTreeLineBase(ic.x,        ic.y,        ic.x + tlen, ic.y + hs/2, color, thick);
+            this.drawTreeLineBase(ic.x + tlen, ic.y + hs/2, ncx - tlen,  ic.y + hs/2, color, thick);
+            this.drawTreeLineBase(ncx - tlen,  ic.y + hs/2, ncx,         ic.y + hs, color, thick);
+            this.drawTreeLineBase(ncx,         ic.y + hs,   ncx,         ncy, color, thick);
+          } else {
+            this.drawTreeLineBase(ic.x, ic.y, ic.x, ncy - hs, color, thick);
+            this.drawTreeLineBase(ic.x, ncy - hs, ic.x + tlen, ccy, color, thick);
+            this.drawTreeLineBase(ic.x + tlen, ccy, ncx - tlen, ccy, color, thick);
+            this.drawTreeLineBase(ncx - tlen, ccy, ncx, ncy, color, thick);
+          }
         } else {
           this.drawTreeLineBase(ic.x, ic.y, ncx, ncy, color, thick);
         }
