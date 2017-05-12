@@ -1005,6 +1005,10 @@ FTKR_CustomSimpleActorStatus.jsのヘルプを参照してください。
 
 なお、以降のスキルツリー画面は、ウィンドウの設定を以下のように変更しています。
 
+* `<Skill Name Format>` : \}%1\{
+* `<Skill Name Offset X>` : 42
+* `<Skill Tree Max Cols>` : 4
+
 ### スキルを派生させる
 まず、基本的な設定である派生スキルの作成例を説明します。
 
