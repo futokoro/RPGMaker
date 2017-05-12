@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2017/05/11
-// バージョン : v1.5.1
+// 最終更新日 : 2017/05/12
+// バージョン : v1.5.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.5.1 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v1.5.2 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -113,6 +113,14 @@ FTKR.CSS = FTKR.CSS || {};
  * 1 - 有効にする, 0 - 無効にする
  * @default 1
  * 
+ * @param --顔画像の設定--
+ * @default
+ * 
+ * @param Face Position X
+ * @desc 顔画像を描画エリア内のどこに表示するか。
+ * 0 - 左寄せ, 1 - 中央, 2 - 右寄せ
+ * @default 1
+ * 
  * @param --歩行キャラの設定--
  * @default
  * 
@@ -125,6 +133,11 @@ FTKR.CSS = FTKR.CSS || {};
  * @desc アクターの歩行キャラの画像高さを設定します
  * デフォルトは48
  * @default 48
+ * 
+ * @param Chara Position X
+ * @desc アクターの歩行キャラを描画エリア内のどこに表示するか。
+ * 0 - 左寄せ, 1 - 中央, 2 - 右寄せ
+ * @default 1
  * 
  * @param --SVキャラの設定--
  * @default
@@ -139,6 +152,11 @@ FTKR.CSS = FTKR.CSS || {};
  * デフォルトは64
  * @default 64
  * 
+ * @param Sv Position X
+ * @desc アクターのSvキャラを描画エリア内のどこに表示するか。
+ * 0 - 左寄せ, 1 - 中央, 2 - 右寄せ
+ * @default 1
+ * 
  * @param Sv Image Motion
  * @desc Svキャラの標準モーションを設定します
  * @default wait
@@ -152,10 +170,6 @@ FTKR.CSS = FTKR.CSS || {};
  * @desc ステートモーションを有効にするか設定します
  * 1 - 有効にする, 0 - 無効にする
  * @default 1
- * 
- * @param Enable Animation
- * @desc バトル画面でSVキャラにダメージポップアップやアニメーションを表示させるか (0 - 無効, 1 - 有効)
- * @default 0
  * 
  * @param --ステートの設定--
  * @default
@@ -808,6 +822,20 @@ FTKR.CSS = FTKR.CSS || {};
  * 
  * 
  *-----------------------------------------------------------------------------
+ * 顔画像の設定 [ face ]
+ *-----------------------------------------------------------------------------
+ * プラグインパラメータ<Actor Status Text*>にて、'face'を入力した場合
+ * アクターの顔画像を表示します。
+ * 顔画像について、以下のパラメータで設定を変更できます。
+ * 
+ * <Face Position X>
+ *    :アクターの顔画像を描画エリアのどの位置に表示するか設定します。
+ *    :0 - 左寄せ, 1 - 中央(デフォルト), 2 - 右寄せ
+ *    :描画エリアの幅が、顔画像の表示幅よりも大きい場合に機能します。
+ *    :また、波括弧を使って描画エリアを拡張した場合にも有効です。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
  * キャラクタ画像の設定 [ chara ]
  *-----------------------------------------------------------------------------
  * プラグインパラメータ<Actor Status Text*>にて、'chara'を入力した場合
@@ -819,6 +847,14 @@ FTKR.CSS = FTKR.CSS || {};
  *    :アクターのキャラクタ画像のサイズを設定します。
  *    :標準では48*48の画像を使用していますが、それ以外のサイズの
  *    :キャラ画像を使用している場合に、設定値を変えてください。
+ * 
+ * <Chara Position X>
+ *    :アクターのキャラクタ画像を描画エリアのどの位置に表示するか設定します。
+ *    :0 - 左寄せ, 1 - 中央(デフォルト), 2 - 右寄せ
+ * 
+ * <Chara Position Y>
+ *    :アクターのキャラクタ画像を描画エリアのどの位置に表示するか設定します。
+ *    :0 - 下寄せ, 1 - 中央(デフォルト), 2 - 上寄せ
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -833,6 +869,14 @@ FTKR.CSS = FTKR.CSS || {};
  *    :アクターのSVキャラクタ画像のサイズを設定します。
  *    :標準では64*64の画像を使用していますが、それ以外のサイズの
  *    :キャラ画像を使用している場合に、設定値を変えてください。
+ * 
+ * <Sv Position X>
+ *    :アクターのSVキャラクタ画像を描画エリアのどの位置に表示するか設定します。
+ *    :0 - 左寄せ, 1 - 中央(デフォルト), 2 - 右寄せ
+ * 
+ * <Sv Position Y>
+ *    :アクターのSVキャラクタ画像を描画エリアのどの位置に表示するか設定します。
+ *    :0 - 下寄せ, 1 - 中央(デフォルト), 2 - 上寄せ
  * 
  * <Sv Image Motion>
  *    :標準で表示するモーションを設定します。
@@ -1056,6 +1100,11 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.5.2 - 2017/05/12 : 機能追加、不要なパラメータを削除
+ *    1. 画像の表示位置の調整機能を追加。
+ *    2. アクターを横に並べたときに描画エリアを拡張すると、隣のアクターの
+ *       表示エリアにも拡張される不具合を修正。
+ * 
  * v1.5.1 - 2017/05/11 : 不具合修正、機能追加
  *    1. ステータスウィンドウに表示できる人数よりもパーティーが少ない場合に
  *       エラーになる不具合を修正。
@@ -1184,9 +1233,13 @@ FTKR.CSS.window = {
 
 //オリジナルステータス設定オブジェクト
 FTKR.CSS.cssStatus = {
+    face:{
+        posiX:Number(FTKR.CSS.parameters['Face Position X'] || 0),
+    },
     chara:{
         width:Number(FTKR.CSS.parameters['Chara Image Width'] || 0),
         height:Number(FTKR.CSS.parameters['Chara Image Height'] || 0),
+        posiX:Number(FTKR.CSS.parameters['Chara Position X'] || 0),
     },
     svChara:{
         width:Number(FTKR.CSS.parameters['Sv Image Width'] || 0),
@@ -1195,6 +1248,7 @@ FTKR.CSS.cssStatus = {
         loop:Number(FTKR.CSS.parameters['Sv Motion Loop'] || 0),
         state:Number(FTKR.CSS.parameters['Enabled State Motion'] || 0),
         animation:Number(FTKR.CSS.parameters['Enable Animation'] || 0),
+        posiX:Number(FTKR.CSS.parameters['Sv Position X'] || 0),
     },
     state:{
         wait:Number(FTKR.CSS.parameters['Animation Wait'] || 0),
@@ -1537,6 +1591,7 @@ lss   :簡易ステータスオブジェクト
 Window_Base.prototype.drawCssActorStatus = function(index, actor, x, y, width, height, lss) {
     if (!lss) lss = FTKR.CSS.simpleStatus;
     var w = width;
+    this._dispWidth = width;
     var h = height;
     var wrs = lss.widthRate.split(',').num();
     var spc = lss.space.split(',').num();
@@ -1550,6 +1605,17 @@ Window_Base.prototype.drawCssActorStatus = function(index, actor, x, y, width, h
     }
 };
 
+/*-------------------------------------------------------------
+描画エリアを表示する関数
+drawCssActorStatusText(index, actor, x, y, width, statusnames, lss)
+index       :アクターの表示番号
+actor       :アクターオブジェクト
+x           :描画エリアのx座標
+y           :描画エリアのy座標
+width       :描画エリアの幅
+statusnames :描画エリアの表示コードの配列
+lss         :簡易ステータスオブジェクト
+-------------------------------------------------------------*/
 Window_Base.prototype.drawCssActorStatusText = function(index, actor, x, y, width, statusnames, lss) {
     var dy = this.lineHeight();
     var line = 0;
@@ -1561,7 +1627,7 @@ Window_Base.prototype.drawCssActorStatusText = function(index, actor, x, y, widt
 Window_Base.prototype.drawCssActorStatusBases = function(index, actor, x, y, width, status, lss) {
     if (status.match(/\{(.+)\}/i)) {
         status = RegExp.$1;
-        width = this.width - this.padding*2 - x;
+        width = this._dispWidth;
     }
     var statuses = status.match(/\[(.+)\]/i) ? RegExp.$1.split('/') : [status];
     var line = 0;
@@ -1648,7 +1714,8 @@ Window_Base.prototype.drawCssFace = function(actor, dx, dy, width, height) {
     var len = Math.min(width, height);
     var dh = len || Window_Base._faceHeight;
     var dw = len || Window_Base._faceWidth;
-    dx = Math.floor(dx + (width - dw) / 2);
+    var offsetX = FTKR.CSS.cssStatus.face.posiX * (width - dw) / 2;
+    dx = Math.floor(dx + offsetX);
     var bitmap = ImageManager.loadFace(actor.faceName());
     var pw = Window_Base._faceWidth;
     var ph = Window_Base._faceHeight;
@@ -1674,8 +1741,10 @@ Window_Base.prototype.drawCssActorChara = function(actor, x, y, width, chara) {
 Window_Base.prototype.drawCssChara = function(faceName, index, dx, dy, width, height, chara) {
     var dh = chara.height;
     var dw = dh || width || chara.width;
-    dx = dx + (width - dw) / 2;
-    dy = dy + (height - dh) / 2;
+    var offsetX = chara.posiX * (width - dw) / 2;
+    var offsetY = (height - dh) / 2;
+    dx = Math.floor(dx + offsetX);
+    dy = Math.floor(dy + offsetY);
     var bitmap = ImageManager.loadCharacter(faceName);
     var sw = chara.width;
     var sh = chara.height;
@@ -1706,12 +1775,12 @@ Window_Base.prototype.drawCssSvChara = function(index, actor, dx, dy, width, hei
     } else {
         sprite.setBattler(actor);
     }
-    var sx = Math.floor(dx + width / 2 + this.padding);
+    var offsetX = svChara.posiX * (width - svChara.width) / 2;
+    var sx = Math.floor(dx + offsetX + this.padding + svChara.width / 2);
     var sy = Math.floor(dy + height + this.padding);
     sprite.setHome(sx, sy);
     sprite.startMove(0,0,0);
     sprite.stopMove();
-    if (!svChara.animation) sprite._animationNg = true;
     if (!Imported.FTKR_ESM) {
         var stateMotion = actor.getStateMotion();
         var motion = svChara.state && stateMotion ? stateMotion : svChara.motion;
