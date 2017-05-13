@@ -227,7 +227,8 @@ face;level,state,hp,mp;custom(0),custom(1),custom(2),custom(3)
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.0.1](FTKR_CSS_DetailedStatus.js) | 2017/05/08 | ウィンドウ設定変更機能を追加 |
+| [ver1.0.2](FTKR_CSS_DetailedStatus.js) | 2017/05/13 | ウィンドウ設定変更機能が正常に機能していない不具合を修正 |
+| ver1.0.1 | 2017/05/08 | ウィンドウ設定変更機能を追加 |
 | ver1.0.0 | 2017/04/21 | 初版作成 |
 
 ## ライセンス

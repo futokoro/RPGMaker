@@ -3,8 +3,8 @@
 // FTKR_CSS_DetailedStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/21
-// 最終更新日 : 2017/05/08
-// バージョン : v1.0.1
+// 最終更新日 : 2017/05/13
+// バージョン : v1.0.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS.DS = FTKR.CSS.DS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.1 詳細ステータス画面の表示内容を変更するプラグイン
+ * @plugindesc v1.0.2 詳細ステータス画面の表示内容を変更するプラグイン
  * @author フトコロ
  *
  * @param --詳細ステータスの表示設定--
@@ -307,6 +307,9 @@ FTKR.CSS.DS = FTKR.CSS.DS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.2 - 2017/05/13 : 不具合修正
+ *    1. ウィンドウ設定が正常に機能していない不具合を修正。
+ * 
  * v1.0.1 - 2017/05/08 : 機能追加、不要なパラメータを削除
  *    1. ウィンドウの設定変更機能を追加。
  * 
@@ -430,42 +433,42 @@ Window_Status.prototype.refresh = function() {
     }
 };
 
-if(FTKR.CSS.SS.window.enabled) {
+if(FTKR.CSS.DS.window.enabled) {
 
 //書き換え
 //ウィンドウの行数
 Window_Status.prototype.numVisibleRows = function() {
-    return FTKR.CSS.SS.window.numVisibleRows;
+    return FTKR.CSS.DS.window.numVisibleRows;
 };
 
 //書き換え
 //ウィンドウのフォントサイズ
 Window_Status.prototype.standardFontSize = function() {
-    return FTKR.CSS.SS.window.fontSize;
+    return FTKR.CSS.DS.window.fontSize;
 };
 
 //書き換え
 //ウィンドウに周囲の余白サイズ
 Window_Status.prototype.standardPadding = function() {
-    return FTKR.CSS.SS.window.padding;
+    return FTKR.CSS.DS.window.padding;
 };
 
 //書き換え
 //ウィンドウ内の1行の高さ
 Window_Status.prototype.lineHeight = function() {
-    return FTKR.CSS.SS.window.lineHeight;
+    return FTKR.CSS.DS.window.lineHeight;
 };
 
 //書き換え
 //ウィンドウの背景の透明度
 Window_Status.prototype.standardBackOpacity = function() {
-    return FTKR.CSS.SS.window.opacity;
+    return FTKR.CSS.DS.window.opacity;
 };
 
 //書き換え
 //ウィンドウ枠の表示
 Window_Status.prototype._refreshFrame = function() {
-    if (!FTKR.CSS.SS.window.hideFrame) Window.prototype._refreshFrame.call(this);
+    if (!FTKR.CSS.DS.window.hideFrame) Window.prototype._refreshFrame.call(this);
 };
 
 }//ウィンドウカスタム有効
