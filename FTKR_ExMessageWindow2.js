@@ -3,8 +3,8 @@
 // FTKR_ExMessageWindow2.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/24
-// 最終更新日 : 2017/05/08
-// バージョン : v2.0.10
+// 最終更新日 : 2017/05/14
+// バージョン : v2.0.11
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EMW = FTKR.EMW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.0.10 一度に複数のメッセージウィンドウを表示するプラグイン
+ * @plugindesc v2.0.11 一度に複数のメッセージウィンドウを表示するプラグイン
  * @author フトコロ
  * 
  * @param Create ExWindow Number
@@ -450,6 +450,11 @@ FTKR.EMW = FTKR.EMW || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.0.11 - 2017/05/14 : 不具合修正
+ *    1. ウィンドウの終了許可が正しく動作しない不具合を修正。
+ *    2. ウィンドウの表示位置とサイズの設定が、ウィンドウを閉じても
+ *       元に戻らない不具合を修正。
+ * 
  * v2.0.10 - 2017/05/08 : プラグインコマンド追加・修正
  * 
  * v2.0.9 - 2017/05/07 : 不具合修正
@@ -693,8 +698,7 @@ Game_Message.prototype.isBusy = function() {
 };
 
 Game_Message.prototype.isEmwBusy = function() {
-    return this.canMovePlayer() || (!this.canClose() && this.isLastText()) ?
-        false : this.isBusyBase();
+    return this.canMovePlayer() || (this.isLastText()) ? false : this.isBusyBase();
 };
 
 Game_Message.prototype.isBusyBase = function() {
@@ -799,6 +803,11 @@ Game_Message.prototype.prohibitClose = function() {
     this._permissionClose = false;
 };
 
+Game_Message.prototype.clearText = function()  {
+    this._lastText = false;
+    this._texts = [];
+};
+
 //------------------------------------------------------------------------
 // 文章表示
 //------------------------------------------------------------------------
@@ -823,6 +832,18 @@ Window_Message.prototype.updatePlacement = function() {
         this._positionX = $gameMessage.windowPositionX();
         this.x = this._positionX * (Graphics.boxWidth - this.width) / 2;
     }
+};
+
+FTKR.EMW.Window_Message_terminateMessage = Window_Message.prototype.terminateMessage;
+Window_Message.prototype.terminateMessage = function() {
+    this.resetPosition();
+    FTKR.EMW.Window_Message_terminateMessage.call(this);
+};
+
+Window_Message.prototype.resetPosition = function() {
+    this.width = Graphics.boxWidth;
+    this.height = this.fittingHeight(this.numVisibleRows());
+    this.x = (Graphics.boxWidth - this.width) / 2;
 };
 
 Game_Message.prototype.setWindowSize = function(width, heightLine) {
@@ -871,6 +892,7 @@ Game_Interpreter.prototype.command101 = function() {
         return FTKR.EMW.Game_Interpreter_command101.call(this);
     } else {
         if (!$gameMessageEx.window(windowId).isEmwBusy()) {
+            $gameMessageEx.window(windowId).clearText();
             $gameMessageEx.window(windowId).setFaceImage(this._params[0], this._params[1]);
             $gameMessageEx.window(windowId).setBackground(this._params[2]);
             $gameMessageEx.window(windowId).setPositionType(this._params[3]);
@@ -1103,6 +1125,7 @@ Window_MessageEx.prototype.updateBackground = function() {
 Window_MessageEx.prototype.terminateMessage = function() {
     this._gameMessage.lastText();
     if (this._gameMessage.canClose()) {
+        this.resetPosition();
         if (Imported.YEP_MessageCore) this._nameWindow.deactivate();
         this.close();
         this._goldWindow.close();
