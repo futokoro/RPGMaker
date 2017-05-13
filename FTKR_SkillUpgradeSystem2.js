@@ -26,13 +26,170 @@ FTKR.SUS = FTKR.SUS || {};
  *  %1 - スキル名,  %2 - 強化レベルの合計
  * @default %1(+%2)
  *
- * @param --Max Upgrade Type Num--
+ * @param ---Show Command---
+ * @default
+ * 
+ * @param Show Skill Command
+ * @desc メニュー欄のどこにスキル強化コマンドを追加するか。
+ *  1 - メニュー欄, 2 - スキルメニュー欄, 3 - サブコマンド欄
+ * @default 1
+ *
+ * @param Upgrade Skill Command Name
+ * @desc スキル強化コマンドのコマンド名を設定します。
+ * @default スキル強化
+ *
+ * @param Skill Menu Switch ID
+ * @desc メニュー欄の表示のON/OFFを制御するスイッチIDを指定します。
+ * @default 0
+ *
+ * @param Upgrade Disable Confirmation
+ * @desc スキル強化実行時に確認画面で実行確認するか。
+ *  1 - 確認する, 0 - 確認しない(コストが常に表示)
+ * @default 1
+ *
+ * @param Always Display Cost
+ * @desc 強化コストに常に表示するか。
+ *  1 - 表示する, 0 - 表示しない
+ * @default 0
+ *
+ * @param How Show NonUg Item
+ * @desc 強化できないパラメータを薄く表示するか指定します。
+ *  0 - 変更しない, 1 -薄く表示する
+ * @default 0
+ *
+ * @param Hide Not Upgrade Item
+ * @desc 強化不可設定のパラメータを非表示にするか指定します。
+ *  1 - 表示しない, 0 - 表示する
+ * @default 0
+ *
+ * @param Hide Cannot Pay Item
+ * @desc 強化コスト不足のパラメータを非表示にするか指定します。
+ *  1 - 表示しない, 0 - 表示する
+ * @default 0
+ *
+ * @param Hide Limit Upgrade Item
+ * @desc 最大強化レベルに達したパラメータを非表示にするか指定します。
+ *  1 - 表示しない, 0 - 表示する
+ * @default 0
+ * 
+ * @param --Skill List Window--
+ * @default
+ * 
+ * @param Skill List Width
+ * @desc スキルリストウィンドウの幅を指定します。
+ *  デフォルトは 240
+ * @default 240
+ *
+ * @param --Skill Status Title Window--
+ * @default
+ * 
+ * @param Skill Status Title Format
+ * @desc タイトルの表示内容を文字列で記述します。
+ *  %1 - アクター名, %2 - スキル名
+ * @default [%2]のスキル情報\c[16]
+ *
+ * @param Discription Lines
+ * @desc スキルの説明文の行数を設定します。
+ * @default 2
+ *
+ * @param --Skill Status Window--
  * @default
  *
- * @param Max Upgrade Type Number
- * @desc 強化可能なパラメータの種類を設定します。
- * 上級者向け設定
- * @default 8
+ * @param Skill Status Text1 Format
+ * @desc スキルステータスのテキスト1の表示内容を記述します。
+ *  詳細はヘルプ参照のこと
+ * @default %1
+ *
+ * @param Skill Status Text2 Format
+ * @desc スキルステータスのテキスト2の表示内容を記述します。
+ *  詳細はヘルプ参照のこと
+ * @default LV\sb[60]\l[2]\n%2\lR[2]\n/\c[17]\nMAX\sb[60]\c[17]\n%3\lR[2]\c[17]
+ *
+ * @param Skill Status Text3 Format
+ * @desc スキルステータスのテキスト3の表示内容を記述します。
+ *  詳細はヘルプ参照のこと
+ * @default %4
+ *
+ * @param Skill Status Width Rate
+ * @desc テキスト1～3を表示するテキスト幅の比率
+ *  カンマ(,)で区切って表示すること
+ * @default 1,1,1
+ * 
+ * @param Skill Status Line Color1
+ * @desc ラインの色1を指定します。
+ *  -1 を設定した場合は、ラインは非表示
+ * @default 17
+ * 
+ * @param Skill Status Line Color2
+ * @desc ラインの色2を指定します。
+ *  -1 を設定した場合は、ラインは非表示
+ * @default 17
+ *
+ * @param Skill Status Line Gauge
+ * @desc スキルレベルの差により、ラインをゲージとして使用するか。
+ *  1 - ゲージにする, 0 - ゲージにしない
+ * @default 0
+ *
+ * @param Skill Status Max Cols
+ * @desc 1行に表示するステータスの数を指定します。
+ *  (最小値 1, 最大値 3)
+ * @default 1
+ * 
+ * @param Skill Status Item Heigth
+ * @desc 1つのステータスを表示する行数を指定します。
+ *  (最小値 1, 最大値 3)
+ * @default 1
+ * 
+ * @param --Upgrade Param Window--
+ * @default
+ *
+ * @param Upgrade Param Title Format
+ * @desc タイトルの表示内容を文字列で記述します。
+ *  %1 - スキル名, %2 - 強化タイプ名
+ * @default [%2]の情報\c[16]
+ *
+ * @param Upgrade Param SubTitle Format
+ * @desc パラメータタイトルの表示内容を文字列で記述します。
+ * @default 強化値：\c[16]
+ *
+ * @param Upgrade Param Text Format
+ * @desc 表示内容を文字列で記述します。
+ *  フォーマットのパラメータはヘルプ参照
+ * @default \l[2]\nLV\n%1\lR[2]\n:\n%2\lR[6]\n⇒\l[2]\C\nLV\n%3\lR[2]\n:\n%4\lR[6]
+ *
+ * @param Upgrade Param CostTitle Format
+ * @desc コストタイトルの表示内容を文字列で記述します。
+ * @default コスト：\c[16]
+ *
+ * @param Upgrade Param CostItem Format
+ * @desc コストの表示内容を文字列で記述します。
+ *  %1 - コスト名, %2 - コスト数量, %3 - コストの手持ち量
+ * @default %1\l[16]\n%2\lR[3]\c[17]\n%3\c[17]\lR[5]
+ *
+ * @param Upgrade Param MaxLv Message
+ * @desc 最大強化レベルに達した時の表示内容を文字列で記述します。
+ * @default \l[2]\nこれ以上強化できません
+ *
+ * @param Upgrade Param Cost Lines
+ * @desc 3つのコストを並べ方を指定します。
+ * parallel - 3行に並べる, series - 1行にまとめる,
+ * @default parallel
+ *
+ * @param --Confirmation Window--
+ * @default
+ *
+ * @param Confirmation Title Format
+ * @desc スキル強化実行時の確認内容を記述します。
+ *  %1 - アクター名, %2 - スキル名
+ * @default スキル強化の確認
+ *
+ * @param Confirmation Ok Format
+ * @desc 確認コマンドの「実行する」の表示内容を記述します。
+ * @default 実行する
+ *
+ * @param Confirmation Cancel Format
+ * @desc 確認コマンドの「実行しない」の表示内容を記述します。
+ * @default 実行しない
  *
  * @param ---Default Param---
  * @default
@@ -360,171 +517,6 @@ FTKR.SUS = FTKR.SUS || {};
  *  %1 - 元のパラメータ, %2 - 強化時の上昇量, %3 - 強化レベル
  * @default 
  *
- * @param ---Show Command---
- * @default
- * 
- * @param Show Skill Command
- * @desc メニュー欄のどこにスキル強化コマンドを追加するか。
- *  1 - メニュー欄, 2 - スキルメニュー欄, 3 - サブコマンド欄
- * @default 1
- *
- * @param Upgrade Skill Command Name
- * @desc スキル強化コマンドのコマンド名を設定します。
- * @default スキル強化
- *
- * @param Skill Menu Switch ID
- * @desc メニュー欄の表示のON/OFFを制御するスイッチIDを指定します。
- * @default 0
- *
- * @param Upgrade Disable Confirmation
- * @desc スキル強化実行時に確認画面で実行確認するか。
- *  1 - 確認する, 0 - 確認しない(コストが常に表示)
- * @default 1
- *
- * @param Always Display Cost
- * @desc 強化コストに常に表示するか。
- *  1 - 表示する, 0 - 表示しない
- * @default 0
- *
- * @param How Show NonUg Item
- * @desc 強化できないパラメータを薄く表示するか指定します。
- *  0 - 変更しない, 1 -薄く表示する
- * @default 0
- *
- * @param Hide Not Upgrade Item
- * @desc 強化不可設定のパラメータを非表示にするか指定します。
- *  1 - 表示しない, 0 - 表示する
- * @default 0
- *
- * @param Hide Cannot Pay Item
- * @desc 強化コスト不足のパラメータを非表示にするか指定します。
- *  1 - 表示しない, 0 - 表示する
- * @default 0
- *
- * @param Hide Limit Upgrade Item
- * @desc 最大強化レベルに達したパラメータを非表示にするか指定します。
- *  1 - 表示しない, 0 - 表示する
- * @default 0
- * 
- * @param --Skill List Window--
- * @default
- * 
- * @param Skill List Width
- * @desc スキルリストウィンドウの幅を指定します。
- *  デフォルトは 240
- * @default 240
- *
- * @param --Skill Status Title Window--
- * @default
- * 
- * @param Skill Status Title Format
- * @desc タイトルの表示内容を文字列で記述します。
- *  %1 - アクター名, %2 - スキル名
- * @default [%2]のスキル情報\c[16]
- *
- * @param Discription Lines
- * @desc スキルの説明文の行数を設定します。
- * @default 2
- *
- * @param --Skill Status Window--
- * @default
- *
- * @param Skill Status Text1 Format
- * @desc スキルステータスのテキスト1の表示内容を記述します。
- *  詳細はヘルプ参照のこと
- * @default %1
- *
- * @param Skill Status Text2 Format
- * @desc スキルステータスのテキスト2の表示内容を記述します。
- *  詳細はヘルプ参照のこと
- * @default LV\sb[60]\l[2]\n%2\lR[2]\n/\c[17]\nMAX\sb[60]\c[17]\n%3\lR[2]\c[17]
- *
- * @param Skill Status Text3 Format
- * @desc スキルステータスのテキスト3の表示内容を記述します。
- *  詳細はヘルプ参照のこと
- * @default %4
- *
- * @param Skill Status Width Rate
- * @desc テキスト1～3を表示するテキスト幅の比率
- *  カンマ(,)で区切って表示すること
- * @default 1,1,1
- * 
- * @param Skill Status Line Color1
- * @desc ラインの色1を指定します。
- *  -1 を設定した場合は、ラインは非表示
- * @default 17
- * 
- * @param Skill Status Line Color2
- * @desc ラインの色2を指定します。
- *  -1 を設定した場合は、ラインは非表示
- * @default 17
- *
- * @param Skill Status Line Gauge
- * @desc スキルレベルの差により、ラインをゲージとして使用するか。
- *  1 - ゲージにする, 0 - ゲージにしない
- * @default 0
- *
- * @param Skill Status Max Cols
- * @desc 1行に表示するステータスの数を指定します。
- *  (最小値 1, 最大値 3)
- * @default 1
- * 
- * @param Skill Status Item Heigth
- * @desc 1つのステータスを表示する行数を指定します。
- *  (最小値 1, 最大値 3)
- * @default 1
- * 
- * @param --Upgrade Param Window--
- * @default
- *
- * @param Upgrade Param Title Format
- * @desc タイトルの表示内容を文字列で記述します。
- *  %1 - スキル名, %2 - 強化タイプ名
- * @default [%2]の情報\c[16]
- *
- * @param Upgrade Param SubTitle Format
- * @desc パラメータタイトルの表示内容を文字列で記述します。
- * @default 強化値：\c[16]
- *
- * @param Upgrade Param Text Format
- * @desc 表示内容を文字列で記述します。
- *  フォーマットのパラメータはヘルプ参照
- * @default \l[2]\nLV\n%1\lR[2]\n:\n%2\lR[6]\n⇒\l[2]\C\nLV\n%3\lR[2]\n:\n%4\lR[6]
- *
- * @param Upgrade Param CostTitle Format
- * @desc コストタイトルの表示内容を文字列で記述します。
- * @default コスト：\c[16]
- *
- * @param Upgrade Param CostItem Format
- * @desc コストの表示内容を文字列で記述します。
- *  %1 - コスト名, %2 - コスト数量, %3 - コストの手持ち量
- * @default %1\l[16]\n%2\lR[3]\c[17]\n%3\c[17]\lR[5]
- *
- * @param Upgrade Param MaxLv Message
- * @desc 最大強化レベルに達した時の表示内容を文字列で記述します。
- * @default \l[2]\nこれ以上強化できません
- *
- * @param Upgrade Param Cost Lines
- * @desc 3つのコストを並べ方を指定します。
- * parallel - 3行に並べる, series - 1行にまとめる,
- * @default parallel
- *
- * @param --Confirmation Window--
- * @default
- *
- * @param Confirmation Title Format
- * @desc スキル強化実行時の確認内容を記述します。
- *  %1 - アクター名, %2 - スキル名
- * @default スキル強化の確認
- *
- * @param Confirmation Ok Format
- * @desc 確認コマンドの「実行する」の表示内容を記述します。
- * @default 実行する
- *
- * @param Confirmation Cancel Format
- * @desc 確認コマンドの「実行しない」の表示内容を記述します。
- * @default 実行しない
- *
  * @param --Upgrade SE--
  * @default
  * 
@@ -764,127 +756,8 @@ FTKR.SUS.parameters = PluginManager.parameters('FTKR_SkillUpgradeSystem2');
 //スキル名
 FTKR.SUS.susSkillNameFormat = String(FTKR.SUS.parameters['Skill Name Format'] || '%1(+%2)');
 FTKR.SUS.susUpgradeDefName = String(FTKR.SUS.parameters['Upgrade Default Name'] || '強化');
-FTKR.SUS.maxUtypeNum = Number(FTKR.SUS.parameters['Max Upgrade Type Number'] || 8);
 FTKR.SUS.defDamageRate = Number(FTKR.SUS.parameters['Damage Rate'] || 0);
 FTKR.SUS.defCriticalRate = Number(FTKR.SUS.parameters['Critical Rate'] || 0);
-
-//強化項目のデフォルト設定用
-FTKR.SUS.utypes = [];
-var paramType0 = {
-  'type':'default',
-  'limit':Number(FTKR.SUS.parameters['Upgrade Default Limit'] || 99),
-  'value':Number(FTKR.SUS.parameters['Upgrade Default Value'] || 1),
-  'ctype':Number(FTKR.SUS.parameters['Upgrade Default Cost Type'] || 1),
-  'cost':String(FTKR.SUS.parameters['Upgrade Default Cost Value'] || 1),
-  'cid':Number(FTKR.SUS.parameters['Upgrade Default Cost Id'] || 0),
-  'icon':Number(FTKR.SUS.parameters['Upgrade Default Icon'] || 73),
-  'format':String(FTKR.SUS.parameters['Upgrade Default Calc Format'] || '%1+(%2*%3)')
-};
-FTKR.SUS.utypes.push(paramType0); 
-
-// Type 1
-var paramType1 = {
-  'type':String(FTKR.SUS.parameters['Upgrade Type 1 Type'] || 'damages'),
-  'limit':Number(FTKR.SUS.parameters['Upgrade Type 1 Limit'] || 0),
-  'value':Number(FTKR.SUS.parameters['Upgrade Type 1 Value'] || 0),
-  'cost':String(FTKR.SUS.parameters['Upgrade Type 1 Cost Value'] || 0),
-  'icon':Number(FTKR.SUS.parameters['Upgrade Type 1 Icon'] || 0),
-  'ctype':Number(FTKR.SUS.parameters['Upgrade Type 1 Cost type'] || 0),
-  'cid':Number(FTKR.SUS.parameters['Upgrade Type 1 Cost Id'] || 0),
-  'format':String(FTKR.SUS.parameters['Upgrade Type 1 Format'] || '')
-};
-FTKR.SUS.utypes.push(paramType1);
-
-// Type 2
-var paramType2 = {
-  'type':String(FTKR.SUS.parameters['Upgrade Type 2 Type'] || 'mpCost'),
-  'limit':Number(FTKR.SUS.parameters['Upgrade Type 2 Limit'] || 0),
-  'value':Number(FTKR.SUS.parameters['Upgrade Type 2 Value'] || -1),
-  'cost':String(FTKR.SUS.parameters['Upgrade Type 2 Cost Value'] || 0),
-  'icon':Number(FTKR.SUS.parameters['Upgrade Type 2 Icon'] || 0),
-  'ctype':Number(FTKR.SUS.parameters['Upgrade Type 2 Cost type'] || 0),
-  'cid':Number(FTKR.SUS.parameters['Upgrade Type 2 Cost Id'] || 0),
-  'format':String(FTKR.SUS.parameters['Upgrade Type 2 Format'] || '')
-};
-FTKR.SUS.utypes.push(paramType2);
-
-// Type 3
-var paramType3 = {
-  'type':String(FTKR.SUS.parameters['Upgrade Type 3 Type'] || 'tpCost'),
-  'limit':Number(FTKR.SUS.parameters['Upgrade Type 3 Limit'] || 0),
-  'value':Number(FTKR.SUS.parameters['Upgrade Type 3 Value'] || -1),
-  'cost':String(FTKR.SUS.parameters['Upgrade Type 3 Cost Value'] || 0),
-  'icon':Number(FTKR.SUS.parameters['Upgrade Type 3 Icon'] || 0),
-  'ctype':Number(FTKR.SUS.parameters['Upgrade Type 3 Cost type'] || 0),
-  'cid':Number(FTKR.SUS.parameters['Upgrade Type 3 Cost Id'] || 0),
-  'format':String(FTKR.SUS.parameters['Upgrade Type 3 Format'] || '')
-};
-FTKR.SUS.utypes.push(paramType3);
-
-// Type 4
-var paramType4 = {
-  'type':String(FTKR.SUS.parameters['Upgrade Type 4 Type'] || 'spead'),
-  'limit':Number(FTKR.SUS.parameters['Upgrade Type 4 Limit'] || 0),
-  'value':Number(FTKR.SUS.parameters['Upgrade Type 4 Value'] || 0),
-  'cost':String(FTKR.SUS.parameters['Upgrade Type 4 Cost Value'] || 0),
-  'icon':Number(FTKR.SUS.parameters['Upgrade Type 4 Icon'] || 0),
-  'ctype':Number(FTKR.SUS.parameters['Upgrade Type 4 Cost type'] || 0),
-  'cid':Number(FTKR.SUS.parameters['Upgrade Type 4 Cost Id'] || 0),
-  'format':String(FTKR.SUS.parameters['Upgrade Type 4 Format'] || '')
-};
-FTKR.SUS.utypes.push(paramType4);
-
-// Type 5
-var paramType5 = {
-  'type':String(FTKR.SUS.parameters['Upgrade Type 5 Type'] || 'tpGain'),
-  'limit':Number(FTKR.SUS.parameters['Upgrade Type 5 Limit'] || 0),
-  'value':Number(FTKR.SUS.parameters['Upgrade Type 5 Value'] || 0),
-  'cost':String(FTKR.SUS.parameters['Upgrade Type 5 Cost Value'] || 0),
-  'icon':Number(FTKR.SUS.parameters['Upgrade Type 5 Icon'] || 0),
-  'ctype':Number(FTKR.SUS.parameters['Upgrade Type 5 Cost type'] || 0),
-  'cid':Number(FTKR.SUS.parameters['Upgrade Type 5 Cost Id'] || 0),
-  'format':String(FTKR.SUS.parameters['Upgrade Type 5 Format'] || '')
-};
-FTKR.SUS.utypes.push(paramType5);
-
-// Type 6
-var paramType6 = {
-  'type':String(FTKR.SUS.parameters['Upgrade Type 6 Type'] || 'repeats'),
-  'limit':Number(FTKR.SUS.parameters['Upgrade Type 6 Limit'] || 0),
-  'value':Number(FTKR.SUS.parameters['Upgrade Type 6 Value'] || 0),
-  'cost':String(FTKR.SUS.parameters['Upgrade Type 6 Cost Value'] || 0),
-  'icon':Number(FTKR.SUS.parameters['Upgrade Type 6 Icon'] || 0),
-  'ctype':Number(FTKR.SUS.parameters['Upgrade Type 6 Cost type'] || 0),
-  'cid':Number(FTKR.SUS.parameters['Upgrade Type 6 Cost Id'] || 0),
-  'format':String(FTKR.SUS.parameters['Upgrade Type 6 Format'] || '')
-};
-FTKR.SUS.utypes.push(paramType6);
-
-// Type 7
-var paramType7 = {
-  'type':String(FTKR.SUS.parameters['Upgrade Type 7 Type'] || 'scope'),
-  'limit':Number(FTKR.SUS.parameters['Upgrade Type 7 Limit'] || 1),
-  'value':Number(FTKR.SUS.parameters['Upgrade Type 7 Value'] || 1),
-  'cost':String(FTKR.SUS.parameters['Upgrade Type 7 Cost Value'] || 0),
-  'icon':Number(FTKR.SUS.parameters['Upgrade Type 7 Icon'] || 0),
-  'ctype':Number(FTKR.SUS.parameters['Upgrade Type 7 Cost type'] || 0),
-  'cid':Number(FTKR.SUS.parameters['Upgrade Type 7 Cost Id'] || 0),
-  'format':String(FTKR.SUS.parameters['Upgrade Type 7 Format'] || '')
-};
-FTKR.SUS.utypes.push(paramType7);
-
-// Type 8
-var paramType8 = {
-  'type':String(FTKR.SUS.parameters['Upgrade Type 8 Type'] || 'effects'),
-  'limit':Number(FTKR.SUS.parameters['Upgrade Type 8 Limit'] || 0),
-  'value':Number(FTKR.SUS.parameters['Upgrade Type 8 Value'] || 0),
-  'cost':String(FTKR.SUS.parameters['Upgrade Type 8 Cost Value'] || 0),
-  'icon':Number(FTKR.SUS.parameters['Upgrade Type 8 Icon'] || 0),
-  'ctype':Number(FTKR.SUS.parameters['Upgrade Type 8 Cost type'] || 0),
-  'cid':Number(FTKR.SUS.parameters['Upgrade Type 8 Cost Id'] || 0),
-  'format':String(FTKR.SUS.parameters['Upgrade Type 8 Format'] || '')
-};
-FTKR.SUS.utypes.push(paramType8);
 
 //メニュー表示
 FTKR.SUS.showCommand = Number(FTKR.SUS.parameters['Show Skill Command'] || 0);
@@ -897,32 +770,40 @@ FTKR.SUS.hideNotUgItem = Number(FTKR.SUS.parameters['Hide Not Upgrade Item'] || 
 FTKR.SUS.hideCantPayItem = Number(FTKR.SUS.parameters['Hide Cannot Pay Item'] || 0);
 FTKR.SUS.hideLimitUgItem = Number(FTKR.SUS.parameters['Hide Limit Upgrade Item'] || 0);
 
-if (!FTKR.SUS.enableConf) FTKR.SUS.alwaysDispCost = 1;
+//スキルリストウィンドウ設定
 FTKR.SUS.skillListWidth = Number(FTKR.SUS.parameters['Skill List Width'] || 240);
-FTKR.SUS.subUpgradeOk = false;
+FTKR.SUS.skillListMaxCols = Number(FTKR.SUS.parameters['Skill List Max Cols'] || 1);
+FTKR.SUS.skillListSpacing = Number(FTKR.SUS.parameters['Skill List Spacing'] || 48);
 
-//ステータス欄の表示名、色
+//スキルステータスウィンドウ設定
 FTKR.SUS.ustatusTitleFormat = String(FTKR.SUS.parameters['Skill Status Title Format'] || '');
 FTKR.SUS.DiscriptionLines = Number(FTKR.SUS.parameters['Discription Lines'] || 2);
 
-FTKR.SUS.utypeText1Format = String(FTKR.SUS.parameters['Skill Status Text1 Format'] || '');
-FTKR.SUS.utypeText2Format = String(FTKR.SUS.parameters['Skill Status Text2 Format'] || '');
-FTKR.SUS.utypeText3Format = String(FTKR.SUS.parameters['Skill Status Text3 Format'] || '');
-FTKR.SUS.utypeWidthRate = String(FTKR.SUS.parameters['Skill Status Width Rate'] || '1,1,1');
-FTKR.SUS.utypeLineColor1 = Number(FTKR.SUS.parameters['Skill Status Line Color1'] || -1);
-FTKR.SUS.utypeLineColor2 = Number(FTKR.SUS.parameters['Skill Status Line Color2'] || -1);
-FTKR.SUS.utypeLineGauge = Number(FTKR.SUS.parameters['Skill Status Line Gauge'] || 0);
-FTKR.SUS.utypeMaxCols = Number(FTKR.SUS.parameters['Skill Status Max Cols'] || 1);
-FTKR.SUS.utypeItemHeigth = Number(FTKR.SUS.parameters['Skill Status Item Heigth'] || 1);
+//強化タイプウィンドウ設定
+FTKR.SUS.utype = {
+    Text1Format:String(FTKR.SUS.parameters['Skill Status Text1 Format'] || ''),
+    Text2Format:String(FTKR.SUS.parameters['Skill Status Text2 Format'] || ''),
+    Text3Format:String(FTKR.SUS.parameters['Skill Status Text3 Format'] || ''),
+    WidthRate:String(FTKR.SUS.parameters['Skill Status Width Rate'] || '1,1,1'),
+    LineColor1:Number(FTKR.SUS.parameters['Skill Status Line Color1'] || -1),
+    LineColor2:Number(FTKR.SUS.parameters['Skill Status Line Color2'] || -1),
+    LineGauge:Number(FTKR.SUS.parameters['Skill Status Line Gauge'] || 0),
+    MaxCols:Number(FTKR.SUS.parameters['Skill Status Max Cols'] || 1),
+    ItemHeigth:Number(FTKR.SUS.parameters['Skill Status Item Heigth'] || 1),
+};
 
-FTKR.SUS.ucostTitleFormat = String(FTKR.SUS.parameters['Upgrade Param Title Format'] || '');
-FTKR.SUS.ucostSubTitle1Text = String(FTKR.SUS.parameters['Upgrade Param SubTitle Format'] || '');
-FTKR.SUS.ucostTextFromat = String(FTKR.SUS.parameters['Upgrade Param Text Format'] || '');
-FTKR.SUS.ucostSubTitle2Text = String(FTKR.SUS.parameters['Upgrade Param CostTitle Format'] || '');
-FTKR.SUS.ucostItemFormat = String(FTKR.SUS.parameters['Upgrade Param CostItem Format'] || '');
+//コストウィンドウ設定
+FTKR.SUS.ucost = {
+    TitleFormat:String(FTKR.SUS.parameters['Upgrade Param Title Format'] || ''),
+    SubTitle1Text:String(FTKR.SUS.parameters['Upgrade Param SubTitle Format'] || ''),
+    TextFromat:String(FTKR.SUS.parameters['Upgrade Param Text Format'] || ''),
+    SubTitle2Text:String(FTKR.SUS.parameters['Upgrade Param CostTitle Format'] || ''),
+    ItemFormat:String(FTKR.SUS.parameters['Upgrade Param CostItem Format'] || ''),
+    CostLines:String(FTKR.SUS.parameters['Upgrade Param Cost Lines'] || 'parallel'),
+};
 FTKR.SUS.CannotUpgradeMessage = String(FTKR.SUS.parameters['Upgrade Param MaxLv Message'] || '');
-FTKR.SUS.ucostCostLines = String(FTKR.SUS.parameters['Upgrade Param Cost Lines'] || 'parallel');
 
+//確認ウィンドウ設定
 FTKR.SUS.confTitleFormat = String(FTKR.SUS.parameters['Confirmation Title Format'] || '');
 FTKR.SUS.confOkFormat = String(FTKR.SUS.parameters['Confirmation Ok Format'] || '');
 FTKR.SUS.confCancelFormat  = String(FTKR.SUS.parameters['Confirmation Cancel Format'] || '');
@@ -932,6 +813,104 @@ FTKR.SUS.susSeName = String(FTKR.SUS.parameters['Upgrade SE Name'] || 'Sound2');
 FTKR.SUS.susSeVolume = Number(FTKR.SUS.parameters['Upgrade SE Volume'] || 0);
 FTKR.SUS.susSePitch = Number(FTKR.SUS.parameters['Upgrade SE Pitch'] || 0);
 FTKR.SUS.susSePan = Number(FTKR.SUS.parameters['Upgrade SE Pan'] || 0);
+
+//コストアイコン
+FTKR.SUS.costGoldIcon = Number(FTKR.SUS.parameters['Cost Gold Icon'] || 0);
+FTKR.SUS.costVarIcon = Number(FTKR.SUS.parameters['Cost Variables Icon'] || 0);
+
+//強化項目のデフォルト設定用
+FTKR.SUS.uTypes = [
+    {
+      type:'default',
+      limit:Number(FTKR.SUS.parameters['Upgrade Default Limit'] || 99),
+      value:Number(FTKR.SUS.parameters['Upgrade Default Value'] || 1),
+      ctype:Number(FTKR.SUS.parameters['Upgrade Default Cost Type'] || 1),
+      cost:String(FTKR.SUS.parameters['Upgrade Default Cost Value'] || 1),
+      cid:Number(FTKR.SUS.parameters['Upgrade Default Cost Id'] || 0),
+      icon:Number(FTKR.SUS.parameters['Upgrade Default Icon'] || 73),
+      format:String(FTKR.SUS.parameters['Upgrade Default Calc Format'] || '%1+(%2*%3)')
+    },
+    {
+      type:String(FTKR.SUS.parameters['Upgrade Type 1 Type'] || 'damages'),
+      limit:Number(FTKR.SUS.parameters['Upgrade Type 1 Limit'] || 0),
+      value:Number(FTKR.SUS.parameters['Upgrade Type 1 Value'] || 0),
+      cost:String(FTKR.SUS.parameters['Upgrade Type 1 Cost Value'] || 0),
+      icon:Number(FTKR.SUS.parameters['Upgrade Type 1 Icon'] || 0),
+      ctype:Number(FTKR.SUS.parameters['Upgrade Type 1 Cost type'] || 0),
+      cid:Number(FTKR.SUS.parameters['Upgrade Type 1 Cost Id'] || 0),
+      format:String(FTKR.SUS.parameters['Upgrade Type 1 Format'] || '')
+    },
+    {
+      type:String(FTKR.SUS.parameters['Upgrade Type 2 Type'] || 'mpCost'),
+      limit:Number(FTKR.SUS.parameters['Upgrade Type 2 Limit'] || 0),
+      value:Number(FTKR.SUS.parameters['Upgrade Type 2 Value'] || -1),
+      cost:String(FTKR.SUS.parameters['Upgrade Type 2 Cost Value'] || 0),
+      icon:Number(FTKR.SUS.parameters['Upgrade Type 2 Icon'] || 0),
+      ctype:Number(FTKR.SUS.parameters['Upgrade Type 2 Cost type'] || 0),
+      cid:Number(FTKR.SUS.parameters['Upgrade Type 2 Cost Id'] || 0),
+      format:String(FTKR.SUS.parameters['Upgrade Type 2 Format'] || '')
+    },
+    {
+      type:String(FTKR.SUS.parameters['Upgrade Type 3 Type'] || 'tpCost'),
+      limit:Number(FTKR.SUS.parameters['Upgrade Type 3 Limit'] || 0),
+      value:Number(FTKR.SUS.parameters['Upgrade Type 3 Value'] || -1),
+      cost:String(FTKR.SUS.parameters['Upgrade Type 3 Cost Value'] || 0),
+      icon:Number(FTKR.SUS.parameters['Upgrade Type 3 Icon'] || 0),
+      ctype:Number(FTKR.SUS.parameters['Upgrade Type 3 Cost type'] || 0),
+      cid:Number(FTKR.SUS.parameters['Upgrade Type 3 Cost Id'] || 0),
+      format:String(FTKR.SUS.parameters['Upgrade Type 3 Format'] || '')
+    },
+    {
+      type:String(FTKR.SUS.parameters['Upgrade Type 4 Type'] || 'spead'),
+      limit:Number(FTKR.SUS.parameters['Upgrade Type 4 Limit'] || 0),
+      value:Number(FTKR.SUS.parameters['Upgrade Type 4 Value'] || 0),
+      cost:String(FTKR.SUS.parameters['Upgrade Type 4 Cost Value'] || 0),
+      icon:Number(FTKR.SUS.parameters['Upgrade Type 4 Icon'] || 0),
+      ctype:Number(FTKR.SUS.parameters['Upgrade Type 4 Cost type'] || 0),
+      cid:Number(FTKR.SUS.parameters['Upgrade Type 4 Cost Id'] || 0),
+      format:String(FTKR.SUS.parameters['Upgrade Type 4 Format'] || '')
+    },
+    {
+      type:String(FTKR.SUS.parameters['Upgrade Type 5 Type'] || 'tpGain'),
+      limit:Number(FTKR.SUS.parameters['Upgrade Type 5 Limit'] || 0),
+      value:Number(FTKR.SUS.parameters['Upgrade Type 5 Value'] || 0),
+      cost:String(FTKR.SUS.parameters['Upgrade Type 5 Cost Value'] || 0),
+      icon:Number(FTKR.SUS.parameters['Upgrade Type 5 Icon'] || 0),
+      ctype:Number(FTKR.SUS.parameters['Upgrade Type 5 Cost type'] || 0),
+      cid:Number(FTKR.SUS.parameters['Upgrade Type 5 Cost Id'] || 0),
+      format:String(FTKR.SUS.parameters['Upgrade Type 5 Format'] || '')
+    },
+    {
+      type:String(FTKR.SUS.parameters['Upgrade Type 6 Type'] || 'repeats'),
+      limit:Number(FTKR.SUS.parameters['Upgrade Type 6 Limit'] || 0),
+      value:Number(FTKR.SUS.parameters['Upgrade Type 6 Value'] || 0),
+      cost:String(FTKR.SUS.parameters['Upgrade Type 6 Cost Value'] || 0),
+      icon:Number(FTKR.SUS.parameters['Upgrade Type 6 Icon'] || 0),
+      ctype:Number(FTKR.SUS.parameters['Upgrade Type 6 Cost type'] || 0),
+      cid:Number(FTKR.SUS.parameters['Upgrade Type 6 Cost Id'] || 0),
+      format:String(FTKR.SUS.parameters['Upgrade Type 6 Format'] || '')
+    },
+    {
+      type:String(FTKR.SUS.parameters['Upgrade Type 7 Type'] || 'scope'),
+      limit:Number(FTKR.SUS.parameters['Upgrade Type 7 Limit'] || 1),
+      value:Number(FTKR.SUS.parameters['Upgrade Type 7 Value'] || 1),
+      cost:String(FTKR.SUS.parameters['Upgrade Type 7 Cost Value'] || 0),
+      icon:Number(FTKR.SUS.parameters['Upgrade Type 7 Icon'] || 0),
+      ctype:Number(FTKR.SUS.parameters['Upgrade Type 7 Cost type'] || 0),
+      cid:Number(FTKR.SUS.parameters['Upgrade Type 7 Cost Id'] || 0),
+      format:String(FTKR.SUS.parameters['Upgrade Type 7 Format'] || '')
+    },
+    {
+      type:String(FTKR.SUS.parameters['Upgrade Type 8 Type'] || 'effects'),
+      limit:Number(FTKR.SUS.parameters['Upgrade Type 8 Limit'] || 0),
+      value:Number(FTKR.SUS.parameters['Upgrade Type 8 Value'] || 0),
+      cost:String(FTKR.SUS.parameters['Upgrade Type 8 Cost Value'] || 0),
+      icon:Number(FTKR.SUS.parameters['Upgrade Type 8 Icon'] || 0),
+      ctype:Number(FTKR.SUS.parameters['Upgrade Type 8 Cost type'] || 0),
+      cid:Number(FTKR.SUS.parameters['Upgrade Type 8 Cost Id'] || 0),
+      format:String(FTKR.SUS.parameters['Upgrade Type 8 Format'] || '')
+    },
+];
 
 //スキルのパラメータ名
 FTKR.SUS.mainDamageName = String(FTKR.SUS.parameters['Main damage Name'] || '');
@@ -978,6 +957,17 @@ FTKR.SUS.Elements = {
   Name:String(FTKR.SUS.parameters['Elements Name'] || ''),
 };
 
+//アクターステータスウィンドウ設定
+FTKR.SUS.actorStatus = {
+  text1:String(FTKR.SUS.parameters['Actor Status Text1'] || ''),
+  text2:String(FTKR.SUS.parameters['Actor Status Text2'] || ''),
+  text3:String(FTKR.SUS.parameters['Actor Status Text3'] || ''),
+  space:String(FTKR.SUS.parameters['Actor Status Space'] || ''),
+  spaceIn:Number(FTKR.SUS.parameters['Actor Status Space In Text'] || 0),
+  widthRate:String(FTKR.SUS.parameters['Actor Status Width Rate'] || ''),
+  faceLine:Number(FTKR.SUS.parameters['Display Face Scale'] || 0),
+};
+
 //フレームオブジェクト
 FTKR.SUS.frame = {
     //基本設定
@@ -1010,55 +1000,14 @@ FTKR.SUS.frame = {
     },
 };
 
-//ステータス欄の表示名、色
-FTKR.SUS.skillListMaxCols = Number(FTKR.SUS.parameters['Skill List Max Cols'] || 1);
-FTKR.SUS.skillListSpacing = Number(FTKR.SUS.parameters['Skill List Spacing'] || 48);
-
-FTKR.SUS.ustatusTitleFormat = String(FTKR.SUS.parameters['Skill Status Title Format'] || '');
-FTKR.SUS.discriptionLines = Number(FTKR.SUS.parameters['Discription Lines'] || 2);
-
-FTKR.SUS.actorStatus = {
-  text1:String(FTKR.SUS.parameters['Actor Status Text1'] || ''),
-  text2:String(FTKR.SUS.parameters['Actor Status Text2'] || ''),
-  text3:String(FTKR.SUS.parameters['Actor Status Text3'] || ''),
-  space:String(FTKR.SUS.parameters['Actor Status Space'] || ''),
-  spaceIn:Number(FTKR.SUS.parameters['Actor Status Space In Text'] || 0),
-  widthRate:String(FTKR.SUS.parameters['Actor Status Width Rate'] || ''),
-  faceLine:Number(FTKR.SUS.parameters['Display Face Scale'] || 0),
-};
-
-//コスト
-FTKR.SUS.costTitleFormat = String(FTKR.SUS.parameters['Cost Title Format'] || '');
-FTKR.SUS.costItemFormat = String(FTKR.SUS.parameters['Cost Item Format'] || '');
-FTKR.SUS.costGoldIcon = Number(FTKR.SUS.parameters['Cost Gold Icon'] || 0);
-FTKR.SUS.costVarIcon = Number(FTKR.SUS.parameters['Cost Variables Icon'] || 0);
-
 //=============================================================================
 // プラグイン 定数
 //=============================================================================
 
-Game_BattlerBase.MAX_SUS_UPGRADE_TYPES = 8;
+FTKR.SUS.maxUtypeNum = 8;
 
-if (FTKR.SUS.maxUtypeNum > Game_BattlerBase.MAX_SUS_UPGRADE_TYPES) {
-  FTKR.SUS.maxUtypeNum = Game_BattlerBase.MAX_SUS_UPGRADE_TYPES;
-;}
-
-//=============================================================================
-// Bitmap
-//=============================================================================
-
-//座標(x1,y1)から座標(x2,y2)までの線を引く
-Bitmap.prototype.drawLine = function(x1, y1, x2, y2, color, thick) {
-    var context = this._context;
-    context.strokeStyle = color;
-    context.lineWidth = thick;
-    context.beginPath();
-    context.moveTo(x1, y1);
-    context.lineTo(x2, y2);
-    context.closePath();
-    context.stroke();
-    this._setDirty();
-};
+if (!FTKR.SUS.enableConf) FTKR.SUS.alwaysDispCost = 1;
+FTKR.SUS.subUpgradeOk = false;
 
 //=============================================================================
 // Math
@@ -1077,31 +1026,11 @@ Math.percent = function(dec) {
   return diffdec ? int * Math.pow(10, diffdec) : int;
 }
 
-Math.limit = function(value, lowerlimit, upperlimit) {
-  return Math.min(Math.max(value, lowerlimit), upperlimit);
-}
-
 // 配列の要素の合計
 Math.sam = function(arr) {
     return arr.reduce( function(prev, current, i, arr) {
         return prev + current;
     });
-};
-
-/*
-a,b 二つの値の大小を比較して、
- a > b なら +1
- a < b なら -1
- それ以外の結果なら 0 を返す
-*/
-Math.code = function(a, b) {
-  if (a > b) {
-    return +1;
-  } else if (a < b) {
-    return -1;
-  } else {
-    return 0;
-  }
 };
 
 //=============================================================================
@@ -1114,13 +1043,6 @@ Array.prototype.num = function() {
       return Number(elm);
   });
 }
-
-//重複した要素を除いて、Array配列にlist配列の要素を加える。
-Array.prototype.addExceptForDup = function(list) {
-    list.forEach( function(item) {
-        if (!this.contains(item)) this.push(item);
-    },this);
-};
 
 //=============================================================================
 // String
@@ -1145,14 +1067,6 @@ String.prototype.charCount = function() {
 //文字列からstrを削除する
 String.prototype.del = function(str) {
     return this.replace(str, '');
-};
-
-//=============================================================================
-// ImageManager
-//=============================================================================
-
-ImageManager.loadSepImage = function(filename, hue) {
-    return this.loadBitmap('img/sep/', filename, hue, false);
 };
 
 //=============================================================================
@@ -1228,12 +1142,12 @@ FTKR.SUS.DataManager_isDatabaseLoaded = DataManager.isDatabaseLoaded;
 DataManager.isDatabaseLoaded = function() {
     if (!FTKR.SUS.DataManager_isDatabaseLoaded.call(this)) return false;
     if (!FTKR.SUS.DatabaseLoaded) {
-        DataManager.susActorNotetags($dataActors);
-        DataManager.susActorNotetags($dataClasses);
-        DataManager.sepSkillNotetags($dataSkills);
-        DataManager.susSkillNotetags($dataSkills);
-        DataManager.susHideNotetags($dataActors);
-        DataManager.susHideNotetags($dataClasses);
+        this.susActorNotetags($dataActors);
+        this.susActorNotetags($dataClasses);
+        this.sepSkillNotetags($dataSkills);
+        this.susSkillNotetags($dataSkills);
+        this.susHideNotetags($dataActors);
+        this.susHideNotetags($dataClasses);
         FTKR.SUS.DatabaseLoaded = true;
     }
     return true;
@@ -1242,25 +1156,10 @@ DataManager.isDatabaseLoaded = function() {
 DataManager.sepSkillNotetags = function(group) {
     for (var n = 1; n < group.length; n++) {
         var obj = group[n];
-        var notedata = obj.note.split(/[\r\n]+/);
-
-        var setMode = 'none';
-        obj.sep = {};
-        obj.sep.damages = [];
-        obj.sep.effects = [];
-        obj.sep.repeats = '';
-        obj.sep.required = '';
-        obj.sep.cost = '';
-        obj.sep.descs = [];
         var scope = obj.scope;
         obj.scoperandom = scope > 2 && scope < 7 ? scope - 2 : 0;
-        DataManager.makeSepData(obj);
+        this.makeSepBase(obj);
     }
-};
-
-// skillの拡張部分(sepdata)を作成する
-DataManager.makeSepData = function(skill) {
-    this.makeSepBase(skill);
 };
 
 DataManager.makeSepBase = function(skill) {
@@ -1480,8 +1379,8 @@ DataManager.isSepSkill = function(skill) {
 FTKR.SUS.Game_Actor_initMembers = Game_Actor.prototype.initMembers;
 Game_Actor.prototype.initMembers = function() {
   FTKR.SUS.Game_Actor_initMembers.call(this);
-    this._sepIds = [];
-    this._sepDataSkills = [];
+  this._sepIds = [];
+  this._sepDataSkills = [];
   this._udatas = [];
 };
 
@@ -1610,7 +1509,7 @@ Game_Actor.prototype.setSepSkill = function(skillId) {
 
 Game_Actor.prototype.isSepEnabled = function(skillId, typeId, dataId) {
   var skill = this.getSkill(skillId);
-  var prop = skill[FTKR.SUS.utypes[typeId].type];
+  var prop = skill[FTKR.SUS.uTypes[typeId].type];
   if (!prop.length) return true;
   return this.evalEnabledFormula(prop[dataId].enabled, skill);
 };
@@ -1716,7 +1615,7 @@ Game_Actor.prototype.isUpgradeTypes  = function(typename) {
 };
 
 Game_Actor.prototype.isUtypeName = function(typeId) {
-  return FTKR.SUS.utypes[typeId].type;
+  return FTKR.SUS.uTypes[typeId].type;
 };
 
 Game_Actor.prototype.isHideSkillStatus = function(typeId, sepSkill, effectNum, dataId) {
@@ -1766,7 +1665,7 @@ Game_Actor.prototype.canPayUpgradeCost = function(udata) {
 Game_Actor.prototype.getSusTypeId = function(typename) {
   if (!typename) return false;
   for(var t = 1; t < FTKR.SUS.maxUtypeNum + 1 ; t++) {
-    if (FTKR.SUS.utypes[t].type === typename) return t;
+    if (FTKR.SUS.uTypes[t].type === typename) return t;
   }
 };
 
@@ -1985,8 +1884,8 @@ Game_Actor.prototype.setUpgradeSkillValue = function(skillId, typeId) {
   if (result) return result;
   result = $dataSkills[skillId].susUpgradeValue[typeId];
   if (result) return result;
-  result = FTKR.SUS.utypes[typeId].value;
-  return result ? result : FTKR.SUS.utypes[0].value;
+  result = FTKR.SUS.uTypes[typeId].value;
+  return result ? result : FTKR.SUS.uTypes[0].value;
 };
 
 Game_Actor.prototype.setUpgradeSkillLimitBase = function(skillId, typeId) {
@@ -1996,8 +1895,8 @@ Game_Actor.prototype.setUpgradeSkillLimitBase = function(skillId, typeId) {
   if (result > 0) return result;
   result = $dataSkills[skillId].susUpgradeLimit[typeId];
   if (result > 0) return result;
-  result = FTKR.SUS.utypes[typeId].limit;
-  return result > 0 ? result : FTKR.SUS.utypes[0].limit;
+  result = FTKR.SUS.uTypes[typeId].limit;
+  return result > 0 ? result : FTKR.SUS.uTypes[0].limit;
 };
 
 Game_Actor.prototype.setUpgradeSkillLimit = function(skillId, typeId, value) {
@@ -2043,7 +1942,7 @@ Game_Actor.prototype.setUpgradeSkillCost = function(skillId, typeId) {
   var skill = $dataSkills[skillId];
   results = this.getSusSkillNotetagsCost(skill, typeId);
   if (results) return results;
-  var utype = FTKR.SUS.utypes[typeId];
+  var utype = FTKR.SUS.uTypes[typeId];
   if (utype) {
     results = [];
     result = {value:utype.cost, type:this.convertCtype(utype.ctype), id:utype.cid, count:0};
@@ -2052,7 +1951,7 @@ Game_Actor.prototype.setUpgradeSkillCost = function(skillId, typeId) {
       return results;
     }
   }
-  var utype0 = FTKR.SUS.utypes[0];
+  var utype0 = FTKR.SUS.uTypes[0];
   if (!utype0) return false;
   result = {value:utype0.cost, type:this.convertCtype(utype0.ctype), id:utype0.cid, count:0};
   results.push(result);
@@ -2074,8 +1973,8 @@ Game_Actor.prototype.convertCtype = function(ctype) {
 Game_Actor.prototype.setUpgradeSkillFormat = function(skillId, typeId) {
   var fmt = $dataSkills[skillId].susUpgradeFormat[typeId];
   if (fmt) return fmt;
-  fmt = FTKR.SUS.utypes[typeId].format;
-  return fmt ? fmt : FTKR.SUS.utypes[0].format;
+  fmt = FTKR.SUS.uTypes[typeId].format;
+  return fmt ? fmt : FTKR.SUS.uTypes[0].format;
 };
 
 Game_Actor.prototype.upgradeSepSkill = function(skillId, typeId, dataId) {
@@ -2091,7 +1990,7 @@ Game_Actor.prototype.susUpgradeSepSkill = function(skillId, typeId, dataId) {
   udata.cost.forEach( function(cost, i) {
       udata.cost[i].count += 1;
   });
-  var type = FTKR.SUS.utypes[typeId].type;
+  var type = FTKR.SUS.uTypes[typeId].type;
   var value = this.getSusUparam(skillId, type, dataId);
   this.setUpgradeParam(sepSkill, type, value, dataId);
   var fmt = FTKR.SUS.susSkillNameFormat;
@@ -2195,26 +2094,24 @@ Game_Enemy.prototype.evalEnabledFormula = function(formula, skill) {
 //=============================================================================
 
 Window_Base.prototype.drawSusSkillGauge = function(x, y, width, udata) {
-  if (FTKR.SUS.utypeLineColor1 > -1 && FTKR.SUS.utypeLineColor2 > -1) {
-    var rate = FTKR.SUS.utypeLineGauge && udata.limit ? udata.count/udata.limit : 1;
-    this.drawGauge(x, y, width, rate, this.textColor(FTKR.SUS.utypeLineColor1),
-        this.textColor(FTKR.SUS.utypeLineColor2));
+  if (FTKR.SUS.utype.LineColor1 > -1 && FTKR.SUS.utype.LineColor2 > -1) {
+    var rate = FTKR.SUS.utype.LineGauge && udata.limit ? udata.count/udata.limit : 1;
+    this.drawGauge(x, y, width, rate, this.textColor(FTKR.SUS.utype.LineColor1),
+        this.textColor(FTKR.SUS.utype.LineColor2));
   }
 };
 
-//書き換え
 Window_Base.prototype.setSepSkillStatusFormats = function() {
   return [
-    FTKR.SUS.utypeText1Format,
-    FTKR.SUS.utypeText2Format,
-    FTKR.SUS.utypeText3Format
+    FTKR.SUS.utype.Text1Format,
+    FTKR.SUS.utype.Text2Format,
+    FTKR.SUS.utype.Text3Format
   ];
 };
 
-//書き換え
 Window_Base.prototype.setSepSkillStatusParams = function(skill, typeId, dataId) {
   var udata = this._actor.getSusUdata(skill.id, typeId, dataId);
-  var utype = FTKR.SUS.utypes[typeId];
+  var utype = FTKR.SUS.uTypes[typeId];
   return [
     TextManager.skillParam(utype.type, skill, dataId),
     udata.count,
@@ -2223,17 +2120,14 @@ Window_Base.prototype.setSepSkillStatusParams = function(skill, typeId, dataId) 
   ];
 };
 
-//書き換え
 Window_Base.prototype.sepTypeWidthRate = function() {
-  return FTKR.SUS.utypeWidthRate;
+  return FTKR.SUS.utype.WidthRate;
 };
 
-//書き換え
 Window_Base.prototype.sepTypeItemHeigth = function() {
-  return FTKR.SUS.utypeItemHeigth;
+  return FTKR.SUS.utype.ItemHeigth;
 };
 
-//書き換え
 Window_Base.prototype.exchangeFormat = function(format, skill, typeId, dataId) {
   var udata = this._actor.getSusUdata(skill.id, typeId, dataId);
   if (format.match(/%2|%3/) && !udata.limit) format = ''; 
@@ -2319,7 +2213,7 @@ Window_Base.prototype.drawSepSkillStatus = function(tx, ty, tw, rect, typeId, sk
   var wrs = Math.sam(wr);
   for (var i = 0; i < 3; i++) {
     txs[i] = (i === 0 || (i > 3 - sih)) ? tx : txs[i-1] + tws[i-1];
-    tys[i] = rect.y + ty * Math.limit(sih - 3 + i, 0, 2);
+    tys[i] = rect.y + ty * (sih - 3 + i).clamp(0, 2);
     switch (sih) {
       case 1:
         tws[i] = tw * wr[i] / wrs; break;
@@ -2333,27 +2227,7 @@ Window_Base.prototype.drawSepSkillStatus = function(tx, ty, tw, rect, typeId, sk
     this.drawFormatText(formats[i], txs[i], tys[i], params, tws[i]);
   }
 };
-/*
-Window_Base.prototype.setSepParam = function(type, skill, dataId, eflag) {
-  var actor = this._actor;
-  if (type === 'scope' && !actor.isRandomScope(skill)) {
-    return TextManager.scope(skill.scope);
-  } else {
-    if (type === 'damages') {
-      var damage = skill.damages[dataId].rate;
-      return eflag ? TextManager.damageId(skill, dataId).format(damage) : damage + '%';
-    } else if (type === 'effects') {
-      var effect = skill.effects[dataId];
-      return eflag ? TextManager.effect(type, effect).format(effect.rate) : effect.rate;
-    } else if (type === 'scope') {
-      var fmt = TextManager.scope(skill.scope);
-      return fmt.format(skill.scoperandom);
-    } else {
-      return skill[type];
-    }
-  }
-};
-*/
+
 /*-------------------------------------------------------------
   コストデータ(アイコン,名前,必要数,手持ち数)を表示する関数
 -------------------------------------------------------------*/
@@ -2396,30 +2270,6 @@ Window_Base.prototype.setSepCost = function(cost) {
     default:
       return this.setCost(0, '', 0);
   }
-};
-
-//画像表示関数 /img/sep/に保存したname.pngを表示する。
-Window_Base.prototype.drawSepImage = function(name, index, x, y, width, height, scale) {
-    if (name) {
-        var bitmap = ImageManager.loadSepImage(name);
-        var pw = width;
-        var ph = height;
-        scale = scale || 1;
-        var sx = index % 4 * pw;
-        var sy = Math.floor(index / 4) * ph;
-        this.contents.blt(bitmap, sx, sy, pw, ph, x, y, pw * scale, ph * scale);
-    }
-};
-
-Window_Base.prototype.drawBackgroundImage = function(bgi) {
-  var x = bgi.offsetX || 0;
-  var y = bgi.offsetY || 0;
-  if (bgi.name) this.drawSepImage(bgi.name, 0, x, y, bgi.width, bgi.height, 1);
-};
-
-//斜線描画関数
-Window_Base.prototype.drawDiagLine = function(x1, y1, x2, y2, color, thick) {
-    this.contents.drawLine(x1, y1, x2, y2, this.textColor(color), thick);
 };
 
 //アイコンの表示スケールを指定できる表示関数
@@ -2908,11 +2758,11 @@ Window_UpgradeTypeList.prototype.clearWindow = function() {
 };
 
 Window_UpgradeTypeList.prototype.maxCols = function() {
-  return Math.limit(FTKR.SUS.utypeMaxCols, 1, 3);
+  return FTKR.SUS.utype.MaxCols.clamp(1, 3);
 };
 
 Window_UpgradeTypeList.prototype.itemHeight = function() {
-    return this.lineHeight() * Math.limit(FTKR.SUS.utypeItemHeigth, 1, 3);
+    return this.lineHeight() * FTKR.SUS.utype.ItemHeigth.clamp(1, 3);
 };
 
 Window_UpgradeTypeList.prototype.maxItems = function() {
@@ -2937,7 +2787,7 @@ Window_UpgradeTypeList.prototype.makeItemList = function() {
   var skill = actor.getSkill(this._skillId);
   for(var t = 1; t < FTKR.SUS.maxUtypeNum + 1; t++) {
     for (var prop in skill) {
-      if (prop === FTKR.SUS.utypes[t].type) {
+      if (prop === FTKR.SUS.uTypes[t].type) {
         var len = prop === 'damages' || prop === 'effects' ? skill[prop].length : 1;
         for (var i = 0; i < len; i++) {
           if (prop === 'damages' && skill.damages[i].type < 1) continue;
@@ -2995,8 +2845,8 @@ Window_UpgradeTypeList.prototype.drawSkillStatus = function(tx, ty, tw, rect, sk
 };
 
 Window_UpgradeTypeList.prototype.drawStatusIcon = function(x, y, typeId) {
-    var utype = FTKR.SUS.utypes[typeId];
-    var icon = utype.icon ? utype.icon : FTKR.SUS.utypes[0].icon;
+    var utype = FTKR.SUS.uTypes[typeId];
+    var icon = utype.icon ? utype.icon : FTKR.SUS.uTypes[0].icon;
     this.drawIcon(icon, x, y);
 };
 
@@ -3189,7 +3039,7 @@ Window_SusCost.prototype.drawAllCost = function() {
     var eId = this._dataId;
     var sepSkill = actor.sepSkill(sId);
     var udata = actor.getSusUdata(sId, this._typeId, eId);
-    var type = FTKR.SUS.utypes[this._typeId].type;
+    var type = FTKR.SUS.uTypes[this._typeId].type;
 
     var width = this.width - this.standardPadding() * 2;
     var y = this.lineHeight();
@@ -3199,17 +3049,17 @@ Window_SusCost.prototype.drawAllCost = function() {
       this.drawSusUparam(y, width, sepSkill, type, udata, eId);
       cy = 0;
     }
-    this.drawFormatText(FTKR.SUS.ucostSubTitle2Text, 0, y*3 - cy, width);
+    this.drawFormatText(FTKR.SUS.ucost.SubTitle2Text, 0, y*3 - cy, width);
     var sp = this.textWidth('0');
     var dcx = [0,0,0];
     var sflag = 1;
-    if (FTKR.SUS.ucostCostLines === 'series') {
+    if (FTKR.SUS.ucost.CostLines === 'series') {
       width = (width - sp*2)/3;
       dcx = [0, width + sp, width*2 + sp*2];
       sflag = 0;
     }
     for (var i = 0; i< 3; i++) {
-      this.drawSepCost(FTKR.SUS.ucostItemFormat, udata.cost[i], dcx[i], y*4 - cy + y*i*sflag, width);
+      this.drawSepCost(FTKR.SUS.ucost.ItemFormat, udata.cost[i], dcx[i], y*4 - cy + y*i*sflag, width);
     }
   }
 };
@@ -3220,8 +3070,8 @@ Window_SusCost.prototype.drawSusUparam = function(y, width, sepSkill, type, udat
       sepSkill.name,
       defname.format(TextManager.skillParam(type, sepSkill, dataId))
   ];
-  this.drawFormatText(FTKR.SUS.ucostTitleFormat, 0, 0, params, width);
-  this.drawFormatText(FTKR.SUS.ucostSubTitle1Text, 0, y, false, width);
+  this.drawFormatText(FTKR.SUS.ucost.TitleFormat, 0, 0, params, width);
+  this.drawFormatText(FTKR.SUS.ucost.SubTitle1Text, 0, y, false, width);
   if (udata.count < udata.limit) {
     var params = [
       udata.count,
@@ -3229,7 +3079,7 @@ Window_SusCost.prototype.drawSusUparam = function(y, width, sepSkill, type, udat
       udata.count + 1,
       this.setSusUparam(type, sepSkill, udata.count + 1, dataId)
     ];
-    this.drawFormatText(FTKR.SUS.ucostTextFromat, 0, y*2, params, width);
+    this.drawFormatText(FTKR.SUS.ucost.TextFromat, 0, y*2, params, width);
   } else {
     this.drawFormatText(FTKR.SUS.CannotUpgradeMessage, 0, y*2, width);
   }
@@ -3544,7 +3394,7 @@ Scene_Base.prototype.susCreateSkillStatusWindow = function() {
 Scene_Base.prototype.susCostWindowHeight = function() {
   var line = 7;
   if (FTKR.SUS.alwaysDispCost) line -= 3; 
-  if (FTKR.SUS.ucostCostLines === 'series') line -=2;
+  if (FTKR.SUS.ucost.CostLines === 'series') line -=2;
   return this._helpWindow.lineHeight() * line + this._helpWindow.standardPadding() * 2;
 };
 
@@ -3566,7 +3416,7 @@ Scene_Base.prototype.susCreateUpgradeCostWindow = function() {
 };
 
 Scene_Base.prototype.susCreateConfTitleWindow = function() {
-  var wr = FTKR.SUS.ucostCostLines === 'series' ? 4 : 3;
+  var wr = FTKR.SUS.ucost.CostLines === 'series' ? 4 : 3;
 
   var wx = Graphics.boxWidth * (6 - wr) / 12;
   var ww = Graphics.boxWidth * wr / 6;

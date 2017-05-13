@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2017/05/12
-// バージョン : v1.5.2
+// 最終更新日 : 2017/05/13
+// バージョン : v1.5.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.5.2 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v1.5.3 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -192,6 +192,13 @@ FTKR.CSS = FTKR.CSS || {};
  * @desc 行の高さに合わせてアイコンサイズを調整するか
  * 1 - 有効にする, 0 - 無効にする
  * @default 0
+ * 
+ * @param --装備パラメータの設定--
+ * @default
+ * 
+ * @param Equip Right Arrow
+ * @desc 装備を変える時に表示する右矢印記号を指定します。
+ * @default \c[16]→
  * 
  * @param --カスタムパラメータの設定--
  * @default
@@ -731,7 +738,7 @@ FTKR.CSS = FTKR.CSS || {};
  *    :入力できるパラメータ名は、
  *    :face(x), chara, sv, name, class, nickname, hp, mp, tp, level, 
  *    :state, state2(x), profile, param(x), custom(x), gauge(x), 
- *    :equip(x), text(x), imageです。
+ *    :equip(x), text(x), image, eparam(x)です。
  *    :
  *    :face, face(x) -
  *    : 顔画像を表示します。
@@ -771,6 +778,15 @@ FTKR.CSS = FTKR.CSS || {};
  *    :
  *    :image - 
  *    : アクターのメモ欄で設定した画像を表示します。
+ *    :
+ *    :eparam(x) -
+ *    : 装備画面にて使用可能な、パラメータ表示用コードです。
+ *    : 選択したアイテムを装備した時のパラメータを表示します。
+ *    : x は 0 ~ 7 の値で、下記のパラメータを指定します。
+ *    : 0 - 最大HP、1 - 最大MP、2 - 攻撃力、3 - 防御力、4 - 魔法攻撃、
+ *    : 5 - 魔法防御、6 - 敏捷性、7 - 運
+ *    : 矢印記号は、プラグインパラメータ<Equip Right Arror>で変更できます。
+ *    :
  *    :
  *    :カンマ(,)で区切って複数のパラメータを入力した場合は、
  *    :行を変えてそれぞれのパラメータを表示します。
@@ -1100,6 +1116,9 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.5.3 - 2017/05/13 : 機能追加
+ *    1. 装備画面で使用可能な、パラメータ表示コードを追加。
+ * 
  * v1.5.2 - 2017/05/12 : 不具合修正、機能追加、不要なパラメータを削除
  *    1. アクターを横に並べたときに描画エリアを拡張すると、隣のアクターの
  *       表示エリアにも拡張される不具合を修正。
@@ -1255,6 +1274,9 @@ FTKR.CSS.cssStatus = {
         overlap:Number(FTKR.CSS.parameters['Enable Overlap'] || 0),
         autoScale:Number(FTKR.CSS.parameters['Enable Auto Scale'] || 0),
         rate:Number(FTKR.CSS.parameters['Overlap Rate'] || 0),
+    },
+    equip:{
+        arrow:String(FTKR.CSS.parameters['Equip Right Arrow'] || ''),
     },
     customs:[
         {name:String(FTKR.CSS.parameters['Custom 0 Display Name'] || ''),
@@ -1642,7 +1664,9 @@ Window_Base.prototype.drawCssActorStatusBases = function(index, actor, x, y, wid
 
 Window_Base.prototype.drawCssActorStatusBase = function(index, actor, x, y, width, status, lss) {
     var css = FTKR.CSS.cssStatus;
-    if (status.match(/(?:param\()(.+)\)/i)) {
+    if (status.match(/(?:eparam\()(.+)\)/i)) {
+        return this.drawCssActorEquipParam(actor, x, y, width, Number(RegExp.$1), lss);
+    } else if (status.match(/(?:param\()(.+)\)/i)) {
         return this.drawCssActorParam(actor, x, y, width, Number(RegExp.$1));
     } else if (status.match(/(?:custom\()(.+)\)/i)) {
         var customId = Number(RegExp.$1);
@@ -2025,6 +2049,23 @@ Window_Base.prototype.drawCssImage = function(actor, dx, dy, width) {
     var sy = bgi.offsetY || 0;
     this.contents.blt(bitmap, sx, sy, sw, sh, dx, dy, dw, dh);
 };
+
+//------------------------------------------------------------------------
+//指定したアイテムを装備した時のパラメータの表示関数
+//------------------------------------------------------------------------
+Window_Base.prototype.drawCssActorEquipParam = function(actor, x, y, width, paramId, lss) {
+    if (paramId < 0 && paramId > 7) return 0;
+    this.drawTextEx(FTKR.CSS.cssStatus.equip.arrow, x, y);
+    var target = lss.target;
+    if(target) {
+        var newValue = target.param(paramId);
+        var diffvalue = newValue - actor.param(paramId);
+        this.changeTextColor(this.paramchangeTextColor(diffvalue));
+        this.drawText(newValue, x, y, width, 'right');
+    }
+    return 1;
+};
+
 
 //=============================================================================
 // Window_MenuStatus
