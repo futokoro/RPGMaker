@@ -3,8 +3,8 @@
 // FTKR_SkillTreeSystem.js
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/02/25
-// 最終更新日 : 2017/05/12
-// バージョン : v1.7.1
+// 最終更新日 : 2017/05/13
+// バージョン : v1.7.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.7.1 ツリー型スキル習得システム
+ * @plugindesc v1.7.2 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -95,6 +95,11 @@ FTKR.STS = FTKR.STS || {};
  * @desc SPコストが0の場合にコストウィンドウで非表示にするか
  * 0 - 表示する, 1 - 非表示にする
  * @default 0
+ * 
+ * @param Display Get Sp
+ * @desc 戦闘終了時のSP入手メッセージ
+ * %1 - 獲得SP量, %2 - スキルポイント名
+ * @default %1 の%2を獲得！
  * 
  * @param --スキル枠の設定(Skill Frame)--
  * 
@@ -1198,6 +1203,9 @@ FTKR.STS = FTKR.STS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.7.2 - 2017/05/13 : 機能追加
+ *    1. 戦闘終了時にSP獲得メッセージを表示する機能を追加。
+ * 
  * v1.7.1 - 2017/05/12 : 機能追加
  *    1. 縦の表示位置を変更する機能に横方向の位置を調整する機能を追加。
  *    2. カギ線の表示タイプを追加。
@@ -1354,11 +1362,12 @@ FTKR.STS.skillLearnedIcon = Number(FTKR.STS.parameters['Skill Learned Icon'] || 
 
 //スキルポイント関係
 FTKR.STS.sp = {
-  dispName:String(FTKR.STS.parameters['SP Display Name'] || 'SP'),
-  defaultReq:String(FTKR.STS.parameters['Default Required SP'] || ''),
-  getLevelUp:String(FTKR.STS.parameters['Get Level Up Sp'] || ''),
-  icon:Number(FTKR.STS.parameters['Cost Sp Icon'] || 0),
-  hideCost0:Number(FTKR.STS.parameters['Hide Sp Cost 0'] || 0),
+    dispName:String(FTKR.STS.parameters['SP Display Name'] || 'SP'),
+    defaultReq:String(FTKR.STS.parameters['Default Required SP'] || ''),
+    getLevelUp:String(FTKR.STS.parameters['Get Level Up Sp'] || ''),
+    icon:Number(FTKR.STS.parameters['Cost Sp Icon'] || 0),
+    hideCost0:Number(FTKR.STS.parameters['Hide Sp Cost 0'] || 0),
+    format:String(FTKR.STS.parameters['Display Get Sp'] || ''),
 };
 
 //スキル枠
@@ -1594,6 +1603,20 @@ BattleManager.gainStsSp = function() {
     $gameParty.allMembers().forEach(function(actor) {
         actor.getSp(sp);
     });
+};
+
+FTKR.STS.BattleManager_displayRewards = BattleManager.displayRewards;
+BattleManager.displayRewards = function() {
+    FTKR.STS.BattleManager_displayRewards.call(this);
+    this.displayStsSp();
+};
+
+BattleManager.displayStsSp = function() {
+    var sp = this._rewards.stsSps;
+    if (sp > 0) {
+        var text = FTKR.STS.sp.format.format(sp, FTKR.STS.sp.dispName);
+        if (text) $gameMessage.add('\\.' + text);
+    }
 };
 
 //=============================================================================
