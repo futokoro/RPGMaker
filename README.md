@@ -1,6 +1,6 @@
 # RPGツクールMV プラグイン
 
-## 目次
+# 目次
 
 1. [ステータス](#ステータス)
 1. [変数_スイッチ](#変数_スイッチ)
@@ -13,23 +13,28 @@
 1. [その他備忘録](#その他備忘録)
 1. [試作品置き場](#試作品置き場)
 
-## ステータス
+# ステータス
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_AddOriginalParameters](FTKR_AddOriginalParameters.js) | [あり](FTKR_AddOriginalParameters.ja.md) | [v1.1.4](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AddOriginalParameters.js) | 2017/04/30 |オリジナルパラメータを追加する |
 | [FTKR_SearchPartyParam](FTKR_SearchPartyParam.js) | [あり](FTKR_SearchPartyParam.ja.md) | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SearchPartyParam.js) | 2017/04/14 | パーティー内のパラメータに関するスクリプトを実装する |
 | [FTKR_ExSvMotion](FTKR_ExSvMotion.js) | [仮版](FTKR_ExSvMotion.ja.md) | [v1.2.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExSvMotion.js) | 2017/05/11 | SVキャラのモーションを拡張する |
+| [FTKR_ExMetaData](ExMetaData.js) | [あり](FTKR_ExMetaData.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExMetaData.js) | 2017/05/05 | 敵グループとイベントのメタデータを拡張する |
+| [FTKR_FacialImageDifference](FTKR_FacialImageDifference.js) | [仮版](FTKR_FacialImageDifference.ja.md) | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_FacialImageDifference.js) | 2017/05/11 | アクターの状態によって顔画像を変える |
+
+## ステータス表示の変更
+
+| プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
+|:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) | [あり](FTKR_CustomSimpleActorStatus.ja.md) | [v1.5.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CustomSimpleActorStatus.js) | 2017/05/12 | メニュー画面のステータス表示を変更する |
 | [FTKR_CSS_BattleStatus](CSS_BattleStatus.js) | [あり](FTKR_CSS_BattleStatus.ja.md) | [v1.1.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_BattleStatus.js) | 2017/05/11 | バトル画面のステータス表示を変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) |
 | [FTKR_CSS_DetailedStatus](CSS_DetailedStatus.js) | [あり](FTKR_CSS_DetailedStatus.ja.md) | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_DetailedStatus.js) | 2017/05/08 | ステータス画面のステータス表示を変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) |
 | [FTKR_CSS_SkillStatus](CSS_SkillStatus.js) | [あり](FTKR_CSS_SkillStatus.ja.md) | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_SkillStatus.js) | 2017/05/08 | スキル画面のステータス表示を変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) |
-| [FTKR_ExMetaData](ExMetaData.js) | [あり](FTKR_ExMetaData.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExMetaData.js) | 2017/05/05 | 敵グループとイベントのメタデータを拡張する |
-| [FTKR_FacialImageDifference](FTKR_FacialImageDifference.js) | [仮版](FTKR_FacialImageDifference.ja.md) | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_FacialImageDifference.js) | 2017/05/11 | アクターの状態によって顔画像を変える |
 
 [目次に戻る](#目次)
 
-## 変数_スイッチ
+# 変数_スイッチ
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
@@ -39,7 +44,7 @@
 
 [目次に戻る](#目次)
 
-## ウィンドウ
+# ウィンドウ
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
@@ -47,7 +52,7 @@
 
 [目次に戻る](#目次)
 
-## メッセージ
+# メッセージ
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
@@ -57,7 +62,7 @@
 
 [目次に戻る](#目次)
 
-## アイテム_スキル仕様拡張
+# アイテム_スキル仕様拡張
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
@@ -72,7 +77,7 @@
 
 [目次に戻る](#目次)
 
-## スキル
+# スキル
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
@@ -80,7 +85,7 @@
 | [FTKR_SkillSubCommand](FTKR_SkillSubCommand.js) | [仮版](FTKR_SkillSubCommand.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillSubCommand.js) | 2017/04/15 | スキル画面にサブコマンドを追加する <br> FTKR_SEP_ShowSkillStatusと組み合わせて使用できません |
 | [FTKR_AutoInvokeSkill](FTKR_AutoInvokeSkill.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AutoInvokeSkill.js) | 2017/05/03 | 特定条件で自動でスキルを発動させる |
 
-### スキル強化システム
+## スキル強化システム
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
@@ -89,7 +94,7 @@
 | [FTKR_SkillUpgradeSystem_Core](FTKR_SkillUpgradeSystem_Core.js) | [ツクマテ](http://tm.lucky-duet.com/viewtopic.php?f=5&t=3076) | [v1.4.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillUpgradeSystem_Core.js) | 2017/03/16 | スキル強化システム <br> ＜以下のプラグインが必要＞ <br>[FTKR_SkillExpansion](FTKR_SkillExpansion.js) |
 | [FTKR_SkillUpgradeSystem_Window](FTKR_SkillUpgradeSystem_Window.js) | 作成中 | [v1.4.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillUpgradeSystem_Window.js) | 2017/03/16 | スキル強化システムの専用画面を実装する <br> ＜以下のプラグインが必要＞ <br>[FTKR_SkillExpansion](FTKR_SkillExpansion.js) <br>[FTKR_SEP_ShowSkillStatus](FTKR_SEP_ShowSkillStatus.js) <br> [FTKR_SkillUpgradeSystem_Core](FTKR_SkillUpgradeSystem_Core.js)|
 
-### スキルツリーシステム
+## スキルツリーシステム
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
@@ -98,7 +103,7 @@
 
 [目次に戻る](#目次)
 
-## アイテム
+# アイテム
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
@@ -106,7 +111,7 @@
 
 [目次に戻る](#目次)
 
-## ステート
+# ステート
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
@@ -115,7 +120,7 @@
 
 [目次に戻る](#目次)
 
-## デバッグ
+# デバッグ
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
@@ -123,11 +128,11 @@
 
 [目次に戻る](#目次)
 
-## その他備忘録
+# その他備忘録
 
 * [コードリスト](Code_List.ja.md)
 
-## 試作品置き場
+# 試作品置き場
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
