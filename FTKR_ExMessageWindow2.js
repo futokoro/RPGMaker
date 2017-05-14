@@ -4,7 +4,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2017/04/24
 // 最終更新日 : 2017/05/14
-// バージョン : v2.0.11
+// バージョン : v2.0.12
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EMW = FTKR.EMW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.0.11 一度に複数のメッセージウィンドウを表示するプラグイン
+ * @plugindesc v2.0.12 一度に複数のメッセージウィンドウを表示するプラグイン
  * @author フトコロ
  * 
  * @param Create ExWindow Number
@@ -450,6 +450,9 @@ FTKR.EMW = FTKR.EMW || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.0.12 - 2017/05/14 : 不具合修正
+ *    1. デフォルトウィンドウが表示終了時にエラーになる不具合修正。
+ * 
  * v2.0.11 - 2017/05/14 : 不具合修正
  *    1. ウィンドウを終了禁止にした後に表示内容を更新できない不具合を修正。
  *    2. ウィンドウの表示位置とサイズの設定が、ウィンドウを閉じても
@@ -693,7 +696,7 @@ Game_Message.prototype.disabledCanMovePlayer = function() {
 //書き換え
 Game_Message.prototype.isBusy = function() {
     return $gameMessageEx.windows().some(function(message){
-            return message.isEmwBusy();
+        return message.isEmwBusy();
     });
 };
 
@@ -748,7 +751,10 @@ Window_Message.prototype.updateWait = function() {
 
 FTKR.EMW.Window_Message_terminateMessage = Window_Message.prototype.terminateMessage;
 Window_Message.prototype.terminateMessage = function() {
-    if ($gameMessage.canClose()) FTKR.EMW.Window_Message_terminateMessage.call(this);
+    if ($gameMessage.canClose()) {
+        this.resetPosition();
+        FTKR.EMW.Window_Message_terminateMessage.call(this);
+    }
 };
 
 Game_Message.prototype.isTerminate = function() {
@@ -832,12 +838,6 @@ Window_Message.prototype.updatePlacement = function() {
         this._positionX = $gameMessage.windowPositionX();
         this.x = this._positionX * (Graphics.boxWidth - this.width) / 2;
     }
-};
-
-FTKR.EMW.Window_Message_terminateMessage = Window_Message.prototype.terminateMessage;
-Window_Message.prototype.terminateMessage = function() {
-    this.resetPosition();
-    FTKR.EMW.Window_Message_terminateMessage.call(this);
 };
 
 Window_Message.prototype.resetPosition = function() {
