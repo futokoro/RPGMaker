@@ -325,7 +325,7 @@ FTKR.EMW = FTKR.EMW || {};
  * 行数 - 高さ y を行数単位で数値指定してください。
  * 
  * 
- * 7. メッセージウィンドウの表示位置設定(X座標)(*1)
+ * 7. メッセージウィンドウの表示位置設定(X座標)
  * 
  * EMW_メッセージウィンドウ位置設定 Id position
  * EMW_MESSAGEWINDOW_SETPOSITION Id position
@@ -349,7 +349,6 @@ FTKR.EMW = FTKR.EMW || {};
  * 
  * 指定したIDのウィンドウ表示中にプレイヤーの行動を許可します。
  *  
- * 
  * (*1) この設定は一度ウィンドウが閉じるとリセットします。
  * 
  * 
@@ -449,6 +448,9 @@ FTKR.EMW = FTKR.EMW || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v2.0.13 - 2017/05/14 : 他プラグインとの競合修正
+ *    1. ウィンドウを閉じる時の設定リセット機能を見直し。
  * 
  * v2.0.12 - 2017/05/14 : 不具合修正
  *    1. デフォルトウィンドウが表示終了時にエラーになる不具合修正。
@@ -641,6 +643,10 @@ Game_Interpreter.prototype.setMessageWindowSize = function(args) {
             } else if (someTextToRegs(arg, ['行数', 'LINES'])) {
                 i++;
                 heightLine = Number(args[i]);
+            } else if (someTextToRegs(arg, ['リセット', 'RESET'])) {
+                width = Graphics.boxWidth;
+                heightLine = 4;
+                continue;
             }
         }
         $gameMessageEx.window(windowId).setWindowSize(width, heightLine);
@@ -752,7 +758,6 @@ Window_Message.prototype.updateWait = function() {
 FTKR.EMW.Window_Message_terminateMessage = Window_Message.prototype.terminateMessage;
 Window_Message.prototype.terminateMessage = function() {
     if ($gameMessage.canClose()) {
-        this.resetPosition();
         FTKR.EMW.Window_Message_terminateMessage.call(this);
     }
 };
@@ -1072,6 +1077,7 @@ Window_MessageEx.prototype.constructor = Window_MessageEx;
 Window_MessageEx.prototype.initialize = function(windowId) {
     this._windowId = windowId;
     this._gameMessage = $gameMessageEx.window(this._windowId);
+    this._positionX = 0;
     Window_Message.prototype.initialize.call(this);
 };
 
@@ -1113,8 +1119,8 @@ Window_MessageEx.prototype.updatePlacement = function() {
     this._positionType = this._gameMessage.positionType();
     this.y = this._positionType * (Graphics.boxHeight - this.height) / 2;
     this._goldWindow.y = this.y > 0 ? 0 : Graphics.boxHeight - this._goldWindow.height;
-    this._positionX = this._gameMessage.windowPositionX();
-    if (this._positionX) this.x = this._positionX * (Graphics.boxWidth - this.width) / 2;
+    var posiX = this._gameMessage.windowPositionX();
+    if (posiX) this.x = posiX * (Graphics.boxWidth - this.width) / 2;
 };
 
 Window_MessageEx.prototype.updateBackground = function() {
@@ -1125,7 +1131,6 @@ Window_MessageEx.prototype.updateBackground = function() {
 Window_MessageEx.prototype.terminateMessage = function() {
     this._gameMessage.lastText();
     if (this._gameMessage.canClose()) {
-        this.resetPosition();
         if (Imported.YEP_MessageCore) this._nameWindow.deactivate();
         this.close();
         this._goldWindow.close();
@@ -1419,8 +1424,8 @@ FTKR.EMW.Scene_Map_terminate = Scene_Map.prototype.terminate;
 Scene_Map.prototype.terminate = function() {
     FTKR.EMW.Scene_Map_terminate.call(this);
     if (SceneManager.isNextScene(Scene_Battle)) {
-        $gameMessageEx.windows().forEach( function(message){
-            message.terminate();
+        $gameMessageEx.windows().forEach( function(message, i){
+            if (i > 0) message.terminate();
         });
     }
 };
@@ -1428,8 +1433,8 @@ Scene_Map.prototype.terminate = function() {
 //場所移動コマンド
 FTKR.EMW.Game_Interpreter_command201 = Game_Interpreter.prototype.command201;
 Game_Interpreter.prototype.command201 = function() {
-    $gameMessageEx.windows().forEach( function(message){
-        message.terminate();
+    $gameMessageEx.windows().forEach( function(message, i){
+        if (i > 0) message.terminate();
     });
     return FTKR.EMW.Game_Interpreter_command201.call(this);
 };
