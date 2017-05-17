@@ -3,8 +3,8 @@
 // FTKR_SkillTreeSystem.js
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/02/25
-// 最終更新日 : 2017/05/13
-// バージョン : v1.7.2
+// 最終更新日 : 2017/05/18
+// バージョン : v1.7.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.7.2 ツリー型スキル習得システム
+ * @plugindesc v1.7.3 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -1203,6 +1203,9 @@ FTKR.STS = FTKR.STS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.7.3 - 2017/05/18 : 不具合修正
+ *    1. 横方向の位置を調整する機能の不具合を修正。
+ * 
  * v1.7.2 - 2017/05/13 : 機能追加
  *    1. 戦闘終了時にSP獲得メッセージを表示する機能を追加。
  * 
@@ -2129,31 +2132,31 @@ Game_Actor.prototype.getSkillTree = function(tree) {
     var count = 0;
     while (count < FTKR.STS.MAX_DEVSKILL_COUNT) {
         dupCount = 0;
-        for (var i = 0; i < FTKR.STS.skillTree.maxCols + dupCount; i++) {
+        var text = '';
+        for (var i = 0; i < FTKR.STS.skillTree.maxCols - dupCount; i++) {
             var id = list[i];
             if (!id) {
                 results.push(null);
             } else {
                 var item = this.stsSkill(id);
                 if (item.sts.position > count + 1) {
-                    list.push(null);
                     results.forEach( function(result, t){
-                        if (result && result.id === id) results.splice(t,1);
+                        if (result && result.id === id) results.splice(t, 1, null);
                     });
+                    results.push(null);
                     nextlist.addExceptForDup([id]);
-                    dupCount++;
                 } else {
                     var diffX = item.sts.diffX;
                     if (diffX) {
                         for (var d = 0; d < diffX; d++) {
                             results.push(null);
-                            i++;
+                            dupCount++;
                        }
                     }
                     FTKR.setGameData(this, null, item);
                     if (this.evalStsFormula(item.sts.show, true)) {
                         var skillIds = this.getDevSkillId(item, tree);
-                        var data = { id:id, next:skillIds, x:i - dupCount, y:count };
+                        var data = { id:id, next:skillIds, x:i + dupCount, y:count };
                         results.forEach( function(result, t){
                             if (result && result.id === data.id) results.splice(t, 1, null);
                         });
