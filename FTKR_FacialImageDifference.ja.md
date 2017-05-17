@@ -106,7 +106,8 @@ FTKR_FacialImageDifference.js
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.0.1](FTKR_FacialImageDifference.js) | 2017/05/11 | フロントビュー戦闘で顔画像が表示しない不具合を修正<br>顔画像にダメージポップアップやアニメーションを表示する機能を追加<br>YEP_BattleEngineCoreに対応 |
+| [ver1.0.2](FTKR_FacialImageDifference.js) | 2017/05/17 | 顔画像の表示レイヤーを、ステータスウィンドウのコンテンツよりも下に変更 |
+| ver1.0.1 | 2017/05/11 | フロントビュー戦闘で顔画像が表示しない不具合を修正<br>顔画像にダメージポップアップやアニメーションを表示する機能を追加<br>YEP_BattleEngineCoreに対応 |
 | ver1.0.0 | 2017/05/10 | 初版公開 |
 
 ## ライセンス

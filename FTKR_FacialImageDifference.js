@@ -3,8 +3,8 @@
 // FTKR_FacialImageDifference.js
 // 作成者     : フトコロ
 // 作成日     : 2017/05/10
-// 最終更新日 : 2017/05/11
-// バージョン : v1.0.1
+// 最終更新日 : 2017/05/17
+// バージョン : v1.0.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.FID = FTKR.FID || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.1 アクターの状態によって顔画像を変えるプラグイン
+ * @plugindesc v1.0.2 アクターの状態によって顔画像を変えるプラグイン
  * @author フトコロ
  *
  * @noteParam FID_画像
@@ -263,6 +263,10 @@ FTKR.FID = FTKR.FID || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.2 - 2017/05/17 : 仕様変更
+ *    1. 顔画像の表示レイヤーを、ステータスウィンドウのコンテンツよりも下に
+ *       変更。
+ * 
  * v1.0.1 - 2017/05/11 : 不具合修正、機能追加
  *    1. フロントビュー戦闘で顔画像が表示しない不具合を修正。
  *    2. 顔画像にダメージポップアップやアニメーションを表示する機能を追加
@@ -378,6 +382,30 @@ Game_Party.prototype.requestMotionRefresh = function() {
 // アクターの顔画像表示処理を修正
 //=============================================================================
 
+//書き換え
+Window.prototype._createAllParts = function() {
+    this._windowSpriteContainer = new PIXI.Container();
+    this._windowBackSprite = new Sprite();
+    this._windowCursorSprite = new Sprite();
+    this._windowFrameSprite = new Sprite();
+    this._windowCssSprite = new Sprite(); //追加
+    this._windowContentsSprite = new Sprite();
+    this._downArrowSprite = new Sprite();
+    this._upArrowSprite = new Sprite();
+    this._windowPauseSignSprite = new Sprite();
+    this._windowBackSprite.bitmap = new Bitmap(1, 1);
+    this._windowBackSprite.alpha = 192 / 255;
+    this.addChild(this._windowSpriteContainer);
+    this._windowSpriteContainer.addChild(this._windowBackSprite);
+    this._windowSpriteContainer.addChild(this._windowFrameSprite);
+    this.addChild(this._windowCursorSprite);
+    this.addChild(this._windowCssSprite); //追加
+    this.addChild(this._windowContentsSprite);
+    this.addChild(this._downArrowSprite);
+    this.addChild(this._upArrowSprite);
+    this.addChild(this._windowPauseSignSprite);
+};
+
 FTKR.FID.Window_Base_initialize = Window_Base.prototype.initialize;
 Window_Base.prototype.initialize = function(x, y, width, height) {
     FTKR.FID.Window_Base_initialize.call(this, x, y, width, height);
@@ -400,21 +428,25 @@ Window_Base.prototype.drawCssFace = function(actor, dx, dy, width, height) {
     var index = actor.index() % this.showActorNum();
     var sprite = this._faceSprite[index];
     var fh = Window_Base._faceHeight;
+    var scale = Imported.FTKR_CSS ? (Math.min(width, height) || fh) / fh : 1;
     if (!sprite) {
         sprite = new Sprite_ActorFace(actor);
-        this.addChild(sprite);
+        this._windowCssSprite.addChild(sprite);
         this._faceSprite[index] = sprite;
     } else if (sprite._actor !== actor){
         sprite.setBattler(actor);
     }
-    var sx = Math.floor(dx + width / 2 + this.padding);
+    dx = dx + fh * scale / 2 + this.padding;
+    if (Imported.FTKR_CSS) {
+        var len = Math.min(width, height);
+        var dw = len || Window_Base._faceWidth * scale;
+        dx += FTKR.CSS.cssStatus.face.posiX * (width - dw) / 2;
+    }
+    var sx = Math.floor(dx);
     var sy = Math.floor(dy + height + this.padding);
     sprite.setHome(sx, sy);
     sprite.startMove(0,0,0);
-    if (Imported.FTKR_CSS) {
-        var scale = (Math.min(width, height) || fh) / fh;
-        sprite.setScale(scale);
-    }
+    sprite.setScale(scale);
 };
 
 FTKR.FID.Window_Base_clearCssSprite = Window_Base.prototype.clearCssSprite;
