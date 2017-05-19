@@ -9,6 +9,7 @@
 1. [アイテム_スキル仕様拡張](#アイテム_スキル仕様拡張)
 1. [スキル](#スキル)
 1. [アイテム](#アイテム)
+1. [敵グループ](#敵グループ)
 1. [デバッグ](#デバッグ)
 1. [その他備忘録](#その他備忘録)
 1. [試作品置き場](#試作品置き場)
@@ -20,7 +21,6 @@
 | [FTKR_AddOriginalParameters](FTKR_AddOriginalParameters.js) | [あり](FTKR_AddOriginalParameters.ja.md) | [v1.1.4](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AddOriginalParameters.js) | 2017/04/30 |オリジナルパラメータを追加する |
 | [FTKR_SearchPartyParam](FTKR_SearchPartyParam.js) | [あり](FTKR_SearchPartyParam.ja.md) | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SearchPartyParam.js) | 2017/04/14 | パーティー内のパラメータに関するスクリプトを実装する |
 | [FTKR_ExSvMotion](FTKR_ExSvMotion.js) | [仮版](FTKR_ExSvMotion.ja.md) | [v1.2.3](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExSvMotion.js) | 2017/05/19 | SVキャラのモーションを拡張する |
-| [FTKR_ExMetaData](ExMetaData.js) | [あり](FTKR_ExMetaData.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExMetaData.js) | 2017/05/05 | 敵グループとイベントのメタデータを拡張する |
 | [FTKR_FacialImageDifference](FTKR_FacialImageDifference.js) | [仮版](FTKR_FacialImageDifference.ja.md) | [v1.0.3](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_FacialImageDifference.js) | 2017/05/18 | アクターの状態によって顔画像を変える |
 
 ## ステータス表示の変更
@@ -118,6 +118,15 @@
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_TransformationState](FTKR_TransformationState.js) | なし | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_TransformationState.js) | 2017/05/03 | ステートが掛かっている間SV画像を変更する |
 | [FTKR_AutoStateConditions](FTKR_AutoStateConditions.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AutoStateConditions.js) | 2017/05/02 | ステートに自動付与条件および自動解除条件を設定する |
+
+[目次に戻る](#目次)
+
+# 敵グループ
+
+| プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
+|:-----------|:-----------:|:-------------|:-------------|:-------------|
+| [FTKR_ExMetaData](FTKR_ExMetaData.js) | [あり](FTKR_ExMetaData.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExMetaData.js) | 2017/05/05 | 敵グループとイベントのメタデータを拡張する |
+| [FTKR_SetupTroops](FTKR_SetupTroops.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SetupTroops.js) | 2017/05/19 | ゲーム内で敵グループの編成を設定する |
 
 [目次に戻る](#目次)
 
