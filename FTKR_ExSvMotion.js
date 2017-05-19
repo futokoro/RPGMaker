@@ -3,8 +3,8 @@
 // FTKR_ExSvMotion.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/19
-// 最終更新日 : 2017/05/11
-// バージョン : v1.2.2
+// 最終更新日 : 2017/05/19
+// バージョン : v1.2.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ESM = FTKR.ESM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.2 SVキャラのモーションを拡張するプラグイン
+ * @plugindesc v1.2.3 SVキャラのモーションを拡張するプラグイン
  * @author フトコロ
  *
  * @noteParam ESM_画像
@@ -584,6 +584,9 @@ FTKR.ESM = FTKR.ESM || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.2.3 - 2017/05/19 : 不具合修正
+ *    1. 防御モーションの優先度が反映されない不具合を修正。
+ * 
  * v1.2.2 - 2017/05/11 : 不要な記述を削除
  *    1. 余計なログを出力する箇所を削除。
  * 
@@ -826,7 +829,8 @@ Game_Actor.prototype.performAction = function(action) {
     if (action.isAttack()) {
         this.performAttack();
     } else if (action.isGuard()) {
-        this.requestMotion('guard');
+        this.requestMotion('refresh');
+//        this.requestMotion('guard');
     } else if (action.isMagicSkill()) {
         var motion = this.esmMotion(action.item(), 'spell');
         this.requestMotion(motion);
@@ -869,7 +873,7 @@ Game_BattlerBase.prototype.getEsmMotion = function() {
 
 Game_BattlerBase.prototype.checkConditionAll = function() {
     for(var i = Game_BattlerBase.ESM_MOTION_NUMBER; i > 0; i--) {
-        if(this.checkCondition(FTKR.ESM.motion.state[i].condition)) {
+        if (this.checkCondition(FTKR.ESM.motion.state[i].condition)) {
             return i;
         }
     }
@@ -887,7 +891,7 @@ Game_BattlerBase.prototype.checkCondition = function(condition) {
         case /input/i.test(condition):
             return this.isInputting() || this.isActing();
         case /guard/i.test(condition):
-            return this.isGuard() || this.isGuardWaiting();
+            return this.isGuardMotion();
         case /chant/i.test(condition):
             return this.isChanting();
         case /victory/i.test(condition):
@@ -899,6 +903,11 @@ Game_BattlerBase.prototype.checkCondition = function(condition) {
         default:
             return false;
     };
+};
+
+Game_BattlerBase.prototype.isGuardMotion = function() {
+    return this.isGuard() || this.isGuardWaiting() ||
+        (BattleManager._action && BattleManager._action.isGuard());
 };
 
 Game_BattlerBase.prototype.evalEsmCondition = function(number) {
@@ -1173,11 +1182,7 @@ Sprite_Actor.prototype.updateMotionCount = function() {
 //書き換え
 Sprite_Actor.prototype.refreshMotion = function() {
     var actor = this._actor;
-    var motionGuard = Sprite_Actor.MOTIONS['guard'];
     if (actor) {
-        if (this.motion() === motionGuard && !BattleManager.isInputting()) {
-            return;
-        }
         this.esmRefreshMotion(actor);
     }
 };
