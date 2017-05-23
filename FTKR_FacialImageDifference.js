@@ -3,8 +3,8 @@
 // FTKR_FacialImageDifference.js
 // 作成者     : フトコロ
 // 作成日     : 2017/05/10
-// 最終更新日 : 2017/05/18
-// バージョン : v1.0.3
+// 最終更新日 : 2017/05/23
+// バージョン : v1.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.FID = FTKR.FID || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.3 アクターの状態によって顔画像を変えるプラグイン
+ * @plugindesc v1.1.0 アクターの状態によって顔画像を変えるプラグイン
  * @author フトコロ
  *
  * @noteParam FID_画像
@@ -27,6 +27,10 @@ FTKR.FID = FTKR.FID || {};
  * @param Enable Animation
  * @desc バトル画面で顔画像にダメージポップアップやアニメーションを表示させるか (0 - 無効, 1 - 有効)
  * @default 0
+ * 
+ * @param Enable Face Difference
+ * @desc 顔画像の変更機能を有効にするか (0 - 無効, 1 - 有効)
+ * @default 1
  * 
  * @param --画像番号変更--
  * @desc 
@@ -146,8 +150,10 @@ FTKR.FID = FTKR.FID || {};
  *-----------------------------------------------------------------------------
  * 概要
  *-----------------------------------------------------------------------------
- * 本プラグインを実装することで、アクターのさまざまな状態において
- * 表示する顔画像を変更します。
+ * 本プラグインを実装することで、アクターの顔画像に以下の機能を追加します。
+ * 
+ * １．アクターのさまざまな状態において表示する顔画像を変更します。
+ * ２．アクターの顔画像にアニメーションやダメージポップアップを表示します。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -263,6 +269,11 @@ FTKR.FID = FTKR.FID || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.0 - 2017/05/23 : 仕様変更
+ *    1. パーティーが全体魔法を受けた時のアニメーション表示位置を調整。
+ *    2. パーティーが全体魔法を受けた時のダメージポップアップタイミングを調整。
+ *    3. 顔画像の変更機能の有効無効設定を追加。
+ * 
  * v1.0.3 - 2017/05/18 : 不具合修正
  *    1. 防御時の顔画像設定用プラグインパラメータの誤記修正。
  * 
@@ -273,7 +284,7 @@ FTKR.FID = FTKR.FID || {};
  * v1.0.1 - 2017/05/11 : 不具合修正、機能追加
  *    1. フロントビュー戦闘で顔画像が表示しない不具合を修正。
  *    2. 顔画像にダメージポップアップやアニメーションを表示する機能を追加
- *    3. YEP_BattleEngineCoreに対応。
+ *    3. YEP_BattleEngineCoreに対応(顔画像変更機能のみ)。
  * 
  * v1.0.0 - 2017/05/10 : 初版作成
  * 
@@ -287,6 +298,7 @@ FTKR.FID = FTKR.FID || {};
 FTKR.FID.parameters = PluginManager.parameters('FTKR_FacialImageDifference');
 
 FTKR.FID.enableAnimation = Number(FTKR.FID.parameters['Enable Animation'] || 0);
+FTKR.FID.enableFaceDifference = Number(FTKR.FID.parameters['Enable Face Difference'] || 0);
 
 //オリジナルステータス設定オブジェクト
 FTKR.FID.faces = {
@@ -392,6 +404,7 @@ Window.prototype._createAllParts = function() {
     this._windowCursorSprite = new Sprite();
     this._windowFrameSprite = new Sprite();
     this._windowCssSprite = new Sprite(); //追加
+    this._windowCssSprite.setFrame(0, 0, Graphics.width, Graphics.height);
     this._windowContentsSprite = new Sprite();
     this._downArrowSprite = new Sprite();
     this._upArrowSprite = new Sprite();
@@ -433,7 +446,7 @@ Window_Base.prototype.drawCssFace = function(actor, dx, dy, width, height) {
     var fh = Window_Base._faceHeight;
     var scale = Imported.FTKR_CSS ? (Math.min(width, height) || fh) / fh : 1;
     if (!sprite) {
-        sprite = new Sprite_ActorFace(actor);
+        sprite = new Sprite_ActorFace(actor, this);
         this._windowCssSprite.addChild(sprite);
         this._faceSprite[index] = sprite;
     } else if (sprite._actor !== actor){
@@ -470,8 +483,9 @@ function Sprite_ActorFace() {
 Sprite_ActorFace.prototype = Object.create(Sprite_Actor.prototype);
 Sprite_ActorFace.prototype.constructor = Sprite_ActorFace;
 
-Sprite_ActorFace.prototype.initialize = function(battler) {
+Sprite_ActorFace.prototype.initialize = function(battler, window) {
     Sprite_Battler.prototype.initialize.call(this, battler);
+    this._spriteWindow = window;
 };
 
 Sprite_ActorFace._imageWidth  = 144;
@@ -498,7 +512,7 @@ Sprite_ActorFace.prototype.setBattler = function(battler) {
 
 Sprite_ActorFace.prototype.update = function() {
     Sprite_Base.prototype.update.call(this);
-    if (this._battler) {
+    if (this._actor) {
         this.updateMain();
         if (FTKR.FID.enableAnimation) {
             this.updateAnimation();
@@ -519,8 +533,8 @@ Sprite_ActorFace.prototype.update = function() {
 Sprite_ActorFace.prototype.updateMain = function() {
       this.updateBitmap();
       this.updateFrame();
-//    this.updateMove();
-//    this.updatePosition();
+//      this.updateMove();
+//      this.updatePosition();
 };
 
 Sprite_ActorFace.prototype.setupMotion = function() {
@@ -547,11 +561,17 @@ Sprite_ActorFace.prototype.updateFrame = function() {
     Sprite_Battler.prototype.updateFrame.call(this);
     var bitmap = this._mainSprite.bitmap;
     if (bitmap) {
-        var motionIndex = this.faceTypeIndex();
         var cw = Sprite_ActorFace._imageWidth;
         var ch = Sprite_ActorFace._imageHeight;
-        var cx = motionIndex % 6;
-        var cy = Math.floor(motionIndex / 6);
+        if (FTKR.FID.enableFaceDifference) {
+            var motionIndex = this.faceTypeIndex();
+            var cx = motionIndex % 6;
+            var cy = Math.floor(motionIndex / 6);
+        } else {
+            var motionIndex = this._actor.faceIndex();
+            var cx = motionIndex % 4;
+            var cy = Math.floor(motionIndex / 4);
+        }
         this._mainSprite.setFrame(cx * cw, cy * ch, cw, ch);
     }
 };
@@ -597,14 +617,14 @@ Sprite_ActorFace.prototype.setScale = function(scale) {
 //------------------------------------------------------------------------
 Sprite_ActorFace.prototype.updateVisibility = function() {
     Sprite_Base.prototype.updateVisibility.call(this);
-    if (!this._battler) {
+    if (!this._actor) {
         this.visible = false;
     }
 };
 
 Sprite_ActorFace.prototype.setupAnimation = function() {
-    while (this._battler.isAnimationRequested()) {
-        var data = this._battler.shiftAnimation();
+    while (this._actor.isAnimationRequested()) {
+        var data = this._actor.shiftAnimation();
         var animation = $dataAnimations[data.animationId];
         var mirror = data.mirror;
         var delay = animation.position === 3 ? 0 : data.delay;
@@ -612,17 +632,76 @@ Sprite_ActorFace.prototype.setupAnimation = function() {
     }
 };
 
+Sprite_ActorFace.prototype.startAnimation = function(animation, mirror, delay) {
+    var sprite = new Sprite_FaceAnimation(this._spriteWindow);
+    sprite.setup(this._effectTarget, animation, mirror, delay);
+    this.parent.addChild(sprite);
+    this._animationSprites.push(sprite);
+};
+
 Sprite_ActorFace.prototype.setupDamagePopup = function() {
-    if (this._battler.isDamagePopupRequested()) {
+    if (this._actor.isDamagePopupRequested()) {
         var sprite = new Sprite_Damage();
         sprite.x = this.x + this.damageOffsetX();
         sprite.y = this.y + this.damageOffsetY();
-        sprite.setup(this._battler);
+        sprite.setup(this._actor);
         this._damages.push(sprite);
         this.parent.addChild(sprite);
-        this._battler.clearDamagePopup();
-        this._battler.clearResult();
+        this._actor.clearDamagePopup();
+        this._actor.clearResult();
     }
 };
 
+//=============================================================================
+// Sprite_FaceAnimation
+// アクターの顔画像用アニメーション表示スプライト
+//=============================================================================
 
+function Sprite_FaceAnimation() {
+    this.initialize.apply(this, arguments);
+}
+
+Sprite_FaceAnimation.prototype = Object.create(Sprite_Animation.prototype);
+Sprite_FaceAnimation.prototype.constructor = Sprite_FaceAnimation;
+
+Sprite_FaceAnimation._checker1 = {};
+Sprite_FaceAnimation._checker2 = {};
+
+Sprite_FaceAnimation.prototype.initialize = function(window) {
+    Sprite_Animation.prototype.initialize.call(this);
+    this._spriteWindow = window;
+};
+
+Sprite_FaceAnimation.prototype.updatePosition = function() {
+    Sprite_Animation.prototype.updatePosition.call(this);
+    if (this._animation.position === 3) {
+        this.x -= this._spriteWindow.x;
+        this.y -= this._spriteWindow.y;
+        console.log(this.x, this.y);
+    }
+};
+
+//=============================================================================
+// Window_BattleStatus
+// バトル画面のステータス表示用ウィンドウクラス
+//=============================================================================
+
+Window_BattleStatus.prototype.isBusy = function() {
+    return this.isFaceSpriteBusy();
+};
+
+Window_BattleStatus.prototype.isFaceSpriteBusy = function() {
+    return this._faceSprite.some( function(sprite) {
+        return sprite.isAnimationPlaying();
+    });
+};
+
+//=============================================================================
+// BattleManager
+// バトルマネージャー
+//=============================================================================
+
+FTKR.FID.BattleManager_isBusy = BattleManager.isBusy;
+BattleManager.isBusy = function() {
+    return (FTKR.FID.BattleManager_isBusy.call(this) || this._statusWindow.isBusy());
+};
