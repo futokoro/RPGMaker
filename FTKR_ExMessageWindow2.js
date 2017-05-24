@@ -3,8 +3,8 @@
 // FTKR_ExMessageWindow2.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/24
-// 最終更新日 : 2017/05/14
-// バージョン : v2.0.13
+// 最終更新日 : 2017/05/24
+// バージョン : v2.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,18 +15,31 @@ FTKR.EMW = FTKR.EMW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.0.13 一度に複数のメッセージウィンドウを表示するプラグイン
+ * @plugindesc v2.1.0 一度に複数のメッセージウィンドウを表示するプラグイン
  * @author フトコロ
+ * 
+ * @param --初期設定--
+ * @desc 
  * 
  * @param Create ExWindow Number
  * @desc 拡張ウィンドウを生成する数を設定します。
- * 0 - マップ上のイベントの数だけ生成します
  * @default 1
- *
+ * 
+ * @param --シーン開始時--
+ * @desc 
+ * 
  * @param Scene Start Terminate
- * @desc シーン開始時にウィンドウIDを強制終了する。
- * 1 - 有効にする、0 - 無効にする。
+ * @desc シーン開始時にすべてのウィンドウIDを強制終了する。
+ * 1 - 有効にする、0 - 無効にする
  * @default 1
+ * 
+ * @param --イベント終了時--
+ * @desc 
+ * 
+ * @param Reset Window Id
+ * @desc イベント終了時にウィンドウIDをリセットする。
+ * 1 - 有効にする、0 - 無効にする
+ * @default 0
  * 
  * @help 
  *-----------------------------------------------------------------------------
@@ -38,6 +51,7 @@ FTKR.EMW = FTKR.EMW || {};
  * 1. 複数のメッセージウィンドウを画面に表示できます。
  * 
  * 2. メッセージ表示中にプレイヤーの行動を許可できます。
+ *    (イベント実行のトリガーが「自動実行」または「並列処理」の場合のみ)
  * 
  * 3. 表示中のメッセージウィンドウを強制終了させることができます。
  * 
@@ -83,9 +97,13 @@ FTKR.EMW = FTKR.EMW || {};
  * 設定値が 2 なら、ID0 ~ ID2 まで使用できます。
  * 
  * 
- * ＜ウィンドウIDの注意点＞
- * 本プラグインは、ウィンドウIDの数だけウィンドウデータを生成します。
- * ウィンドウIDの数が多すぎる場合、その分処理が重くなる可能性があります。
+ * ！！注意！！
+ * ウィンドウデータは、シーン開始時に生成します。
+ * ウィンドウIDの生成数が多すぎる場合(*1)、シーン変更に数秒掛かるように
+ * なる可能性があります。
+ * 
+ * (*1)PCのスペックや、マップの広さ、マップ上のイベント数などによって
+ *    変わります。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -156,13 +174,42 @@ FTKR.EMW = FTKR.EMW || {};
  * 
  * 
  *-----------------------------------------------------------------------------
- * 行動許可の設定方法(制御文字)
+ * 行動許可の設定方法
  *-----------------------------------------------------------------------------
- * 以下の制御文字を文章中に入力することで、メッセージ表示中の
+ * １．プラグインコマンドで設定
+ * 以下のプラグインコマンドで指定したウィンドウIDを表示中のに
+ * プレイヤーの行動を許可できます。
+ * 
+ * EMW_メッセージウィンドウ行動許可 ウィンドウID
+ * EMW_MESSAGEWINDOW_CANMOVE windowID
+ * 
+ * または
+ * 
+ * EMW_メッセージウィンドウ指定 ウィンドウID 行動許可
+ * EMW_MESSAGEWINDOW_SET windowID CANMOVE
+ * 
+ * 
+ * ２．制御文字で設定
+ * 以下の制御文字を文章中に入力することで、メッセージ表示中に
  * プレイヤーの行動可否を設定できます。
  * 
  * \EMP - 行動を許可
  * \DMP - 行動を禁止
+ * 
+ * 
+ * ！！注意１！！
+ * 行動許可の設定は、イベントのトリガーが「自動実行」または「並列処理」の場合に
+ * 有効になります。
+ * 「決定ボタン」や「○○から接触」によって実行するイベントの場合、行動許可は
+ * 無効になります。
+ * 
+ * 
+ * ！！注意２！！
+ * 行動許可の設定はすべてのシーンで共通です。
+ * そのため、行動許可設定にした場合、場所移動等を行っても対象のウィンドウIDは
+ * 行動許可設定のままです。
+ * 行動禁止設定にしたい場合は、かならず行動禁止コマンドや制御文字を
+ * 実行してください。(強制終了コマンドでは行動禁止設定にはなりません)
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -246,6 +293,17 @@ FTKR.EMW = FTKR.EMW || {};
  * 再度ウィンドウが開きます。
  * 
  * 
+ * ！！注意！！
+ * 別の並列処理イベントで文章を繰り返し表示している場合、シーン変更の
+ * タイミングによっては強制終了とシーン変更処理の間に文章表示コマンドを
+ * 実行してしまう場合があります。
+ * この場合、シーン変更後にその文書を表示してしまいます。
+ * 
+ * これを回避するためには、以下のような方法があります。
+ * １. プラグインパラメータの<Scene Start Terminate>の設定を有効にする。
+ * ２. シーン変更の直前に、並列処理イベントの動作を止めるようにイベントを組む。
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * プラグインコマンド
  *-----------------------------------------------------------------------------
@@ -257,6 +315,7 @@ FTKR.EMW = FTKR.EMW || {};
  * EMW_MESSAGEWINDOW_CLOSE Id
  * 
  * 表示されているメッセージウィンドウを強制的に閉じます。
+ * このとき終了禁止設定を解除します。
  *  すべて - 表示しているすべてのウィンドウIDを強制的に閉じます。
  *  Id　　 - 指定したウィンドウのIDを強制的に閉じます。
  *    　　   指定しない場合は、ウィンドウID0 を閉じます。
@@ -264,16 +323,16 @@ FTKR.EMW = FTKR.EMW || {};
  * 
  * 2. 文章を表示するウィンドウを指定
  * 
- * EMW_メッセージウィンドウ指定 Id (終了禁止/終了許可) (行動許可) (幅 x) (行数 y) (左/中/右)
- * EMW_MESSAGEWINDOW_SET Id (NOEND/CANCLOSE) (CANMOVE) (WIDTH x) (LINES y) (LEFT/CENTER/RIGTH)
+ * EMW_メッセージウィンドウ指定 Id (終了禁止/終了許可) (行動許可/行動禁止) (幅 x) (行数 y) (左/中/右)
+ * EMW_MESSAGEWINDOW_SET Id (NOEND/CANCLOSE) (CANMOVE/NOTMOVE) (WIDTH x) (LINES y) (LEFT/CENTER/RIGTH)
  * 
  * このコマンド以降に文章を表示する場合に使用する拡張ウィンドウの
  * メッセージウィンドウIDを指定します。
  * 
- * '終了禁止' または '終了許可' をつけると
- * IDの指定と合わせて、ウィンドウの開閉設定ができます。
+ * '終了禁止' または '終了許可' をつけると、IDの指定と合わせて、
+ * ウィンドウの開閉設定ができます。
  * 
- * '行動許可'をつけると、IDの指定と合わせて、
+ * '行動許可' または '行動禁止' をつけると、IDの指定と合わせて、
  * ウィンドウの行動許可設定ができます。
  * 
  * '幅 x'をつけると、IDの指定と合わせて、
@@ -324,6 +383,8 @@ FTKR.EMW = FTKR.EMW || {};
  * 幅 - 横幅 x をpixel単位で数値指定してください。
  * 行数 - 高さ y を行数単位で数値指定してください。
  * 
+ * (*1) この設定は一度ウィンドウが閉じるとリセットします。
+ * 
  * 
  * 7. メッセージウィンドウの表示位置設定(X座標)
  * 
@@ -342,14 +403,20 @@ FTKR.EMW = FTKR.EMW || {};
  * EMW_MESSAGEWINDOW_SETPOSITION 1 right
  * 
  * 
- * 8. メッセージウィンドウ表示中の行動許可(*1)
+ * 8. メッセージウィンドウ表示中の行動許可
  * 
  * EMW_メッセージウィンドウ行動許可 Id
  * EMW_MESSAGEWINDOW_CANMOVE Id
  * 
  * 指定したIDのウィンドウ表示中にプレイヤーの行動を許可します。
- *  
- * (*1) この設定は一度ウィンドウが閉じるとリセットします。
+ * 
+ * 
+ * 9. メッセージウィンドウ表示中の行動禁止
+ * 
+ * EMW_メッセージウィンドウ行動禁止 Id
+ * EMW_MESSAGEWINDOW_NOTMOVE Id
+ * 
+ * 指定したIDのウィンドウ表示中のプレイヤーの行動を禁止します。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -363,7 +430,6 @@ FTKR.EMW = FTKR.EMW || {};
  * MVデフォルトのメッセージウィンドウ($gameMessage)と同じです。
  * 
  * 以下に、スクリプトの一例を示します。
- * なお、これらの設定は一度文章を閉じるとリセットされます。
  * 
  * 1. 文章の表示
  * $gameMessageEx.window(ウィンドウID).disp('文章')
@@ -398,6 +464,7 @@ FTKR.EMW = FTKR.EMW || {};
  * 5. 表示内容の初期化
  * $gameMessageEx.window(ウィンドウID).clear()
  *    :表示する文章や顔画像等の設定内容を初期化します。
+ *    :なお、終了禁止設定と行動許可設定は解除しません。
  * 
  * 
  * 6. ウィンドウの終了禁止
@@ -432,7 +499,12 @@ FTKR.EMW = FTKR.EMW || {};
  * 
  * 11. ウィンドウ表示時の行動許可
  * $gameMessageEx.window(ウィンドウID).enabledCanMovePlayer()
- *    :指定したウィンドウIDの表示中にプレイヤーの行動を許可します。
+ *    :指定したウィンドウIDの表示中のプレイヤーの行動を許可します。
+ * 
+ * 
+ * 12. ウィンドウ表示時の行動禁止
+ * $gameMessageEx.window(ウィンドウID).disabledCanMovePlayer()
+ *    :指定したウィンドウIDの表示中のプレイヤーの行動を禁止します。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -448,6 +520,12 @@ FTKR.EMW = FTKR.EMW || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v2.1.0 - 2017/05/24 : 仕様見直し、機能追加、ヘルプ修正
+ *    1. ウィンドウが閉じても行動許可を解除しないように変更。
+ *    2. 行動許可中の文章の表示コマンドの実行判定を見直し。
+ *    3. イベント終了時にウィンドウIDをリセットする機能を追加。
+ *    4. プラグインコマンドにウィンドウIDの行動禁止コマンドを追加。
  * 
  * v2.0.13 - 2017/05/14 : 他プラグインとの競合修正
  *    1. ウィンドウを閉じる時の設定リセット機能を見直し。
@@ -500,10 +578,15 @@ FTKR.EMW = FTKR.EMW || {};
 // プラグイン パラメータ
 //=============================================================================
 FTKR.EMW.parameters = PluginManager.parameters('FTKR_ExMessageWindow2');
-
-FTKR.EMW.exwindowNum = Number(FTKR.EMW.parameters['Create ExWindow Number'] || '');
-FTKR.EMW.sceneStartTerminate = Number(FTKR.EMW.parameters['Scene Start Terminate'] || '');
 FTKR.EMW.nameWindows = [];
+
+FTKR.EMW.exwindowNum = Number(FTKR.EMW.parameters['Create ExWindow Number'] || 0);
+FTKR.EMW.scene = {
+    startTerminate:Number(FTKR.EMW.parameters['Scene Start Terminate'] || 0),
+};
+FTKR.EMW.event = {
+    resetWindowId:Number(FTKR.EMW.parameters['Reset Window Id'] || 0),
+};
 
 //objのメモ欄から <metacode: x> の値を読み取って配列で返す
 var readObjectMeta = function(obj, metacodes) {
@@ -534,12 +617,6 @@ var convertPositionX = function(text) {
     }
 };
 
-var someTextToRegs = function(test, regs) {
-    return regs.some( function(reg){
-        return test && (test === reg || test.toUpperCase() === reg);
-    });
-};
-
 var matchTextToRegs = function(test, regs) {
     return regs.some( function(reg){
         return test.match(reg);
@@ -556,35 +633,49 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
     if (!command.match(/EMW_(.+)/i)) return;
     command = RegExp.$1;
     if(!matchTextToRegs(command, [/メッセージウィンドウ(.+)/, /MessageWindow_(.+)/i])) return;
-    command = RegExp.$1;
-    switch (true) {
-    case someTextToRegs(command, ['指定', 'SET']):
+    command = (RegExp.$1 + '').toUpperCase();
+    switch (command) {
+    case '指定':
+    case 'SET':
         this.setMessageWindowId(args);
         break;
-    case someTextToRegs(command, ['リセット', 'RESET']):
+    case 'リセット':
+    case 'RESET':
         this._windowId = 0;
         break;
-    case someTextToRegs(command, ['強制クローズ', '強制終了', 'CLOSE']):
+    case '強制クローズ':
+    case '強制終了':
+    case 'CLOSE':
         this.messageWindowTerminate(args);
         break;
-    case someTextToRegs(command, ['終了禁止', 'NOEND']):
+    case '終了禁止':
+    case 'NOEND':
         var windowId = Number(args[0] || 0);
         if (windowId >= 0) $gameMessageEx.window(windowId).prohibitClose();
         break;
-    case someTextToRegs(command, ['終了許可', 'CANCLOSE']):
+    case '終了許可':
+    case 'CANCLOSE':
         var windowId = Number(args[0] || 0);
         if (windowId >= 0) $gameMessageEx.window(windowId).permitClose();
         break;
-    case someTextToRegs(command, ['サイズ設定', 'SETSIZE']):
+    case 'サイズ設定':
+    case 'SETSIZE':
         this.setMessageWindowSize(args);
         break;
-    case someTextToRegs(command, ['位置設定', 'SETPOSITION']):
+    case '位置設定':
+    case 'SETPOSITION':
         var windowId = Number(args[0] || 0);
         if (windowId >= 0) $gameMessageEx.window(windowId).setPositionX(args[1]);
         break;
-    case someTextToRegs(command, ['行動許可', 'CANMOVE']):
+    case '行動許可':
+    case 'CANMOVE':
         var windowId = Number(args[0] || 0);
         if (windowId >= 0) $gameMessageEx.window(windowId).enabledCanMovePlayer(args[1]);
+        break;
+    case '行動禁止':
+    case 'NOTMOVE':
+        var windowId = Number(args[0] || 0);
+        if (windowId >= 0) $gameMessageEx.window(windowId).disabledCanMovePlayer(args[1]);
         break;
     }
 };
@@ -595,21 +686,39 @@ Game_Interpreter.prototype.setMessageWindowId = function(args) {
         this._windowId = windowId;
         var width = 0, heightLine = 0;
         for (var i = 1; i < args.length; i++) {
-            var arg = args[i];
-            if (someTextToRegs(arg, ['終了禁止', 'NOEND'])) {
+            var arg = (args[i] + '').toUpperCase();
+            switch (arg) {
+            case '終了禁止':
+            case 'NOEND':
                 $gameMessageEx.window(windowId).prohibitClose();
-            } else if (someTextToRegs(arg, ['終了許可', 'CANCLOSE'])) {
+                break;
+            case '終了許可':
+            case 'CANCLOSE':
                 $gameMessageEx.window(windowId).permitClose();
-            } else if (someTextToRegs(arg, ['行動許可', 'CANMOVE'])) {
+                break;
+            case '行動許可':
+            case 'CANMOVE':
                 $gameMessageEx.window(windowId).enabledCanMovePlayer();
-            } else if (someTextToRegs(arg, ['幅', 'WIDTH'])) {
+                break;
+            case '行動禁止':
+            case 'NOTMOVE':
+                $gameMessageEx.window(windowId).disabledCanMovePlayer();
+                break;
+            case '幅':
+            case 'WIDTH':
                 i++;
                 width = Number(args[i]);
-            } else if (someTextToRegs(arg, ['行数', 'LINES'])) {
+                break;
+            case '行数':
+            case 'LINES':
                 i++;
                 heightLine = Number(args[i]);
-            } else if (convertPositionX(arg) !== undefined) {
-                $gameMessageEx.window(windowId).setPositionX(arg);
+                break;
+            default:
+                if (convertPositionX(arg) !== undefined) {
+                    $gameMessageEx.window(windowId).setPositionX(arg);
+                }
+                break;
             }
         }
         if (width || heightLine) {
@@ -619,15 +728,20 @@ Game_Interpreter.prototype.setMessageWindowId = function(args) {
 };
 
 Game_Interpreter.prototype.messageWindowTerminate = function(args) {
-    if (someTextToRegs(args[0], ['すべて', 'ALL'])) {
+    var arg = (args[0] + '').toUpperCase();
+    switch (arg) {
+    case 'すべて':
+    case 'ALL':
         $gameMessageEx.windows().forEach( function(message){
             message.terminate();
         });
-    } else {
+        break;
+    default:
         var windowId = Number(args[0] || 0);
         if (windowId >= 0) {
             $gameMessageEx.window(windowId).terminate();
         }
+        break;
     }
 };
 
@@ -636,14 +750,20 @@ Game_Interpreter.prototype.setMessageWindowSize = function(args) {
     if (windowId >= 0) {
         var width = 0, heightLine = 0;
         for (var i = 1; i < args.length; i++) {
-            var arg = args[i];
-            if (someTextToRegs(arg, ['幅', 'WIDTH'])) {
+            var arg = (args[i] + '').toUpperCase();
+            switch (arg) {
+            case '幅':
+            case 'WIDTH':
                 i++;
                 width = Number(args[i]);
-            } else if (someTextToRegs(arg, ['行数', 'LINES'])) {
+                break;
+            case '行数':
+            case 'LINES':
                 i++;
                 heightLine = Number(args[i]);
-            } else if (someTextToRegs(arg, ['リセット', 'RESET'])) {
+                break;
+            case 'リセット':
+            case 'RESET':
                 width = Graphics.boxWidth;
                 heightLine = 4;
                 continue;
@@ -657,10 +777,16 @@ Game_Interpreter.prototype.setMessageWindowSize = function(args) {
 // メッセージ表示用クラスの機能変更
 //=============================================================================
 
+FTKR.EMW.Game_Message_initialize = Game_Message.prototype.initialize;
+Game_Message.prototype.initialize = function() {
+    FTKR.EMW.Game_Message_initialize.call(this);
+    this._permissionClose = true;
+    this._canMovePlayer = false;
+};
+
 FTKR.EMW.Game_Message_clear = Game_Message.prototype.clear;
 Game_Message.prototype.clear = function() {
     FTKR.EMW.Game_Message_clear.call(this);
-    this._canMovePlayer = false;
     this._terminate = false;
     this._lastText = false;
     this._positionX = 0;
@@ -707,7 +833,11 @@ Game_Message.prototype.isBusy = function() {
 };
 
 Game_Message.prototype.isEmwBusy = function() {
-    return this.canMovePlayer() || (this.isLastText()) ? false : this.isBusyBase();
+    return this.canMovePlayer() ? false : this.isEmwEventBusy();
+};
+
+Game_Message.prototype.isEmwEventBusy = function() {
+    return this.isLastText() ? false : this.isBusyBase();
 };
 
 Game_Message.prototype.isBusyBase = function() {
@@ -796,12 +926,6 @@ Game_Message.prototype.lastText = function() {
 //------------------------------------------------------------------------
 // ウィンドウの終了禁止・許可
 //------------------------------------------------------------------------
-FTKR.EMW.Game_Message_initialize = Game_Message.prototype.initialize;
-Game_Message.prototype.initialize = function() {
-    FTKR.EMW.Game_Message_initialize.call(this);
-    this._permissionClose = true;
-};
-
 Game_Message.prototype.canClose = function() {
     return this._permissionClose;
 };
@@ -845,12 +969,6 @@ Window_Message.prototype.updatePlacement = function() {
     }
 };
 
-Window_Message.prototype.resetPosition = function() {
-    this.width = Graphics.boxWidth;
-    this.height = this.fittingHeight(this.numVisibleRows());
-    this.x = (Graphics.boxWidth - this.width) / 2;
-};
-
 Game_Message.prototype.setWindowSize = function(width, heightLine) {
     this._windowWidth = width;
     this._windowHeightLine = heightLine;
@@ -880,11 +998,16 @@ FTKR.EMW.Game_Interpreter_initialize = Game_Interpreter.prototype.initialize;
 Game_Interpreter.prototype.initialize = function(depth) {
     FTKR.EMW.Game_Interpreter_initialize.call(this, depth);
     this._windowId = 0;
-    this._messageWindowLists = [];
 };
 
 Game_Interpreter.prototype.windowId = function() {
     return this._windowId;
+};
+
+FTKR.EMW.Game_Interpreter_terminate = Game_Interpreter.prototype.terminate;
+Game_Interpreter.prototype.terminate = function() {
+    FTKR.EMW.Game_Interpreter_terminate.call(this);
+    if (FTKR.EMW.event.resetWindowId) this._windowId = 0;
 };
 
 //------------------------------------------------------------------------
@@ -896,7 +1019,7 @@ Game_Interpreter.prototype.command101 = function() {
     if (!windowId) {
         return FTKR.EMW.Game_Interpreter_command101.call(this);
     } else {
-        if (!$gameMessageEx.window(windowId).isEmwBusy()) {
+        if (!$gameMessageEx.window(windowId).isEmwEventBusy()) {
             $gameMessageEx.window(windowId).clearText();
             $gameMessageEx.window(windowId).setFaceImage(this._params[0], this._params[1]);
             $gameMessageEx.window(windowId).setBackground(this._params[2]);
@@ -949,7 +1072,7 @@ Game_Interpreter.prototype.command102 = function() {
     if (!windowId) {
         return FTKR.EMW.Game_Interpreter_command102.call(this);
     } else {
-        if (!$gameMessageEx.window(windowId).isEmwBusy()) {
+        if (!$gameMessageEx.window(windowId).isEmwEventBusy()) {
             this.setupChoices(this._params);
             this._index++;
             this.setWaitMode('message');
@@ -990,7 +1113,7 @@ Game_Interpreter.prototype.command103 = function() {
     if (!windowId) {
         return FTKR.EMW.Game_Interpreter_command103.call(this);
     } else {
-        if (!$gameMessageEx.window(windowId).isEmwBusy()) {
+        if (!$gameMessageEx.window(windowId).isEmwEventBusy()) {
             this.setupNumInput(this._params);
             this._index++;
             this.setWaitMode('message');
@@ -1018,7 +1141,7 @@ Game_Interpreter.prototype.command104 = function() {
     if (!windowId) {
         return FTKR.EMW.Game_Interpreter_command104.call(this);
     } else {
-        if (!$gameMessageEx.window(windowId).isEmwBusy()) {
+        if (!$gameMessageEx.window(windowId).isEmwEventBusy()) {
             this.setupItemChoice(this._params);
             this._index++;
             this.setWaitMode('message');
@@ -1399,7 +1522,7 @@ Scene_Map.prototype.createMessageExWindowAll = function() {
     this._messageExWindows = [];
     this._messageExWindows[0] = this._messageWindow;
     $gameMessageEx.window(0)._window_MessageEx = this._messageExWindows[0];
-    FTKR.EMW.sceneStartTerminate ? $gameMessageEx.window(0).terminate() :
+    FTKR.EMW.scene.startTerminate ? $gameMessageEx.window(0).terminate() :
         $gameMessageEx.window(0).firstText();
     var number = this.readMapMeta() || FTKR.EMW.exwindowNum;
     for (var i = 1; i < number + 1; i++) {
@@ -1411,7 +1534,7 @@ Scene_Map.prototype.createMessageExWindowAll = function() {
 Scene_Map.prototype.createMessageExWindow = function(windowId) {
     this._messageExWindows[windowId] = new Window_MessageEx(windowId);
     $gameMessageEx.window(windowId)._window_MessageEx = this._messageExWindows[windowId];
-    FTKR.EMW.sceneStartTerminate ? $gameMessageEx.window(windowId).terminate() :
+    FTKR.EMW.scene.startTerminate ? $gameMessageEx.window(windowId).terminate() :
         $gameMessageEx.window(windowId).firstText();
     this.addWindow(this._messageExWindows[windowId]);
     this._messageExWindows[windowId].subWindows().forEach(function(window) {
