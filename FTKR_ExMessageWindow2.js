@@ -3,8 +3,8 @@
 // FTKR_ExMessageWindow2.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/24
-// 最終更新日 : 2017/05/24
-// バージョン : v2.1.0
+// 最終更新日 : 2017/05/25
+// バージョン : v2.1.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EMW = FTKR.EMW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.1.0 一度に複数のメッセージウィンドウを表示するプラグイン
+ * @plugindesc v2.1.1 一度に複数のメッセージウィンドウを表示するプラグイン
  * @author フトコロ
  * 
  * @param --初期設定--
@@ -521,6 +521,9 @@ FTKR.EMW = FTKR.EMW || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.1.1 - 2017/05/25 : 不具合修正
+ *    1. ウィンドウの強制終了が正常に動作しない不具合を修正。
+ * 
  * v2.1.0 - 2017/05/24 : 仕様見直し、機能追加、ヘルプ修正
  *    1. ウィンドウが閉じても行動許可を解除しないように変更。
  *    2. 行動許可中の文章の表示コマンドの実行判定を見直し。
@@ -782,12 +785,12 @@ Game_Message.prototype.initialize = function() {
     FTKR.EMW.Game_Message_initialize.call(this);
     this._permissionClose = true;
     this._canMovePlayer = false;
+    this._terminate = false;
 };
 
 FTKR.EMW.Game_Message_clear = Game_Message.prototype.clear;
 Game_Message.prototype.clear = function() {
     FTKR.EMW.Game_Message_clear.call(this);
-    this._terminate = false;
     this._lastText = false;
     this._positionX = 0;
     this._windowWidth = 0;
@@ -880,6 +883,7 @@ Window_Message.prototype.updateWait = function() {
         this._waitCount = 0;
         if(this._textState) this._textState.index = this._textState.text.length;
         this._pauseSkip = true;
+        this._gameMessage.resetTerminate();
         return false;
     }
     return FTKR.EMW.Window_Message_updateWait.call(this);
@@ -894,12 +898,21 @@ Window_Message.prototype.terminateMessage = function() {
 
 Game_Message.prototype.isTerminate = function() {
     return this._terminate;
-}
+};
+
+Game_Message.prototype.setTerminate = function() {
+    this._terminate = true;
+};
+
+Game_Message.prototype.resetTerminate = function() {
+    this._terminate = false;
+};
 
 Game_Message.prototype.terminate = function() {
     if (!this.isBusyBase()) return;
     this.permitClose();
-    this._terminate = true;
+    this.lastText();
+    this.setTerminate();
     var message = this.windowMessageEx();
     if (message) {
         message.activate()
@@ -1305,6 +1318,7 @@ Window_MessageEx.prototype.updateWait = function() {
         this._waitCount = 0;
         if(this._textState) this._textState.index = this._textState.text.length;
         this._pauseSkip = true;
+        this._gameMessage.resetTerminate();
         return false;
     }
     if (Imported.YEP_MessageCore && this.isFastForward()) return false;
@@ -1542,24 +1556,15 @@ Scene_Map.prototype.createMessageExWindow = function(windowId) {
     }, this);
 };
 
-//マップシーンの終了処理
+//シーン終了時にすべてのウィンドウIDを強制終了
 FTKR.EMW.Scene_Map_terminate = Scene_Map.prototype.terminate;
 Scene_Map.prototype.terminate = function() {
     FTKR.EMW.Scene_Map_terminate.call(this);
-    if (SceneManager.isNextScene(Scene_Battle)) {
+    if (SceneManager.isNextScene(Scene_Battle) || SceneManager.isNextScene(Scene_Map)) {
         $gameMessageEx.windows().forEach( function(message, i){
             if (i > 0) message.terminate();
         });
     }
-};
-
-//場所移動コマンド
-FTKR.EMW.Game_Interpreter_command201 = Game_Interpreter.prototype.command201;
-Game_Interpreter.prototype.command201 = function() {
-    $gameMessageEx.windows().forEach( function(message, i){
-        if (i > 0) message.terminate();
-    });
-    return FTKR.EMW.Game_Interpreter_command201.call(this);
 };
 
 //=============================================================================
