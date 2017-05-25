@@ -35,6 +35,8 @@ FTKR.STP = FTKR.STP || {};
  * 敵グループ編成の設定方法
  *-----------------------------------------------------------------------------
  * 以下のプラグインパラメータを使用します。
+ * なお、敵グループIDや、エネミーID、座標等の値には、'\V[x]'でゲーム内変数IDxを
+ * 指定できます。
  * 
  * １．メンバーの初期化
  * 
@@ -77,6 +79,9 @@ FTKR.STP = FTKR.STP || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.0 - 2017/05/25 : 機能追加
+ *    1. バトル中でも敵グループメンバー追加が可能なように変更。
+ * 
  * v1.0.0 - 2017/05/19 : 初版作成
  * 
  *-----------------------------------------------------------------------------
@@ -94,9 +99,25 @@ var matchTextToRegs = function(test, regs) {
     });
 };
 
+var convertEscapeCharacters = function(text) {
+    if (text == null) text = '';
+    var window = SceneManager._scene._windowLayer.children[0];
+    return window ? window.convertEscapeCharacters(text) : text;
+};
+
 //=============================================================================
 // プラグインコマンド
 //=============================================================================
+
+Game_Interpreter.prototype.setArgNumber = function(arg) {
+    try {
+        var arg = convertEscapeCharacters(arg);
+        return Number(eval(arg));
+    } catch (e) {
+        console.error(e);
+        return 0;
+    }
+};
 
 var _STP_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -108,24 +129,50 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
     switch (command) {
     case '初期化':
     case 'RESET':
-        var troopId = Number(args[0]);
+        var troopId = this.setArgNumber(args[0]);
         if (troopId) $dataTroops[troopId].members = [];
         break;
     case '追加':
     case 'ADD':
-        var troopId = Number(args[0]);
-        var enemyId = Number(args[1]);
-        var x = Number(args[2]);
-        var y = Number(args[3]);
+        var troopId = this.setArgNumber(args[0]);
+        var enemyId = this.setArgNumber(args[1]);
+        var x = this.setArgNumber(args[2]);
+        var y = this.setArgNumber(args[3]);
         if (!troopId || !enemyId || !x || !y) break;
-        var hidden = Boolean(Number(args[4]));
+        var hidden = Boolean(this.setArgNumber(args[4]));
         var enemy = {
             enemyId:enemyId,
             x:x,
             y:y,
             hidden:hidden
         };
+        var memberId = $dataTroops[troopId].members.length;
         $dataTroops[troopId].members.push(enemy);
+        if ($gameParty.inBattle()) {
+            $gameTroop.addEnemy(enemy);
+            $gameTroop.members()[memberId].onBattleStart();
+            BattleManager._spriteset.addEnemy(memberId);
+        }
         break;
     }
 };
+
+Game_Troop.prototype.addEnemy = function(member) {
+    if ($dataEnemies[member.enemyId]) {
+        var enemyId = member.enemyId;
+        var x = member.x;
+        var y = member.y;
+        var enemy = new Game_Enemy(enemyId, x, y);
+        if (member.hidden) {
+            enemy.hide();
+        }
+        this._enemies.push(enemy);
+    }
+};
+
+Spriteset_Battle.prototype.addEnemy = function(memberId) {
+    var enemy = $gameTroop.members()[memberId];
+    this._enemySprites[memberId] = new Sprite_Enemy(enemy);
+    this._battleField.addChild(this._enemySprites[memberId]);
+};
+

@@ -223,7 +223,7 @@ name にはモーションのコードを設定してください。
 
 以下のプラグインを使用することで、本プラグインの機能を拡張できます。
 
-* [FTKR_FTKR_FacialImageDifference.js](FTKR_FTKR_FacialImageDifference.ja.md) - メニュー画面等で表示する顔画像をアクターの状態で変更できます。
+* [FTKR_FacialImageDifference.js](FTKR_FacialImageDifference.ja.md) - メニュー画面等で表示する顔画像をアクターの状態で変更できます。
 
 ## ライセンス
 
