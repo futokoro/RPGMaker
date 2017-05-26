@@ -3,8 +3,8 @@
 // FTKR_ExBattleEvent.js
 // 作成者     : フトコロ
 // 作成日     : 2017/05/25
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2017/05/26
+// バージョン : v1.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -14,8 +14,13 @@ var FTKR = FTKR || {};
 FTKR.EBE = FTKR.EBE || {};
 
 /*:
- * @plugindesc v1.0.0 バトルイベントを拡張するプラグイン
+ * @plugindesc v1.1.0 バトルイベントを拡張するプラグイン
  * @author フトコロ
+ * 
+ * @param Battle Event
+ * @desc 戦闘中に実行するコモンイベントID
+ * 0 - 実行しない、カンマ(,)で区切って複数設定できます
+ * @default 
  * 
  * @param Victory Event
  * @desc 戦闘勝利時に実行するコモンイベントID
@@ -39,10 +44,12 @@ FTKR.EBE = FTKR.EBE || {};
  * ２．通常の戦闘敗北時の処理(*1)の替わりに、コモンイベントまたは敵グループに
  * 　　設定したイベントを実行します。
  * 
+ * ３．バトル中に、バトルイベントとしてコモンイベントを実行します。
+ * 
  * (*1)戦闘終了時のステートの解除から、勝利等のメッセージ、戦闘報酬の処理など
  * 
  * 
- * イベントの処理が終了すると、バトル画面が終了します。
+ * 戦闘終了時のイベントの処理が終了すると、バトル画面が終了します。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -199,18 +206,113 @@ FTKR.EBE = FTKR.EBE || {};
  * 
  * 
  *-----------------------------------------------------------------------------
+ * バトル中のコモンイベントについて
+ *-----------------------------------------------------------------------------
+ * 敵グループに設定するバトルイベントの替わりに、コモンイベントを実行します。
+ * 
+ * 実行するイベントは以下のとおりです。
+ * １．プラグインパラメータ<Battle Event>に設定したIDのコモンイベントの中で
+ * 　　実行条件を満たすイベント。
+ * 
+ * プラグインパラメータ<Battle Event>にはカンマ(,)とハイフン(-)を使うことで
+ * 複数のコモンイベントIDを設定できます。
+ * ハイフン(-)は、繋げた前後のIDの間のすべてのIDを登録します。
+ * 
+ * 入力例)
+ * 　1, 4, 5, 10-15
+ * 
+ * 複数のイベントIDを入力した場合、入力した順番(左から)に実行条件を
+ * 判定して、条件を満たしていればそのイベントを実行します。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * バトル中のコモンイベントの実行条件の設定
+ *-----------------------------------------------------------------------------
+ * コモンイベントに以下の注釈を入力することで、実行条件を設定できます。
+ * 
+ * <スパン: [タイミング]>
+ * <SPAN: [TIMING]>
+ * 実行回数に関する条件を設定します。
+ * スパンを指定しない場合は、この設定を適用します。
+ * [タイミング] には以下を入力してください。
+ * 　バトル or BATTLE　　 - 戦闘中に１回だけ実行します。
+ * 　ターン or TURN　　   - ターン中に１回だけ実行します。
+ * 　モーメント or MOMENT - 条件を満たす度に実行します。
+ * 
+ * 
+ * <ターン終了>
+ * <TURNEND>
+ * ターン終了時に実行します。
+ * 
+ * <ターン:a + b *X>
+ * <TURN:a + b *X>
+ * 指定したターンに実行します。
+ * a と b に数値を入力してください。(* と X は半角, XはそのままXと入力)
+ * 　a - 最初に実行するターン数
+ * 　b - 次に何ターン後に実行するか(以降この値のターンが経過する毎に実行)
+ * 　例)
+ * 　　<ターン:1 + 2 *X>
+ * 　　<TURN:2 + 4 *X>
+ * 
+ * <敵キャラHP: #a b %以下>
+ * <ENEMY_HP: #a LESS THAN b %>
+ * 指定した敵キャラのHP残量によって実行します。
+ * a と b に数値を入力してください。(# と % は半角)
+ * a と b の間には必ず半角スペースを入れてください。
+ * 　a - 敵キャラの番号(グループに追加した順番)
+ * 　b - 残りHPの割合値
+ * 　例)
+ * 　　<敵キャラHP: #1 50 %以下>
+ * 　　<ENEMY_HP: #2 LESS THAN 70 %>
+ * 
+ * <アクターHP: #a b %以下>
+ * <ACTOR_HP: #a LESS THAN b %>
+ * 指定したアクターのHP残量によって実行します。
+ * a と b に数値を入力してください。
+ * a と b の間には必ず半角スペースを入れてください。
+ * 　a - アクターID
+ * 　b - 残りHPの割合値
+ * 　例)
+ * 　　<アクターHP: #1 50 %以下>
+ * 　　<ACTOR_HP: #2 LESS THAN 70 %>
+ * 
+ * <スイッチ: a>
+ * <SWITCH: a>
+ * 指定したスイッチがONの時に実行します。
+ * a に数値を入力してください。
+ * 　a - スイッチID
+ * 
+ * <実行条件>
+ * 条件式
+ * </実行条件>
+ * または
+ * <Conditions>
+ * code
+ * </Conditions>
+ * 条件式(code)で記述したJavaScript計算式を判定して実行します。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
  * プラグインコマンド
  *-----------------------------------------------------------------------------
  * バトルイベント用に以下のプラグインコマンドが使用できます。
  * 
  * １．パーティーメンバーに指定のモーションをとらせる
- * 　EBE_モーション実行 [モーション名]
- * 　EBE_REQUEST_MOTION [MOTION NAME]
+ * 　EBE_モーション実行 [モーション名] [対象メンバー]
+ * 　EBE_REQUEST_MOTION [MOTION NAME] [TARGET MEMBER]
  * 
  * モーション名(MOTION NAME)には以下を入力してください。(要小文字)
- *    walk, wait, chant, guard, damage, evade, thrust, swing,
- *    missile, skill, spell, item, escape, victory, dying,
- *    abnormal, sleep, dead,
+ * 　walk, wait, chant, guard, damage, evade, thrust, swing,
+ * 　missile, skill, spell, item, escape, victory, dying,
+ * 　abnormal, sleep, dead,
+ * 対象メンバーには以下を入力してください。
+ * 空欄の場合は、すべてのメンバーを対象にします。
+ * 　0~ - 先頭を 0番としたときの隊列順
+ * 　全員 or ALL - すべてのメンバー
+ * 
+ * 例)
+ * 　EBE_モーション実行 victory 1
+ * 　EBE_REQUEST_MOTION wait ALL
  * 
  * 
  * ２．戦闘を再開する
@@ -227,6 +329,66 @@ FTKR.EBE = FTKR.EBE || {};
  * イベントを組んでください。
  * 
  * 
+ * ３．画面に数字をポップアップさせる
+ * 　EBE_数字ポップアップ [スプライト番号] [設定内容]
+ * 　EBE_POPUP_NUMBER [SPRITE_NUMBER] [SETTING]
+ * 
+ * 画面に数字をポップアップさせます。
+ * スプライト番号を変えることで、複数の数字を表示できます。
+ * 設定内容には以下を入力してください。(順不同)
+ * なお、数値には \V[x] でゲーム内変数を指定できます。
+ * 　
+ * 　画像番号 [数値]
+ * 　IMAGENUM [Number]
+ * 　- 使用する画像は ダメージポップアップ用の img/system/damage.png です。
+ * 　　上から 0番として、指定した列の数字スプライトを使用します。
+ * 　　指定しない場合は、0番(白)を使用します。
+ * 
+ * 　表示内容 [数値]
+ * 　VALUE [Number]
+ * 　- 入力した数値を画面に表示します。
+ * 
+ * 　ポップアップ高さ [高さ] [差分]
+ * 　POPUP_HEIGHT [Number] [Offset]
+ * 　- ポップアップする高さを指定します。
+ * 　　高さで、基準の高さを指定します。(デフォルト 40)
+ * 　　差分で、桁毎の高さの差を指定します。(デフォルト 0.5)
+ * 　　差分は変えたい場合にのみ指定してください。
+ * 
+ * 　表示時間 [数値]
+ * 　DURATION [Number]
+ * 　- スプライトを表示している時間を指定します。(デフォルト 30)
+ * 　　実際の表示時間は、この値と表示する数字の桁数を掛けた値です。
+ * 　　残り時間が10未満になると、画像の透明度が上がり、0で透明になります。
+ * 
+ * 　表示差 [数値]
+ * 　DIFF_COUNT [Number]
+ * 　- 数字の桁毎の表示タイミングのずれを指定します。(デフォルト 0)
+ * 
+ * 　表示座標 [X] [Y]
+ * 　POSITION [X] [Y]
+ * 　- スプライト画像を表示する位置を指定します。
+ * 　　x座標とy座標両方を指定してください。
+ * 　
+ * 　消去しない
+ * 　REMAIN
+ * 　- この引数を入力すると透明度が変化せず、画面に表示しつづけます。
+ * 
+ * 　消去
+ * 　ERASE
+ * 　- この引数を入力すると、指定したスプライト番号の画像を消します。
+ * 　
+ * 　例)
+ * 　　EBE_数字ポップアップ 1 表示内容 1234 表示座標 100 100
+ * 　　EBE_POPUP_NUMBER 1 VALUE 1234 POSITION 100 100
+ * 
+ * 　　EBE_数字ポップアップ 2 画像番号 1 表示内容 12345 表示座標 100 100 消去しない
+ * 　　EBE_POPUP_NUMBER 2 IMAGENUM 1 VALUE 12345 POSITION 100 100 REMAIN
+ * 
+ * 　　EBE_数字ポップアップ 1 消去
+ * 　　EBE_POPUP_NUMBER 1 ERASE
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * 本プラグインのライセンスについて(License)
  *-----------------------------------------------------------------------------
@@ -241,21 +403,16 @@ FTKR.EBE = FTKR.EBE || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.0 - 2017/05/26 : 機能追加
+ *    1. バトル中にコモンイベントを実行できる機能を追加。
+ *    2. モーション実行コマンドにアクターを対象にできる機能を追加。
+ *    3. 画面に数字をポップアップさせるプラグインコマンドを追加。
+ * 
  * v1.0.0 - 2017/05/25 : 初版作成
  * 
  *-----------------------------------------------------------------------------
 */
 //=============================================================================
-
-//=============================================================================
-// プラグイン パラメータ
-//=============================================================================
-FTKR.EBE.parameters = PluginManager.parameters('FTKR_ExBattleEvent');
-
-FTKR.EBE.battleEnd = {
-    victory : Number(FTKR.EBE.parameters['Victory Event'] || 0),
-    defeat : Number(FTKR.EBE.parameters['Defeat Event'] || 0),
-};
 
 var matchTextToRegs = function(test, regs) {
     return regs.some( function(reg){
@@ -271,9 +428,108 @@ var readCommentMeta = function(comment, metacodes) {
     });
 };
 
+var splitConvertNumber = function(param) {
+    var results = [];
+    (param + '').split(',').forEach( function(split){
+        match = /[ ]*(\d+)[ ]*-[ ]*(\d+)/.exec(split);
+        if (match) {
+            for (var i = Number(match[1]); i <= Number(match[2]); i++) {
+                results.push(i);
+            }
+        } else {
+            if(!isNaN(split)) results.push(Number(split));
+        }
+    });
+    return results;
+};
+
+// textを条件式に使える状態に変換する
+var convertTextToConditions = function(text) {
+    var result = '';
+    if (text) {
+        var datas = text.split(';');
+        datas.forEach(function(data, i) {
+            result += data;
+            if (datas[i+1]) result += ')&&(';
+        });
+        result = '(' + result + ')';
+    }
+    return result;
+};
+
+var convertEscapeCharacters = function(text) {
+    if (text == null) text = '';
+    var window = SceneManager._scene._windowLayer.children[0];
+    return window ? window.convertEscapeCharacters(text) : text;
+};
+
+//=============================================================================
+// 自作関数(グローバル)
+//=============================================================================
+
+FTKR.gameData = FTKR.gameData || {
+    user   :null,
+    target :null,
+    item   :null,
+    number :0,
+};
+
+if (!FTKR.setGameData) {
+FTKR.setGameData = function(user, target, item, number) {
+    FTKR.gameData = {
+        user   :user || null,
+        target :target || null,
+        item   :item || null,
+        number :number || 0
+    };
+};
+}
+
+if (!FTKR.evalFormula) {
+FTKR.evalFormula = function(formula) {
+    var datas = FTKR.gameData;
+    try {
+        var s = $gameSwitches._data;
+        var v = $gameVariables._data;
+        var a = datas.user;
+        var b = datas.target;
+        var item   = datas.item;
+        var number = datas.number;
+        if (b) var result = b.result();
+        var value = eval(formula);
+        if (isNaN(value)) value = 0;
+        return value;
+    } catch (e) {
+        console.error(e);
+        return 0;
+    }
+};
+}
+
+//=============================================================================
+// プラグイン パラメータ
+//=============================================================================
+FTKR.EBE.parameters = PluginManager.parameters('FTKR_ExBattleEvent');
+
+FTKR.EBE.battleEvents = splitConvertNumber(FTKR.EBE.parameters['Battle Event']);
+FTKR.EBE.battleEnd = {
+    victory : Number(FTKR.EBE.parameters['Victory Event'] || 0),
+    defeat : Number(FTKR.EBE.parameters['Defeat Event'] || 0),
+};
+
 //=============================================================================
 // プラグインコマンド
 //=============================================================================
+
+Game_Interpreter.prototype.setArgNumber = function(arg) {
+    try {
+        var arg = convertEscapeCharacters(arg);
+        return Number(eval(arg));
+    } catch (e) {
+        console.error(e);
+        return 0;
+    }
+};
 
 var _EBE_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -291,7 +547,12 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
             break;
         case 'モーション実行':
         case 'REQUEST_MOTION':
-            $gameParty.requestMotion(args[0]);
+            if(!args[1] || args[1] === '全員' || args[1].toUpperCase() === 'ALL') {
+                $gameParty.requestMotion(args[0]);
+            } else if (Number(args[1]) >= 0) {
+                var actor = $gameActors.actor(Number(args[1]));
+                if (actor) actor.requestMotion(args[0]);
+            }
             break;
         case '勝利ME演奏':
         case 'PLAY_VICTORY_ME':
@@ -333,7 +594,72 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
         case 'RESTART_BATTLE':
             BattleManager._checkEbeBattleEvent = false;
             break;
+        case '数字ポップアップ':
+        case 'POPUP_NUMBER':
+            this.setupNumberPopup(args);
+            break;
     }
+};
+
+Game_Interpreter.prototype.setupNumberPopup = function(args) {
+    var index = this.setArgNumber(args[0]);
+    for (var i = 1; i < args.length; i++) {
+        var arg = (args[i] + '').toUpperCase();
+        switch (arg) {
+            case '画像番号':
+            case 'IMAGENUM':
+                i++;
+                var baseRow = this.setArgNumber(args[i]);
+                break;
+            case '表示内容':
+            case 'VALUE':
+                i++;
+                var value = this.setArgNumber(args[i]);
+                break;
+            case 'ポップアップ高さ':
+            case 'POPUP_HEIGHT':
+                i++;
+                var height = this.setArgNumber(args[i]);
+                if (!isNaN(args[i+1])) {
+                    i++;
+                    var offsetY = this.setArgNumber(args[i]);
+                }
+                break;
+            case '表示時間':
+            case 'DURATION':
+                i++;
+                var duration = this.setArgNumber(args[i]);
+                break;
+            case '表示差':
+            case 'DIFF_COUNT':
+                i++;
+                var maxcount = this.setArgNumber(args[i]);
+                break;
+            case '表示座標':
+            case 'POSITION':
+                i++;
+                var x = this.setArgNumber(args[i]);
+                i++;
+                var y = this.setArgNumber(args[i]);
+                break;
+            case '消去しない':
+            case 'REMAIN':
+                var remain = true;
+                break;
+            case '消去':
+            case 'ERASE':
+                BattleManager.eraseNumberPopup(index);
+                return ;
+        }
+    }
+    var sprite = BattleManager.setupNumberPopup(index);
+    if (!isNaN(baseRow)) sprite.setBaseRow(baseRow);
+    if (!isNaN(height)) sprite.setPopupHeight(height, offsetY);
+    if (!isNaN(duration)) sprite.setDuration(duration);
+    if (!isNaN(maxcount)) sprite.setMaxcount(maxcount);
+    if (!isNaN(x) && !isNaN(y))sprite.setPosition(x, y);
+    if (remain) sprite.setRemain();
+    if (!isNaN(value)) sprite.setValue(value);
 };
 
 //=============================================================================
@@ -344,34 +670,57 @@ FTKR.EBE.BattleManager_initMembers = BattleManager.initMembers;
 BattleManager.initMembers = function() {
     FTKR.EBE.BattleManager_initMembers.call(this);
     this._checkEbeBattleEvent = false;
+    this._battleEndPattern = 0;
+    this._numberSprite = [];
+};
+
+FTKR.EBE.BattleManager_checkBattleEnd = BattleManager.checkBattleEnd;
+BattleManager.checkBattleEnd = function() {
+    if (this._phase) {
+        if (this._checkEbeBattleEvent) {
+            this.endBattle(this._battleEndPattern);
+            return true;
+        }
+    }
+    return FTKR.EBE.BattleManager_checkBattleEnd.call(this);
 };
 
 FTKR.EBE.BattleManager_processVictory = BattleManager.processVictory;
 BattleManager.processVictory = function() {
     if (FTKR.EBE.battleEnd.victory && !this._checkEbeBattleEvent) {
-        console.log('setupEbeBattleEvent', this._phase);
-        if ($gameTroop.setupEbeBattleEvent('victory', ['EBE_戦闘勝利時'])) this._checkEbeBattleEvent = true;
+        if ($gameTroop.setupEbeBattleEvent('victory', ['EBE_戦闘勝利時'])) {
+            this._checkEbeBattleEvent = true;
+            this._battleEndPattern = 0;
+        }
         return true;
     }
-    if (!this._checkEbeBattleEvent) {
-        FTKR.EBE.BattleManager_processVictory.call(this);
-    } else {
-        console.log('battle End');
-        this.endBattle(0);
-    }
+    FTKR.EBE.BattleManager_processVictory.call(this);
 };
 
 FTKR.EBE.BattleManager_processDefeat = BattleManager.processDefeat;
 BattleManager.processDefeat = function() {
     if (FTKR.EBE.battleEnd.defeat && !this._checkEbeBattleEvent) {
-        if ($gameTroop.setupEbeBattleEvent('defeat', ['EBE_戦闘敗北時'])) this._checkEbeBattleEvent = true;
+        if ($gameTroop.setupEbeBattleEvent('defeat', ['EBE_戦闘敗北時'])) {
+            this._checkEbeBattleEvent = true;
+            this._battleEndPattern = 2;
+        }
         return true;
     }
-    if (!this._checkEbeBattleEvent) {
-        FTKR.EBE.BattleManager_processDefeat.call(this);
-    } else {
-        this.endBattle(2);
+    FTKR.EBE.BattleManager_processDefeat.call(this);
+};
+
+BattleManager.setupNumberPopup = function(index) {
+    if (!this._numberSprite[index]) {
+        var sprite = new Sprite_Number();
+        this._numberSprite[index] = sprite;
+        this._spriteset._battleField.addChild(this._numberSprite[index]);
     }
+    return this._numberSprite[index];
+};
+
+BattleManager.eraseNumberPopup = function(index) {
+    this._spriteset._battleField.removeChild(this._numberSprite[index]);
+    this._numberSprite[index] = {};
 };
 
 //=============================================================================
@@ -387,6 +736,49 @@ Game_Party.prototype.requestMotion = function(motionName) {
 //=============================================================================
 // Game_Troop
 //=============================================================================
+
+FTKR.EBE.Game_Troop_clear = Game_Troop.prototype.clear;
+Game_Troop.prototype.clear = function() {
+    FTKR.EBE.Game_Troop_clear.call(this);
+    this._commonEventFlags = [];
+};
+
+FTKR.EBE.Game_Troop_setupBattleEvent = Game_Troop.prototype.setupBattleEvent;
+Game_Troop.prototype.setupBattleEvent = function() {
+    FTKR.EBE.Game_Troop_setupBattleEvent.call(this);
+    if (!this._interpreter.isRunning()) {
+        if (this._interpreter.setupReservedCommonEvent()) {
+            return;
+        }
+        var eventIds = FTKR.EBE.battleEvents;
+        for (var i = 0; i < eventIds.length; i++) {
+            if (eventIds[i]) {
+                var event = $dataCommonEvents[eventIds[i]];
+                if (this.meetsCommonEventCommentConditions(event) && !this._commonEventFlags[i]) {
+                    this._interpreter.setup(event.list, this.troop().id);
+                    if (this.commonEventSpan(event) <= 1) {
+                        this._commonEventFlags[i] = true;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+};
+
+FTKR.EBE.Game_Troop_increaseTurn = Game_Troop.prototype.increaseTurn;
+Game_Troop.prototype.increaseTurn = function() {
+    var eventIds = FTKR.EBE.battleEvents;
+    for (var i = 0; i < eventIds.length; i++) {
+        if (eventIds[i]) {
+            var event = $dataCommonEvents[eventIds[i]];
+            if (this.commonEventSpan(event) === 1) {
+                this._commonEventFlags[i] = false;
+            }
+        }
+    }
+    FTKR.EBE.Game_Troop_increaseTurn.call(this);
+};
 
 Game_Troop.prototype.setupEbeBattleEvent = function(condition, metacodes) {
     if (!this._interpreter.isRunning()) {
@@ -417,3 +809,284 @@ Game_Troop.prototype.meetsPagesCommentConditions = function(page, metacodes) {
         }
     }
 };
+
+Game_Troop.prototype.commonEventSpan = function(event) {
+    for (var v = 0; v < event.list.length; v++) {
+        var list = event.list[v];
+        if (list && ([108, 408].contains(list.code))) {
+            var match = /<([^<>:]+)(:?)([^>]*)>/g.exec(list.parameters[0]);
+            switch((match[1] + '').toUpperCase()) {
+                case 'スパン':
+                case 'SPAN':
+                    switch((match[3] + '').toUpperCase()) {
+                        case 'バトル':
+                        case 'BATTLE':
+                            return 0;
+                        case 'ターン':
+                        case 'TURN':
+                            return 1;
+                        case 'モーメント':
+                        case 'MOMENT':
+                            return 2;
+                    }
+            }
+        }
+    }
+    return 0;
+};
+
+Game_Troop.prototype.meetsCommonEventCommentConditions = function(event) {
+    return this.meetsConditions(this.convertCommonEventConditions(event));
+};
+
+Game_Troop.prototype.convertCommonEventConditions = function(event) {
+    var conditions = {};
+    var code = false;
+    for (var i = 0; i < event.list.length; i++) {
+        var list = event.list[i];
+        if (list && ([108, 408].contains(list.code))) {
+            var match = /<([^<>:]+)(:?)([^>]*)>/g.exec(list.parameters[0]);
+            if (match) {
+                switch((match[1] + '').toUpperCase()){
+                    case 'ターン終了':
+                    case 'TURNEND':
+                        conditions.turnEnding = true;
+                        break;
+                    case 'ターン':
+                    case 'TURN':
+                        if (match[2] === ':') {
+                            var turn = /(\d+)[ ]*\+[ ]*(\d+)[ ]*\*X/i.exec(match[3]);
+                            if (turn) {
+                                conditions.turnValid = true;
+                                conditions.turnA = Number(turn[1]);
+                                conditions.turnB = Number(turn[2]);
+                            }
+                        }
+                        break;
+                    case '敵キャラHP':
+                    case 'ENEMY_HP':
+                        if (match[2] === ':') {
+                            var value = /#(\d+)[ ]*(\d+)[ ]*\%以下/i.exec(match[3]);
+                            if (!value) value = /#(\d+)[ ]*less[ ]than[ ]*(\d+)[ ]*\%/i.exec(match[3]);
+                            if (value) {
+                                conditions.enemyValid = true;
+                                conditions.enemyIndex = Number(value[1]);
+                                conditions.enemyHp = Number(value[2]);
+                            }
+                        }
+                        break;
+                    case 'アクターHP':
+                    case 'ACTOR_HP':
+                        if (match[2] === ':') {
+                            var value = /#(\d+)[ ]*(\d+)[ ]*\%以下/i.exec(match[3]);
+                            if (!value) value = /#(\d+)[ ]*less[ ]than[ ]*(\d+)[ ]*\%/i.exec(match[3]);
+                            if (value) {
+                                conditions.actorValid = true;
+                                conditions.actorId = Number(value[1]);
+                                conditions.actorHp = Number(value[2]);
+                            }
+                        }
+                        break;
+                    case 'スイッチ':
+                    case 'SWITCH':
+                        if (match[2] === ':') {
+                            conditions.switchValid = true;
+                            conditions.switchId = Number(match[3]);
+                        }
+                        break;
+                    case '/実行条件':
+                    case '/CONDITIONS':
+                        code = false;
+                        break;
+                    case '実行条件':
+                    case 'CONDITIONS':
+                        conditions.customValid = true;
+                        conditions.custom = '';
+                        code = true;
+                        break;
+                }
+            } else {
+                 if (code) conditions.custom += list.parameters[0] + ';';
+            }
+        }
+    }
+    var page = {conditions:conditions};
+    return page;
+};
+
+Game_Troop.prototype.evalConditionsFormula = function(text) {
+    var formula = convertTextToConditions(text);
+    if (!formula) return true;
+    return FTKR.evalFormula(formula);
+};
+
+FTKR.EBE.Game_Troop_meetsConditions = Game_Troop.prototype.meetsConditions;
+Game_Troop.prototype.meetsConditions = function(page) {
+    var c = page.conditions;
+    var result = FTKR.EBE.Game_Troop_meetsConditions.call(this, page);
+    if (!c.turnEnding && !result) {
+        return false;
+    }
+    if ((c.turnEnding || c.turnValid || c.enemyValid ||
+            c.actorValid || c.switchValid) && !result) {
+        return false;
+    }
+    if (c.customValid && !this.evalConditionsFormula(c.custom)) {
+        return false;
+    }
+    return true;
+};
+
+//=============================================================================
+// Sprite_Number
+// 数字をスプライトで表示する
+//=============================================================================
+
+function Sprite_Number() {
+    this.initialize.apply(this, arguments);
+}
+
+Sprite_Number.prototype = Object.create(Sprite.prototype);
+Sprite_Number.prototype.constructor = Sprite_Number;
+
+Sprite_Number.prototype.initialize = function() {
+    Sprite.prototype.initialize.call(this);
+    this._flashColor = [0, 0, 0, 0];
+    this._flashDuration = 0;
+    this._damageBitmap = ImageManager.loadSystem('Damage');
+    this._remain = false;
+    this._duration = 30;
+    this._maxcount = 0;
+    this._count = 0;
+    this._baseRow = 0;
+    this._value = 0;
+    this._index = 0;
+    this._popupHeight = 40;
+    this._popupOffsetY = 0.5;
+    this._fullDuration = this._duration;
+};
+
+Sprite_Number.prototype.setupCriticalEffect = function() {
+    this._flashColor = [255, 0, 0, 160];
+    this._flashDuration = 60;
+};
+
+Sprite_Number.prototype.digitWidth = function() {
+    return this._damageBitmap ? this._damageBitmap.width / 10 : 0;
+};
+
+Sprite_Number.prototype.digitHeight = function() {
+    return this._damageBitmap ? this._damageBitmap.height / 5 : 0;
+};
+
+Sprite_Number.prototype.setBaseRow = function(baseRow) {
+    this._baseRow = baseRow;
+};
+
+Sprite_Number.prototype.setDuration = function(duration) {
+    this._duration = duration;
+};
+
+Sprite_Number.prototype.setValue = function(value) {
+    this._value = value;
+    this.resetFullDuration();
+};
+
+Sprite_Number.prototype.setMaxcount = function(maxcount) {
+    this._maxcount = maxcount;
+    this._count = this._maxcount;
+};
+
+Sprite_Number.prototype.setPosition = function(x, y) {
+    this.x = x;
+    this.y = y;
+};
+
+Sprite_Number.prototype.setRemain = function() {
+    this._remain = true;
+};
+
+Sprite_Number.prototype.setPopupHeight = function(popupHeight, popupOffsetY) {
+    this._popupHeight = popupHeight;
+    if(!isNaN(popupOffsetY)) this._popupOffsetY = popupOffsetY;
+};
+
+Sprite_Number.prototype.resetFullDuration = function() {
+    var string = Math.abs(this._value).toString();
+    this._fullDuration = this._duration * string.length;
+};
+
+Sprite_Number.prototype.updateOpacity = function() {
+    if (this._remain) return;
+    if (this._fullDuration < 10) {
+        this.opacity = 255 * this._fullDuration / 10;
+    }
+};
+
+Sprite_Number.prototype.update = function() {
+    Sprite.prototype.update.call(this);
+    if (this._count >= this._maxcount) {
+        this.createDigit(this._index);
+        this._index++;
+        this._count = 0;
+    } else {
+        this._count++;
+    }
+    if (this._fullDuration > 0) {
+        this._fullDuration--;
+        for (var i = 0; i < this.children.length; i++) {
+            this.updateChild(this.children[i]);
+        }
+    }
+    this.updateFlash();
+    this.updateOpacity();
+};
+
+Sprite_Number.prototype.createChildSprite = function() {
+    var sprite = new Sprite();
+    sprite.bitmap = this._damageBitmap;
+    sprite.anchor.x = 0.5;
+    sprite.anchor.y = 1;
+    sprite.y = -this._popupHeight;
+    sprite.ry = sprite.y;
+    this.addChild(sprite);
+    return sprite;
+};
+
+Sprite_Number.prototype.createDigit = function(index) {
+    var value = this._value;
+    var baseRow = this._baseRow;
+    var string = Math.abs(value).toString();
+    if (index >= string.length) return;
+    var row = baseRow + (value < 0 ? 1 : 0);
+    var w = this.digitWidth();
+    var h = this.digitHeight();
+    var sprite = this.createChildSprite();
+    var n = Number(string[index]);
+    sprite.setFrame(n * w, row * h, w, h);
+    sprite.x = (index - (string.length - 1) / 2) * w;
+    sprite.dy = -this._popupOffsetY * 2 * index;
+};
+
+Sprite_Number.prototype.updateChild = function(sprite) {
+    sprite.dy += this._popupOffsetY;
+    sprite.ry += sprite.dy;
+    if (sprite.ry >= 0) {
+        sprite.ry = 0;
+        sprite.dy *= -0.6;
+    }
+    sprite.y = Math.round(sprite.ry);
+    sprite.setBlendColor(this._flashColor);
+};
+
+Sprite_Number.prototype.updateFlash = function() {
+    if (this._flashDuration > 0) {
+        var d = this._flashDuration--;
+        this._flashColor[3] *= (d - 1) / d;
+    }
+};
+
+Sprite_Number.prototype.isPlaying = function() {
+    return this._duration > 0;
+};
+

@@ -135,7 +135,7 @@
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
-| [FTKR_ExBattleEvent](FTKR_ExBattleEvent.js) | [あり](FTKR_ExBattleEvent.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExBattleEvent.js) | 2017/05/25 | バトルイベントを拡張する |
+| [FTKR_ExBattleEvent](FTKR_ExBattleEvent.js) | [あり](FTKR_ExBattleEvent.ja.md) | [v1.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExBattleEvent.js) | 2017/05/26 | バトルイベントを拡張する |
 
 [目次に戻る](#目次)
 
