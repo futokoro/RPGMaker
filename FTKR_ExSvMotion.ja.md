@@ -69,7 +69,7 @@ FTKR_ExSvMotion.js
 デフォルトの設定は以下の通りです。
 
 | アクターの行動 | コードの設定 | プラグインパラメータ |
-| --- | --- | --- | --- |
+| --- | --- | --- |
 | ダメージを受ける | damage | Damage Motion |
 | 回避する | evade | Evade Motion |
 | 突き攻撃 | thrust | Thrust Motion |
