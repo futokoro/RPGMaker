@@ -41,7 +41,7 @@ FTKR_FacialImageDifference.js
 
 本プラグインの機能が有効な顔画像は、以下の通りです。
 
-１．`Window_Base.prototype.drawActorFace()`で表示する顔画像
+１．`Window_Base.prototype.drawActorFace()`で表示する顔画像<br>
 ２．`FTKR_CustomSimpleActorStatus.js`および、その拡張プラグインによって表示する顔画像
 
 これ以外の方法で表示させている顔画像に対しては適用できません。
