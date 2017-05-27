@@ -3,8 +3,8 @@
 // FTKR_DisplayRegenerateMessage.js
 // 作成者     : フトコロ
 // 作成日     : 2017/05/26
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2017/05/27
+// バージョン : v1.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,18 +15,47 @@ FTKR.DRM = FTKR.DRM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 HP再生値をバトルログに表示するプラグイン
+ * @plugindesc v1.1.0 HP再生値をバトルログに表示するプラグイン
  * @author フトコロ
  * 
- * @param Regenerate HPMP Message
- * @desc  HPMP再生時のメッセージ
+ * @param --HP再生--
+ * @desc  
+ * 
+ * @param Regenerate HP Plus
+ * @desc  HP再生時(増加)のメッセージ
  * %1 - 対象の名前, %2 - ステータス名, %3 - 回復量
  * @default %1 の %2 が %3 回復した！
  * 
- * @param Regenerate TP Message
- * @desc TP再生時のメッセージ
+ * @param Regenerate HP Minus
+ * @desc  HP再生時(減少)のメッセージ
+ * %1 - 対象の名前, %2 - ステータス名, %3 - 回復量
+ * @default %1 の %2 が %3 減少した！
+ * 
+ * @param --MP再生--
+ * @desc  
+ * 
+ * @param Regenerate MP Plus
+ * @desc  MP再生時(増加)のメッセージ
+ * %1 - 対象の名前, %2 - ステータス名, %3 - 回復量
+ * @default %1 の %2 が %3 回復した！
+ * 
+ * @param Regenerate MP Minus
+ * @desc  HP再生時(減少)のメッセージ
+ * %1 - 対象の名前, %2 - ステータス名, %3 - 回復量
+ * @default %1 の %2 が %3 減少した！
+ * 
+ * @param --TP再生--
+ * @desc  
+ * 
+ * @param Regenerate TP Plus
+ * @desc TP再生時(増加)のメッセージ
  * %1 - 対象の名前, %2 - ステータス名, %3 - 増加量
  * @default %1 の %2 が %3 増加した！
+ * 
+ * @param Regenerate TP Minus
+ * @desc  TP再生時(減少)のメッセージ
+ * %1 - 対象の名前, %2 - ステータス名, %3 - 回復量
+ * @default %1 の %2 が %3 減少した！
  * 
  * @help 
  *-----------------------------------------------------------------------------
@@ -35,6 +64,9 @@ FTKR.DRM = FTKR.DRM || {};
  * 各種再生率による回復量をバトルログに表示します。
  * 
  * 表示するメッセージはプラグインパラメータで設定できます。
+ * 増加時と減少時でメッセージを変えることが出来ます。
+ * 
+ * プラグインパラメータを空欄にした場合は、表示しません。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -58,6 +90,10 @@ FTKR.DRM = FTKR.DRM || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.0 - 2017/05/27 : 仕様変更
+ *    1. 増加時と減少時でメッセージを分離。
+ *    2. HPとMPのメッセージを分離。
+ * 
  * v1.0.0 - 2017/05/26 : 初版作成
  * 
  *-----------------------------------------------------------------------------
@@ -70,8 +106,12 @@ FTKR.DRM = FTKR.DRM || {};
 FTKR.DRM.parameters = PluginManager.parameters('FTKR_DisplayRegenerateMessage');
 
 FTKR.DRM.message = {
-    hpmp:String(FTKR.DRM.parameters['Regenerate HPMP Message'] || ''),
-    tp:String(FTKR.DRM.parameters['Regenerate TP Message'] || ''),
+    hpPlus :String(FTKR.DRM.parameters['Regenerate HP Plus'] || ''),
+    mpPlus :String(FTKR.DRM.parameters['Regenerate MP Plus'] || ''),
+    tpPlus :String(FTKR.DRM.parameters['Regenerate TP Plus'] || ''),
+    hpMinus:String(FTKR.DRM.parameters['Regenerate HP Minus'] || ''),
+    mpMinus:String(FTKR.DRM.parameters['Regenerate MP Minus'] || ''),
+    tpMinus:String(FTKR.DRM.parameters['Regenerate TP Minus'] || ''),
 };
 
 //=============================================================================
@@ -79,17 +119,19 @@ FTKR.DRM.message = {
 //=============================================================================
 BattleManager.setupBattleLogMessage = function(text) {
     if (text) {
-        var window = this._logWindow;
-        window.push('addText', text);
+        this._logWindow.push('addText', text);
+        this._drmLogMessage = true;
     }
 };
 
 BattleManager.clearBattleLogMessage = function() {
-    var window = this._logWindow;
-    window.push('wait');
-    window.push('clear');
+    if (this._drmLogMessage) {
+        var window = this._logWindow;
+        window.push('wait');
+        window.push('clear');
+        this._drmLogMessage = false;
+    }
 };
-
 
 //=============================================================================
 // 再生の処理
@@ -101,7 +143,8 @@ Game_Battler.prototype.regenerateHp = function() {
     value = Math.max(value, -this.maxSlipDamage());
     if (value !== 0) {
         this.gainHp(value);
-        this.setupBattleLogMessage(value, FTKR.DRM.message.hpmp, TextManager.hp);
+        var message = value > 0 ? FTKR.DRM.message.hpPlus : FTKR.DRM.message.hpMinus;
+        this.setupBattleLogMessage(value, message, TextManager.hp);
     }
 };
 
@@ -110,7 +153,8 @@ Game_Battler.prototype.regenerateMp = function() {
     var value = Math.floor(this.mmp * this.mrg);
     if (value !== 0) {
         this.gainMp(value);
-        this.setupBattleLogMessage(value, FTKR.DRM.message.hpmp, TextManager.mp);
+        var message = value > 0 ? FTKR.DRM.message.mpPlus : FTKR.DRM.message.mpMinus;
+        this.setupBattleLogMessage(value, message, TextManager.mp);
     }
 };
 
@@ -118,7 +162,10 @@ Game_Battler.prototype.regenerateMp = function() {
 Game_Battler.prototype.regenerateTp = function() {
     var value = Math.floor(100 * this.trg);
     this.gainSilentTp(value);
-    if(value) this.setupBattleLogMessage(value, FTKR.DRM.message.tp, TextManager.tp);
+    if (value !== 0) {
+        var message = value > 0 ? FTKR.DRM.message.tpPlus : FTKR.DRM.message.tpMinus;
+        this.setupBattleLogMessage(value, message, TextManager.tp);
+    }
 };
 
 FTKR.DRM.Game_Battler_regenerateAll = Game_Battler.prototype.regenerateAll;
@@ -132,7 +179,7 @@ Game_Battler.prototype.regenerateAll = function() {
 //=============================================================================
 
 Game_Actor.prototype.setupBattleLogMessage = function(value, fmt, status) {
-    BattleManager.setupBattleLogMessage(fmt.format(this.name(), status, value))
+    BattleManager.setupBattleLogMessage(fmt.format(this.name(), status, Math.abs(value)));
 };
 
 //=============================================================================
@@ -140,5 +187,5 @@ Game_Actor.prototype.setupBattleLogMessage = function(value, fmt, status) {
 //=============================================================================
 
 Game_Enemy.prototype.setupBattleLogMessage = function(value, fmt, status) {
-    BattleManager.setupBattleLogMessage(fmt.format(this.name(), status, value))
+    BattleManager.setupBattleLogMessage(fmt.format(this.name(), status, Math.abs(value)));
 };
