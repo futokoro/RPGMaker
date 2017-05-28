@@ -2,7 +2,7 @@
 
 # [FTKR_ItemSelfVariables](FTKR_ItemSelfVariables.js) プラグイン
 
-オリジナルのパラメータを追加するプラグインです。
+アイテムやスキルなどにセルフ変数を実装するプラグインです。
 
 ダウンロード: [FTKR_ItemSelfVariables.js](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ItemSelfVariables.js)
 

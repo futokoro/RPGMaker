@@ -10,6 +10,7 @@
 
 以下の項目の順でプラグインの使い方を説明します。
 1. [概要](#概要)
+1. [プラグインの登録](#プラグインの登録)
 1. [戦闘勝利時のイベントの設定](#戦闘勝利時のイベントの設定)
 1. [戦闘敗北時のイベントの設定](#戦闘敗北時のイベントの設定)
 1. [戦闘中のイベントの設定](#戦闘中のイベントの設定)
@@ -32,6 +33,18 @@
 イベントの処理が終了すると、バトル画面が終了します。
 
 ![画像](image/FTKR_ExBattleEvent/n01_001.png)
+
+[目次に戻る](#目次)
+
+# プラグインの登録
+
+[FTKR_ItemSelfVariables](FTKR_ExVariablesChange.ja.md)プラグインと組み合わせて使用する場合は、当プラグインを上にしてください。
+```
+FTKR_ExBattleEvent.js
+FTKR_ExVariablesChange.js
+```
+順番が逆(当プラグインが下)の場合、FTKR_ExVariablesChangeの戦闘勝利時および戦闘敗北時の変数操作が実行できません。
+また、戦闘終了時の処理は、戦闘勝利イベントや敗北イベントの後に実行します。
 
 [目次に戻る](#目次)
 
@@ -440,6 +453,7 @@ EBE_POPUP_NUMBER 1 ERASE
 以下のプラグインを使用することで、本プラグインの機能を拡張できます。
 
 * [FTKR_SetupTroops.js](FTKR_SetupTroops.ja.md) - バトル中に敵グループに設定していないエネミーを追加できます。
+* [FTKR_ExVariablesChange](FTKR_ExVariablesChange.ja.md) - バトル中にイベントに拠らずに変数を操作できます。
 
 # ライセンス
 
