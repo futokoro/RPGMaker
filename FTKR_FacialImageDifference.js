@@ -3,8 +3,8 @@
 // FTKR_FacialImageDifference.js
 // 作成者     : フトコロ
 // 作成日     : 2017/05/10
-// 最終更新日 : 2017/05/23
-// バージョン : v1.1.0
+// 最終更新日 : 2017/05/28
+// バージョン : v1.1.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.FID = FTKR.FID || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.0 アクターの状態によって顔画像を変えるプラグイン
+ * @plugindesc v1.1.1 アクターの状態によって顔画像を変えるプラグイン
  * @author フトコロ
  *
  * @noteParam FID_画像
@@ -31,6 +31,17 @@ FTKR.FID = FTKR.FID || {};
  * @param Enable Face Difference
  * @desc 顔画像の変更機能を有効にするか (0 - 無効, 1 - 有効)
  * @default 1
+ * 
+ * @param --ダメージポップアップ位置--
+ * @desc 
+ * 
+ * @param Offset X
+ * @desc 顔画像に対するダメージポップアップ位置のX座標のずれ
+ * @default -32
+ * 
+ * @param Offset Y
+ * @desc 顔画像に対するダメージポップアップ位置のY座標のずれ
+ * @default 0
  * 
  * @param --画像番号変更--
  * @desc 
@@ -269,6 +280,11 @@ FTKR.FID = FTKR.FID || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.1 - 2017/05/27 : 不具合修正、機能追加
+ *    1. メニュー画面で顔画像が戦闘不能以外に変わらない不具合修正。
+ *    2. ダメージポップアップ位置を調整する機能を追加。
+ *    3. 単体スキルを受けたときのアニメーション表示位置を調整。
+ * 
  * v1.1.0 - 2017/05/23 : 仕様変更
  *    1. パーティーが全体魔法を受けた時のアニメーション表示位置を調整。
  *    2. パーティーが全体魔法を受けた時のダメージポップアップタイミングを調整。
@@ -299,6 +315,11 @@ FTKR.FID.parameters = PluginManager.parameters('FTKR_FacialImageDifference');
 
 FTKR.FID.enableAnimation = Number(FTKR.FID.parameters['Enable Animation'] || 0);
 FTKR.FID.enableFaceDifference = Number(FTKR.FID.parameters['Enable Face Difference'] || 0);
+
+FTKR.FID.damage = {
+    offsetX :Number(FTKR.FID.parameters['Offset X'] || 0),
+    offsetY :Number(FTKR.FID.parameters['Offset Y'] || 0),
+};
 
 //オリジナルステータス設定オブジェクト
 FTKR.FID.faces = {
@@ -461,7 +482,7 @@ Window_Base.prototype.drawCssFace = function(actor, dx, dy, width, height) {
     var sx = Math.floor(dx);
     var sy = Math.floor(dy + height + this.padding);
     sprite.setHome(sx, sy);
-    sprite.startMove(0,0,0);
+    sprite.startEntryMotion();
     sprite.setScale(scale);
 };
 
@@ -508,6 +529,11 @@ Sprite_ActorFace.prototype.setBattler = function(battler) {
         this._actor = battler;
         this.startEntryMotion();
     }
+};
+
+Sprite_ActorFace.prototype.startEntryMotion = function() {
+    this.refreshMotion();
+    this.startMove(0, 0, 0);
 };
 
 Sprite_ActorFace.prototype.update = function() {
@@ -635,6 +661,7 @@ Sprite_ActorFace.prototype.setupAnimation = function() {
 Sprite_ActorFace.prototype.startAnimation = function(animation, mirror, delay) {
     var sprite = new Sprite_FaceAnimation(this._spriteWindow);
     sprite.setup(this._effectTarget, animation, mirror, delay);
+    if (this.scale._y !== 1) sprite.setHeight(Sprite_ActorFace._imageHeight * this.scale._y);
     this.parent.addChild(sprite);
     this._animationSprites.push(sprite);
 };
@@ -650,6 +677,14 @@ Sprite_ActorFace.prototype.setupDamagePopup = function() {
         this._actor.clearDamagePopup();
         this._actor.clearResult();
     }
+};
+
+Sprite_ActorFace.prototype.damageOffsetX = function() {
+    return FTKR.FID.damage.offsetX;
+};
+
+Sprite_ActorFace.prototype.damageOffsetY = function() {
+    return FTKR.FID.damage.offsetY;
 };
 
 //=============================================================================
@@ -670,14 +705,31 @@ Sprite_FaceAnimation._checker2 = {};
 Sprite_FaceAnimation.prototype.initialize = function(window) {
     Sprite_Animation.prototype.initialize.call(this);
     this._spriteWindow = window;
+    this._spriteHeight = 144;
+};
+
+Sprite_FaceAnimation.prototype.setHeight = function(height) {
+    this._spriteHeight = height;
 };
 
 Sprite_FaceAnimation.prototype.updatePosition = function() {
-    Sprite_Animation.prototype.updatePosition.call(this);
     if (this._animation.position === 3) {
-        this.x -= this._spriteWindow.x;
-        this.y -= this._spriteWindow.y;
-        console.log(this.x, this.y);
+        this.x = this.parent.width / 2 - this._spriteWindow.x;
+        this.y = this.parent.height / 2 - this._spriteWindow.y;
+    } else {
+        var parent = this._target.parent;
+        var grandparent = parent ? parent.parent : null;
+        this.x = this._target.x;
+        this.y = this._target.y;
+        if (this.parent === grandparent) {
+            this.x += parent.x;
+            this.y += parent.y;
+        }
+        if (this._animation.position === 0) {
+            this.y -= this._spriteHeight;
+        } else if (this._animation.position === 1) {
+            this.y -= this._spriteHeight / 2;
+        }
     }
 };
 
