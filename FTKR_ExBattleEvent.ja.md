@@ -38,7 +38,7 @@
 
 # プラグインの登録
 
-[FTKR_ItemSelfVariables](FTKR_ExVariablesChange.ja.md)プラグインと組み合わせて使用する場合は、当プラグインを上にしてください。
+[FTKR_ExVariablesChange](FTKR_ExVariablesChange.ja.md)プラグインと組み合わせて使用する場合は、当プラグインを上にしてください。
 ```
 FTKR_ExBattleEvent.js
 FTKR_ExVariablesChange.js
