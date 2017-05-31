@@ -3,8 +3,8 @@
 // FTKR_CSS_BattleStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/11
-// 最終更新日 : 2017/05/11
-// バージョン : v1.1.2
+// 最終更新日 : 2017/05/31
+// バージョン : v1.2.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.2 バトル画面のステータス表示を変更するプラグイン
+ * @plugindesc v1.2.0 バトル画面のステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @param --レイアウト設定--
@@ -103,26 +103,30 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  * 0 - 無効, 1 - 有効
  * @default 0
  * 
- * @param Actor Position X
- * @desc 先頭のアクターの位置のX座標
- *  ( 標準 = 600 ,アクター1人分 = 32 )
+ * @param Max Number of Vertical
+ * @desc アクターを縦に並べる最大数
+ * @default 4
+ * 
+ * @param Center Position X
+ * @desc 前列の中心のX座標
  * @default 600
  *
- * @param Actor Position Y
- * @desc 先頭のアクターの位置のY座標
- *  ( 標準 = 280 ,アクター1人分 = 48 )
- * @default 280
+ * @param Center Position Y
+ * @desc 前列の中心のY座標
+ * @default 312
  *
  * @param Diff Position X
- * @desc 2番目以降のアクターのX座標のずれ
- *  ( 標準 = 32 )
+ * @desc 横方向のアクターの間隔
  * @default 32
  *
  * @param Diff Position Y
- * @desc 2番目以降のアクターのY座標のずれ
- *  ( 標準 = 48 )
+ * @desc 縦方向のアクターの間隔
  * @default 48
  * 
+ * @param Diff Column
+ * @desc 横方向の列の間隔
+ * @default 96
+ *
  * @help
  *-----------------------------------------------------------------------------
  * 概要
@@ -234,12 +238,19 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  *    :アクターの位置変更機能を使うか指定します。
  *    :0 - 無効, 1 - 有効
  * 
- * <Actor Position *>
- *    :先頭のアクターの位置を設定します。
+ * <Max Number of Vertical>
+ *    :アクターを縦に何人まで並べるか設定します。
+ *    :バトルメンバーがこの数以上になった場合、超過分の人数を後列に配置します。
+ * 
+ * <Center Position *>
+ *    :前列の中心の座標を設定します。
  * 
  * <Diff Position *>
  *    :2番目以降のアクターの位置を先頭のアクターから
  *    :どの程度ずらすか設定します。
+ * 
+ * <Diff Column>
+ *    :横方向の列の間隔(前列に対して後列をどの程度ずらすか)を設定します。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -256,8 +267,11 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.2.0 - 2017/05/31 : 機能追加
+ *    1. バトルフィールド上のSVキャラの初期位置変更機能を拡張。
+ * 
  * v1.1.2 - 2017/05/11 : 機能追加
- *    1. バトル画面のSVキャラの初期位置変更機能追加。
+ *    1. バトルフィールド上のSVキャラの初期位置変更機能追加。
  * 
  * v1.1.1 - 2017/05/06 : 機能追加
  *    1. 縦のカーソル間隔を設定する機能を追加。
@@ -307,10 +321,12 @@ FTKR.CSS.BS.simpleStatus = {
 
 FTKR.CSS.BS.position = {
     enable:Number(FTKR.CSS.BS.parameters['Enable Custom Position'] || 0),
-    homeX:Number(FTKR.CSS.BS.parameters['Actor Position X'] || 0),
-    homeY:Number(FTKR.CSS.BS.parameters['Actor Position Y'] || 0),
     diffX:Number(FTKR.CSS.BS.parameters['Diff Position X'] || 0),
     diffY:Number(FTKR.CSS.BS.parameters['Diff Position Y'] || 0),
+    diffCol:Number(FTKR.CSS.BS.parameters['Diff Column'] || 0),
+    centerX:Number(FTKR.CSS.BS.parameters['Center Position X'] || 0),
+    centerY:Number(FTKR.CSS.BS.parameters['Center Position Y'] || 0),
+    maxVer:Number(FTKR.CSS.BS.parameters['Max Number of Vertical'] || 0),
 };
 
 //=============================================================================
@@ -434,7 +450,6 @@ if (Imported.FTKR_CSS) {
   };
 };//FTKR_CustomSimpleActorStatus.jsが必要
 
-
 //=============================================================================
 // Sprite_Actor
 // バトルフィールド上のSVキャラの位置変更
@@ -442,11 +457,36 @@ if (Imported.FTKR_CSS) {
 FTKR.CSS.BS.Sprite_Actor_setActorHome = Sprite_Actor.prototype.setActorHome;
 Sprite_Actor.prototype.setActorHome = function(index) {
     FTKR.CSS.BS.Sprite_Actor_setActorHome.call(this, index);
-    var pos = FTKR.CSS.BS.position;
-    if (pos.enable) {
-        var positionX = pos.homeX + index * pos.diffX;
-        var positionY = pos.homeY + index * pos.diffY;
-        this.setHome(positionX, positionY);
+    if (FTKR.CSS.BS.position.enable) {
+        this.setHome(this.partyPositionX(index), this.partyPositionY(index));
     }
 };
 
+Sprite_Actor.prototype.partyPositionX = function(index) {
+    var party = Math.min($gameParty.battleMembers().length, FTKR.CSS.BS.position.maxVer);
+    var col = Math.floor(index / party);
+    var centerX = FTKR.CSS.BS.position.centerX - this.centerDiffX(party) + col * FTKR.CSS.BS.position.diffCol;
+    var positionX = centerX + (index % party) * FTKR.CSS.BS.position.diffX;
+    console.log(index, 'X', positionX);
+    return positionX;
+};
+
+Sprite_Actor.prototype.partyPositionY = function(index) {
+    var party = Math.min($gameParty.battleMembers().length, FTKR.CSS.BS.position.maxVer);
+    var centerY = FTKR.CSS.BS.position.centerY - this.centerDiffY(party);
+    var positionY = centerY + (index % party) * FTKR.CSS.BS.position.diffY;
+    console.log(index, 'Y', positionY);
+    return positionY;
+};
+
+Sprite_Actor.prototype.centerDiffY = function(party) {
+    var value1 = Math.floor((party + 1) / 2) * FTKR.CSS.BS.position.diffY;
+    var value2 = (Math.floor(party / 2 - 1) * 2 + 1) * FTKR.CSS.BS.position.diffY / 2;
+    return party % 2 ? value1 : value2;
+};
+
+Sprite_Actor.prototype.centerDiffX = function(party) {
+    var value1 = Math.floor((party + 1) / 2) * FTKR.CSS.BS.position.diffX;
+    var value2 = (Math.floor(party / 2 - 1) * 2 + 1) * FTKR.CSS.BS.position.diffX / 2;
+    return party % 2 ? value1 : value2;
+};

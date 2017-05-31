@@ -3,8 +3,8 @@
 // FTKR_ExMessageWindow2.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/24
-// 最終更新日 : 2017/05/25
-// バージョン : v2.1.1
+// 最終更新日 : 2017/05/31
+// バージョン : v2.1.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EMW = FTKR.EMW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.1.1 一度に複数のメッセージウィンドウを表示するプラグイン
+ * @plugindesc v2.1.2 一度に複数のメッセージウィンドウを表示するプラグイン
  * @author フトコロ
  * 
  * @param --初期設定--
@@ -521,6 +521,9 @@ FTKR.EMW = FTKR.EMW || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.1.2 - 2017/05/31 : 不具合修正
+ *    1. 決定ボタン待ちのウィンドウを正常に強制終了できない不具合を修正。
+ * 
  * v2.1.1 - 2017/05/25 : 不具合修正
  *    1. ウィンドウの強制終了が正常に動作しない不具合を修正。
  * 
@@ -883,6 +886,7 @@ Window_Message.prototype.updateWait = function() {
         this._waitCount = 0;
         if(this._textState) this._textState.index = this._textState.text.length;
         this._pauseSkip = true;
+        this.pause = false;
         this._gameMessage.resetTerminate();
         return false;
     }
@@ -1318,6 +1322,7 @@ Window_MessageEx.prototype.updateWait = function() {
         this._waitCount = 0;
         if(this._textState) this._textState.index = this._textState.text.length;
         this._pauseSkip = true;
+        this.pause = false;
         this._gameMessage.resetTerminate();
         return false;
     }
