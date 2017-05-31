@@ -467,7 +467,6 @@ Sprite_Actor.prototype.partyPositionX = function(index) {
     var col = Math.floor(index / party);
     var centerX = FTKR.CSS.BS.position.centerX - this.centerDiffX(party) + col * FTKR.CSS.BS.position.diffCol;
     var positionX = centerX + (index % party) * FTKR.CSS.BS.position.diffX;
-    console.log(index, 'X', positionX);
     return positionX;
 };
 
@@ -475,7 +474,6 @@ Sprite_Actor.prototype.partyPositionY = function(index) {
     var party = Math.min($gameParty.battleMembers().length, FTKR.CSS.BS.position.maxVer);
     var centerY = FTKR.CSS.BS.position.centerY - this.centerDiffY(party);
     var positionY = centerY + (index % party) * FTKR.CSS.BS.position.diffY;
-    console.log(index, 'Y', positionY);
     return positionY;
 };
 
