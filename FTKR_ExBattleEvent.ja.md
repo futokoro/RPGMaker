@@ -53,8 +53,13 @@ FTKR_ExVariablesChange.js
 通常の戦闘勝利時の処理の替わりに、コモンイベントまたは敵グループに設定したイベントを実行します。
 実行するイベントは以下のいずれかです。
 
-１．プラグインパラメータ`<Victory Event>`に設定したIDのコモンイベント<br>
+１．プラグインパラメータ`<Victory Event>`に設定したIDのコモンイベント
+
+![画像](image/FTKR_ExBattleEvent/n02_001.png)
+
 ２．敵グループのバトルイベントで、注釈で`<EBE_戦闘勝利時>`と記入したページ
+
+![画像](image/FTKR_ExBattleEvent/n02_002.png)
 
 １と２どちらもある場合は、バトルイベントを実行します。
 
