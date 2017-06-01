@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2017/05/13
-// バージョン : v1.5.3
+// 最終更新日 : 2017/06/01
+// バージョン : v1.6.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.5.3 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v1.6.0 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -446,12 +446,21 @@ FTKR.CSS = FTKR.CSS || {};
  * @param --カスタムゲージの設定--
  * @default
  * 
+ * @param Gauge Param Digit
+ * @desc 現在値と最大値の表示幅を指定した桁数に設定する
+ * @default 4
+ * 
  * @param --Gauge Param 0--
  * @default
  * 
  * @param Gauge 0 Display Name
  * @desc Gauge(0)の表示名を設定します
- * @default EXP
+ * @default \C[16]EXP
+ * 
+ * @param Gauge 0 References
+ * @desc Gauge(0)で表示する値の参照先を設定します。
+ * アクターを a として、ステータスの参照先を記述すること。
+ * @default 
  * 
  * @param Gauge 0 Current
  * @desc Gauge(0)の現在値の参照先を設定します。
@@ -476,6 +485,11 @@ FTKR.CSS = FTKR.CSS || {};
  * 
  * @param Gauge 1 Display Name
  * @desc Gauge(1)の表示名を設定します
+ * @default 
+ * 
+ * @param Gauge 1 References
+ * @desc Gauge(1)で表示する値の参照先を設定します。
+ * アクターを a として、ステータスの参照先を記述すること。
  * @default 
  * 
  * @param Gauge 1 Current
@@ -503,6 +517,11 @@ FTKR.CSS = FTKR.CSS || {};
  * @desc Gauge(2)の表示名を設定します
  * @default 
  * 
+ * @param Gauge 2 References
+ * @desc Gauge(2)で表示する値の参照先を設定します。
+ * アクターを a として、ステータスの参照先を記述すること。
+ * @default 
+ * 
  * @param Gauge 2 Current
  * @desc Gauge(2)の現在値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
@@ -526,6 +545,11 @@ FTKR.CSS = FTKR.CSS || {};
  * 
  * @param Gauge 3 Display Name
  * @desc Gauge(3)の表示名を設定します
+ * @default 
+ * 
+ * @param Gauge 3 References
+ * @desc Gauge(3)で表示する値の参照先を設定します。
+ * アクターを a として、ステータスの参照先を記述すること。
  * @default 
  * 
  * @param Gauge 3 Current
@@ -553,6 +577,11 @@ FTKR.CSS = FTKR.CSS || {};
  * @desc Gauge(4)の表示名を設定します
  * @default 
  * 
+ * @param Gauge 4 References
+ * @desc Gauge(4)で表示する値の参照先を設定します。
+ * アクターを a として、ステータスの参照先を記述すること。
+ * @default 
+ * 
  * @param Gauge 4 Current
  * @desc Gauge(4)の現在値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
@@ -576,6 +605,11 @@ FTKR.CSS = FTKR.CSS || {};
  * 
  * @param Gauge 5 Display Name
  * @desc Gauge(5)の表示名を設定します
+ * @default 
+ * 
+ * @param Gauge 5 References
+ * @desc Gauge(5)で表示する値の参照先を設定します。
+ * アクターを a として、ステータスの参照先を記述すること。
  * @default 
  * 
  * @param Gauge 5 Current
@@ -603,6 +637,11 @@ FTKR.CSS = FTKR.CSS || {};
  * @desc Gauge(6)の表示名を設定します
  * @default 
  * 
+ * @param Gauge 6 References
+ * @desc Gauge(6)で表示する値の参照先を設定します。
+ * アクターを a として、ステータスの参照先を記述すること。
+ * @default 
+ * 
  * @param Gauge 6 Current
  * @desc Gauge(6)の現在値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
@@ -626,6 +665,11 @@ FTKR.CSS = FTKR.CSS || {};
  * 
  * @param Gauge 7 Display Name
  * @desc Gauge(7)の表示名を設定します
+ * @default 
+ * 
+ * @param Gauge 7 References
+ * @desc Gauge(7)で表示する値の参照先を設定します。
+ * アクターを a として、ステータスの参照先を記述すること。
  * @default 
  * 
  * @param Gauge 7 Current
@@ -653,6 +697,11 @@ FTKR.CSS = FTKR.CSS || {};
  * @desc Gauge(8)の表示名を設定します
  * @default 
  * 
+ * @param Gauge 8 References
+ * @desc Gauge(8)で表示する値の参照先を設定します。
+ * アクターを a として、ステータスの参照先を記述すること。
+ * @default 
+ * 
  * @param Gauge 8 Current
  * @desc Gauge(8)の現在値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
@@ -676,6 +725,11 @@ FTKR.CSS = FTKR.CSS || {};
  * 
  * @param Gauge 9 Display Name
  * @desc Gauge(9)の表示名を設定します
+ * @default 
+ * 
+ * @param Gauge 9 References
+ * @desc Gauge(9)で表示する値の参照先を設定します。
+ * アクターを a として、ステータスの参照先を記述すること。
  * @default 
  * 
  * @param Gauge 9 Current
@@ -879,6 +933,7 @@ FTKR.CSS = FTKR.CSS || {};
  * プラグインパラメータ<Actor Status Text*>にて、'sv'を入力した場合
  * アクターのSVキャラクタ画像(SV戦闘キャラ)を表示します。
  * SVキャラクタ画像について、以下のパラメータで設定を変更できます。
+ * なお、SVキャラクタ画像は、フロントビューモードのゲームでは表示できません。
  * 
  * <Sv Image Width>
  * <Sv Image Height>
@@ -980,20 +1035,33 @@ FTKR.CSS = FTKR.CSS || {};
  * <Gauge Param x>で設定したゲージを表示することができます。
  * カスタムゲージは、最大で10種類設定できます。
  * 
+ * １．共通設定
+ * <Gauge Param Digit>
+ *    :現在値と最大値の表示幅を指定した桁数に設定します。
+ *    :この桁数以上の値の場合、横に圧縮して表示します。
+ * 
+ * ２．個別設定
  * <Gauge x Display Name>
  *    :ゲージの表示名を設定します。
  *    :表示名には制御文字が使用できます。
+ *    :表示名を設定しない場合、ゲージの現在値と最大値の数値を表示しません。
+ * 
+ * <Gauge x References>
+ *    :ゲージで表示する値の参照先をeval値で設定します。
+ *    :この値を設定すると、現在値と最大値は表示しません。
  * 
  * <Gauge x Current>
  *    :ゲージの現在値の参照先をeval値で設定します。
  * 
  * <Gauge x Max>
  *    :ゲージの最大値の参照先をeval値で設定します。
+ *    :最大値の数値は、描画エリアの幅が足りない場合には表示しません。
  * 
  * <Gauge x Color1>
  * <Gauge x Color2>
  *    :ゲージの色1と色2を設定します。
  *    :色1と色2の値を変えることで、HPゲージのようにグラデーションになります。
+ *    :-1 を指定すると、ゲージバーが非表示になります。
  * 
  * [eval の値について]
  * eval部は、ダメージ計算式のように、計算式を入力することで、固定値以外の値を
@@ -1115,6 +1183,11 @@ FTKR.CSS = FTKR.CSS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.6.0 - 2017/06/31 : 機能見直し、機能追加
+ *    1. カスタムゲージの表示内容の調整機能を見直し。
+ *    2. カスタムゲージのゲージバーを非表示にする機能を追加。
+ *    3. カスタムゲージに現在値と最大値の替わりに指定した値を設定する機能を追加。
  * 
  * v1.5.3 - 2017/05/13 : 機能追加
  *    1. 装備画面で使用可能な、パラメータ表示コードを追加。
@@ -1278,6 +1351,9 @@ FTKR.CSS.cssStatus = {
     equip:{
         arrow:String(FTKR.CSS.parameters['Equip Right Arrow'] || ''),
     },
+    gauge:{
+        digit :Number(FTKR.CSS.parameters['Gauge Param Digit'] || 0),
+    },
     customs:[
         {name:String(FTKR.CSS.parameters['Custom 0 Display Name'] || ''),
           formula:String(FTKR.CSS.parameters['Custom 0 References'] || ''),},
@@ -1322,51 +1398,61 @@ FTKR.CSS.cssStatus = {
     ],
     gauges:[
         {name:String(FTKR.CSS.parameters['Gauge 0 Display Name'] || ''),
+          ref:String(FTKR.CSS.parameters['Gauge 0 References'] || ''),
           current:String(FTKR.CSS.parameters['Gauge 0 Current'] || ''),
           max:String(FTKR.CSS.parameters['Gauge 0 Max'] || ''),
           color1:Number(FTKR.CSS.parameters['Gauge 0 Color1'] || 0),
           color2:Number(FTKR.CSS.parameters['Gauge 0 Color2'] || 0),},
         {name:String(FTKR.CSS.parameters['Gauge 1 Display Name'] || ''),
+          ref:String(FTKR.CSS.parameters['Gauge 1 References'] || ''),
           current:String(FTKR.CSS.parameters['Gauge 1 Current'] || ''),
           max:String(FTKR.CSS.parameters['Gauge 1 Max'] || ''),
           color1:Number(FTKR.CSS.parameters['Gauge 1 Color1'] || 0),
           color2:Number(FTKR.CSS.parameters['Gauge 1 Color2'] || 0),},
         {name:String(FTKR.CSS.parameters['Gauge 2 Display Name'] || ''),
+          ref:String(FTKR.CSS.parameters['Gauge 2 References'] || ''),
           current:String(FTKR.CSS.parameters['Gauge 2 Current'] || ''),
           max:String(FTKR.CSS.parameters['Gauge 2 Max'] || ''),
           color1:Number(FTKR.CSS.parameters['Gauge 2 Color1'] || 0),
           color2:Number(FTKR.CSS.parameters['Gauge 2 Color2'] || 0),},
         {name:String(FTKR.CSS.parameters['Gauge 3 Display Name'] || ''),
+          ref:String(FTKR.CSS.parameters['Gauge 3 References'] || ''),
           current:String(FTKR.CSS.parameters['Gauge 3 Current'] || ''),
           max:String(FTKR.CSS.parameters['Gauge 3 Max'] || ''),
           color1:Number(FTKR.CSS.parameters['Gauge 3 Color1'] || 0),
           color2:Number(FTKR.CSS.parameters['Gauge 3 Color2'] || 0),},
         {name:String(FTKR.CSS.parameters['Gauge 4 Display Name'] || ''),
+          ref:String(FTKR.CSS.parameters['Gauge 4 References'] || ''),
           current:String(FTKR.CSS.parameters['Gauge 4 Current'] || ''),
           max:String(FTKR.CSS.parameters['Gauge 4 Max'] || ''),
           color1:Number(FTKR.CSS.parameters['Gauge 4 Color1'] || 0),
           color2:Number(FTKR.CSS.parameters['Gauge 4 Color2'] || 0),},
         {name:String(FTKR.CSS.parameters['Gauge 5 Display Name'] || ''),
+          ref:String(FTKR.CSS.parameters['Gauge 5 References'] || ''),
           current:String(FTKR.CSS.parameters['Gauge 5 Current'] || ''),
           max:String(FTKR.CSS.parameters['Gauge 5 Max'] || ''),
           color1:Number(FTKR.CSS.parameters['Gauge 5 Color1'] || 0),
           color2:Number(FTKR.CSS.parameters['Gauge 5 Color2'] || 0),},
         {name:String(FTKR.CSS.parameters['Gauge 6 Display Name'] || ''),
+          ref:String(FTKR.CSS.parameters['Gauge 6 References'] || ''),
           current:String(FTKR.CSS.parameters['Gauge 6 Current'] || ''),
           max:String(FTKR.CSS.parameters['Gauge 6 Max'] || ''),
           color1:Number(FTKR.CSS.parameters['Gauge 6 Color1'] || 0),
           color2:Number(FTKR.CSS.parameters['Gauge 6 Color2'] || 0),},
         {name:String(FTKR.CSS.parameters['Gauge 7 Display Name'] || ''),
+          ref:String(FTKR.CSS.parameters['Gauge 7 References'] || ''),
           current:String(FTKR.CSS.parameters['Gauge 7 Current'] || ''),
           max:String(FTKR.CSS.parameters['Gauge 7 Max'] || ''),
           color1:Number(FTKR.CSS.parameters['Gauge 7 Color1'] || 0),
           color2:Number(FTKR.CSS.parameters['Gauge 7 Color2'] || 0),},
         {name:String(FTKR.CSS.parameters['Gauge 8 Display Name'] || ''),
+          ref:String(FTKR.CSS.parameters['Gauge 8 References'] || ''),
           current:String(FTKR.CSS.parameters['Gauge 8 Current'] || ''),
           max:String(FTKR.CSS.parameters['Gauge 8 Max'] || ''),
           color1:Number(FTKR.CSS.parameters['Gauge 8 Color1'] || 0),
           color2:Number(FTKR.CSS.parameters['Gauge 8 Color2'] || 0),},
         {name:String(FTKR.CSS.parameters['Gauge 9 Display Name'] || ''),
+          ref:String(FTKR.CSS.parameters['Gauge 9 References'] || ''),
           current:String(FTKR.CSS.parameters['Gauge 9 Current'] || ''),
           max:String(FTKR.CSS.parameters['Gauge 9 Max'] || ''),
           color1:Number(FTKR.CSS.parameters['Gauge 9 Color1'] || 0),
@@ -1599,6 +1685,12 @@ Window_Base.prototype.showActorNum = function() {
     return this.maxPageItems ? this.maxPageItems() : 1;
 };
 
+Window_Base.prototype.evalCssCustomFormula = function(actor, formula) {
+    if (!formula) return '';
+    FTKR.setGameData(actor);
+    return FTKR.evalFormula(formula);
+};
+
 /*-------------------------------------------------------------
 アクターの簡易ステータスを表示する関数
 drawCssActorStatus(index, actor, x, y, width, height, lss)
@@ -1741,8 +1833,6 @@ Window_Base.prototype.drawCssFace = function(actor, dx, dy, width, height) {
     var offsetX = FTKR.CSS.cssStatus.face.posiX * (width - dw) / 2;
     dx = Math.floor(dx + offsetX);
     var bitmap = ImageManager.loadFace(actor.faceName());
-    var pw = Window_Base._faceWidth;
-    var ph = Window_Base._faceHeight;
     var sw = Window_Base._faceWidth;
     var sh = Window_Base._faceHeight;
     var sx = actor.faceIndex() % 4 * sw;
@@ -1957,7 +2047,7 @@ Window_Base.prototype.drawCssActorParam = function(actor, x, y, width, paramId) 
 Window_Base.prototype.drawCssActorCustom = function(actor, x, y, width, custom) {
     var name = custom.name || '';
     var formula = custom.formula || '';
-    var value = actor.evalCssCustomFormula(formula);
+    var value = this.evalCssCustomFormula(actor, formula);
     this.changeTextColor(this.systemColor());
     var tx = this.drawTextEx(name, x, y);
     this.resetTextColor();
@@ -1969,24 +2059,46 @@ Window_Base.prototype.drawCssActorCustom = function(actor, x, y, width, custom) 
 //カスタムゲージの表示関数
 //------------------------------------------------------------------------
 Window_Base.prototype.drawCssActorGauge = function(actor, x, y, width, gauge) {
-    if (!gauge.name || !gauge.current || !gauge.max) return 0;
-    var color1 = this.textColor(gauge.color1);
-    var color2 = this.textColor(gauge.color2);
-    var current = actor.evalCssCustomFormula(gauge.current);
-    var max = actor.evalCssCustomFormula(gauge.max);
-    var rate = current / max;
-    this.drawGauge(x, y, width, rate, color1, color2);
+    if (!gauge.current || !gauge.max) return 0;
+    var current = this.evalCssCustomFormula(actor, gauge.current);
+    var max = this.evalCssCustomFormula(actor, gauge.max);
+    if (gauge.color1 >= 0 && gauge.color2 >= 0) {
+        var rate = current / max;
+        var color1 = this.textColor(gauge.color1);
+        var color2 = this.textColor(gauge.color2);
+        this.drawGauge(x, y, width, rate, color1, color2);
+    }
     this.changeTextColor(this.systemColor());
     var tx = this.drawTextEx(gauge.name, x, y, width);
-    this.drawCurrentAndMax(current, max, x + tx, y, width - tx,
-                           this.normalColor(), this.normalColor());
+    if (gauge.ref) {
+        var ref = this.evalCssCustomFormula(actor, gauge.ref);
+        this.resetTextColor();
+        this.drawText(ref, x + tx, y, width - tx, 'right');
+    } else {
+        if (tx) this.drawCssCurrentAndMax(tx, current, max, x, y, width,
+                              this.normalColor(), this.normalColor());
+    }
     return 1;
 };
 
-Game_Actor.prototype.evalCssCustomFormula = function(formula) {
-    if (!formula) return '';
-    FTKR.setGameData(this);
-    return FTKR.evalFormula(formula);
+Window_Base.prototype.drawCssCurrentAndMax = function(labelWidth, current, max, x, y,
+                                                   width, color1, color2) {
+    var gauge = FTKR.CSS.cssStatus.gauge;
+    var valueWidth = this.textWidth('0') * gauge.digit;
+    var slashWidth = this.textWidth('/');
+    var x1 = x + width - valueWidth;
+    var x2 = x1 - slashWidth;
+    var x3 = x2 - valueWidth;
+    if (x3 >= x + labelWidth) {
+        this.changeTextColor(color1);
+        this.drawText(current, x3, y, valueWidth, 'right');
+        this.changeTextColor(color2);
+        this.drawText('/', x2, y, slashWidth, 'right');
+        this.drawText(max, x1, y, valueWidth, 'right');
+    } else {
+        this.changeTextColor(color1);
+        this.drawText(current, x1, y, valueWidth, 'right');
+    }
 };
 
 //------------------------------------------------------------------------

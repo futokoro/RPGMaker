@@ -3,8 +3,8 @@
 // FTKR_ExBattleEvent.js
 // 作成者     : フトコロ
 // 作成日     : 2017/05/25
-// 最終更新日 : 2017/05/26
-// バージョン : v1.1.0
+// 最終更新日 : 2017/06/01
+// バージョン : v1.2.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -14,7 +14,7 @@ var FTKR = FTKR || {};
 FTKR.EBE = FTKR.EBE || {};
 
 /*:
- * @plugindesc v1.1.0 バトルイベントを拡張するプラグイン
+ * @plugindesc v1.2.0 バトルイベントを拡張するプラグイン
  * @author フトコロ
  * 
  * @param Battle Event
@@ -389,6 +389,24 @@ FTKR.EBE = FTKR.EBE || {};
  * 　　EBE_POPUP_NUMBER 1 ERASE
  * 
  * 
+ * ４．戦闘行動の設定
+ * 　EBE_敵キャラの戦闘行動の設定 [メンバーID]
+ * 　EBE_BATTLE_ENEMY_ACTION [MEMBERID]
+ * 
+ * 　指定の敵キャラの戦闘行動を再設定します。
+ * 　敵キャラがターン開始時に行動を設定してからターン中に行動する間に
+ * 　このコマンドを実行することで、行動を変えることができます。
+ * 
+ * 　[メンバーID]の入力内容
+ * 　0~ - 最初を 0番として、敵グループに追加した順番で敵キャラを指定します
+ * 
+ * 　(参考)
+ * 　指定の敵キャラが行動済みかどうかを調べるスクリプト
+ * 　BattleManager.isActedEnemy(メンバーID)
+ * 
+ * 
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * 本プラグインのライセンスについて(License)
  *-----------------------------------------------------------------------------
@@ -402,6 +420,9 @@ FTKR.EBE = FTKR.EBE || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.2.0 - 2017/06/01 : 機能追加
+ *    1. 敵キャラの戦闘行動を再設定するプラグインコマンドを追加。
  * 
  * v1.1.0 - 2017/05/26 : 機能追加
  *    1. バトル中にコモンイベントを実行できる機能を追加。
@@ -598,6 +619,11 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
         case 'POPUP_NUMBER':
             this.setupNumberPopup(args);
             break;
+        case '敵キャラの戦闘行動の設定':
+        case 'SET_BATTLE_ENEMY_ACTION':
+            var memberId = this.setArgNumber(args[0]);
+            $gameTroop.members()[memberId].makeActions();
+            break;
     }
 };
 
@@ -721,6 +747,18 @@ BattleManager.setupNumberPopup = function(index) {
 BattleManager.eraseNumberPopup = function(index) {
     this._spriteset._battleField.removeChild(this._numberSprite[index]);
     this._numberSprite[index] = {};
+};
+
+BattleManager.isActed = function(battler) {
+    return !this._actionBattlers.contains(battler);
+};
+
+BattleManager.isActedEnemy = function(battlerId) {
+    return !this.isActed($gameTroop.members()[battlerId]);
+};
+
+BattleManager.isActedActor = function(battlerId) {
+    return !this.isActed($gameParty.members()[battlerId]);
 };
 
 //=============================================================================
