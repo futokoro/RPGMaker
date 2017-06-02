@@ -3,8 +3,8 @@
 // FTKR_ItemCategoryFixed.js
 // 作成者     : フトコロ
 // 作成日     : 2017/06/01
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2017/06/02
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -14,7 +14,7 @@ var FTKR = FTKR || {};
 FTKR.ICF = FTKR.ICF || {};
 
 /*:
- * @plugindesc v1.0.0 アイテムボックスのカテゴリ選択を無くす
+ * @plugindesc v1.0.1 アイテムボックスのカテゴリ選択を無くす
  * @author フトコロ
  *
  * @param Item Category
@@ -57,6 +57,7 @@ FTKR.ICF = FTKR.ICF || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.1 - 2017/06/02 : ショップの売却シーンに対応
  * v1.0.0 - 2017/06/01 : 初版作成
  * 
  *-----------------------------------------------------------------------------
@@ -124,5 +125,46 @@ Scene_Item.prototype.createItemWindow = function() {
 //アイテムウィンドウでキャンセルするとメニュー画面に戻る
 Scene_Item.prototype.onItemCancel = function() {
     this._itemWindow.deselect();
-    this.popScene();
+    this.popScene();0
 };
+
+//=============================================================================
+//Scene_Shop
+// 直接アイテムリストを選択できるようにする
+//=============================================================================
+
+FTKR.ICF.Scene_Shop_createSellWindow = Scene_Shop.prototype.createSellWindow;
+Scene_Shop.prototype.createSellWindow = function() {
+    FTKR.ICF.Scene_Shop_createSellWindow.call(this);
+    //アイテムウィンドウのサイズ調整
+    this._sellWindow.y = this._dummyWindow.y;
+    this._sellWindow.height = Graphics.boxHeight - this._sellWindow.y;
+};
+
+//書き換え
+Scene_Shop.prototype.activateSellWindow = function() {
+    this._sellWindow.refresh();
+    this._sellWindow.show();
+    this._sellWindow.activate();
+    this._statusWindow.hide();
+};
+
+//書き換え
+Scene_Shop.prototype.commandSell = function() {
+    this._dummyWindow.hide();
+    this._sellWindow.show();
+    this._sellWindow.activate();
+    this._sellWindow.select(0);
+    this._sellWindow.refresh();
+};
+
+//書き換え
+Scene_Shop.prototype.onSellCancel = function() {
+    this._sellWindow.deselect();
+    this._statusWindow.setItem(null);
+    this._helpWindow.clear();
+    this._commandWindow.activate();
+    this._dummyWindow.show();
+    this._sellWindow.hide();
+};
+
