@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2017/06/01
-// バージョン : v1.6.0
+// 最終更新日 : 2017/06/02
+// バージョン : v1.7.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.6.0 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v1.7.0 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -792,7 +792,7 @@ FTKR.CSS = FTKR.CSS || {};
  *    :入力できるパラメータ名は、
  *    :face(x), chara, sv, name, class, nickname, hp, mp, tp, level, 
  *    :state, state2(x), profile, param(x), custom(x), gauge(x), 
- *    :equip(x), text(x), image, eparam(x)です。
+ *    :equip(x), text(x), image, eparam(x), agauge(x), cgauge(x)です。
  *    :
  *    :face, face(x) -
  *    : 顔画像を表示します。
@@ -841,6 +841,11 @@ FTKR.CSS = FTKR.CSS || {};
  *    : 5 - 魔法防御、6 - 敏捷性、7 - 運
  *    : 矢印記号は、プラグインパラメータ<Equip Right Arror>で変更できます。
  *    :
+ *    :agauge(x) - 
+ *    : アクターのメモ欄で設定したカスタムゲージを表示します。
+ *    :
+ *    :cgauge(x) - 
+ *    : クラスのメモ欄で設定したカスタムゲージを表示します。
  *    :
  *    :カンマ(,)で区切って複数のパラメータを入力した場合は、
  *    :行を変えてそれぞれのパラメータを表示します。
@@ -1087,6 +1092,11 @@ FTKR.CSS = FTKR.CSS || {};
  * </CSS_画像>
  *    :ImageName - 表示させたい画像名を入力します。(*1)
  * 
+ * または
+ * <CSS_IMAGE:ImageName>
+ * code
+ * </CSS_IMAGE>
+ * 
  * (*1)画像は、プロジェクトフォルダ内の/img/picture/に保存してください。
  * 
  * [code に使用できる項目]
@@ -1102,6 +1112,85 @@ FTKR.CSS = FTKR.CSS || {};
  * 
  * Bgi height: n
  *    :画像ファイルを四角に切り取る時の高さを入力します。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * アクター別のカスタムゲージの設定 [ agauge(x) ]
+ *-----------------------------------------------------------------------------
+ * プラグインパラメータ<Actor Status Text*>にて、'agauge(x)'を入力した場合
+ * アクターのメモ欄で設定したゲージを表示することができます。
+ * 現在値と最大値の表示桁数はカスタムゲージの設定を使用します。
+ * 
+ * 使用する場合は、以下のタグをアクターのメモ欄に追記してください。
+ * 
+ * <CSS_カスタム:x>
+ * code
+ * </CSS_カスタム>
+ * 
+ * または
+ * 
+ * <CSS_CUSTOM:x>
+ * code
+ * </CSS_CUSTOM>
+ * 
+ * [code に使用できる項目]
+ * 表示名: y
+ * NAME: y
+ *    :ゲージの表示名を y に設定します。
+ *    :表示名には制御文字が使用できます。
+ *    :表示名を設定しない場合、ゲージの現在値と最大値の数値を表示しません。
+ * 
+ * 参照先: eval
+ * REFERENCES: eval
+ *    :ゲージで表示する値の参照先をeval値で設定します。
+ *    :この値を設定すると、現在値と最大値は表示しません。
+ * 
+ * 現在値: eval
+ * CURRENT: eval
+ *    :ゲージの現在値の参照先をeval値で設定します。
+ * 
+ * 最大値: eval
+ * MAX: eval
+ *    :ゲージの最大値の参照先をeval値で設定します。
+ *    :最大値の数値は、描画エリアの幅が足りない場合には表示しません。
+ * 
+ * 色: y1,y2
+ * COLOR: y1,y2
+ *    :ゲージの色1を y1 に、色2を y2 に設定します。
+ *    :色1と色2の値を変えることで、HPゲージのようにグラデーションになります。
+ *    :-1 を指定すると、ゲージバーが非表示になります。
+ * 
+ * [eval の値について]
+ * eval部は、ダメージ計算式のように、計算式を入力することで、固定値以外の値を
+ * 使用することができます。以下のコードを使用できます。
+ *  a.param - 使用者のパラメータを参照します。(a.hit で使用者の命中率)
+ *  v[x]    - 変数ID x の値を参照します。
+ *  s[x]    - スイッチID x の値を参照します。
+ * 
+ * 命中率のような百分率の値の場合、'a.hit'のように記述すると少数で表示します。
+ * そのため、'a.hit * 100'や、'Math.parcent(a.hit)'などと記述して
+ * 整数に変換するようにします。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * クラス別のカスタムゲージの設定 [ cgauge(x) ]
+ *-----------------------------------------------------------------------------
+ * プラグインパラメータ<Actor Status Text*>にて、'cgauge(x)'を入力した場合
+ * クラスのメモ欄で設定したゲージを表示することができます。
+ * 現在値と最大値の表示桁数はカスタムゲージの設定を使用します。
+ * 
+ * 使用する場合は、以下のタグをアクターのメモ欄に追記してください。
+ * code部の仕様は、アクター別のカスタムゲージと同じです。
+ * 
+ * <CSS_カスタム:x>
+ * code
+ * </CSS_カスタム>
+ * 
+ * または
+ * 
+ * <CSS_CUSTOM:x>
+ * code
+ * </CSS_CUSTOM>
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -1184,7 +1273,13 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
- * v1.6.0 - 2017/06/31 : 機能見直し、機能追加
+ * v1.7.0 - 2017/06/02 : 機能追加、不具合修正
+ *    1. アクター毎に個別に設定できるカスタムゲージを追加。
+ *    2. クラス毎に個別に設定できるカスタムゲージを追加。
+ *    3. プラグインパラメータ<Enabled Skill Status>を無効にした場合
+ *       スキル画面のステータス欄が表示しない不具合を修正。
+ * 
+ * v1.6.0 - 2017/06/01 : 機能見直し、機能追加
  *    1. カスタムゲージの表示内容の調整機能を見直し。
  *    2. カスタムゲージのゲージバーを非表示にする機能を追加。
  *    3. カスタムゲージに現在値と最大値の替わりに指定した値を設定する機能を追加。
@@ -1291,1047 +1386,1171 @@ FTKR.CSS = FTKR.CSS || {};
  */
 //=============================================================================
 
-//=============================================================================
-// プラグイン パラメータ
-//=============================================================================
-FTKR.CSS.parameters = PluginManager.parameters('FTKR_CustomSimpleActorStatus');
+(function() {
 
-FTKR.CSS.enabledSS = Number(FTKR.CSS.parameters['Enabled Simple Status'] || 0);
-FTKR.CSS.enabledSkill = Number(FTKR.CSS.parameters['Enabled Skill Status'] || 0);
+    //=============================================================================
+    // プラグイン パラメータ
+    //=============================================================================
+    var parameters = PluginManager.parameters('FTKR_CustomSimpleActorStatus');
 
-//簡易ステータスオブジェクト
-FTKR.CSS.simpleStatus = {
-    text1:String(FTKR.CSS.parameters['Actor Status Text1'] || ''),
-    text2:String(FTKR.CSS.parameters['Actor Status Text2'] || ''),
-    text3:String(FTKR.CSS.parameters['Actor Status Text3'] || ''),
-    space:String(FTKR.CSS.parameters['Actor Status Space'] || ''),
-    spaceIn:Number(FTKR.CSS.parameters['Actor Status Space In Text'] || 0),
-    widthRate:String(FTKR.CSS.parameters['Actor Status Width Rate'] || ''),
-};
+    FTKR.CSS.enabledSS = Number(parameters['Enabled Simple Status'] || 0);
+    FTKR.CSS.enabledSkill = Number(parameters['Enabled Skill Status'] || 0);
 
-//ウィンドウ設定オブジェクト
-FTKR.CSS.window = {
-    enabled:Number(FTKR.CSS.parameters['Enabled Custom Window'] || 0),
-    numVisibleRows:Number(FTKR.CSS.parameters['Number Visible Rows'] || 0),
-    maxCols:Number(FTKR.CSS.parameters['Number Max Cols'] || 0),
-    fontSize:Number(FTKR.CSS.parameters['Font Size'] || 0),
-    padding:Number(FTKR.CSS.parameters['Window Padding'] || 0),
-    lineHeight:Number(FTKR.CSS.parameters['Window Line Height'] || 0),
-    opacity:Number(FTKR.CSS.parameters['Window Opacity'] || 0),
-    hideFrame:Number(FTKR.CSS.parameters['Hide Window Frame'] || 0),
-    cursolHeight:Number(FTKR.CSS.parameters['Cursol Line Number'] || 0),
-    hspace:Number(FTKR.CSS.parameters['Cursol Height Space'] || 0),
-};
-
-//オリジナルステータス設定オブジェクト
-FTKR.CSS.cssStatus = {
-    face:{
-        posiX:Number(FTKR.CSS.parameters['Face Position X'] || 0),
-    },
-    chara:{
-        width:Number(FTKR.CSS.parameters['Chara Image Width'] || 0),
-        height:Number(FTKR.CSS.parameters['Chara Image Height'] || 0),
-        posiX:Number(FTKR.CSS.parameters['Chara Position X'] || 0),
-    },
-    svChara:{
-        width:Number(FTKR.CSS.parameters['Sv Image Width'] || 0),
-        height:Number(FTKR.CSS.parameters['Sv Image Height'] || 0),
-        motion:String(FTKR.CSS.parameters['Sv Image Motion'] || ''),
-        loop:Number(FTKR.CSS.parameters['Sv Motion Loop'] || 0),
-        state:Number(FTKR.CSS.parameters['Enabled State Motion'] || 0),
-        animation:Number(FTKR.CSS.parameters['Enable Animation'] || 0),
-        posiX:Number(FTKR.CSS.parameters['Sv Position X'] || 0),
-    },
-    state:{
-        wait:Number(FTKR.CSS.parameters['Animation Wait'] || 0),
-        overlap:Number(FTKR.CSS.parameters['Enable Overlap'] || 0),
-        autoScale:Number(FTKR.CSS.parameters['Enable Auto Scale'] || 0),
-        rate:Number(FTKR.CSS.parameters['Overlap Rate'] || 0),
-    },
-    equip:{
-        arrow:String(FTKR.CSS.parameters['Equip Right Arrow'] || ''),
-    },
-    gauge:{
-        digit :Number(FTKR.CSS.parameters['Gauge Param Digit'] || 0),
-    },
-    customs:[
-        {name:String(FTKR.CSS.parameters['Custom 0 Display Name'] || ''),
-          formula:String(FTKR.CSS.parameters['Custom 0 References'] || ''),},
-        {name:String(FTKR.CSS.parameters['Custom 1 Display Name'] || ''),
-          formula:String(FTKR.CSS.parameters['Custom 1 References'] || ''),},
-        {name:String(FTKR.CSS.parameters['Custom 2 Display Name'] || ''),
-          formula:String(FTKR.CSS.parameters['Custom 2 References'] || ''),},
-        {name:String(FTKR.CSS.parameters['Custom 3 Display Name'] || ''),
-          formula:String(FTKR.CSS.parameters['Custom 3 References'] || ''),},
-        {name:String(FTKR.CSS.parameters['Custom 4 Display Name'] || ''),
-          formula:String(FTKR.CSS.parameters['Custom 4 References'] || ''),},
-        {name:String(FTKR.CSS.parameters['Custom 5 Display Name'] || ''),
-          formula:String(FTKR.CSS.parameters['Custom 5 References'] || ''),},
-        {name:String(FTKR.CSS.parameters['Custom 6 Display Name'] || ''),
-          formula:String(FTKR.CSS.parameters['Custom 6 References'] || ''),},
-        {name:String(FTKR.CSS.parameters['Custom 7 Display Name'] || ''),
-          formula:String(FTKR.CSS.parameters['Custom 7 References'] || ''),},
-        {name:String(FTKR.CSS.parameters['Custom 8 Display Name'] || ''),
-          formula:String(FTKR.CSS.parameters['Custom 8 References'] || ''),},
-        {name:String(FTKR.CSS.parameters['Custom 9 Display Name'] || ''),
-          formula:String(FTKR.CSS.parameters['Custom 9 References'] || ''),},
-        {name:String(FTKR.CSS.parameters['Custom 10 Display Name'] || ''),
-          formula:String(FTKR.CSS.parameters['Custom 10 References'] || ''),},
-        {name:String(FTKR.CSS.parameters['Custom 11 Display Name'] || ''),
-          formula:String(FTKR.CSS.parameters['Custom 11 References'] || ''),},
-        {name:String(FTKR.CSS.parameters['Custom 12 Display Name'] || ''),
-          formula:String(FTKR.CSS.parameters['Custom 12 References'] || ''),},
-        {name:String(FTKR.CSS.parameters['Custom 13 Display Name'] || ''),
-          formula:String(FTKR.CSS.parameters['Custom 13 References'] || ''),},
-        {name:String(FTKR.CSS.parameters['Custom 14 Display Name'] || ''),
-          formula:String(FTKR.CSS.parameters['Custom 14 References'] || ''),},
-        {name:String(FTKR.CSS.parameters['Custom 15 Display Name'] || ''),
-          formula:String(FTKR.CSS.parameters['Custom 15 References'] || ''),},
-        {name:String(FTKR.CSS.parameters['Custom 16 Display Name'] || ''),
-          formula:String(FTKR.CSS.parameters['Custom 16 References'] || ''),},
-        {name:String(FTKR.CSS.parameters['Custom 17 Display Name'] || ''),
-          formula:String(FTKR.CSS.parameters['Custom 17 References'] || ''),},
-        {name:String(FTKR.CSS.parameters['Custom 18 Display Name'] || ''),
-          formula:String(FTKR.CSS.parameters['Custom 18 References'] || ''),},
-        {name:String(FTKR.CSS.parameters['Custom 19 Display Name'] || ''),
-          formula:String(FTKR.CSS.parameters['Custom 19 References'] || ''),},
-    ],
-    gauges:[
-        {name:String(FTKR.CSS.parameters['Gauge 0 Display Name'] || ''),
-          ref:String(FTKR.CSS.parameters['Gauge 0 References'] || ''),
-          current:String(FTKR.CSS.parameters['Gauge 0 Current'] || ''),
-          max:String(FTKR.CSS.parameters['Gauge 0 Max'] || ''),
-          color1:Number(FTKR.CSS.parameters['Gauge 0 Color1'] || 0),
-          color2:Number(FTKR.CSS.parameters['Gauge 0 Color2'] || 0),},
-        {name:String(FTKR.CSS.parameters['Gauge 1 Display Name'] || ''),
-          ref:String(FTKR.CSS.parameters['Gauge 1 References'] || ''),
-          current:String(FTKR.CSS.parameters['Gauge 1 Current'] || ''),
-          max:String(FTKR.CSS.parameters['Gauge 1 Max'] || ''),
-          color1:Number(FTKR.CSS.parameters['Gauge 1 Color1'] || 0),
-          color2:Number(FTKR.CSS.parameters['Gauge 1 Color2'] || 0),},
-        {name:String(FTKR.CSS.parameters['Gauge 2 Display Name'] || ''),
-          ref:String(FTKR.CSS.parameters['Gauge 2 References'] || ''),
-          current:String(FTKR.CSS.parameters['Gauge 2 Current'] || ''),
-          max:String(FTKR.CSS.parameters['Gauge 2 Max'] || ''),
-          color1:Number(FTKR.CSS.parameters['Gauge 2 Color1'] || 0),
-          color2:Number(FTKR.CSS.parameters['Gauge 2 Color2'] || 0),},
-        {name:String(FTKR.CSS.parameters['Gauge 3 Display Name'] || ''),
-          ref:String(FTKR.CSS.parameters['Gauge 3 References'] || ''),
-          current:String(FTKR.CSS.parameters['Gauge 3 Current'] || ''),
-          max:String(FTKR.CSS.parameters['Gauge 3 Max'] || ''),
-          color1:Number(FTKR.CSS.parameters['Gauge 3 Color1'] || 0),
-          color2:Number(FTKR.CSS.parameters['Gauge 3 Color2'] || 0),},
-        {name:String(FTKR.CSS.parameters['Gauge 4 Display Name'] || ''),
-          ref:String(FTKR.CSS.parameters['Gauge 4 References'] || ''),
-          current:String(FTKR.CSS.parameters['Gauge 4 Current'] || ''),
-          max:String(FTKR.CSS.parameters['Gauge 4 Max'] || ''),
-          color1:Number(FTKR.CSS.parameters['Gauge 4 Color1'] || 0),
-          color2:Number(FTKR.CSS.parameters['Gauge 4 Color2'] || 0),},
-        {name:String(FTKR.CSS.parameters['Gauge 5 Display Name'] || ''),
-          ref:String(FTKR.CSS.parameters['Gauge 5 References'] || ''),
-          current:String(FTKR.CSS.parameters['Gauge 5 Current'] || ''),
-          max:String(FTKR.CSS.parameters['Gauge 5 Max'] || ''),
-          color1:Number(FTKR.CSS.parameters['Gauge 5 Color1'] || 0),
-          color2:Number(FTKR.CSS.parameters['Gauge 5 Color2'] || 0),},
-        {name:String(FTKR.CSS.parameters['Gauge 6 Display Name'] || ''),
-          ref:String(FTKR.CSS.parameters['Gauge 6 References'] || ''),
-          current:String(FTKR.CSS.parameters['Gauge 6 Current'] || ''),
-          max:String(FTKR.CSS.parameters['Gauge 6 Max'] || ''),
-          color1:Number(FTKR.CSS.parameters['Gauge 6 Color1'] || 0),
-          color2:Number(FTKR.CSS.parameters['Gauge 6 Color2'] || 0),},
-        {name:String(FTKR.CSS.parameters['Gauge 7 Display Name'] || ''),
-          ref:String(FTKR.CSS.parameters['Gauge 7 References'] || ''),
-          current:String(FTKR.CSS.parameters['Gauge 7 Current'] || ''),
-          max:String(FTKR.CSS.parameters['Gauge 7 Max'] || ''),
-          color1:Number(FTKR.CSS.parameters['Gauge 7 Color1'] || 0),
-          color2:Number(FTKR.CSS.parameters['Gauge 7 Color2'] || 0),},
-        {name:String(FTKR.CSS.parameters['Gauge 8 Display Name'] || ''),
-          ref:String(FTKR.CSS.parameters['Gauge 8 References'] || ''),
-          current:String(FTKR.CSS.parameters['Gauge 8 Current'] || ''),
-          max:String(FTKR.CSS.parameters['Gauge 8 Max'] || ''),
-          color1:Number(FTKR.CSS.parameters['Gauge 8 Color1'] || 0),
-          color2:Number(FTKR.CSS.parameters['Gauge 8 Color2'] || 0),},
-        {name:String(FTKR.CSS.parameters['Gauge 9 Display Name'] || ''),
-          ref:String(FTKR.CSS.parameters['Gauge 9 References'] || ''),
-          current:String(FTKR.CSS.parameters['Gauge 9 Current'] || ''),
-          max:String(FTKR.CSS.parameters['Gauge 9 Max'] || ''),
-          color1:Number(FTKR.CSS.parameters['Gauge 9 Color1'] || 0),
-          color2:Number(FTKR.CSS.parameters['Gauge 9 Color2'] || 0),},
-    ],
-};
-
-//SV戦闘キャラ用の影画像の高さ
-Window_Base.SV_SHADOW_HEIGHT = 48;
-
-//=============================================================================
-// 自作関数(グローバル)
-//=============================================================================
-
-FTKR.gameData = FTKR.gameData || {
-    user   :null,
-    target :null,
-    item   :null,
-    number :0,
-};
-
-if (!FTKR.setGameData) {
-FTKR.setGameData = function(user, target, item, number) {
-    FTKR.gameData = {
-        user   :user || null,
-        target :target || null,
-        item   :item || null,
-        number :number || 0
+    //簡易ステータスオブジェクト
+    FTKR.CSS.simpleStatus = {
+        text1:String(parameters['Actor Status Text1'] || ''),
+        text2:String(parameters['Actor Status Text2'] || ''),
+        text3:String(parameters['Actor Status Text3'] || ''),
+        space:String(parameters['Actor Status Space'] || ''),
+        spaceIn:Number(parameters['Actor Status Space In Text'] || 0),
+        widthRate:String(parameters['Actor Status Width Rate'] || ''),
     };
-};
-}
 
-if (!FTKR.evalFormula) {
-FTKR.evalFormula = function(formula) {
-    var datas = FTKR.gameData;
-    try {
-        var s = $gameSwitches._data;
-        var v = $gameVariables._data;
-        var a = datas.user;
-        var b = datas.target;
-        var item   = datas.item;
-        var number = datas.number;
-        if (b) var result = b.result();
-        var value = eval(formula);
-        if (isNaN(value)) value = 0;
-        return value;
-    } catch (e) {
-        console.error(e);
-        return 0;
-    }
-};
-}
+    //ウィンドウ設定オブジェクト
+    FTKR.CSS.window = {
+        enabled:Number(parameters['Enabled Custom Window'] || 0),
+        numVisibleRows:Number(parameters['Number Visible Rows'] || 0),
+        maxCols:Number(parameters['Number Max Cols'] || 0),
+        fontSize:Number(parameters['Font Size'] || 0),
+        padding:Number(parameters['Window Padding'] || 0),
+        lineHeight:Number(parameters['Window Line Height'] || 0),
+        opacity:Number(parameters['Window Opacity'] || 0),
+        hideFrame:Number(parameters['Hide Window Frame'] || 0),
+        cursolHeight:Number(parameters['Cursol Line Number'] || 0),
+        hspace:Number(parameters['Cursol Height Space'] || 0),
+    };
 
-//=============================================================================
-// 自作処理
-//=============================================================================
+    //オリジナルステータス設定オブジェクト
+    FTKR.CSS.cssStatus = {
+        face:{
+            posiX:Number(parameters['Face Position X'] || 0),
+        },
+        chara:{
+            width:Number(parameters['Chara Image Width'] || 0),
+            height:Number(parameters['Chara Image Height'] || 0),
+            posiX:Number(parameters['Chara Position X'] || 0),
+        },
+        svChara:{
+            width:Number(parameters['Sv Image Width'] || 0),
+            height:Number(parameters['Sv Image Height'] || 0),
+            motion:String(parameters['Sv Image Motion'] || ''),
+            loop:Number(parameters['Sv Motion Loop'] || 0),
+            state:Number(parameters['Enabled State Motion'] || 0),
+            animation:Number(parameters['Enable Animation'] || 0),
+            posiX:Number(parameters['Sv Position X'] || 0),
+        },
+        state:{
+            wait:Number(parameters['Animation Wait'] || 0),
+            overlap:Number(parameters['Enable Overlap'] || 0),
+            autoScale:Number(parameters['Enable Auto Scale'] || 0),
+            rate:Number(parameters['Overlap Rate'] || 0),
+        },
+        equip:{
+            arrow:String(parameters['Equip Right Arrow'] || ''),
+        },
+        gauge:{
+            digit :Number(parameters['Gauge Param Digit'] || 0),
+        },
+        customs:[
+            {name:String(parameters['Custom 0 Display Name'] || ''),
+              formula:String(parameters['Custom 0 References'] || ''),},
+            {name:String(parameters['Custom 1 Display Name'] || ''),
+              formula:String(parameters['Custom 1 References'] || ''),},
+            {name:String(parameters['Custom 2 Display Name'] || ''),
+              formula:String(parameters['Custom 2 References'] || ''),},
+            {name:String(parameters['Custom 3 Display Name'] || ''),
+              formula:String(parameters['Custom 3 References'] || ''),},
+            {name:String(parameters['Custom 4 Display Name'] || ''),
+              formula:String(parameters['Custom 4 References'] || ''),},
+            {name:String(parameters['Custom 5 Display Name'] || ''),
+              formula:String(parameters['Custom 5 References'] || ''),},
+            {name:String(parameters['Custom 6 Display Name'] || ''),
+              formula:String(parameters['Custom 6 References'] || ''),},
+            {name:String(parameters['Custom 7 Display Name'] || ''),
+              formula:String(parameters['Custom 7 References'] || ''),},
+            {name:String(parameters['Custom 8 Display Name'] || ''),
+              formula:String(parameters['Custom 8 References'] || ''),},
+            {name:String(parameters['Custom 9 Display Name'] || ''),
+              formula:String(parameters['Custom 9 References'] || ''),},
+            {name:String(parameters['Custom 10 Display Name'] || ''),
+              formula:String(parameters['Custom 10 References'] || ''),},
+            {name:String(parameters['Custom 11 Display Name'] || ''),
+              formula:String(parameters['Custom 11 References'] || ''),},
+            {name:String(parameters['Custom 12 Display Name'] || ''),
+              formula:String(parameters['Custom 12 References'] || ''),},
+            {name:String(parameters['Custom 13 Display Name'] || ''),
+              formula:String(parameters['Custom 13 References'] || ''),},
+            {name:String(parameters['Custom 14 Display Name'] || ''),
+              formula:String(parameters['Custom 14 References'] || ''),},
+            {name:String(parameters['Custom 15 Display Name'] || ''),
+              formula:String(parameters['Custom 15 References'] || ''),},
+            {name:String(parameters['Custom 16 Display Name'] || ''),
+              formula:String(parameters['Custom 16 References'] || ''),},
+            {name:String(parameters['Custom 17 Display Name'] || ''),
+              formula:String(parameters['Custom 17 References'] || ''),},
+            {name:String(parameters['Custom 18 Display Name'] || ''),
+              formula:String(parameters['Custom 18 References'] || ''),},
+            {name:String(parameters['Custom 19 Display Name'] || ''),
+              formula:String(parameters['Custom 19 References'] || ''),},
+        ],
+        gauges:[
+            {name:String(parameters['Gauge 0 Display Name'] || ''),
+              ref:String(parameters['Gauge 0 References'] || ''),
+              current:String(parameters['Gauge 0 Current'] || ''),
+              max:String(parameters['Gauge 0 Max'] || ''),
+              color1:Number(parameters['Gauge 0 Color1'] || 0),
+              color2:Number(parameters['Gauge 0 Color2'] || 0),},
+            {name:String(parameters['Gauge 1 Display Name'] || ''),
+              ref:String(parameters['Gauge 1 References'] || ''),
+              current:String(parameters['Gauge 1 Current'] || ''),
+              max:String(parameters['Gauge 1 Max'] || ''),
+              color1:Number(parameters['Gauge 1 Color1'] || 0),
+              color2:Number(parameters['Gauge 1 Color2'] || 0),},
+            {name:String(parameters['Gauge 2 Display Name'] || ''),
+              ref:String(parameters['Gauge 2 References'] || ''),
+              current:String(parameters['Gauge 2 Current'] || ''),
+              max:String(parameters['Gauge 2 Max'] || ''),
+              color1:Number(parameters['Gauge 2 Color1'] || 0),
+              color2:Number(parameters['Gauge 2 Color2'] || 0),},
+            {name:String(parameters['Gauge 3 Display Name'] || ''),
+              ref:String(parameters['Gauge 3 References'] || ''),
+              current:String(parameters['Gauge 3 Current'] || ''),
+              max:String(parameters['Gauge 3 Max'] || ''),
+              color1:Number(parameters['Gauge 3 Color1'] || 0),
+              color2:Number(parameters['Gauge 3 Color2'] || 0),},
+            {name:String(parameters['Gauge 4 Display Name'] || ''),
+              ref:String(parameters['Gauge 4 References'] || ''),
+              current:String(parameters['Gauge 4 Current'] || ''),
+              max:String(parameters['Gauge 4 Max'] || ''),
+              color1:Number(parameters['Gauge 4 Color1'] || 0),
+              color2:Number(parameters['Gauge 4 Color2'] || 0),},
+            {name:String(parameters['Gauge 5 Display Name'] || ''),
+              ref:String(parameters['Gauge 5 References'] || ''),
+              current:String(parameters['Gauge 5 Current'] || ''),
+              max:String(parameters['Gauge 5 Max'] || ''),
+              color1:Number(parameters['Gauge 5 Color1'] || 0),
+              color2:Number(parameters['Gauge 5 Color2'] || 0),},
+            {name:String(parameters['Gauge 6 Display Name'] || ''),
+              ref:String(parameters['Gauge 6 References'] || ''),
+              current:String(parameters['Gauge 6 Current'] || ''),
+              max:String(parameters['Gauge 6 Max'] || ''),
+              color1:Number(parameters['Gauge 6 Color1'] || 0),
+              color2:Number(parameters['Gauge 6 Color2'] || 0),},
+            {name:String(parameters['Gauge 7 Display Name'] || ''),
+              ref:String(parameters['Gauge 7 References'] || ''),
+              current:String(parameters['Gauge 7 Current'] || ''),
+              max:String(parameters['Gauge 7 Max'] || ''),
+              color1:Number(parameters['Gauge 7 Color1'] || 0),
+              color2:Number(parameters['Gauge 7 Color2'] || 0),},
+            {name:String(parameters['Gauge 8 Display Name'] || ''),
+              ref:String(parameters['Gauge 8 References'] || ''),
+              current:String(parameters['Gauge 8 Current'] || ''),
+              max:String(parameters['Gauge 8 Max'] || ''),
+              color1:Number(parameters['Gauge 8 Color1'] || 0),
+              color2:Number(parameters['Gauge 8 Color2'] || 0),},
+            {name:String(parameters['Gauge 9 Display Name'] || ''),
+              ref:String(parameters['Gauge 9 References'] || ''),
+              current:String(parameters['Gauge 9 Current'] || ''),
+              max:String(parameters['Gauge 9 Max'] || ''),
+              color1:Number(parameters['Gauge 9 Color1'] || 0),
+              color2:Number(parameters['Gauge 9 Color2'] || 0),},
+        ],
+    };
 
-// 配列の要素の合計
-Math.sam = function(arr) {
-    return arr.reduce( function(prev, current, i, arr) {
-        return prev + current;
-    });
-};
+    //SV戦闘キャラ用の影画像の高さ
+    Window_Base.SV_SHADOW_HEIGHT = 48;
 
-Math._getDec = function(value) {
-  var list = (value + '').split('.');
-  return list[1] !== undefined && list[1].length > 0 ? list[1].length : 0;
-};
+    //=============================================================================
+    // 自作関数(グローバル)
+    //=============================================================================
 
-// 少数で表現された割合をパーセント表示の整数に変換する (例:0.5 を 50 に変換)
-Math.percent = function(dec) {
-  var decnum = Math._getDec(dec);
-  var int = +(dec + '').replace('.', '');
-  var diffdec = 2 - decnum;
-  return diffdec ? int * Math.pow(10, diffdec) : int;
-}
+    FTKR.gameData = FTKR.gameData || {
+        user   :null,
+        target :null,
+        item   :null,
+        number :0,
+    };
 
-Number.prototype._getDec = function() {
-    var list = (this + '').split('.');
-    return list[1] !== undefined && list[1].length > 0 ? list[1].length : 0;
-};
-
-// 少数で表現された数値をパーセント表示の数値に変換する (例:0.5 を 50 に変換)
-Number.prototype.percent = function(dec) {
-    dec = dec || 0;
-    var decnum = this._getDec();
-    var int = +(this + '').replace('.', '');
-    var diffdec = 2 + dec - decnum;
-    return Math.floor(int * Math.pow(10, diffdec)) / Math.pow(10, dec);
-}
-
-//配列の要素を、すべて数値に変換する。
-Array.prototype.num = function() {
-  return this.map(function(elm) {
-      return Number(elm);
-  });
-}
-
-//=============================================================================
-// バトル終了後に、逃走フラグを削除
-//=============================================================================
-
-FTKR.CSS.Scene_Map_start = Scene_Map.prototype.start;
-Scene_Map.prototype.start = function() {
-    FTKR.CSS.Scene_Map_start.call(this);
-    BattleManager._escaped = false;
-};
-
-//=============================================================================
-// DataManager
-//=============================================================================
-
-FTKR.CSS.DatabaseLoaded = false;
-FTKR.CSS.DataManager_isDatabaseLoaded = DataManager.isDatabaseLoaded;
-DataManager.isDatabaseLoaded = function() {
-    if (!FTKR.CSS.DataManager_isDatabaseLoaded.call(this)) return false;
-    if (!FTKR.CSS.DatabaseLoaded) {
-        this.cssActorImageNotetags($dataActors);
-        FTKR.CSS.DatabaseLoaded = true;
-    }
-    return true;
-};
-
-DataManager.cssActorImageNotetags = function(group) {
-    var note1a = /<CSS_画像:[ ]*(.+)>/i;
-    var note1b = /<\/CSS_画像>/i;
-
-    for (var n = 1; n < group.length; n++) {
-        var obj = group[n];
-        var notedata = obj.note.split(/[\r\n]+/);
-
-        var setMode = 'none';
-        obj.cssData = '';
-        obj.cssbgi = {
-          name:'',
-          offsetX:0,
-          offsetY:0,
-          width:0,
-          height:0,
+    if (!FTKR.setGameData) {
+    FTKR.setGameData = function(user, target, item, number) {
+        FTKR.gameData = {
+            user   :user || null,
+            target :target || null,
+            item   :item || null,
+            number :number || 0
         };
+    };
+    }
+
+    if (!FTKR.evalFormula) {
+    FTKR.evalFormula = function(formula) {
+        var datas = FTKR.gameData;
+        try {
+            var s = $gameSwitches._data;
+            var v = $gameVariables._data;
+            var a = datas.user;
+            var b = datas.target;
+            var item   = datas.item;
+            var number = datas.number;
+            if (b) var result = b.result();
+            var value = eval(formula);
+            if (isNaN(value)) value = 0;
+            return value;
+        } catch (e) {
+            console.error(e);
+            return 0;
+        }
+    };
+    }
+
+    //=============================================================================
+    // 自作処理
+    //=============================================================================
+
+    var readEntrapmentCodeToTextEx = function(obj, codeTitles) {
+        var regs = convertEntrapmentRegArrayEx(codeTitles);
+        var notedata = obj.note.split(/[\r\n]+/);
+        var setMode = 'none';
+        var results = [];
+
         for (var i = 0; i < notedata.length; i++) {
             var line = notedata[i];
-            if (line.match(note1a)) {
-                obj.cssbgi.name = RegExp.$1;
-                var text = '';
-                setMode = 'data';
-            } else if (note1b.test(line)) {
+            if (matchRegs(line, regs, 'start')) {
+                var data = {
+                    id:RegExp.$1,
+                    text:''
+                };
+                setMode = 'read';
+            } else if (matchRegs(line, regs, 'end')) {
                 setMode = 'none';
-                obj.cssData = text;
-            } else if (setMode === 'data') {
-                text += line + ';';
+                results.push(data);
+            } else if (setMode === 'read') {
+                data.text += line + ';';
             }
         }
-        this.setCssBgiData(obj);
-        obj.cssData = '';
-    }
-};
+        return results;
+    };
 
-DataManager.setCssBgiData = function(obj) {
-    var stsdata = obj.cssData;
-    if (stsdata) {
-        var case2 = /(?:BGI OFFSET X):[ ]*(\d+)/i;
-        var case3 = /(?:BGI OFFSET Y):[ ]*(\d+)/i;
-        var case4 = /(?:BGI WIDTH):[ ]*(\d+)/i;
-        var case5 = /(?:BGI HEIGHT):[ ]*(\d+)/i;
-
-        var datas = stsdata.split(';');
-        for (var i = 0; i < datas.length; i++) {
-            var data = datas[i];
-            if(data.match(case2)) {
-                obj.cssbgi.offsetX = Number(RegExp.$1);
-            } else if(data.match(case3)) {
-                obj.cssbgi.offsetY = Number(RegExp.$1);
-            } else if(data.match(case4)) {
-                obj.cssbgi.width = Number(RegExp.$1);
-            } else if(data.match(case5)) {
-                obj.cssbgi.height = Number(RegExp.$1);
-            }
-        }
-    }
-};
-
-//=============================================================================
-// Game_Actor
-//=============================================================================
-
-FTKR.CSS.Game_Actor_setup = Game_Actor.prototype.setup;
-Game_Actor.prototype.setup = function(actorId) {
-    FTKR.CSS.Game_Actor_setup.call(this, actorId);
-    ImageManager.loadPicture(this.actor().cssbgi.name);
-    ImageManager.loadSvActor(this.battlerName());
-};
-
-//ステートモーションを取得する
-Game_Actor.prototype.getStateMotion = function() {
-    if(Imported.FTKR_ESM) {
-        return this.getEsmMotion();
-    } else {
-        switch (this.stateMotionIndex()) {
-            case 1: return 'abnormal';
-            case 2: return 'sleep';
-            case 3: return 'dead';
-        }
-        return '';
-    }
-};
-
-//=============================================================================
-// Window_Base
-//=============================================================================
-
-FTKR.CSS.Window_Base_initialize = Window_Base.prototype.initialize;
-Window_Base.prototype.initialize = function(x, y, width, height) {
-    FTKR.CSS.Window_Base_initialize.call(this, x, y, width, height);
-    this.sprite = [];
-    this._stateIconSprite = [];
-    this._faceSprite = [];
-};
-
-Window_Base.prototype.clearCssSprite = function(index) {
-    if (this.sprite[index]) {
-        this.sprite[index].setBattler();
-        this._stateIconSprite[index].forEach( function(sprite){
-            sprite.setup();
+    var convertEntrapmentRegArrayEx = function(codeTitles) {
+        return codeTitles.map(function(codeTitle) {
+            return {
+                start:new RegExp('<' + codeTitle + ':[ ]*(.+)>', 'i'),
+                end  :new RegExp('<\/' + codeTitle + '>', 'i')
+            };
         });
+    };
+
+    var matchRegs = function(data, regs, prop) {
+        return regs.some(function(reg){
+            return prop ? data.match(reg[prop]) : data.match(reg);
+        });
+    };
+
+    // 配列の要素の合計
+    Math.sam = function(arr) {
+        return arr.reduce( function(prev, current, i, arr) {
+            return prev + current;
+        });
+    };
+
+    Math._getDec = function(value) {
+      var list = (value + '').split('.');
+      return list[1] !== undefined && list[1].length > 0 ? list[1].length : 0;
+    };
+
+    // 少数で表現された割合をパーセント表示の整数に変換する (例:0.5 を 50 に変換)
+    Math.percent = function(dec) {
+      var decnum = Math._getDec(dec);
+      var int = +(dec + '').replace('.', '');
+      var diffdec = 2 - decnum;
+      return diffdec ? int * Math.pow(10, diffdec) : int;
     }
-};
 
-Window_Base.prototype.showActorNum = function() {
-    return this.maxPageItems ? this.maxPageItems() : 1;
-};
+    Number.prototype._getDec = function() {
+        var list = (this + '').split('.');
+        return list[1] !== undefined && list[1].length > 0 ? list[1].length : 0;
+    };
 
-Window_Base.prototype.evalCssCustomFormula = function(actor, formula) {
-    if (!formula) return '';
-    FTKR.setGameData(actor);
-    return FTKR.evalFormula(formula);
-};
-
-/*-------------------------------------------------------------
-アクターの簡易ステータスを表示する関数
-drawCssActorStatus(index, actor, x, y, width, height, lss)
-index :アクターの表示番号
-actor :アクターオブジェクト
-x     :x座標
-y     :y座標
-width :表示エリアの幅
-height:表示エリアの高さ
-lss   :簡易ステータスオブジェクト
--------------------------------------------------------------*/
-Window_Base.prototype.drawCssActorStatus = function(index, actor, x, y, width, height, lss) {
-    if (!lss) lss = FTKR.CSS.simpleStatus;
-    var w = width;
-    this._dispWidth = width;
-    var h = height;
-    var wrs = lss.widthRate.split(',').num();
-    var spc = lss.space.split(',').num();
-    var aws = [];
-    var axs = [];
-    var status = [lss.text1.split(','), lss.text2.split(','), lss.text3.split(',')];
-    for (var i = 0; i < 3; i++) {
-        aws[i] = (w - Math.sam(spc)) * wrs[i] / Math.sam(wrs);
-        axs[i] = i > 0 ? axs[i-1] + aws[i-1] + spc[i]: x + spc[0];
-        this.drawCssActorStatusText(index, actor, axs[i], y, aws[i], status[i], lss);
+    // 少数で表現された数値をパーセント表示の数値に変換する (例:0.5 を 50 に変換)
+    Number.prototype.percent = function(dec) {
+        dec = dec || 0;
+        var decnum = this._getDec();
+        var int = +(this + '').replace('.', '');
+        var diffdec = 2 + dec - decnum;
+        return Math.floor(int * Math.pow(10, diffdec)) / Math.pow(10, dec);
     }
-};
 
-/*-------------------------------------------------------------
-描画エリアを表示する関数
-drawCssActorStatusText(index, actor, x, y, width, statusnames, lss)
-index       :アクターの表示番号
-actor       :アクターオブジェクト
-x           :描画エリアのx座標
-y           :描画エリアのy座標
-width       :描画エリアの幅
-statusnames :描画エリアの表示コードの配列
-lss         :簡易ステータスオブジェクト
--------------------------------------------------------------*/
-Window_Base.prototype.drawCssActorStatusText = function(index, actor, x, y, width, statusnames, lss) {
-    var dy = this.lineHeight();
-    var line = 0;
-    statusnames.forEach( function(status) {
-        line += this.drawCssActorStatusBases(index, actor, x, y + dy * line, width, status, lss);
-    },this);
-};
-
-Window_Base.prototype.drawCssActorStatusBases = function(index, actor, x, y, width, status, lss) {
-    if (status.match(/\{(.+)\}/i)) {
-        status = RegExp.$1;
-        width = this._dispWidth;
+    //配列の要素を、すべて数値に変換する。
+    Array.prototype.num = function() {
+      return this.map(function(elm) {
+          return Number(elm);
+      });
     }
-    var statuses = status.match(/\[(.+)\]/i) ? RegExp.$1.split('/') : [status];
-    var line = 0;
-    var len = statuses.length;
-    if (len > 1) width = (width - lss.spaceIn * (len - 1))/ len;
-    statuses.forEach( function(element, i) {
-        var dx = (width + lss.spaceIn) * i;
-        line = Math.max(this.drawCssActorStatusBase(index, actor, x + dx, y, width, element, lss), line);
-    },this);
-    return line;
-};
 
-Window_Base.prototype.drawCssActorStatusBase = function(index, actor, x, y, width, status, lss) {
-    var css = FTKR.CSS.cssStatus;
-    if (status.match(/(?:eparam\()(.+)\)/i)) {
-        return this.drawCssActorEquipParam(actor, x, y, width, Number(RegExp.$1), lss);
-    } else if (status.match(/(?:param\()(.+)\)/i)) {
-        return this.drawCssActorParam(actor, x, y, width, Number(RegExp.$1));
-    } else if (status.match(/(?:custom\()(.+)\)/i)) {
-        var customId = Number(RegExp.$1);
-        if (customId >= 0) {
-            return this.drawCssActorCustom(actor, x, y, width, css.customs[customId]);
+    //=============================================================================
+    // バトル終了後に、逃走フラグを削除
+    //=============================================================================
+
+    FTKR.CSS.Scene_Map_start = Scene_Map.prototype.start;
+    Scene_Map.prototype.start = function() {
+        FTKR.CSS.Scene_Map_start.call(this);
+        BattleManager._escaped = false;
+    };
+
+    //=============================================================================
+    // DataManager
+    //=============================================================================
+
+    FTKR.CSS.DatabaseLoaded = false;
+    FTKR.CSS.DataManager_isDatabaseLoaded = DataManager.isDatabaseLoaded;
+    DataManager.isDatabaseLoaded = function() {
+        if (!FTKR.CSS.DataManager_isDatabaseLoaded.call(this)) return false;
+        if (!FTKR.CSS.DatabaseLoaded) {
+            this.cssActorImageNotetags($dataActors);
+            this.cssCustomParamNotetags($dataActors);
+            this.cssCustomParamNotetags($dataClasses);
+            FTKR.CSS.DatabaseLoaded = true;
         }
-    } else if (status.match(/(?:gauge\()(.+)\)/i)) {
-        var gaugeId = Number(RegExp.$1);
-        if (gaugeId >= 0) {
-            return this.drawCssActorGauge(actor, x, y, width, css.gauges[gaugeId]);
+        return true;
+    };
+
+    DataManager.cssActorImageNotetags = function(group) {
+        for (var n = 1; n < group.length; n++) {
+            var obj = group[n];
+            obj.cssbgi = {
+                name:'',
+                offsetX:0,
+                offsetY:0,
+                width:0,
+                height:0,
+            };
+            var datas = readEntrapmentCodeToTextEx(obj, ['CSS_画像', 'CSS_IMAGE']);
+            this.readCssBgiMetaDatas(obj, datas);
         }
-    } else if (status.match(/(?:equip\()(.+)\)/i)) {
-        var equipId = String(RegExp.$1);
-        if (equipId >= 0) return this.drawCssActorEquip(actor, x, y, width, equipId);
-    } else if (status.match(/(?:text\()(.+)\)/i)) {
-        var text = String(RegExp.$1);
-        if (text) return this.drawCssText(actor, x, y, width, text);
-    } else if (status.match(/(?:state2\()(.+)\)/i)) {
-        var line = Number(RegExp.$1);
-        if (line) return this.drawCssActorIcons(index, actor, x, y, width, line, true);
-    } else if (status.match(/(?:face\()(\d+)\)/i)) {
-        return this.drawCssActorFace(actor, x, y, width, lss, Number(RegExp.$1));
-    } else {
-        switch (true) {
-            case (/(?:face)/i).test(status):
-                return this.drawCssActorFace(actor, x, y, width, lss);
-            case (/(?:chara)/i).test(status):
-                return this.drawCssActorChara(actor, x, y, width, css.chara);
-            case (/(?:sv)/i).test(status):
-                return this.drawCssActorSvChara(index, actor, x, y, width, css.svChara);
-            case (/(?:nickname)/i).test(status):
-                return this.drawCssActorNickname(actor, x, y, width);
-            case (/(?:name)/i).test(status):
-                return this.drawCssActorName(actor, x, y, width);
-            case (/(?:level)/i).test(status):
-                return this.drawCssActorLevel(actor, x, y, width);
-            case (/(?:hp)/i).test(status):
-                return this.drawCssActorHp(actor, x, y, width);
-            case (/(?:mp)/i).test(status):
-                return this.drawCssActorMp(actor, x, y, width);
-            case (/(?:tp)/i).test(status):
-                return this.drawCssActorTp(actor, x, y, width);
-            case (/(?:class)/i).test(status):
-                return this.drawCssActorClass(actor, x, y, width);
-            case (/(?:state)/i).test(status):
-                return this.drawCssActorIcons(index, actor, x, y, width);
-            case (/(?:profile)/i).test(status):
-                return this.drawCssProfile(actor, x, y, width);
-            case (/(?:image)/i).test(status):
-                return this.drawCssActorImage(actor, x, y, width);
+    };
+
+    DataManager.readCssBgiMetaDatas = function(obj, metaDatas) {
+        for (var t = 0; t < metaDatas.length; t++) {
+            obj.cssbgi.name = metaDatas[t].id;
+
+            var datas = metaDatas[t].text.split(';');
+            for (var i = 0; i < datas.length; i++) {
+                var data = datas[i];
+                var match = /(.+):[ ]*(.+)/.exec(data);
+                if (!match) continue;
+                switch (match[1].toUpperCase()) {
+                    case 'BGI OFFSET X':
+                        obj.cssbgi.offsetX = Number(match[2]);
+                        break;
+                    case 'BGI OFFSET Y':
+                      obj.cssbgi.offsetY = Number(match[2]);
+                        break;
+                    case 'BGI WIDTH':
+                        obj.cssbgi.width = Number(match[2]);
+                        break;
+                    case 'BGI HEIGHT':
+                        obj.cssbgi.height = Number(match[2]);
+                        break;
+                }
+            }
         }
-    }
-    return 1;
-};
+    };
 
-//------------------------------------------------------------------------
-//アクターの顔画像の表示関数
-//------------------------------------------------------------------------
-Window_Base.prototype.drawCssActorFace = function(actor, x, y, width, lss, scale) {
-    var dy = this.lineHeight();
-    scale = scale || Math.ceil(Window_Base._faceHeight / dy);
-    this.changePaintOpacity(actor.isBattleMember());
-    this.drawCssFace(actor, x, y, width, dy * scale);
-    this.changePaintOpacity(true);
-    return scale;
-};
+    DataManager.cssCustomParamNotetags = function(group) {
+        for (var n = 1; n < group.length; n++) {
+            var obj = group[n];
+            obj.cssGauges = [];
+            var datas = readEntrapmentCodeToTextEx(obj, ['CSS_カスタム', 'CSS_CUSTOM']);
+            this.readCssCustomParamMetaDatas(obj, datas);
+        }
+    };
 
-Window_Base.prototype.drawCssFace = function(actor, dx, dy, width, height) {
-    var len = Math.min(width, height);
-    var dh = len || Window_Base._faceHeight;
-    var dw = len || Window_Base._faceWidth;
-    var offsetX = FTKR.CSS.cssStatus.face.posiX * (width - dw) / 2;
-    dx = Math.floor(dx + offsetX);
-    var bitmap = ImageManager.loadFace(actor.faceName());
-    var sw = Window_Base._faceWidth;
-    var sh = Window_Base._faceHeight;
-    var sx = actor.faceIndex() % 4 * sw;
-    var sy = Math.floor(actor.faceIndex() / 4) * sh;
-    this.contents.blt(bitmap, sx, sy, sw, sh, dx, dy, dw, dh);
-};
+    DataManager.readCssCustomParamMetaDatas = function(obj, metaDatas) {
+        for (var t = 0; t < metaDatas.length; t++) {
+            var dataId = Number(metaDatas[t].id);
+            obj.cssGauges[dataId] = {};
 
-//------------------------------------------------------------------------
-//アクターの歩行キャラの表示関数
-//------------------------------------------------------------------------
-Window_Base.prototype.drawCssActorChara = function(actor, x, y, width, chara) {
-    var dy = this.lineHeight();
-    var line = Math.ceil(chara.height / dy);
-    this.changePaintOpacity(actor.isBattleMember());
-    this.drawCssChara(actor.characterName(), actor.characterIndex(), x, y, width, dy * line, chara);
-    this.changePaintOpacity(true);
-    return line;
-};
+            var datas = metaDatas[t].text.split(';');
+            for (var i = 0; i < datas.length; i++) {
+                var data = datas[i];
+                var match = /(.+):[ ]*(.+)/.exec(data);
+                if (!match) continue;
+                switch (match[1].toUpperCase()) {
+                    case 'NAME':
+                    case '表示名':
+                        obj.cssGauges[dataId].name = match[2];
+                        break;
+                    case 'REFERENCES':
+                    case '参照先':
+                        obj.cssGauges[dataId].ref = match[2];
+                        break;
+                    case 'CURRENT':
+                    case '現在値':
+                        obj.cssGauges[dataId].current = match[2];
+                        break;
+                    case 'MAX':
+                    case '最大値':
+                        obj.cssGauges[dataId].max = match[2];
+                        break;
+                    case 'COLOR':
+                    case '色':
+                        var colors = match[2].replace(/\s/g,'').split(',');
+                        obj.cssGauges[dataId].color1 = Number(colors[0]);
+                        obj.cssGauges[dataId].color2 = colors[1] ? Number(colors[1]) : Number(colors[0]);
+                        break;
+                }
+            }
+        }
+    };
 
-Window_Base.prototype.drawCssChara = function(faceName, index, dx, dy, width, height, chara) {
-    var dh = chara.height;
-    var dw = dh || width || chara.width;
-    var offsetX = chara.posiX * (width - dw) / 2;
-    var offsetY = (height - dh) / 2;
-    dx = Math.floor(dx + offsetX);
-    dy = Math.floor(dy + offsetY);
-    var bitmap = ImageManager.loadCharacter(faceName);
-    var sw = chara.width;
-    var sh = chara.height;
-    var sx = (index * 3 + 1) % 12 * sw;
-    var sy = Math.floor((index * 3 + 1) / 12) * sh;
-    this.contents.blt(bitmap, sx, sy, sw, sh, dx, dy, dw, dh);
-};
+    //=============================================================================
+    // Game_Actor
+    //=============================================================================
 
-//------------------------------------------------------------------------
-//アクターのSV戦闘キャラの表示関数
-//------------------------------------------------------------------------
-Window_Base.prototype.drawCssActorSvChara = function(index, actor, x, y, width, svChara) {
-    var dy = this.lineHeight();
-    var line = Math.ceil(svChara.height / dy);
-    this.changePaintOpacity(actor.isBattleMember());
-    this.drawCssSvChara(index, actor, x, y, width, dy * line, svChara);
-    this.changePaintOpacity(true);
-    return line;
-};
+    FTKR.CSS.Game_Actor_setup = Game_Actor.prototype.setup;
+    Game_Actor.prototype.setup = function(actorId) {
+        FTKR.CSS.Game_Actor_setup.call(this, actorId);
+        ImageManager.loadPicture(this.actor().cssbgi.name);
+        ImageManager.loadSvActor(this.battlerName());
+    };
 
-Window_Base.prototype.drawCssSvChara = function(index, actor, dx, dy, width, height, svChara) {
-    index = index % this.showActorNum();
-    var sprite = this.sprite[index];
-    if (!sprite) {
-        sprite = new Sprite_Actor(actor);
-        this.addChild(sprite);
-        this.sprite[index] = sprite;
-    } else {
-        sprite.setBattler(actor);
-    }
-    var offsetX = svChara.posiX * (width - svChara.width) / 2;
-    var sx = Math.floor(dx + offsetX + this.padding + svChara.width / 2);
-    var sy = Math.floor(dy + height + this.padding);
-    sprite.setHome(sx, sy);
-    sprite.startMove(0,0,0);
-    sprite.stopMove();
-    if (!Imported.FTKR_ESM) {
-        var stateMotion = actor.getStateMotion();
-        var motion = svChara.state && stateMotion ? stateMotion : svChara.motion;
-        sprite.startMotion(motion);
-    }
-};
+    //ステートモーションを取得する
+    Game_Actor.prototype.getStateMotion = function() {
+        if(Imported.FTKR_ESM) {
+            return this.getEsmMotion();
+        } else {
+            switch (this.stateMotionIndex()) {
+                case 1: return 'abnormal';
+                case 2: return 'sleep';
+                case 3: return 'dead';
+            }
+            return '';
+        }
+    };
 
-//------------------------------------------------------------------------
-//アクターの名前の表示関数
-//------------------------------------------------------------------------
-Window_Base.prototype.drawCssActorName = function(actor, x, y, width) {
-    this.changeTextColor(this.hpColor(actor));
-    this.drawText(actor.name(), x, y, width);
-    return 1;
-};
+    //=============================================================================
+    // Window_Base
+    //=============================================================================
 
-//------------------------------------------------------------------------
-//アクターのクラス名の表示関数
-//------------------------------------------------------------------------
-Window_Base.prototype.drawCssActorClass = function(actor, x, y, width) {
-    this.resetTextColor();
-    this.drawText(actor.currentClass().name, x, y, width);
-    return 1;
-};
+    FTKR.CSS.Window_Base_initialize = Window_Base.prototype.initialize;
+    Window_Base.prototype.initialize = function(x, y, width, height) {
+        FTKR.CSS.Window_Base_initialize.call(this, x, y, width, height);
+        this.sprite = [];
+        this._stateIconSprite = [];
+        this._faceSprite = [];
+    };
 
-//------------------------------------------------------------------------
-//アクターの二つ名の表示関数
-//------------------------------------------------------------------------
-Window_Base.prototype.drawCssActorNickname = function(actor, x, y, width) {
-    this.resetTextColor();
-    this.drawText(actor.nickname(), x, y, width);
-    return 1;
-};
+    Window_Base.prototype.clearCssSprite = function(index) {
+        if (this.sprite[index]) {
+            this.sprite[index].setBattler();
+            this._stateIconSprite[index].forEach( function(sprite){
+                sprite.setup();
+            });
+        }
+    };
 
-//------------------------------------------------------------------------
-//アクターのレベルの表示関数
-//------------------------------------------------------------------------
-Window_Base.prototype.drawCssActorLevel = function(actor, x, y, width) {
-    var value = actor.level;
-    var tw = this.textWidth(String(value));
-    this.changeTextColor(this.systemColor());
-    this.drawText(TextManager.levelA, x, y, width - tw - 4);
-    this.resetTextColor();
-    this.drawText(value, x + width - tw, y, tw, 'right');
-    return 1;
-};
+    Window_Base.prototype.showActorNum = function() {
+        return this.maxPageItems ? this.maxPageItems() : 1;
+    };
 
-//------------------------------------------------------------------------
-//アクターのステートアイコンの表示関数
-//------------------------------------------------------------------------
-Window_Base.prototype.drawCssActorIcons = function(index, actor, x, y, width, line) {
-    var css = FTKR.CSS.cssStatus.state;
-    var iw = Window_Base._iconWidth;
-    index = index % this.showActorNum();
-    if (!this._stateIconSprite[index]) {
-        this._stateIconSprite[index] = [];
-    }
-    if(css.autoScale) {
-        var scale = this.iconScale();
-        iw = iw * scale;
-    }
-    var maxlen = line ? this.lineHeight() * line : width;
-    var offset = css.overlap ? this.getOverlapValue(actor, iw, maxlen, css) : iw;
-    var showNum = Math.min(Math.floor((maxlen - 4) / offset));
+    Window_Base.prototype.evalCssCustomFormula = function(actor, formula) {
+        if (!formula) return '';
+        FTKR.setGameData(actor);
+        return FTKR.evalFormula(formula);
+    };
 
-    for (var i = 0; i < showNum; i++) {
-        var sprite = this._stateIconSprite[index][i];
+    /*-------------------------------------------------------------
+    アクターの簡易ステータスを表示する関数
+    drawCssActorStatus(index, actor, x, y, width, height, lss)
+    index :アクターの表示番号
+    actor :アクターオブジェクト
+    x     :x座標
+    y     :y座標
+    width :表示エリアの幅
+    height:表示エリアの高さ
+    lss   :簡易ステータスオブジェクト
+    -------------------------------------------------------------*/
+    Window_Base.prototype.drawCssActorStatus = function(index, actor, x, y, width, height, lss) {
+        if (!lss) lss = FTKR.CSS.simpleStatus;
+        var w = width;
+        this._dispWidth = width;
+        var h = height;
+        var wrs = lss.widthRate.split(',').num();
+        var spc = lss.space.split(',').num();
+        var aws = [];
+        var axs = [];
+        var status = [lss.text1.split(','), lss.text2.split(','), lss.text3.split(',')];
+        for (var i = 0; i < 3; i++) {
+            aws[i] = (w - Math.sam(spc)) * wrs[i] / Math.sam(wrs);
+            axs[i] = i > 0 ? axs[i-1] + aws[i-1] + spc[i]: x + spc[0];
+            this.drawCssActorStatusText(index, actor, axs[i], y, aws[i], status[i], lss);
+        }
+    };
+
+    /*-------------------------------------------------------------
+    描画エリアを表示する関数
+    drawCssActorStatusText(index, actor, x, y, width, statusnames, lss)
+    index       :アクターの表示番号
+    actor       :アクターオブジェクト
+    x           :描画エリアのx座標
+    y           :描画エリアのy座標
+    width       :描画エリアの幅
+    statusnames :描画エリアの表示コードの配列
+    lss         :簡易ステータスオブジェクト
+    -------------------------------------------------------------*/
+    Window_Base.prototype.drawCssActorStatusText = function(index, actor, x, y, width, statusnames, lss) {
+        var dy = this.lineHeight();
+        var line = 0;
+        statusnames.forEach( function(status) {
+            line += this.drawCssActorStatusBases(index, actor, x, y + dy * line, width, status, lss);
+        },this);
+    };
+
+    Window_Base.prototype.drawCssActorStatusBases = function(index, actor, x, y, width, status, lss) {
+        if (status.match(/\{(.+)\}/i)) {
+            status = RegExp.$1;
+            width = this._dispWidth;
+        }
+        var statuses = status.match(/\[(.+)\]/i) ? RegExp.$1.split('/') : [status];
+        var line = 0;
+        var len = statuses.length;
+        if (len > 1) width = (width - lss.spaceIn * (len - 1))/ len;
+        statuses.forEach( function(element, i) {
+            var dx = (width + lss.spaceIn) * i;
+            line = Math.max(this.drawCssActorStatusBase(index, actor, x + dx, y, width, element, lss), line);
+        },this);
+        return line;
+    };
+
+    Window_Base.prototype.drawCssActorStatusBase = function(index, actor, x, y, width, status, lss) {
+        var css = FTKR.CSS.cssStatus;
+        var match = /(.+)\((.+)\)/.exec(status);
+        if (match) {
+            switch(match[1].toUpperCase()) {
+                case 'EPARAM':
+                    return this.drawCssActorEquipParam(actor, x, y, width, Number(match[2]), lss);
+                case 'AGAUGE':
+                    return this.drawCssActorCustomGauge(actor, x, y, width, Number(match[2]));
+                case 'CGAUGE':
+                    return this.drawCssClassCustomGauge(actor, x, y, width, Number(match[2]));
+                case 'PARAM':
+                    return this.drawCssActorParam(actor, x, y, width, Number(match[2]));
+                case 'CUSTOM':
+                    var customId = Number(match[2]);
+                    return customId >= 0 ? this.drawCssActorCustom(actor, x, y, width, css.customs[customId]) : 1;
+                case 'GAUGE':
+                    var gaugeId = Number(match[2]);
+                    return gaugeId >= 0 ? this.drawCssActorGauge(actor, x, y, width, css.gauges[gaugeId]) : 1;
+                case 'EQUIP':
+                    return this.drawCssActorEquip(actor, x, y, width, Number(match[2]));
+                case 'TEXT':
+                    return this.drawCssText(actor, x, y, width, match[2]);
+                case 'STATE2':
+                    return this.drawCssActorIcons(index, actor, x, y, width, Number(match[2]), true);
+                case 'FACE':
+                    return this.drawCssActorFace(actor, x, y, width, lss, Number(match[2]));
+            }
+        } else {
+            switch (status.toUpperCase()) {
+                case 'FACE':
+                    return this.drawCssActorFace(actor, x, y, width, lss);
+                case 'CHARA':
+                    return this.drawCssActorChara(actor, x, y, width, css.chara);
+                case 'SV':
+                    return this.drawCssActorSvChara(index, actor, x, y, width, css.svChara);
+                case 'NICKNAME':
+                    return this.drawCssActorNickname(actor, x, y, width);
+                case 'NAME':
+                    return this.drawCssActorName(actor, x, y, width);
+                case 'LEVEL':
+                    return this.drawCssActorLevel(actor, x, y, width);
+                case 'HP':
+                    return this.drawCssActorHp(actor, x, y, width);
+                case 'MP':
+                    return this.drawCssActorMp(actor, x, y, width);
+                case 'TP':
+                    return this.drawCssActorTp(actor, x, y, width);
+                case 'CLASS':
+                    return this.drawCssActorClass(actor, x, y, width);
+                case 'STATE':
+                    return this.drawCssActorIcons(index, actor, x, y, width);
+                case 'PROFILE':
+                    return this.drawCssProfile(actor, x, y, width);
+                case 'IMAGE':
+                    return this.drawCssActorImage(actor, x, y, width);
+            }
+        }
+        return 1;
+    };
+
+    //------------------------------------------------------------------------
+    //アクターの顔画像の表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorFace = function(actor, x, y, width, lss, scale) {
+        var dy = this.lineHeight();
+        scale = scale || Math.ceil(Window_Base._faceHeight / dy);
+        this.changePaintOpacity(actor.isBattleMember());
+        this.drawCssFace(actor, x, y, width, dy * scale);
+        this.changePaintOpacity(true);
+        return scale;
+    };
+
+    Window_Base.prototype.drawCssFace = function(actor, dx, dy, width, height) {
+        var len = Math.min(width, height);
+        var dh = len || Window_Base._faceHeight;
+        var dw = len || Window_Base._faceWidth;
+        var offsetX = FTKR.CSS.cssStatus.face.posiX * (width - dw) / 2;
+        dx = Math.floor(dx + offsetX);
+        var bitmap = ImageManager.loadFace(actor.faceName());
+        var sw = Window_Base._faceWidth;
+        var sh = Window_Base._faceHeight;
+        var sx = actor.faceIndex() % 4 * sw;
+        var sy = Math.floor(actor.faceIndex() / 4) * sh;
+        this.contents.blt(bitmap, sx, sy, sw, sh, dx, dy, dw, dh);
+    };
+
+    //------------------------------------------------------------------------
+    //アクターの歩行キャラの表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorChara = function(actor, x, y, width, chara) {
+        var dy = this.lineHeight();
+        var line = Math.ceil(chara.height / dy);
+        this.changePaintOpacity(actor.isBattleMember());
+        this.drawCssChara(actor.characterName(), actor.characterIndex(), x, y, width, dy * line, chara);
+        this.changePaintOpacity(true);
+        return line;
+    };
+
+    Window_Base.prototype.drawCssChara = function(faceName, index, dx, dy, width, height, chara) {
+        var dh = chara.height;
+        var dw = dh || width || chara.width;
+        var offsetX = chara.posiX * (width - dw) / 2;
+        var offsetY = (height - dh) / 2;
+        dx = Math.floor(dx + offsetX);
+        dy = Math.floor(dy + offsetY);
+        var bitmap = ImageManager.loadCharacter(faceName);
+        var sw = chara.width;
+        var sh = chara.height;
+        var sx = (index * 3 + 1) % 12 * sw;
+        var sy = Math.floor((index * 3 + 1) / 12) * sh;
+        this.contents.blt(bitmap, sx, sy, sw, sh, dx, dy, dw, dh);
+    };
+
+    //------------------------------------------------------------------------
+    //アクターのSV戦闘キャラの表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorSvChara = function(index, actor, x, y, width, svChara) {
+        var dy = this.lineHeight();
+        var line = Math.ceil(svChara.height / dy);
+        this.changePaintOpacity(actor.isBattleMember());
+        this.drawCssSvChara(index, actor, x, y, width, dy * line, svChara);
+        this.changePaintOpacity(true);
+        return line;
+    };
+
+    Window_Base.prototype.drawCssSvChara = function(index, actor, dx, dy, width, height, svChara) {
+        index = index % this.showActorNum();
+        var sprite = this.sprite[index];
         if (!sprite) {
-            sprite = new Sprite_CssStateIcon(i, showNum);
+            sprite = new Sprite_Actor(actor);
             this.addChild(sprite);
-            this._stateIconSprite[index][i] = sprite;
+            this.sprite[index] = sprite;
         } else {
-            sprite.setup(actor, showNum);
+            sprite.setBattler(actor);
         }
-        sprite.move(x + this.padding, y + this.padding);
-        sprite.offsetMove(offset * i, line);
-        if(css.autoScale) sprite.setScale(scale);
-    }
-    return line ? line : 1;
-};
+        var offsetX = svChara.posiX * (width - svChara.width) / 2;
+        var sx = Math.floor(dx + offsetX + this.padding + svChara.width / 2);
+        var sy = Math.floor(dy + height + this.padding);
+        sprite.setHome(sx, sy);
+        sprite.startMove(0,0,0);
+        sprite.stopMove();
+        if (!Imported.FTKR_ESM) {
+            var stateMotion = actor.getStateMotion();
+            var motion = svChara.state && stateMotion ? stateMotion : svChara.motion;
+            sprite.startMotion(motion);
+        }
+    };
 
-Window_Base.prototype.getOverlapValue = function(actor, iw, maxlen, css) {
-    var iconlen = actor.allIcons().length;
-    var diff = Math.max((maxlen - iw - 4) / iconlen, iw * css.rate);
-    return diff && diff < iw ? diff : iw;
-};
+    //------------------------------------------------------------------------
+    //アクターの名前の表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorName = function(actor, x, y, width) {
+        this.changeTextColor(this.hpColor(actor));
+        this.drawText(actor.name(), x, y, width);
+        return 1;
+    };
 
-Window_Base.prototype.iconOverlapOffset = function(iw, number, width, vartical) {
-    var len = vartical ? (number - 1) * this.lineHeight() + 4 : width - iw - 4;
-    var diff = number > 1 ? len / (number - 1) : 0;
-    return diff < iw ? diff : iw;
-};
-
-Window_Base.prototype.iconScale = function() {
-    var iw = Window_Base._iconWidth;
-    return Math.min(Math.max(this.lineHeight() - 4, 0) / iw, 1);
-};
-
-//アイコンの表示スケールを指定できる表示関数
-Window_Base.prototype.drawCssIcon = function(iconIndex, x, y, scale, auto) {
-    scale = scale || 1;
-    var bitmap = ImageManager.loadSystem('IconSet');
-    var pw = Window_Base._iconWidth;
-    var ph = Window_Base._iconHeight;
-    if (auto) scale = Math.min(Math.max(this.lineHeight() - 4, 0) / pw, 1);
-    var sx = iconIndex % 16 * pw;
-    var sy = Math.floor(iconIndex / 16) * ph;
-    this.contents.blt(bitmap, sx, sy, pw, ph, x, y, pw * scale, ph * scale);
-};
-
-//------------------------------------------------------------------------
-//アクターのHPの表示関数
-//------------------------------------------------------------------------
-Window_Base.prototype.drawCssActorHp = function(actor, x, y, width) {
-    this.drawActorHp(actor, x, y, width);
-    return 1;
-};
-
-//------------------------------------------------------------------------
-//アクターのMPの表示関数
-//------------------------------------------------------------------------
-Window_Base.prototype.drawCssActorMp = function(actor, x, y, width) {
-    this.drawActorMp(actor, x, y, width);
-    return 1;
-};
-
-//------------------------------------------------------------------------
-//アクターのTPの表示関数
-//------------------------------------------------------------------------
-Window_Base.prototype.drawCssActorTp = function(actor, x, y, width) {
-    this.drawActorTp(actor, x, y, width);
-    return 1;
-};
-
-//------------------------------------------------------------------------
-//パラメータの表示関数
-//------------------------------------------------------------------------
-Window_Base.prototype.drawCssActorParam = function(actor, x, y, width, paramId) {
-    if (paramId < 0 && paramId > 7) return 0;
-    this.changeTextColor(this.systemColor());
-    this.drawText(TextManager.param(paramId), x, y, width);
-    this.resetTextColor();
-    this.drawText(actor.param(paramId), x, y, width, 'right');
-    return 1;
-};
-
-//------------------------------------------------------------------------
-//カスタムパラメータの表示関数
-//------------------------------------------------------------------------
-Window_Base.prototype.drawCssActorCustom = function(actor, x, y, width, custom) {
-    var name = custom.name || '';
-    var formula = custom.formula || '';
-    var value = this.evalCssCustomFormula(actor, formula);
-    this.changeTextColor(this.systemColor());
-    var tx = this.drawTextEx(name, x, y);
-    this.resetTextColor();
-    this.drawText(value, x + tx, y, width - tx, 'right');
-    return 1;
-};
-
-//------------------------------------------------------------------------
-//カスタムゲージの表示関数
-//------------------------------------------------------------------------
-Window_Base.prototype.drawCssActorGauge = function(actor, x, y, width, gauge) {
-    if (!gauge.current || !gauge.max) return 0;
-    var current = this.evalCssCustomFormula(actor, gauge.current);
-    var max = this.evalCssCustomFormula(actor, gauge.max);
-    if (gauge.color1 >= 0 && gauge.color2 >= 0) {
-        var rate = current / max;
-        var color1 = this.textColor(gauge.color1);
-        var color2 = this.textColor(gauge.color2);
-        this.drawGauge(x, y, width, rate, color1, color2);
-    }
-    this.changeTextColor(this.systemColor());
-    var tx = this.drawTextEx(gauge.name, x, y, width);
-    if (gauge.ref) {
-        var ref = this.evalCssCustomFormula(actor, gauge.ref);
+    //------------------------------------------------------------------------
+    //アクターのクラス名の表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorClass = function(actor, x, y, width) {
         this.resetTextColor();
-        this.drawText(ref, x + tx, y, width - tx, 'right');
-    } else {
-        if (tx) this.drawCssCurrentAndMax(tx, current, max, x, y, width,
-                              this.normalColor(), this.normalColor());
-    }
-    return 1;
-};
+        this.drawText(actor.currentClass().name, x, y, width);
+        return 1;
+    };
 
-Window_Base.prototype.drawCssCurrentAndMax = function(labelWidth, current, max, x, y,
-                                                   width, color1, color2) {
-    var gauge = FTKR.CSS.cssStatus.gauge;
-    var valueWidth = this.textWidth('0') * gauge.digit;
-    var slashWidth = this.textWidth('/');
-    var x1 = x + width - valueWidth;
-    var x2 = x1 - slashWidth;
-    var x3 = x2 - valueWidth;
-    if (x3 >= x + labelWidth) {
-        this.changeTextColor(color1);
-        this.drawText(current, x3, y, valueWidth, 'right');
-        this.changeTextColor(color2);
-        this.drawText('/', x2, y, slashWidth, 'right');
-        this.drawText(max, x1, y, valueWidth, 'right');
-    } else {
-        this.changeTextColor(color1);
-        this.drawText(current, x1, y, valueWidth, 'right');
-    }
-};
-
-//------------------------------------------------------------------------
-//装備の表示関数
-//------------------------------------------------------------------------
-Window_Base.prototype.drawCssActorEquip = function(actor, x, y, width, equipId) {
-    var equip = actor.equips()[equipId];
-    if (equip) {
-        this.drawCssIcon(equip.iconIndex, x, y, 1, true);
-        var iw = Window_Base._iconWidth + 4;
+    //------------------------------------------------------------------------
+    //アクターの二つ名の表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorNickname = function(actor, x, y, width) {
         this.resetTextColor();
-        this.drawText(equip.name, x + iw, y, width - iw);
-    }
-    return 1;
-};
+        this.drawText(actor.nickname(), x, y, width);
+        return 1;
+    };
 
-//------------------------------------------------------------------------
-//プロフィールの表示関数
-//------------------------------------------------------------------------
-Window_Base.prototype.drawCssProfile = function(actor, x, y, width) {
-    var texts = actor.profile().split('\n');
-    var dy = this.lineHeight();
-    texts.forEach( function(text, i) {
-        this.drawTextEx(text, x, y + dy * i);
-    },this);
-    return texts.length;
-};
+    //------------------------------------------------------------------------
+    //アクターのレベルの表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorLevel = function(actor, x, y, width) {
+        var value = actor.level;
+        var tw = this.textWidth(String(value));
+        this.changeTextColor(this.systemColor());
+        this.drawText(TextManager.levelA, x, y, width - tw - 4);
+        this.resetTextColor();
+        this.drawText(value, x + width - tw, y, tw, 'right');
+        return 1;
+    };
 
-//------------------------------------------------------------------------
-//テキストの表示関数
-//------------------------------------------------------------------------
-Window_Base.prototype.drawCssText = function(actor, x, y, width, text) {
-    this.changeTextColor(this.systemColor());
-    this.drawTextEx(text, x, y);
-    this.resetTextColor();
-    return 1;
-};
+    //------------------------------------------------------------------------
+    //アクターのステートアイコンの表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorIcons = function(index, actor, x, y, width, line) {
+        var css = FTKR.CSS.cssStatus.state;
+        var iw = Window_Base._iconWidth;
+        index = index % this.showActorNum();
+        if (!this._stateIconSprite[index]) {
+            this._stateIconSprite[index] = [];
+        }
+        if(css.autoScale) {
+            var scale = this.iconScale();
+            iw = iw * scale;
+        }
+        var maxlen = line ? this.lineHeight() * line : width;
+        var offset = css.overlap ? this.getOverlapValue(actor, iw, maxlen, css) : iw;
+        var showNum = Math.min(Math.floor((maxlen - 4) / offset));
 
-//------------------------------------------------------------------------
-//指定画像の表示関数
-//------------------------------------------------------------------------
-Window_Base.prototype.drawCssActorImage = function(actor, x, y, width) {
-    var dy = this.lineHeight();
-    var line = Math.ceil(actor.actor().cssbgi.height / dy) || 1;
-    this.changePaintOpacity(actor.isBattleMember());
-    this.drawCssImage(actor, x, y, width);
-    this.changePaintOpacity(true);
-    return line;
-};
+        for (var i = 0; i < showNum; i++) {
+            var sprite = this._stateIconSprite[index][i];
+            if (!sprite) {
+                sprite = new Sprite_CssStateIcon(i, showNum);
+                this.addChild(sprite);
+                this._stateIconSprite[index][i] = sprite;
+            } else {
+                sprite.setup(actor, showNum);
+            }
+            sprite.move(x + this.padding, y + this.padding);
+            sprite.offsetMove(offset * i, line);
+            if(css.autoScale) sprite.setScale(scale);
+        }
+        return line ? line : 1;
+    };
 
-Window_Base.prototype.drawCssImage = function(actor, dx, dy, width) {
-    var bgi = actor.actor().cssbgi;
-    var dh = bgi.height || this.lineHeight();
-    var dw = bgi.width.clamp(0, width) || width;
-    dx = dx + (width - dw) / 2;
-    var bitmap = ImageManager.loadPicture(bgi.name);
-    var sw = bgi.width || dh;
-    var sh = bgi.height || dw;
-    var sx = bgi.offsetX || 0;
-    var sy = bgi.offsetY || 0;
-    this.contents.blt(bitmap, sx, sy, sw, sh, dx, dy, dw, dh);
-};
+    Window_Base.prototype.getOverlapValue = function(actor, iw, maxlen, css) {
+        var iconlen = actor.allIcons().length;
+        var diff = Math.max((maxlen - iw - 4) / iconlen, iw * css.rate);
+        return diff && diff < iw ? diff : iw;
+    };
 
-//------------------------------------------------------------------------
-//指定したアイテムを装備した時のパラメータの表示関数
-//------------------------------------------------------------------------
-Window_Base.prototype.drawCssActorEquipParam = function(actor, x, y, width, paramId, lss) {
-    if (paramId < 0 && paramId > 7) return 0;
-    this.drawTextEx(FTKR.CSS.cssStatus.equip.arrow, x, y);
-    var target = lss.target;
-    if(target) {
-        var newValue = target.param(paramId);
-        var diffvalue = newValue - actor.param(paramId);
-        this.changeTextColor(this.paramchangeTextColor(diffvalue));
-        this.drawText(newValue, x, y, width, 'right');
-    }
-    return 1;
-};
+    Window_Base.prototype.iconOverlapOffset = function(iw, number, width, vartical) {
+        var len = vartical ? (number - 1) * this.lineHeight() + 4 : width - iw - 4;
+        var diff = number > 1 ? len / (number - 1) : 0;
+        return diff < iw ? diff : iw;
+    };
 
+    Window_Base.prototype.iconScale = function() {
+        var iw = Window_Base._iconWidth;
+        return Math.min(Math.max(this.lineHeight() - 4, 0) / iw, 1);
+    };
 
-//=============================================================================
-// Window_MenuStatus
-// メニュー画面のステータスウィンドウの表示クラス
-//=============================================================================
+    //アイコンの表示スケールを指定できる表示関数
+    Window_Base.prototype.drawCssIcon = function(iconIndex, x, y, scale, auto) {
+        scale = scale || 1;
+        var bitmap = ImageManager.loadSystem('IconSet');
+        var pw = Window_Base._iconWidth;
+        var ph = Window_Base._iconHeight;
+        if (auto) scale = Math.min(Math.max(this.lineHeight() - 4, 0) / pw, 1);
+        var sx = iconIndex % 16 * pw;
+        var sy = Math.floor(iconIndex / 16) * ph;
+        this.contents.blt(bitmap, sx, sy, pw, ph, x, y, pw * scale, ph * scale);
+    };
 
-FTKR.CSS.Window_MenuStatus_drawItemImage = Window_MenuStatus.prototype.drawItemImage;
-Window_MenuStatus.prototype.drawItemImage = function(index) {
-    if (!FTKR.CSS.enabledSS) FTKR.CSS.Window_MenuStatus_drawItemImage.call(this, index);
-};
+    //------------------------------------------------------------------------
+    //アクターのHPの表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorHp = function(actor, x, y, width) {
+        this.drawActorHp(actor, x, y, width);
+        return 1;
+    };
 
-FTKR.CSS.Window_MenuStatus_drawItemStatus = Window_MenuStatus.prototype.drawItemStatus;
-Window_MenuStatus.prototype.drawItemStatus = function(index) {
-    if (FTKR.CSS.enabledSS) {
-        var actor = $gameParty.members()[index];
-        var rect = this.itemRect(index);
-        this.drawCssActorStatus(index, actor, rect.x, rect.y, rect.width, rect.height);
-    } else {
-        FTKR.CSS.Window_MenuStatus_drawItemStatus.call(this, index);
-    }
-};
+    //------------------------------------------------------------------------
+    //アクターのMPの表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorMp = function(actor, x, y, width) {
+        this.drawActorMp(actor, x, y, width);
+        return 1;
+    };
 
-Window_MenuStatus.prototype.drawAllItems = function() {
-    var topIndex = this.topIndex();
-    for (var i = 0; i < this.maxPageItems(); i++) {
-        var index = topIndex + i;
-        if (index < this.maxItems()) {
-            this.drawItem(index);
+    //------------------------------------------------------------------------
+    //アクターのTPの表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorTp = function(actor, x, y, width) {
+        this.drawActorTp(actor, x, y, width);
+        return 1;
+    };
+
+    //------------------------------------------------------------------------
+    //パラメータの表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorParam = function(actor, x, y, width, paramId) {
+        if (paramId < 0 && paramId > 7) return 0;
+        this.changeTextColor(this.systemColor());
+        this.drawText(TextManager.param(paramId), x, y, width);
+        this.resetTextColor();
+        this.drawText(actor.param(paramId), x, y, width, 'right');
+        return 1;
+    };
+
+    //------------------------------------------------------------------------
+    //カスタムパラメータの表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorCustom = function(actor, x, y, width, custom) {
+        var name = custom.name || '';
+        var formula = custom.formula || '';
+        var value = this.evalCssCustomFormula(actor, formula);
+        this.changeTextColor(this.systemColor());
+        var tx = this.drawTextEx(name, x, y);
+        this.resetTextColor();
+        this.drawText(value, x + tx, y, width - tx, 'right');
+        return 1;
+    };
+
+    //------------------------------------------------------------------------
+    //カスタムゲージの表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorGauge = function(actor, x, y, width, gauge) {
+        var current = this.evalCssCustomFormula(actor, gauge.current);
+        var max = this.evalCssCustomFormula(actor, gauge.max);
+        if (gauge.color1 >= 0 && gauge.color2 >= 0) {
+            var rate = current / max;
+            var color1 = this.textColor(gauge.color1);
+            var color2 = this.textColor(gauge.color2);
+            this.drawGauge(x, y, width, rate, color1, color2);
+        }
+        this.changeTextColor(this.systemColor());
+        var tx = this.drawTextEx(gauge.name, x, y, width);
+        if (gauge.ref) {
+            var ref = this.evalCssCustomFormula(actor, gauge.ref);
+            this.resetTextColor();
+            this.drawText(ref, x + tx, y, width - tx, 'right');
         } else {
-            this.clearCssSprite(index % this.maxPageItems());
+            if (tx) this.drawCssCurrentAndMax(tx, current, max, x, y, width,
+                                  this.normalColor(), this.normalColor());
         }
-    }
-};
+        return 1;
+    };
 
-if(FTKR.CSS.window.enabled) {
-
-//書き換え
-//ウィンドウの行数
-Window_MenuStatus.prototype.numVisibleRows = function() {
-    return FTKR.CSS.window.numVisibleRows;
-};
-
-//書き換え
-//ウィンドウに横に並べるアクター数
-Window_MenuStatus.prototype.maxCols = function() {
-    return FTKR.CSS.window.maxCols;
-};
-
-//書き換え
-//カーソルの高さ
-Window_MenuStatus.prototype.itemHeight = function() {
-    return this.lineHeight() * FTKR.CSS.window.cursolHeight;
-};
-
-//書き換え
-//ウィンドウに横に並べるアクターの表示間隔
-//ステータスレイアウト側で変更できるのでここでは 0 とする。
-Window_MenuStatus.prototype.spacing = function() {
-    return 0;
-};
-
-//書き換え
-//ウィンドウのフォントサイズ
-Window_MenuStatus.prototype.standardFontSize = function() {
-    return FTKR.CSS.window.fontSize;
-};
-
-//書き換え
-//ウィンドウに周囲の余白サイズ
-Window_MenuStatus.prototype.standardPadding = function() {
-    return FTKR.CSS.window.padding;
-};
-
-//書き換え
-//ウィンドウ内の1行の高さ
-Window_MenuStatus.prototype.lineHeight = function() {
-    return FTKR.CSS.window.lineHeight;
-};
-
-//書き換え
-//ウィンドウの背景の透明度
-Window_MenuStatus.prototype.standardBackOpacity = function() {
-    return FTKR.CSS.window.opacity;
-};
-
-//書き換え
-//ウィンドウ枠の表示
-Window_MenuStatus.prototype._refreshFrame = function() {
-    if (!FTKR.CSS.window.hideFrame) Window.prototype._refreshFrame.call(this);
-};
-
-Window_MenuStatus.prototype.itemHeightSpace = function() {
-    return FTKR.CSS.window.hspace;
-};
-
-Window_MenuStatus.prototype.unitHeight = function() {
-    return this.itemHeight() + this.itemHeightSpace();
-};
-
-Window_MenuStatus.prototype.unitWidth = function() {
-    return this.itemWidth() + this.spacing();
-};
-
-if (FTKR.CSS.window.hspace) {
-//書き換え
-Window_MenuStatus.prototype.maxPageRows = function() {
-    var pageHeight = this.height - this.padding * 2;
-    return Math.floor(pageHeight / this.unitHeight());
-};
-
-//書き換え
-Window_MenuStatus.prototype.topRow = function() {
-    return Math.floor(this._scrollY / this.unitHeight());
-};
-
-//書き換え
-Window_MenuStatus.prototype.setTopRow = function(row) {
-    var scrollY = row.clamp(0, this.maxTopRow()) * this.unitHeight();
-    if (this._scrollY !== scrollY) {
-        this._scrollY = scrollY;
-        this.refresh();
-        this.updateCursor();
-    }
-};
-
-//書き換え
-Window_MenuStatus.prototype.itemRect = function(index) {
-    var rect = new Rectangle();
-    var maxCols = this.maxCols();
-    rect.width = this.itemWidth();
-    rect.height = this.itemHeight();
-    rect.x = index % maxCols * this.unitWidth() - this._scrollX;
-    rect.y = Math.floor(index / maxCols) * this.unitHeight() - this._scrollY;
-    return rect;
-};
-}//FTKR.CSS.window.hspace
-
-}//ウィンドウカスタム有効
-
-//=============================================================================
-// Window_SkillStatus
-// スキル画面のステータスウィンドウの表示クラス
-//=============================================================================
-
-Window_SkillStatus.prototype.refresh = function() {
-    if(FTKR.CSS.enabledSkill) {
-        this.contents.clear();
-        if (this._actor) {
-            var w = this.width - this.padding * 2;
-            var h = this.height - this.padding * 2;
-            this.drawCssActorStatus(0, this._actor, 0, 0, w, h);
+    Window_Base.prototype.drawCssCurrentAndMax = function(labelWidth, current, max, x, y,
+                                                      width, color1, color2) {
+        var gauge = FTKR.CSS.cssStatus.gauge;
+        var valueWidth = this.textWidth('0') * gauge.digit;
+        var slashWidth = this.textWidth('/');
+        var x1 = x + width - valueWidth;
+        var x2 = x1 - slashWidth;
+        var x3 = x2 - valueWidth;
+        if (x3 >= x + labelWidth) {
+            this.changeTextColor(color1);
+            this.drawText(current, x3, y, valueWidth, 'right');
+            this.changeTextColor(color2);
+            this.drawText('/', x2, y, slashWidth, 'right');
+            this.drawText(max, x1, y, valueWidth, 'right');
+        } else {
+            this.changeTextColor(color1);
+            this.drawText(current, x1, y, valueWidth, 'right');
         }
-    }
-};
+    };
+
+    //------------------------------------------------------------------------
+    //装備の表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorEquip = function(actor, x, y, width, equipId) {
+        var equip = actor.equips()[equipId];
+        if (equip) {
+            this.drawCssIcon(equip.iconIndex, x, y, 1, true);
+            var iw = Window_Base._iconWidth + 4;
+            this.resetTextColor();
+            this.drawText(equip.name, x + iw, y, width - iw);
+        }
+        return 1;
+    };
+
+    //------------------------------------------------------------------------
+    //プロフィールの表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssProfile = function(actor, x, y, width) {
+        var texts = actor.profile().split('\n');
+        var dy = this.lineHeight();
+        texts.forEach( function(text, i) {
+            this.drawTextEx(text, x, y + dy * i);
+        },this);
+        return texts.length;
+    };
+
+    //------------------------------------------------------------------------
+    //テキストの表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssText = function(actor, x, y, width, text) {
+        if (!text) return 1;
+        this.changeTextColor(this.systemColor());
+        this.drawTextEx(text, x, y);
+        this.resetTextColor();
+        return 1;
+    };
+
+    //------------------------------------------------------------------------
+    //指定画像の表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorImage = function(actor, x, y, width) {
+        var dy = this.lineHeight();
+        var line = Math.ceil(actor.actor().cssbgi.height / dy) || 1;
+        this.changePaintOpacity(actor.isBattleMember());
+        this.drawCssImage(actor, x, y, width);
+        this.changePaintOpacity(true);
+        return line;
+    };
+
+    Window_Base.prototype.drawCssImage = function(actor, dx, dy, width) {
+        var bgi = actor.actor().cssbgi;
+        var dh = bgi.height || this.lineHeight();
+        var dw = bgi.width.clamp(0, width) || width;
+        dx = dx + (width - dw) / 2;
+        var bitmap = ImageManager.loadPicture(bgi.name);
+        var sw = bgi.width || dh;
+        var sh = bgi.height || dw;
+        var sx = bgi.offsetX || 0;
+        var sy = bgi.offsetY || 0;
+        this.contents.blt(bitmap, sx, sy, sw, sh, dx, dy, dw, dh);
+    };
+
+    //------------------------------------------------------------------------
+    //指定したアイテムを装備した時のパラメータの表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorEquipParam = function(actor, x, y, width, paramId, lss) {
+        if (paramId < 0 && paramId > 7) return 0;
+        this.drawTextEx(FTKR.CSS.cssStatus.equip.arrow, x, y);
+        var target = lss.target;
+        if(target) {
+            var newValue = target.param(paramId);
+            var diffvalue = newValue - actor.param(paramId);
+            this.changeTextColor(this.paramchangeTextColor(diffvalue));
+            this.drawText(newValue, x, y, width, 'right');
+        }
+        return 1;
+    };
+
+    //------------------------------------------------------------------------
+    //アクターに設定したカスタムゲージの表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorCustomGauge = function(actor, x, y, width, paramId) {
+        var gauge = actor.actor().cssGauges[paramId];
+        if (!gauge) return 1;
+        return this.drawCssActorGauge(actor, x, y, width, gauge);
+    };
+
+    //------------------------------------------------------------------------
+    //クラスに設定したカスタムゲージの表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssClassCustomGauge = function(actor, x, y, width, paramId) {
+        var gauge = actor.currentClass().cssGauges[paramId];
+        if (!gauge) return 1;
+        return this.drawCssActorGauge(actor, x, y, width, gauge);
+    };
+
+    //=============================================================================
+    // Window_MenuStatus
+    // メニュー画面のステータスウィンドウの表示クラス
+    //=============================================================================
+
+    FTKR.CSS.Window_MenuStatus_drawItemImage = Window_MenuStatus.prototype.drawItemImage;
+    Window_MenuStatus.prototype.drawItemImage = function(index) {
+        if (!FTKR.CSS.enabledSS) FTKR.CSS.Window_MenuStatus_drawItemImage.call(this, index);
+    };
+
+    FTKR.CSS.Window_MenuStatus_drawItemStatus = Window_MenuStatus.prototype.drawItemStatus;
+    Window_MenuStatus.prototype.drawItemStatus = function(index) {
+        if (FTKR.CSS.enabledSS) {
+            var actor = $gameParty.members()[index];
+            var rect = this.itemRect(index);
+            this.drawCssActorStatus(index, actor, rect.x, rect.y, rect.width, rect.height);
+        } else {
+            FTKR.CSS.Window_MenuStatus_drawItemStatus.call(this, index);
+        }
+    };
+
+    Window_MenuStatus.prototype.drawAllItems = function() {
+        var topIndex = this.topIndex();
+        for (var i = 0; i < this.maxPageItems(); i++) {
+            var index = topIndex + i;
+            if (index < this.maxItems()) {
+                this.drawItem(index);
+            } else {
+                this.clearCssSprite(index % this.maxPageItems());
+            }
+        }
+    };
+
+    if(FTKR.CSS.window.enabled) {
+
+    //書き換え
+    //ウィンドウの行数
+    Window_MenuStatus.prototype.numVisibleRows = function() {
+        return FTKR.CSS.window.numVisibleRows;
+    };
+
+    //書き換え
+    //ウィンドウに横に並べるアクター数
+    Window_MenuStatus.prototype.maxCols = function() {
+        return FTKR.CSS.window.maxCols;
+    };
+
+    //書き換え
+    //カーソルの高さ
+    Window_MenuStatus.prototype.itemHeight = function() {
+        return this.lineHeight() * FTKR.CSS.window.cursolHeight;
+    };
+
+    //書き換え
+    //ウィンドウに横に並べるアクターの表示間隔
+    //ステータスレイアウト側で変更できるのでここでは 0 とする。
+    Window_MenuStatus.prototype.spacing = function() {
+        return 0;
+    };
+
+    //書き換え
+    //ウィンドウのフォントサイズ
+    Window_MenuStatus.prototype.standardFontSize = function() {
+        return FTKR.CSS.window.fontSize;
+    };
+
+    //書き換え
+    //ウィンドウに周囲の余白サイズ
+    Window_MenuStatus.prototype.standardPadding = function() {
+        return FTKR.CSS.window.padding;
+    };
+
+    //書き換え
+    //ウィンドウ内の1行の高さ
+    Window_MenuStatus.prototype.lineHeight = function() {
+        return FTKR.CSS.window.lineHeight;
+    };
+
+    //書き換え
+    //ウィンドウの背景の透明度
+    Window_MenuStatus.prototype.standardBackOpacity = function() {
+        return FTKR.CSS.window.opacity;
+    };
+
+    //書き換え
+    //ウィンドウ枠の表示
+    Window_MenuStatus.prototype._refreshFrame = function() {
+        if (!FTKR.CSS.window.hideFrame) Window.prototype._refreshFrame.call(this);
+    };
+
+    Window_MenuStatus.prototype.itemHeightSpace = function() {
+        return FTKR.CSS.window.hspace;
+    };
+
+    Window_MenuStatus.prototype.unitHeight = function() {
+        return this.itemHeight() + this.itemHeightSpace();
+    };
+
+    Window_MenuStatus.prototype.unitWidth = function() {
+        return this.itemWidth() + this.spacing();
+    };
+
+    if (FTKR.CSS.window.hspace) {
+    //書き換え
+    Window_MenuStatus.prototype.maxPageRows = function() {
+        var pageHeight = this.height - this.padding * 2;
+        return Math.floor(pageHeight / this.unitHeight());
+    };
+
+    //書き換え
+    Window_MenuStatus.prototype.topRow = function() {
+        return Math.floor(this._scrollY / this.unitHeight());
+    };
+
+    //書き換え
+    Window_MenuStatus.prototype.setTopRow = function(row) {
+        var scrollY = row.clamp(0, this.maxTopRow()) * this.unitHeight();
+        if (this._scrollY !== scrollY) {
+            this._scrollY = scrollY;
+            this.refresh();
+            this.updateCursor();
+        }
+    };
+
+    //書き換え
+    Window_MenuStatus.prototype.itemRect = function(index) {
+        var rect = new Rectangle();
+        var maxCols = this.maxCols();
+        rect.width = this.itemWidth();
+        rect.height = this.itemHeight();
+        rect.x = index % maxCols * this.unitWidth() - this._scrollX;
+        rect.y = Math.floor(index / maxCols) * this.unitHeight() - this._scrollY;
+        return rect;
+    };
+    }//FTKR.CSS.window.hspace
+
+    }//ウィンドウカスタム有効
+
+    //=============================================================================
+    // Window_SkillStatus
+    // スキル画面のステータスウィンドウの表示クラス
+    //=============================================================================
+
+    var _window_SkillStatus_refresh = Window_SkillStatus.prototype.refresh;
+    Window_SkillStatus.prototype.refresh = function() {
+        if(FTKR.CSS.enabledSkill) {
+            this.contents.clear();
+            if (this._actor) {
+                var w = this.width - this.padding * 2;
+                var h = this.height - this.padding * 2;
+                this.drawCssActorStatus(0, this._actor, 0, 0, w, h);
+            }
+        } else {
+            _window_SkillStatus_refresh.call(this);
+        }
+    };
+
+    //=============================================================================
+    // Sprite_Battlerの修正
+    // Sprite_Actorの修正
+    //=============================================================================
+
+    FTKR.CSS.Sprite_Battler_initMembers = Sprite_Battler.prototype.initMembers;
+    Sprite_Battler.prototype.initMembers = function() {
+        FTKR.CSS.Sprite_Battler_initMembers.call(this);
+        this._canMove = true;
+    };
+
+    //------------------------------------------------------------------------
+    // SV戦闘キャラの位置を変更できないようにする
+    //------------------------------------------------------------------------
+    Sprite_Actor.prototype.stopMove = function() {
+        this._canMove = false;
+    };
+
+    Sprite_Actor.prototype.canMove = function() {
+        return this._canMove;
+    };
+
+    FTKR.CSS.Sprite_Actor_updateTargetPosition = Sprite_Actor.prototype.updateTargetPosition;
+    Sprite_Actor.prototype.updateTargetPosition = function() {
+        if (!this.canMove()) return;
+        FTKR.CSS.Sprite_Actor_updateTargetPosition.call(this);
+    };
+
+}());//END
 
 //=============================================================================
 // Sprite_CssStateIcon
@@ -2407,33 +2626,5 @@ Sprite_CssStateIcon.prototype.update = function() {
         this.updateFrame();
         this._animationCount = 0;
     }
-};
-
-//=============================================================================
-// Sprite_Battlerの修正
-// Sprite_Actorの修正
-//=============================================================================
-
-FTKR.CSS.Sprite_Battler_initMembers = Sprite_Battler.prototype.initMembers;
-Sprite_Battler.prototype.initMembers = function() {
-    FTKR.CSS.Sprite_Battler_initMembers.call(this);
-    this._canMove = true;
-};
-
-//------------------------------------------------------------------------
-// SV戦闘キャラの位置を変更できないようにする
-//------------------------------------------------------------------------
-Sprite_Actor.prototype.stopMove = function() {
-    this._canMove = false;
-};
-
-Sprite_Actor.prototype.canMove = function() {
-    return this._canMove;
-};
-
-FTKR.CSS.Sprite_Actor_updateTargetPosition = Sprite_Actor.prototype.updateTargetPosition;
-Sprite_Actor.prototype.updateTargetPosition = function() {
-    if (!this.canMove()) return;
-    FTKR.CSS.Sprite_Actor_updateTargetPosition.call(this);
 };
 
