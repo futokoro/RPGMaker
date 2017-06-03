@@ -3,8 +3,8 @@
 // FTKR_SkillTreeSystem.js
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/02/25
-// 最終更新日 : 2017/05/24
-// バージョン : v1.7.4
+// 最終更新日 : 2017/06/03
+// バージョン : v1.7.5
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.7.4 ツリー型スキル習得システム
+ * @plugindesc v1.7.5 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -1250,6 +1250,9 @@ FTKR.STS = FTKR.STS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.7.5 - 2017/06/03 : 不具合修正
+ *    1. ツリーリセット時に複数回習得させた分のSPが戻らない不具合を修正。
+ * 
  * v1.7.4 - 2017/05/24 : ヘルプ修正
  * 
  * v1.7.3 - 2017/05/18 : 不具合修正
@@ -1942,12 +1945,13 @@ Game_Actor.prototype.levelUp = function() {
 
 FTKR.STS.Game_Actor_learnSkill = Game_Actor.prototype.learnSkill;
 Game_Actor.prototype.learnSkill = function(skillId) {
-    if (!this.isStsLearnedSkill(skillId)) this.setStsSkillCount(skillId, 0);
+    if (!this.isStsLearnedSkill(skillId)) {
+        this.setStsSkillCount(skillId, 0);
+    }
     FTKR.STS.Game_Actor_learnSkill.call(this, skillId);
     if (this.isLearnedSkill(skillId) && !this.stsCount(skillId)) {
         if (FTKR.STS.learnedActorVarID) $gameVariables.setValue(FTKR.STS.learnedActorVarID, this.actorId());
         if (FTKR.STS.learnedSkillVarID) $gameVariables.setValue(FTKR.STS.learnedSkillVarID, skillId);
-        this.addStsUsedSp(skillId);
         this.stsCountUp(skillId);
         this._stsLearnSkills[skillId] = true;
     }
@@ -1963,7 +1967,6 @@ Game_Actor.prototype.forgetSkill = function(skillId) {
 
 Game_Actor.prototype.resetStsSkill = function(skillId) {
     this.setStsSkillCount(skillId, 0);
-    this.setStsUsedSp(skillId, 0);
     this._stsLearnSkills[skillId] = false;
 };
 
@@ -1982,18 +1985,12 @@ Game_Actor.prototype.stsCountUp = function(skillId) {
 };
 
 Game_Actor.prototype.stsUsedSp = function(skillId) {
-    return this._stsUsedSp[skillId] || 0;
-};
-
-Game_Actor.prototype.setStsUsedSp = function(skillId, value) {
-    return this._stsUsedSp[skillId] = value;
-};
-
-Game_Actor.prototype.addStsUsedSp = function(skillId) {
+    if (!this.isLearnedSkill(skillId)) return 0;
     var skill = this.stsSkill(skillId);
     FTKR.setGameData(this, null, skill);
     var value = this.evalStsFormula(skill.sts.costs[0].value, 0, 0);
-    return this.setStsUsedSp(skillId, this.stsUsedSp(skillId) + value);
+    var count = this.stsCount(skillId) || 1;
+    return value * count;
 };
 
 Game_Actor.prototype.evalStsFormula = function(formula, result1, result2) {
@@ -2141,7 +2138,6 @@ Game_Actor.prototype.resetTree = function(treeType) {
   datas.forEach( function(data) {
     if (!data) return;
     var skill = this.stsSkill(data.id);
-    console.log(skill.name, this.stsCount(data.id), this.stsUsedSp(data.id), totalSp);
     totalSp += this.stsUsedSp(skill.id);
     this.forgetSkill(data.id);
     this.resetStsSkill(data.id);
