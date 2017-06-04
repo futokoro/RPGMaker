@@ -3,8 +3,8 @@
 // FTKR_SkillTreeSystem.js
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/02/25
-// 最終更新日 : 2017/06/03
-// バージョン : v1.7.5
+// 最終更新日 : 2017/06/05
+// バージョン : v1.7.6
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.7.5 ツリー型スキル習得システム
+ * @plugindesc v1.7.6 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -1017,6 +1017,10 @@ FTKR.STS = FTKR.STS || {};
  * スキルツリーの初期化
  *-----------------------------------------------------------------------------
  * 以下のプラグインコマンドで、スキルツリーを初期化できます。
+ * リセットと初期化で使用したSP(*1)が戻るかどうか変わります。
+ * 
+ * (*1)使用したSPとは、スキルの習得にSPを消費した値の合計です。
+ *     SPを消費せずにスキルを習得した場合は 0 と計算します。
  * 
  * <STS Reset Actor(x) ALL>
  * <STS リセット アクター(x) すべて>
@@ -1249,6 +1253,10 @@ FTKR.STS = FTKR.STS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.7.6 - 2017/06/05 : 不具合修正
+ *    1. 消費コストの表示が正しく反映されない不具合を修正。
+ *    1. ツリーリセット時に通常よりも多くSPが戻る不具合を修正。
  * 
  * v1.7.5 - 2017/06/03 : 不具合修正
  *    1. ツリーリセット時に複数回習得させた分のSPが戻らない不具合を修正。
@@ -1986,11 +1994,12 @@ Game_Actor.prototype.stsCountUp = function(skillId) {
 
 Game_Actor.prototype.stsUsedSp = function(skillId) {
     if (!this.isLearnedSkill(skillId)) return 0;
-    var skill = this.stsSkill(skillId);
-    FTKR.setGameData(this, null, skill);
-    var value = this.evalStsFormula(skill.sts.costs[0].value, 0, 0);
-    var count = this.stsCount(skillId) || 1;
-    return value * count;
+    return this._stsUsedSp[skillId];
+};
+
+Game_Actor.prototype.stsAddUsedSp = function(skillId, value) {
+    if (!this._stsUsedSp[skillId]) this._stsUsedSp[skillId] = 0;
+    this._stsUsedSp[skillId] += value;
 };
 
 Game_Actor.prototype.evalStsFormula = function(formula, result1, result2) {
@@ -2024,6 +2033,7 @@ Game_Actor.prototype.paySepCost = function(cost) {
         case 'armor':
           return $gameParty.loseItem($dataArmors[cost.id], value);
         case 'sp':
+          this.stsAddUsedSp(FTKR.gameData.item.id, value);
           return this.loseSp(value);
     }
 };
@@ -3157,7 +3167,7 @@ Window_StsCost.prototype.drawAllCost = function() {
       for (var i = 0; i< 3; i++) {
         var cost = skill.sts.costs[i];
         if (cost) {
-            FTKR.setGameData(this, null, skill);
+            FTKR.setGameData(this._actor, null, skill);
             if (FTKR.STS.sp.hideCost0 && cost.type === 'sp' && (!cost.value || Number(cost.value) === 0)) continue;
             this.drawStsCost(cost, 0, y*(1+i), width);
         }
