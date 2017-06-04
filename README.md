@@ -111,7 +111,8 @@
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_ItemNonScope](FTKR_ItemNonScope.js) | [仮版](FTKR_ItemNonScope.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ItemNonScope.js) | 2017/04/19 | アイテムが範囲なしの場合にパーティーの全メンバーを対象にする |
 | [FTKR_ItemCategoryFixed](FTKR_ItemCategoryFixed.js) | [仮版](FTKR_ItemCategoryFixed.ja.md) | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ItemCategoryFixed.js) | 2017/06/02 | アイテムボックスでカテゴリー選択を無くす |
-| [FTKR_ExItemBox](FTKR_ExItemBox.js) | [仮版](FTKR_ExItemBox.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExItemBox.js) | 2017/06/04 | アイテムボックスの仕様を変更するプラグイン<br> FTKR_ItemCategoryFixedと組み合わせて使用できません |
+| [FTKR_ItemSubCommand](FTKR_ItemSubCommand.js) | [仮版](FTKR_ItemSubCommand.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ItemSubCommand.js) | 2017/06/04 | アイテムボックスにサブコマンドを追加するプラグイン |
+| [FTKR_ExItemBox](FTKR_ExItemBox.js) | [仮版](FTKR_ExItemBox.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExItemBox.js) | 2017/06/04 | アイテムボックスの仕様を変更するプラグイン<br> FTKR_ItemCategoryFixedとFTKR_ItemSubCommandと組み合わせて使用できません |
 
 [目次に戻る](#目次)
 
