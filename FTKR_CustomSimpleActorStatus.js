@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2017/06/02
-// バージョン : v1.7.0
+// 最終更新日 : 2017/06/05
+// バージョン : v1.7.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.7.0 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v1.7.1 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -139,6 +139,11 @@ FTKR.CSS = FTKR.CSS || {};
  * 0 - 左寄せ, 1 - 中央, 2 - 右寄せ
  * @default 1
  * 
+ * @param Chara Direction
+ * @desc アクターの歩行キャラの向きを設定します。
+ * 0 - 正面固定, 1 - マップ上の先頭プレイヤーの向き
+ * @default 0
+ * 
  * @param --SVキャラの設定--
  * @default
  * 
@@ -157,14 +162,14 @@ FTKR.CSS = FTKR.CSS || {};
  * 0 - 左寄せ, 1 - 中央, 2 - 右寄せ
  * @default 1
  * 
+ * @param Enabled Sv Motion
+ * @desc Svキャラのモーションを有効にするか設定します
+ * 0 - 無効にする, 1 - 常に有効にする, 2 - 戦闘時以外有効
+ * @default 1
+ * 
  * @param Sv Image Motion
  * @desc Svキャラの標準モーションを設定します
  * @default wait
- * 
- * @param Sv Motion Loop
- * @desc 表示モーションをループさせるか設定します
- * 0 - ループさせない, 1 - ループさせる
- * @default 1
  * 
  * @param Enabled State Motion
  * @desc ステートモーションを有効にするか設定します
@@ -199,6 +204,14 @@ FTKR.CSS = FTKR.CSS || {};
  * @param Equip Right Arrow
  * @desc 装備を変える時に表示する右矢印記号を指定します。
  * @default \c[16]→
+ * 
+ * @param --カスタム画像の設定--
+ * @default
+ * 
+ * @param Image Position X
+ * @desc カスタム画像を描画エリア内のどこに表示するか。
+ * 0 - 左寄せ, 1 - 中央, 2 - 右寄せ
+ * @default 1
  * 
  * @param --カスタムパラメータの設定--
  * @default
@@ -831,7 +844,7 @@ FTKR.CSS = FTKR.CSS || {};
  *    : 制御文字が使用できます。
  *    :
  *    :image - 
- *    : アクターのメモ欄で設定した画像を表示します。
+ *    : アクターのメモ欄で設定したカスタム画像を表示します。
  *    :
  *    :eparam(x) -
  *    : 装備画面にて使用可能な、パラメータ表示用コードです。
@@ -927,9 +940,9 @@ FTKR.CSS = FTKR.CSS || {};
  *    :アクターのキャラクタ画像を描画エリアのどの位置に表示するか設定します。
  *    :0 - 左寄せ, 1 - 中央(デフォルト), 2 - 右寄せ
  * 
- * <Chara Position Y>
- *    :アクターのキャラクタ画像を描画エリアのどの位置に表示するか設定します。
- *    :0 - 下寄せ, 1 - 中央(デフォルト), 2 - 上寄せ
+ * <Chara Direction>
+ *    :アクターのキャラクタ画像の向きを設定します。
+ *    :0 - 正面固定, 1 - マップ上の先頭プレイヤーの向き
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -938,7 +951,6 @@ FTKR.CSS = FTKR.CSS || {};
  * プラグインパラメータ<Actor Status Text*>にて、'sv'を入力した場合
  * アクターのSVキャラクタ画像(SV戦闘キャラ)を表示します。
  * SVキャラクタ画像について、以下のパラメータで設定を変更できます。
- * なお、SVキャラクタ画像は、フロントビューモードのゲームでは表示できません。
  * 
  * <Sv Image Width>
  * <Sv Image Height>
@@ -950,9 +962,12 @@ FTKR.CSS = FTKR.CSS || {};
  *    :アクターのSVキャラクタ画像を描画エリアのどの位置に表示するか設定します。
  *    :0 - 左寄せ, 1 - 中央(デフォルト), 2 - 右寄せ
  * 
- * <Sv Position Y>
- *    :アクターのSVキャラクタ画像を描画エリアのどの位置に表示するか設定します。
- *    :0 - 下寄せ, 1 - 中央(デフォルト), 2 - 上寄せ
+ * <Enabled Sv Motion>
+ *    :アクターのSVキャラクタ画像のモーションを有効にするか設定します。
+ *    :0 - 無効, 1 - 有効, 2 - 戦闘時以外有効
+ *    :無効にした場合は、モーションを表示しません。
+ *    :表示する画像は、画像ファイル内の左上のSVキャラクタ画像で固定です。
+ *    :フロントビューモードの場合は、強制的に無効になります。
  * 
  * <Sv Image Motion>
  *    :標準で表示するモーションを設定します。
@@ -960,11 +975,6 @@ FTKR.CSS = FTKR.CSS || {};
  *    : walk, wait, chant, guard, damage, evade, thrust, swing,
  *    : missile, skill, spell, item, escape, victory, dying,
  *    : abnormal, sleep, dead
- * 
- * <Sv Motion Loop>
- *    :一部のループしないモーションに対して、表示モーションを
- *    :ループさせるか設定します。
- *    :0 - ループさせない, 1 - ループさせる
  * 
  * <Enabled State Motion>
  *    :ステートモーションを有効にするか設定します。
@@ -1081,7 +1091,7 @@ FTKR.CSS = FTKR.CSS || {};
  * 
  * 
  *-----------------------------------------------------------------------------
- * 指定した画像を表示する [ image ]
+ * カスタム画像を表示する [ image ]
  *-----------------------------------------------------------------------------
  * プラグインパラメータ<Actor Status Text*>にて、'image'を入力した場合
  * 以下のタグをアクターのメモ欄に追記することで、指定した画像を表示する
@@ -1112,6 +1122,15 @@ FTKR.CSS = FTKR.CSS || {};
  * 
  * Bgi height: n
  *    :画像ファイルを四角に切り取る時の高さを入力します。
+ * 
+ * 
+ * 指定した画像は、以下のプラグインパラメータで設定を変更できます。
+ * 
+ * <Image Position X>
+ *    :指定した画像を描画エリアのどの位置に表示するか設定します。
+ *    :0 - 左寄せ, 1 - 中央(デフォルト), 2 - 右寄せ
+ *    :描画エリアの幅が、顔画像の表示幅よりも大きい場合に機能します。
+ *    :また、波括弧を使って描画エリアを拡張した場合にも有効です。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -1273,6 +1292,12 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.7.1 - 2017/06/05 : 不具合修正、機能追加
+ *    1. 歩行キャラが正しく表示されない不具合を修正。
+ *    2. 歩行キャラの向きを、マップ上のプレイヤーに合わせる機能を追加。
+ *    3. SVキャラのモーションを無効にする機能を追加。
+ *    4. カスタム画像を表示する位置を調整する機能を追加。
+ * 
  * v1.7.0 - 2017/06/02 : 機能追加、不具合修正
  *    1. アクター毎に個別に設定できるカスタムゲージを追加。
  *    2. クラス毎に個別に設定できるカスタムゲージを追加。
@@ -1429,14 +1454,14 @@ FTKR.CSS = FTKR.CSS || {};
             width:Number(parameters['Chara Image Width'] || 0),
             height:Number(parameters['Chara Image Height'] || 0),
             posiX:Number(parameters['Chara Position X'] || 0),
+            direction:Number(parameters['Chara Direction'] || 0),
         },
         svChara:{
             width:Number(parameters['Sv Image Width'] || 0),
             height:Number(parameters['Sv Image Height'] || 0),
+            enable:Number(parameters['Enabled Sv Motion'] || 0),
             motion:String(parameters['Sv Image Motion'] || ''),
-            loop:Number(parameters['Sv Motion Loop'] || 0),
             state:Number(parameters['Enabled State Motion'] || 0),
-            animation:Number(parameters['Enable Animation'] || 0),
             posiX:Number(parameters['Sv Position X'] || 0),
         },
         state:{
@@ -1450,6 +1475,9 @@ FTKR.CSS = FTKR.CSS || {};
         },
         gauge:{
             digit :Number(parameters['Gauge Param Digit'] || 0),
+        },
+        image:{
+            posiX:Number(parameters['Image Position X'] || 0),
         },
         customs:[
             {name:String(parameters['Custom 0 Display Name'] || ''),
@@ -1873,10 +1901,10 @@ FTKR.CSS = FTKR.CSS || {};
     Window_Base.prototype.drawCssActorStatus = function(index, actor, x, y, width, height, lss) {
         if (!lss) lss = FTKR.CSS.simpleStatus;
         var w = width;
-        this._dispWidth = width;
         var h = height;
         var wrs = lss.widthRate.split(',').num();
         var spc = lss.space.split(',').num();
+        this._dispWidth = width - spc[0] - spc[3];
         var aws = [];
         var axs = [];
         var status = [lss.text1.split(','), lss.text2.split(','), lss.text3.split(',')];
@@ -1937,10 +1965,10 @@ FTKR.CSS = FTKR.CSS || {};
                     return this.drawCssActorParam(actor, x, y, width, Number(match[2]));
                 case 'CUSTOM':
                     var customId = Number(match[2]);
-                    return customId >= 0 ? this.drawCssActorCustom(actor, x, y, width, css.customs[customId]) : 1;
+                    return this.drawCssActorCustom(actor, x, y, width, css.customs[customId]);
                 case 'GAUGE':
                     var gaugeId = Number(match[2]);
-                    return gaugeId >= 0 ? this.drawCssActorGauge(actor, x, y, width, css.gauges[gaugeId]) : 1;
+                    return this.drawCssActorGauge(actor, x, y, width, css.gauges[gaugeId]);
                 case 'EQUIP':
                     return this.drawCssActorEquip(actor, x, y, width, Number(match[2]));
                 case 'TEXT':
@@ -2016,12 +2044,14 @@ FTKR.CSS = FTKR.CSS || {};
         var dy = this.lineHeight();
         var line = Math.ceil(chara.height / dy);
         this.changePaintOpacity(actor.isBattleMember());
-        this.drawCssChara(actor.characterName(), actor.characterIndex(), x, y, width, dy * line, chara);
+        this.drawCssChara(actor, x, y, width, dy * line, chara);
         this.changePaintOpacity(true);
         return line;
     };
 
-    Window_Base.prototype.drawCssChara = function(faceName, index, dx, dy, width, height, chara) {
+    Window_Base.prototype.drawCssChara = function(actor, dx, dy, width, height, chara) {
+        var faceName = actor.characterName();
+        var index = actor.characterIndex();
         var dh = chara.height;
         var dw = dh || width || chara.width;
         var offsetX = chara.posiX * (width - dw) / 2;
@@ -2029,10 +2059,11 @@ FTKR.CSS = FTKR.CSS || {};
         dx = Math.floor(dx + offsetX);
         dy = Math.floor(dy + offsetY);
         var bitmap = ImageManager.loadCharacter(faceName);
+        var direction = chara.direction ? $gamePlayer._direction / 2 - 1 : 0;
         var sw = chara.width;
         var sh = chara.height;
-        var sx = (index * 3 + 1) % 12 * sw;
-        var sy = Math.floor((index * 3 + 1) / 12) * sh;
+        var sx = (index % 4 * 3 + 1) * sw;
+        var sy = (Math.floor(index / 4) * 4 + direction) * sh;
         this.contents.blt(bitmap, sx, sy, sw, sh, dx, dy, dw, dh);
     };
 
@@ -2049,6 +2080,19 @@ FTKR.CSS = FTKR.CSS || {};
     };
 
     Window_Base.prototype.drawCssSvChara = function(index, actor, dx, dy, width, height, svChara) {
+        if (this.enableCssSvCharaMotion(svChara)) {
+            this.drawCssSvSprite(index, actor, dx, dy, width, height, svChara);
+        } else {
+            this.drawCssSvImage(index, actor, dx, dy, width, height, svChara);
+        }
+    };
+
+    Window_Base.prototype.enableCssSvCharaMotion = function(svChara) {
+        return $gameSystem.isSideView() &&
+            (svChara.enable === 1 || svChara.enable === 2 && !$gameParty.inBattle());
+    };
+
+    Window_Base.prototype.drawCssSvSprite = function(index, actor, dx, dy, width, height, svChara) {
         index = index % this.showActorNum();
         var sprite = this.sprite[index];
         if (!sprite) {
@@ -2069,6 +2113,19 @@ FTKR.CSS = FTKR.CSS || {};
             var motion = svChara.state && stateMotion ? stateMotion : svChara.motion;
             sprite.startMotion(motion);
         }
+    };
+
+    Window_Base.prototype.drawCssSvImage = function(index, actor, dx, dy, width, height, svChara) {
+        var dh = svChara.height;
+        var dw = dh || width || svChara.width;
+        var offsetX = svChara.posiX * (width - dw) / 2;
+        var offsetY = (height - dh) / 2;
+        dx = Math.floor(dx + offsetX);
+        dy = Math.floor(dy + offsetY);
+        var bitmap = ImageManager.loadSvActor(actor.battlerName());
+        var sw = svChara.width;
+        var sh = svChara.height;
+        this.contents.blt(bitmap, 0, 0, sw, sh, dx, dy, dw, dh);
     };
 
     //------------------------------------------------------------------------
@@ -2214,6 +2271,7 @@ FTKR.CSS = FTKR.CSS || {};
     //カスタムパラメータの表示関数
     //------------------------------------------------------------------------
     Window_Base.prototype.drawCssActorCustom = function(actor, x, y, width, custom) {
+        if (!custom) return 1;
         var name = custom.name || '';
         var formula = custom.formula || '';
         var value = this.evalCssCustomFormula(actor, formula);
@@ -2228,6 +2286,7 @@ FTKR.CSS = FTKR.CSS || {};
     //カスタムゲージの表示関数
     //------------------------------------------------------------------------
     Window_Base.prototype.drawCssActorGauge = function(actor, x, y, width, gauge) {
+        if (!gauge) return 1;
         var current = this.evalCssCustomFormula(actor, gauge.current);
         var max = this.evalCssCustomFormula(actor, gauge.max);
         if (gauge.color1 >= 0 && gauge.color2 >= 0) {
@@ -2322,7 +2381,8 @@ FTKR.CSS = FTKR.CSS || {};
         var bgi = actor.actor().cssbgi;
         var dh = bgi.height || this.lineHeight();
         var dw = bgi.width.clamp(0, width) || width;
-        dx = dx + (width - dw) / 2;
+        var offsetX = FTKR.CSS.cssStatus.image.posiX * (width - dw) / 2;
+        dx = Math.floor(dx + offsetX);
         var bitmap = ImageManager.loadPicture(bgi.name);
         var sw = bgi.width || dh;
         var sh = bgi.height || dw;
@@ -2628,3 +2688,4 @@ Sprite_CssStateIcon.prototype.update = function() {
     }
 };
 
+//EOF

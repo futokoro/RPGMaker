@@ -3,8 +3,8 @@
 // FTKR_ExVariablesChange.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/18
-// 最終更新日 : 2017/05/19
-// バージョン : v1.1.1
+// 最終更新日 : 2017/06/05
+// バージョン : v1.2.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EVC = FTKR.EVC || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.1 変数の操作を拡張するプラグイン
+ * @plugindesc v1.2.0 変数の操作を拡張するプラグイン
  * @author フトコロ
  *
  * @param --アイテム増減時--
@@ -57,7 +57,11 @@ FTKR.EVC = FTKR.EVC || {};
  * @default 
  *
  * @param Receive Damage
- * @desc アイテム・スキルを使用してダメージを受けた時の汎用処理
+ * @desc アイテム・スキルを使用されてダメージを受けた時の汎用処理
+ * @default 
+ *
+ * @param Evade
+ * @desc アイテム・スキルを使用されて回避した時の汎用処理
  * @default 
  *
  * @param Kill
@@ -147,6 +151,8 @@ FTKR.EVC = FTKR.EVC || {};
  * なお、タグで設定した変数の計算が行われる順番は以下の通りです。
  * アイテム/スキル ⇒ アクター/エネミー ⇒ クラス ⇒ 装備 ⇒ ステート
  * 
+ * ＜アイテム・スキルを使用した場合＞
+ * 
  * 1. 成功失敗問わずに使用すると実行
  * 
  * <EVC 使用時>
@@ -175,19 +181,28 @@ FTKR.EVC = FTKR.EVC || {};
  * </EVC ダメージ時>
  * 
  * 
- * 5. ダメージを受けると実行
- * 
- * <EVC 被ダメージ時>
- * 計算式
- * </EVC 被ダメージ時>
- * 
- * 
  * 6. ダメージを与えて敵を倒すと実行
  * (アクターなら倒したとき、エネミーなら倒されたとき実行)
  * 
  * <EVC 討伐時>
  * 計算式
  * </EVC 討伐時>
+ * 
+ * 
+ * ＜アイテム・スキルを使用された場合＞
+ * 
+ * 1. ダメージを受けると実行
+ * 
+ * <EVC 被ダメージ時>
+ * 計算式
+ * </EVC 被ダメージ時>
+ * 
+ * 
+ * 2. 回避すると実行
+ * 
+ * <EVC 回避時>
+ * 計算式
+ * </EVC 回避時>
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -318,6 +333,10 @@ FTKR.EVC = FTKR.EVC || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.2.0 - 2017/06/05 : 機能追加
+ *    1. アイテム・スキルの回避時を追加。
+ *    2. 処理の見直し。
+ * 
  * v1.1.1 - 2017/05/19 : ヘルプ修正
  * 
  * v1.1.0 - 2017/05/11 : 機能追加
@@ -349,329 +368,335 @@ FTKR.EVC = FTKR.EVC || {};
 */
 //=============================================================================
 
-//=============================================================================
-// プラグイン パラメータ
-//=============================================================================
-FTKR.EVC.parameters = PluginManager.parameters('FTKR_ExVariablesChange');
+(function() {
 
-FTKR.EVC.default = {
-    buy     :String(FTKR.EVC.parameters['Buy'] || ''),
-    gain    :String(FTKR.EVC.parameters['Gain'] || ''),
-    sell    :String(FTKR.EVC.parameters['Sell'] || ''),
-    lose    :String(FTKR.EVC.parameters['Lose'] || ''),
-    use     :String(FTKR.EVC.parameters['Use'] || ''),
-    success :String(FTKR.EVC.parameters['Success'] || ''),
-    failure :String(FTKR.EVC.parameters['Failure'] || ''),
-    damage  :String(FTKR.EVC.parameters['Damage'] || ''),
-    receive :String(FTKR.EVC.parameters['Receive Damage'] || ''),
-    kill    :String(FTKR.EVC.parameters['Kill'] || ''),
-    end     :String(FTKR.EVC.parameters['Battle End'] || ''),
-    Victory :String(FTKR.EVC.parameters['Battle Victory'] || ''),
-    escape  :String(FTKR.EVC.parameters['Battle Escape'] || ''),
-    defeat  :String(FTKR.EVC.parameters['Battle Defeat'] || ''),
-};
+    //=============================================================================
+    // プラグイン パラメータ
+    //=============================================================================
+    var parameters = PluginManager.parameters('FTKR_ExVariablesChange');
 
-
-//=============================================================================
-// 自作関数(グローバル)
-//=============================================================================
-
-FTKR.gameData = FTKR.gameData || {
-    user   :null,
-    target :null,
-    item   :null,
-    number :0,
-};
-
-if (!FTKR.setGameData) {
-FTKR.setGameData = function(user, target, item, number) {
-    FTKR.gameData = {
-        user   :user || null,
-        target :target || null,
-        item   :item || null,
-        number :number || 0
+    FTKR.EVC.default = {
+        buy     :String(parameters['Buy'] || ''),
+        gain    :String(parameters['Gain'] || ''),
+        sell    :String(parameters['Sell'] || ''),
+        lose    :String(parameters['Lose'] || ''),
+        use     :String(parameters['Use'] || ''),
+        success :String(parameters['Success'] || ''),
+        failure :String(parameters['Failure'] || ''),
+        damage  :String(parameters['Damage'] || ''),
+        receive :String(parameters['Receive Damage'] || ''),
+        evade   :String(parameters['Evade'] || ''),
+        kill    :String(parameters['Kill'] || ''),
+        end     :String(parameters['Battle End'] || ''),
+        victory :String(parameters['Battle Victory'] || ''),
+        escape  :String(parameters['Battle Escape'] || ''),
+        defeat  :String(parameters['Battle Defeat'] || ''),
     };
-};
-}
 
-if (!FTKR.evalCalcFormula) {
-FTKR.evalCalcFormula = function(formula) {
-    var datas = FTKR.gameData;
-    try {
-        var s = $gameSwitches._data;
-        var v = $gameVariables._data;
-        var a = datas.user;
-        var b = datas.target;
-        var item   = datas.item;
-        var number = datas.number;
-        if (b) var result = b.result();
-        eval(formula);
-    } catch (e) {
-        console.error(e);
-    }
-};
-}
+    //=============================================================================
+    // 自作関数(グローバル)
+    //=============================================================================
 
-//=============================================================================
-// 自作関数
-//=============================================================================
+    FTKR.gameData = FTKR.gameData || {
+        user   :null,
+        target :null,
+        item   :null,
+        number :0,
+    };
 
-// 挟み込み形式のメタデータを読み取ってtextを返す
-var readEntrapmentCodeToText = function(obj, codeTitles) {
-    regs = convertEntrapmentRegArray('EVC', codeTitles);
-    var notedata = obj.note.split(/[\r\n]+/);
-    var setMode = 'none';
-    var text = '';
-    notedata.forEach( function(line) {
-        if (testRegs(line, regs, 'a')) {
-            setMode = 'read';
-        } else if (testRegs(line, regs, 'b')) {
-            setMode = 'none';
-        } else if (setMode === 'read') {
-            text += line + ';';
-        }
-    });
-    return text;
-};
-
-//文字列の配列を挟み込み形式用の正規表現オブジェクトの配列に変換する
-var convertEntrapmentRegArray = function(header, codeTitles) {
-    return codeTitles.map(function(str) {
-        return {
-            a:new RegExp('<' + header + ' ' + str + '>', 'i'),
-            b:new RegExp('<\/' + header + ' ' + str + '>', 'i')
+    if (!FTKR.setGameData) {
+    FTKR.setGameData = function(user, target, item, number) {
+        FTKR.gameData = {
+            user   :user || null,
+            target :target || null,
+            item   :item || null,
+            number :number || 0
         };
-    });
-};
-
-//正規表現オブジェクトの配列regsとdataをテストする
-var testRegs = function(data, regs, prop) {
-    return regs.some(function(reg) {
-        return prop ? reg[prop].test(data) : reg.test(data);
-    });
-};
-
-//objのメモ欄から <codeTitle[0]: x> から <codeTitle[n]: x>のいずれかの値を読み取って配列で返す
-var readSplitAnyEntrapmentCode = function(obj, codeTitles) {
-    var evalsText = readEntrapmentCodeToText(obj, codeTitles);
-    return evalsText ? evalsText.split(';') : [];
-};
-
-//配列内のobjのメモ欄から <codeTitle: x> の値を読み取って配列で返す
-var readItemsEntrapmentCodeSplitTotal = function(items, codeTitles) {
-    var result = [];
-    items.forEach( function(item) {
-        if(item) Array.prototype.push.apply(result, readSplitAnyEntrapmentCode(item, codeTitles));
-    });
-    return result;
-};
-
-//target(アクターまたはエネミー)が持つ、codeTitle[0] ~ codeTitle[n]のいずれかで指定したタグの値を配列にして返す
-// クラス、装備、ステートも含む
-var readItemsEntrapmentCodeArray = function(target, codeTitles) {
-    var result = [];
-    if(target.isActor()) {
-        return result.concat(
-            readSplitAnyEntrapmentCode(target.actor(), codeTitles),
-            readSplitAnyEntrapmentCode($dataClasses[target.actor().classId], codeTitles),
-            readItemsEntrapmentCodeSplitTotal(target.equips(), codeTitles),
-            readItemsEntrapmentCodeSplitTotal(target.states(), codeTitles)
-        );
-    } else if(target.isEnemy()) {
-        return result.concat(
-            readSplitAnyEntrapmentCode(target.enemy(), codeTitles),
-            readItemsEntrapmentCodeSplitTotal(target.states(), codeTitles)
-        );
+    };
     }
-    return result;
-};
 
-//=============================================================================
-// DataManager
-//=============================================================================
-
-DataManager.variablesChangeNoteTags = function(codeTitles, item, target) {
-    if(item) this.variablesChangeItemNoteTags(codeTitles, item);
-    if(target) this.variablesChangeUnitNoteTags(codeTitles, target);
-};
-
-DataManager.variablesChangeItemNoteTags = function(codeTitles, obj) {
-    var evalsText = readEntrapmentCodeToText(obj, codeTitles);
-    if (!evalsText) return;
-    this.evcEvalsFormula(evalsText.split(';'));
-};
-
-DataManager.variablesChangeUnitNoteTags = function(codeTitles, obj) {
-    var evalsTexts = readItemsEntrapmentCodeArray(obj, codeTitles);
-    this.evcEvalsFormula(evalsTexts);
-};
-
-DataManager.evcEvalsFormula = function(evals) {
-    for (var i = 0; i < evals.length; i++) {
-        FTKR.evalCalcFormula(evals[i]);
+    if (!FTKR.evalCalcFormula) {
+    FTKR.evalCalcFormula = function(formula) {
+        var datas = FTKR.gameData;
+        try {
+            var s = $gameSwitches._data;
+            var v = $gameVariables._data;
+            var a = datas.user;
+            var b = datas.target;
+            var item   = datas.item;
+            var number = datas.number;
+            if (b) var result = b.result();
+            eval(formula);
+        } catch (e) {
+            console.error(e);
+        }
+    };
     }
-    if($gameMap) $gameMap.requestRefresh();
-};
 
-DataManager.defaultVariablesChange = function(condition) {
-    var eval = FTKR.EVC.default[condition];
-    if(eval) {
-        var evals = eval.split(';');
-        DataManager.evcEvalsFormula(evals);
-    }
-};
+    //=============================================================================
+    // 自作関数
+    //=============================================================================
 
-//=============================================================================
-// 使用時
-//=============================================================================
+    //挟み込み形式のメタデータを読み取ってtextを返す
+    var readEntrapmentCodeToText = function(obj, codeTitles) {
+        regs = convertEntrapmentRegArray('EVC', codeTitles);
+        var notedata = obj.note.split(/[\r\n]+/);
+        var setMode = 'none';
+        var text = '';
+        notedata.forEach( function(line) {
+            if (testRegs(line, regs, 'a')) {
+                setMode = 'read';
+            } else if (testRegs(line, regs, 'b')) {
+                setMode = 'none';
+            } else if (setMode === 'read') {
+                text += line + ';';
+            }
+        });
+        return text;
+    };
 
-FTKR.EVC.Game_Action_apply = Game_Action.prototype.apply;
-Game_Action.prototype.apply = function(target) {
-    FTKR.EVC.Game_Action_apply.call(this, target);
-    this.evcVariablesChange(target);
-};
+    //文字列の配列を挟み込み形式用の正規表現オブジェクトの配列に変換する
+    var convertEntrapmentRegArray = function(header, codeTitles) {
+        return codeTitles.map(function(str) {
+            return {
+                a:new RegExp('<' + header + ' ' + str + '>', 'i'),
+                b:new RegExp('<\/' + header + ' ' + str + '>', 'i')
+            };
+        });
+    };
 
-Game_Action.prototype.evcVariablesChange = function(target) {
-    var result = target.result();
-    if (!result.used) return false;
-    FTKR.setGameData(this.subject(), target, this.item());
-    this.variablesChangeItemNoteTags(['使用時', 'USE'], this.subject());
-    DataManager.defaultVariablesChange('use');
-    if (result.isHit()) {
-        this.variablesChangeItemNoteTags(['使用成功時', 'SUCCESS'], this.subject());
-        DataManager.defaultVariablesChange('success');
-        if (result.hpDamage || result.mpDamage) {
-            this.variablesChangeItemNoteTags(['与ダメージ時', 'DAMAGE'], this.subject());
-            DataManager.defaultVariablesChange('damage');
-            if (target.isEnemy() && target.hp <= 0) {
-                this.variablesChangeItemNoteTags(['討伐時', 'KILL'], this.subject());
-                DataManager.variablesChangeUnitNoteTags(['討伐時', 'KILL'], target)
-                DataManager.defaultVariablesChange('kill');
+    //正規表現オブジェクトの配列regsとdataをテストする
+    var testRegs = function(data, regs, prop) {
+        return regs.some(function(reg) {
+            return prop ? reg[prop].test(data) : reg.test(data);
+        });
+    };
+
+    //objのメモ欄から <codeTitle[0]: x> から <codeTitle[n]: x>のいずれかの値を読み取って配列で返す
+    var readSplitAnyEntrapmentCode = function(obj, codeTitles) {
+        var evalsText = readEntrapmentCodeToText(obj, codeTitles);
+        return evalsText ? evalsText.split(';') : [];
+    };
+
+    //配列内のobjのメモ欄から <codeTitle: x> の値を読み取って配列で返す
+    var readItemsEntrapmentCodeSplitTotal = function(items, codeTitles) {
+        var result = [];
+        items.forEach( function(item) {
+            if(item) Array.prototype.push.apply(result, readSplitAnyEntrapmentCode(item, codeTitles));
+        });
+        return result;
+    };
+
+    //target(アクターまたはエネミー)が持つ、codeTitle[0] ~ codeTitle[n]のいずれかで指定したタグの値を配列にして返す
+    // クラス、装備、ステートも含む
+    var readItemsEntrapmentCodeArray = function(target, codeTitles) {
+        var result = [];
+        if(target.isActor()) {
+            return result.concat(
+                readSplitAnyEntrapmentCode(target.actor(), codeTitles),
+                readSplitAnyEntrapmentCode($dataClasses[target.actor().classId], codeTitles),
+                readItemsEntrapmentCodeSplitTotal(target.equips(), codeTitles),
+                readItemsEntrapmentCodeSplitTotal(target.states(), codeTitles)
+            );
+        } else if(target.isEnemy()) {
+            return result.concat(
+                readSplitAnyEntrapmentCode(target.enemy(), codeTitles),
+                readItemsEntrapmentCodeSplitTotal(target.states(), codeTitles)
+            );
+        }
+        return result;
+    };
+
+    var variablesChangeNoteTags = function(codeTitles, item, target) {
+        if(item) variablesChangeItemNoteTags(codeTitles, item);
+        if(target) variablesChangeUnitNoteTags(codeTitles, target);
+    };
+
+    var variablesChangeItemNoteTags = function(codeTitles, obj) {
+        var evalsText = readEntrapmentCodeToText(obj, codeTitles);
+        if (!evalsText) return;
+        evcEvalsFormula(evalsText.split(';'));
+    };
+
+    var variablesChangeUnitNoteTags = function(codeTitles, obj) {
+        evcEvalsFormula(readItemsEntrapmentCodeArray(obj, codeTitles));
+    };
+
+    var evcEvalsFormula = function(evals) {
+        for (var i = 0; i < evals.length; i++) {
+            FTKR.evalCalcFormula(evals[i]);
+        }
+        if($gameMap) $gameMap.requestRefresh();
+    };
+
+    var defaultVariablesChange = function(condition) {
+        var eval = FTKR.EVC.default[condition];
+        if(eval) {
+            evcEvalsFormula(eval.split(';'));
+        }
+    };
+
+    //=============================================================================
+    // 使用時
+    //=============================================================================
+
+    FTKR.EVC.Game_Action_apply = Game_Action.prototype.apply;
+    Game_Action.prototype.apply = function(target) {
+        this.evcVariablesChangeBefor(target);
+        FTKR.EVC.Game_Action_apply.call(this, target);
+        this.evcVariablesChangeAfter(target);
+    };
+
+    Game_Action.prototype.evcVariablesChangeBefor = function(target) {
+        FTKR.setGameData(this.subject(), target, this.item());
+        this.variablesChangeItemNoteTags(['使用時', 'USE'], this.subject());
+        defaultVariablesChange('use');
+    };
+
+    Game_Action.prototype.evcVariablesChangeAfter = function(target) {
+        var result = target.result();
+        FTKR.setGameData(this.subject(), target, this.item());
+        if (result.isHit()) {
+            this.variablesChangeItemNoteTags(['使用成功時', 'SUCCESS'], this.subject());
+            defaultVariablesChange('success');
+            if (result.hpDamage || result.mpDamage) {
+                this.variablesChangeItemNoteTags(['与ダメージ時', 'DAMAGE'], this.subject());
+                defaultVariablesChange('damage');
+                if (target.isEnemy() && target.hp <= 0) {
+                    this.variablesChangeItemNoteTags(['討伐時', 'KILL'], this.subject());
+                    variablesChangeUnitNoteTags(['討伐時', 'KILL'], target)
+                    defaultVariablesChange('kill');
+                }
+            }
+        } else {
+            if (result.evaded) {
+                variablesChangeUnitNoteTags(['回避時', 'EVADE'], target);
+                defaultVariablesChange('evade');
+            }
+            this.variablesChangeItemNoteTags(['使用失敗時', 'FAILURE'], this.subject());
+            defaultVariablesChange('failure');
+        }
+        return true;
+    };
+
+    Game_Action.prototype.variablesChangeItemNoteTags = function(codeTitles, target) {
+        variablesChangeNoteTags(codeTitles, this.item(), target);
+    };
+
+    //=============================================================================
+    // 被ダメージ時
+    //=============================================================================
+
+    FTKR.EVC.Game_Action_executeDamage = Game_Action.prototype.executeDamage;
+    Game_Action.prototype.executeDamage = function(target, value) {
+        FTKR.EVC.Game_Action_executeDamage.call(this, target, value);
+        variablesChangeItemNoteTags(['被ダメージ時', 'RECEIVE_DAM'], this.item());
+        if (!this.isHpEffect()) {
+            variablesChangeUnitNoteTags(['被ダメージ時', 'RECEIVE_DAM'], target);
+            defaultVariablesChange('receive');
+        }
+    };
+
+    FTKR.EVC.Game_Battler_onDamage = Game_Battler.prototype.onDamage;
+    Game_Battler.prototype.onDamage = function(value) {
+        variablesChangeUnitNoteTags(['被ダメージ時', 'RECEIVE_DAM'], this);
+        defaultVariablesChange('receive');
+        FTKR.EVC.Game_Battler_onDamage.call(this, value);
+    };
+
+    //=============================================================================
+    // 購入時
+    //=============================================================================
+
+    FTKR.EVC.Scene_Shop_doBuy = Scene_Shop.prototype.doBuy;
+    Scene_Shop.prototype.doBuy = function(number) {
+        FTKR.setGameData(null, null, this._item, number);
+        variablesChangeNoteTags(['購入時', 'BUY'], this._item);
+        defaultVariablesChange('buy');
+        FTKR.EVC.Scene_Shop_doBuy.call(this, number);
+    };
+
+    //=============================================================================
+    // 増加・減少時
+    //=============================================================================
+
+    FTKR.EVC.Game_Party_gainItem = Game_Party.prototype.gainItem;
+    Game_Party.prototype.gainItem = function(item, amount, includeEquip) {
+        if (this.itemContainer(item) && amount) {
+            FTKR.setGameData(null, null, item, amount);
+            if (amount > 0) {
+                variablesChangeNoteTags(['増加時', 'GAIN'], item);
+                defaultVariablesChange('gain');
+            } else if (amount < 0) {
+                variablesChangeNoteTags(['減少時', 'LOSE'], item);
+                defaultVariablesChange('lose');
             }
         }
-    } else {
-        this.variablesChangeItemNoteTags(['使用失敗時', 'FAILURE'], this.subject());
-        DataManager.defaultVariablesChange('failure');
-    }
-    return true;
-};
+        FTKR.EVC.Game_Party_gainItem.call(this, item, amount, includeEquip);
+    };
 
-Game_Action.prototype.variablesChangeItemNoteTags = function(codeTitles, target) {
-    DataManager.variablesChangeNoteTags(codeTitles, this.item(), target);
-};
+    //=============================================================================
+    // 売却時
+    //=============================================================================
 
-//=============================================================================
-// 被ダメージ時
-//=============================================================================
+    FTKR.EVC.Scene_Shop_doSell = Scene_Shop.prototype.doSell;
+    Scene_Shop.prototype.doSell = function(number) {
+        FTKR.setGameData(null, null, this._item, number);
+        variablesChangeNoteTags(['売却時', 'SELL'], this._item);
+        defaultVariablesChange('sell');
+        FTKR.EVC.Scene_Shop_doSell.call(this, number);
+    };
 
-FTKR.EVC.Game_Action_executeDamage = Game_Action.prototype.executeDamage;
-Game_Action.prototype.executeDamage = function(target, value) {
-    FTKR.EVC.Game_Action_executeDamage.call(this, target, value);
-    DataManager.variablesChangeItemNoteTags(['被ダメージ時', 'RECEIVE_DAM'], this.item());
-    if (!this.isHpEffect()) {
-        DataManager.variablesChangeUnitNoteTags(['被ダメージ時', 'RECEIVE_DAM'], target);
-        DataManager.defaultVariablesChange('receive');
-    }
-};
+    //=============================================================================
+    // 戦闘終了時
+    //=============================================================================
 
-FTKR.EVC.Game_Battler_onDamage = Game_Battler.prototype.onDamage;
-Game_Battler.prototype.onDamage = function(value) {
-    DataManager.variablesChangeUnitNoteTags(['被ダメージ時', 'RECEIVE_DAM'], this);
-    DataManager.defaultVariablesChange('receive');
-    FTKR.EVC.Game_Battler_onDamage.call(this, value);
-};
-
-//=============================================================================
-// 購入時
-//=============================================================================
-
-FTKR.EVC.Scene_Shop_doBuy = Scene_Shop.prototype.doBuy;
-Scene_Shop.prototype.doBuy = function(number) {
-    FTKR.setGameData(null, null, this._item, number);
-    DataManager.variablesChangeNoteTags(['購入時', 'BUY'], this._item);
-    DataManager.defaultVariablesChange('buy');
-    FTKR.EVC.Scene_Shop_doBuy.call(this, number);
-};
-
-//=============================================================================
-// 増加・減少時
-//=============================================================================
-
-FTKR.EVC.Game_Party_gainItem = Game_Party.prototype.gainItem;
-Game_Party.prototype.gainItem = function(item, amount, includeEquip) {
-    if (this.itemContainer(item) && amount) {
-        FTKR.setGameData(null, null, item, amount);
-        if (amount > 0) {
-            DataManager.variablesChangeNoteTags(['増加時', 'GAIN'], item);
-            DataManager.defaultVariablesChange('gain');
-        } else if (amount < 0) {
-            DataManager.variablesChangeNoteTags(['減少時', 'LOSE'], item);
-            DataManager.defaultVariablesChange('lose');
-        }
-    }
-    FTKR.EVC.Game_Party_gainItem.call(this, item, amount, includeEquip);
-};
-
-//=============================================================================
-// 売却時
-//=============================================================================
-
-FTKR.EVC.Scene_Shop_doSell = Scene_Shop.prototype.doSell;
-Scene_Shop.prototype.doSell = function(number) {
-    FTKR.setGameData(null, null, this._item, number);
-    DataManager.variablesChangeNoteTags(['売却時', 'SELL'], this._item);
-    DataManager.defaultVariablesChange('sell');
-    FTKR.EVC.Scene_Shop_doSell.call(this, number);
-};
-
-//=============================================================================
-// 戦闘終了時
-//=============================================================================
-
-FTKR.EVC.BattleManager_processVictory = BattleManager.processVictory;
-BattleManager.processVictory = function() {
-    $gameParty.members().forEach(function(member){
-        FTKR.setGameData(member);
-        DataManager.variablesChangeUnitNoteTags(['勝利時', 'VICTORY'], member);
-    });
-    FTKR.setGameData();
-    DataManager.defaultVariablesChange('victory');
-    FTKR.EVC.BattleManager_processVictory.call(this);
-};
-
-FTKR.EVC.BattleManager_processEscape = BattleManager.processEscape;
-BattleManager.processEscape = function() {
-    var success = FTKR.EVC.BattleManager_processEscape.call(this);
-    if (success) {
+    FTKR.EVC.BattleManager_processVictory = BattleManager.processVictory;
+    BattleManager.processVictory = function() {
         $gameParty.members().forEach(function(member){
             FTKR.setGameData(member);
-            DataManager.variablesChangeUnitNoteTags(['逃走時', 'ESCAPE'], member);
+            variablesChangeUnitNoteTags(['勝利時', 'VICTORY'], member);
         });
         FTKR.setGameData();
-        DataManager.defaultVariablesChange('escape');
-    }
-    return success;
-};
+        defaultVariablesChange('victory');
+        FTKR.EVC.BattleManager_processVictory.call(this);
+    };
 
-FTKR.EVC.BattleManager_processDefeat = BattleManager.processDefeat;
-BattleManager.processDefeat = function() {
-    $gameParty.members().forEach(function(member){
-        FTKR.setGameData(member);
-        DataManager.variablesChangeUnitNoteTags(['敗北時', 'DEFEAT'], member);
-        DataManager.defaultVariablesChange('defeat');
-    });
-    FTKR.setGameData();
-    FTKR.EVC.BattleManager_processDefeat.call(this);
-};
+    FTKR.EVC.BattleManager_processEscape = BattleManager.processEscape;
+    BattleManager.processEscape = function() {
+        var success = FTKR.EVC.BattleManager_processEscape.call(this);
+        if (success) {
+            $gameParty.members().forEach(function(member){
+                FTKR.setGameData(member);
+                variablesChangeUnitNoteTags(['逃走時', 'ESCAPE'], member);
+            });
+            FTKR.setGameData();
+            defaultVariablesChange('escape');
+        }
+        return success;
+    };
 
-FTKR.EVC.BattleManager_endBattle = BattleManager.endBattle;
-BattleManager.endBattle = function(result) {
-    FTKR.EVC.BattleManager_endBattle.call(this, result);
-    $gameParty.members().forEach(function(member){
-        FTKR.setGameData(member);
-        DataManager.variablesChangeUnitNoteTags(['戦闘終了時', 'BATTLEEND'], member);
-    });
-    FTKR.setGameData();
-    DataManager.defaultVariablesChange('end');
-};
+    FTKR.EVC.BattleManager_processDefeat = BattleManager.processDefeat;
+    BattleManager.processDefeat = function() {
+        $gameParty.members().forEach(function(member){
+            FTKR.setGameData(member);
+            variablesChangeUnitNoteTags(['敗北時', 'DEFEAT'], member);
+            defaultVariablesChange('defeat');
+        });
+        FTKR.setGameData();
+        FTKR.EVC.BattleManager_processDefeat.call(this);
+    };
+
+    FTKR.EVC.BattleManager_endBattle = BattleManager.endBattle;
+    BattleManager.endBattle = function(result) {
+        FTKR.EVC.BattleManager_endBattle.call(this, result);
+        $gameParty.members().forEach(function(member){
+            FTKR.setGameData(member);
+            variablesChangeUnitNoteTags(['戦闘終了時', 'BATTLEEND'], member);
+        });
+        FTKR.setGameData();
+        defaultVariablesChange('end');
+    };
+
+}());//EOF
 
