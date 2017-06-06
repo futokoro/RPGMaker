@@ -966,6 +966,16 @@ FTKR_CustomSimpleActorStatus.jsのヘルプを参照してください。
 
 ![画像](image/FTKR_SkillTreeSystem/FTKR_SkillTreeSystem_n04_010.png)
 
+アイテム等のコストで表示が見切れる場合は、制御文字`\LW`を使うと表示幅を調整できます。
+
+入力例)
+
+![画像](image/FTKR_SkillTreeSystem/n04_031.png)
+
+コスト名を 100pixel 内に収めて表示します。
+
+![画像](image/FTKR_SkillTreeSystem/n04_032.png)
+
 `<Cost Number Format>`
 
 コストの数値を表示している部分の設定です。

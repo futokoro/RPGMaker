@@ -1,10 +1,10 @@
 //=============================================================================
-// ツリー型スキル習得システム(v1.6)用 ウィンドウレイアウト変更プラグイン
+// ツリー型スキル習得システム用 ウィンドウレイアウト変更プラグイン
 // FTKR_STS_CustomWindow.js
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/03/31
-// 最終更新日 : 2017/04/22
-// バージョン : v1.1.1
+// 最終更新日 : 2017/06/06
+// バージョン : v1.2.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.STS.CW = FTKR.STS.CW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.1 ツリー型スキル習得システム(v1.6)用 ウィンドウレイアウト変更プラグイン
+ * @plugindesc v1.2.0 ツリー型スキル習得システム用 ウィンドウレイアウト変更プラグイン
  * @author フトコロ
  *
  * @param --ツリータイプウィンドウの設定(Tree Types Window)--
@@ -179,6 +179,14 @@ FTKR.STS.CW = FTKR.STS.CW || {};
  *  1 - 表示する, 0 - 表示しない
  * @default 1
  *
+ * @param Cost Max Cols
+ * @desc コストを横に並べる最大数を指定します。
+ * @default 1
+ *
+ * @param Cost Spacing
+ * @desc コストを横に並べた時の間隔を指定します。
+ * @default 24
+ *
  * @param Cost Position X
  * @desc コストウィンドウの左上のX座標を指定します。
  * (参考値：デフォルト画面幅サイズ = 816)
@@ -219,6 +227,14 @@ FTKR.STS.CW = FTKR.STS.CW || {};
  * @desc 前提スキルに常に表示するか。
  *  1 - 表示する, 0 - 表示しない
  * @default 0
+ *
+ * @param Preskill Max Cols
+ * @desc 前提スキルを横に並べる最大数を指定します。
+ * @default 1
+ *
+ * @param Preskill Spacing
+ * @desc 前提スキルを横に並べた時の間隔を指定します。
+ * @default 24
  *
  * @param Preskill Position X
  * @desc 前提スキルウィンドウの左上のX座標を指定します。
@@ -422,6 +438,9 @@ FTKR.STS.CW = FTKR.STS.CW || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.2.0 : 2017/06/06 : 機能追加
+ *    1. 習得コストと前提スキルを横に並べて表示する機能を追加。
+ * 
  * v1.1.1 - 2017/04/22 : 不具合修正
  *    1. ウィンドウサイズを変更した際に、コンテンツエリアが変わっていない
  *       不具合を修正。
@@ -504,6 +523,8 @@ FTKR.STS.CW.actorStatus = {
 };
 //コストウィンドウ設定
 FTKR.STS.CW.cost = {
+    maxCols:Number(FTKR.STS.CW.parameters['Cost Max Cols'] || 0),
+    spacing:Number(FTKR.STS.CW.parameters['Cost Spacing'] || 0),
     posiX:Number(FTKR.STS.CW.parameters['Cost Position X'] || 0),
     posiY:Number(FTKR.STS.CW.parameters['Cost Position Y'] || 0),
     width:Number(FTKR.STS.CW.parameters['Cost Width'] || 0),
@@ -514,6 +535,8 @@ FTKR.STS.CW.cost = {
 };
 //前提スキルウィンドウ設定
 FTKR.STS.CW.preskill = {
+    maxCols:Number(FTKR.STS.CW.parameters['Preskill Max Cols'] || 0),
+    spacing:Number(FTKR.STS.CW.parameters['Preskill Spacing'] || 0),
     posiX:Number(FTKR.STS.CW.parameters['Preskill Position X'] || 0),
     posiY:Number(FTKR.STS.CW.parameters['Preskill Position Y'] || 0),
     width:Number(FTKR.STS.CW.parameters['Preskill Width'] || 0),
@@ -828,6 +851,40 @@ Window_StsCost.prototype._refreshFrame = function() {
     if (!FTKR.STS.CW.cost.frame) Window.prototype._refreshFrame.call(this);
 };
 
+Window_StsCost.prototype.drawAllCost = function() {
+    if (this._actor) {
+        var skill = this._skillId ? this._actor.stsSkill(this._skillId) : null;
+        var width = this.width - this.padding * 2;
+        var y = this.lineHeight();
+        this.drawStsDescTitle(FTKR.STS.cost.titleFormat, 0, 0, width, skill);
+        if (this._skillId) {
+            var costs = skill.sts.costs;
+            var cols = FTKR.STS.CW.cost.maxCols;
+            var spacing = FTKR.STS.CW.cost.spacing;
+            var cw = (width - spacing * (cols - 1))/ cols
+            var cx = 0, cy = 0;
+            for (var i = 0, n = 0; i< costs.length; i++) {
+                var cost = costs[i];
+                if (cost) {
+                    if (FTKR.STS.sp.hideCost0 && cost.type === 'sp' &&
+                        (!cost.value || Number(cost.value) === 0)) {
+                        n -= 1;
+                        continue;
+                    }
+                    if (!((i + n) % cols)) {
+                        cx = 0;
+                        cy += 1;
+                    } else {
+                        cx += cw + spacing;
+                    }
+                    FTKR.setGameData(this._actor, null, skill);
+                    this.drawStsCost(cost, cx, y * cy, cw);
+                }
+            }
+        }
+    }
+};
+
 //=============================================================================
 // Window_StsPreskill
 //=============================================================================
@@ -848,6 +905,37 @@ Window_StsPreskill.prototype.standardPadding = function() {
 
 Window_StsPreskill.prototype._refreshFrame = function() {
     if (!FTKR.STS.CW.preskill.frame) Window.prototype._refreshFrame.call(this);
+};
+
+Window_StsPreskill.prototype.drawAllPreskill = function(index) {
+    if (this._actor) {
+        var actor = this._actor;
+        var skill = this._skillId ? actor.stsSkill(this._skillId) : null;
+        var width = this.width - this.padding * 2;
+        var y = this.lineHeight();
+        this.drawStsDescTitle(FTKR.STS.preskill.titleFormat, 0, 0, width, skill);
+        if (this._skillId && this._tTypeId) {
+            var preskillIds = actor.getPreskillId(this._skillId, this._tTypeId);
+            var cols = FTKR.STS.CW.preskill.maxCols;
+            var spacing = FTKR.STS.CW.preskill.spacing;
+            var cw = (width - spacing * (cols - 1))/ cols
+            var cx = 0, cy = 0;
+            for (var i = 0; i< preskillIds.length; i++) {
+                var preskill = actor.stsSkill(preskillIds[i]);
+                if (preskill) {
+                    if (!(i % cols)) {
+                        cx = 0;
+                        cy += 1;
+                    } else {
+                        cx += cw + spacing;
+                    }
+                    this.changePaintOpacity(actor.isStsLearnedSkill(preskill.id));
+                    this.drawFormatTextEx(FTKR.STS.preskill.itemFormat, cx, y * cy, [preskill.name], cw);
+                    this.changePaintOpacity(1);
+                }
+            }
+        }
+    }
 };
 
 //=============================================================================
