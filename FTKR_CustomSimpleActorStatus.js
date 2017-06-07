@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2017/06/05
-// バージョン : v1.7.1
+// 最終更新日 : 2017/06/07
+// バージョン : v1.7.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.7.1 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v1.7.2 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -212,6 +212,14 @@ FTKR.CSS = FTKR.CSS || {};
  * @desc カスタム画像を描画エリア内のどこに表示するか。
  * 0 - 左寄せ, 1 - 中央, 2 - 右寄せ
  * @default 1
+ * 
+ * @param --メッセージの設定--
+ * @default
+ * 
+ * @param Display LevelUp Message
+ * @desc レベルアップ時のメッセージを設定します。
+ * %1 - アクター名, %2 - 現在レベル, %3 - 上昇したレベル
+ * @default \C[17]%3 Level Up!
  * 
  * @param --カスタムパラメータの設定--
  * @default
@@ -1292,6 +1300,11 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.7.2 - 2017/06/07 : 不具合修正、機能追加
+ *    1. 波括弧による描画エリアの拡張が正しく機能しない不具合を修正。
+ *    2. eval()によるJS計算結果を表示するコードを追加。
+ *    3. レベルアップメッセージを表示するコードを追加。
+ * 
  * v1.7.1 - 2017/06/05 : 不具合修正、機能追加
  *    1. 歩行キャラが正しく表示されない不具合を修正。
  *    2. 歩行キャラの向きを、マップ上のプレイヤーに合わせる機能を追加。
@@ -1478,6 +1491,9 @@ FTKR.CSS = FTKR.CSS || {};
         },
         image:{
             posiX:Number(parameters['Image Position X'] || 0),
+        },
+        message:{
+            levelUp:String(parameters['Display LevelUp Message'] || ''),
         },
         customs:[
             {name:String(parameters['Custom 0 Display Name'] || ''),
@@ -1835,6 +1851,13 @@ FTKR.CSS = FTKR.CSS || {};
     // Game_Actor
     //=============================================================================
 
+    FTKR.CSS.Game_Actor_levelUp = Game_Actor.prototype.levelUp;
+    Game_Actor.prototype.levelUp = function() {
+        FTKR.CSS.Game_Actor_levelUp.call(this);
+        if (!this._levelUpCount) this._levelUpCount = 0;
+        this._levelUpCount += 1;
+    };
+
     FTKR.CSS.Game_Actor_setup = Game_Actor.prototype.setup;
     Game_Actor.prototype.setup = function(actorId) {
         FTKR.CSS.Game_Actor_setup.call(this, actorId);
@@ -1912,6 +1935,7 @@ FTKR.CSS = FTKR.CSS || {};
             aws[i] = (w - Math.sam(spc)) * wrs[i] / Math.sam(wrs);
             axs[i] = i > 0 ? axs[i-1] + aws[i-1] + spc[i]: x + spc[0];
             this.drawCssActorStatusText(index, actor, axs[i], y, aws[i], status[i], lss);
+            this._dispWidth -= aws[i] + spc[i+1];
         }
     };
 
@@ -1977,6 +2001,8 @@ FTKR.CSS = FTKR.CSS || {};
                     return this.drawCssActorIcons(index, actor, x, y, width, Number(match[2]), true);
                 case 'FACE':
                     return this.drawCssActorFace(actor, x, y, width, lss, Number(match[2]));
+                case 'EVAL':
+                    return this.drawCssEval(actor, x, y, width, match[2]);
             }
         } else {
             switch (status.toUpperCase()) {
@@ -2006,6 +2032,8 @@ FTKR.CSS = FTKR.CSS || {};
                     return this.drawCssProfile(actor, x, y, width);
                 case 'IMAGE':
                     return this.drawCssActorImage(actor, x, y, width);
+                case 'MESSAGE':
+                    return this.drawCssActorMessage(actor, x, y, width);
             }
         }
         return 1;
@@ -2366,6 +2394,17 @@ FTKR.CSS = FTKR.CSS || {};
     };
 
     //------------------------------------------------------------------------
+    //JS計算式の表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssEval = function(actor, x, y, width, text) {
+        if (!text) return 1;
+        var value = this.evalCssCustomFormula(actor, text);
+        this.resetTextColor();
+        this.drawText(value, x, y, width, 'right');
+        return 1;
+    };
+
+    //------------------------------------------------------------------------
     //指定画像の表示関数
     //------------------------------------------------------------------------
     Window_Base.prototype.drawCssActorImage = function(actor, x, y, width) {
@@ -2423,6 +2462,30 @@ FTKR.CSS = FTKR.CSS || {};
         var gauge = actor.currentClass().cssGauges[paramId];
         if (!gauge) return 1;
         return this.drawCssActorGauge(actor, x, y, width, gauge);
+    };
+
+    //------------------------------------------------------------------------
+    //アクターの状態の変化に対するメッセージの表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorMessage = function(actor, x, y, width) {
+        if (!actor._levelUpCount) return 1;
+        var text = FTKR.CSS.cssStatus.message.levelUp.format(actor.name(), actor.level, actor._levelUpCount);
+        this.drawTextEx(text, x, y);
+        actor._levelUpMessage = true;
+        return 1;
+    };
+
+    FTKR.CSS.Scene_Base_start = Scene_Base.prototype.start;
+    Scene_Base.prototype.start = function() {
+        FTKR.CSS.Scene_Base_start.call(this);
+        if ($gameParty) {
+            $gameParty.members().forEach( function(actor){
+                if (actor && actor._levelUpMessage) {
+                    actor._levelUpCount = 0;
+                    actor._levelUpMessage = false;
+                }
+            });
+        }
     };
 
     //=============================================================================
