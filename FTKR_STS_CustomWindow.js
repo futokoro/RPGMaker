@@ -3,8 +3,8 @@
 // FTKR_STS_CustomWindow.js
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/03/31
-// 最終更新日 : 2017/06/06
-// バージョン : v1.2.0
+// 最終更新日 : 2017/06/07
+// バージョン : v1.2.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.STS.CW = FTKR.STS.CW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.0 ツリー型スキル習得システム用 ウィンドウレイアウト変更プラグイン
+ * @plugindesc v1.2.1 ツリー型スキル習得システム用 ウィンドウレイアウト変更プラグイン
  * @author フトコロ
  *
  * @param --ツリータイプウィンドウの設定(Tree Types Window)--
@@ -332,6 +332,18 @@ FTKR.STS.CW = FTKR.STS.CW || {};
  * @dir img/system/
  * @type file
  * 
+ * @noteParam STS_画像
+ * @noteRequire 1
+ * @noteDir img/system/
+ * @noteType file
+ * @noteData actors
+ * 
+ * @noteParam STS_IMAGE
+ * @noteRequire 1
+ * @noteDir img/system/
+ * @noteType file
+ * @noteData actors
+ * 
  * @help
  *-----------------------------------------------------------------------------
  * 概要
@@ -437,6 +449,9 @@ FTKR.STS.CW = FTKR.STS.CW || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.2.1 : 2017/06/07 : 不具合修正
+ *    1. アクター立ち絵のタグが正しく読み取れない不具合を修正。
  * 
  * v1.2.0 : 2017/06/06 : 機能追加
  *    1. 習得コストと前提スキルを横に並べて表示する機能を追加。
@@ -580,8 +595,8 @@ DataManager.isDatabaseLoaded = function() {
 DataManager.stsBgiDataNotetags = function(group) {
     var note1a = /<STS_IMAGE:(.+)>/i;
     var note1aj = /<STS_画像:(.+)>/i;
-    var note1b = /<\/<STS_IMAGE>>/i;
-    var note1bj = /<\/<STS_画像>>/i;
+    var note1b = /<\/STS_IMAGE>/i;
+    var note1bj = /<\/STS_画像>/i;
 
     for (var n = 1; n < group.length; n++) {
         var obj = group[n];
