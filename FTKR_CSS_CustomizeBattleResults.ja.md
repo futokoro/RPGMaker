@@ -2,7 +2,7 @@
 
 # [FTKR_CSS_CustomizeBattleResults](FTKR_CSS_CustomizeBattleResults.js) プラグイン
 
-カスタム可能な戦闘結果画面を表示するプラグインです。<br>
+カスタム可能な戦績画面を表示するプラグインです。<br>
 本プラグインは、[FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md)の拡張プラグインです。
 
 ダウンロード: [FTKR_CSS_CustomizeBattleResults.js](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_CustomizeBattleResults.js)
@@ -18,12 +18,14 @@
 1. [コマンドウィンドウの設定](#コマンドウィンドウの設定)
 1. [アクター別戦績ウィンドウの設定](#アクター別戦績ウィンドウの設定)
 1. [アイテムウィンドウの設定](#アイテムウィンドウの設定)
+1. [共通設定](#共通設定)
+1. [プラグインコマンド](#プラグインコマンド)
 * [プラグインの更新履歴](#プラグインの更新履歴)
 * [ライセンス](#ライセンス)
 
 ## 概要
 
-本プラグインを実装することで、カスタム可能な戦闘結果画面を表示できます。
+本プラグインを実装することで、戦闘終了時に表示する戦闘結果メッセージの替わりに、カスタム可能な戦績画面を表示できます。
 
 ![画像](image/FTKR_CSS_CustomizeBattleResults/n01_001.png)
 
@@ -42,70 +44,175 @@ FTKR_CSS_CustomizeBattleResults.js
 
 ## 基本仕様
 
+戦績画面は、以下ウィンドウで構成しています。
+戦績画面中は、キー操作でアクター別戦績ウィンドウとアイテムウィンドウの表示を入れ替えることができます。
+
+1. タイトルウィンドウ
+2. 共通戦績ウィンドウ
+3. コマンドウィンドウ
+4. アクター別戦績ウィンドウ
+5. アイテムウィンドウ
+
+### コマンドウィンドウで、「ステータス」を選択中の画面
+パーティーメンバーの一覧を表示します。
+
+![画像](image/FTKR_CSS_CustomizeBattleResults/n02_001.png)
+
+### コマンドウィンドウで、「アイテム」を選択中の画面
+入手アイテムの一覧を表示します。
+
+![画像](image/FTKR_CSS_CustomizeBattleResults/n02_002.png)
+
+### コマンドウィンドウで、「終了」を選択
+
+戦績画面を閉じて、バトルを終了します。
+
 [目次に戻る](#目次)
 
 ## タイトルウィンドウの設定
+
+以下のプラグインパラメータで、タイトルウィンドウで表示する内容を設定します。
+
+### 表示する文字列
+`Title Text`
+
+ウィンドウに表示する文字列を設定します。
+制御文字が使用できます。
+
+### 文字列を表示する位置
+`Title Text Position`
+
+設定した文字列をウィンドウのどの位置の表示するか設定します。
+* 0 - 左寄せ
+* 1 - 中央 (デフォルト)
+* 2 - 右寄せ
+
+その他のプラグインパラメータは、[共通設定](#共通設定)を参照してください。
+
+![画像](image/FTKR_CSS_CustomizeBattleResults/n03_001.png)
 
 [目次に戻る](#目次)
 
 ## 共通戦績ウィンドウの設定
 
+以下のプラグインパラメータで、タイトルウィンドウで表示する内容を設定します。
+
+### 表示するステータス
+
+`Party Status Text1` から `Party Status Width Rate`の設定方法は、[FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md)と同じです。
+
+なお、各コードで参照するアクターデータは、バトルメンバーの先頭キャラです。
+以下のスクリプトで、戦績データを取得できます。
+
+| データ | スクリプト |
+| --- | --- |
+| 入手経験値 | BattleManager._rewards.exp |
+| 入手金 | BattleManager._rewards.gold |
+| 入手アイテムリスト(配列) | BattleManager._rewards.items |
+| 戦闘終了時のターン数 | $gameTroop._turnCount |
+
+
+その他のプラグインパラメータは、[共通設定](#共通設定)を参照してください。
+
+![画像](image/FTKR_CSS_CustomizeBattleResults/n04_001.png)
+
 [目次に戻る](#目次)
 
 ## コマンドウィンドウの設定
+
+以下のプラグインパラメータで、タイトルウィンドウで表示する内容を設定します。
+
+### コマンド名
+
+`Command Display Status`
+
+アクター別戦績ウィンドウを表示するコマンドの名前を設定します。
+
+`Command Display Item`
+
+アイテムウィンドウを表示するコマンドの名前を設定します。
+
+`Command Finish`
+
+戦績画面を終了するコマンドの名前を設定します。
+
+その他のプラグインパラメータは、[共通設定](#共通設定)を参照してください。
+
+![画像](image/FTKR_CSS_CustomizeBattleResults/n05_001.png)
 
 [目次に戻る](#目次)
 
 ## アクター別戦績ウィンドウの設定
 
+以下のプラグインパラメータで、タイトルウィンドウで表示する内容を設定します。
+
+### 表示するステータス
+`Actor Status Text1` から `Actor Status Width Rate`の設定方法は、[FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md)と同じです。
+
+その他のプラグインパラメータは、[共通設定](#共通設定)を参照してください。
+
+![画像](image/FTKR_CSS_CustomizeBattleResults/n06_001.png)
+
 [目次に戻る](#目次)
 
 ## アイテムウィンドウの設定
 
-## プラグインパラメータの設定
-以下のプラグインパラメータで設定できます。
+プラグインパラメータは、[共通設定](#共通設定)を参照してください。
 
-### 設定の有効化
-`Enabled Custom Window`
+![画像](image/FTKR_CSS_CustomizeBattleResults/n07_001.png)
 
-スキル画面のステータスウィンドウ変更機能を使うか指定します。
-* 0 - 無効(デフォルト)
-* 1 - 有効
+## 共通設定
+
+各ウィンドウに共通するプラグインパラメータの設定を示します。
 
 ### 縦の行数
-`Number Visible Rows`
+`*** Visible Rows`
 
-ステータスウィンドウの縦の行数を変更します。
-デフォルトは4行です。
-この値を変えても、コマンドウィンドウのサイズは変わりません。
+ウィンドウの縦の行数を変更します。
+
+### 横の列数
+`*** Max Cols`
+
+ウィンドウの横の列数を変更します。
+
+### カーソル高さの行数
+`*** Cursol Lines`
+
+カーソルの高さ(アクター1人分の高さ)を何行分にするか設定します。
+
+### 縦のカーソル間隔
+`*** Cursol Height Space`
+
+縦のカーソル間隔を設定します。
+デフォルトは 0 です。(単位はpixel)
 
 ### フォントサイズ
-`Font Size`
+`*** Font Size`
 
 ウィンドウ内のフォントサイズを変更します。
 デフォルトは 28 です。(単位はpixel)
 
 ### 余白サイズ
-`Window Padding`
+`*** Padding`
 
 ウィンドウの周囲の余白を変更します。
 デフォルトは 18 です。(単位はpixel)
 
 ### 行の高さ
-`Window Line Height`
+`*** Line Height`
 
 ウィンドウ内の1行の高さを変更します。
 デフォルトは 36 です。(単位はpixel)
 
 ### 背景の透明度
-`Window Opacity`
+`*** Opacity`
 
 ウィンドウ内の背景の透明度を変更します。
 デフォルトは 192 です。
 0 - 透明、255 - 不透明
 
 ### ウィンドウ枠の非表示化
-`Hide Window Frame`
+`*** Hide Frame`
 
 ウィンドウ枠を非表示にするか指定します。
 * 1 - 非表示にする
@@ -133,11 +240,32 @@ FTKR_CSS_CustomizeBattleResults.js
 
 [目次に戻る](#目次)
 
+## プラグインコマンド
+
+以下のプラグインコマンドを使用できます。
+
+### 戦績画面の表示
+```
+CBR_戦績画面表示
+CBR_SHOW_BATTLE_RESULT
+```
+戦績画面を表示します。
+[FTKR_ExBattleEvent](FTKR_ExBattleEvent.ja.md)を使って戦闘終了時のイベントで実行する場合は、「戦闘報酬の入手コマンド」の前で実行してください。
+
+[目次に戻る](#目次)
+
 ## プラグインの更新履歴
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.0.0](FTKR_CSS_CustomizeBattleResults.js) | 2017/06/07 | 初版作成 |
+| [ver1.0.1](FTKR_CSS_CustomizeBattleResults.js) | 2017/06/08 | 不要なプラグインパラメータを削除 |
+| ver1.0.0 | 2017/06/07 | 初版作成 |
+
+## 拡張プラグイン
+
+以下のプラグインを使用することで、本プラグインの機能を拡張できます。
+
+* [FTKR_ExBattleEvent](FTKR_ExBattleEvent.ja.md) - 戦闘終了時にコモンイベントを実行できます
 
 ## ライセンス
 

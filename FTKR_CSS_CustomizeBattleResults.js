@@ -3,8 +3,8 @@
 // FTKR_CSS_CustomizeBattleResults.js
 // 作成者     : フトコロ
 // 作成日     : 2017/06/07
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2017/06/08
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -14,13 +14,8 @@ var FTKR = FTKR || {};
 FTKR.CBR = FTKR.CBR || {};
 
 /*:
- * @plugindesc v1.0.0 カスタム可能な戦闘結果画面を表示する
+ * @plugindesc v1.0.1 カスタム可能な戦闘結果画面を表示する
  * @author フトコロ
- *
- * @param Display Default Message
- * @desc MVデフォルトの勝利時メッセージを表示するか。
- * 1 - 表示する, 0 - 表示しない
- * @default 1
  *
  * @param --タイトル設定--
  * @default
@@ -290,6 +285,8 @@ FTKR.CBR = FTKR.CBR || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.1 - 2017/06/08 : 不要なプラグインパラメータを削除
+ * 
  * v1.0.0 - 2017/06/07 : 初版作成
  * 
  *-----------------------------------------------------------------------------
@@ -304,7 +301,6 @@ if (Imported.FTKR_CSS) (function() {
     var parameters = PluginManager.parameters('FTKR_CSS_CustomizeBattleResults');
 
     FTKR.CBR = {
-        defmessage      :Number(parameters['Display Default Message'] || 0),
         title:{
             text        :String(parameters['Title Text'] || ''),
             position    :Number(parameters['Title Text Position'] || 0),
@@ -423,7 +419,7 @@ if (Imported.FTKR_CSS) (function() {
         this._showBattleResultOk = false;
     }
 
-    var _CBR_BattleManager_processVictory = BattleManager.processVictory;
+    //書き換え
     BattleManager.processVictory = function() {
         this._showBattleResultOk = true;
         $gameParty.removeBattleStates();
