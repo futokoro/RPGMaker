@@ -3,8 +3,8 @@
 // FTKR_ItemConpositionSystem.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/08
-// 最終更新日 : 2017/04/14
-// バージョン : v0.9.2
+// 最終更新日 : 2017/06/08
+// バージョン : v0.9.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ICS = FTKR.ICS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v0.9.2 アイテム合成システム
+ * @plugindesc v0.9.3 アイテム合成システム
  * @author フトコロ
  *
  * @param --基本設定--
@@ -47,6 +47,11 @@ FTKR.ICS = FTKR.ICS || {};
  * @param Category Type ID
  * @desc カテゴリータイプを設定した武器タイプIDを設定します。
  * @default 
+ *
+ * @param Not Applicable to Recipe
+ * @desc レシピが無い組み合わせの場合の結果を設定します。
+ * lost - 消失, reset - 復元
+ * @default lost
  *
  * @param --合成成功率の設定--
  * @default
@@ -189,6 +194,10 @@ FTKR.ICS = FTKR.ICS || {};
  * @param Result Lost
  * @desc 消失時の表示内容を記述します。
  * @default 消失
+ * 
+ * @param Result Reset
+ * @desc 復元時の表示内容を記述します。
+ * @default 復元
  * 
  * @param Result Item Format
  * @desc 生成したアイテムの表示内容を記述します。
@@ -335,7 +344,10 @@ FTKR.ICS = FTKR.ICS || {};
  * 
  * レシピを習得した場合、合成情報欄に、合成して出来るアイテムが表示します。
  * 
- * レシピに合致しない組み合わせの場合は、素材スロットのアイテムは消失します。
+ * レシピに合致しない組み合わせの場合の結果は、以下の通りです。
+ * プラグインパラメータ<Not Applicable to Recipe>の設定で、
+ *    消失設定 - 使用したアイテムは無くなります。
+ *    復元設定 - 使用したアイテムが戻ります。
  * 
  * 
  * 2. レシピから選ぶ場合
@@ -672,7 +684,11 @@ FTKR.ICS = FTKR.ICS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
-
+ * 
+ * v0.9.3 - 2017/06/08 : 機能追加
+ *    1. 投入したアイテムが何のレシピにも該当しない場合に、使用したアイテムが
+ *       戻る処理を追加。
+ * 
  * v0.9.2 - 2017/04/14 : 機能追加
  *    1. 特殊合成を追加。
  * 
@@ -705,6 +721,7 @@ FTKR.ICS.basic = {
         itemId:Number(FTKR.ICS.parameters['Variables Get ItemId'] || 0),
         itemClass:Number(FTKR.ICS.parameters['Variables Get ItemClass'] || 0),
     },
+    notApp:String(FTKR.ICS.parameters['Not Applicable to Recipe'] || 'lost'),
 };
 
 //合成成功率の設定
@@ -778,6 +795,7 @@ FTKR.ICS.result = {
     great:String(FTKR.ICS.parameters['Result Great Success'] || ''),
     success:String(FTKR.ICS.parameters['Result Success'] || ''),
     failure:String(FTKR.ICS.parameters['Result Failure'] || ''),
+    reset:String(FTKR.ICS.parameters['Result Reset'] || ''),
     lost:String(FTKR.ICS.parameters['Result Lost'] || ''),
     item:String(FTKR.ICS.parameters['Result Item Format'] || ''),
     okFormat:String(FTKR.ICS.parameters['Result Ok Format'] || ''),
@@ -2290,6 +2308,8 @@ Window_IcsResult.prototype.resultText = function () {
             return result.success;
         case 'failure':
             return result.failure;
+        case 'reset':
+            return result.reset;
         default:
             return result.lost;
     }
@@ -2546,10 +2566,14 @@ Scene_ICS.prototype.slotsClear = function() {
     this._resultWindow.clearWindow();
 }
 
-Scene_ICS.prototype.slotsReset = function() {
+Scene_ICS.prototype.resetItems = function() {
     this._compositionSlotWindow._slots.forEach( function(slot, i) {
         if(slot) $gameParty.gainItem(slot.item(), slot.number());
     });
+};
+
+Scene_ICS.prototype.slotsReset = function() {
+    this.resetItems();
     this.slotsClear();
 };
 
@@ -2748,7 +2772,13 @@ Scene_ICS.prototype.composition = function(sound) {
         $gameParty.gainItem(getItem.item, getItem.number);
         this._resultWindow.setResult(judg, getItem.item, getItem.number);
     } else {
-        this._resultWindow.setResult('lost', null, 0);
+        AudioManager.playStaticSe(sound.lost);
+        if (FTKR.ICS.basic.notApp === 'reset') {
+            this.resetItems();
+            this._resultWindow.setResult('reset', null, 0);
+        } else {
+            this._resultWindow.setResult('lost', null, 0);
+        }
     }
     this._resultWindow.show();
     this._resultConfWindow.show();

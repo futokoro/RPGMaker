@@ -3,8 +3,8 @@
 // FTKR_ExVariablesChange.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/18
-// 最終更新日 : 2017/06/07
-// バージョン : v1.2.1
+// 最終更新日 : 2017/06/08
+// バージョン : v1.2.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EVC = FTKR.EVC || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.1 変数の操作を拡張するプラグイン
+ * @plugindesc v1.2.2 変数の操作を拡張するプラグイン
  * @author フトコロ
  *
  * @param --アイテム増減時--
@@ -335,6 +335,9 @@ FTKR.EVC = FTKR.EVC || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.2.2 - 2017/06/07 : 不具合修正
+ *    1. 被ダメージ時の処理タイミングを修正。(v1.2.1の修正による不具合)
+ * 
  * v1.2.1 - 2017/06/07 : 不具合修正、機能追加
  *    1. 被ダメージ時に使用者・対象者・使用スキル(アイテム)のゲームデータを
  *       参照できない不具合を修正。
@@ -589,19 +592,28 @@ FTKR.EVC = FTKR.EVC || {};
     };
 
     //=============================================================================
-    // 被ダメージ時
+    // ダメージ時
     //=============================================================================
 
     var _EVC_Game_Action_executeDamage = Game_Action.prototype.executeDamage;
     Game_Action.prototype.executeDamage = function(target, value) {
+        FTKR.setGameData(this.subject(), target, this.item());
         _EVC_Game_Action_executeDamage.call(this, target, value);
         if (this.isHpEffect() || this.isMpEffect()) {
-            FTKR.setGameData(this.subject(), target, this.item());
             this.variablesChangeItemNoteTags(['与ダメージ時', 'DAMAGE'], this.subject());
             defaultVariablesChange('damage');
-            this.variablesChangeItemNoteTags(['被ダメージ時', 'RECEIVE_DAM'], target);
-            defaultVariablesChange('receive');
+            if (this.isMpEffect()) {
+                variablesChangeUnitNoteTags(['被ダメージ時', 'RECEIVE_DAM'], target);
+                defaultVariablesChange('receive');
+            }
         }
+    };
+
+    var _EVC_Game_Battler_onDamage = Game_Battler.prototype.onDamage;
+    Game_Battler.prototype.onDamage = function(value) {
+        variablesChangeUnitNoteTags(['被ダメージ時', 'RECEIVE_DAM'], this);
+        defaultVariablesChange('receive');
+        _EVC_Game_Battler_onDamage.call(this, value);
     };
 
     //=============================================================================
@@ -699,4 +711,3 @@ FTKR.EVC = FTKR.EVC || {};
     };
 
 }());//EOF
-
