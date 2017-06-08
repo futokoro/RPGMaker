@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2017/06/07
-// バージョン : v1.7.2
+// 最終更新日 : 2017/06/08
+// バージョン : v1.7.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.7.2 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v1.7.3 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -178,6 +178,11 @@ FTKR.CSS = FTKR.CSS || {};
  * 
  * @param --ステートの設定--
  * @default
+ * 
+ * @param Enable CSS States
+ * @desc ステートアイコンの表示を専用の描画処理に変えるか。
+ * 1 - 有効にする, 0 - 無効にする
+ * @default 1
  * 
  * @param Animation Wait
  * @desc ステートアイコンの切り替え時間を指定します
@@ -998,12 +1003,17 @@ FTKR.CSS = FTKR.CSS || {};
  * アクターのステートを表示します。
  * 
  * state     - 横に並べられるだけ表示します。
- * state2(x) - 縦に x 行分表示します。
+ * state2(x) - 縦に x 行分表示します。(Enable CSS Statesが有効の場合のみ)
  * 
  * 並べきれないアイコンは、切り替え時間に合わせて表示が替わります。
  * 
  * 
  * 以下のパラメータで設定を変更できます。
+ * <Enable CSS States>
+ *    :ステートアイコンの表示について当プラグインの専用描画処理を有効にするか
+ *    :設定します。
+ *    :有効にすると、以下のプラグインの設定に従いステートアイコンを表示します。
+ *    :無効の場合はMVのデフォルトの描画処理を使用します。
  * 
  * <Animation Wait>
  *    :ステートアイコンの切り替え時間を指定します。
@@ -1300,10 +1310,12 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.7.3 - 2017/06/08 : 機能追加
+ *    1. ステートアイコンの表示処理をMVデフォルトに戻す機能を追加。
+ * 
  * v1.7.2 - 2017/06/07 : 不具合修正、機能追加
  *    1. 波括弧による描画エリアの拡張が正しく機能しない不具合を修正。
  *    2. eval()によるJS計算結果を表示するコードを追加。
- *    3. レベルアップメッセージを表示するコードを追加。
  * 
  * v1.7.1 - 2017/06/05 : 不具合修正、機能追加
  *    1. 歩行キャラが正しく表示されない不具合を修正。
@@ -1478,6 +1490,7 @@ FTKR.CSS = FTKR.CSS || {};
             posiX:Number(parameters['Sv Position X'] || 0),
         },
         state:{
+            enable:Number(parameters['Enable CSS States'] || 0),
             wait:Number(parameters['Animation Wait'] || 0),
             overlap:Number(parameters['Enable Overlap'] || 0),
             autoScale:Number(parameters['Enable Auto Scale'] || 0),
@@ -1998,7 +2011,7 @@ FTKR.CSS = FTKR.CSS || {};
                 case 'TEXT':
                     return this.drawCssText(actor, x, y, width, match[2]);
                 case 'STATE2':
-                    return this.drawCssActorIcons(index, actor, x, y, width, Number(match[2]), true);
+                    return this.drawCssActorIcons(index, actor, x, y, width, Number(match[2]));
                 case 'FACE':
                     return this.drawCssActorFace(actor, x, y, width, lss, Number(match[2]));
                 case 'EVAL':
@@ -2200,6 +2213,15 @@ FTKR.CSS = FTKR.CSS || {};
     //アクターのステートアイコンの表示関数
     //------------------------------------------------------------------------
     Window_Base.prototype.drawCssActorIcons = function(index, actor, x, y, width, line) {
+        if (FTKR.CSS.cssStatus.state.enable) {
+            return this.drawCssIconsSprite(index, actor, x, y, width, line);
+        } else {
+            this.drawActorIcons(actor, x, y, width);
+            return 1;
+        }
+    };
+
+    Window_Base.prototype.drawCssIconsSprite = function(index, actor, x, y, width, line) {
         var css = FTKR.CSS.cssStatus.state;
         var iw = Window_Base._iconWidth;
         index = index % this.showActorNum();
