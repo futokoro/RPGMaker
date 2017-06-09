@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2017/06/09
-// バージョン : v1.7.4
+// 最終更新日 : 2017/06/08
+// バージョン : v1.7.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.7.4 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v1.7.3 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -914,6 +914,13 @@ FTKR.CSS = FTKR.CSS || {};
  *    : 2,1,1 - Text1で全体の半分を使用します。
  *    :         Text2とText3で残りの半分を2等分します。
  * 
+ * <Display Face Scale>
+ *    :アクターの顔画像を表示スケールを設定します。
+ *    :正確には、ウィンドウの行数の何行分で表示するかを設定します。
+ *    :標準は 4行 で、それ以外の場合に画像を拡大縮小します。
+ *    :
+ *    :3以下にすることで、表示に必要な行数を減らすことが出来ます。
+ * 
  * 
  *-----------------------------------------------------------------------------
  * 顔画像の設定 [ face ]
@@ -1302,8 +1309,6 @@ FTKR.CSS = FTKR.CSS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
- * 
- * v1.7.4 - 2017/06/09 : YEP_BuffsStatesCore.jsに対応
  * 
  * v1.7.3 - 2017/06/08 : 機能追加
  *    1. ステートアイコンの表示処理をMVデフォルトに戻す機能を追加。
@@ -2249,7 +2254,7 @@ FTKR.CSS = FTKR.CSS || {};
 
     Window_Base.prototype.getOverlapValue = function(actor, iw, maxlen, css) {
         var iconlen = actor.allIcons().length;
-        var diff = Math.max((maxlen - iw - 4) / (iconlen - 1), iw * css.rate);
+        var diff = Math.max((maxlen - iw - 4) / iconlen, iw * css.rate);
         return diff && diff < iw ? diff : iw;
     };
 
@@ -2715,13 +2720,10 @@ Sprite_CssStateIcon._iconWidth  = 32;
 Sprite_CssStateIcon._iconHeight = 32;
 
 Sprite_CssStateIcon.prototype.initMembers = function() {
-    Sprite_StateIcon.prototype.initMembers.call(this);
-    this.anchor.x = 0;
-    this.anchor.y = 0;
-    if (Imported.YEP_BuffsStatesCore) {
-        this._turnCounterSprite.anchor.x = 0;
-        this._turnCounterSprite.anchor.y = 0;
-    }
+    this._battler = null;
+    this._animationCount = 0;
+    this._animationIndex = 0;
+    this._iconIndex = 0;
 };
 
 Sprite_CssStateIcon.prototype.setup = function(battler, showNum) {
@@ -2770,29 +2772,5 @@ Sprite_CssStateIcon.prototype.update = function() {
         this._animationCount = 0;
     }
 };
-
-if (Imported.YEP_BuffsStatesCore) {
-
-Sprite_CssStateIcon.prototype.updateTurnAndCounter = function() {
-    this._turnCounterSprite.bitmap.clear();
-    if (!this._battler) return;
-    var group = this._battler.statesAndBuffs();
-    if (group.length <= 0) return;
-    var state = group[this._animationIndex * this._showNum + this._index];
-    if (!state) return;
-    if (typeof state === 'number') {
-        if (Yanfly.Param.BSCEnemyBTurn) {
-            this.drawBuffTurns(state);
-            if (Yanfly.Param.BSCShowBuffRate) {
-                this.drawBuffRate(state)
-            }
-        }
-    } else {
-        if (Yanfly.Param.BSCEnemyTurn) this.drawStateTurns(state);
-        if (Yanfly.Param.BSCEnemyCounter) this.drawStateCounter(state);
-    }
-};
-
-}//YEP_BuffsStatesCore.js END
 
 //EOF

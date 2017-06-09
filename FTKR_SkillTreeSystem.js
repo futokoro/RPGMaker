@@ -3,8 +3,8 @@
 // FTKR_SkillTreeSystem.js
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/02/25
-// 最終更新日 : 2017/06/05
-// バージョン : v1.7.6
+// 最終更新日 : 2017/06/09
+// バージョン : v1.8.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.7.6 ツリー型スキル習得システム
+ * @plugindesc v1.8.0 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -1253,6 +1253,8 @@ FTKR.STS = FTKR.STS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.8.0 - 2017/06/09 : コアスクリプトv1.5.0の対応
  * 
  * v1.7.6 - 2017/06/05 : 不具合修正
  *    1. 消費コストの表示が正しく反映されない不具合を修正。
@@ -3356,11 +3358,11 @@ Scene_STS.prototype.create = function() {
   }
   this.createStsCostWindow();
   this.createStsPreskillWindow();
-  this.refreshActor();
 };
 
 Scene_STS.prototype.createStsActorStatusWindow = function() {
   this._stsActorStatusWindow = new Window_StsActorStatus(0, 0, 240, 144);
+  this._stsActorStatusWindow.reserveFaceImages();
   this.addWindow(this._stsActorStatusWindow);
 };
 
