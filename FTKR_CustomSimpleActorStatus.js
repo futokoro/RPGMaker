@@ -4,7 +4,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
 // 最終更新日 : 2017/06/10
-// バージョン : v1.7.5
+// バージョン : v1.7.6
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.7.5 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v1.7.6 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -1303,7 +1303,11 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
- * v1.7.5 - 217/06/10 : 不具合修正
+ * v1.7.6 - 2017/06/10 : 不具合修正
+ *    1. YEP_BuffsStatesCore.js組み合わせた時にステートカウントの表示が
+ *       正しく更新されない不具合を修正。
+ * 
+ * v1.7.5 - 2017/06/10 : 不具合修正
  *    1. テキストコードに制御文字を入力すると、正しく表示できない不具合を修正。
  * 
  * v1.7.4 - 2017/06/09 : YEP_BuffsStatesCore.jsに対応
@@ -2233,7 +2237,6 @@ FTKR.CSS = FTKR.CSS || {};
         var maxlen = line ? this.lineHeight() * line : width;
         var offset = css.overlap ? this.getOverlapValue(actor, iw, maxlen, css) : iw;
         var showNum = Math.min(Math.floor((maxlen - 4) / offset));
-
         for (var i = 0; i < showNum; i++) {
             var sprite = this._stateIconSprite[index][i];
             if (!sprite) {
@@ -2711,17 +2714,27 @@ Sprite_CssStateIcon.prototype.initialize = function(index, showNum) {
     Sprite_StateIcon.prototype.initialize.call(this);
     this._index = index;
     this._showNum = showNum;
-    this.contents = new Bitmap(32, 32);
+  //  this.contents = new Bitmap(32, 32);
 };
 
 Sprite_CssStateIcon._iconWidth  = 32;
 Sprite_CssStateIcon._iconHeight = 32;
 
 Sprite_CssStateIcon.prototype.initMembers = function() {
-    Sprite_StateIcon.prototype.initMembers.call(this);
+    this._battler = null;
+    this._iconIndex = 0;
+    this._animationCount = this.animationWait();
+    this._animationIndex = 0;
     this.anchor.x = 0;
     this.anchor.y = 0;
     if (Imported.YEP_BuffsStatesCore) {
+        if (!this._turnCounterSprite) {
+            this._turnCounterSprite = new Sprite();
+            this.addChild(this._turnCounterSprite);
+        }
+        var w = Window_Base._iconWidth;
+        var h = Window_Base._iconHeight;
+        this._turnCounterSprite.bitmap = new Bitmap(w, h);
         this._turnCounterSprite.anchor.x = 0;
         this._turnCounterSprite.anchor.y = 0;
     }
