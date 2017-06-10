@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2017/06/09
-// バージョン : v1.7.4
+// 最終更新日 : 2017/06/10
+// バージョン : v1.7.5
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.7.4 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v1.7.5 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -1303,6 +1303,9 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.7.5 - 217/06/10 : 不具合修正
+ *    1. テキストコードに制御文字を入力すると、正しく表示できない不具合を修正。
+ * 
  * v1.7.4 - 2017/06/09 : YEP_BuffsStatesCore.jsに対応
  * 
  * v1.7.3 - 2017/06/08 : 機能追加
@@ -1967,11 +1970,11 @@ FTKR.CSS = FTKR.CSS || {};
     };
 
     Window_Base.prototype.drawCssActorStatusBases = function(index, actor, x, y, width, status, lss) {
-        if (status.match(/\{(.+)\}/i)) {
+        if (status.match(/^\{(.+)\}$/i)) {
             status = RegExp.$1;
             width = this._dispWidth;
         }
-        var statuses = status.match(/\[(.+)\]/i) ? RegExp.$1.split('/') : [status];
+        var statuses = status.match(/^\[(.+)\]$/i) ? RegExp.$1.split('/') : [status];
         var line = 0;
         var len = statuses.length;
         if (len > 1) width = (width - lss.spaceIn * (len - 1))/ len;
