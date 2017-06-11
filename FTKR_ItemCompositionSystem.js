@@ -167,6 +167,10 @@ FTKR.ICS = FTKR.ICS || {};
  * 1 - 表示する, 0 - 表示しない
  * @default 1
  * 
+ * @param Recipe Title Format
+ * @desc 必要素材を表示する時のタイトル文字列を設定します。
+ * @default 必要素材
+ * 
  * @param --確認ウィンドウの設定(Confirmation Window)--
  * @default
  *
@@ -794,6 +798,7 @@ FTKR.ICS.status = {
     dispRecipe:Number(FTKR.ICS.parameters['Display Recipe Materials'] || 0),
     unkouwn:String(FTKR.ICS.parameters['Unkouwn Item Name'] || ''),
     number:String(FTKR.ICS.parameters['Composit Number Format'] || ''),
+    recipeTitle:String(FTKR.ICS.parameters['Recipe Title Format'] || ''),
 };
 
 //確認ウィンドウ設定
@@ -2112,7 +2117,10 @@ Window_IcsCompsiState.prototype.refresh = function() {
         this._comp = comp;
         this._number = number;
     } else if (FTKR.ICS.status.dispRecipe && this._showResipe && this._resipeItem) {
-        this.drawResipeMaterials(this._resipeItem, this._resipeTypeId, 0, 0);
+        this.drawTextEx(FTKR.ICS.status.recipeTitle, 0, 0);
+        this.resetTextColor();
+        var y = FTKR.ICS.status.recipeTitle ? this.lineHeight() : 0;
+        this.drawResipeMaterials(this._resipeItem, this._resipeTypeId, 0, y);
         this._comp = {};
         this._number = 0;
     } else {
