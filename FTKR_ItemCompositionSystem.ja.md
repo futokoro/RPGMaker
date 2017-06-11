@@ -320,8 +320,14 @@ STS アイテム合成画面表示
 
 ![画像](image/FTKR_ItemCompositSystem/n01_008.png)
 
+なお、プラグインパラメータ`Display Recipe Materials`を有効にしていると、合成情報ウィンドウに選択中のレシピの素材アイテムを表示します。
+
+![画像](image/FTKR_ItemCompositSystem/n01_017.png)
+
 数の設定が終わると、レシピの素材アイテムがまとめて合成アイテムスロットに移ります。
 また、レシピを覚えているため、右側の合成情報に合成時の詳細が表示します。
+
+なお、この時表示する合成難易度値は、プラグインパラメータ`Display Difficulty`の設定で、非表示にすることができます。
 
 ![画像](image/FTKR_ItemCompositSystem/n01_009.png)
 
