@@ -3,8 +3,8 @@
 // FTKR_SkillTreeSystem.js
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/02/25
-// 最終更新日 : 2017/06/09
-// バージョン : v1.8.0
+// 最終更新日 : 2017/06/11
+// バージョン : v1.8.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.8.0 ツリー型スキル習得システム
+ * @plugindesc v1.8.1 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -1254,6 +1254,9 @@ FTKR.STS = FTKR.STS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.8.1 - 2017/06/11 : 不具合修正
+ *    1.ツリーリセットを繰り返すと通常よりも多くSPが戻る不具合を修正。
+ * 
  * v1.8.0 - 2017/06/09 : コアスクリプトv1.5.0の対応
  * 
  * v1.7.6 - 2017/06/05 : 不具合修正
@@ -1994,6 +1997,10 @@ Game_Actor.prototype.stsCountUp = function(skillId) {
     }
 };
 
+Game_Actor.prototype.setStsUsedSp = function(skillId, value) {
+    this._stsUsedSp[skillId] = value;
+};
+
 Game_Actor.prototype.stsUsedSp = function(skillId) {
     if (!this.isLearnedSkill(skillId)) return 0;
     return this._stsUsedSp[skillId];
@@ -2149,10 +2156,11 @@ Game_Actor.prototype.resetTree = function(treeType) {
   if (!datas.length) return 0;
   datas.forEach( function(data) {
     if (!data) return;
-    var skill = this.stsSkill(data.id);
-    totalSp += this.stsUsedSp(skill.id);
+//    var skill = this.stsSkill(data.id);
+    totalSp += this.stsUsedSp(data.id);
     this.forgetSkill(data.id);
     this.resetStsSkill(data.id);
+    this.setStsUsedSp(data.id, 0);
   },this);
   return totalSp;
 };
