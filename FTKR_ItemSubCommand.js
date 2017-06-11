@@ -3,12 +3,12 @@
 // FTKR_ItemSubCommand.js
 // 作成者     : フトコロ
 // 作成日     : 2017/06/04
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2017/06/11
+// バージョン : v1.1.0
 //=============================================================================
 
 /*:
- * @plugindesc v1.0.0 アイテムボックスにサブコマンドを追加する
+ * @plugindesc v1.1.0 アイテムボックスにサブコマンドを追加する
  * @author フトコロ
  *
  * @param --サブコマンド--
@@ -25,7 +25,55 @@
  * @param Command Cancel Format
  * @desc 実行コマンドの「やめる」のコマンド名を設定します。
  * @default やめる
+ * 
+ * @param Command Position X
+ * @desc コマンドウィンドウの左上のX座標を指定します。
+ * (デフォルト 0)(-1 で、画面右寄せ)
+ * @default 0
  *
+ * @param Command Position Y
+ * @desc コマンドウィンドウの左上のY座標を指定します。
+ * (デフォルト 180)(-1 で、画面下寄せ)
+ * @default 180
+ *
+ * @param Command Width
+ * @desc コマンドウィンドウの幅を指定します。
+ * (デフォルト 240)(参考値：余白 = 18)(-1 で、画面右端まで)
+ * @default 240
+ *
+ * @param Command Height
+ * @desc コマンドウィンドウの高さを指定します。
+ * (参考値：1行 = 36、余白 = 18)(-1 で、画面下端まで)
+ * @default -1
+ * 
+ * @param --数値入力画面--
+ * @default
+ * 
+ * @param Max Number Format
+ * @desc 数値入力ウィンドウで最大数を示す表示内容を設定します。
+ * %1 - 手持ちのアイテム数
+ * @default /MAX %1
+ * 
+ * @param Number Position X
+ * @desc 数値入力ウィンドウの左上のX座標を指定します。
+ * (デフォルト 0)(-1 で、画面右寄せ)
+ * @default 240
+ *
+ * @param Number Position Y
+ * @desc 数値入力ウィンドウの左上のY座標を指定します。
+ * (デフォルト 180)(-1 で、画面下寄せ)
+ * @default 180
+ *
+ * @param Number Width
+ * @desc 数値入力ウィンドウの幅を指定します。
+ * (デフォルト 456)(参考値：余白 = 18)(-1 で、画面右端まで)
+ * @default 456
+ *
+ * @param Number Height
+ * @desc 数値入力ウィンドウの高さを指定します。
+ * (参考値：1行 = 36、余白 = 18)(-1 で、画面下端まで)
+ * @default -1
+ * 
  * @param --確認画面--
  * @default
  *
@@ -89,6 +137,9 @@
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.0 - 2017/06/11 : 機能追加
+ *    1. サブコマンドのウィンドウサイズと位置を調整する機能を追加。
+ *    2. 数値入力画面の最大数の表示内容を変更する機能を追加。
  * v1.0.0 - 2017/06/04 : 初版作成
  * 
  *-----------------------------------------------------------------------------
@@ -115,6 +166,17 @@ FTKR.ISC = FTKR.ISC || {};
                 use     :String(parameters['Command Use Format'] || ''),
                 discard :String(parameters['Command Discard Format'] || ''),
                 cancel  :String(parameters['Command Cancel Format'] || ''),
+                posiX   :Number(parameters['Command Position X'] || 0),
+                posiY   :Number(parameters['Command Position Y'] || 0),
+                width   :Number(parameters['Command Width'] || 0),
+                height  :Number(parameters['Command Height'] || 0),
+            },
+            number:{
+                maxFormat:String(parameters['Max Number Format'] || ''),
+                posiX   :Number(parameters['Number Position X'] || 0),
+                posiY   :Number(parameters['Number Position Y'] || 0),
+                width   :Number(parameters['Number Width'] || 0),
+                height  :Number(parameters['Number Height'] || 0),
             },
             conf:{
                 title       :String(parameters['Conf Title Format'] || ''),
@@ -153,11 +215,29 @@ FTKR.ISC = FTKR.ISC || {};
         return true;
     };
     
+    Scene_Item.prototype.convertX = function(layout) {
+        return layout.posiX === -1 ? Graphics.boxWidth - layout.width : layout.posiX;
+    };
+
+    Scene_Item.prototype.convertY = function(layout) {
+        return layout.posiY === -1 ? Graphics.boxHeight - layout.height : layout.posiY;
+    };
+
+    Scene_Item.prototype.convertWidth = function(layout) {
+        return layout.width === -1 ? Graphics.boxWidth - layout.posiX : layout.width;
+    };
+
+    Scene_Item.prototype.convertHeight = function(layout) {
+        return layout.height === -1 ? Graphics.boxHeight - layout.posiY : layout.height;
+    };
+
     Scene_Item.prototype.createSubCommandWindow = function() {
-        var wy = this._itemWindow.y;
-        var ww = 240;
-        var wh = Graphics.boxHeight - wy;
-        this._subCommandWindow = new Window_ItemSubCommand(0, wy, ww, wh);
+        var wnd = FTKR.ISC.subcom.command;
+        var wx = this.convertX(wnd);
+        var wy = this.convertY(wnd);
+        var ww = this.convertWidth(wnd);
+        var wh = this.convertHeight(wnd);
+        this._subCommandWindow = new Window_ItemSubCommand(wx, wy, ww, wh);
         var window = this._subCommandWindow;
         window.setHandler('ok', this.onSubComOk.bind(this));
         window.setHandler('cancel', this.onSubComCancel.bind(this));
@@ -201,9 +281,10 @@ FTKR.ISC = FTKR.ISC || {};
     //アイテムを捨てる処理の追加
     //------------------------------------------------------------------------
     Scene_Item.prototype.createNumberWindow = function() {
-        var wy = this._itemWindow.y;
-        var wx = this._subCommandWindow.width;
-        var wh = Graphics.boxHeight - wy;
+        var wnd = FTKR.ISC.subcom.number;
+        var wx = this.convertX(wnd);
+        var wy = this.convertY(wnd);
+        var wh = this.convertHeight(wnd);
         this._numberWindow = new Window_ItemNumber(wx, wy, wh);
         this._numberWindow.hide();
         this._numberWindow.setHandler('ok',     this.onNumberOk.bind(this));
@@ -280,6 +361,7 @@ FTKR.ISC = FTKR.ISC || {};
 
     //=============================================================================
     // Window_ItemNumber
+    // 数値入力用クラス
     //=============================================================================
 
     function Window_ItemNumber() {
@@ -289,17 +371,28 @@ FTKR.ISC = FTKR.ISC || {};
     Window_ItemNumber.prototype = Object.create(Window_ShopNumber.prototype);
     Window_ItemNumber.prototype.constructor = Window_ItemNumber;
 
+    Window_ItemNumber.prototype.convertWidth = function(layout) {
+        return layout.width === -1 ? Graphics.boxWidth - layout.posiX : layout.width;
+    };
+
+    Window_ItemNumber.prototype.windowWidth = function() {
+        return this.convertWidth(FTKR.ISC.subcom.number);
+    };
+
     Window_ItemNumber.prototype.refresh = function() {
         this.contents.clear();
         this.drawItemName(this._item, 0, this.itemY());
         this.drawMultiplicationSign();
         this.drawNumber();
         var width = this.width - this.standardPadding() * 2;
-        this.drawText('/MAX ' + this._max, 0, this.itemY() + this.lineHeight(), width, 'right');
+        var text = FTKR.ISC.subcom.number.maxFormat.format(this._max);
+        var x = width - this.textWidth(text);
+        this.drawTextEx(text, x, this.itemY() + this.lineHeight());
     };
 
     //=============================================================================
     // Window_ItemConfTitle
+    // 確認画面用ウィンドウクラス
     //=============================================================================
 
     function Window_ItemConfTitle() {
@@ -325,7 +418,7 @@ FTKR.ISC = FTKR.ISC || {};
     Window_ItemConfTitle.prototype.drawTitle = function() {
         if (this._item) {
             var text = FTKR.ISC.subcom.conf.title.format(this._item.name, this._number);
-            var width = this.drawTextEx(text, 0, 0);
+            var width = this.textWidth(text);
             this.resizeWindow(width);
             this._confWindow.resizeWindow(width);
             this.drawTextEx(text, 0, 0);
