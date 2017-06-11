@@ -1544,7 +1544,7 @@ STS 削除 ツリータイプ(x) アクター(x)
 | ver1.6.2 | 2017/04/02 | プラグイン内ヘルプ参照、[ツクマテ](http://tm.lucky-duet.com/viewtopic.php?f=5&t=3201)で公開 |
 | ver1.0.0 | 2017/02/25 | 初版作成、[ツクマテ](http://tm.lucky-duet.com/viewtopic.php?f=5&t=3201)で公開 |
 
-旧バージョンを使用する場合は、ファイル名のバージョン部分(FTKR_SkillTreeSystem[_*.*.*].jsの[]部分)を削除してください。
+旧バージョンを使用する場合は、ファイル名のバージョン部分(FTKR_SkillTreeSystem[_1.x.x].jsの[]部分)を削除してください。
 
 # 拡張プラグイン
 
