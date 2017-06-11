@@ -3,8 +3,8 @@
 // FTKR_ItemConpositionSystem.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/08
-// 最終更新日 : 2017/06/08
-// バージョン : v0.9.3
+// 最終更新日 : 2017/06/11
+// バージョン : v0.9.4
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ICS = FTKR.ICS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v0.9.3 アイテム合成システム
+ * @plugindesc v0.9.4 アイテム合成システム
  * @author フトコロ
  *
  * @param --基本設定--
@@ -153,9 +153,19 @@ FTKR.ICS = FTKR.ICS || {};
  * @desc 合成結果が不明な場合の表示内容を設定します。
  * @default ？？？？
  * 
+ * @param Display Difficulty
+ * @desc 合成の難易度を表示するか設定します。
+ * 1 - 表示する, 0 - 表示しない
+ * @default 1
+ * 
  * @param Composit Number Format
  * @desc 合成アイテムの生成数の表示内容を設定します。
  * @default 生成数：
+ * 
+ * @param Display Recipe Materials
+ * @desc レシピから選んでいる場合に、必要素材を表示する。
+ * 1 - 表示する, 0 - 表示しない
+ * @default 1
  * 
  * @param --確認ウィンドウの設定(Confirmation Window)--
  * @default
@@ -685,6 +695,10 @@ FTKR.ICS = FTKR.ICS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v0.9.4 - 2017/06/11 : 機能追加
+ *    1. 合成情報ウィンドウの難易度表示をON/OFFする機能を追加。
+ *    2. レシピから選ぶ場合、合成情報ウィンドウに必要レシピを表示する機能を追加。
+ * 
  * v0.9.3 - 2017/06/08 : 機能追加
  *    1. 投入したアイテムが何のレシピにも該当しない場合に、使用したアイテムが
  *       戻る処理を追加。
@@ -776,6 +790,8 @@ FTKR.ICS.statusTitle = {
 
 //合成情報ウィンドウ設定
 FTKR.ICS.status = {
+    dispDifficulty:Number(FTKR.ICS.parameters['Display Difficulty'] || 0),
+    dispRecipe:Number(FTKR.ICS.parameters['Display Recipe Materials'] || 0),
     unkouwn:String(FTKR.ICS.parameters['Unkouwn Item Name'] || ''),
     number:String(FTKR.ICS.parameters['Composit Number Format'] || ''),
 };
@@ -1791,6 +1807,19 @@ Window_IcsItemList.prototype.drawItemName = function(item, x, y, width, typeId) 
     }
 };
 
+Window_IcsItemList.prototype.setCompositioStateWindow = function(window) {
+    this._compositionStateWindow = window;
+    this.update();
+};
+
+Window_IcsItemList.prototype.update = function() {
+    Window_ItemList.prototype.update.call(this);
+    if (this._showResipe && this._compositionStateWindow) {
+        var item = this._data[this._index];
+        this._compositionStateWindow.setRecipe(item, this.typeId());
+    }
+};
+
 //=============================================================================
 // Window_IcsCompsiSlotTitle
 //=============================================================================
@@ -1932,22 +1961,26 @@ Window_IcsNumber.prototype.updateButtonsVisiblity = function() {
     }
 };
 
+Window_Base.prototype.drawResipeMaterials = function(item, typeId, x, y) {
+    var materials = item.ics.recipe(typeId).materials();
+    materials.forEach( function(material, i) {
+        var dy = y + this.lineHeight() * i;
+        if (material.category()) {
+            this.drawText('カテゴリー ' + material.category(), x, dy);
+        } else {
+            this.drawItemName(material.item(), x, dy);
+        }
+        var width = this.width - this.padding * 2;
+        this.drawText(material.number(), x, dy, width, 'right');
+    },this);
+};
+
 Window_IcsNumber.prototype.refresh = function() {
     this.contents.clear();
     this.drawItemName(this._item, 0, this.itemY());
     if(this._showResipe) {
-        var materials = this._item.ics.recipe(this._typeId).materials();
-        materials.forEach( function(material, i) {
-            var y = this.buttonY() + this.lineHeight() * (i + 1);
-            if (material.category()) {
-                this.drawText('カテゴリー ' + material.category(), 0, y);
-            } else {
-                var item = material.item();
-                this.drawItemName(item, 0, y);
-            }
-            var width = this.width - this.padding * 2;
-            this.drawText(material.number(), 0, y, width, 'right');
-        },this);
+        var y = this.buttonY() + this.lineHeight();
+        this.drawResipeMaterials(this._item, this._typeId, 0, y);
     }
     this.drawMultiplicationSign();
     this.drawNumber();
@@ -2004,12 +2037,28 @@ Window_IcsCompsiState.prototype.clearWindow = function() {
     this._comp = {};
     this._number = null;
     this._learnRecipe = false;
+    this._showResipe = false;
+    this._resipeItem = null;
+    this._resipeTypeId = null;
     this.refresh();
 };
 
 Window_IcsCompsiState.prototype.setItems = function(items) {
     if (this._slotMaterials === items) return;
     this._slotMaterials = items;
+    this.refresh();
+};
+
+Window_IcsCompsiState.prototype.setRecipe = function(item, typeId) {
+    if (this._resipeItem === item && this._resipeTypeId === typeId) return;
+    this._resipeItem = item;
+    this._resipeTypeId = typeId;
+    this.refresh();
+};
+
+Window_IcsCompsiState.prototype.resetRecipe = function() {
+    this._resipeItem = null;
+    this._resipeTypeId = null;
     this.refresh();
 };
 
@@ -2027,20 +2076,20 @@ Window_IcsCompsiState.prototype.refresh = function() {
             this.drawText('成功', 0, 0, w/2);
             var success = recipe.difficulty().success;
             if (!recipe.great()) success += recipe.difficulty().great;
-            this.drawText('難易度：' + success, w/2, 0, w/2);
+            if (FTKR.ICS.status.dispDifficulty) this.drawText('難易度：' + success, w/2, 0, w/2);
             this.drawText(comp.item.name, 0, y, w);
             this.drawText(number, 0, y, w, 'right');
             var dy = 0;
             if (recipe.great()) {
                 this.drawText('大成功', 0, y*(2 + dy), w/2);
-                this.drawText('難易度：' + recipe.difficulty().great, w/2, y*(2 + dy), w/2);
+                if (FTKR.ICS.status.dispDifficulty) this.drawText('難易度：' + recipe.difficulty().great, w/2, y*(2 + dy), w/2);
                 dy += 1;
                 this.drawText(recipe.great(), 0, y*(2 + dy), w/2);
                 dy += 1;
             }
             if (recipe.failure()) {
                 this.drawText('失敗', 0, y*(2 + dy), w/2);
-                this.drawText('難易度：' + recipe.difficulty().failure, w/2, y*(2 + dy), w/2);
+                if (FTKR.ICS.status.dispDifficulty) this.drawText('難易度：' + recipe.difficulty().failure, w/2, y*(2 + dy), w/2);
                 dy += 1;
                 this.drawText(recipe.failure(), 0, y*(2 + dy), w/2);
             }
@@ -2062,6 +2111,10 @@ Window_IcsCompsiState.prototype.refresh = function() {
 //        console.log('composit data', comp, 'number', number);
         this._comp = comp;
         this._number = number;
+    } else if (FTKR.ICS.status.dispRecipe && this._showResipe && this._resipeItem) {
+        this.drawResipeMaterials(this._resipeItem, this._resipeTypeId, 0, 0);
+        this._comp = {};
+        this._number = 0;
     } else {
         this.drawTextEx(FTKR.ICS.status.unkouwn, 0, 0);
         this._comp = {};
@@ -2496,6 +2549,7 @@ Scene_ICS.prototype.createCompositionStateWindow = function() {
     var ww = Graphics.boxWidth / 2;
     var wh = Graphics.boxHeight - wy;
     this._compositionStateWindow = new Window_IcsCompsiState(wx, wy, ww, wh);
+    this._itemWindow.setCompositioStateWindow(this._compositionStateWindow);
     this.addWindow(this._compositionStateWindow);
 };
 
@@ -2600,11 +2654,13 @@ Scene_ICS.prototype.onCategoryOk = function() {
         case 'recipe':
             this._categoryWindow._showResipe = true;
             this._itemWindow._showResipe = true;
+            this._compositionStateWindow._showResipe = true;
             this._categoryWindow.actSelect(-1);
             break;
         case 'material':
             this._categoryWindow._showResipe = false;
             this._itemWindow._showResipe = false;
+            this._compositionStateWindow._showResipe = false;
             this._categoryWindow.actSelect(-1);
             break;
         case 'end':
