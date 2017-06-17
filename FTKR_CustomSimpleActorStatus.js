@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2017/06/10
-// バージョン : v1.7.6
+// 最終更新日 : 2017/06/17
+// バージョン : v1.8.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.7.6 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v1.8.0 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -241,6 +241,10 @@ FTKR.CSS = FTKR.CSS || {};
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
  * 
+ * @param Custom 0 Unit
+ * @desc Custom(0)の単位を設定します。
+ * @default 
+ * 
  * @param --Custom Param 1--
  * @default
  * 
@@ -253,6 +257,10 @@ FTKR.CSS = FTKR.CSS || {};
  * アクターを a として、ステータスの参照先を記述すること。
  * @default a.currentExp()
  * 
+ * @param Custom 1 Unit
+ * @desc Custom(1)の単位を設定します。
+ * @default 
+ * 
  * @param --Custom Param 2--
  * @default
  * 
@@ -263,6 +271,10 @@ FTKR.CSS = FTKR.CSS || {};
  * @param Custom 2 References
  * @desc Custom(2)の値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
+ * @default 
+ * 
+ * @param Custom 2 Unit
+ * @desc Custom(2)の単位を設定します。
  * @default 
  * 
  * @param --Custom Param 3--
@@ -277,6 +289,10 @@ FTKR.CSS = FTKR.CSS || {};
  * アクターを a として、ステータスの参照先を記述すること。
  * @default a.nextRequiredExp()
  * 
+ * @param Custom 3 Unit
+ * @desc Custom(3)の単位を設定します。
+ * @default 
+ * 
  * @param --Custom Param 4--
  * @default
  * 
@@ -287,6 +303,10 @@ FTKR.CSS = FTKR.CSS || {};
  * @param Custom 4 References
  * @desc Custom(4)の値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
+ * @default 
+ * 
+ * @param Custom 4 Unit
+ * @desc Custom(4)の単位を設定します。
  * @default 
  * 
  * @param --Custom Param 5--
@@ -301,6 +321,10 @@ FTKR.CSS = FTKR.CSS || {};
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
  * 
+ * @param Custom 5 Unit
+ * @desc Custom(5)の単位を設定します。
+ * @default 
+ * 
  * @param --Custom Param 6--
  * @default
  * 
@@ -311,6 +335,10 @@ FTKR.CSS = FTKR.CSS || {};
  * @param Custom 6 References
  * @desc Custom(6)の値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
+ * @default 
+ * 
+ * @param Custom 6 Unit
+ * @desc Custom(6)の単位を設定します。
  * @default 
  * 
  * @param --Custom Param 7--
@@ -325,6 +353,10 @@ FTKR.CSS = FTKR.CSS || {};
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
  * 
+ * @param Custom 7 Unit
+ * @desc Custom(7)の単位を設定します。
+ * @default 
+ * 
  * @param --Custom Param 8--
  * @default
  * 
@@ -335,6 +367,10 @@ FTKR.CSS = FTKR.CSS || {};
  * @param Custom 8 References
  * @desc Custom(8)の値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
+ * @default 
+ * 
+ * @param Custom 8 Unit
+ * @desc Custom(8)の単位を設定します。
  * @default 
  * 
  * @param --Custom Param 9--
@@ -349,6 +385,10 @@ FTKR.CSS = FTKR.CSS || {};
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
  * 
+ * @param Custom 9 Unit
+ * @desc Custom(9)の単位を設定します。
+ * @default 
+ * 
  * @param --Custom Param 10--
  * @default
  * 
@@ -359,6 +399,10 @@ FTKR.CSS = FTKR.CSS || {};
  * @param Custom 10 References
  * @desc Custom(10)の値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
+ * @default 
+ * 
+ * @param Custom 10 Unit
+ * @desc Custom(10)の単位を設定します。
  * @default 
  * 
  * @param --Custom Param 11--
@@ -373,6 +417,10 @@ FTKR.CSS = FTKR.CSS || {};
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
  * 
+ * @param Custom 11 Unit
+ * @desc Custom(11)の単位を設定します。
+ * @default 
+ * 
  * @param --Custom Param 12--
  * @default
  * 
@@ -383,6 +431,10 @@ FTKR.CSS = FTKR.CSS || {};
  * @param Custom 12 References
  * @desc Custom(12)の値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
+ * @default 
+ * 
+ * @param Custom 12 Unit
+ * @desc Custom(12)の単位を設定します。
  * @default 
  * 
  * @param --Custom Param 13--
@@ -397,6 +449,10 @@ FTKR.CSS = FTKR.CSS || {};
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
  * 
+ * @param Custom 13 Unit
+ * @desc Custom(13)の単位を設定します。
+ * @default 
+ * 
  * @param --Custom Param 14--
  * @default
  * 
@@ -407,6 +463,10 @@ FTKR.CSS = FTKR.CSS || {};
  * @param Custom 14 References
  * @desc Custom(14)の値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
+ * @default 
+ * 
+ * @param Custom 14 Unit
+ * @desc Custom(14)の単位を設定します。
  * @default 
  * 
  * @param --Custom Param 15--
@@ -421,6 +481,10 @@ FTKR.CSS = FTKR.CSS || {};
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
  * 
+ * @param Custom 15 Unit
+ * @desc Custom(15)の単位を設定します。
+ * @default 
+ * 
  * @param --Custom Param 16--
  * @default
  * 
@@ -431,6 +495,10 @@ FTKR.CSS = FTKR.CSS || {};
  * @param Custom 16 References
  * @desc Custom(16)の値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
+ * @default 
+ * 
+ * @param Custom 16 Unit
+ * @desc Custom(16)の単位を設定します。
  * @default 
  * 
  * @param --Custom Param 17--
@@ -445,6 +513,10 @@ FTKR.CSS = FTKR.CSS || {};
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
  * 
+ * @param Custom 17Unit
+ * @desc Custom(17)の単位を設定します。
+ * @default 
+ * 
  * @param --Custom Param 18--
  * @default
  * 
@@ -457,6 +529,10 @@ FTKR.CSS = FTKR.CSS || {};
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
  * 
+ * @param Custom 18 Unit
+ * @desc Custom(18)の単位を設定します。
+ * @default 
+ * 
  * @param --Custom Param 19--
  * @default
  * 
@@ -467,6 +543,10 @@ FTKR.CSS = FTKR.CSS || {};
  * @param Custom 19 References
  * @desc Custom(19)の値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
+ * @default 
+ * 
+ * @param Custom 19 Unit
+ * @desc Custom(19)の単位を設定します。
  * @default 
  * 
  * @param --カスタムゲージの設定--
@@ -1042,6 +1122,10 @@ FTKR.CSS = FTKR.CSS || {};
  * <Custom x References>
  *    :パラメータの値の参照先をeval値で設定します。
  * 
+ * <Custom x Unit>
+ *    :パラメータの値の単位を設定します。
+ *    :単位には制御文字が使用できます。
+ * 
  * [eval の値について]
  * eval部は、ダメージ計算式のように、計算式を入力することで、固定値以外の値を
  * 使用することができます。以下のコードを使用できます。
@@ -1303,8 +1387,11 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.8.0 - 2017/06/17 : 機能追加
+ *    1. カスタムパラメータに単位を表示する機能を追加。
+ * 
  * v1.7.6 - 2017/06/10 : 不具合修正
- *    1. YEP_BuffsStatesCore.js組み合わせた時にステートカウントの表示が
+ *    1. YEP_BuffsStatesCore.jsと組み合わせた時にステートカウントの表示が
  *       正しく更新されない不具合を修正。
  * 
  * v1.7.5 - 2017/06/10 : 不具合修正
@@ -1512,44 +1599,64 @@ FTKR.CSS = FTKR.CSS || {};
         },
         customs:[
             {name:String(parameters['Custom 0 Display Name'] || ''),
+              unit:String(parameters['Custom 0 Unit'] || ''),
               formula:String(parameters['Custom 0 References'] || ''),},
             {name:String(parameters['Custom 1 Display Name'] || ''),
+              unit:String(parameters['Custom 1 Unit'] || ''),
               formula:String(parameters['Custom 1 References'] || ''),},
             {name:String(parameters['Custom 2 Display Name'] || ''),
+              unit:String(parameters['Custom 2 Unit'] || ''),
               formula:String(parameters['Custom 2 References'] || ''),},
             {name:String(parameters['Custom 3 Display Name'] || ''),
+              unit:String(parameters['Custom 3 Unit'] || ''),
               formula:String(parameters['Custom 3 References'] || ''),},
             {name:String(parameters['Custom 4 Display Name'] || ''),
+              unit:String(parameters['Custom 4 Unit'] || ''),
               formula:String(parameters['Custom 4 References'] || ''),},
             {name:String(parameters['Custom 5 Display Name'] || ''),
+              unit:String(parameters['Custom 5 Unit'] || ''),
               formula:String(parameters['Custom 5 References'] || ''),},
             {name:String(parameters['Custom 6 Display Name'] || ''),
+              unit:String(parameters['Custom 6 Unit'] || ''),
               formula:String(parameters['Custom 6 References'] || ''),},
             {name:String(parameters['Custom 7 Display Name'] || ''),
+              unit:String(parameters['Custom 7 Unit'] || ''),
               formula:String(parameters['Custom 7 References'] || ''),},
             {name:String(parameters['Custom 8 Display Name'] || ''),
+              unit:String(parameters['Custom 8 Unit'] || ''),
               formula:String(parameters['Custom 8 References'] || ''),},
             {name:String(parameters['Custom 9 Display Name'] || ''),
+              unit:String(parameters['Custom 9 Unit'] || ''),
               formula:String(parameters['Custom 9 References'] || ''),},
             {name:String(parameters['Custom 10 Display Name'] || ''),
+              unit:String(parameters['Custom 10 Unit'] || ''),
               formula:String(parameters['Custom 10 References'] || ''),},
             {name:String(parameters['Custom 11 Display Name'] || ''),
+              unit:String(parameters['Custom 11 Unit'] || ''),
               formula:String(parameters['Custom 11 References'] || ''),},
             {name:String(parameters['Custom 12 Display Name'] || ''),
+              unit:String(parameters['Custom 12 Unit'] || ''),
               formula:String(parameters['Custom 12 References'] || ''),},
             {name:String(parameters['Custom 13 Display Name'] || ''),
+              unit:String(parameters['Custom 13 Unit'] || ''),
               formula:String(parameters['Custom 13 References'] || ''),},
             {name:String(parameters['Custom 14 Display Name'] || ''),
+              unit:String(parameters['Custom 14 Unit'] || ''),
               formula:String(parameters['Custom 14 References'] || ''),},
             {name:String(parameters['Custom 15 Display Name'] || ''),
+              unit:String(parameters['Custom 15 Unit'] || ''),
               formula:String(parameters['Custom 15 References'] || ''),},
             {name:String(parameters['Custom 16 Display Name'] || ''),
+              unit:String(parameters['Custom 16 Unit'] || ''),
               formula:String(parameters['Custom 16 References'] || ''),},
             {name:String(parameters['Custom 17 Display Name'] || ''),
+              unit:String(parameters['Custom 17 Unit'] || ''),
               formula:String(parameters['Custom 17 References'] || ''),},
             {name:String(parameters['Custom 18 Display Name'] || ''),
+              unit:String(parameters['Custom 18 Unit'] || ''),
               formula:String(parameters['Custom 18 References'] || ''),},
             {name:String(parameters['Custom 19 Display Name'] || ''),
+              unit:String(parameters['Custom 19 Unit'] || ''),
               formula:String(parameters['Custom 19 References'] || ''),},
         ],
         gauges:[
@@ -2325,11 +2432,14 @@ FTKR.CSS = FTKR.CSS || {};
         if (!custom) return 1;
         var name = custom.name || '';
         var formula = custom.formula || '';
+        var unit = custom.unit || '';
+        var tux = this.textWidth(this.convertEscapeCharacters(unit));
         var value = this.evalCssCustomFormula(actor, formula);
         this.changeTextColor(this.systemColor());
         var tx = this.drawTextEx(name, x, y);
         this.resetTextColor();
-        this.drawText(value, x + tx, y, width - tx, 'right');
+        this.drawText(value, x + tx, y, width - tx - tux, 'right');
+        if (unit) this.drawTextEx(unit, x + width - tux, y);
         return 1;
     };
 
