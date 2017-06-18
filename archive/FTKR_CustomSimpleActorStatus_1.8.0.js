@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2017/06/18
-// バージョン : v2.0.0
+// 最終更新日 : 2017/06/17
+// バージョン : v1.8.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.0.0 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v1.8.0 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -23,6 +23,95 @@ FTKR.CSS = FTKR.CSS || {};
  * @noteDir img/pictures/
  * @noteType file
  * @noteData actors
+ * 
+ * @param --簡易ステータス表示--
+ * @default
+ * 
+ * @param Enabled Simple Status
+ * @desc 簡易ステータス画面のレイアウト変更機能を使うか。
+ * 1 - 有効にする, 0 - 無効にする
+ * @default 1
+ * 
+ * @param Actor Status Text1
+ * @desc Text1部に表示するステータスを指定します。
+ * 詳細はヘルプ参照
+ * @default face
+ * 
+ * @param Actor Status Text2
+ * @desc Text2部に表示するステータスを指定します。
+ * 詳細はヘルプ参照
+ * @default name,level,state
+ * 
+ * @param Actor Status Text3
+ * @desc Text3部に表示するステータスを指定します。
+ * 詳細はヘルプ参照
+ * @default class,hp,mp
+ * 
+ * @param Actor Status Space
+ * @desc 各Textの間隔を指定します。
+ * @default 0,20,50,0
+ * 
+ * @param Actor Status Space In Text
+ * @desc Text内で複数表示する場合の間隔を指定します。
+ * @default 5
+ * 
+ * @param Actor Status Width Rate
+ * @desc Text1~Text3の表示幅の比率を指定します。
+ * 詳細はヘルプ参照
+ * @default 2,2,3
+ *
+ * @param --ステータスウィンドウ設定--
+ * @default
+ * 
+ * @param Enabled Custom Window
+ * @desc ウィンドウのレイアウト変更機能を使うか。
+ * 1 - 有効にする, 0 - 無効にする
+ * @default 0
+ * 
+ * @param Number Visible Rows
+ * @desc ステータスウィンドウの縦の行数：デフォルト 16
+ * @default 16
+ * 
+ * @param Number Max Cols
+ * @desc アクターを横に並べる数：デフォルト 1
+ * @default 1
+ * 
+ * @param Cursol Line Number
+ * @desc カーソル高さの行数：デフォルト 4
+ * @default 4
+ * 
+ * @param Cursol Height Space
+ * @desc 縦のカーソル間隔：デフォルト 0
+ * @default 0
+ * 
+ * @param Font Size
+ * @desc フォントサイズ：デフォルト 28
+ * @default 28
+ * 
+ * @param Window Padding
+ * @desc ウィンドウの周囲の余白：デフォルト 18
+ * @default 18
+ * 
+ * @param Window Line Height
+ * @desc ウィンドウ内の1行の高さ：デフォルト 36
+ * @default 36
+ * 
+ * @param Window Opacity
+ * @desc ウィンドウ内の背景の透明度：デフォルト 192
+ * @default 192
+ * 
+ * @param Hide Window Frame
+ * @desc ウィンドウ枠を非表示にするか
+ * 1 - 非表示にする、0 - 表示する
+ * @default 0
+ * 
+ * @param --スキル画面の設定--
+ * @default
+ * 
+ * @param Enabled Skill Status
+ * @desc スキル画面のステータスをメニュー画面と同じにするか。
+ * 1 - 有効にする, 0 - 無効にする
+ * @default 1
  * 
  * @param --顔画像の設定--
  * @default
@@ -771,12 +860,10 @@ FTKR.CSS = FTKR.CSS || {};
  *-----------------------------------------------------------------------------
  * 概要
  *-----------------------------------------------------------------------------
- * 当プラグインは、アクターのステータス表示のレイアウトをより詳細に設定できる
- * 処理を実装します。
+ * 本プラグインを実装することで、メニューや、スキル画面で表示するアクターの
+ * ステータス表示のレイアウトを変更できます。
  * 
- * 当プラグインの拡張プラグイン(FTKR_CSS_***.js)と組み合わせることで
- * メニュー画面や、バトル画面などさまざまなステータス画面を設定できるように
- * なります。
+ * なお、この機能はプラグインパラメータで個別にON/OFFできます。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -785,16 +872,21 @@ FTKR.CSS = FTKR.CSS || {};
  * 1.「プラグインマネージャー(プラグイン管理)」に、本プラグインを追加して
  *    ください。
  * 
- * 2. 拡張プラグインと組み合わせる場合は、当プラグインが上になるように
- *    配置してください。
- * 
  * 
  *-----------------------------------------------------------------------------
  * アクターの簡易ステータス表示の設定
  *-----------------------------------------------------------------------------
- * プラグインパラメータの設定により、アクターのステータスの表示レイアウトを
- * 変更することができます。
- * この仕様は、当プラグインの拡張プラグインで共通です。
+ * プラグインパラメータの設定により、メニュー画面およびスキル画面で表示する
+ * 簡易ステータスの表示レイアウトを変更することができます。
+ * 
+ * <Enabled Simple Status>
+ *    :メニュー画面のレイアウト変更機能を使うか指定します。
+ *    :0 - 無効, 1 - 有効
+ * 
+ * <Enabled Skill Status>
+ *    :スキル画面のレイアウト変更機能を使うか指定します。
+ *    :0 - 無効, 1 - 有効
+ * 
  * 
  * <Actor Status Text1>
  * <Actor Status Text2>
@@ -806,8 +898,7 @@ FTKR.CSS = FTKR.CSS || {};
  *    :入力できるパラメータ名は、
  *    :face(x), chara, sv, name, class, nickname, hp, mp, tp, level, 
  *    :state, state2(x), profile, param(x), custom(x), gauge(x), 
- *    :equip(x), text(x), image, eparam(x), agauge(x), cgauge(x)
- *    :eval(x) です。
+ *    :equip(x), text(x), image, eparam(x), agauge(x), cgauge(x)です。
  *    :
  *    :face, face(x) -
  *    : 顔画像を表示します。
@@ -861,9 +952,6 @@ FTKR.CSS = FTKR.CSS || {};
  *    :
  *    :cgauge(x) - 
  *    : クラスのメモ欄で設定したカスタムゲージを表示します。
- *    :
- *    :eval(x) - 
- *    : JS計算式 x を評価して、その結果を表示します。
  *    :
  *    :カンマ(,)で区切って複数のパラメータを入力した場合は、
  *    :行を変えてそれぞれのパラメータを表示します。
@@ -1220,6 +1308,72 @@ FTKR.CSS = FTKR.CSS || {};
  * 
  * 
  *-----------------------------------------------------------------------------
+ * メニュー画面のステータスウィンドウの設定
+ *-----------------------------------------------------------------------------
+ * 以下のプラグインパラメータで設定できます。
+ * 
+ * <Enabled Custom Window>
+ *    :メニュー画面のウィンドウ変更機能を使うか指定します。
+ *    :0 - 無効, 1 - 有効
+ * 
+ * <Number Visible Rows>
+ *    :ステータスウィンドウの縦の行数を変更します。
+ *    :デフォルトは16行です。
+ * 
+ * <Number Max Cols>
+ *    :ウィンドウ内でアクターを横に並べる数を変更します。
+ *    :デフォルトは 1 です。
+ * 
+ * <Cursol Line Number>
+ *    :カーソル(アクター１人分)の高さを何行分にするか設定します。
+ *    :デフォルトは 4 です。
+ * 
+ * <Cursol Height Space>
+ *    :縦のカーソル間隔を設定します。
+ *    :デフォルトは 0 です。(単位はpixel)
+ * 
+ * <Font Size>
+ *    :ウィンドウ内のフォントサイズを変更します。
+ *    :デフォルトは 28 です。(単位はpixel)
+ * 
+ * <Window Padding>
+ *    :ウィンドウの周囲の余白を変更します。
+ *    :デフォルトは 18 です。(単位はpixel)
+ * 
+ * <Window Line Height>
+ *    :ウィンドウ内の1行の高さを変更します。
+ *    :デフォルトは 36 です。(単位はpixel)
+ * 
+ * <Window Opacity>
+ *    :ウィンドウ内の背景の透明度を変更します。
+ *    :デフォルトは 192 です。
+ *    :0 - 透明、255 - 不透明
+ * 
+ * <Hide Window Frame>
+ *    :ウィンドウ枠を非表示にするか指定します。
+ *    :1 - 非表示にする、0 - 表示する
+ *    :デフォルトは表示します。
+ * 
+ * 
+ * ＜ウィンドウの高さ＞
+ * ウィンドウの高さは、以下の計算式で算出します。
+ *    [ウィンドウ高さ] ＝ [縦の行数] × [1行の高さ] + [余白のサイズ] × 2
+ * 
+ * 
+ * ＜フォントサイズと行の高さ＞
+ * 基本的に、下の大小関係になるように設定しましょう。
+ *    フォントサイズ ＜ 1行の高さ
+ * 
+ * 
+ * ＜ウィンドウを消す方法＞
+ * 以下の設定にすると、ウィンドウ枠とウィンドウの背景が消えて
+ * アクターのステータスだけを表示します。
+ * 
+ * <Window Opacity>     : 0
+ * <Hide Window Frame>  : 1
+ * 
+ * 
+ *-----------------------------------------------------------------------------
  * 本プラグインのライセンスについて(License)
  *-----------------------------------------------------------------------------
  * 本プラグインはMITライセンスのもとで公開しています。
@@ -1232,8 +1386,6 @@ FTKR.CSS = FTKR.CSS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
- * 
- * v2.0.0 - 2017/06/18 : メニュー画面の変更機能を分離
  * 
  * v1.8.0 - 2017/06/17 : 機能追加
  *    1. カスタムパラメータに単位を表示する機能を追加。
@@ -1379,6 +1531,33 @@ FTKR.CSS = FTKR.CSS || {};
     // プラグイン パラメータ
     //=============================================================================
     var parameters = PluginManager.parameters('FTKR_CustomSimpleActorStatus');
+
+    FTKR.CSS.enabledSS = Number(parameters['Enabled Simple Status'] || 0);
+    FTKR.CSS.enabledSkill = Number(parameters['Enabled Skill Status'] || 0);
+
+    //簡易ステータスオブジェクト
+    FTKR.CSS.simpleStatus = {
+        text1:String(parameters['Actor Status Text1'] || ''),
+        text2:String(parameters['Actor Status Text2'] || ''),
+        text3:String(parameters['Actor Status Text3'] || ''),
+        space:String(parameters['Actor Status Space'] || ''),
+        spaceIn:Number(parameters['Actor Status Space In Text'] || 0),
+        widthRate:String(parameters['Actor Status Width Rate'] || ''),
+    };
+
+    //ウィンドウ設定オブジェクト
+    FTKR.CSS.window = {
+        enabled:Number(parameters['Enabled Custom Window'] || 0),
+        numVisibleRows:Number(parameters['Number Visible Rows'] || 0),
+        maxCols:Number(parameters['Number Max Cols'] || 0),
+        fontSize:Number(parameters['Font Size'] || 0),
+        padding:Number(parameters['Window Padding'] || 0),
+        lineHeight:Number(parameters['Window Line Height'] || 0),
+        opacity:Number(parameters['Window Opacity'] || 0),
+        hideFrame:Number(parameters['Hide Window Frame'] || 0),
+        cursolHeight:Number(parameters['Cursol Line Number'] || 0),
+        hspace:Number(parameters['Cursol Height Space'] || 0),
+    };
 
     //オリジナルステータス設定オブジェクト
     FTKR.CSS.cssStatus = {
@@ -2443,6 +2622,163 @@ FTKR.CSS = FTKR.CSS || {};
     };
 
     //=============================================================================
+    // Window_MenuStatus
+    // メニュー画面のステータスウィンドウの表示クラス
+    //=============================================================================
+
+    FTKR.CSS.Window_MenuStatus_drawItemImage = Window_MenuStatus.prototype.drawItemImage;
+    Window_MenuStatus.prototype.drawItemImage = function(index) {
+        if (!FTKR.CSS.enabledSS) FTKR.CSS.Window_MenuStatus_drawItemImage.call(this, index);
+    };
+
+    FTKR.CSS.Window_MenuStatus_drawItemStatus = Window_MenuStatus.prototype.drawItemStatus;
+    Window_MenuStatus.prototype.drawItemStatus = function(index) {
+        if (FTKR.CSS.enabledSS) {
+            var actor = $gameParty.members()[index];
+            var rect = this.itemRect(index);
+            this.drawCssActorStatus(index, actor, rect.x, rect.y, rect.width, rect.height);
+        } else {
+            FTKR.CSS.Window_MenuStatus_drawItemStatus.call(this, index);
+        }
+    };
+
+    Window_MenuStatus.prototype.drawAllItems = function() {
+        var topIndex = this.topIndex();
+        for (var i = 0; i < this.maxPageItems(); i++) {
+            var index = topIndex + i;
+            if (index < this.maxItems()) {
+                this.drawItem(index);
+            } else {
+                this.clearCssSprite(index % this.maxPageItems());
+            }
+        }
+    };
+
+    if(FTKR.CSS.window.enabled) {
+
+    //書き換え
+    //ウィンドウの行数
+    Window_MenuStatus.prototype.numVisibleRows = function() {
+        return FTKR.CSS.window.numVisibleRows;
+    };
+
+    //書き換え
+    //ウィンドウに横に並べるアクター数
+    Window_MenuStatus.prototype.maxCols = function() {
+        return FTKR.CSS.window.maxCols;
+    };
+
+    //書き換え
+    //カーソルの高さ
+    Window_MenuStatus.prototype.itemHeight = function() {
+        return this.lineHeight() * FTKR.CSS.window.cursolHeight;
+    };
+
+    //書き換え
+    //ウィンドウに横に並べるアクターの表示間隔
+    //ステータスレイアウト側で変更できるのでここでは 0 とする。
+    Window_MenuStatus.prototype.spacing = function() {
+        return 0;
+    };
+
+    //書き換え
+    //ウィンドウのフォントサイズ
+    Window_MenuStatus.prototype.standardFontSize = function() {
+        return FTKR.CSS.window.fontSize;
+    };
+
+    //書き換え
+    //ウィンドウに周囲の余白サイズ
+    Window_MenuStatus.prototype.standardPadding = function() {
+        return FTKR.CSS.window.padding;
+    };
+
+    //書き換え
+    //ウィンドウ内の1行の高さ
+    Window_MenuStatus.prototype.lineHeight = function() {
+        return FTKR.CSS.window.lineHeight;
+    };
+
+    //書き換え
+    //ウィンドウの背景の透明度
+    Window_MenuStatus.prototype.standardBackOpacity = function() {
+        return FTKR.CSS.window.opacity;
+    };
+
+    //書き換え
+    //ウィンドウ枠の表示
+    Window_MenuStatus.prototype._refreshFrame = function() {
+        if (!FTKR.CSS.window.hideFrame) Window.prototype._refreshFrame.call(this);
+    };
+
+    Window_MenuStatus.prototype.itemHeightSpace = function() {
+        return FTKR.CSS.window.hspace;
+    };
+
+    Window_MenuStatus.prototype.unitHeight = function() {
+        return this.itemHeight() + this.itemHeightSpace();
+    };
+
+    Window_MenuStatus.prototype.unitWidth = function() {
+        return this.itemWidth() + this.spacing();
+    };
+
+    if (FTKR.CSS.window.hspace) {
+    //書き換え
+    Window_MenuStatus.prototype.maxPageRows = function() {
+        var pageHeight = this.height - this.padding * 2;
+        return Math.floor(pageHeight / this.unitHeight());
+    };
+
+    //書き換え
+    Window_MenuStatus.prototype.topRow = function() {
+        return Math.floor(this._scrollY / this.unitHeight());
+    };
+
+    //書き換え
+    Window_MenuStatus.prototype.setTopRow = function(row) {
+        var scrollY = row.clamp(0, this.maxTopRow()) * this.unitHeight();
+        if (this._scrollY !== scrollY) {
+            this._scrollY = scrollY;
+            this.refresh();
+            this.updateCursor();
+        }
+    };
+
+    //書き換え
+    Window_MenuStatus.prototype.itemRect = function(index) {
+        var rect = new Rectangle();
+        var maxCols = this.maxCols();
+        rect.width = this.itemWidth();
+        rect.height = this.itemHeight();
+        rect.x = index % maxCols * this.unitWidth() - this._scrollX;
+        rect.y = Math.floor(index / maxCols) * this.unitHeight() - this._scrollY;
+        return rect;
+    };
+    }//FTKR.CSS.window.hspace
+
+    }//ウィンドウカスタム有効
+
+    //=============================================================================
+    // Window_SkillStatus
+    // スキル画面のステータスウィンドウの表示クラス
+    //=============================================================================
+
+    var _window_SkillStatus_refresh = Window_SkillStatus.prototype.refresh;
+    Window_SkillStatus.prototype.refresh = function() {
+        if(FTKR.CSS.enabledSkill) {
+            this.contents.clear();
+            if (this._actor) {
+                var w = this.width - this.padding * 2;
+                var h = this.height - this.padding * 2;
+                this.drawCssActorStatus(0, this._actor, 0, 0, w, h);
+            }
+        } else {
+            _window_SkillStatus_refresh.call(this);
+        }
+    };
+
+    //=============================================================================
     // Sprite_Battlerの修正
     // Sprite_Actorの修正
     //=============================================================================
@@ -2488,6 +2824,7 @@ Sprite_CssStateIcon.prototype.initialize = function(index, showNum) {
     Sprite_StateIcon.prototype.initialize.call(this);
     this._index = index;
     this._showNum = showNum;
+  //  this.contents = new Bitmap(32, 32);
 };
 
 Sprite_CssStateIcon._iconWidth  = 32;
