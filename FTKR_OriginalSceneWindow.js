@@ -3,8 +3,8 @@
 // FTKR_OriginalSceneWindow.js
 // 作成者     : フトコロ
 // 作成日     : 2017/06/17
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2017/06/19
+// バージョン : v1.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.OSW = FTKR.OSW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 オリジナルのシーンやウィンドウを作成する
+ * @plugindesc v1.1.0 オリジナルのシーンやウィンドウを作成する
  * @author フトコロ
  *
  * @param --ウィンドウの共通設定--
@@ -61,10 +61,6 @@ FTKR.OSW = FTKR.OSW || {};
  * 1 - 有効, 0 - 無効
  * @default 0
  * 
- * @param Cancel Command Name
- * @desc シーンを閉じるコマンドの名前を設定します。
- * @default 閉じる
- * 
  * @param Command Position X
  * @desc コマンドウィンドウを表示するX座標を設定します。
  * @default 0
@@ -76,6 +72,15 @@ FTKR.OSW = FTKR.OSW || {};
  * @param Command Width
  * @desc コマンドウィンドウの幅を設定します。
  * @default 240
+ * 
+ * @param Command Max Cols
+ * @desc コマンドウィンドウの最大列数を設定します。
+ * @default 1
+ * 
+ * @param Command Align
+ * @desc コマンドウィンドウのコマンド表示位置を設定します。
+ * left / center / right
+ * @default left
  * 
  * @param Command Number In Original
  * @desc オリジナルシーンのコマンドウィンドウ生成数を設定します。
@@ -126,6 +131,51 @@ FTKR.OSW = FTKR.OSW || {};
  * FTKR_CustomSimpleActorStatus.js が必要
  * @default 1,0,0
  * 
+ * @param --セレクトウィンドウの設定--
+ * @desc 
+ * 
+ * @param Select Width
+ * @desc セレクトウィンドウの幅を設定します。
+ * @default 240
+ * 
+ * @param Select Height
+ * @desc セレクトウィンドウの高さを設定します。
+ * @default 240
+ * 
+ * @param Select Cursor Height
+ * @desc セレクトウィンドウのカーソル高さを設定します。
+ * @default 1
+ * 
+ * @param Select Max Cols
+ * @desc セレクトウィンドウの最大列数を設定します。
+ * @default 2
+ * 
+ * @param Select Number In Original
+ * @desc オリジナルシーンのセレクトウィンドウ生成数を設定します。
+ * @default 
+ * 
+ * @param Select Number In Map
+ * @desc マップシーンのセレクトウィンドウ生成数を設定します。
+ * @default 
+ * 
+ * @param --セレクトウィンドウの表示内容設定--
+ * @desc 
+ * 
+ * @param Select Status Space
+ * @desc 各Textの間隔を指定します。
+ * FTKR_CustomSimpleActorStatus.js が必要
+ * @default 0,0,0,0
+ * 
+ * @param Select Status Space In Text
+ * @desc Text内で複数表示する場合の間隔を指定します。
+ * FTKR_CustomSimpleActorStatus.js が必要
+ * @default 5
+ * 
+ * @param Select Status Width Rate
+ * @desc Text1~Text3の表示幅の比率を指定します。
+ * FTKR_CustomSimpleActorStatus.js が必要
+ * @default 1,0,0
+ * 
  * @help 
  *-----------------------------------------------------------------------------
  * 概要
@@ -140,6 +190,8 @@ FTKR.OSW = FTKR.OSW || {};
  * 作成できるウィンドウは、以下の２種類です。
  *   1. コマンドウィンドウ - シーン変更やコモンイベントを実行するコマンドを表示
  *   2. コモンウィンドウ　 - さまざまな文字列や数値、画像などを表示(*1)
+ *   3. セレクトウィンドウ - さまざまな文字列や数値、画像などをリストに表示(*1)
+ *                          選択したリストの番号をゲーム内変数に格納
  * 
  * (*1) コモンウィンドウに、文字列以外を表示させたい場合は
  *      FTKR_CustomSimpleActorStatus.js が必要です。
@@ -189,8 +241,13 @@ FTKR.OSW = FTKR.OSW || {};
  * 
  * オリジナルシーンは、デフォルトでは何も表示しません。
  * 
- * コマンドウィンドウやコモンウィンドウを追加する場合は
- * 以降の設定方法に従い、オリジナルシーンの設定を行ってください。
+ * ウィンドウを追加する場合は、以降の設定方法に従い
+ * オリジナルシーンの設定を行ってください。
+ * 
+ * オリジナルシーンでは、コモンイベントの呼び出しが可能です。
+ * ただし、文章を表示するタイプのイベントコマンドや、
+ * アニメーション、ピクチャ表示のイベントコマンドなど
+ * 使用できないイベントコマンドがあります。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -238,6 +295,8 @@ FTKR.OSW = FTKR.OSW || {};
  *        :ウィンドウのサイズを pixel単位 で指定します。
  *        :ウィンドウの高さは、設定したコマンドの数と最大列数により決まります。
  *        :width に -1 を入力すると、画面の幅に合わせます。
+ *        :width に 0 を入力すると、幅は変えずに高さだけ設定します。
+ *        :コマンドを追加した場合は、サイズの再設定を行ってください。
  * 
  *    最大列数 [value]
  *    MAX_COLS [value]
@@ -280,20 +339,25 @@ FTKR.OSW = FTKR.OSW || {};
  *    コマンド追加 [コマンド名] [シンボル名] [実行条件] [メソッド]
  *    ADD_COMMAND [name] [symbol] [enabled] [method]
  *        :コマンドを追加します。
- *        :なお、オリジナルシーンでは、デフォルトで「閉じる」コマンドを
- *        :設定しています。
  *        :
  *        :[実行条件]
  *        : true と入力すると、常にコマンドを実行できます。
  *        : JS計算式を入力すると、実行条件を動的に変えることができます。
  *        :
  *        :[メソッド]の入力例
+ *        :  シーン終了
+ *        :  END_SCENE
+ *        :    :コマンドを実行すると、シーンを終了します。
+ *        :    :オリジナルシーンからマップシーンに戻すときに使います。
+ *        :    :このコマンドをオリジナルシーン以外で使わないでください。
+ *        :
  *        :  シーン変更(scene)
  *        :  CHANGE_SCENE(scene)
  *        :    :コマンドを実行すると、scene で指定したシーンを表示します。
  *        :    :  sceneの例)
  *        :    :    Scene_Item  - アイテムシーン
  *        :    :    Scene_Skill - スキルシーン
+ *        :
  *        :  コモンイベント(イベントId)
  *        :  COMMON_EVENT(eventId)
  *        :    :コマンドを実行すると、イベントID で指定した
@@ -301,6 +365,21 @@ FTKR.OSW = FTKR.OSW || {};
  *        :    :なお実行するコモンイベントは、最後に以下のプラグインコマンドを
  *        :    :実行してください。
  *        :    :  OSW_コマンドウィンドウ設定 [シーン名] アクティブ ON
+ *        :
+ *        :  ウィンドウアクティブ([ウィンドウタイプ],[ウィンドウID],[非表示化])
+ *        :  WINDOW_ACTIVE([windowType],[windowId],[hideOn])
+ *        :    :コマンドを実行すると、指定したウィンドウにアクティブ状態が移ります。
+ *        :    :[ウィンドウタイプ] には以下を指定してください。 
+ *        :    :    コマンド or COMMAND
+ *        :    :    セレクト or SELECT
+ *        :    :[非表示化]には、以下を指定してください。
+ *        :    :    true  - コマンド選択後にウィンドウを非表示にします。
+ *        :    :    false - コマンド選択後にウィンドウを表示したままにします。
+ * 
+ *    カーソル残す [ON or OFF]
+ *    LEAVE_CURSOR
+ *        :アクティブOFFにした時に、カーソルを残すかどうか設定します。
+ *        :アクティブ設定よりも前に設定してください。
  * 
  *    アクティブ [ON or OFF]
  *    ACTIVE [ON or OFF
@@ -388,6 +467,21 @@ FTKR.OSW = FTKR.OSW || {};
  *        :ウィンドウのフレームを表示するかどうか設定します。
  *        :(デフォルトでは表示)
  * 
+ *    アクター [アクターID]
+ *    ACTOR [actorId]
+ *        :ウィンドウ内で表示するパラメータの参照元のアクターを指定します。
+ *        :アクターIDには、\V[x]でゲーム内変数を使用できます。
+ * 
+ *    パーティー [メンバーID]
+ *    PARTY [memberId]
+ *        :ウィンドウ内で表示するパラメータの参照元のアクターを指定します。
+ *        :メンバーIDは、先頭を0番としたパーティー内の並び順です。
+ *        :メンバーIDには、\V[x]でゲーム内変数を使用できます。
+ * 
+ *    テキスト初期化
+ *    CLEAR_TEXT
+ *        :設定したテキストをすべて初期化します。
+ *    
  *    テキスト [行数] [表示する文字列]
  *    TEXT [line] [displayText]
  *        :ウィンドウに表示する文字列を設定します。
@@ -396,15 +490,6 @@ FTKR.OSW = FTKR.OSW || {};
  *        :FTKR_CustomSimpleActorStatus.js と組み合わせている場合には
  *        :この記述は使用できません。
  *    
- *    テキスト初期化
- *    CLEAR_TEXT
- *        :設定したテキストをすべて初期化します。
- *    
- *    アクター [アクターID]
- *    ACTOR [actorId]
- *        :ウィンドウ内で表示するパラメータの参照元のアクターを指定します。
- *        :アクターIDには、\V[x]でゲーム内変数を使用できます。
- * 
  *    内容 [表示内容]
  *    CONTENT [contentSetting]
  *        :FTKR_CustomSimpleActorStatus.js と組み合わせている場合に
@@ -443,6 +528,143 @@ FTKR.OSW = FTKR.OSW || {};
  * 
  * 
  *-----------------------------------------------------------------------------
+ * セレクトウィンドウの設定
+ *-----------------------------------------------------------------------------
+ * セレクトウィンドウの生成数はプラグインパラメータで設定します。
+ * 
+ * Select Number In Original
+ *    :オリジナルシーンでの生成数
+ * 
+ * Select Number In Map
+ *    :マップシーンでの生成数
+ * 
+ * 
+ * セレクトウィンドウの設定は、以下のプラグインセレクトで行います。
+ * 
+ * OSW_セレクトウィンドウ設定 [シーン名] [ウィンドウID] [設定内容]
+ * OSW_SET_SELECT_WINDOW [scene] [windowId] [setting]
+ * 
+ * [シーン名]に、以下を設定してください。
+ *    オリジナル or ORIGINAL
+ *        :オリジナルシーンを設定する
+ *    マップ or MAP
+ *        :マップシーンを設定する
+ * 
+ * [ウィンドウID]で、設定するウィンドウのIDを指定します。
+ * 
+ * [設定内容]には、以下があります。
+ * この設定は、プラグインパラメータの設定よりも優先します。
+ * 
+ *    生成
+ *    CREATE
+ *        :ウィンドウを生成します。
+ *        :オリジナルシーンおよびマップシーンでのみ使用できます。
+ *        :このパラメータは単独で使用してください。
+ * 
+ *    位置 [x] [y]
+ *    POSITION [x] [y]
+ *        :ウィンドウの表示位置を pixel単位 で指定します。
+ *        :x に -1 を入力すると、ウィンドウサイズに合わせて画面右寄せします。
+ *        :y に -1 を入力すると、ウィンドウサイズに合わせて画面下寄せします。
+ * 
+ *    サイズ [width] [height]
+ *    SIZE [width] [height]
+ *        :ウィンドウのサイズを pixel単位 で指定します。
+ *        :width に -1 を入力すると、画面の幅に合わせます。
+ *        :height に -1 を入力すると、画面の高さに合わせます。
+ * 
+ *    最大列数 [value]
+ *    MAX_COLS [value]
+ *        :セレクトを横に並べる数を設定します。
+ *        :デフォルトは１です。
+ * 
+ *    カーソル高さ [value]
+ *    CURSOR_HEIGHT [value]
+ *        :カーソルの高さ(行数)を設定します。
+ *        :デフォルトは１です。
+ * 
+ *    フォントサイズ [value]
+ *    FONTSIZE [value]
+ *        :ウィンドウのフォントサイズを pixel単位 で指定します。
+ * 
+ *    行の高さ [value]
+ *    LINEHEIGHT [value]
+ *        :ウィンドウの１行の高さを pixel単位 で指定します。
+ * 
+ *    余白 [value]
+ *    PADDING [value]
+ *        :ウィンドウの周囲の余白を pixel単位 で指定します。
+ * 
+ *    透明度 [value]
+ *    OPACITY [value]
+ *        :ウィンドウの透明度を pixel単位 で指定します。
+ * 
+ *    フレーム [ON or OFF]
+ *    FRAME [ON or OFF]
+ *        :ウィンドウのフレームを表示するかどうか設定します。
+ *        :デフォルトでは表示(ON)します。
+ * 
+ *    リスト初期化
+ *    CLEAR_LIST
+ *        :設定したリストをすべて初期化します。
+ *    
+ *    リスト設定 [設定内容]
+ *    SET_LIST [setting]
+ *        :表示リストを設定します。
+ *        :
+ *        :テキスト [リスト1,リスト2,...]
+ *        :TEXT [list1,list2,...]
+ *        :   リストの表示名を直接設定します。
+ *        :   カンマで区切って入力してください。
+ *        :
+ *        :パーティーメンバー
+ *        :PARTY_MEMBER
+ *        :   リストをパーティーメンバーの人数分に設定します。
+ *        :   別途、内容コマンドで表示するステータスを設定します。
+ * 
+ *    リスト実行設定 [実行タイプ] [非表示化] [ウィンドウタイプ] [ウィンドウID] [格納用変数ID]
+ *    SET_LIST_ACTION [action_type] [hideOn] [windowType] [windowId] [variablesId]
+ *        :セレクトウィンドウ上での実行操作の結果を設定します。
+ *        :
+ *        :[実行タイプ]には以下を指定します。
+ *        :   決定 or OK - リストを選択したときの処理
+ *        :   キャンセル or CANCEL - キャンセルボタンを押したときの処理
+ *        :
+ *        :[非表示化]には、以下を指定してください。
+ *        :    true  - コマンド選択後にウィンドウを非表示にします。
+ *        :    false - コマンド選択後にウィンドウを表示したままにします。
+ *        :
+ *        :[ウィンドウタイプ] には以下を指定してください。 
+ *        :    コマンド or COMMAND
+ *        :    セレクト or SELECT
+ *        :
+ *        :[格納用変数ID] は、「決定」時のみ設定します。
+ *        :    選択したリストの番号(先頭が0番)を指定した変数に格納します。
+ * 
+ *    内容 [表示内容]
+ *    CONTENT [contentSetting]
+ *        :FTKR_CustomSimpleActorStatus.js と組み合わせている場合に
+ *        :使用可能な記述です。
+ *        :[表示内容]の記述は、コモンウィンドウと同じです。
+ * 
+ *    カーソル残す [ON or OFF]
+ *    LEAVE_CURSOR
+ *        :アクティブOFFにした時に、カーソルを残すかどうか設定します。
+ *        :アクティブ設定よりも前に設定してください。
+ * 
+ *    アクティブ [ON or OFF]
+ *    ACTIVE [ON or OFF
+ *        :セレクトウィンドウを選択可能な状態にするかどうか設定します。
+ *        :複数のセレクトウィンドウを表示させる場合には、
+ *        :アクティブをONにするウィンドウは一つだけにしてください。
+ * 
+ *    表示 [ON or OFF]
+ *    SHOW [ON or OFF]
+ *        :ウィンドウの表示のON/OFFを切り替えます。
+ *        :表示をONに切り替える時に、更新を行います。
+ *        :基本的に最後に設定してください。
+ * 
+ *-----------------------------------------------------------------------------
  * 本プラグインのライセンスについて(License)
  *-----------------------------------------------------------------------------
  * 本プラグインはMITライセンスのもとで公開しています。
@@ -452,6 +674,14 @@ FTKR.OSW = FTKR.OSW || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.1.0 - 2017/06/19 : 機能追加、仕様変更
+ *    1. オリジナルシーンの「閉じる」コマンドのデフォルト設定を削除。
+ *    2. コマンドウィンドウを表示OFFにした時に、アクティブもOFFにするように変更。
+ *    3. コマンド追加のメソッドに、シーンを閉じる機能と、別のウィンドウを
+ *       アクティブONにする機能を追加。
+ *    4. オリジナルシーンでコモンイベントを呼び出せるように修正。
+ *    5. セレクトウィンドウの作成機能を追加。
  * 
  * v1.0.0 - 2017/06/17 : 初版作成
  * 
@@ -471,6 +701,10 @@ function Game_OswCommon() {
     this.initialize.apply(this, arguments);
 }
 
+function Game_OswSelectable() {
+    this.initialize.apply(this, arguments);
+}
+
 function Game_OswScene() {
     this.initialize.apply(this, arguments);
 }
@@ -484,9 +718,9 @@ function Game_OswScene() {
 
     FTKR.OSW = {
         basic:{
-            fontSize  :Number(parameters['Font Size'] || 0),
+            fontSize  :Number(parameters['Font Size'] || 28),
             padding   :Number(parameters['Window Padding'] || 0),
-            lineHeight:Number(parameters['Window Line Height'] || 0),
+            lineHeight:Number(parameters['Window Line Height'] || 36),
             opacity   :Number(parameters['Window Opacity'] || 0),
             frame     :Number(parameters['Window Frame'] || 0),
         },
@@ -494,22 +728,23 @@ function Game_OswScene() {
             bgimage   :String(parameters['Background Image Name'] || ''),
         },
         command:{
-            cancel        :String(parameters['Cancel Command Name'] || 'CANCEL'),
             x             :Number(parameters['Command Position X'] || 0),
             y             :Number(parameters['Command Position Y'] || 0),
-            width         :Number(parameters['Command Width'] || 0),
+            width         :Number(parameters['Command Width'] || 240),
+            maxCols       :Number(parameters['Command Max Cols'] || 1),
+            align         :String(parameters['Command Align'] || 'left'),
             number:{
                 original  :Number(parameters['Command Number In Original'] || 0),
                 map       :Number(parameters['Command Number In Map'] || 0),
             },
         },
         common:{
-            width         :Number(parameters['Common Width'] || 0),
-            height        :Number(parameters['Common Height'] || 0),
+            width         :Number(parameters['Common Width'] || 240),
+            height        :Number(parameters['Common Height'] || 240),
             content:{
-                space     :String(parameters['Actor Status Space'] || ''),
+                space     :String(parameters['Actor Status Space'] || '0,0,0,0'),
                 spaceIn   :Number(parameters['Actor Status Space In Text'] || 0),
-                widthRate :String(parameters['Actor Status Width Rate'] || ''),
+                widthRate :String(parameters['Actor Status Width Rate'] || '1,0,0'),
             },
             number:{
                 original  :Number(parameters['Common Number In Original'] || 0),
@@ -517,7 +752,37 @@ function Game_OswScene() {
                 battle    :Number(parameters['Common Number In Battle'] || 0),
             },
         },
+        select:{
+            width         :Number(parameters['Select Width'] || -1),
+            height        :Number(parameters['Select Height'] || 240),
+            maxCols       :Number(parameters['Select Max Cols'] || 1),
+            cursorHeight  :Number(parameters['Select Cursor Height'] || 1),
+            number:{
+                original  :Number(parameters['Select Number In Original'] || 0),
+                map       :Number(parameters['Select Number In Map'] || 0),
+            },
+            content:{
+                space     :String(parameters['Select Status Space'] || '0,0,0,0'),
+                spaceIn   :Number(parameters['Select Status Space In Text'] || 0),
+                widthRate :String(parameters['Select Status Width Rate'] || '1,0,0'),
+            },
+        },
     };
+
+    Game_OswBase.WINDOW_COMMON     = 0;
+    Game_OswBase.WINDOW_COMMAND    = 1;
+    Game_OswBase.WINDOW_SELECTABLE = 2;
+
+    Game_OswBase.SCENE_ORIGINAL = 0;
+    Game_OswBase.SCENE_MAP      = 1;
+    Game_OswBase.SCENE_BATTLE   = 2;
+
+    Game_OswBase.SELECT_TEXT_LIST  = 0;
+    Game_OswBase.SELECT_PARTY_LIST = 1;
+    
+    Game_OswBase.SELECT_PARTY_ALL = 0;
+    Game_OswBase.SELECT_PARTY_BATTLE = 1;
+    Game_OswBase.SELECT_PARTY_RESERVE = 2;
 
     var convertEscapeCharacters = function(text) {
         if (text == null) text = '';
@@ -532,15 +797,6 @@ function Game_OswScene() {
     var setArgNum = function(arg) {
         try {
             return Number(eval(setArgStr(arg)));
-        } catch (e) {
-            console.error(e);
-            return 0;
-        }
-    };
-
-    var setArgObj = function(arg) {
-        try {
-            return eval(setArgStr(arg));
         } catch (e) {
             console.error(e);
             return 0;
@@ -563,11 +819,15 @@ function Game_OswScene() {
                 break;
             case 'コモン設定':
             case 'SET_COMMON':
-                this.setOswWindowParam(args, 0);
+                this.setOswWindowParam(args, Game_OswBase.WINDOW_COMMON);
                 break;
             case 'コマンド設定':
             case 'SET_COMMAND':
-                this.setOswWindowParam(args, 1);
+                this.setOswWindowParam(args, Game_OswBase.WINDOW_COMMAND);
+                break;
+            case 'セレクト設定':
+            case 'SET_SELECT':
+                this.setOswWindowParam(args, Game_OswBase.WINDOW_SELECTABLE);
                 break;
         }
     };
@@ -577,25 +837,32 @@ function Game_OswScene() {
         switch (setArgStr(args[0]).toUpperCase()) {
             case 'オリジナル':
             case 'ORIGINAL':
-                var window = type ?
-                    $gameOswData.commandWindow(windowId) :
-                    $gameOswData.commonWindow(windowId);
+                var gameData = $gameOswData;
                 break;
             case 'マップ':
             case 'MAP':
-                var window = type ?
-                    $gameMap.commandWindow(windowId) :
-                    $gameMap.commonWindow(windowId);
+                var gameData = $gameMap;
                 break;
             case 'バトル':
             case 'BATTLE':
-                var window = type ?
-                    $gameParty.commandWindow(windowId) :
-                    $gameParty.commonWindow(windowId);
+                var gameData = $gameParty;
                 break;
             default:
                 return;
         }
+        switch (type) {
+            case Game_OswBase.WINDOW_COMMON:
+                var window = gameData.commonWindow(windowId);
+                break;
+            case Game_OswBase.WINDOW_COMMAND:
+                var window = gameData.commandWindow(windowId);
+                break;
+            case Game_OswBase.WINDOW_SELECTABLE:
+                var window = gameData.selectWindow(windowId);
+                break;
+            default:
+                return;
+        };
         this.setOswWindowArgs(window, 2, args, type);
     };
 
@@ -625,6 +892,18 @@ function Game_OswScene() {
                     var h = window.isCommand() ? null : setArgNum(args[i+2]);
                     window.setSize(w, h);
                     i += window.isCommand() ? 1 : 2;
+                    break;
+                case 'カーソル残す':
+                case 'LEAVE_CURSOR':
+                    switch (setArgStr(args[i+1]).toUpperCase()) {
+                        case 'ON':
+                            window.leaveSelect();
+                            break;
+                        case 'OFF':
+                            window.deselect();
+                            break;
+                    }
+                    i += 1;
                     break;
                 case '表示':
                 case 'SHOW':
@@ -659,6 +938,12 @@ function Game_OswScene() {
                     window.setMaxCols(value);
                     i += 1;
                     break;
+                case 'カーソル高さ':
+                case 'CURSOR_HEIGHT':
+                    var value = setArgNum(args[i+1]);
+                    window.setCursorHeight(value);
+                    i += 1;
+                    break;
                 case 'コマンド位置':
                 case 'COMMAND_ALIGN':
                     window.setTextAlign(args[i+1]);
@@ -670,7 +955,50 @@ function Game_OswScene() {
                     break;
                 case 'コマンド初期化':
                 case 'CLEAR_COMMAND':
-                    window.clearCommands();
+                    window.clearList();
+                    break;
+                case 'リスト設定':
+                case 'SET_LIST':
+                    switch (setArgStr(args[i+1]).toUpperCase()) {
+                        case 'テキスト':
+                        case 'TEXT':
+                            var list = (args[i+2] + '').split(',');
+                            window.setList(Game_OswBase.SELECT_TEXT_LIST,
+                                list);
+                            i += 2;
+                            break;
+                        case 'パーティー':
+                        case 'PARTY':
+                            switch ((args[i+2]).toUpperCase()) {
+                                case '全メンバー':
+                                case 'ALL_MEMBER':
+                                    var number = $gameParty.allMembers().length;
+                                    var type = Game_OswBase.SELECT_PARTY_ALL;
+                                    break;
+                                case 'バトルメンバー':
+                                case 'BATTLE_MEMBER':
+                                    var number = $gameParty.battleMembers().length;
+                                    var type = Game_OswBase.SELECT_PARTY_BATTLE;
+                                    break;
+                                case '控えメンバー':
+                                case 'RESERVE_MEMBER':
+                                    var number = $gameParty.reserveMembers().length;
+                                    var type = Game_OswBase.SELECT_PARTY_RESERVE;
+                                    break;
+                            }
+                            window.setList(Game_OswBase.SELECT_PARTY_LIST, 
+                                null, number, type);
+                            i += 2;
+                            break;
+                    }
+                    break;
+                case 'リスト初期化':
+                case 'CLEAR_LIST':
+                    window.clearList();
+                    break;
+                case 'リスト実行設定':
+                case 'SET_LIST_ACTION':
+                    i += this.setOswSelectArgs(window, i + 1, args);
                     break;
                 case 'テキスト':
                 case 'TEXT':
@@ -685,11 +1013,17 @@ function Game_OswScene() {
                     break;
                 case '内容':
                 case 'CONTENT':
-                    i += this.setOswCommonContentArgs(window, i + 1, args);
+                    i += this.setOswContentArgs(window, i + 1, args);
                     break;
                 case 'アクター':
                 case 'ACTOR':
                     var actor = $gameActors.actor(setArgNum(args[i+1]));
+                    window.setActor(actor);
+                    i += 1;
+                    break;
+                case 'パーティー':
+                case 'PARTY':
+                    var actor = $gameParty.members()[setArgNum(args[i+1])];
                     window.setActor(actor);
                     i += 1;
                     break;
@@ -745,25 +1079,51 @@ function Game_OswScene() {
         var name = setArgStr(args[i]);
         var symbol = setArgStr(args[i+1]);
         var enabled = args[i+2];
-        var match = /(.+)\((.+)\)/.exec(args[i+3]) || [];
-        switch ((match[1] + '').toUpperCase()) {
-            case 'シーン変更':
-            case 'CHANGE_SCENE':
-                var method = 'SceneManager.push.bind(SceneManager,' + match[2] + ')';
-                break;
-            case 'コモンイベント':
-            case 'COMMON_EVENT':
-                var method = '$gameTemp.reserveCommonEvent.bind($gameTemp,' + match[2] + ')';
-                break;
-            default:
-                var method = args[i+3];
-                break;
-        }
+        var method = this.setOswMethod(args[i+3]);
         window.addCommand(name, symbol, enabled, null, method);
         return 4;
     };
 
-    Game_Interpreter.prototype.setOswCommonContentArgs = function(window, index, args) {
+    Game_Interpreter.prototype.setOswMethod = function(text) {
+        var match = /(.+)\((.+)\)/.exec(text) || [];
+        switch ((match[1] + '').toUpperCase()) {
+            case 'ウィンドウアクティブ':
+            case 'WINDOW_ACTIVE':
+                var newwindow = match[2].split(',');
+                switch (newwindow[0].toUpperCase()) {
+                    case 'コマンド':
+                    case 'COMMAND':
+                        var windowType = Game_OswBase.WINDOW_COMMAND;
+                        break;
+                    case 'セレクト':
+                    case 'SELECT':
+                        var windowType = Game_OswBase.WINDOW_SELECTABLE;
+                        break;
+                }
+                var windowId = Number(newwindow[1]);
+                var hide = Boolean(eval(newwindow[2]));
+                var deselect = Boolean(eval(newwindow[3]));
+                var varId = Number(newwindow[4]) || 0;
+                var action = windowType + ',' + windowId + ',' + hide + ',' + deselect+ ',' + varId;
+                return 'this.changeActivateWindow.bind(this, window,' + action + ')';
+            case 'シーン変更':
+            case 'CHANGE_SCENE':
+                return 'SceneManager.push.bind(SceneManager,' + match[2] + ')';
+            case 'コモンイベント':
+            case 'COMMON_EVENT':
+                return '$gameTemp.reserveCommonEvent.bind($gameTemp,' + match[2] + ')';
+            default:
+                switch ((text + '').toUpperCase()) {
+                    case 'シーン終了':
+                    case 'END_SCENE':
+                        return 'this.popScene.bind(this)';
+                    default:
+                        return text;
+                }
+        }
+    };
+
+    Game_Interpreter.prototype.setOswContentArgs = function(window, index, args) {
         var count = 0;
         for (var i = index; i < args.length; i++) {
             var arg = (args[i] + '').toUpperCase();
@@ -782,7 +1142,7 @@ function Game_OswScene() {
                     break;
                 case '並列間隔':
                 case 'PARALLEL_SPACE':
-                    window.setContentInSpace(setArgNum(args[i+1]));
+                    window.setContentSpaceIn(setArgNum(args[i+1]));
                     i += 1;
                     count += 2;
                     break;
@@ -797,6 +1157,21 @@ function Game_OswScene() {
             }
         }
         return count;
+    };
+
+    Game_Interpreter.prototype.setOswSelectArgs = function(window, i, args) {
+        var method = this.setOswMethod(args[i+1]);
+        switch (args[i].toUpperCase()) {
+            case '決定':
+            case 'OK':
+                window.setOkAction(method);
+                return 3;
+            case 'キャンセル':
+            case 'CANCEL':
+                window.setCancelAction(method);
+                return 3;
+        }
+        return;
     };
 
     //=============================================================================
@@ -831,41 +1206,61 @@ function Game_OswScene() {
     // ウィンドウ設定用ベースデータクラス
     //=============================================================================
 
-    Game_OswBase.WINDOW_COMMON = 0;
-    Game_OswBase.WINDOW_COMMAND = 1;
-
     Game_OswBase.prototype.initialize = function(scene) {
+        var basic = FTKR.OSW.basic;
         this._scene = scene;
         this._x = 0;
         this._y = 0;
         this._width = 0;
         this._height = 0;
+        this._maxCols = 1;
+        this._index = 0;
+        this._actor = null;
+        this._deselect = false;
         this._show = false;
+        this._active = false;
+        this._deactivate = false;
         this._requestRefresh = false;
-        var basic = FTKR.OSW.basic;
+        this._creative = false;
         this._opacity = basic.opacity;
         this._padding = basic.padding;
         this._fontSize = basic.fontSize;
         this._lineHeight = basic.lineHeight;
         this._frame = basic.frame;
-        this._creative = false;
+        this._content = {
+            text1     : '',
+            text2     : '',
+            text3     : '',
+            space     : '0,0,0,0',
+            spaceIn   : 0,
+            widthRate : '1,1,1',
+        }
     };
 
     Game_OswBase.prototype.isOriginal = function() {
-        return this._scene === 0;
+        return this._scene === Game_OswBase.SCENE_ORIGINAL;
     };
 
     Game_OswBase.prototype.isMap = function() {
-        return this._scene === 1;
+        return this._scene === Game_OswBase.SCENE_MAP;
     };
 
     Game_OswBase.prototype.isBattle = function() {
-        return this._scene === 2;
+        return this._scene === Game_OswBase.SCENE_BATTLE;
+    };
+
+    Game_OswBase.prototype.requestRefresh = function() {
+        return this._requestRefresh;
     };
 
     Game_OswBase.prototype.setPosition = function(x, y) {
         this._x = x === -1 ? Graphics.boxWidth - this._width : x;
         this._y = y === -1 ? Graphics.boxHeight - this._height : y;
+    };
+
+    Game_OswBase.prototype.setSize = function(width, height) {
+        this.setWidth(width);
+        this.setHeight(height);
     };
 
     Game_OswBase.prototype.setWidth = function(width) {
@@ -876,6 +1271,14 @@ function Game_OswScene() {
         this._height = height=== -1 ? Graphics.boxHeight : height;
     };
 
+    Game_OswBase.prototype.deselect = function() {
+        this._deselect = true;
+    };
+
+    Game_OswBase.prototype.leaveSelect = function() {
+        this._deselect = false;
+    };
+
     Game_OswBase.prototype.show = function() {
         this._show = true;
     };
@@ -884,8 +1287,20 @@ function Game_OswScene() {
         this._show = false;
     };
 
-    Game_OswBase.prototype.requestRefresh = function() {
-        return this._requestRefresh;
+    Game_OswBase.prototype.setActor = function(actor) {
+        this._actor = actor;
+    };
+
+    Game_OswBase.prototype.setMaxCols = function(value) {
+        this._maxCols = value;
+    };
+
+    Game_OswBase.prototype.activate = function() {
+        this._active = true;
+    };
+
+    Game_OswBase.prototype.deactivate = function() {
+        this._active = false;
     };
 
     Game_OswBase.prototype.setRequestRefresh = function() {
@@ -924,6 +1339,102 @@ function Game_OswScene() {
         this._creative = true;
     };
 
+    Game_OswBase.prototype.content = function() {
+        return this._content;
+    };
+
+    Game_OswBase.prototype.setContent = function(status, space, spaceIn, widthRate) {
+        this.setContentStatus(status);
+        this.setContentSpace(space);
+        this.setContentSpaceIn(spaceIn);
+        this.setContentWidthRate(widthRate);
+    };
+
+    Game_OswBase.prototype.setContentStatus = function(status) {
+        var texts = status.split(';');
+        this._content.text1 = texts[0] || '';
+        this._content.text2 = texts[1] || '';
+        this._content.text3 = texts[2] || '';
+    };
+
+    Game_OswBase.prototype.setContentSpace = function(space) {
+        this._content.space = space;
+    };
+
+    Game_OswBase.prototype.setContentSpaceIn = function(spaceIn) {
+        this._content.spaceIn = spaceIn;
+    };
+
+    Game_OswBase.prototype.setContentWidthRate = function(widthRate) {
+        this._content.widthRate = widthRate;
+    };
+
+    //=============================================================================
+    // Game_OswSelectable
+    // セレクトウィンドウ設定用データクラス
+    //=============================================================================
+
+    Game_OswSelectable.prototype = Object.create(Game_OswBase.prototype);
+    Game_OswSelectable.prototype.constructor = Game_OswSelectable;
+
+    Game_OswSelectable.prototype.initialize = function(scene) {
+        Game_OswBase.prototype.initialize.call(this, scene);
+        var select = FTKR.OSW.select;
+        var content = select.content;
+        this._drawType = 0;
+        this.clearList();
+        this.setOkAction(false, false, null, null, null);
+        this.setCancelAction(false, false, null, null);
+        this.setMaxCols(select.maxCols);
+        this.setCursorHeight(select.cursorHeight);
+        this.setPosition(select.x, select.y);
+        this.setSize(select.width, select.height);
+        this.setContent('', content.space, content.spaceIn, content.widthRate);
+    };
+
+    Game_OswSelectable.prototype.itemNum = function() {
+        return Math.max(this._list.length, this._number);
+    };
+
+    Game_OswSelectable.prototype.clearList = function() {
+        this._list = [];
+        this._number = 0;
+        this._listType = null;
+    };
+
+    Game_OswSelectable.prototype.setList = function(drawType, list, number, listType) {
+        this._drawType = drawType;
+        this._list = list || [];
+        this._number = number || this._list.length;
+        this._listType = listType;
+    };
+
+    Game_OswSelectable.prototype.setNumber = function(value) {
+        this._number = value;
+    };
+
+    Game_OswSelectable.prototype.isCommand = function() {
+        return false;
+    }
+
+    Game_OswSelectable.prototype.setCursorHeight = function(value) {
+        this._cursorHeight = value;
+    };
+
+    Game_OswSelectable.prototype.setOkAction = function(method, varId) {
+        this._ok = {
+            method :method,
+            varId  :varId,
+        }
+    };
+
+    Game_OswSelectable.prototype.setCancelAction = function(method, varId) {
+        this._cancel = {
+            method :method,
+            varId  :varId,
+        }
+    };
+
     //=============================================================================
     // Game_OswCommand
     // コマンドウィンドウ設定用データクラス
@@ -934,20 +1445,16 @@ function Game_OswScene() {
 
     Game_OswCommand.prototype.initialize = function(scene) {
         Game_OswBase.prototype.initialize.call(this, scene);
-        this._list = [];
-        this._index = 0;
-        this._maxCols = 1;
-        this._align = 'left';
-        this._active = false;
-        this._deactivate = false;
         var cmd = FTKR.OSW.command;
+        this.clearList();
+        this.setTextAlign(cmd.align);
+        this.setMaxCols(cmd.maxCols);
         this.setPosition(cmd.x, cmd.y);
-        this.setWidth(cmd.width);
-        this.setHeight(this.windowHeight());
+        this.setSize(cmd.width);
     };
 
     Game_OswCommand.prototype.commandNum = function() {
-        return this._list.length + (!this._scene ? 1 : 0);
+        return this._list.length;
     };
 
     Game_OswCommand.prototype.windowHeight = function() {
@@ -955,15 +1462,7 @@ function Game_OswScene() {
         return this._padding * 2 + this._lineHeight * line;
     };
 
-    Game_OswCommand.prototype.activate = function() {
-        this._active = true;
-    };
-
-    Game_OswCommand.prototype.deactivate = function() {
-        this._active = false;
-    };
-    
-    Game_OswCommand.prototype.clearCommands = function() {
+    Game_OswCommand.prototype.clearList = function() {
         this._list = [];
     };
 
@@ -972,26 +1471,12 @@ function Game_OswScene() {
     }
 
     Game_OswCommand.prototype.setSize = function(width) {
-        this.setWidth(width);
+        if (width) this.setWidth(width);
         this.setHeight(this.windowHeight());
-    };
-
-    Game_OswCommand.prototype.setMaxCols = function(value) {
-        this._maxCols = value;
     };
 
     Game_OswCommand.prototype.setTextAlign = function(align) {
         this._align = align;
-    };
-
-    Game_OswCommand.prototype.setCommand = function(list, name, symbol, enabled, ext, method) {
-        this._list[line] = {
-            name    :name,
-            symbol  :symbol,
-            enabled :enabled,
-            ext     :ext,
-            method  :method,
-        };
     };
 
     Game_OswCommand.prototype.addCommand = function(name, symbol, enabled, ext, method) {
@@ -1014,27 +1499,16 @@ function Game_OswScene() {
 
     Game_OswCommon.prototype.initialize = function(scene) {
         Game_OswBase.prototype.initialize.call(this, scene);
-        this._actor = null;
         var common = FTKR.OSW.common;
+        var content = common.content;
+        this.clearTexts();
         this.setSize(common.width, common.height);
-        this._texts = [];
-        this._content = {
-            text1     : '',
-            text2     : '',
-            text3     : '',
-            space     : common.content.space,
-            spaceIn   : common.content.spaceIn,
-            widthRate : common.content.widthRate,
-        }
+        this.setContent('', content.space, content.spaceIn, content.widthRate);
     };
 
     Game_OswCommon.prototype.isCommand = function() {
         return false;
     }
-
-    Game_OswCommon.prototype.content = function() {
-        return this._content;
-    };
 
     Game_OswCommon.prototype.texts = function() {
         return this._texts;
@@ -1048,34 +1522,6 @@ function Game_OswScene() {
         this._texts[line] = text;
     };
 
-    Game_OswCommon.prototype.setSize = function(width, height) {
-        this.setWidth(width);
-        this.setHeight(height);
-    };
-
-    Game_OswCommon.prototype.setActor = function(actor) {
-        this._actor = actor;
-    };
-
-    Game_OswCommon.prototype.setContentStatus = function(status) {
-        var texts = status.split(';');
-        this._content.text1 = texts[0] || '';
-        this._content.text2 = texts[1] || '';
-        this._content.text3 = texts[2] || '';
-    };
-
-    Game_OswCommon.prototype.setContentSpace = function(space) {
-        this._content.space = space;
-    };
-
-    Game_OswCommon.prototype.setContentSpaceIn = function(spaceIn) {
-        this._content.spaceIn = spaceIn;
-    };
-
-    Game_OswCommon.prototype.setContentWidthRate = function(widthRate) {
-        this._content.widthRate = widthRate;
-    };
-
     //=============================================================================
     // Game_Map
     // マップデータクラスにマップシーン用のウィンドウ設定を追加
@@ -1084,28 +1530,39 @@ function Game_OswScene() {
     var _OSW_Game_Map_initialize = Game_Map.prototype.initialize;
     Game_Map.prototype.initialize = function() {
         _OSW_Game_Map_initialize.call(this);
+        this._oswIndex = -1;
         this._oswList = [];
         this.initCommandWindows();
         this.initCommonWindows();
+        this.initSelectWindows();
     };
 
     Game_Map.prototype.addOswList = function(type, id) {
+        if (!this._oswList) this._oswList = [];
         if (type === Game_OswBase.WINDOW_COMMAND && id >= this.commandWindowNumber()) return;
         if (type === Game_OswBase.WINDOW_COMMON && id >= this.commonWindowNumber()) return;
+        if (type === Game_OswBase.WINDOW_SELECTABLE && id >= this.selectWindowNumber()) return;
         this._oswList.push({type:type, id:id, creative:false});
     };
 
     Game_Map.prototype.initCommandWindows = function() {
         this._oswCommandWindows = [];
         for (var i = 0; i < this.commandWindowNumber(); i++) {
-            this._oswCommandWindows[i] = new Game_OswCommand(1);
+            this._oswCommandWindows[i] = new Game_OswCommand(Game_OswBase.SCENE_MAP);
         }
     };
 
     Game_Map.prototype.initCommonWindows = function() {
         this._oswCommonWindows = [];
         for (var i = 0; i < this.commonWindowNumber(); i++) {
-            this._oswCommonWindows[i] = new Game_OswCommon(1);
+            this._oswCommonWindows[i] = new Game_OswCommon(Game_OswBase.SCENE_MAP);
+        }
+    };
+
+    Game_Map.prototype.initSelectWindows = function() {
+        this._oswSelectWindows = [];
+        for (var i = 0; i < this.selectWindowNumber(); i++) {
+            this._oswSelectWindows[i] = new Game_OswSelectable(Game_OswBase.SCENE_MAP);
         }
     };
 
@@ -1117,8 +1574,20 @@ function Game_OswScene() {
         return this._oswCommonWindows[windowId];
     };
 
+    Game_Map.prototype.commonWindow = function(windowId) {
+        return this._oswCommonWindows[windowId];
+    };
+
+    Game_Map.prototype.selectWindow = function(windowId) {
+        return this._oswSelectWindows[windowId];
+    };
+
     Game_Map.prototype.commandWindowNumber = function() {
         return FTKR.OSW.command.number.map;
+    };
+
+    Game_Map.prototype.selectWindowNumber = function() {
+        return FTKR.OSW.select.number.map;
     };
 
     Game_Map.prototype.commonWindowNumber = function() {
@@ -1130,17 +1599,28 @@ function Game_OswScene() {
     // パーティーデータクラスに、バトルシーン用のウィンドウ設定を追加
     //=============================================================================
 
+    Game_Party.prototype.reserveMembers = function() {
+        return this.allMembers().slice(this.battleMembers().length);
+    };
+
     var _OSW_Game_Party_initialize = Game_Party.prototype.initialize;
     Game_Party.prototype.initialize = function() {
         _OSW_Game_Party_initialize.call(this);
+        this._oswList = [];
         this.initCommonWindows();
+    };
+
+    Game_Party.prototype.addOswList = function(id) {
+        if (!this._oswList) this._oswList = [];
+        this._oswList.push({type:Game_OswBase.WINDOW_COMMON, id:id, creative:false});
     };
 
     Game_Party.prototype.initCommonWindows = function() {
         this._oswCommonWindows = [];
         for (var i = 0; i < this.commonWindowNumber(); i++) {
-            this._oswCommonWindows[i] = new Game_OswCommon(2);
+            this._oswCommonWindows[i] = new Game_OswCommon(Game_OswBase.SCENE_BATTLE);
             this._oswCommonWindows[i].createWindow();
+            this.addOswList(i);
         }
     };
 
@@ -1158,28 +1638,41 @@ function Game_OswScene() {
     //=============================================================================
 
     Game_OswScene.prototype.initialize = function() {
+        this._interpreter = new Game_Interpreter();
+        this._oswIndex = -1;
+        this._active = false;
         this._oswList = [];
         this.initCommandWindows();
         this.initCommonWindows();
+        this.initSelectWindows();
     };
 
     Game_OswScene.prototype.addOswList = function(type, id) {
+        if (!this._oswList) this._oswList = [];
         if (type === Game_OswBase.WINDOW_COMMAND && id >= this.commandWindowNumber()) return;
         if (type === Game_OswBase.WINDOW_COMMON && id >= this.commonWindowNumber()) return;
+        if (type === Game_OswBase.WINDOW_SELECTABLE && id >= this.selectWindowNumber()) return;
         this._oswList.push({type:type, id:id, creative:false});
     };
 
     Game_OswScene.prototype.initCommandWindows = function() {
         this._oswCommandWindows = [];
         for (var i = 0; i < this.commandWindowNumber(); i++) {
-            this._oswCommandWindows[i] = new Game_OswCommand(0);
+            this._oswCommandWindows[i] = new Game_OswCommand(Game_OswBase.SCENE_ORIGINAL);
         }
     };
 
     Game_OswScene.prototype.initCommonWindows = function() {
         this._oswCommonWindows = [];
         for (var i = 0; i < this.commonWindowNumber(); i++) {
-            this._oswCommonWindows[i] = new Game_OswCommon(0);
+            this._oswCommonWindows[i] = new Game_OswCommon(Game_OswBase.SCENE_ORIGINAL);
+        }
+    };
+
+    Game_OswScene.prototype.initSelectWindows = function() {
+        this._oswSelectWindows = [];
+        for (var i = 0; i < this.selectWindowNumber(); i++) {
+            this._oswSelectWindows[i] = new Game_OswSelectable(Game_OswBase.SCENE_ORIGINAL);
         }
     };
 
@@ -1191,12 +1684,60 @@ function Game_OswScene() {
         return this._oswCommonWindows[windowId];
     };
 
+    Game_OswScene.prototype.selectWindow = function(windowId) {
+        return this._oswSelectWindows[windowId];
+    };
+
     Game_OswScene.prototype.commandWindowNumber = function() {
         return FTKR.OSW.command.number.original;
     };
 
     Game_OswScene.prototype.commonWindowNumber = function() {
         return FTKR.OSW.common.number.original;
+    };
+
+    Game_OswScene.prototype.selectWindowNumber = function() {
+        return FTKR.OSW.select.number.original;
+    };
+
+    Game_OswScene.prototype.update = function(sceneActive) {
+        if (sceneActive) {
+            this._active = true;
+            this.updateInterpreter();
+        } else {
+            this._active = false;
+        }
+    };
+
+    Game_OswScene.prototype.updateInterpreter = function() {
+        for (;;) {
+            this._interpreter.update();
+            if (this._interpreter.isRunning()) {
+                return;
+            }
+            if (!this.setupStartingEvent()) {
+                return;
+            }
+        }
+    };
+
+    Game_OswScene.prototype.setupStartingEvent = function() {
+        if (this._interpreter.setupReservedCommonEvent()) {
+            return true;
+        }
+        if (this.setupTestEvent()) {
+            return true;
+        }
+        return false;
+    };
+
+    Game_OswScene.prototype.setupTestEvent = function() {
+        if ($testEvent) {
+            this._interpreter.setup($testEvent, 0);
+            $testEvent = null;
+            return true;
+        }
+        return false;
     };
 
     //=============================================================================
@@ -1223,18 +1764,29 @@ function Game_OswScene() {
     Scene_Base.prototype.createAllOswWindows = function(gameData) {
         this._oswCommandWindows = [];
         this._oswCommonWindows = [];
+        this._oswSelectWindows = [];
         gameData._oswList.forEach( function(window) {
             this.createOswWindow(gameData, window);
         },this);
     };
 
     Scene_Base.prototype.createOswWindow = function(gameData, window) {
-        if (window.type === Game_OswBase.WINDOW_COMMON) {
-            if (this._oswCommonWindows[window.id]) return;
-            this.createCommonWindow(window.id, gameData.commonWindow(window.id));
-        } else if (window.type === Game_OswBase.WINDOW_COMMAND) {
-            if (this._oswCommandWindows[window.id]) return;
-            this.createCommandWindow(window.id, gameData.commandWindow(window.id));
+        switch (window.type) {
+            case Game_OswBase.WINDOW_COMMON:
+                if (this._oswCommonWindows[window.id]) return;
+                var gameWindow = gameData.commonWindow(window.id);
+                this.createCommonWindow(window.id, gameWindow);
+                break;
+            case Game_OswBase.WINDOW_COMMAND:
+                if (this._oswCommandWindows[window.id]) return;
+                var gameWindow = gameData.commandWindow(window.id);
+                this.createCommandWindow(window.id, gameWindow);
+                break;
+            case Game_OswBase.WINDOW_SELECTABLE:
+                if (this._oswSelectWindows[window.id]) return;
+                var gameWindow = gameData.selectWindow(window.id);
+                this.createSelectWindow(window.id, gameWindow);
+                break;
         }
     };
 
@@ -1249,35 +1801,19 @@ function Game_OswScene() {
     //------------------------------------------------------------------------
     // コマンドウィンドウの作成
     //------------------------------------------------------------------------
-    Scene_Base.prototype.createAllCommandWindows = function(gameData) {
-        this._oswCommandWindows = [];
-        var number = gameData.commandWindowNumber();
-        for (var i = 0; i < number; i++) {
-            this.createCommandWindow(i, gameData.commandWindow(i));
-        }
-    };
-  
-    Scene_Base.prototype.createCommandWindow = function(windowId, window) {
-        this._oswCommandWindows[windowId] = new Window_OswCommand(window);
-        window._list.forEach(function(cmd) {
+    Scene_Base.prototype.createCommandWindow = function(windowId, gameWindow) {
+        this._oswCommandWindows[windowId] = new Window_OswCommand(gameWindow);
+        var window = this._oswCommandWindows[windowId];
+        gameWindow._list.forEach(function(cmd) {
             var method = eval(cmd.method);
-            this._oswCommandWindows[windowId].setHandler(cmd.symbol, method);
+            window.setHandler(cmd.symbol, method);
         },this);
-        if(window.isOriginal()) this._oswCommandWindows[windowId].setHandler('cancel',  this.popScene.bind(this));
-        this.addOswWindow(this._oswCommandWindows[windowId]);
+        this.addOswWindow(window);
     };
 
     //------------------------------------------------------------------------
     // コモンウィンドウの作成
     //------------------------------------------------------------------------
-    Scene_Base.prototype.createAllCommonWindows = function(gameData) {
-        this._oswCommonWindows = [];
-        var number = gameData.commonWindowNumber();
-        for (var i = 0; i < number; i++) {
-            this.createCommonWindow(i, gameData.commonWindow(i));
-        }
-    };
-
     Scene_Base.prototype.createCommonWindow = function(windowId, window) {
         this._oswCommonWindows[windowId] = new Window_OswCommon(window);
         if (window.isBattle()) {
@@ -1287,6 +1823,37 @@ function Game_OswScene() {
         }
     };
 
+    //------------------------------------------------------------------------
+    // セレクトウィンドウの作成
+    //------------------------------------------------------------------------
+    Scene_Base.prototype.createSelectWindow = function(windowId, gameWindow) {
+        this._oswSelectWindows[windowId] = new Window_OswSelect(gameWindow);
+        var window = this._oswSelectWindows[windowId];
+        window.setHandler('ok', eval(gameWindow._ok.method));
+        window.setHandler('cancel', eval(gameWindow._cancel.method));
+        this.addOswWindow(window);
+    };
+
+    Scene_Base.prototype.changeActivateWindow = function(window, windowType, windowId, hide, deselect, varId) {
+        if (hide) window.hide();
+        if (deselect) window.deselect();
+        window._window.deactivate();
+        if (varId) $gameVariables.setValue(varId, window.index());
+        switch (windowType) {
+            case Game_OswBase.WINDOW_COMMAND:
+                var newWindow = this._oswCommandWindows[windowId];
+                break;
+            case Game_OswBase.WINDOW_SELECTABLE:
+                var newWindow = this._oswSelectWindows[windowId];
+                break;
+        }
+        if (newWindow) {
+            newWindow._window.activate();
+            newWindow.show();
+            newWindow.select(newWindow.index());
+        }
+    };
+    
     //=============================================================================
     // Scene_Map
     // マップシーンに追加
@@ -1317,7 +1884,7 @@ function Game_OswScene() {
 
     var _OSW_Scene_Battle_createStatusWindow = Scene_Battle.prototype.createStatusWindow;
     Scene_Battle.prototype.createStatusWindow = function() {
-        this.createAllCommonWindows($gameParty);
+        this.createAllOswWindows($gameParty);
         _OSW_Scene_Battle_createStatusWindow.call(this);
     };
 
@@ -1357,7 +1924,102 @@ function Game_OswScene() {
 
     Scene_OSW.prototype.update = function() {
         Scene_MenuBase.prototype.update.call(this);
+        var active = this.isActive();
+        $gameOswData.update(active);
         this.updateCreateOswWindows($gameOswData);
+    };
+
+    //=============================================================================
+    // Window_Base
+    // 共通処理を追加
+    //=============================================================================
+
+    Window_Base.prototype.updateOswShow = function() {
+        if (this._show !== this._window._show) {
+            this._show = this._window._show;
+            if (this._show) {
+                this.updateOswPlacement();
+                this.show();
+                this.refresh();
+            } else {
+                this.deactivate();
+                this.hide();
+            }
+        }
+    };
+
+    Window_Base.prototype.updateOswActive = function() {
+        if (this.active !== this._window._active) {
+            if (this._window._active) {
+                this.activate();
+                var index = Math.max(this._window._index, 0);
+                this.select(index);
+            } else {
+                this.deactivate();
+            }
+        }
+    };
+
+    Window_Base.prototype.updateOswSelect = function() {
+        if (!this.active && this._window._deselect) {
+            this.deselect();
+        }
+    };
+
+    Window_Base.prototype.updateOswRefresh = function() {
+        if (this._window.requestRefresh()) {
+            this.updateOswPlacement();
+            this.refresh();
+            this._window.clearRequestRefresh();
+        }
+    };
+
+    Window_Base.prototype.updateOswPlacement = function() {
+        this.move(
+            this._window._x,
+            this._window._y,
+            this._window._width,
+            this._window._height
+        );
+    };
+
+    Window_Base.prototype.updateOswIndex = function() {
+        if (!this.active) return;
+        if ($gameOswData._active && $gameOswData._oswIndex !== this.index()) {
+            $gameOswData._oswIndex = this.index();
+        } else if (!$gameOswData._active && $gameMap._oswIndex !== this.index()) {
+            $gameMap._oswIndex = this.index();
+        }
+    };
+
+    Window_Base.prototype.convertTextWidth = function(text) {
+        var tw = 0;
+        var conv = this.convertEscapeCharacters(text);
+        if (/i\[(\d+)\]/i.test(conv)) {
+            conv = (conv.toUpperCase()).replace(/i\[(\d+)\]/ig, '');
+            tw += Window_Base._iconWidth;
+        }
+        if (/c\[(\d+)\]/i.test(conv)) {
+            conv = (conv.toUpperCase()).replace(/c\[(\d+)\]/ig, '');
+        }
+        if (conv.match(/lw\[(\d+),?([^\]]+)\]/i)) {
+            tw += RegExp.$1;
+            conv = (conv.toUpperCase()).replace(/lw\[(\d+),?([^\]]+)\]/ig, '');
+        }
+        tw += this.textWidth(conv);
+        return tw;
+    };
+
+    Window_Base.prototype.convertAlign = function(align) {
+        switch (align) {
+            case 'left':
+                return 0;
+            case 'center':
+                return 1;
+            case 'right':
+                return 2;
+        }
+        return 0;
     };
 
     //=============================================================================
@@ -1420,7 +2082,6 @@ function Game_OswScene() {
             var enabled = eval(this.convertEscapeCharacters(cmd.enabled));
             this.addCommand(cmd.name, cmd.symbol, enabled);
         },this);
-        if(this._window.isOriginal()) this.addCommand(FTKR.OSW.command.cancel, 'cancel', true);
     };
 
     Window_OswCommand.prototype.drawItem = function(index) {
@@ -1437,85 +2098,16 @@ function Game_OswScene() {
         }
     };
 
-    Window_Base.prototype.convertTextWidth = function(text) {
-        var tw = 0;
-        var conv = this.convertEscapeCharacters(text);
-        if (/i\[(\d+)\]/i.test(conv)) {
-            conv = (conv.toUpperCase()).replace(/i\[(\d+)\]/ig, '');
-            tw += Window_Base._iconWidth;
-        }
-        if (/c\[(\d+)\]/i.test(conv)) {
-            conv = (conv.toUpperCase()).replace(/c\[(\d+)\]/ig, '');
-        }
-        if (conv.match(/lw\[(\d+),?([^\]]+)\]/i)) {
-            tw += RegExp.$1;
-            conv = (conv.toUpperCase()).replace(/lw\[(\d+),?([^\]]+)\]/ig, '');
-        }
-        tw += this.textWidth(conv);
-        return tw;
-    };
-
-    Window_Base.prototype.convertAlign = function(align) {
-        switch (align) {
-            case 'left':
-                return 0;
-            case 'center':
-                return 1;
-            case 'right':
-                return 2;
-        }
-        return 0;
-    };
-
     Window_OswCommand.prototype.update = function() {
         if (this._window._index !== this.index()) {
             this._window._index = this.index();
         }
-        this.updateShow();
-        this.updateActive();
-        this.updateRefresh();
+        this.updateOswIndex();
+        this.updateOswShow();
+        this.updateOswActive();
+        this.updateOswSelect();
+        this.updateOswRefresh();
         Window_Command.prototype.update.call(this);
-    };
-
-    Window_OswCommand.prototype.updateShow = function() {
-        if (this._show !== this._window._show) {
-            this._show = this._window._show;
-            if (this._show) {
-                this.updatePlacement();
-                this.show();
-                this.refresh();
-            } else {
-                this.hide();
-            }
-        }
-    };
-
-    Window_OswCommand.prototype.updateActive = function() {
-        if (this.active !== this._window._active) {
-            if (this._window._active) {
-                this.activate();
-                this.select(this._window._index);
-            } else {
-                this.deactivate();
-            }
-        }
-    };
-
-    Window_OswCommand.prototype.updateRefresh = function() {
-        if (this._window.requestRefresh()) {
-            this.updatePlacement();
-            this.refresh();
-            this._window.clearRequestRefresh();
-        }
-    };
-
-    Window_OswCommand.prototype.updatePlacement = function() {
-        this.move(
-            this._window._x,
-            this._window._y,
-            this._window._width,
-            this._window._height
-        );
     };
 
     //=============================================================================
@@ -1556,31 +2148,14 @@ function Game_OswScene() {
         return this._window._opacity;
     };
 
+    Window_OswCommon.prototype._refreshFrame = function() {
+        if (this._window._frame) Window.prototype._refreshFrame.call(this);
+    };
+
     Window_OswCommon.prototype.update = function() {
         Window_Base.prototype.update.call(this);
-        this.updateShow();
-        this.updateRefresh();
-    };
-
-    Window_OswCommon.prototype.updateShow = function() {
-        if (this._show !== this._window._show) {
-            this._show = this._window._show;
-            if (this._show) {
-                this.updatePlacement();
-                this.show();
-                this.refresh();
-            } else {
-                this.hide();
-            }
-        }
-    };
-
-    Window_OswCommon.prototype.updateRefresh = function() {
-        if (this._window.requestRefresh()) {
-            this.updatePlacement();
-            this.refresh();
-            this._window.clearRequestRefresh();
-        }
+        this.updateOswShow();
+        this.updateOswRefresh();
     };
 
     Window_OswCommon.prototype.refresh = function() {
@@ -1604,17 +2179,107 @@ function Game_OswScene() {
         }
     };
 
-    Window_OswCommon.prototype.updatePlacement = function() {
-        this.move(
-            this._window._x,
-            this._window._y,
-            this._window._width,
-            this._window._height
-        );
+    //=============================================================================
+    // Window_OswSelect
+    // セレクトウィンドウクラス
+    //=============================================================================
+
+    function Window_OswSelect() {
+        this.initialize.apply(this, arguments);
+    }
+
+    Window_OswSelect.prototype = Object.create(Window_Selectable.prototype);
+    Window_OswSelect.prototype.constructor = Window_OswSelect;
+
+    Window_OswSelect.prototype.initialize = function(window) {
+        this._window = window;
+        this._actor = window._actor || null;
+        Window_Selectable.prototype.initialize.call(this, window._x, window._y, window._width, window._height);
+        this._show = false;
+        this.hide();
+        this.deactivate();
+        this.refresh();
     };
 
-    Window_OswCommon.prototype._refreshFrame = function() {
+    Window_OswSelect.prototype.maxCols = function() {
+        return this._window._maxCols;
+    };
+
+    Window_OswSelect.prototype.standardFontSize = function() {
+        return this._window._fontSize;
+    };
+
+    Window_OswSelect.prototype.standardPadding = function() {
+        return this._window._padding;
+    };
+
+    Window_OswSelect.prototype.lineHeight = function() {
+        return this._window._lineHeight;
+    };
+
+    Window_OswSelect.prototype.itemHeight = function() {
+        return this.lineHeight() * this._window._cursorHeight;
+    };
+
+    Window_OswSelect.prototype.standardBackOpacity = function() {
+        return this._window._opacity;
+    };
+
+    Window_OswSelect.prototype._refreshFrame = function() {
         if (this._window._frame) Window.prototype._refreshFrame.call(this);
+    };
+
+    Window_OswSelect.prototype.maxItems = function() {
+        switch (this._window._drawType) {
+            case Game_OswBase.SELECT_TEXT_LIST:
+                return this._window._list.length;
+            case Game_OswBase.SELECT_PARTY_LIST:
+                switch (this._window._listType) {
+                    case Game_OswBase.SELECT_PARTY_ALL:
+                        return $gameParty.allMembers().length;
+                    case Game_OswBase.SELECT_PARTY_BATTLE:
+                        return $gameParty.maxBattleMembers();
+                    case Game_OswBase.SELECT_PARTY_RESERVE:
+                        return $gameParty.reserveMembers().length;
+                }
+        }
+        return this._window.itemNum();
+    };
+
+    Window_OswSelect.prototype.drawItem = function(index) {
+        var lss = this._window.content();
+        var rect = this.itemRect(index);
+        if (this._window._drawType) {
+            var actor = this.setActor(index);
+            if (!actor) return;
+            this.drawCssActorStatus(index, actor, rect.x, rect.y, rect.width, rect.height, lss);
+        } else {
+            this.drawText(this._window._list[index], rect.x, rect.y, rect.width);
+        }
+    };
+
+    Window_OswSelect.prototype.setActor = function(index) {
+        switch (this._window._listType) {
+            case Game_OswBase.SELECT_PARTY_ALL:
+                return $gameParty.allMembers()[index];
+            case Game_OswBase.SELECT_PARTY_BATTLE:
+                return $gameParty.battleMembers()[index];
+            case Game_OswBase.SELECT_PARTY_RESERVE:
+                return $gameParty.reserveMembers()[index];
+        }
+        return null;
+    };
+
+    Window_OswSelect.prototype.update = function() {
+        if (this._window._index !== this.index()) {
+            this._window._index = this.index();
+        }
+        this.updateOswIndex();
+        this.updateOswShow();
+        this.updateOswActive();
+        this.updateOswSelect();
+        this.updateOswRefresh();
+        Window_Selectable.prototype.update.call(this);
     };
 
 }());//EOF

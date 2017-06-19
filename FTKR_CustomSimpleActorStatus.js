@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2017/06/18
-// バージョン : v2.0.0
+// 最終更新日 : 2017/06/19
+// バージョン : v2.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.0.0 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v2.1.0 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -1098,11 +1098,15 @@ FTKR.CSS = FTKR.CSS || {};
  * 
  * 
  *-----------------------------------------------------------------------------
- * カスタム画像を表示する [ image ]
+ * カスタム画像を表示する [ image / image(x) ]
  *-----------------------------------------------------------------------------
- * プラグインパラメータ<Actor Status Text*>にて、'image'を入力した場合
- * 以下のタグをアクターのメモ欄に追記することで、指定した画像を表示する
- * ことができます。
+ * プラグインパラメータ<Actor Status Text*>にて、'image' または 'image(x)'を
+ * 入力した場合、以下のタグをアクターのメモ欄に追記することで、指定した画像を
+ * 表示することができます。
+ * 画像は複数登録することができます。
+ * 
+ *    image    - 最初に登録した画像を表示します。
+ *    image(x) - 画像を登録した順番に x = 0,1,2,... と指定します。
  * 
  * <CSS_画像:ImageName>
  * code
@@ -1117,18 +1121,27 @@ FTKR.CSS = FTKR.CSS || {};
  * (*1)画像は、プロジェクトフォルダ内の/img/picture/に保存してください。
  * 
  * [code に使用できる項目]
- * 以下のタグで、画像を四角に切り取って表示することができます。
+ * 以下のタグで、画像を四角に切り取って表示(トリミング)することができます。
+ * 
  * Bgi offset X: n
  *    :画像ファイルを四角に切り取る時の左上のX座標を入力します。
+ *    :指定しない場合は 0 になります。
  * 
  * Bgi offset Y: n
  *    :画像ファイルを四角に切り取る時の左上のY座標を入力します。
+ *    :指定しない場合は 0 になります。
  * 
  * Bgi width: n
  *    :画像ファイルを四角に切り取る時の幅を入力します。
+ *    :指定しない場合は 画像のサイズ になります。
  * 
  * Bgi height: n
  *    :画像ファイルを四角に切り取る時の高さを入力します。
+ *    :指定しない場合は 画像のサイズ になります。
+ * 
+ * Bgi scale: n
+ *    :画像ファイルを表示するときの拡大率(%)を入力します。
+ *    :指定しない場合は原寸サイズで表示します。(原寸サイズ = 100)
  * 
  * 
  * 指定した画像は、以下のプラグインパラメータで設定を変更できます。
@@ -1232,6 +1245,10 @@ FTKR.CSS = FTKR.CSS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v2.1.0 - 2017/06/19 : 機能変更、機能追加
+ *    1. カスタム画像の設定仕様を変更。
+ *    2. カスタム画像を複数設定できる機能を追加。
  * 
  * v2.0.0 - 2017/06/18 : メニュー画面の変更機能を分離
  * 
@@ -1704,22 +1721,26 @@ FTKR.CSS = FTKR.CSS || {};
     DataManager.cssActorImageNotetags = function(group) {
         for (var n = 1; n < group.length; n++) {
             var obj = group[n];
-            obj.cssbgi = {
-                name:'',
-                offsetX:0,
-                offsetY:0,
-                width:0,
-                height:0,
-            };
+            obj.cssbgi = [];
             var datas = readEntrapmentCodeToTextEx(obj, ['CSS_画像', 'CSS_IMAGE']);
             this.readCssBgiMetaDatas(obj, datas);
         }
     };
 
+    DataManager.setCssBgiBase = function(obj, index, name) {
+        obj.cssbgi[index] = {
+            name    :name,
+            offsetX :0,
+            offsetY :0,
+            width   :0,
+            height  :0,
+            scale   :100,
+        };
+    };
+
     DataManager.readCssBgiMetaDatas = function(obj, metaDatas) {
         for (var t = 0; t < metaDatas.length; t++) {
-            obj.cssbgi.name = metaDatas[t].id;
-
+            this.setCssBgiBase(obj, t, metaDatas[t].id);
             var datas = metaDatas[t].text.split(';');
             for (var i = 0; i < datas.length; i++) {
                 var data = datas[i];
@@ -1727,16 +1748,19 @@ FTKR.CSS = FTKR.CSS || {};
                 if (!match) continue;
                 switch (match[1].toUpperCase()) {
                     case 'BGI OFFSET X':
-                        obj.cssbgi.offsetX = Number(match[2]);
+                        obj.cssbgi[t].offsetX = Number(match[2]);
                         break;
                     case 'BGI OFFSET Y':
-                      obj.cssbgi.offsetY = Number(match[2]);
+                      obj.cssbgi[t].offsetY = Number(match[2]);
                         break;
                     case 'BGI WIDTH':
-                        obj.cssbgi.width = Number(match[2]);
+                        obj.cssbgi[t].width = Number(match[2]);
                         break;
                     case 'BGI HEIGHT':
-                        obj.cssbgi.height = Number(match[2]);
+                        obj.cssbgi[t].height = Number(match[2]);
+                        break;
+                    case 'BGI SCALE':
+                        obj.cssbgi[t].scale = Number(match[2]);
                         break;
                 }
             }
@@ -1946,6 +1970,8 @@ FTKR.CSS = FTKR.CSS || {};
                     return this.drawCssActorFace(actor, x, y, width, lss, Number(match[2]));
                 case 'EVAL':
                     return this.drawCssEval(actor, x, y, width, match[2]);
+                case 'IMAGE':
+                    return this.drawCssActorImage(actor, x, y, width, Number(match[2]));
             }
         } else {
             switch (status.toUpperCase()) {
@@ -1974,7 +2000,7 @@ FTKR.CSS = FTKR.CSS || {};
                 case 'PROFILE':
                     return this.drawCssProfile(actor, x, y, width);
                 case 'IMAGE':
-                    return this.drawCssActorImage(actor, x, y, width);
+                    return this.drawCssActorImage(actor, x, y, width, 0);
                 case 'MESSAGE':
                     return this.drawCssActorMessage(actor, x, y, width);
             }
@@ -2361,27 +2387,28 @@ FTKR.CSS = FTKR.CSS || {};
     //------------------------------------------------------------------------
     //指定画像の表示関数
     //------------------------------------------------------------------------
-    Window_Base.prototype.drawCssActorImage = function(actor, x, y, width) {
-        var dy = this.lineHeight();
-        var line = Math.ceil(actor.actor().cssbgi.height / dy) || 1;
+    Window_Base.prototype.drawCssActorImage = function(actor, x, y, width, id) {
         this.changePaintOpacity(actor.isBattleMember());
-        this.drawCssImage(actor, x, y, width);
+        var line = this.drawCssImage(actor, x, y, width, id);
         this.changePaintOpacity(true);
         return line;
     };
 
-    Window_Base.prototype.drawCssImage = function(actor, dx, dy, width) {
-        var bgi = actor.actor().cssbgi;
-        var dh = bgi.height || this.lineHeight();
-        var dw = bgi.width.clamp(0, width) || width;
-        var offsetX = FTKR.CSS.cssStatus.image.posiX * (width - dw) / 2;
-        dx = Math.floor(dx + offsetX);
+    Window_Base.prototype.drawCssImage = function(actor, dx, dy, width, id) {
+        var bgi = actor.actor().cssbgi[id];
         var bitmap = ImageManager.loadPicture(bgi.name);
-        var sw = bgi.width || dh;
-        var sh = bgi.height || dw;
+        if (!bitmap) return 1;
+        var sw = bgi.width || bitmap.width;
+        var sh = bgi.height || bitmap.height;
         var sx = bgi.offsetX || 0;
         var sy = bgi.offsetY || 0;
+
+        var dh = sh * bgi.scale / 100;
+        var dw = sw * bgi.scale / 100;
+        var offsetX = FTKR.CSS.cssStatus.image.posiX * (width - dw) / 2;
+        dx = Math.floor(dx + offsetX);
         this.contents.blt(bitmap, sx, sy, sw, sh, dx, dy, dw, dh);
+        return Math.ceil(dh / this.lineHeight()) || 1;
     };
 
     //------------------------------------------------------------------------
