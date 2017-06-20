@@ -3,8 +3,8 @@
 // FTKR_OriginalSceneWindow.js
 // 作成者     : フトコロ
 // 作成日     : 2017/06/17
-// 最終更新日 : 2017/06/19
-// バージョン : v1.1.1
+// 最終更新日 : 2017/06/20
+// バージョン : v1.2.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.OSW = FTKR.OSW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.1 オリジナルのシーンやウィンドウを作成する
+ * @plugindesc v1.2.0 オリジナルのシーンやウィンドウを作成する
  * @author フトコロ
  *
  * @param --ウィンドウの共通設定--
@@ -483,6 +483,13 @@ FTKR.OSW = FTKR.OSW || {};
  *        :メンバーIDは、先頭を0番としたパーティー内の並び順です。
  *        :メンバーIDには、\V[x]でゲーム内変数を使用できます。
  * 
+ *    セレクト参照 [セレクトウィンドウID]
+ *    REFERENCE_SELECT [selectWindowId]
+ *        :ウィンドウ内で表示するパラメータの参照元のアクターとデータを
+ *        :指定したセレクトウィンドウから参照します。
+ *        :この設定が有る場合、セレクトウィンドウのカーソル操作に連動して
+ *        :コモンウィンドウの表示を更新します。
+ * 
  *    テキスト初期化
  *    CLEAR_TEXT
  *        :設定したテキストをすべて初期化します。
@@ -609,6 +616,17 @@ FTKR.OSW = FTKR.OSW || {};
  *        :ウィンドウのフレームを表示するかどうか設定します。
  *        :デフォルトでは表示(ON)します。
  * 
+ *    アクター [アクターID]
+ *    ACTOR [actorId]
+ *        :ウィンドウ内で表示するパラメータの参照元のアクターを指定します。
+ *        :アクターIDには、\V[x]でゲーム内変数を使用できます。
+ * 
+ *    パーティー [メンバーID]
+ *    PARTY [memberId]
+ *        :ウィンドウ内で表示するパラメータの参照元のアクターを指定します。
+ *        :メンバーIDは、先頭を0番としたパーティー内の並び順です。
+ *        :メンバーIDには、\V[x]でゲーム内変数を使用できます。
+ * 
  *    リスト初期化
  *    CLEAR_LIST
  *        :設定したリストをすべて初期化します。
@@ -633,7 +651,43 @@ FTKR.OSW = FTKR.OSW || {};
  *        :          - バトルメンバーをリストに設定します。
  *        :     控えメンバー　 or RESERVE_MENBAR
  *        :          - 戦闘に参加しないパーティーメンバーをリストに設定します。
- * 
+ *        :
+ *        :アクター [条件式]
+ *        :ACTOR [enable]
+ *        :   リストをデータベースのアクターに設定します。
+ *        :
+ *        :職業 [条件式]
+ *        :CLASS [enable]
+ *        :   リストをデータベースの職業に設定します。
+ *        :
+ *        :スキル [条件式]
+ *        :SKILL [enable]
+ *        :   リストをデータベースのスキルに設定します。
+ *        :
+ *        :アイテム [条件式]
+ *        :ITEM [enable]
+ *        :   リストをデータベースのアイテムに設定します。
+ *        :
+ *        :武器 [条件式]
+ *        :WEAPON [enable]
+ *        :   リストをデータベースの武器に設定します。
+ *        :
+ *        :防具[条件式]
+ *        :ARMOR [enable]
+ *        :   リストをデータベースの防具に設定します。
+ *        :
+ *        :敵キャラ [条件式]
+ *        :ENEMY [enable]
+ *        :   リストをデータベースの敵キャラに設定します。
+ *        :
+ *        :敵グループ [条件式]
+ *        :TROOP [enable]
+ *        :   リストをデータベースの敵グループに設定します。
+ *        :
+ *        :[条件式]にJS計算式記述の表示条件を設定します。
+ *        : item で対象のデータを参照できます。(例: item.id = 対象のID)
+ *        :なお、名前が設定されていないデータは表示しません。
+ *        :条件式を設定しない場合は、名前が設定されているすべてのデータを表示します。
  * 
  *    リスト実行設定 [実行タイプ] [メソッド]
  *    SET_LIST_ACTION [action_type] [method]
@@ -685,6 +739,11 @@ FTKR.OSW = FTKR.OSW || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.2.0 - 2017/06/20 : 機能追加
+ *    1. セレクトウィンドウのリスト設定の表示内容を追加。
+ *    2. セレクトウィンドウのアクターやデータをコモンウィンドウが受け取る
+ *       参照コマンドを追加。
  * 
  * v1.1.1 - 2017/06/19 : ヘルプ修正
  * 
@@ -790,11 +849,19 @@ function Game_OswScene() {
     Game_OswBase.SCENE_MAP      = 1;
     Game_OswBase.SCENE_BATTLE   = 2;
 
-    Game_OswBase.SELECT_TEXT_LIST  = 0;
-    Game_OswBase.SELECT_PARTY_LIST = 1;
+    Game_OswBase.SELECT_TEXT_LIST   = 0;
+    Game_OswBase.SELECT_PARTY_LIST  = 1;
+    Game_OswBase.SELECT_ACTOR_LIST  = 2;
+    Game_OswBase.SELECT_CLASS_LIST  = 3;
+    Game_OswBase.SELECT_SKILL_LIST  = 4;
+    Game_OswBase.SELECT_ITEM_LIST   = 5;
+    Game_OswBase.SELECT_WEAPON_LIST = 6;
+    Game_OswBase.SELECT_ARMOR_LIST  = 7;
+    Game_OswBase.SELECT_ENEMY_LIST  = 8;
+    Game_OswBase.SELECT_TROOP_LIST  = 9;
     
-    Game_OswBase.SELECT_PARTY_ALL = 0;
-    Game_OswBase.SELECT_PARTY_BATTLE = 1;
+    Game_OswBase.SELECT_PARTY_ALL     = 0;
+    Game_OswBase.SELECT_PARTY_BATTLE  = 1;
     Game_OswBase.SELECT_PARTY_RESERVE = 2;
 
     var convertEscapeCharacters = function(text) {
@@ -815,6 +882,49 @@ function Game_OswScene() {
             return 0;
         }
     };
+
+    //=============================================================================
+    // 自作関数(グローバル)
+    //=============================================================================
+
+    FTKR.gameData = FTKR.gameData || {
+        user   :null,
+        target :null,
+        item   :null,
+        number :0,
+    };
+
+    if (!FTKR.setGameData) {
+    FTKR.setGameData = function(user, target, item, number) {
+        FTKR.gameData = {
+            user   :user || null,
+            target :target || null,
+            item   :item || null,
+            number :number || 0
+        };
+    };
+    }
+
+    if (!FTKR.evalFormula) {
+    FTKR.evalFormula = function(formula) {
+        var datas = FTKR.gameData;
+        try {
+            var s = $gameSwitches._data;
+            var v = $gameVariables._data;
+            var a = datas.user;
+            var b = datas.target;
+            var item   = datas.item;
+            var number = datas.number;
+            if (b) var result = b.result();
+            var value = eval(formula);
+            if (isNaN(value)) value = 0;
+            return value;
+        } catch (e) {
+            console.error(e);
+            return 0;
+        }
+    };
+    }
 
     //=============================================================================
     // プラグインコマンド
@@ -972,38 +1082,7 @@ function Game_OswScene() {
                     break;
                 case 'リスト設定':
                 case 'SET_LIST':
-                    switch (setArgStr(args[i+1]).toUpperCase()) {
-                        case 'テキスト':
-                        case 'TEXT':
-                            var list = (args[i+2] + '').split(',');
-                            window.setList(Game_OswBase.SELECT_TEXT_LIST,
-                                list);
-                            i += 2;
-                            break;
-                        case 'パーティー':
-                        case 'PARTY':
-                            switch ((args[i+2]).toUpperCase()) {
-                                case '全メンバー':
-                                case 'ALL_MEMBER':
-                                    var number = $gameParty.allMembers().length;
-                                    var type = Game_OswBase.SELECT_PARTY_ALL;
-                                    break;
-                                case 'バトルメンバー':
-                                case 'BATTLE_MEMBER':
-                                    var number = $gameParty.battleMembers().length;
-                                    var type = Game_OswBase.SELECT_PARTY_BATTLE;
-                                    break;
-                                case '控えメンバー':
-                                case 'RESERVE_MEMBER':
-                                    var number = $gameParty.reserveMembers().length;
-                                    var type = Game_OswBase.SELECT_PARTY_RESERVE;
-                                    break;
-                            }
-                            window.setList(Game_OswBase.SELECT_PARTY_LIST, 
-                                null, number, type);
-                            i += 2;
-                            break;
-                    }
+                    i += this.setOswSelectList(window, i, args);
                     break;
                 case 'リスト初期化':
                 case 'CLEAR_LIST':
@@ -1038,6 +1117,12 @@ function Game_OswScene() {
                 case 'PARTY':
                     var actor = $gameParty.members()[setArgNum(args[i+1])];
                     window.setActor(actor);
+                    i += 1;
+                    break;
+                case 'セレクト参照':
+                case 'REFERENCE_SELECT':
+                    var windowId = setArgNum(args[i+1]);
+                    window.setReference(windowId);
                     i += 1;
                     break;
                 case '更新':
@@ -1187,6 +1272,78 @@ function Game_OswScene() {
         return;
     };
 
+    Game_Interpreter.prototype.setOswSelectList = function(window, i, args) {
+        switch (setArgStr(args[i+1]).toUpperCase()) {
+            case 'テキスト':
+            case 'TEXT':
+                var list = (args[i+2] + '').split(',');
+                window.setList(Game_OswBase.SELECT_TEXT_LIST,
+                    list);
+                return 2;
+            case 'パーティー':
+            case 'PARTY':
+                switch ((args[i+2]).toUpperCase()) {
+                    case '全メンバー':
+                    case 'ALL_MEMBER':
+                        var type = Game_OswBase.SELECT_PARTY_ALL;
+                        break;
+                    case 'バトルメンバー':
+                    case 'BATTLE_MEMBER':
+                        var type = Game_OswBase.SELECT_PARTY_BATTLE;
+                        break;
+                    case '控えメンバー':
+                    case 'RESERVE_MEMBER':
+                        var type = Game_OswBase.SELECT_PARTY_RESERVE;
+                        break;
+                }
+                window.setList(Game_OswBase.SELECT_PARTY_LIST, 
+                    null, type, true);
+                return 2;
+            case 'アクター':
+            case 'ACTOR':
+                window.setList(Game_OswBase.SELECT_ACTOR_LIST, 
+                    null, null, args[i+2]);
+                return 2;
+            case '職業':
+            case 'CLASS':
+                window.setList(Game_OswBase.SELECT_CLASS_LIST, 
+                    null, null, args[i+2]);
+                return 2;
+            case 'スキル':
+            case 'SKILL':
+                window.setList(Game_OswBase.SELECT_SKILL_LIST, 
+                    null, null, args[i+2]);
+                return 2;
+            case 'アイテム':
+            case 'ITEM':
+                window.setList(Game_OswBase.SELECT_ITEM_LIST, 
+                    null, null, args[i+2]);
+                return 2;
+            case '武器':
+            case 'WEAPON':
+                window.setList(Game_OswBase.SELECT_WEAPON_LIST, 
+                    null, null, args[i+2]);
+                return 2;
+            case '防具':
+            case 'ARMOR':
+                window.setList(Game_OswBase.SELECT_ARMOR_LIST, 
+                    null, null, args[i+2]);
+                return 2;
+            case '敵キャラ':
+            case 'ENEMY':
+                window.setList(Game_OswBase.SELECT_ENEMY_LIST, 
+                    null, null, args[i+2]);
+                return 2;
+            case '敵グループ':
+            case 'TROOP':
+                window.setList(Game_OswBase.SELECT_TROOP_LIST, 
+                    null, null, args[i+2]);
+                return 2;
+            default:
+                return 0;
+        }
+    };
+
     //=============================================================================
     // DataManager
     //=============================================================================
@@ -1247,6 +1404,7 @@ function Game_OswScene() {
             space     : '0,0,0,0',
             spaceIn   : 0,
             widthRate : '1,1,1',
+            item      : null,
         }
     };
 
@@ -1405,25 +1563,17 @@ function Game_OswScene() {
         this.setContent('', content.space, content.spaceIn, content.widthRate);
     };
 
-    Game_OswSelectable.prototype.itemNum = function() {
-        return Math.max(this._list.length, this._number);
-    };
-
     Game_OswSelectable.prototype.clearList = function() {
         this._list = [];
-        this._number = 0;
         this._listType = null;
+        this._enable = true;
     };
 
-    Game_OswSelectable.prototype.setList = function(drawType, list, number, listType) {
+    Game_OswSelectable.prototype.setList = function(drawType, list, listType, enable) {
         this._drawType = drawType;
         this._list = list || [];
-        this._number = number || this._list.length;
         this._listType = listType;
-    };
-
-    Game_OswSelectable.prototype.setNumber = function(value) {
-        this._number = value;
+        this._enable = enable || true;
     };
 
     Game_OswSelectable.prototype.isCommand = function() {
@@ -1514,6 +1664,7 @@ function Game_OswScene() {
         Game_OswBase.prototype.initialize.call(this, scene);
         var common = FTKR.OSW.common;
         var content = common.content;
+        this._referenceId = -1;
         this.clearTexts();
         this.setSize(common.width, common.height);
         this.setContent('', content.space, content.spaceIn, content.widthRate);
@@ -1527,12 +1678,20 @@ function Game_OswScene() {
         return this._texts;
     };
 
+    Game_OswCommon.prototype.referenceId = function() {
+        return this._referenceId;
+    }
+    
     Game_OswCommon.prototype.clearTexts = function() {
         this._texts = [];
     };
 
     Game_OswCommon.prototype.setText = function(line, text) {
         this._texts[line] = text;
+    };
+
+    Game_OswCommon.prototype.setReference = function(windowId) {
+        this._referenceId = windowId;
     };
 
     //=============================================================================
@@ -2138,9 +2297,11 @@ function Game_OswScene() {
     Window_OswCommon.prototype.initialize = function(window) {
         this._window = window;
         this._actor = window._actor || null;
+        this._item = null;
         Window_Base.prototype.initialize.call(this, 
             window._x, window._y, window._width, window._height);
         this._show = false;
+        this._referenceIndex = -1;
         this.hide();
         this.refresh();
     };
@@ -2168,6 +2329,7 @@ function Game_OswScene() {
     Window_OswCommon.prototype.update = function() {
         Window_Base.prototype.update.call(this);
         this.updateOswShow();
+        this.updateReference();
         this.updateOswRefresh();
     };
 
@@ -2183,6 +2345,7 @@ function Game_OswScene() {
 
     Window_OswCommon.prototype.drawContent = function(x, y, width, height) {
         if (Imported.FTKR_CSS) {
+            this._window.content().item = this._item;
             this.drawCssActorStatus(0, this._actor, x, y, width, height,
                                     this._window.content());
         } else {
@@ -2190,6 +2353,30 @@ function Game_OswScene() {
                 this.drawTextEx(text, x, y + this.lineHeight() * i);
             },this);
         }
+    };
+
+    Window_OswCommon.prototype.evalCssCustomFormula = function(actor, formula) {
+        if (!formula) return '';
+        var item = this._window.content().item;
+        FTKR.setGameData(actor, null, item);
+        return FTKR.evalFormula(formula);
+    };
+
+    Window_OswCommon.prototype.evalCssStrFormula = function(actor, formula) {
+        if (!formula) return '';
+        var item = this._window.content().item;
+        FTKR.setGameData(actor, null, item);
+        return FTKR.evalStrFormula(formula);
+    };
+
+    Window_OswCommon.prototype.updateReference = function() {
+        if (this._window.referenceId() == -1) return;
+        var window = SceneManager._scene._oswSelectWindows[this._window.referenceId()];
+        if (this._referenceIndex === window.index()) return;
+        this._referenceIndex = window.index();
+        this._actor = window._actor;
+        this._item = window.item(window.index());
+        this.refresh();
     };
 
     //=============================================================================
@@ -2206,8 +2393,9 @@ function Game_OswScene() {
 
     Window_OswSelect.prototype.initialize = function(window) {
         this._window = window;
-        this._actor = window._actor || null;
         Window_Selectable.prototype.initialize.call(this, window._x, window._y, window._width, window._height);
+        this._actor = null;
+        this._data = [];
         this._show = false;
         this.hide();
         this.deactivate();
@@ -2243,31 +2431,93 @@ function Game_OswScene() {
     };
 
     Window_OswSelect.prototype.maxItems = function() {
+        return this._data ? this._data.length : 1;
+    };
+
+    Window_OswSelect.prototype.setItemsList = function() {
         switch (this._window._drawType) {
             case Game_OswBase.SELECT_TEXT_LIST:
-                return this._window._list.length;
+                return this._window._list;
             case Game_OswBase.SELECT_PARTY_LIST:
                 switch (this._window._listType) {
                     case Game_OswBase.SELECT_PARTY_ALL:
-                        return $gameParty.allMembers().length;
+                        return $gameParty.allMembers();
                     case Game_OswBase.SELECT_PARTY_BATTLE:
-                        return $gameParty.maxBattleMembers();
+                        return $gameParty.battleMembers();
                     case Game_OswBase.SELECT_PARTY_RESERVE:
-                        return $gameParty.reserveMembers().length;
+                        return $gameParty.reserveMembers();
                 }
+            case Game_OswBase.SELECT_ACTOR_LIST:
+                return $dataActors;
+            case Game_OswBase.SELECT_CLASS_LIST:
+                return $dataClasses;
+            case Game_OswBase.SELECT_SKILL_LIST:
+                return $dataSkills;
+            case Game_OswBase.SELECT_ITEM_LIST:
+                return $dataItems;
+            case Game_OswBase.SELECT_WEAPON_LIST:
+                return $dataWeapons;
+            case Game_OswBase.SELECT_ARMOR_LIST:
+                return $dataArmors;
+            case Game_OswBase.SELECT_ENEMY_LIST:
+                return $dataEnemies;
+            case Game_OswBase.SELECT_TROOP_LIST:
+                return $dataTroops;
         }
-        return this._window.itemNum();
+        return [];
+    };
+
+    Window_OswSelect.prototype.refresh = function() {
+        this.makeItemList();
+        this.createContents();
+        this.drawAllItems();
+    };
+
+    Window_OswSelect.prototype.item = function(index) {
+        return this._data && index >= 0 ? this._data[index] : null;
+    };
+
+    Window_OswSelect.prototype.isEnabled = function(item) {
+        FTKR.setGameData(this._window._actor, null, item);
+        return FTKR.evalFormula(this._window._enable);
+    };
+
+    Window_OswSelect.prototype.makeItemList = function() {
+        var list = this.setItemsList();
+        if (this._window._drawType) {
+            this._data = list.filter( function(item) {
+                return item && item.name && this.isEnabled(item);
+            },this);
+        } else {
+            this._data = list;
+        }
+    };
+
+    Window_OswSelect.prototype.evalCssCustomFormula = function(actor, formula) {
+        if (!formula) return '';
+        var item = this._window.content().item;
+        FTKR.setGameData(actor, null, item);
+        return FTKR.evalFormula(formula);
+    };
+
+    Window_OswSelect.prototype.evalCssStrFormula = function(actor, formula) {
+        if (!formula) return '';
+        var item = this._window.content().item;
+        FTKR.setGameData(actor, null, item);
+        return FTKR.evalStrFormula(formula);
     };
 
     Window_OswSelect.prototype.drawItem = function(index) {
         var lss = this._window.content();
         var rect = this.itemRect(index);
         if (this._window._drawType) {
-            var actor = this.setActor(index);
-            if (!actor) return;
-            this.drawCssActorStatus(index, actor, rect.x, rect.y, rect.width, rect.height, lss);
+            this._actor = this.setActor(index);
+            lss.item = this.item(index);
+            this.drawCssActorStatus(index, this._actor, rect.x, rect.y, rect.width, rect.height, lss);
         } else {
-            this.drawText(this._window._list[index], rect.x, rect.y, rect.width);
+            this._actor = null;
+            lss.item = null;
+            this.drawText(this._data[index], rect.x, rect.y, rect.width);
         }
     };
 
@@ -2280,7 +2530,7 @@ function Game_OswScene() {
             case Game_OswBase.SELECT_PARTY_RESERVE:
                 return $gameParty.reserveMembers()[index];
         }
-        return null;
+        return this._window._actor;
     };
 
     Window_OswSelect.prototype.update = function() {

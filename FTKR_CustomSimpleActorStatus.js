@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2017/06/19
-// バージョン : v2.1.0
+// 最終更新日 : 2017/06/20
+// バージョン : v2.2.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.1.0 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v2.2.0 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -807,7 +807,7 @@ FTKR.CSS = FTKR.CSS || {};
  *    :face(x), chara, sv, name, class, nickname, hp, mp, tp, level, 
  *    :state, state2(x), profile, param(x), custom(x), gauge(x), 
  *    :equip(x), text(x), image, eparam(x), agauge(x), cgauge(x)
- *    :eval(x) です。
+ *    :eval(x) streval(x) です。
  *    :
  *    :face, face(x) -
  *    : 顔画像を表示します。
@@ -844,6 +844,8 @@ FTKR.CSS = FTKR.CSS || {};
  *    :text(x) -
  *    : 文字列 x を表示します。
  *    : 制御文字が使用できます。
+ *    : なお、x はパラメータの参照コードを入力することが可能です。
+ *    : 例) text($dataItems[1].name) で、アイテムID1の名前を表示
  *    :
  *    :image - 
  *    : アクターのメモ欄で設定したカスタム画像を表示します。
@@ -863,7 +865,10 @@ FTKR.CSS = FTKR.CSS || {};
  *    : クラスのメモ欄で設定したカスタムゲージを表示します。
  *    :
  *    :eval(x) - 
- *    : JS計算式 x を評価して、その結果を表示します。
+ *    : JS計算式 x を評価して、その結果を数値で表示します。
+ *    :
+ *    :streval(x) - 
+ *    : JS計算式 x を評価して、その結果を文字列で表示します。
  *    :
  *    :カンマ(,)で区切って複数のパラメータを入力した場合は、
  *    :行を変えてそれぞれのパラメータを表示します。
@@ -1246,6 +1251,10 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.2.0 - 2017/06/19 : 機能変更、機能追加
+ *    1. テキストコードに、JS計算式の評価処理を追加。
+ *    2. JS計算式の評価コードで、文字列のまま表示する機能を追加。
+ * 
  * v2.1.0 - 2017/06/19 : 機能変更、機能追加
  *    1. カスタム画像の設定仕様を変更。
  *    2. カスタム画像を複数設定できる機能を追加。
@@ -1607,6 +1616,25 @@ FTKR.CSS = FTKR.CSS || {};
     };
     }
 
+    if (!FTKR.evalStrFormula) {
+    FTKR.evalStrFormula = function(formula) {
+        var datas = FTKR.gameData;
+        try {
+            var s = $gameSwitches._data;
+            var v = $gameVariables._data;
+            var a = datas.user;
+            var b = datas.target;
+            var item   = datas.item;
+            var number = datas.number;
+            if (b) var result = b.result();
+            var value = eval(formula);
+            return value;
+        } catch (e) {
+            return formula;
+        }
+    };
+    }
+
     //=============================================================================
     // 自作処理
     //=============================================================================
@@ -1877,6 +1905,12 @@ FTKR.CSS = FTKR.CSS || {};
         return FTKR.evalFormula(formula);
     };
 
+    Window_Base.prototype.evalCssStrFormula = function(actor, formula) {
+        if (!formula) return '';
+        FTKR.setGameData(actor);
+        return FTKR.evalStrFormula(formula);
+    };
+
     /*-------------------------------------------------------------
     アクターの簡易ステータスを表示する関数
     drawCssActorStatus(index, actor, x, y, width, height, lss)
@@ -1968,8 +2002,10 @@ FTKR.CSS = FTKR.CSS || {};
                     return this.drawCssActorIcons(index, actor, x, y, width, Number(match[2]));
                 case 'FACE':
                     return this.drawCssActorFace(actor, x, y, width, lss, Number(match[2]));
+                case 'STREVAL':
+                    return this.drawCssEval(actor, x, y, width, match[2], false);
                 case 'EVAL':
-                    return this.drawCssEval(actor, x, y, width, match[2]);
+                    return this.drawCssEval(actor, x, y, width, match[2], true);
                 case 'IMAGE':
                     return this.drawCssActorImage(actor, x, y, width, Number(match[2]));
             }
@@ -2367,6 +2403,7 @@ FTKR.CSS = FTKR.CSS || {};
     //------------------------------------------------------------------------
     Window_Base.prototype.drawCssText = function(actor, x, y, width, text) {
         if (!text) return 1;
+        var text = this.evalCssStrFormula(actor, text);
         this.changeTextColor(this.systemColor());
         this.drawTextEx(text, x, y);
         this.resetTextColor();
@@ -2374,13 +2411,19 @@ FTKR.CSS = FTKR.CSS || {};
     };
 
     //------------------------------------------------------------------------
-    //JS計算式の表示関数
+    //JS評価式の表示関数
     //------------------------------------------------------------------------
-    Window_Base.prototype.drawCssEval = function(actor, x, y, width, text) {
+    Window_Base.prototype.drawCssEval = function(actor, x, y, width, text, isNumber) {
         if (!text) return 1;
-        var value = this.evalCssCustomFormula(actor, text);
+        if (isNumber) {
+            var value = this.evalCssCustomFormula(actor, text);
+            var align = 'right';
+        } else {
+            var value = this.evalCssStrFormula(actor, text);
+            var align = 'left';
+        }
         this.resetTextColor();
-        this.drawText(value, x, y, width, 'right');
+        this.drawText(value, x, y, width, align);
         return 1;
     };
 
