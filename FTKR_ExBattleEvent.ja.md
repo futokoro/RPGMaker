@@ -162,6 +162,8 @@ EBE_GAIN_REWARDS
 １．プラグインパラメータ`<Defeat Event>`に設定したIDのコモンイベント<br>
 ２．敵グループのバトルイベントで、注釈で`<EBE_戦闘敗北時>`と記入したページ
 
+![画像](image/FTKR_ExBattleEvent/n03_001.png)
+
 １と２どちらもある場合は、バトルイベントを実行します。
 
 バトルイベント内では、`this._eventId` で敵グループIdを取得できます。
