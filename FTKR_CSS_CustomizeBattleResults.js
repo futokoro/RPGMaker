@@ -3,8 +3,8 @@
 // FTKR_CSS_CustomizeBattleResults.js
 // 作成者     : フトコロ
 // 作成日     : 2017/06/07
-// 最終更新日 : 2017/06/08
-// バージョン : v1.0.1
+// 最終更新日 : 2017/06/23
+// バージョン : v1.0.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -14,7 +14,7 @@ var FTKR = FTKR || {};
 FTKR.CBR = FTKR.CBR || {};
 
 /*:
- * @plugindesc v1.0.1 カスタム可能な戦闘結果画面を表示する
+ * @plugindesc v1.0.2 カスタム可能な戦闘結果画面を表示する
  * @author フトコロ
  *
  * @param --タイトル設定--
@@ -27,27 +27,33 @@ FTKR.CBR = FTKR.CBR || {};
  * @param Title Text Position
  * @desc タイトル文章の表示位置をを設定します。
  * 0 - 左寄せ, 1 - 中央, 2 - 右寄せ
+ * @type number
  * @default 1
  *
  * @param Title Font Size
  * @desc フォントサイズ：デフォルト 28
+ * @type number
  * @default 28
  * 
  * @param Title Padding
  * @desc ウィンドウの周囲の余白：デフォルト 18
+ * @type number
  * @default 18
  * 
  * @param Title Line Height
  * @desc ウィンドウ内の1行の高さ：デフォルト 36
+ * @type number
  * @default 36
  * 
  * @param Title Opacity
  * @desc ウィンドウ内の背景の透明度：デフォルト 192
+ * @type number
  * @default 192
  * 
  * @param Title Hide Frame
  * @desc ウィンドウ枠を非表示にするか
  * 1 - 非表示にする、0 - 表示する
+ * @type number
  * @default 0
  * 
  * @param --共通戦績設定--
@@ -74,6 +80,7 @@ FTKR.CBR = FTKR.CBR || {};
  * 
  * @param Party Status Space In Text
  * @desc Text内で複数表示する場合の間隔を指定します。
+ * @type number
  * @default 5
  * 
  * @param Party Status Width Rate
@@ -83,27 +90,33 @@ FTKR.CBR = FTKR.CBR || {};
  *
  * @param Party Visible Rows
  * @desc 共通戦績ウィンドウの縦の行数
+ * @type number
  * @default 2
  *
  * @param Party Font Size
  * @desc フォントサイズ：デフォルト 28
+ * @type number
  * @default 28
  * 
  * @param Party Padding
  * @desc ウィンドウの周囲の余白：デフォルト 18
+ * @type number
  * @default 18
  * 
  * @param Party Line Height
  * @desc ウィンドウ内の1行の高さ：デフォルト 36
+ * @type number
  * @default 36
  * 
  * @param Party Opacity
  * @desc ウィンドウ内の背景の透明度：デフォルト 192
+ * @type number
  * @default 192
  * 
  * @param Party Hide Frame
  * @desc ウィンドウ枠を非表示にするか
  * 1 - 非表示にする、0 - 表示する
+ * @type number
  * @default 0
  * 
  * @param --戦績コマンド設定--
@@ -123,23 +136,28 @@ FTKR.CBR = FTKR.CBR || {};
  * 
  * @param Command Font Size
  * @desc フォントサイズ：デフォルト 28
+ * @type number
  * @default 28
  * 
  * @param Command Padding
  * @desc ウィンドウの周囲の余白：デフォルト 18
+ * @type number
  * @default 18
  * 
  * @param Command Line Height
  * @desc ウィンドウ内の1行の高さ：デフォルト 36
+ * @type number
  * @default 36
  * 
  * @param Command Opacity
  * @desc ウィンドウ内の背景の透明度：デフォルト 192
+ * @type number
  * @default 192
  * 
  * @param Command Hide Frame
  * @desc ウィンドウ枠を非表示にするか
  * 1 - 非表示にする、0 - 表示する
+ * @type number
  * @default 0
  * 
  * @param --アクター別戦績設定--
@@ -166,6 +184,7 @@ FTKR.CBR = FTKR.CBR || {};
  * 
  * @param Actor Status Space In Text
  * @desc Text内で複数表示する場合の間隔を指定します。
+ * @type number
  * @default 5
  * 
  * @param Actor Status Width Rate
@@ -175,39 +194,48 @@ FTKR.CBR = FTKR.CBR || {};
  * 
  * @param Actor Visible Rows
  * @desc ステータスウィンドウの縦の行数：デフォルト 8
+ * @type number
  * @default 9
  * 
  * @param Actor Max Cols
  * @desc アクターを横に並べる数：デフォルト 2
+ * @type number
  * @default 2
  * 
  * @param Actor Cursor Lines
  * @desc カーソル高さの行数：デフォルト 4
+ * @type number
  * @default 3
  * 
  * @param Actor Cursor Height Space
  * @desc 縦のカーソル間隔：デフォルト 0
+ * @type number
  * @default 0
  * 
  * @param Actor Font Size
  * @desc フォントサイズ：デフォルト 28
+ * @type number
  * @default 28
  * 
  * @param Actor Padding
  * @desc ウィンドウの周囲の余白：デフォルト 18
+ * @type number
  * @default 18
  * 
  * @param Actor Line Height
  * @desc ウィンドウ内の1行の高さ：デフォルト 36
+ * @type number
  * @default 36
  * 
  * @param Actor Opacity
  * @desc ウィンドウ内の背景の透明度：デフォルト 192
+ * @type number
  * @default 192
  * 
  * @param Actor Hide Frame
  * @desc ウィンドウ枠を非表示にするか
  * 1 - 非表示にする、0 - 表示する
+ * @type number
  * @default 0
  * 
  * @param --入手アイテム設定--
@@ -215,39 +243,48 @@ FTKR.CBR = FTKR.CBR || {};
  *
  * @param Item Visible Rows
  * @desc ステータスウィンドウの縦の行数：デフォルト 8
+ * @type number
  * @default 8
  * 
  * @param Item Max Cols
  * @desc アイテムを横に並べる数：デフォルト 2
+ * @type number
  * @default 2
  * 
  * @param Item Cursor Lines
  * @desc カーソル高さの行数：デフォルト 1
+ * @type number
  * @default 1
  * 
  * @param Item Cursor Height Space
  * @desc 縦のカーソル間隔：デフォルト 0
+ * @type number
  * @default 0
  * 
  * @param Item Font Size
  * @desc フォントサイズ：デフォルト 28
+ * @type number
  * @default 28
  * 
  * @param Item Padding
  * @desc ウィンドウの周囲の余白：デフォルト 18
+ * @type number
  * @default 18
  * 
  * @param Item Line Height
  * @desc ウィンドウ内の1行の高さ：デフォルト 36
+ * @type number
  * @default 36
  * 
  * @param Item Opacity
  * @desc ウィンドウ内の背景の透明度：デフォルト 192
+ * @type number
  * @default 192
  * 
  * @param Item Hide Frame
  * @desc ウィンドウ枠を非表示にするか
  * 1 - 非表示にする、0 - 表示する
+ * @type number
  * @default 0
  * 
  * @help 
@@ -284,6 +321,11 @@ FTKR.CBR = FTKR.CBR || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.2 - 2017/06/23 : 不具合修正
+ *    1. 入手経験値が29以下の場合に、アクターが経験値を入手できない不具合を修正。
+ *    2. 戦績画面タイトルの文字列の表示位置を修正。
+ *    3. プラグインパラメータに@typeを適用
  * 
  * v1.0.1 - 2017/06/08 : 不要なプラグインパラメータを削除
  * 
@@ -363,6 +405,9 @@ if (Imported.FTKR_CSS) (function() {
         }
     };
 
+    Scene_Battle.CBR_SPLIT_NUMBER = 30;
+    Scene_Battle.CBR_COUNT_MAX    = 2;
+
     //objのメモ欄から <metacode: x> の値を読み取って返す
     var readObjectMeta = function(obj, metacodes) {
         if (!obj) return false;
@@ -381,14 +426,34 @@ if (Imported.FTKR_CSS) (function() {
         return window ? window.convertEscapeCharacters(text) : text;
     };
 
-    var setArgNumber = function(arg) {
-        try {
-            var arg = convertEscapeCharacters(arg);
-            return Number(eval(arg));
-        } catch (e) {
-            console.error(e);
-            return 0;
+    var textWidth = function(text) {
+        if (text == null) text = '';
+        var window = SceneManager._scene._windowLayer.children[0];
+        return window ? window.textWidth(text) : 0;
+    };
+
+    var convertTextWidth = function(text) {
+        var tw = 0;
+        text = convertEscapeCharacters(text);
+        if (/\\i\[(\d+)\]/i.test(text)) {
+            tw += Window_Base._iconWidth;
+            text = (text.toUpperCase()).replace(/\\i\[(\d+)\]/ig, '');
         }
+        if (/\\c\[(\d+)\]/i.test(text)) {
+            text = (text.toUpperCase()).replace(/\\c\[(\d+)\]/ig, '');
+        }
+        if (/\\{/i.test(text)) {
+            text = (text.toUpperCase()).replace(/\\{/ig, '');
+        }
+        if (/\\}/i.test(text)) {
+            text = (text.toUpperCase()).replace(/\\}/ig, '');
+        }
+        if (text.match(/\\lw\[(\d+),?([^\]]+)\]/i)) {
+            tw += RegExp.$1;
+            text = (text.toUpperCase()).replace(/\\lw\[(\d+),?([^\]]+)\]/ig, '');
+        }
+        tw += textWidth(text);
+        return tw;
     };
 
     //=============================================================================
@@ -434,14 +499,15 @@ if (Imported.FTKR_CSS) (function() {
 
     //書き換え
     BattleManager.gainExp = function() {
-        this._cbrExp = this._rewards.exp;
+        this._cbrGainExp = this._rewards.exp;
+        SceneManager._scene.setGainExp(this._cbrGainExp);
         this._rewards.exp = 0;
     };
 
     var _CBR_BattleManager_updateEvent = BattleManager.updateEvent;
     BattleManager.updateEvent = function() {
         if (this._phase === 'battleEnd' && this._showBattleResultOk) {
-            SceneManager._scene.updateExp(this._cbrExp);
+            SceneManager._scene.updateExp(this._cbrGainExp);
             return true;
         }
         return _CBR_BattleManager_updateEvent.call(this);
@@ -471,7 +537,9 @@ if (Imported.FTKR_CSS) (function() {
     var _CBR_Scene_Battle_initialize = Scene_Battle.prototype.initialize;
     Scene_Battle.prototype.initialize = function() {
         _CBR_Scene_Battle_initialize.call(this);
+        this._cbrCount = 0;
         this._cbrExp = 0;
+        this._cbrModExp = 0;
     };
 
     var _CBR_Scene_Battle_isAnyInputWindowActive = Scene_Battle.prototype.isAnyInputWindowActive;
@@ -547,15 +615,25 @@ if (Imported.FTKR_CSS) (function() {
         this.addWindow(this._battleResultItemWindow);
     };
 
+    Scene_Battle.prototype.setGainExp = function(gainExp) {
+        this._cbrExp = 0;
+        var splitNum = Scene_Battle.CBR_SPLIT_NUMBER;
+        this._cbrSplitExp = Math.floor(gainExp / splitNum);
+        this._cbrModExp = gainExp % splitNum;
+        this._cbrCount = Scene_Battle.CBR_COUNT_MAX;
+    };
+
     Scene_Battle.prototype.updateExp = function(gainExp) {
+        if (!gainExp) return;
         if (this._cbrExp >= gainExp) return;
-        if (this._cbrCount < 2) {
+        if (this._cbrCount < Scene_Battle.CBR_COUNT_MAX) {
             this._cbrCount += 1;
         } else {
             this._cbrCount = 0;
-            var exp = Math.floor(gainExp / 30);
+            var modexp = this._cbrModExp ? 1 : 0;
+            var exp = this._cbrSplitExp + modexp;
+            if (modexp) this._cbrModExp -= 1;
             this._cbrExp += exp;
-            this._cbrExp = Math.min(this._cbrExp, gainExp);
             $gameParty.allMembers().forEach(function(actor) {
                 actor.gainExp(exp);
             },this);
@@ -635,8 +713,8 @@ if (Imported.FTKR_CSS) (function() {
     };
 
     Window_BattleResultTitle.prototype.drawTitle = function() {
-        var textWidth = this.textWidth(FTKR.CBR.title.text);
-        var x = FTKR.CBR.title.position * (this.contentsWidth() - textWidth) / 2;
+        var textWidth = convertTextWidth(FTKR.CBR.title.text);
+        var x = FTKR.CBR.title.position * (this.width - textWidth) / 2;
         this.drawTextEx(FTKR.CBR.title.text, x, 0);
     };
 
