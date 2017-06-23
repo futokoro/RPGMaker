@@ -210,7 +210,8 @@ Physical~ で物理タイプの回避率、Magical~ で魔法タイプの回避�
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.0.2](FTKR_ExItemConfig_Activate.js) | 2017/05/11 | 不具合修正 |
+| [ver1.0.3](FTKR_ExItemConfig_Activate.js) | 2017/06/23 | 回避率の取得処理でエラーが起きる不具合を修正 |
+| ver1.0.2 | 2017/05/11 | 不具合修正 |
 | ver1.0.1 | 2017/04/29 | FTKR_ItemSelfVariables の v1.1.0以降に対応 |
 | ver1.0.0 | 2017/04/14 | 初版公開 |
 

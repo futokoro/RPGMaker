@@ -3,8 +3,8 @@
 // FTKR_OriginalSceneWindow.js
 // 作成者     : フトコロ
 // 作成日     : 2017/06/17
-// 最終更新日 : 2017/06/20
-// バージョン : v1.2.0
+// 最終更新日 : 2017/06/23
+// バージョン : v1.2.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.OSW = FTKR.OSW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.0 オリジナルのシーンやウィンドウを作成する
+ * @plugindesc v1.2.1 オリジナルのシーンやウィンドウを作成する
  * @author フトコロ
  *
  * @param --ウィンドウの共通設定--
@@ -23,23 +23,28 @@ FTKR.OSW = FTKR.OSW || {};
  * 
  * @param Font Size
  * @desc フォントサイズ
+ * @type number
  * @default 28
  * 
  * @param Window Padding
  * @desc ウィンドウの周囲の余白
+ * @type number
  * @default 18
  * 
  * @param Window Line Height
  * @desc ウィンドウ内の1行の高さ
+ * @type number
  * @default 36
  * 
  * @param Window Opacity
  * @desc ウィンドウ内の背景の透明度
+ * @type number
  * @default 192
  * 
  * @param Window Frame
  * @desc ウィンドウ枠を表示にするか
  * 1 - 表示する, 0 - 表示しない
+ * @type number
  * @default 1
  * 
  * @param --オリジナルシーンの設定--
@@ -59,6 +64,7 @@ FTKR.OSW = FTKR.OSW || {};
  * @param Enable Escape Code
  * @desc コマンドに制御文字を使えるようにします。
  * 1 - 有効, 0 - 無効
+ * @type number
  * @default 0
  * 
  * @param Command Position X
@@ -71,10 +77,12 @@ FTKR.OSW = FTKR.OSW || {};
  * 
  * @param Command Width
  * @desc コマンドウィンドウの幅を設定します。
+ * @type number
  * @default 240
  * 
  * @param Command Max Cols
  * @desc コマンドウィンドウの最大列数を設定します。
+ * @type number
  * @default 1
  * 
  * @param Command Align
@@ -84,10 +92,12 @@ FTKR.OSW = FTKR.OSW || {};
  * 
  * @param Command Number In Original
  * @desc オリジナルシーンのコマンドウィンドウ生成数を設定します。
+ * @type number
  * @default 
  * 
  * @param Command Number In Map
  * @desc マップシーンのコマンドウィンドウ生成数を設定します。
+ * @type number
  * @default 
  * 
  * @param --コモンウィンドウの設定--
@@ -103,14 +113,17 @@ FTKR.OSW = FTKR.OSW || {};
  * 
  * @param Common Number In Original
  * @desc オリジナルシーンのコモンウィンドウ生成数を設定します。
+ * @type number
  * @default 
  * 
  * @param Common Number In Map
  * @desc マップシーンのコモンウィンドウ生成数を設定します。
+ * @type number
  * @default 
  * 
  * @param Common Number In Battle
  * @desc バトルシーンのコモンウィンドウ生成数を設定します。
+ * @type number
  * @default 
  * 
  * @param --コモンウィンドウの表示内容設定--
@@ -124,6 +137,7 @@ FTKR.OSW = FTKR.OSW || {};
  * @param Actor Status Space In Text
  * @desc Text内で複数表示する場合の間隔を指定します。
  * FTKR_CustomSimpleActorStatus.js が必要
+ * @type number
  * @default 5
  * 
  * @param Actor Status Width Rate
@@ -144,18 +158,22 @@ FTKR.OSW = FTKR.OSW || {};
  * 
  * @param Select Cursor Height
  * @desc セレクトウィンドウのカーソル高さを設定します。
+ * @type number
  * @default 1
  * 
  * @param Select Max Cols
  * @desc セレクトウィンドウの最大列数を設定します。
+ * @type number
  * @default 2
  * 
  * @param Select Number In Original
  * @desc オリジナルシーンのセレクトウィンドウ生成数を設定します。
+ * @type number
  * @default 
  * 
  * @param Select Number In Map
  * @desc マップシーンのセレクトウィンドウ生成数を設定します。
+ * @type number
  * @default 
  * 
  * @param --セレクトウィンドウの表示内容設定--
@@ -169,6 +187,7 @@ FTKR.OSW = FTKR.OSW || {};
  * @param Select Status Space In Text
  * @desc Text内で複数表示する場合の間隔を指定します。
  * FTKR_CustomSimpleActorStatus.js が必要
+ * @type number
  * @default 5
  * 
  * @param Select Status Width Rate
@@ -740,6 +759,12 @@ FTKR.OSW = FTKR.OSW || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.2.1 - 2017/06/23 : 不具合修正
+ *    1. 表示内容の設定で、ステータスに制御文字を使用すると正しく反映されない
+ *       不具合を修正。
+ *    2. ウィンドウの表示をOFFにした時に、アクティブがOFFにならない不具合を修正。
+ *    3. プラグインパラメータに@typeを対応
+ * 
  * v1.2.0 - 2017/06/20 : 機能追加
  *    1. セレクトウィンドウのリスト設定の表示内容を追加。
  *    2. セレクトウィンドウのアクターやデータをコモンウィンドウが受け取る
@@ -1035,10 +1060,8 @@ function Game_OswScene() {
                             window.show();
                             break;
                         case 'OFF':
+                            window.deactivate();
                             window.hide();
-                            break;
-                        default:
-                            setArgNum(args[i+1]) ? window.show() : window.hide();
                             break;
                     }
                     i += 1;
@@ -1228,7 +1251,7 @@ function Game_OswScene() {
             switch (arg) {
                 case 'ステータス':
                 case 'STATUS':
-                    window.setContentStatus(setArgStr(args[i+1]));
+                    window.setContentStatus(args[i+1]);
                     i += 1;
                     count += 2;
                     break;
@@ -2114,7 +2137,6 @@ function Game_OswScene() {
                 this.show();
                 this.refresh();
             } else {
-                this.deactivate();
                 this.hide();
             }
         }
@@ -2159,8 +2181,10 @@ function Game_OswScene() {
         if (!this.active) return;
         if ($gameOswData._active && $gameOswData._oswIndex !== this.index()) {
             $gameOswData._oswIndex = this.index();
+            $gameOswData._oswItem = this.item(this.index());
         } else if (!$gameOswData._active && $gameMap._oswIndex !== this.index()) {
             $gameMap._oswIndex = this.index();
+            $gameMap._oswItem = this.item(this.index());
         }
     };
 
@@ -2215,6 +2239,10 @@ function Game_OswScene() {
         this.deactivate();
         this.select(this._window._index);
         this.refresh();
+    };
+
+    Window_OswCommand.prototype.item = function(index) {
+        return null;
     };
 
     Window_OswCommand.prototype.windowWidth = function() {
