@@ -3,8 +3,8 @@
 // FTKR_BattleCommandIcon.js
 // 作成者     : フトコロ
 // 作成日     : 2017/06/24
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2017/06/24
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.BCI = FTKR.BCI || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 バトルコマンドにアイコンを追加する
+ * @plugindesc v1.0.1 バトルコマンドにアイコンを追加する
  * @author フトコロ
  *
  * @param --パーティーコマンド--
@@ -96,6 +96,8 @@ FTKR.BCI = FTKR.BCI || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.1 - 2017/06/24 : 不具合修正
+ * 
  * v1.0.0 - 2017/06/24 : 初版作成
  * 
  *-----------------------------------------------------------------------------
@@ -109,6 +111,13 @@ FTKR.BCI = FTKR.BCI || {};
     //=============================================================================
     var parameters = PluginManager.parameters('FTKR_BattleCommandIcon');
 
+    //配列の要素を、すべて数値に変換する。
+    Array.prototype.num = function() {
+      return this.map(function(elm) {
+          return Number(elm);
+      });
+    }
+
     FTKR.BCI.icons = {
         party:{
           fight  :Number(parameters['Fight Command Icon'] || 0),
@@ -121,13 +130,6 @@ FTKR.BCI = FTKR.BCI || {};
           item   :Number(parameters['Item Command Icon'] || 0),
         },
     };
-
-    //配列の要素を、すべて数値に変換する。
-    Array.prototype.num = function() {
-      return this.map(function(elm) {
-          return Number(elm);
-      });
-    }
 
     Window_Command.prototype.commandExt = function(index) {
         return this._list[index].ext;
