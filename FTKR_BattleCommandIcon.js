@@ -33,7 +33,7 @@ FTKR.BCI = FTKR.BCI || {};
  * @type number
  * @default 
  *
- * @param --パーティーコマンド--
+ * @param --アクターコマンド--
  * @default
  * 
  * @param Attack Command Icon
