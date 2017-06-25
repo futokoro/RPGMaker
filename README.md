@@ -11,6 +11,7 @@
 1. [アイテム](#アイテム)
 1. [敵グループ](#敵グループ)
 1. [バトル](#バトル)
+1. [イベント](#イベント)
 1. [デバッグ](#デバッグ)
 1. [その他備忘録](#その他備忘録)
 1. [試作品置き場](#試作品置き場)
@@ -63,7 +64,7 @@
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_ExEscapeCharacters](FTKR_ExEscapeCharacters.js) | [仮版](FTKR_ExEscapeCharacters.ja.md) | [v1.0.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExEscapeCharacters.js) | 2017/03/28 | 制御文字を追加する |
 | [FTKR_ExMessageWindow](FTKR_ExMessageWindow.js) | [仮版](FTKR_ExMessageWindow.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExMessageWindow.js) | 2017/03/28 | 制御文字を使って、一度に複数のメッセージウィンドウを表示する |
-| [FTKR_ExMessageWindow2](FTKR_ExMessageWindow2.js) | [仮版](FTKR_ExMessageWindow2.ja.md) | [v2.2.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExMessageWindow2.js) | 2017/06/09 | 文章の表示コマンドを使って、一度に複数のメッセージウィンドウを表示する <br> FTKR_ExMessageWindowと組み合わせて使用できません |
+| [FTKR_ExMessageWindow2](FTKR_ExMessageWindow2.js) | [仮版](FTKR_ExMessageWindow2.ja.md) | [v2.3.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExMessageWindow2.js) | 2017/06/25 | 文章の表示コマンドを使って、一度に複数のメッセージウィンドウを表示する <br> FTKR_ExMessageWindowと組み合わせて使用できません |
 
 [目次に戻る](#目次)
 
@@ -145,6 +146,14 @@
 | [FTKR_ExBattleEvent](FTKR_ExBattleEvent.js) | [あり](FTKR_ExBattleEvent.ja.md) | [v1.2.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExBattleEvent.js) | 2017/06/01 | バトルイベントを拡張する |
 | [FTKR_DisplayRegenerateMessage](FTKR_DisplayRegenerateMessage.js) | [あり](FTKR_DisplayRegenerateMessage.ja.md) | [v1.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_DisplayRegenerateMessage.js) | 2017/05/27 | HP再生量をバトルログに表示する |
 | [FTKR_BattleCommandIcon](FTKR_BattleCommandIcon.js) | [あり](FTKR_BattleCommandIcon.ja.md) | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_BattleCommandIcon.js) | 2017/06/24 | バトルコマンドにアイコンを追加する |
+
+[目次に戻る](#目次)
+
+# イベント
+
+| プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
+|:-----------|:-----------:|:-------------|:-------------|:-------------|
+| [FTKR_EventSmoothStart](FTKR_EventSmoothStart.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_EventSmoothStart.js) | 2017/06/25 | イベント起動時のプレイヤーの移動停止を無視する |
 
 [目次に戻る](#目次)
 

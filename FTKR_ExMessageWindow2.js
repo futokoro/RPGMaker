@@ -3,8 +3,8 @@
 // FTKR_ExMessageWindow2.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/24
-// 最終更新日 : 2017/06/09
-// バージョン : v2.2.0
+// 最終更新日 : 2017/06/25
+// バージョン : v2.3.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EMW = FTKR.EMW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.2.0 一度に複数のメッセージウィンドウを表示するプラグイン
+ * @plugindesc v2.3.0 一度に複数のメッセージウィンドウを表示するプラグイン
  * @author フトコロ
  * 
  * @param --初期設定--
@@ -323,8 +323,8 @@ FTKR.EMW = FTKR.EMW || {};
  * 
  * 2. 文章を表示するウィンドウを指定
  * 
- * EMW_メッセージウィンドウ指定 Id (終了禁止/終了許可) (行動許可/行動禁止) (幅 x) (行数 y) (左/中/右)
- * EMW_MESSAGEWINDOW_SET Id (NOEND/CANCLOSE) (CANMOVE/NOTMOVE) (WIDTH x) (LINES y) (LEFT/CENTER/RIGTH)
+ * EMW_メッセージウィンドウ指定 Id (終了禁止/終了許可) (行動許可/行動禁止) (幅 x) (行数 y) (左/中/右) (テキスト更新)
+ * EMW_MESSAGEWINDOW_SET Id (NOEND/CANCLOSE) (CANMOVE/NOTMOVE) (WIDTH x) (LINES y) (LEFT/CENTER/RIGTH) (UPDATE_TEXT)
  * 
  * このコマンド以降に文章を表示する場合に使用する拡張ウィンドウの
  * メッセージウィンドウIDを指定します。
@@ -343,6 +343,10 @@ FTKR.EMW = FTKR.EMW || {};
  * 
  * '左' '中' または '右'をつけると、IDの指定と合わせて、
  * ウィンドウのX座標の表示位置を設定できます。
+ * 
+ * 'テキスト更新'とつけると、IDの指定と合わせて、
+ * 制御文字で設定したウェイトやカーソル待ちを無視して
+ * 文章の表示コマンドで表示内容を上書きできます。
  * 
  * 
  * 3. 文章を表示するウィンドウの指定をリセット
@@ -417,6 +421,16 @@ FTKR.EMW = FTKR.EMW || {};
  * EMW_MESSAGEWINDOW_NOTMOVE Id
  * 
  * 指定したIDのウィンドウ表示中のプレイヤーの行動を禁止します。
+ * 
+ * 
+ * 10. メッセージウィンドウ表示内容の更新
+ * 
+ * EMW_メッセージウィンドウテキスト更新 Id
+ * EMW_MESSAGEWINDOW_UPDATE_TEXT Id
+ * 
+ * 指定したIDのウィンドウ表示内容を
+ * 制御文字で設定したウェイトやカーソル待ちを無視して
+ * 文章の表示コマンドで上書きできます。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -520,6 +534,9 @@ FTKR.EMW = FTKR.EMW || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v2.3.0 - 2017/06/25 : 機能追加
+ *    1. 表示するテキスト内容を強制更新する機能を追加。
  * 
  * v2.2.0 - 2017/06/09 : コアスクリプトv1.5.0に対応
  * 
@@ -685,6 +702,11 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
         var windowId = Number(args[0] || 0);
         if (windowId >= 0) $gameMessageEx.window(windowId).disabledCanMovePlayer(args[1]);
         break;
+    case 'テキスト更新':
+    case 'UPDATE_TEXT':
+        var windowId = Number(args[0] || 0);
+        if (windowId >= 0) $gameMessageEx.window(windowId).setFinishDisp();
+        break;
     }
 };
 
@@ -696,6 +718,10 @@ Game_Interpreter.prototype.setMessageWindowId = function(args) {
         for (var i = 1; i < args.length; i++) {
             var arg = (args[i] + '').toUpperCase();
             switch (arg) {
+            case 'テキスト更新':
+            case 'UPDATE_TEXT':
+                $gameMessageEx.window(windowId).setFinishDisp();
+                break;
             case '終了禁止':
             case 'NOEND':
                 $gameMessageEx.window(windowId).prohibitClose();
@@ -791,6 +817,7 @@ Game_Message.prototype.initialize = function() {
     this._permissionClose = true;
     this._canMovePlayer = false;
     this._terminate = false;
+    this._finishDisp = false;
 };
 
 FTKR.EMW.Game_Message_clear = Game_Message.prototype.clear;
@@ -879,27 +906,47 @@ Window_Message.prototype.update = function() {
 };
 
 Window_Message.prototype.updateConditions = function() {
-    return !this.isOpening() && !this.isClosing() && !$gameMessage.isLastText();
+    return !this.isOpening() && !this.isClosing() && !this._gameMessage.isLastText();
 };
 
 FTKR.EMW.Window_Message_updateWait = Window_Message.prototype.updateWait;
 Window_Message.prototype.updateWait = function() {
-    if ($gameMessage.isTerminate()) {
-        this._waitCount = 0;
-        if(this._textState) this._textState.index = this._textState.text.length;
-        this._pauseSkip = true;
-        this.pause = false;
-        this._gameMessage.resetTerminate();
+    if (this._gameMessage.isFinishDisp()) {
+        this.finishDisplay();
+        if (this._gameMessage.isTerminate()) {
+            this._gameMessage.resetTerminate();
+        }
         return false;
     }
     return FTKR.EMW.Window_Message_updateWait.call(this);
 };
 
+Window_Message.prototype.finishDisplay = function() {
+    this._waitCount = 0;
+    if(this._textState) this._textState.index = this._textState.text.length;
+    this._pauseSkip = true;
+    this.pause = false;
+    this._gameMessage.resetFinishDisp();
+};
+
 FTKR.EMW.Window_Message_terminateMessage = Window_Message.prototype.terminateMessage;
 Window_Message.prototype.terminateMessage = function() {
-    if ($gameMessage.canClose()) {
+    this._gameMessage.lastText();
+    if (this._gameMessage.canClose()) {
         FTKR.EMW.Window_Message_terminateMessage.call(this);
     }
+};
+
+Game_Message.prototype.isFinishDisp = function() {
+    return this._finishDisp;
+};
+
+Game_Message.prototype.setFinishDisp = function() {
+    this._finishDisp = true;
+};
+
+Game_Message.prototype.resetFinishDisp = function() {
+    this._finishDisp = false;
 };
 
 Game_Message.prototype.isTerminate = function() {
@@ -918,6 +965,7 @@ Game_Message.prototype.terminate = function() {
     if (!this.isBusyBase()) return;
     this.permitClose();
     this.lastText();
+    this.setFinishDisp();
     this.setTerminate();
     var message = this.windowMessageEx();
     if (message) {
@@ -1246,11 +1294,11 @@ Window_MessageEx.prototype.startMessage = function() {
     this.open();
     this.activate();
 };
-
+/*
 Window_MessageEx.prototype.updateConditions = function() {
     return !this.isOpening() && !this.isClosing() && !this._gameMessage.isLastText();
 };
-
+*/
 Window_MessageEx.prototype.updatePlacement = function() {
     if (this._gameMessage.windowWidth()) {
         this.width = this._gameMessage.windowWidth();
@@ -1319,14 +1367,13 @@ Window_MessageEx.prototype.drawMessageFace = function() {
 Window_MessageEx.prototype.newLineX = function() {
     return this._gameMessage.faceName() === '' ? 0 : 168;
 };
-
+/*
 Window_MessageEx.prototype.updateWait = function() {
-    if (this._gameMessage.isTerminate()) {
-        this._waitCount = 0;
-        if(this._textState) this._textState.index = this._textState.text.length;
-        this._pauseSkip = true;
-        this.pause = false;
-        this._gameMessage.resetTerminate();
+    if (this._gameMessage.isFinishDisp()) {
+        this.finishDisplay();
+        if (this._gameMessage.isTerminate()) {
+            this._gameMessage.resetTerminate();
+        }
         return false;
     }
     if (Imported.YEP_MessageCore && this.isFastForward()) return false;
@@ -1338,6 +1385,14 @@ Window_MessageEx.prototype.updateWait = function() {
     }
 };
 
+Window_MessageEx.prototype.finishDisplay = function() {
+    this._waitCount = 0;
+    if(this._textState) this._textState.index = this._textState.text.length;
+    this._pauseSkip = true;
+    this.pause = false;
+    this._gameMessage.resetFinishDisp();
+};
+*/
 //=============================================================================
 // Window_ChoiceListEx
 // 選択肢の拡張ウィンドウクラス
@@ -1532,6 +1587,11 @@ FTKR.EMW.Scene_Map_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function() {
     this.createMessageExWindowAll();
     FTKR.EMW.Scene_Map_createAllWindows.call(this);
+    this._messageWindow._gameMessage = $gameMessageEx.window(0);
+    this._messageExWindows[0] = this._messageWindow;
+    $gameMessageEx.window(0)._window_MessageEx = this._messageExWindows[0];
+    FTKR.EMW.scene.startTerminate ? $gameMessageEx.window(0).terminate() :
+        $gameMessageEx.window(0).firstText();
 };
 
 Scene_Map.prototype.readMapMeta = function() {
@@ -1542,10 +1602,12 @@ Scene_Map.prototype.readMapMeta = function() {
 //またはマップデータのメモ欄の設定を読み込む
 Scene_Map.prototype.createMessageExWindowAll = function() {
     this._messageExWindows = [];
+    /*
     this._messageExWindows[0] = this._messageWindow;
     $gameMessageEx.window(0)._window_MessageEx = this._messageExWindows[0];
     FTKR.EMW.scene.startTerminate ? $gameMessageEx.window(0).terminate() :
         $gameMessageEx.window(0).firstText();
+        */
     var number = this.readMapMeta() || FTKR.EMW.exwindowNum;
     for (var i = 1; i < number + 1; i++) {
         this.createMessageExWindow(i);
