@@ -118,7 +118,7 @@
 | [FTKR_ItemSubCommand](FTKR_ItemSubCommand.js) | [仮版](FTKR_ItemSubCommand.ja.md) | [v1.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ItemSubCommand.js) | 2017/06/11 | アイテムボックスにサブコマンドを追加するプラグイン |
 | [FTKR_ItemBoxCapacity](FTKR_ItemBoxCapacity.js) | [仮版](FTKR_ItemBoxCapacity.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ItemBoxCapacity.js) | 2017/06/09 | アイテムボックスに所持容量を追加するプラグイン |
 | [FTKR_ExItemBox](FTKR_ExItemBox.js) | [仮版](FTKR_ExItemBox.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExItemBox.js) | 2017/06/04 | アイテムボックスの仕様を変更するプラグイン<br> FTKR_ItemCategoryFixedとFTKR_ItemBoxCapacity、FTKR_ItemSubCommandと組み合わせて使用できません |
-| [FTKR_ItemCompositionSystem](FTKR_ItemCompositionSystem.js) | [仮版](FTKR_ItemCompositionSystem.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ItemCompositionSystem.js) | 2017/06/26 | アイテム合成システム |
+| [FTKR_ItemCompositionSystem](FTKR_ItemCompositionSystem.js) | [仮版](FTKR_ItemCompositionSystem.ja.md) | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ItemCompositionSystem.js) | 2017/06/27 | アイテム合成システム |
 
 [目次に戻る](#目次)
 
