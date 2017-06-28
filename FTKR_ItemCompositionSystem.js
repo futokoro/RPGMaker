@@ -3,8 +3,8 @@
 // FTKR_ItemConpositionSystem.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/08
-// 最終更新日 : 2017/06/27
-// バージョン : v1.0.2
+// 最終更新日 : 2017/06/28
+// バージョン : v1.0.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ICS = FTKR.ICS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.2 アイテム合成システム
+ * @plugindesc v1.0.3 アイテム合成システム
  * @author フトコロ
  *
  * @param --基本設定--
@@ -33,11 +33,6 @@ FTKR.ICS = FTKR.ICS || {};
  * @param Show Command Switch ID
  * @desc メニュー欄の表示のON/OFFを制御するスイッチIDを指定します。
  * @default 0
- *
- * @param Show Number Button
- * @desc アイテム数の指定画面でタッチ用ボタンを表示するか。
- *  1 - 表示する, 0 - 表示しない
- * @default 1
  *
  * @param Enable Confirmation
  * @desc アイテム合成実行時に確認画面で実行確認するか。
@@ -121,6 +116,19 @@ FTKR.ICS = FTKR.ICS || {};
  * @param End Cmd Name
  * @desc 「合成を止める」コマンドの表示内容を設定します。
  * @default 合成を止める
+ * 
+ * @param --素材数指定ウィンドウの設定--
+ * @default
+ *
+ * @param Show Number Button
+ * @desc アイテム数の指定画面でタッチ用ボタンを表示するか。
+ *  1 - 表示する, 0 - 表示しない
+ * @default 1
+ *
+ * @param Display Materials On Number
+ * @desc 素材数指定ウィンドウにレシピ素材を表示するか。
+ * 0 - 表示させない, 1 - 表示する
+ * @default 1
  * 
  * @param --素材スロットウィンドウの設定--
  * @default
@@ -710,6 +718,12 @@ FTKR.ICS = FTKR.ICS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.3 - 2017/06/27 不具合修正、機能追加
+ *    1. 合成情報ウィンドウに必要レシピを表示する機能が、正しく動作しない
+ *       不具合を修正。
+ *    2. 素材数指定ウィンドウに、必要レシピを表示するかどうか設定する
+ *       プラグインパラメータを追加。
+ * 
  * v1.0.2 - 2017/06/27 不具合修正、ヘルプ修正
  *    1. レシピタグで難易度を設定すると、正しく反映されない不具合を修正。
  * 
@@ -745,6 +759,22 @@ FTKR.ICS = FTKR.ICS || {};
  */
 //=============================================================================
 
+function Game_Composit() {
+    this.initialize.apply(this, arguments);
+}
+
+function Game_IcsRecipe() {
+    this.initialize.apply(this, arguments);
+}
+
+function Game_Material() {
+    this.initialize.apply(this, arguments);
+}
+
+function Game_IcsRecipeBook() {
+    this.initialize.apply(this, arguments);
+}
+
 (function() {
 
     //=============================================================================
@@ -759,7 +789,6 @@ FTKR.ICS = FTKR.ICS || {};
         categoryId    :Number(parameters['Category Type ID'] || 0),
         menuSwId      :Number(parameters['Show Command Switch ID'] || 0),
         enableConf    :Number(parameters['Enable Confirmation'] || 0),
-        showButton    :Number(parameters['Show Number Button'] || 0),
         varId:{
             itemId    :Number(parameters['Variables Get ItemId'] || 0),
             itemClass :Number(parameters['Variables Get ItemClass'] || 0),
@@ -799,6 +828,12 @@ FTKR.ICS = FTKR.ICS || {};
             action    :String(parameters['Action Cmd Name'] || ''),
             end       :String(parameters['End Cmd Name'] || ''),
         },
+    };
+
+    //素材数指定ウィンドウ設定
+    FTKR.ICS.number = {
+        showButton    :Number(parameters['Show Number Button'] || 0),
+        dispMaterials :Number(parameters['Display Materials On Number'] || 0),
     };
 
     //素材スロットタイトルウィンドウ設定
@@ -1432,10 +1467,6 @@ FTKR.ICS = FTKR.ICS || {};
     // Game_Composit
     //=============================================================================
 
-    function Game_Composit() {
-        this.initialize.apply(this, arguments);
-    }
-
     Game_Composit.prototype.initialize = function() {
         this._category = '';
         this._rank = 0;
@@ -1479,13 +1510,13 @@ FTKR.ICS = FTKR.ICS || {};
         this._recipes.push(recipe);
     };
 
+    Game_Composit.prototype.hasRecipe = function() {
+        return this.recipe(0).materials().length;
+    };
+
     //=============================================================================
     // Game_IcsRecipe
     //=============================================================================
-
-    function Game_IcsRecipe() {
-        this.initialize.apply(this, arguments);
-    }
 
     Game_IcsRecipe.prototype.initialize = function() {
         this._required = '';
@@ -1541,10 +1572,6 @@ FTKR.ICS = FTKR.ICS || {};
     //=============================================================================
     // Game_Material
     //=============================================================================
-
-    function Game_Material() {
-        this.initialize.apply(this, arguments);
-    }
 
     Game_Material.prototype.initialize = function(category, dataClass, itemId, number) {
         this._category = category || '';
@@ -1616,10 +1643,6 @@ FTKR.ICS = FTKR.ICS || {};
     //=============================================================================
     // Game_IcsRecipeBook
     //=============================================================================
-
-    function Game_IcsRecipeBook() {
-        this.initialize.apply(this, arguments);
-    }
 
     Game_IcsRecipeBook.prototype.initialize = function(dataClass, itemId, typeId) {
         this._dataClass = dataClass || '';
@@ -2111,7 +2134,7 @@ FTKR.ICS = FTKR.ICS || {};
     };
 
     Window_IcsNumber.prototype.updateButtonsVisiblity = function() {
-        if (FTKR.ICS.basic.showButton) {
+        if (FTKR.ICS.number.showButton) {
             this.showButtons();
         } else {
             this.hideButtons();
@@ -2136,7 +2159,7 @@ FTKR.ICS = FTKR.ICS || {};
     Window_IcsNumber.prototype.refresh = function() {
         this.contents.clear();
         this.drawItemName(this._item, 0, this.itemY());
-        if(this._showResipe) {
+        if(this._showResipe && FTKR.ICS.number.dispMaterials) {
             var y = this.buttonY() + this.lineHeight();
             this.drawResipeMaterials(this._item, this._typeId, 0, y);
         }
@@ -2187,6 +2210,7 @@ FTKR.ICS = FTKR.ICS || {};
 
     Window_IcsCompsiState.prototype.initialize = function(x, y, width, height) {
         Window_Base.prototype.initialize.call(this, x, y, width, height);
+        this._showResipe = false;
         this.clearWindow();
     };
 
@@ -2196,7 +2220,6 @@ FTKR.ICS = FTKR.ICS || {};
         this._comp = {};
         this._number = null;
         this._learnRecipe = false;
-        this._showResipe = false;
         this._resipeItem = null;
         this._resipeTypeId = null;
         this.refresh();
@@ -2300,7 +2323,7 @@ FTKR.ICS = FTKR.ICS || {};
     //また、合っているアイテムのレシピ情報を this._comps に加える
     Window_IcsCompsiState.prototype.checkMaterials = function(datas) {
         return datas.filter( function(item) {
-            if (item) {
+            if (item && item.ics.hasRecipe()) {
                 var result = this.matchRecipeMaterials(item);
                 if (result) this._comps.push(result);
                 return result;
