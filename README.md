@@ -119,6 +119,7 @@
 | [FTKR_ItemBoxCapacity](FTKR_ItemBoxCapacity.js) | [仮版](FTKR_ItemBoxCapacity.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ItemBoxCapacity.js) | 2017/06/09 | アイテムボックスに所持容量を追加するプラグイン |
 | [FTKR_ExItemBox](FTKR_ExItemBox.js) | [仮版](FTKR_ExItemBox.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExItemBox.js) | 2017/06/04 | アイテムボックスの仕様を変更するプラグイン<br> FTKR_ItemCategoryFixedとFTKR_ItemBoxCapacity、FTKR_ItemSubCommandと組み合わせて使用できません |
 | [FTKR_ItemCompositionSystem](FTKR_ItemCompositionSystem.js) | [仮版](FTKR_ItemCompositionSystem.ja.md) | [v1.0.3](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ItemCompositionSystem.js) | 2017/06/28 | アイテム合成システム |
+| [FTKR_ExEquipSlot](FTKR_ExEquipSlot.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExEquipSlot.js) | 2017/06/30 | 同じ装備タイプの装備を２つ以上装備できるようにする |
 
 [目次に戻る](#目次)
 
