@@ -2,9 +2,9 @@
 // トランプカードゲームプラグイン
 // FTKR_CardGames.js
 // 作成者     : フトコロ
-// 作成日     : 2017/07/02
-// 最終更新日 : 
-// バージョン : v0.7.0
+// 作成日     : 2017/07/01
+// 最終更新日 : 2017/07/01
+// バージョン : v0.7.5
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CRD = FTKR.CRD || {};
 
 //=============================================================================
 /*:
- * @plugindesc v0.7.0 トランプカードゲーム
+ * @plugindesc v0.7.5 トランプカードゲーム
  * @author フトコロ
  *
  * @param --基本の設定--
@@ -134,12 +134,24 @@ FTKR.CRD = FTKR.CRD || {};
  *-----------------------------------------------------------------------------
  * 遊び方
  *-----------------------------------------------------------------------------
- * 以下のプラグインパラメータを実行すると、ゲームを開始します。
+ * 1. プレイヤーの設定
+ * 
+ * CRD_プレイヤー設定 [プレイヤー1] [プレイヤー2] ...
+ * CRD_SETTING_PLAYER [player1] [player2] ...
+ * 
+ * ゲームに参加するプレイヤーを設定します。
+ * アクターIDを設定してください。(最大4人まで)
+ * -1 を設定すると、パーティーのリーダーキャラになります。
+ * プレイヤー1が操作キャラになります。
+ * 
+ * 
+ * 2. ゲーム画面の表示
  * 
  * CRD_カードゲーム表示
  * CRD_OPEN_CARDGAME
  * 
- * 現状では、誰かが一位抜けするとゲームが終了します。
+ * ゲーム画面を表示して、ゲームを開始します。
+ * 最後の一人になるまでプレイできます。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -153,7 +165,13 @@ FTKR.CRD = FTKR.CRD || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
- * v0.7.0 - 2017/07/02 : 試作作成
+ * v0.7.5 - 2017/07/01 : 機能追加
+ *    1. プレイヤー設定機能を追加
+ *    2. プレイヤーの名前と顔画像を表示する機能を追加。
+ *    3. 最後の一人になるまでゲームを続けるように変更。
+ *    4. カード選択時に、非選択のカードを透明にするように変更。
+ * 
+ * v0.7.0 - 2017/07/01 : 試作作成
  * 
  *-----------------------------------------------------------------------------
 */
@@ -186,18 +204,47 @@ FTKR.CRD = FTKR.CRD || {};
         },
     };
 
-    //枠線を描く
-    Bitmap.prototype.drawFrame = function(x, y, width, height, thick, color) {
-        var context = this._context;
-        context.strokeStyle = color;
-        context.lineWidth = thick;
-        context.strokeRect(x + thick/2, y + thick/2, width - thick, height - thick);
-        this._setDirty();
+    var convertEscapeCharacters = function(text) {
+        if (text == null) text = '';
+        var window = SceneManager._scene._windowLayer.children[0];
+        return window ? window.convertEscapeCharacters(text) : text;
     };
+
+    var setArgStr = function(arg) {
+        return convertEscapeCharacters(arg);
+    };
+
+    var setArgNum = function(arg) {
+        try {
+            return Number(eval(setArgStr(arg)));
+        } catch (e) {
+            return 0;
+        }
+    };
+
+    var shuffle = function(array) {
+        var count = array.length, suit, rank, i;
+        while (count) {
+            i = Math.floor(Math.random() * count--);
+            suit = array[count].suit;
+            rank = array[count].rank;
+            array[count].suit = array[i].suit;
+            array[count].rank = array[i].rank;
+            array[i] = {suit:suit, rank:rank};
+        }
+        return array;
+    }
 
     //=============================================================================
     // DataManager
     //=============================================================================
+
+    //カードゲーム設定用データクラスを登録
+    var _CRD_DataManager_createGameObjects = DataManager.createGameObjects;
+    DataManager.createGameObjects = function() {
+        _CRD_DataManager_createGameObjects.call(this);
+        $gameCardData = new Game_CardData();
+    };
 
     //画像ファイルの事前ロード
     var  _CRD_DataManager_loadDatabase = DataManager.loadDatabase;
@@ -216,14 +263,6 @@ FTKR.CRD = FTKR.CRD || {};
         ImageManager.loadPicture(FTKR.CRD.image.joker);
     };
 
-    DataManager.standardCardWidth = function() {
-        return ImageManager.loadPicture(FTKR.CRD.image.joker).width;
-    };
-
-    DataManager.standardCardHeight = function() {
-        return ImageManager.loadPicture(FTKR.CRD.image.joker).height;
-    };
-
     //=============================================================================
     // プラグインコマンド
     //=============================================================================
@@ -238,7 +277,101 @@ FTKR.CRD = FTKR.CRD || {};
             case 'OPEN_CARDGAME':
                 SceneManager.push(Scene_CRD);
                 break;
+            case 'プレイヤー設定':
+            case 'SETTING_PLAYER':
+                $gameCardData.resetPlayer();
+                args.forEach( function(arg, i) {
+                    if (i >= 4) return;
+                    $gameCardData.addPlayer(setArgNum(arg));
+                });
+                break;
         }
+    };
+
+    //=============================================================================
+    // Game_Actor
+    //=============================================================================
+
+    var _CRD_Game_Actor_setup = Game_Actor.prototype.setup;
+    Game_Actor.prototype.setup = function(actorId) {
+        _CRD_Game_Actor_setup.call(this, actorId);
+        ImageManager.loadFace(this.faceName());
+    };
+
+    //=============================================================================
+    // Game_CardData
+    // カードゲーム設定用データ
+    //=============================================================================
+
+    function Game_CardData() {
+        this.initialize.apply(this, arguments);
+    }
+
+    Game_CardData.prototype.initialize = function() {
+        this._players = [];
+        this._suits = FTKR.CRD.basic.suit.split(',');
+        this._maxRank = FTKR.CRD.basic.rank;
+        this._joker = FTKR.CRD.basic.joker;
+    };
+
+    //プレイヤーの設定
+    Game_CardData.prototype.players = function() {
+        return this._players;
+    };
+    
+    Game_CardData.prototype.playerNum = function() {
+        return this._players.length;
+    };
+
+    Game_CardData.prototype.player = function(id) {
+        return this._players[id];
+    };
+
+    Game_CardData.prototype.resetPlayer = function() {
+        this._players = [];
+    };
+
+    Game_CardData.prototype.addPlayer = function(actorId) {
+        this._players.push(actorId);
+    };
+
+    //スートの設定
+    Game_CardData.prototype.suits = function() {
+        return this._suits;
+    };
+
+    Game_CardData.prototype.resetSuits = function() {
+        this._suits = FTKR.CRD.basic.suit.split(',');
+    };
+
+    Game_CardData.prototype.setSuits = function(suits) {
+        this._suits = suits;
+    };
+
+    //ランクの設定
+    Game_CardData.prototype.maxRank = function() {
+        return this._maxRank;
+    };
+
+    Game_CardData.prototype.resetMaxRank = function() {
+        this._maxRank = FTKR.CRD.basic.rank;
+    };
+
+    Game_CardData.prototype.setMaxRank = function(maxRank) {
+        this._maxRank = maxRank;
+    };
+
+    //ジョーカーの設定
+    Game_CardData.prototype.joker = function() {
+        return this._joker;
+    };
+
+    Game_CardData.prototype.resetJoker = function() {
+        this._joker = FTKR.CRD.basic.joker;
+    };
+
+    Game_CardData.prototype.setJoker = function(joker) {
+        this._joker = joker;
     };
 
     //=============================================================================
@@ -257,6 +390,7 @@ FTKR.CRD = FTKR.CRD || {};
         Scene_MenuBase.prototype.initialize.call(this);
         this._handNum = FTKR.CRD.basic.number;
         this._gameEnd = false;
+        this._endPeople = 0;
     };
 
     Scene_CRD.prototype.createBackground = function() {
@@ -269,24 +403,71 @@ FTKR.CRD = FTKR.CRD || {};
 
     Scene_CRD.prototype.create = function() {
         Scene_MenuBase.prototype.create.call(this);
-        this.createDummyWindow();
-        this.createHandWindows();
-        this.createMessageBoxWindow();
-        var suits = FTKR.CRD.basic.suit.split(',');
-        this.makeStock(suits, FTKR.CRD.basic.rank, FTKR.CRD.basic.joker);
-        this.stockShuffle();
-        this.deal(-1);
-        this.discardPair();
-        if (this.checkGameEnd()) return;
-        this._index = 1;
-        this._subjectId = 0;
+        this.setPlayer();
+        this.createAllWindows();
+        this.settingGame();
+        this.setRoute();
+        this.setSubjectId(0);
         this.setPlayerName();
         this.targetWindow().activate();
         this.targetWindow().select(0);
     };
 
+    Scene_CRD.prototype.setRoute = function() {
+        this._route = [];
+        this._players.forEach( function(player, i){
+            var n = i + 1;
+            if (n >= $gameCardData.playerNum()) n = 0;
+            this._route.push(n);
+        },this);
+    };
+
+    Scene_CRD.prototype.setSubjectId = function(id) {
+        this._subjectId = 0;
+        this.setIndex();
+    };
+
+    Scene_CRD.prototype.shiftSubject = function() {
+        this._subjectId += 1;
+        if (this._subjectId >= $gameCardData.playerNum()) this._subjectId = 0;
+        this.setIndex();
+    };
+
+    Scene_CRD.prototype.setIndex = function() {
+        this._index = this._route[this._subjectId];
+    };
+
+    Scene_CRD.prototype.createAllWindows = function() {
+        this.createDummyWindow();
+        this.createHandWindows();
+        this.createActorWindows();
+        this.createMessageBoxWindow();
+    };
+
+    Scene_CRD.prototype.settingGame = function() {
+        this.makeStock();
+        this.stockShuffle();
+        this.deal(-1);
+        this.discardPair();
+        if (this.checkGameEnd()) return;
+    };
+
+    Scene_CRD.prototype.player = function(id) {
+        return this._players[id];
+    };
+
+    Scene_CRD.prototype.setPlayer = function() {
+        this._players = [];
+        $gameCardData.players().forEach(function(actorId){
+            var actor = actorId === -1 ? 
+                $gameParty.leader() :
+                $gameActors.actor(actorId);
+            this._players.push(actor);
+        },this);
+    };
     Scene_CRD.prototype.setPlayerName = function() {
-        this._messageBoxWindow.setPlayer(this.subjectWindow()._player);
+        var name = this.player(this.subjectId()).name();
+        this._messageBoxWindow.setPlayer(name);
     };
 
     Scene_CRD.prototype.stock = function() {
@@ -319,7 +500,10 @@ FTKR.CRD = FTKR.CRD || {};
         });
     };
 
-    Scene_CRD.prototype.makeStock = function(suitTypes, maxRank, jokerNum) {
+    Scene_CRD.prototype.makeStock = function() {
+        var suitTypes = $gameCardData.suits();
+        var maxRank = $gameCardData.maxRank();
+        var jokerNum = $gameCardData.joker();
         this._stock = [];
         suitTypes.forEach( function(suit){
             for (var r = 1; r < maxRank + 1; r++) {
@@ -330,19 +514,6 @@ FTKR.CRD = FTKR.CRD || {};
             this._stock.push({suit:'joker', rank:0});
         }
     };
-
-    var shuffle = function(array) {
-        var count = array.length, suit, rank, i;
-        while (count) {
-            i = Math.floor(Math.random() * count--);
-            suit = array[count].suit;
-            rank = array[count].rank;
-            array[count].suit = array[i].suit;
-            array[count].rank = array[i].rank;
-            array[i] = {suit:suit, rank:rank};
-        }
-        return array;
-    }
 
     Scene_CRD.prototype.gameEnd = function() {
         this._gameEnd = true;
@@ -383,20 +554,19 @@ FTKR.CRD = FTKR.CRD || {};
 
     Scene_CRD.prototype.createHandWindows = function() {
         this._handWindows = [];
-        var number = FTKR.CRD.basic.number;
+        var number = $gameCardData.playerNum();
         this.createHandWindow1();
         if (number > 1) this.createHandWindow2();
         if (number > 2) this.createHandWindow3();
         if (number > 3) this.createHandWindow4();
     };
 
-
     Scene_CRD.prototype.createHandWindow1 = function() {
         var ww = FTKR.CRD.basic.width;
         var wh = FTKR.CRD.basic.height;
         var wx = (Graphics.boxWidth - ww) / 2;
         var wy = Graphics.boxHeight - wh;
-        this._handWindows[0] = new Window_PlayerHand(wx, wy, ww, wh, 'あなた', true);
+        this._handWindows[0] = new Window_PlayerHand(wx, wy, ww, wh, true);
         this._handWindows[0].setHandler('ok',     this.onSelectOk.bind(this));
         this.addWindow(this._handWindows[0]);
     };
@@ -406,7 +576,7 @@ FTKR.CRD = FTKR.CRD || {};
         var wh = FTKR.CRD.basic.height;
         var wx = (Graphics.boxWidth - ww) / 2;
         var wy = 0;
-        this._handWindows[1] = new Window_PlayerHand(wx, wy, ww, wh, '相手１', false);
+        this._handWindows[1] = new Window_PlayerHand(wx, wy, ww, wh, false);
         this._handWindows[1].setHandler('ok',     this.onSelectOk.bind(this));
         this.addWindow(this._handWindows[1]);
     };
@@ -416,7 +586,7 @@ FTKR.CRD = FTKR.CRD || {};
         var ww = FTKR.CRD.basic.height;
         var wx = 0;
         var wy = (Graphics.boxHeight - wh) / 2;
-        this._handWindows[2] = new Window_PlayerHandVar(wx, wy, ww, wh, '相手２', false);
+        this._handWindows[2] = new Window_PlayerHandVar(wx, wy, ww, wh, false);
         this._handWindows[2].setHandler('ok',     this.onSelectOk.bind(this));
         this.addWindow(this._handWindows[2]);
     };
@@ -426,11 +596,59 @@ FTKR.CRD = FTKR.CRD || {};
         var ww = FTKR.CRD.basic.height;
         var wx = Graphics.boxWidth - ww;
         var wy = (Graphics.boxHeight - wh) / 2;
-        this._handWindows[3] = new Window_PlayerHandVar(wx, wy, ww, wh, '相手３', false);
+        this._handWindows[3] = new Window_PlayerHandVar(wx, wy, ww, wh, false);
         this._handWindows[3].setHandler('ok',     this.onSelectOk.bind(this));
         this.addWindow(this._handWindows[3]);
     };
 
+    Scene_CRD.prototype.createActorWindows = function() {
+        this._actorWindows = [];
+        var number = $gameCardData.playerNum();
+        this.createActorWindow1();
+        if (number > 1) this.createActorWindow2();
+        if (number > 2) this.createActorWindow3();
+        if (number > 3) this.createActorWindow4();
+    };
+
+    Scene_CRD.prototype.createActorWindow1 = function() {
+        var wh = Window_Base._faceHeight / 2 + this._dummyWindow.standardPadding() * 2;
+        var ww = Window_Base._faceHeight + this._dummyWindow.standardPadding() * 2;
+        var wx = (Graphics.boxWidth - ww) / 2;
+        var wy = this._handWindows[0].y - wh;
+        var actor = this.player(0);
+        this._actorWindows[0] = new Window_PlayerStatus(actor, wx, wy, ww, wh);
+        this.addWindow(this._actorWindows[0]);
+    };
+
+    Scene_CRD.prototype.createActorWindow2 = function() {
+        var wh = Window_Base._faceHeight / 2 + this._dummyWindow.standardPadding() * 2;
+        var ww = Window_Base._faceHeight + this._dummyWindow.standardPadding() * 2;
+        var wx = (Graphics.boxWidth - ww) / 2;
+        var wy = this._handWindows[1].y + this._handWindows[1].height;
+        var actor = this.player(1);
+        this._actorWindows[1] = new Window_PlayerStatus(actor, wx, wy, ww, wh);
+        this.addWindow(this._actorWindows[1]);
+    };
+
+    Scene_CRD.prototype.createActorWindow3 = function() {
+        var wh = Window_Base._faceHeight + this._dummyWindow.standardPadding() * 2;
+        var ww = Window_Base._faceHeight / 2+ this._dummyWindow.standardPadding() * 2;
+        var wx = this._handWindows[2].x + this._handWindows[2].width;
+        var wy = (Graphics.boxHeight - wh) / 2;
+        var actor = this.player(2);
+        this._actorWindows[2] = new Window_PlayerStatus(actor, wx, wy, ww, wh);
+        this.addWindow(this._actorWindows[2]);
+    };
+
+    Scene_CRD.prototype.createActorWindow4 = function() {
+        var wh = Window_Base._faceHeight + this._dummyWindow.standardPadding() * 2;
+        var ww = Window_Base._faceHeight / 2+ this._dummyWindow.standardPadding() * 2;
+        var wx = this._handWindows[3].x - ww;
+        var wy = (Graphics.boxHeight - wh) / 2;
+        var actor = this.player(3);
+        this._actorWindows[3] = new Window_PlayerStatus(actor, wx, wy, ww, wh);
+        this.addWindow(this._actorWindows[3]);
+    };
 
     Scene_CRD.prototype.createMessageBoxWindow = function() {
         this._messageBoxWindow = new Window_MessageBox();
@@ -440,21 +658,28 @@ FTKR.CRD = FTKR.CRD || {};
     };
 
     Scene_CRD.prototype.shiftIndex = function() {
-        this._index++;
-        this._subjectId++;
-        if (this._index >= this.handNum()) this._index = 0;
-        if (this._subjectId >= this.handNum()) this._subjectId = 0;
+        do {
+            this.shiftSubject();
+            if (!this.targetWindow().cardNum()) {
+                this.refreshRoute(this._subjectId);
+                this.setIndex();
+            }
+        } while (!this.subjectWindow().cardNum());
+    };
+
+    Scene_CRD.prototype.remainingNum = function() {
+        return this._handWindows.filter( function(window, i){
+            return window._hand.length;
+        },this).length
     };
 
     Scene_CRD.prototype.checkGameEnd = function() {
-        return this._handWindows.some( function(window){
-            if (!window._hand.length) {
-                this.gameEnd();
-                this._messageBoxWindow.setGameEnd(window._player);
-                this._messageBoxWindow.activate();
-                return true;
-            }
-        },this);
+        if (this.remainingNum() === 1) {
+            this.gameEnd();
+            this._messageBoxWindow.setGameEnd();
+            this._messageBoxWindow.activate();
+            return true;
+        }
     };
 
     Scene_CRD.prototype.onSelectOk = function() {
@@ -476,7 +701,7 @@ FTKR.CRD = FTKR.CRD || {};
             if (this.checkGameEnd()) return;
             this.shiftIndex();
             this.setPlayerName();
-            if (this.index() === 1) {
+            if (this._subjectId === 0) {
                 this.targetWindow().activate();
                 this.targetWindow().select(0);
             } else {
@@ -490,6 +715,10 @@ FTKR.CRD = FTKR.CRD || {};
         window.addHand(hand.suit, hand.rank);
         window.discardPair();
         window.refreshHand();
+        if (!window.cardNum()) {
+            this._endPeople++;
+            this._actorWindows[index].setRank(this._endPeople);
+        }
         window.deselect();
     };
 
@@ -498,7 +727,19 @@ FTKR.CRD = FTKR.CRD || {};
         var handIndex = isPlayer ? window.index() :
             Math.floor(Math.randomInt(window._hand.length));
         var hand = window.reduceHand(handIndex);
+        if (!window.cardNum()) {
+            this._endPeople++;
+            this._actorWindows[index].setRank(this._endPeople);
+            this.refreshRoute(index);
+        }
         return hand;
+    };
+
+    Scene_CRD.prototype.refreshRoute = function(index) {
+        do {
+            this._route[index] += 1;
+            if (this._route[index] >= $gameCardData.playerNum()) this._route[index] = 0;
+        } while (!this._handWindows[this._route[index]].cardNum());
     };
 
     //=============================================================================
@@ -513,11 +754,10 @@ FTKR.CRD = FTKR.CRD || {};
     Window_PlayerHand.prototype = Object.create(Window_Selectable.prototype);
     Window_PlayerHand.prototype.constructor = Window_PlayerHand;
 
-    Window_PlayerHand.prototype.initialize = function(x, y, width, height, player, isPlayer) {
+    Window_PlayerHand.prototype.initialize = function(x, y, width, height, isPlayer) {
         this._hand = [];
         this._sprites = [];
         this._isPlayer = isPlayer;
-        this._player = player;
         Window_Selectable.prototype.initialize.call(this, x, y, width, height);
         this.setCardSize();
         this.refresh();
@@ -570,19 +810,11 @@ FTKR.CRD = FTKR.CRD || {};
         return this.cardNum();
     };
 
-    Window_PlayerHand.prototype.drawRectLine = function(index, thick, color) {
-        var rect = this.itemRect(index);
-        this.contents.drawFrame(rect.x, rect.y, rect.width, rect.height, thick, this.textColor(color));
-    };
-
     Window_PlayerHand.prototype.drawItem = function(index) {
         var card = this._hand[index];
         if (!card) return;
         var rect = this.itemRect(index);
         this.drawCardImage(index, rect.x, rect.y, this._isPlayer, card.suit, card.rank);
-        if (index === this.index()) {
-            this.drawRectLine(index, 2, 15);
-        }
     };
 
     Window_PlayerHand.prototype.addHand = function(suit, rank) {
@@ -670,7 +902,9 @@ FTKR.CRD = FTKR.CRD || {};
         Window_Selectable.prototype.select.call(this, index);
         if (index >= 0 && index === this.index()) {
             this.refresh();
-            this._sprites[index].opacity = 100;
+            this._sprites.forEach( function(sprite, i){
+                if (i !== index) sprite.opacity = 100;
+            });
         }
     };
 
@@ -766,6 +1000,72 @@ FTKR.CRD = FTKR.CRD || {};
     };
 
     //=============================================================================
+    // Window_PlayerStatus
+    // プレイヤーステータス
+    //=============================================================================
+
+    function Window_PlayerStatus() {
+        this.initialize.apply(this, arguments);
+    }
+
+    Window_PlayerStatus.prototype = Object.create(Window_Base.prototype);
+    Window_PlayerStatus.prototype.constructor = Window_PlayerStatus;
+
+    Window_PlayerStatus.prototype.initialize = function(actor, wx, wy, ww, wh) {
+        Window_Base.prototype.initialize.call(this, wx, wy, ww, wh);
+        this._actor = actor;
+        this._rank = 0;
+        this.refresh();
+    };
+
+    Window_PlayerStatus.prototype.setRank = function(rank) {
+        this._rank = rank;
+        this.refresh();
+    };
+
+    Window_PlayerStatus.prototype.refresh = function() {
+        if(this.contents) {
+            this.contents.clear();
+            var width = this.width - this.padding * 2;
+            var x = 0, y = 0;
+            if (this.width > this.height) {
+                width /= 2;
+                x += width;
+            } else {
+                y += width;
+            }
+            this.drawActorFace(this._actor, 0, 0, width);
+            this.drawText(this._actor.name(), x, y, width, 'center');
+            this.drawText(this.rank(), x, y + this.lineHeight(), width, 'center');
+        }
+    };
+
+    Window_PlayerStatus.prototype.rank = function() {
+        switch (this._rank) {
+            case 1:
+                return '一位';
+            case 2:
+                return '二位';
+            case 3:
+                return '三位';
+            default:
+                return '';
+        }
+    };
+
+    Window_PlayerStatus.prototype.drawActorFace = function(actor, dx, dy, size) {
+        var dh = size || Window_Base._faceHeight;
+        var dw = size || Window_Base._faceWidth;
+        var bitmap = ImageManager.reserveFace(actor.faceName());
+        var sw = Window_Base._faceWidth;
+        var sh = Window_Base._faceHeight;
+        var sx = actor.faceIndex() % 4 * sw;
+        var sy = Math.floor(actor.faceIndex() / 4) * sh;
+        this.contents.blt(bitmap, sx, sy, sw, sh, dx, dy, dw, dh);
+    };
+
+
+    //=============================================================================
     // Window_MessageBox
     // メッセージボックス
     //=============================================================================
@@ -779,7 +1079,7 @@ FTKR.CRD = FTKR.CRD || {};
 
     Window_MessageBox.prototype.initialize = function() {
         var ww = 240;
-        var wh = 144;
+        var wh = 72;
         var wx = (Graphics.boxWidth - ww) / 2;
         var wy = (Graphics.boxHeight - wh) / 2;
         Window_Selectable.prototype.initialize.call(this, wx, wy, ww, wh);
@@ -793,15 +1093,15 @@ FTKR.CRD = FTKR.CRD || {};
     Window_MessageBox.prototype.setGameEnd = function(player) {
         this._player = player;
         this.contents.clear();
-        var text = this._player + 'の勝利です';
-        this.drawText(text, 0, this.lineHeight(), this.width - this.padding * 2, 'center');
+        var text = 'ゲーム終了です';
+        this.drawText(text, 0, 0, this.width - this.padding * 2, 'center');
     };
 
     Window_MessageBox.prototype.refresh = function() {
         if(this._player) {
             this.contents.clear();
             var text = this._player + 'のターンです';
-            this.drawText(text, 0, this.lineHeight(), this.width - this.padding * 2, 'center');
+            this.drawText(text, 0, 0, this.width - this.padding * 2, 'center');
         }
     };
 
