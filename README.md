@@ -176,7 +176,7 @@
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_ActionGauge](FTKR_ActionGauge.js) | なし | [v0.7.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ActionGauge.js) | 2017/04/21 | アクションゲージ |
-| [FTKR_CardGames](FTKR_CardGames.js) | なし | [v0.7.5](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CardGames.js) | 2017/07/02 | カードゲーム |
+| [FTKR_CardGames](FTKR_CardGames.js) | なし | [v0.8.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CardGames.js) | 2017/07/03 | カードゲーム |
 #
 
 [目次に戻る](#目次)
