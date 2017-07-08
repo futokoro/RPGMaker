@@ -3,8 +3,8 @@
 // FTKR_FacialImageDifference.js
 // 作成者     : フトコロ
 // 作成日     : 2017/05/10
-// 最終更新日 : 2017/05/28
-// バージョン : v1.1.1
+// 最終更新日 : 2017/07/08
+// バージョン : v1.1.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.FID = FTKR.FID || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.1 アクターの状態によって顔画像を変えるプラグイン
+ * @plugindesc v1.1.2 アクターの状態によって顔画像を変えるプラグイン
  * @author フトコロ
  *
  * @noteParam FID_画像
@@ -279,6 +279,9 @@ FTKR.FID = FTKR.FID || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.1.2 - 2017/07/08 : 不具合修正
+ *    1. シーン変更時に現在の顔画像をリセットする機能を追加。
  * 
  * v1.1.1 - 2017/05/27 : 不具合修正、機能追加
  *    1. メニュー画面で顔画像が戦闘不能以外に変わらない不具合修正。
@@ -606,6 +609,7 @@ Sprite_ActorFace.prototype.startMotion = function(motionType) {
     Sprite_Actor.prototype.startMotion.call(this, motionType);
     if (this._faceType !== motionType) {
         this._faceType = motionType;
+        console.log(motionType);
         if (Imported.FTKR_ESM) this.setNewMotion(this._actor, motionType);
     }
 };
@@ -756,4 +760,22 @@ Window_BattleStatus.prototype.isFaceSpriteBusy = function() {
 FTKR.FID.BattleManager_isBusy = BattleManager.isBusy;
 BattleManager.isBusy = function() {
     return (FTKR.FID.BattleManager_isBusy.call(this) || this._statusWindow.isBusy());
+};
+
+//=============================================================================
+// Scene_Base
+// シーン変更時に顔番号をリセット
+//=============================================================================
+
+FTKR.FID.Scene_Base_start = Scene_Base.prototype.start;
+Scene_Base.prototype.start = function() {
+    FTKR.FID.Scene_Base_start.call(this);
+    this.resetActorFaceType();
+};
+
+Scene_Base.prototype.resetActorFaceType = function() {
+    if (!$gameParty) return;
+    $gameParty.members().forEach( function(member) {
+        member.clearFace();
+    });
 };

@@ -3,8 +3,8 @@
 // FTKR_ExSvMotion.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/19
-// 最終更新日 : 2017/05/19
-// バージョン : v1.2.3
+// 最終更新日 : 2017/07/09
+// バージョン : v1.2.4
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ESM = FTKR.ESM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.3 SVキャラのモーションを拡張するプラグイン
+ * @plugindesc v1.2.4 SVキャラのモーションを拡張するプラグイン
  * @author フトコロ
  *
  * @noteParam ESM_画像
@@ -584,6 +584,10 @@ FTKR.ESM = FTKR.ESM || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.2.4 - 2017/07/09 : 不具合修正
+ *    1. 状態モーションのescapeが、戦闘時以外でも有効になる不具合を修正。
+ *    2. 戦闘終了時に、アクターのアクションをリセットする機能を追加。
+ * 
  * v1.2.3 - 2017/05/19 : 不具合修正
  *    1. 防御モーションの優先度が反映されない不具合を修正。
  * 
@@ -784,6 +788,19 @@ FTKR.evalFormula = function(formula) {
 }
 
 //=============================================================================
+// 戦闘終了時にアクターのアクションをリセット
+//=============================================================================
+
+FTKR.ESM.BattleManager_updateBattleEnd = BattleManager.updateBattleEnd;
+BattleManager.updateBattleEnd = function() {
+    $gameParty.members().forEach( function(member){
+        member.clearActions();
+        member._actionState = '';
+    });
+    FTKR.ESM.BattleManager_updateBattleEnd.call(this);
+};
+
+//=============================================================================
 // 基本モーションの設定を変更
 //=============================================================================
 
@@ -897,7 +914,7 @@ Game_BattlerBase.prototype.checkCondition = function(condition) {
         case /victory/i.test(condition):
             return $gameParty.inBattle() && $gameTroop.isAllDead() && this._requestVictory;
         case /escape/i.test(condition):
-            return BattleManager.isEscaped() && this._requestEscape;
+            return $gameParty.inBattle() && BattleManager.isEscaped() && this._requestEscape;
         case /dying/i.test(condition):
             return this.isDying();
         default:
