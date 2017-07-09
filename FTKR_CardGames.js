@@ -3,8 +3,8 @@
 // FTKR_CardGames.js
 // 作成者     : フトコロ
 // 作成日     : 2017/07/02
-// 最終更新日 : 2017/07/08
-// バージョン : v1.0.0
+// 最終更新日 : 2017/07/09
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CRD = FTKR.CRD || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 トランプカードゲーム
+ * @plugindesc v1.0.1 トランプカードゲーム
  * @author フトコロ
  *
  * @param --カードの設定--
@@ -509,7 +509,10 @@ FTKR.CRD = FTKR.CRD || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
- * v1.0.0 - 2017/07/08 : 正式版公開
+ * v1.0.1 - 2017/07/09 : 不具合修正
+ *    1. プレイヤーを設定するプラグインコマンドでエラーになる不具合を修正。
+ * 
+ * v1.0.0 - 2017/07/09 : 正式版公開
  *    1. NPCの台詞を設定する機能を追加。
  *    2. NPCの台詞、表情、特徴をゲーム内スイッチでON/OFFできる機能を追加。
  *    3. ゲーム数を、ゲーム内変数で設定するように変更。
@@ -889,7 +892,6 @@ FTKR.CRD = FTKR.CRD || {};
                 args.forEach( function(arg, i) {
                     if (i >= 4) return;
                     setVarId(FTKR.CRD.setting.playerId[i], setArgNum(arg));
-//                    $gameCardData.addPlayer(setArgNum(arg));
                 });
                 break;
         }
@@ -927,7 +929,6 @@ FTKR.CRD = FTKR.CRD || {};
     //プレイヤーの設定
     Game_CardData.prototype.players = function() {
         var players = [];
-        console.log(FTKR.CRD.setting.playerId);
         FTKR.CRD.setting.playerId.filter( function(id){
             var value = $gameVariables.value(id);
             if (value !== 0) {
@@ -942,21 +943,12 @@ FTKR.CRD = FTKR.CRD || {};
         return FTKR.CRD.setting.playerId.filter( function(id){
             return $gameVariables.value(id) !== 0;
         }).length;
-//        return this._players.length;
-    };
-/*
-    Game_CardData.prototype.player = function(id) {
-        return this._players[id];
     };
 
     Game_CardData.prototype.resetPlayer = function() {
         this._players = [];
     };
 
-    Game_CardData.prototype.addPlayer = function(actorId) {
-        this._players.push(actorId);
-    };
-*/
     Game_CardData.prototype.chara = function(id) {
         return this._charas[id];
     };
@@ -1175,7 +1167,6 @@ FTKR.CRD = FTKR.CRD || {};
                 $gameActors.actor(actorId);
             this._players.push(actor);
         },this);
-        console.log($gameCardData.players(), this._players);
     };
 
     Scene_CRD.prototype.stock = function() {
@@ -1974,7 +1965,6 @@ FTKR.CRD = FTKR.CRD || {};
                     if (card.suit !== 'joker') faceIndex = face.index;
                     break;
                 case Scene_CRD.FACE_MADE_PAIR:
-                    console.log(this._hand);
                     if (this._hand.some(function(hand){
                         return hand.rank === card.rank && hand.suit !== card.suit;
                     })) faceIndex = face.index;
@@ -2267,7 +2257,6 @@ FTKR.CRD = FTKR.CRD || {};
         var sw = Window_Base._faceWidth;
         var sh = Window_Base._faceHeight;
         var faceIndex = this._tempFaceIndex >= 0 && switchId('faces') ? this._tempFaceIndex : actor.faceIndex();
-        console.log(faceIndex, this._tempFaceIndex, actor.faceIndex());
         var sx = faceIndex % 4 * sw;
         var sy = Math.floor(faceIndex / 4) * sh;
         this.contents.blt(bitmap, sx, sy, sw, sh, dx, dy, dw, dh);
