@@ -3,8 +3,8 @@
 // FTKR_CardGames.js
 // 作成者     : フトコロ
 // 作成日     : 2017/07/02
-// 最終更新日 : 2017/07/06
-// バージョン : v0.9.0
+// 最終更新日 : 2017/07/08
+// バージョン : v1.0.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CRD = FTKR.CRD || {};
 
 //=============================================================================
 /*:
- * @plugindesc v0.9.0 トランプカードゲーム
+ * @plugindesc v1.0.0 トランプカードゲーム
  * @author フトコロ
  *
  * @param --カードの設定--
@@ -32,29 +32,109 @@ FTKR.CRD = FTKR.CRD || {};
  * @default 13
  * @type number
  *
- * @param --ゲームの設定--
- * @default
- * 
  * @param Number Of Jokers
  * @desc 使用するジョーカーの数を選択します。
  * 0 ~ 2
  * @default 1
  * @type number
  *
- * @param Number Of Players
- * @desc ゲームに参加する人数を設定します。
- * @default 4
+ * @param --ゲームの設定--
+ * @default
+ * 
+ * @param Subject Player Color
+ * @desc 現在ターンのプレイヤーのカラーを設定します。
+ * @default 17
  * @type number
- *
- * @param Number Of Games
- * @desc ゲーム数を設定します。
- * @default 1
+ * 
+ * @param Target Player Color
+ * @desc 手札を引く相手プレイヤーのカラーを設定します。
+ * @default 29
  * @type number
- *
+ * 
  * @param Ranking Points
  * @desc ゲームの勝敗の結果で取得するポイントを設定します。
  * カンマ(,)で区切って、1位から4位まで設定してください。
  * @default 2,1,-1,-2
+ * 
+ * @param --ゲーム変数の設定--
+ * @default
+ * 
+ * @param Game Count ID
+ * @desc ゲーム数を設定する変数のIDを指定します。
+ * @default 
+ * @type number
+ *
+ * @param Player 1 ID
+ * @desc プレイヤー１のアクターIDを指定した変数に格納します。
+ * @default 
+ * @type number
+ *
+ * @param Player 1 Result
+ * @desc プレイヤー１の結果を指定した変数に格納します。
+ * @default 
+ * @type number
+ *
+ * @param Player 2 ID
+ * @desc プレイヤー2のアクターIDを指定した変数に格納します。
+ * @default 
+ * @type number
+ *
+ * @param Player 2 Result
+ * @desc プレイヤー２の結果を指定した変数に格納します。
+ * @default 
+ * @type number
+ *
+ * @param Player 3 ID
+ * @desc プレイヤー3のアクターIDを指定した変数に格納します。
+ * @default 
+ * @type number
+ *
+ * @param Player 3 Result
+ * @desc プレイヤー３の結果を指定した変数に格納します。
+ * @default 
+ * @type number
+ *
+ * @param Player 4 ID
+ * @desc プレイヤー4のアクターIDを指定した変数に格納します。
+ * @default 
+ * @type number
+ *
+ * @param Player 4 Result
+ * @desc プレイヤー４の結果を指定した変数に格納します。
+ * @default 
+ * @type number
+ * 
+ * @param --ゲームスイッチの設定--
+ * @default
+ * 
+ * @param Random Start ID
+ * @desc 開始プレイヤーをランダムにする機能の有効無効を設定するスイッチのIDを指定します。
+ * @default 
+ * @type number
+ *
+ * @param NPC Dialogues ID
+ * @desc NPCの台詞の有効無効を設定するスイッチのIDを指定します。
+ * @default 
+ * @type number
+ *
+ * @param NPC Facial Expressions ID
+ * @desc NPCの表情の有効無効を設定するスイッチのIDを指定します。
+ * @default 
+ * @type number
+ *
+ * @param NPC Characteristics ID
+ * @desc NPCの特徴の有効無効を設定するスイッチのIDを指定します。
+ * @default 
+ * @type number
+ *
+ * @param --勝敗結果の取得--
+ * @default
+ * 
+ * @param Reset Variables
+ * @desc ゲーム画面表示時に、指定した変数に 0 を代入します。
+ * 0 - 無効、1 - 有効
+ * @default 1
+ * @type number
  *
  * @param --画面レイアウト--
  * @default
@@ -69,35 +149,40 @@ FTKR.CRD = FTKR.CRD || {};
  * @default 180
  * @type number
  *
- * @param --勝敗結果の取得--
+ * @param Dialogue Width
+ * @desc 台詞ウィンドウの幅を設定します。
+ * @default 240
+ * @type number
+ *
+ * @param Dialogue Height
+ * @desc 台詞ウィンドウの高さを設定します。
+ * @default 72
+ * @type number
+ *
+ * @param Dialogue Offset Y
+ * @desc 台詞ウィンドウとアクターウィンドウのY座標の差を設定します。
+ * @default 18
+ * @type number
+ *
+ * @param Dialogue Skin
+ * @desc 台詞ウィンドウのスキンを設定します。
+ * 設定しない場合は、デフォルトスキンを使用します。
+ * @default 
+ * @require 1
+ * @dir img/system/
+ * @type file
+ *
+ * @param --コマンドの設定--
  * @default
  * 
- * @param Reset Variables
- * @desc ゲーム画面表示時に、指定した変数に 0 を代入します。
- * 0 - 無効、1 - 有効
- * @default 1
- * @type number
+ * @param Turn End Command
+ * @desc ターンを終了するコマンド名を設定します。
+ * @default ターン終了
  *
- * @param Player 1 Result
- * @desc プレイヤー１の結果を指定した変数に格納します。
- * @default 
- * @type number
+ * @param Sort Command
+ * @desc 手札を並び替えるコマンド名を設定します。
+ * @default 並び替え
  *
- * @param Player 2 Result
- * @desc プレイヤー２の結果を指定した変数に格納します。
- * @default 
- * @type number
- *
- * @param Player 3 Result
- * @desc プレイヤー３の結果を指定した変数に格納します。
- * @default 
- * @type number
- *
- * @param Player 4 Result
- * @desc プレイヤー４の結果を指定した変数に格納します。
- * @default 
- * @type number
- * 
  * @param --画像の設定--
  * @default
  * 
@@ -329,10 +414,11 @@ FTKR.CRD = FTKR.CRD || {};
  * NPC時に特徴を設定することができます。
  * 
  * <CRD_特徴>
- * 内容: 確率
+ * 内容: 確率(, 台詞)
  * </CRD_特徴>
  * 
  * 確率は、1～10の値で、10％刻みで内容を実行する確率を設定できます。
+ * 台詞は、NPCの台詞を設定するときだけ追記してください。
  * 内容には以下の項目があります。
  * 
  * <カードの取り方に関する内容>
@@ -385,6 +471,15 @@ FTKR.CRD = FTKR.CRD || {};
  * 2. ジョーカーを持っていない(x) - ジョーカーを持っていない間、顔画像をx番に変えます
  * 
  * 
+ * <台詞に関する内容>
+ * ※この台詞は自分のターンが終わると消去されます
+ * 
+ * 1. ジョーカーを引く　　 - ジョーカーを引いた時に指定の台詞を表示します
+ * 2. ジョーカー以外を引く - ジョーカー以外を引いた時に指定の台詞を表示します
+ * 3. ペアができた　　　　 - ペアができた時に指定の台詞を表示します
+ * 4. ペアができない　　　 - ペアができなかった時に指定の台詞を表示します
+ * 
+ * 
  * 特徴は複数設定することができます。
  * 複数の特徴がある場合は、上から順番に内容を処理します。
  * 
@@ -416,10 +511,20 @@ FTKR.CRD = FTKR.CRD || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.0 - 2017/07/08 : 正式版公開
+ *    1. NPCの台詞を設定する機能を追加。
+ *    2. NPCの台詞、表情、特徴をゲーム内スイッチでON/OFFできる機能を追加。
+ *    3. ゲーム数を、ゲーム内変数で設定するように変更。
+ *    4. プラグインパラメータを一部削除。
+ *    5. コマンド名をプラグインパラメータで設定する機能を追加。
+ *    6. 開始プレイヤーをランダムに決める機能を追加。
+ *    7. NPCの配置を見直し。
+ *    8. ターン中のプレイヤーの名前の表示色を変更する機能を追加。
+ * 
  * v0.9.0 - 2017/07/06 : 機能追加
  *    1. カードを引いたときに任意の場所にセットする機能を追加。
  *    2. 手札の並び替え機能を追加。
- *    3. NPCに特徴を設定する機能を追加。
+ *    3. NPCの特徴を設定する機能を追加。
  * 
  * v0.8.0 - 2017/07/03 : 機能追加、プラグインパラメータ名変更
  *    1. ディプロイメントの「未使用ファイル」に対応する機能を追加。
@@ -452,16 +557,40 @@ FTKR.CRD = FTKR.CRD || {};
         card:{
             suit       :String(parameters['Suit Type'] || 'spade,club,heart,diamond'),
             rank       :Number(parameters['Max Rank'] || 13).clamp(1,13),
+            jokerNum   :Number(parameters['Number Of Jokers'] || 1).clamp(0,2),
         },
         layout:{
-            width      :Number(parameters['Hand Width'] || 500),
-            height     :Number(parameters['Hand Height'] || 200),
+            targetPosi :Number(parameters['Target Position'] || 0),
+            width      :Number(parameters['Hand Width'] || 432),
+            height     :Number(parameters['Hand Height'] || 180),
+            dialogue:{
+                skin   :String(parameters['Dialogue Skin'] || ''),
+                width  :Number(parameters['Dialogue Width'] || 240),
+                height :Number(parameters['Dialogue Height'] || 72),
+                offsetY:Number(parameters['Dialogue Offset Y'] || 18),
+            },
         },
         game:{
-            jokerNum   :Number(parameters['Number Of Jokers'] || 1).clamp(0,2),
-            playerNum  :Number(parameters['Number Of Players'] || 2).clamp(2,4),
-            gameNum    :Number(parameters['Number Of Games'] || 1),
+            subjectColor :Number(parameters['Subject Player Color'] || 17),
+            targetColor :Number(parameters['Target Player Color'] || 29),
             points     :String(parameters['Ranking Points'] || '2,1,-1,-2'),
+        },
+        setting:{
+            playerId:[
+                Number(parameters['Player 1 ID'] || 0),
+                Number(parameters['Player 2 ID'] || 0),
+                Number(parameters['Player 3 ID'] || 0),
+                Number(parameters['Player 4 ID'] || 0),
+            ],
+            randomStart:Number(parameters['Random Start ID'] || 0),
+            gameCount  :Number(parameters['Game Count ID'] || 0),
+            dialogue   :Number(parameters['NPC Dialogues ID'] || 0),
+            faces      :Number(parameters['NPC Facial Expressions ID'] || 0),
+            chara      :Number(parameters['NPC Characteristics ID'] || 0),
+        },
+        command:{
+            turnEnd    :String(parameters['Turn End Command'] || 'ターン終了'),
+            sort       :String(parameters['Sort Command'] || '並び替え'),
         },
         result:{
             reset:Number(parameters['Reset Variables'] || 0),
@@ -565,6 +694,26 @@ FTKR.CRD = FTKR.CRD || {};
 
     var checkRate = function(rate) {
         return Math.randomInt(100) < rate * 10;
+    };
+
+    var variableId = function(prop) {
+        return $gameVariables.value(FTKR.CRD.setting[prop]);
+    };
+
+    var setVarId = function(prop, value) {
+        $gameVariables.setValue(FTKR.CRD.setting[prop], value);
+    };
+
+    var switchId = function(prop) {
+        return $gameSwitches.value(FTKR.CRD.setting[prop]);
+    };
+
+    var switchOnId = function(prop) {
+        $gameSwitches.setValue(FTKR.CRD.setting[prop], true);
+    };
+
+    var switchOffId = function(prop) {
+        $gameSwitches.setValue(FTKR.CRD.setting[prop], false);
     };
 
     //配列の要素を、すべて数値に変換する。
@@ -695,6 +844,33 @@ FTKR.CRD = FTKR.CRD || {};
         return crdData;
     };
 
+    //アクターの台詞タグを読み取る
+    DataManager.readCrdDialogues = function(obj) {
+        var metaData = readEntrapmentCodeToText(obj, ['CRD_台詞']);
+        var datas = metaData.split(';');
+        var dialogues = [];
+        for (var i = 0; i < datas.length; i++) {
+            var data = datas[i];
+            var match = /(.+):[ ]*(\d+),[ ]*(.+)/.exec(data);
+            if (!match) continue;
+            switch (match[1].toUpperCase()) {
+                case 'ジョーカーを引く':
+                    dialogues.push({type:Scene_CRD.LOG_DRAW_JOKER, rate:Number(match[2]), text:match[3]});
+                    break;
+                case 'ジョーカー以外を引く':
+                    dialogues.push({type:Scene_CRD.LOG_DRAW_NOT_JOKER, rate:Number(match[2]), text:match[3]});
+                    break;
+                case 'ペアができた':
+                    dialogues.push({type:Scene_CRD.LOG_MADE_PAIR, rate:Number(match[2]), text:match[3]});
+                    break;
+                case 'ペアができない':
+                    dialogues.push({type:Scene_CRD.LOG_NOT_MADE_PAIR, rate:Number(match[2]), text:match[3]});
+                    break;
+            }
+        }
+        return dialogues;
+    };
+
     //=============================================================================
     // プラグインコマンド
     //=============================================================================
@@ -714,12 +890,9 @@ FTKR.CRD = FTKR.CRD || {};
                 $gameCardData.resetPlayer();
                 args.forEach( function(arg, i) {
                     if (i >= 4) return;
-                    $gameCardData.addPlayer(setArgNum(arg));
+                    setVarId(FTKR.CRD.setting.playerId[i], setArgNum(arg));
+//                    $gameCardData.addPlayer(setArgNum(arg));
                 });
-                break;
-            case 'ゲーム数設定':
-            case 'SETTING_GAMES':
-                $gameCardData.setGames(setArgNum(args[0]));
                 break;
         }
     };
@@ -748,21 +921,32 @@ FTKR.CRD = FTKR.CRD || {};
         this._charas = [];
         this._suits = FTKR.CRD.card.suit.split(',');
         this._maxRank = FTKR.CRD.card.rank;
-        this._joker = FTKR.CRD.game.jokerNum;
+        this._joker = FTKR.CRD.card.jokerNum;
         this._points = ('0,' + FTKR.CRD.game.points).split(',').num();
-        this._games = FTKR.CRD.game.gameNum;
         this._playerPoints = [0,0,0,0];
     };
 
     //プレイヤーの設定
     Game_CardData.prototype.players = function() {
-        return this._players;
+        var players = [];
+        console.log(FTKR.CRD.setting.playerId);
+        FTKR.CRD.setting.playerId.filter( function(id){
+            var value = $gameVariables.value(id);
+            if (value !== 0) {
+                players.push(value);
+                return true;
+            }
+        });
+        return players;
     };
     
     Game_CardData.prototype.playerNum = function() {
-        return this._players.length;
+        return FTKR.CRD.setting.playerId.filter( function(id){
+            return $gameVariables.value(id) !== 0;
+        }).length;
+//        return this._players.length;
     };
-
+/*
     Game_CardData.prototype.player = function(id) {
         return this._players[id];
     };
@@ -774,13 +958,17 @@ FTKR.CRD = FTKR.CRD || {};
     Game_CardData.prototype.addPlayer = function(actorId) {
         this._players.push(actorId);
     };
-
+*/
     Game_CardData.prototype.chara = function(id) {
         return this._charas[id];
     };
 
     Game_CardData.prototype.setChara = function(id, chara) {
         this._charas[id] = chara;
+    };
+
+    Game_CardData.prototype.setDialogue = function(id, dialogue) {
+        this._charas[id].dialogues = dialogue;
     };
 
     //スートの設定
@@ -815,7 +1003,7 @@ FTKR.CRD = FTKR.CRD || {};
     };
 
     Game_CardData.prototype.resetJoker = function() {
-        this._joker = FTKR.CRD.game.jokerNum;
+        this._joker = FTKR.CRD.card.jokerNum;
     };
 
     Game_CardData.prototype.setJoker = function(joker) {
@@ -833,19 +1021,6 @@ FTKR.CRD = FTKR.CRD || {};
 
     Game_CardData.prototype.setPoints = function(points) {
         this._points = points;
-    };
-
-    //ゲーム数の設定
-    Game_CardData.prototype.games = function() {
-        return this._games;
-    };
-
-    Game_CardData.prototype.resetGames = function() {
-        this._games = FTKR.CRD.game.gameNum;
-    };
-
-    Game_CardData.prototype.setGames = function(games) {
-        this._games = games;
     };
 
     //プレイヤーポイントの設定
@@ -900,16 +1075,18 @@ FTKR.CRD = FTKR.CRD || {};
     Scene_CRD.FACE_HAS_JOKER      = 81;
     Scene_CRD.FACE_NOT_HAS_JOKER  = 82;
 
+    Scene_CRD.LOG_DRAW_JOKER     = 101;
+    Scene_CRD.LOG_DRAW_NOT_JOKER = 102;
+    Scene_CRD.LOG_MADE_PAIR      = 103;
+    Scene_CRD.LOG_NOT_MADE_PAIR  = 104;
+
     Scene_CRD.prototype.initialize = function() {
         Scene_MenuBase.prototype.initialize.call(this);
-        this._handNum = FTKR.CRD.game.playerNum;
         this.clearGame();
         this.clearVariables();
         $gameCardData.resetPlayerPoints();
         this.setPlayerCharacteristics();
         this._setEnd = false;
-        this._hand = null;
-        this._pickup = false;
         this._gameCount = 1;
     };
 
@@ -923,7 +1100,7 @@ FTKR.CRD = FTKR.CRD || {};
     };
 
     Scene_CRD.prototype.setSubjectId = function(id) {
-        this._subjectId = 0;
+        this._subjectId = id;
         this.setTarget();
     };
 
@@ -942,11 +1119,14 @@ FTKR.CRD = FTKR.CRD || {};
             if (id === -1) id = $gameParty.leader().actorId();
             var actor = $dataActors[id];
             $gameCardData.setChara(i, DataManager.readCrdCharacteristics(actor));
+            $gameCardData.setDialogue(i, DataManager.readCrdDialogues(actor));
         });
     };
 
     Scene_CRD.prototype.clearGame = function() {
         this._gameEnd = false;
+        this._hand = null;
+        this._pickup = false;
         this._endPeople = 0;
     };
 
@@ -955,19 +1135,34 @@ FTKR.CRD = FTKR.CRD || {};
         FTKR.CRD.result.varId.forEach( function(varId){
             if (varId) $gameVariables.setValue(varId, 0);
         });
+        if (!variableId('gameCount')) {
+            setVarId('gameCount', 1);
+        }
     };
 
     Scene_CRD.prototype.settingGame = function() {
+        this.setRoute();
+        this.setStartPlayer();
         this.makeStock();
         this.stockShuffle();
         this.deal(-1);
         this.discardPair();
         if (this.checkGameEnd()) return;
-        this.setRoute();
-        this.setSubjectId(0);
-        this.setPlayerName();
-        this.targetWindow().activate();
-        this.targetWindow().select(0);
+        this.refreshActor();
+        if (this._startId === 0) {
+            this.targetWindow().activate();
+            this.targetWindow().select(0);
+        } else {
+            this._messageBoxWindow.activate();
+        }
+    };
+
+    Scene_CRD.prototype.setStartPlayer = function() {
+        this._startId = switchId('randomStart') ?
+            Math.randomInt($gameCardData.playerNum()) : 0;
+        this.setSubjectId(this._startId);
+        var name = this.player(this.subjectId()).name();
+        this._messageBoxWindow.setText(name + 'から開始します');
     };
 
     Scene_CRD.prototype.player = function(id) {
@@ -982,11 +1177,7 @@ FTKR.CRD = FTKR.CRD || {};
                 $gameActors.actor(actorId);
             this._players.push(actor);
         },this);
-    };
-
-    Scene_CRD.prototype.setPlayerName = function() {
-        var name = this.player(this.subjectId()).name();
-        this._messageBoxWindow.setPlayer(name);
+        console.log($gameCardData.players(), this._players);
     };
 
     Scene_CRD.prototype.stock = function() {
@@ -997,19 +1188,16 @@ FTKR.CRD = FTKR.CRD || {};
         return this._stock.length;
     }
 
-    Scene_CRD.prototype.handNum = function() {
-        return this._handNum;
-    };
-
     Scene_CRD.prototype.deal = function(dealNum) {
-        var i = 0, num = this.stockNum();
+        var i = this._startId, num = this.stockNum();
         for (var n = 0; n < num; n++) {
             this._targetId = i;
             var hand = this.stock().shift();
             this.targetWindow().pushHand(hand.suit, hand.rank);
             i++;
-            if (i >= this.handNum()) i = 0;
+            if (i >= $gameCardData.playerNum()) i = 0;
         }
+        this.setTarget();
     };
 
     Scene_CRD.prototype.discardPair = function() {
@@ -1094,6 +1282,7 @@ FTKR.CRD = FTKR.CRD || {};
         this.createHandWindows();
         this.createActorWindows();
         this.createMessageBoxWindow();
+        this.createDialogueWindows();
         this.createCommandBoxWindow();
     };
 
@@ -1123,23 +1312,23 @@ FTKR.CRD = FTKR.CRD || {};
     };
 
     Scene_CRD.prototype.createHandWindow2 = function() {
-        var ww = FTKR.CRD.layout.width;
-        var wh = FTKR.CRD.layout.height;
-        var wx = (Graphics.boxWidth - ww) / 2;
-        var wy = 0;
-        var open = FTKR.CRD.debug.open;
-        this._handWindows[1] = new Window_PlayerHand(1, wx, wy, ww, wh, open);
-        this._handWindows[1].setHandler('ok',     this.onSelectOk.bind(this));
-        this.addWindow(this._handWindows[1]);
-    };
-
-    Scene_CRD.prototype.createHandWindow3 = function() {
         var wh = FTKR.CRD.layout.width;
         var ww = FTKR.CRD.layout.height;
         var wx = 0;
         var wy = (Graphics.boxHeight - wh) / 2;
         var open = FTKR.CRD.debug.open;
-        this._handWindows[2] = new Window_PlayerHandVar(2, wx, wy, ww, wh, open);
+        this._handWindows[1] = new Window_PlayerHandVar(1, wx, wy, ww, wh, open);
+        this._handWindows[1].setHandler('ok',     this.onSelectOk.bind(this));
+        this.addWindow(this._handWindows[1]);
+    };
+
+    Scene_CRD.prototype.createHandWindow3 = function() {
+        var ww = FTKR.CRD.layout.width;
+        var wh = FTKR.CRD.layout.height;
+        var wx = (Graphics.boxWidth - ww) / 2;
+        var wy = 0;
+        var open = FTKR.CRD.debug.open;
+        this._handWindows[2] = new Window_PlayerHand(2, wx, wy, ww, wh, open);
         this._handWindows[2].setHandler('ok',     this.onSelectOk.bind(this));
         this.addWindow(this._handWindows[2]);
     };
@@ -1175,20 +1364,20 @@ FTKR.CRD = FTKR.CRD || {};
     };
 
     Scene_CRD.prototype.createActorWindow2 = function() {
-        var wh = Window_Base._faceHeight / 2 + this._dummyWindow.standardPadding() * 2;
-        var ww = Window_Base._faceHeight + this._dummyWindow.standardPadding() * 2;
-        var wx = (Graphics.boxWidth - ww) / 2;
-        var wy = this._handWindows[1].y + this._handWindows[1].height;
+        var wh = Window_Base._faceHeight + this._dummyWindow.standardPadding() * 2;
+        var ww = Window_Base._faceHeight / 2 + this._dummyWindow.standardPadding() * 2;
+        var wx = this._handWindows[1].x + this._handWindows[1].width;
+        var wy = (Graphics.boxHeight - wh) / 2;
         var actor = this.player(1);
         this._actorWindows[1] = new Window_PlayerStatus(actor, 1, wx, wy, ww, wh);
         this.addWindow(this._actorWindows[1]);
     };
 
     Scene_CRD.prototype.createActorWindow3 = function() {
-        var wh = Window_Base._faceHeight + this._dummyWindow.standardPadding() * 2;
-        var ww = Window_Base._faceHeight / 2+ this._dummyWindow.standardPadding() * 2;
-        var wx = this._handWindows[2].x + this._handWindows[2].width;
-        var wy = (Graphics.boxHeight - wh) / 2;
+        var wh = Window_Base._faceHeight / 2 + this._dummyWindow.standardPadding() * 2;
+        var ww = Window_Base._faceHeight + this._dummyWindow.standardPadding() * 2;
+        var wx = (Graphics.boxWidth - ww) / 2;
+        var wy = this._handWindows[2].y + this._handWindows[2].height;
         var actor = this.player(2);
         this._actorWindows[2] = new Window_PlayerStatus(actor, 2, wx, wy, ww, wh);
         this.addWindow(this._actorWindows[2]);
@@ -1204,6 +1393,20 @@ FTKR.CRD = FTKR.CRD || {};
         this.addWindow(this._actorWindows[3]);
     };
 
+    Scene_CRD.prototype.createDialogueWindows = function() {
+        this._dialogueWindows = [];
+        var number = $gameCardData.playerNum();
+        this.createDialogueWindow(0);
+        if (number > 1) this.createDialogueWindow(1);
+        if (number > 2) this.createDialogueWindow(2);
+        if (number > 3) this.createDialogueWindow(3);
+    };
+
+    Scene_CRD.prototype.createDialogueWindow = function(index) {
+        this._dialogueWindows[index] = new Window_Dialogue(this._actorWindows[index]);
+        this.addWindow(this._dialogueWindows[index]);
+    };
+
     Scene_CRD.prototype.createMessageBoxWindow = function() {
         this._messageBoxWindow = new Window_MessageBox();
         this._messageBoxWindow.setHandler('ok',     this.onMessageOk.bind(this));
@@ -1216,7 +1419,7 @@ FTKR.CRD = FTKR.CRD || {};
         var wy = Graphics.boxHeight - this._dummyWindow.fittingHeight(2);
         this._commandBoxWindow = new Window_CmdBox(wx, wy);
         this._commandBoxWindow.setHandler('turnEnd', this.onTurnEnd.bind(this));
-        this._commandBoxWindow.setHandler('shuffle', this.onShuffle.bind(this));
+        this._commandBoxWindow.setHandler('sort', this.onShuffle.bind(this));
         this.addWindow(this._commandBoxWindow);
     };
 
@@ -1225,7 +1428,7 @@ FTKR.CRD = FTKR.CRD || {};
         this._commandBoxWindow.hide();
         this._pickup = false;
         this.shiftIndex();
-        this.setPlayerName();
+        this.refreshActor();
         this._messageBoxWindow.activate();
     };
 
@@ -1265,20 +1468,22 @@ FTKR.CRD = FTKR.CRD || {};
             this._endPeople++;
             this.setGameOutPoint(this.lastPlayer());
             this._actorWindows[this.lastPlayer()].setRank(this._endPeople);
-            if (this._gameCount >= $gameCardData.games()) {
+            if (this._gameCount >= variableId('gameCount')) {
                 this.setEnd();
             } else {
                 this.gameEnd();
                 this._gameCount++;
             }
-            this._messageBoxWindow.setGameEnd();
+            this._messageBoxWindow.setText('ゲーム終了です');
             this._messageBoxWindow.activate();
             return true;
         }
     };
 
     Scene_CRD.prototype.onSelectOk = function() {
+        this._messageBoxWindow.clearText();
         this.resetTempFace();
+        this.resetDialogue();
         if (!this._hand && !this._pickup) {
             this._hand = this.reduceHand(this.targetId(), true);
             var holdId = this.subjectWindow().cardNum();
@@ -1293,12 +1498,12 @@ FTKR.CRD = FTKR.CRD || {};
         } else if (!this._hand && this._pickup) {
             var index = this.subjectWindow().index();
             this._hand = this.subjectWindow()._hand[index];
+            this._sortHoldId = index;
             this.subjectWindow().setHoldId(index);
             this.subjectWindow().activate();
         } else if (this._hand && this._pickup) {
-            var holdid = this.subjectWindow()._holdId;
             var index = this.subjectWindow().index();
-            if (index === holdid) this._hand.up = !this._hand.up;
+            if (index === this._sortHoldId) this._hand.up = !this._hand.up;
             this.onShuffleEnd();
         } else {
             this.onShuffleEnd();
@@ -1331,6 +1536,7 @@ FTKR.CRD = FTKR.CRD || {};
     };
 
     Scene_CRD.prototype.onMessageOk = function() {
+        this._messageBoxWindow.clearText();
         if (this.isGameEnd()) {
             this.clearGame();
             this.clearHands();
@@ -1340,12 +1546,13 @@ FTKR.CRD = FTKR.CRD || {};
             this.popScene();
         } else {
             this.resetTempFace();
+            this.resetDialogue();
             var hand = this.reduceHand(this.targetId(), false);
             this.addHand(this.subjectId(), hand);
             this.discardPairHand(this.subjectId());
             if (this.checkGameEnd()) return;
             this.shiftIndex();
-            this.setPlayerName();
+            this.refreshActor();
             if (this._subjectId === 0) {
                 this.targetWindow().activate();
                 this.targetWindow().select(0);
@@ -1355,9 +1562,21 @@ FTKR.CRD = FTKR.CRD || {};
         }
     };
 
+    Scene_CRD.prototype.refreshActor = function() {
+        this._actorWindows.forEach(function(window){
+            window.refresh();
+        });
+    };
+
     Scene_CRD.prototype.resetTempFace = function() {
         this._actorWindows.forEach(function(window){
             window.resetTempFace();
+        });
+    };
+
+    Scene_CRD.prototype.resetDialogue = function() {
+        this._dialogueWindows.forEach(function(window){
+            window.setDialogue('');
         });
     };
 
@@ -1368,48 +1587,52 @@ FTKR.CRD = FTKR.CRD || {};
         window.pushoutNPCHand();
         var faceIndex = window.changeTempFace(hand);
         if (faceIndex >= 0) this._actorWindows[index].setTempFace(faceIndex);
+        var logText = window.setDialogue(hand);
+        if (logText) this._dialogueWindows[index].setDialogue(logText);
     };
 
     Scene_CRD.prototype.putinNPCHand = function() {
         var handIndex = null;
         var hands = setArrNum(0, this.subjectWindow().cardNum() + 1);
-        var lastHands = hands.clone();
-        $gameCardData.chara(this.subjectId()).putins.some( function(putin){
-            if (!putin) return true;
-            if (!checkRate(putin.rate)) return false;
-            switch (putin.type) {
-                case Scene_CRD.PUTIN_END:
-                    hands = [hands.shift(), hands.pop()];
-                    break;
-                case Scene_CRD.NOT_PUTIN_END:
-                    hands.shift();
-                    hands.pop();
-                    break;
-                case Scene_CRD.PUTIN_MIDDLE:
-                    var len = Math.floor((hands.length - 1) / 2);
-                    var mod = (hands.length - 1) % 2;
-                    hands = hands.splice(len, 1 + mod);
-                    break;
-                case Scene_CRD.NOT_PUTIN_MIDDLE:
-                    var len = Math.floor((hands.length - 1) / 2);
-                    var mod = (hands.length - 1) % 2;
-                    hands.splice(len, 1 + mod);
-                    break;
-                case Scene_CRD.PUTIN_RIGHT:
-                    var len = Math.floor((hands.length + 1) / 2);
-                    hands = hands.slice(len);
-                    break;
-                case Scene_CRD.PUTIN_LEFT:
-                    var len = Math.ceil((hands.length - 1) / 2);
-                    hands = hands.slice(0, len);
-                    break;
-            };
-            if (!hands.length) {
-                hands = lastHands.clone();
-            } else {
-                lastHands = hands.clone();
-            }
-        },this);
+        if (switchId('chara')) {
+            var lastHands = hands.clone();
+            $gameCardData.chara(this.subjectId()).putins.some( function(putin){
+                if (!putin) return true;
+                if (!checkRate(putin.rate)) return false;
+                switch (putin.type) {
+                    case Scene_CRD.PUTIN_END:
+                        hands = [hands.shift(), hands.pop()];
+                        break;
+                    case Scene_CRD.NOT_PUTIN_END:
+                        hands.shift();
+                        hands.pop();
+                        break;
+                    case Scene_CRD.PUTIN_MIDDLE:
+                        var len = Math.floor((hands.length - 1) / 2);
+                        var mod = (hands.length - 1) % 2;
+                        hands = hands.splice(len, 1 + mod);
+                        break;
+                    case Scene_CRD.NOT_PUTIN_MIDDLE:
+                        var len = Math.floor((hands.length - 1) / 2);
+                        var mod = (hands.length - 1) % 2;
+                        hands.splice(len, 1 + mod);
+                        break;
+                    case Scene_CRD.PUTIN_RIGHT:
+                        var len = Math.floor((hands.length + 1) / 2);
+                        hands = hands.slice(len);
+                        break;
+                    case Scene_CRD.PUTIN_LEFT:
+                        var len = Math.ceil((hands.length - 1) / 2);
+                        hands = hands.slice(0, len);
+                        break;
+                };
+                if (!hands.length) {
+                    hands = lastHands.clone();
+                } else {
+                    lastHands = hands.clone();
+                }
+            },this);
+        }
         return hands[Math.randomInt(hands.length)];
     };
 
@@ -1442,53 +1665,55 @@ FTKR.CRD = FTKR.CRD || {};
     Scene_CRD.prototype.drawNPCHand = function() {
         var handIndex = null;
         var hands = this.targetWindow()._hand.clone();
-        var lastHands = hands.clone();
-        $gameCardData.chara(this.subjectId()).draws.some( function(draw){
-            if (!draw) return true;
-            if (!checkRate(draw.rate)) return false;
-            switch (draw.type) {
-                case Scene_CRD.DRAW_END:
-                    hands = [hands.shift(), hands.pop()];
-                    break;
-                case Scene_CRD.NOT_DRAW_END:
-                    hands.shift();
-                    hands.pop();
-                    break;
-                case Scene_CRD.DRAW_MIDDLE:
-                    var len = Math.floor((hands.length - 1) / 2);
-                    var mod = (hands.length - 1) % 2;
-                    hands = hands.splice(len, 1 + mod);
-                    break;
-                case Scene_CRD.NOT_DRAW_MIDDLE:
-                    var len = Math.floor((hands.length - 1) / 2);
-                    var mod = (hands.length - 1) % 2;
-                    hands.splice(len, 1 + mod);
-                    break;
-                case Scene_CRD.DRAW_RIGHT:
-                    var len = Math.floor((hands.length + 1) / 2);
-                    hands = hands.slice(len);
-                    break;
-                case Scene_CRD.DRAW_LEFT:
-                    var len = Math.ceil((hands.length - 1) / 2);
-                    hands = hands.slice(0, len);
-                    break;
-                case Scene_CRD.DRAW_PICKUP:
-                    hands = hands.filter(function(hand){
-                        return hand.up;
-                    });
-                    break;
-                case Scene_CRD.NOT_DRAW_PICKUP:
-                    hands = hands.filter(function(hand){
-                        return !hand.up;
-                    });
-                    break;
-            };
-            if (!hands.length) {
-                hands = lastHands.clone();
-            } else {
-                lastHands = hands.clone();
-            }
-        },this);
+        if (switchId('chara')) {
+            var lastHands = hands.clone();
+            $gameCardData.chara(this.subjectId()).draws.some( function(draw){
+                if (!draw) return true;
+                if (!checkRate(draw.rate)) return false;
+                switch (draw.type) {
+                    case Scene_CRD.DRAW_END:
+                        hands = [hands.shift(), hands.pop()];
+                        break;
+                    case Scene_CRD.NOT_DRAW_END:
+                        hands.shift();
+                        hands.pop();
+                        break;
+                    case Scene_CRD.DRAW_MIDDLE:
+                        var len = Math.floor((hands.length - 1) / 2);
+                        var mod = (hands.length - 1) % 2;
+                        hands = hands.splice(len, 1 + mod);
+                        break;
+                    case Scene_CRD.NOT_DRAW_MIDDLE:
+                        var len = Math.floor((hands.length - 1) / 2);
+                        var mod = (hands.length - 1) % 2;
+                        hands.splice(len, 1 + mod);
+                        break;
+                    case Scene_CRD.DRAW_RIGHT:
+                        var len = Math.floor((hands.length + 1) / 2);
+                        hands = hands.slice(len);
+                        break;
+                    case Scene_CRD.DRAW_LEFT:
+                        var len = Math.ceil((hands.length - 1) / 2);
+                        hands = hands.slice(0, len);
+                        break;
+                    case Scene_CRD.DRAW_PICKUP:
+                        hands = hands.filter(function(hand){
+                            return hand.up;
+                        });
+                        break;
+                    case Scene_CRD.NOT_DRAW_PICKUP:
+                        hands = hands.filter(function(hand){
+                            return !hand.up;
+                        });
+                        break;
+                };
+                if (!hands.length) {
+                    hands = lastHands.clone();
+                } else {
+                    lastHands = hands.clone();
+                }
+            },this);
+        }
         var handIndex = 0;
         var card = hands[Math.randomInt(hands.length)];
         this.targetWindow()._hand.some( function(hand, i){
@@ -1665,7 +1890,7 @@ FTKR.CRD = FTKR.CRD || {};
         this._sprites[index].bitmap = bitmap;
         this._sprites[index].x = dx + this.padding;
         var offset = this._hand[index].up ? this.padding / 2 : 0;
-        if (this._playerId === 1) offset *= -1;
+        if (this._playerId === 2) offset *= -1;
         this._sprites[index].y = dy + this.padding - offset;
         this._sprites[index].scale.x = this.cardScale();
         this._sprites[index].scale.y = this.cardScale();
@@ -1680,6 +1905,11 @@ FTKR.CRD = FTKR.CRD || {};
                 for (var i = this.cardNum(); i < this._sprites.length; i++) {
                     this._sprites[i].bitmap = null;
                 }
+            }
+            if (this.cardNum()) {
+                this.show();
+            } else {
+                this.hide();
             }
         }
     };
@@ -1711,6 +1941,7 @@ FTKR.CRD = FTKR.CRD || {};
         this._hand.forEach(function(hand){
             hand.up = false;
         });
+        if (!switchId('chara')) return;
         $gameCardData.chara(this._playerId).pushouts.some( function(pushout){
             if (!pushout) return true;
             if (!checkRate(pushout.rate)) return false;
@@ -1745,18 +1976,46 @@ FTKR.CRD = FTKR.CRD || {};
                     if (card.suit !== 'joker') faceIndex = face.index;
                     break;
                 case Scene_CRD.FACE_MADE_PAIR:
+                    console.log(this._hand);
                     if (this._hand.some(function(hand){
-                        return hand.rank === card.rank;
+                        return hand.rank === card.rank && hand.suit !== card.suit;
                     })) faceIndex = face.index;
                     break;
                 case Scene_CRD.FACE_NOT_MADE_PAIR:
                     if (this._hand.every( function(hand){
-                        return hand.rank !== card.rank;
+                        return hand.rank !== card.rank && hand.suit !== card.suit;
                     })) faceIndex = face.index;
                     break;
             }
         },this);
         return faceIndex;
+    };
+
+    Window_PlayerHand.prototype.setDialogue = function(card) {
+        var logText = '';
+        $gameCardData.chara(this._playerId).dialogues.some( function(log){
+            if (!log) return true;
+            if (!checkRate(log.rate)) return false;
+            switch (log.type) {
+                case Scene_CRD.LOG_DRAW_JOKER:
+                    if (card.suit === 'joker') logText = log.text;
+                    break;
+                case Scene_CRD.LOG_DRAW_NOT_JOKER:
+                    if (card.suit !== 'joker') logText = log.text;
+                    break;
+                case Scene_CRD.LOG_MADE_PAIR:
+                    if (this._hand.some(function(hand){
+                        return hand.rank === card.rank && hand.suit !== card.suit;
+                    })) logText = log.text;
+                    break;
+                case Scene_CRD.LOG_NOT_MADE_PAIR:
+                    if (this._hand.every( function(hand){
+                        return hand.rank !== card.rank && hand.suit !== card.suit;
+                    })) logText = log.text;
+                    break;
+            }
+        },this);
+        return logText;
     };
 
     Window_PlayerHand.prototype.standardBackOpacity = function() {
@@ -1844,7 +2103,7 @@ FTKR.CRD = FTKR.CRD || {};
         this._sprites[index].bitmap = bitmap;
         var offset = this._hand[index].up ? this.padding / 2 : 0;
         if (this._playerId === 3) offset *= -1;
-        this._sprites[index].x = dx + this.padding + this.itemWidth() - offset;
+        this._sprites[index].x = dx + this.padding + this.itemWidth() + offset;
         this._sprites[index].y = dy + this.padding;
         this._sprites[index].scale.x = this.cardScale();
         this._sprites[index].scale.y = this.cardScale();
@@ -1890,13 +2149,101 @@ FTKR.CRD = FTKR.CRD || {};
                 y += width;
             }
             this.drawActorFace(this._actor, 0, 0, width);
-            this.drawText(this._actor.name(), x, y, width, 'center');
+            this.drawPlayerName(x, y, width);
             if (this.rank()) {
                 this.drawText(this.rank(), x, y + this.lineHeight(), width, 'center');
             } else {
                 var point = $gameCardData.playerPoint(this._index);
                 this.drawText(point, x, y + this.lineHeight(), width, 'right');
             }
+            this.setPauseSignPosition();
+        }
+    };
+
+    Window_PlayerStatus.prototype.drawPlayerName = function(x, y, width) {
+        if (this._index === SceneManager._scene.subjectId()) {
+            this.changeTextColor(this.textColor(FTKR.CRD.game.subjectColor));
+        } else if (this._index === SceneManager._scene.targetId()) {
+            this.changeTextColor(this.textColor(FTKR.CRD.game.targetColor));
+        }
+        this.drawText(this._actor.name(), x, y, width, 'center');
+        this.resetTextColor();
+    };
+
+    var _CRD_Window_Dialogue_updatePauseSign = Window_PlayerStatus.prototype._updatePauseSign;
+    Window_PlayerStatus.prototype._updatePauseSign = function() {
+        _CRD_Window_Dialogue_updatePauseSign.call(this);
+        if (this._index === SceneManager._scene.subjectId()) {
+            this._windowPauseSignSprite.alpha = 1.0;
+        }
+    };
+
+    Window_PlayerStatus.prototype.setPauseSignPosition = function() {
+        var sign = this._windowPauseSignSprite;
+        var targetId = SceneManager._scene.targetId();
+        sign.anchor.x = 0;
+        sign.anchor.y = 0;
+        switch (this._index) {
+            case 0:
+                switch (targetId) {
+                    case 1:
+                        sign.move(0, 0);
+                        sign.rotation = 90 * Math.PI / 180;
+                        break;
+                    case 2:
+                        sign.move(this.width/2 + sign.width/2, 0);
+                        sign.rotation = 180 * Math.PI / 180;
+                        break;
+                    case 3:
+                        sign.move(this.width, 0);
+                        sign.rotation = 270 * Math.PI / 180;
+                        break;
+                }
+                break;
+            case 1:
+                sign.rotation = 270 * Math.PI / 180;
+                switch (targetId) {
+                    case 0:
+                        sign.move(this.width, this.height + sign.height);
+                        break;
+                    case 2:
+                        sign.move(this.width, sign.height);
+                        break;
+                    case 3:
+                        sign.move(this.width, this.height/2 + sign.height/2);
+                        break;
+                }
+                break;
+            case 2:
+                switch (targetId) {
+                    case 0:
+                        sign.move(this.width/2 - sign.width/2, this.height);
+                        sign.rotation = 0;
+                        break;
+                    case 1:
+                        sign.move(0, this.height);
+                        sign.rotation = 90 * Math.PI / 180;;
+                        break;
+                    case 3:
+                        sign.move(this.width, this.height);
+                        sign.rotation = 270 * Math.PI / 180;
+                        break;
+                }
+                break;
+            case 3:
+                sign.rotation = 90 * Math.PI / 180;
+                switch (targetId) {
+                    case 0:
+                        sign.move(0, this.height - sign.height);
+                        break;
+                    case 1:
+                        sign.move(0, this.height/2 - sign.height/2);
+                        break;
+                    case 2:
+                        sign.move(0, 0);
+                        break;
+                }
+                break;
         }
     };
 
@@ -1921,7 +2268,8 @@ FTKR.CRD = FTKR.CRD || {};
         var bitmap = ImageManager.reserveFace(actor.faceName());
         var sw = Window_Base._faceWidth;
         var sh = Window_Base._faceHeight;
-        var faceIndex = this._tempFaceIndex >= 0 ? this._tempFaceIndex : actor.faceIndex();
+        var faceIndex = this._tempFaceIndex >= 0 && switchId('faces') ? this._tempFaceIndex : actor.faceIndex();
+        console.log(faceIndex, this._tempFaceIndex, actor.faceIndex());
         var sx = faceIndex % 4 * sw;
         var sy = Math.floor(faceIndex / 4) * sh;
         this.contents.blt(bitmap, sx, sy, sw, sh, dx, dy, dw, dh);
@@ -1955,6 +2303,62 @@ FTKR.CRD = FTKR.CRD || {};
     };
 
     //=============================================================================
+    // Window_Dialogue
+    // 台詞ウィンドウ
+    //=============================================================================
+
+    function Window_Dialogue() {
+        this.initialize.apply(this, arguments);
+    }
+
+    Window_Dialogue.prototype = Object.create(Window_Base.prototype);
+    Window_Dialogue.prototype.constructor = Window_Dialogue;
+
+    Window_Dialogue.prototype.initialize = function(window) {
+        this._window = window;
+        this._text = '';
+        var log = FTKR.CRD.layout.dialogue;
+        var ww = log.width;
+        var wh = log.height;
+        var wx = this._window.x + this._window.width / 2 - ww / 2;
+        var wy = this._window.y - wh - log.offsetY;
+        Window_Base.prototype.initialize.call(this, wx, wy, ww, wh);
+        this._windowPauseSignSprite.y += log.offsetY;
+        this.hide();
+    };
+
+    Window_Dialogue.prototype.setDialogue = function(text) {
+        this._text = text;
+        if (switchId('dialogue')) this.refresh();
+    };
+
+    Window_Dialogue.prototype.refresh = function() {
+        this.contents.clear();
+        this.drawText(this._text, 0, 0, this.width - this.padding * 2);
+        if (this._text) {
+            this.show()
+        } else {
+            this.hide();
+        };
+    };
+
+    var _CRD_Window_Dialogue_updatePauseSign = Window_Dialogue.prototype._updatePauseSign;
+    Window_Dialogue.prototype._updatePauseSign = function() {
+        _CRD_Window_Dialogue_updatePauseSign.call(this);
+        if (this.visible) this._windowPauseSignSprite.alpha = 1.0;
+    };
+
+    var _CRD_Window_Base_loadWindowskin = Window_Dialogue.prototype.loadWindowskin;
+    Window_Dialogue.prototype.loadWindowskin = function() {
+        var skin = FTKR.CRD.layout.dialogue.skin;
+        if (skin) {
+            this.windowskin = ImageManager.loadSystem(skin);
+        } else {
+            _CRD_Window_Base_loadWindowskin.call(this);
+        }
+    };
+
+    //=============================================================================
     // Window_MessageBox
     // メッセージボックス
     //=============================================================================
@@ -1972,25 +2376,27 @@ FTKR.CRD = FTKR.CRD || {};
         var wx = (Graphics.boxWidth - ww) / 2;
         var wy = (Graphics.boxHeight - wh) / 2;
         Window_Selectable.prototype.initialize.call(this, wx, wy, ww, wh);
+        this._text = '';
+        this.hide();
     };
 
-    Window_MessageBox.prototype.setPlayer = function(player) {
-        this._player = player;
+    Window_MessageBox.prototype.setText = function(text) {
+        this._text = text;
         this.refresh();
     };
 
-    Window_MessageBox.prototype.setGameEnd = function(player) {
-        this._player = player;
-        this.contents.clear();
-        var text = 'ゲーム終了です';
-        this.drawText(text, 0, 0, this.width - this.padding * 2, 'center');
+    Window_MessageBox.prototype.clearText = function() {
+        this._text = '';
+        this.refresh();
     };
 
     Window_MessageBox.prototype.refresh = function() {
-        if(this._player) {
+        if (this._text) {
             this.contents.clear();
-            var text = this._player + 'のターンです';
-            this.drawText(text, 0, 0, this.width - this.padding * 2, 'center');
+            this.drawText(this._text, 0, 0, this.width - this.padding * 2, 'center');
+            this.show();
+        } else {
+            this.hide();
         }
     };
 
@@ -2013,8 +2419,9 @@ FTKR.CRD = FTKR.CRD || {};
     };
 
     Window_CmdBox.prototype.makeCommandList = function() {
-        this.addCommand('ターン終了', 'turnEnd', true);
-        this.addCommand('並び替え', 'shuffle', true);
+        var cmd = FTKR.CRD.command;
+        this.addCommand(cmd.turnEnd, 'turnEnd', true);
+        this.addCommand(cmd.sort, 'sort', true);
     };
 
 }());//EOF

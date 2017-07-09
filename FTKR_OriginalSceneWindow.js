@@ -3,8 +3,8 @@
 // FTKR_OriginalSceneWindow.js
 // 作成者     : フトコロ
 // 作成日     : 2017/06/17
-// 最終更新日 : 2017/06/23
-// バージョン : v1.2.1
+// 最終更新日 : 2017/07/09
+// バージョン : v1.3.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.OSW = FTKR.OSW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.1 オリジナルのシーンやウィンドウを作成する
+ * @plugindesc v1.3.0 オリジナルのシーンやウィンドウを作成する
  * @author フトコロ
  *
  * @param --ウィンドウの共通設定--
@@ -759,6 +759,8 @@ FTKR.OSW = FTKR.OSW || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.3.0 - 2017/07/09 : 機能追加
+ * 
  * v1.2.1 - 2017/06/23 : 不具合修正
  *    1. 表示内容の設定で、ステータスに制御文字を使用すると正しく反映されない
  *       不具合を修正。
@@ -888,6 +890,7 @@ function Game_OswScene() {
     Game_OswBase.SELECT_PARTY_ALL     = 0;
     Game_OswBase.SELECT_PARTY_BATTLE  = 1;
     Game_OswBase.SELECT_PARTY_RESERVE = 2;
+    Game_OswBase.SELECT_ACTOR         = 3;
 
     var convertEscapeCharacters = function(text) {
         if (text == null) text = '';
@@ -903,7 +906,6 @@ function Game_OswScene() {
         try {
             return Number(eval(setArgStr(arg)));
         } catch (e) {
-            console.error(e);
             return 0;
         }
     };
@@ -979,25 +981,25 @@ function Game_OswScene() {
                 break;
         }
     };
+    Game_Interpreter.prototype.gameData = function(arg) {
+        switch (setArgStr(arg).toUpperCase()) {
+            case 'オリジナル':
+            case 'ORIGINAL':
+                return $gameOswData;
+            case 'マップ':
+            case 'MAP':
+                return  $gameMap;
+            case 'バトル':
+            case 'BATTLE':
+                return  $gameParty;
+            default:
+                return {};
+        }
+    };
 
     Game_Interpreter.prototype.setOswWindowParam = function(args, type) {
         var windowId = setArgNum(args[1]);
-        switch (setArgStr(args[0]).toUpperCase()) {
-            case 'オリジナル':
-            case 'ORIGINAL':
-                var gameData = $gameOswData;
-                break;
-            case 'マップ':
-            case 'MAP':
-                var gameData = $gameMap;
-                break;
-            case 'バトル':
-            case 'BATTLE':
-                var gameData = $gameParty;
-                break;
-            default:
-                return;
-        }
+        var gameData = this.gameData(args[0]);
         switch (type) {
             case Game_OswBase.WINDOW_COMMON:
                 var window = gameData.commonWindow(windowId);
@@ -1325,7 +1327,7 @@ function Game_OswScene() {
             case 'アクター':
             case 'ACTOR':
                 window.setList(Game_OswBase.SELECT_ACTOR_LIST, 
-                    null, null, args[i+2]);
+                    null, Game_OswBase.SELECT_ACTOR, args[i+2]);
                 return 2;
             case '職業':
             case 'CLASS':
@@ -2425,6 +2427,7 @@ function Game_OswScene() {
         this._actor = null;
         this._data = [];
         this._show = false;
+        this._reference = [];
         this.hide();
         this.deactivate();
         this.refresh();
@@ -2541,11 +2544,13 @@ function Game_OswScene() {
         if (this._window._drawType) {
             this._actor = this.setActor(index);
             lss.item = this.item(index);
+            lss.opacity = this.setCssOpacity(index);
             this.drawCssActorStatus(index, this._actor, rect.x, rect.y, rect.width, rect.height, lss);
+            lss.opacity = false;
         } else {
             this._actor = null;
             lss.item = null;
-            this.drawText(this._data[index], rect.x, rect.y, rect.width);
+            this.drawTextEx(this._data[index], rect.x, rect.y, rect.width);
         }
     };
 
@@ -2557,8 +2562,18 @@ function Game_OswScene() {
                 return $gameParty.battleMembers()[index];
             case Game_OswBase.SELECT_PARTY_RESERVE:
                 return $gameParty.reserveMembers()[index];
+            case Game_OswBase.SELECT_ACTOR:
+                return this.item(index) ? new Game_Actor(this.item(index).id) : null;
         }
         return this._window._actor;
+    };
+
+    Window_OswSelect.prototype.setCssOpacity = function(index) {
+        switch (this._window._listType) {
+            case Game_OswBase.SELECT_ACTOR:
+                return true;
+        }
+        return false;
     };
 
     Window_OswSelect.prototype.update = function() {
@@ -2571,6 +2586,14 @@ function Game_OswScene() {
         this.updateOswSelect();
         this.updateOswRefresh();
         Window_Selectable.prototype.update.call(this);
+    };
+
+    Window_OswSelect.prototype.select = function(index) {
+        Window_Selectable.prototype.select.call(this, index);
+        if (this._window._drawType) {
+            this._actor = this.setActor(index);
+            this._window.content().item = this.item(index);
+        }
     };
 
 }());//EOF

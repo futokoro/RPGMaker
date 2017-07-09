@@ -12,6 +12,7 @@
 1. [敵グループ](#敵グループ)
 1. [バトル](#バトル)
 1. [イベント](#イベント)
+1. [ミニゲーム](#ミニゲーム)
 1. [デバッグ](#デバッグ)
 1. [その他備忘録](#その他備忘録)
 1. [試作品置き場](#試作品置き場)
@@ -159,6 +160,14 @@
 
 [目次に戻る](#目次)
 
+# ミニゲーム
+
+| プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
+|:-----------|:-----------:|:-------------|:-------------|:-------------|
+| [FTKR_CardGames](FTKR_CardGames.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CardGames.js) | 2017/07/09 | カードゲーム |
+
+[目次に戻る](#目次)
+
 # デバッグ
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
@@ -176,7 +185,6 @@
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_ActionGauge](FTKR_ActionGauge.js) | なし | [v0.7.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ActionGauge.js) | 2017/04/21 | アクションゲージ |
-| [FTKR_CardGames](FTKR_CardGames.js) | なし | [v0.9.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CardGames.js) | 2017/07/06 | カードゲーム |
 #
 
 [目次に戻る](#目次)
