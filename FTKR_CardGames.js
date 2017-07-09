@@ -891,7 +891,7 @@ FTKR.CRD = FTKR.CRD || {};
                 $gameCardData.resetPlayer();
                 args.forEach( function(arg, i) {
                     if (i >= 4) return;
-                    setVarId(FTKR.CRD.setting.playerId[i], setArgNum(arg));
+                    $gameVariables.setValue(FTKR.CRD.setting.playerId[i], setArgNum(arg));
                 });
                 break;
         }
