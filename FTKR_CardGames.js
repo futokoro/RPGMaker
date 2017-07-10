@@ -3,8 +3,8 @@
 // FTKR_CardGames.js
 // 作成者     : フトコロ
 // 作成日     : 2017/07/02
-// 最終更新日 : 2017/07/09
-// バージョン : v1.0.1
+// 最終更新日 : 2017/07/11
+// バージョン : v1.0.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CRD = FTKR.CRD || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.1 トランプカードゲーム
+ * @plugindesc v1.0.2 トランプカードゲーム
  * @author フトコロ
  *
  * @param --カードの設定--
@@ -509,6 +509,9 @@ FTKR.CRD = FTKR.CRD || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.2 - 2017/07/11 : 不具合修正
+ *    1. カードゲーム画面表示時にゲームが進まない場合がある不具合を修正。
+ * 
  * v1.0.1 - 2017/07/09 : 不具合修正
  *    1. プレイヤーを設定するプラグインコマンドでエラーになる不具合を修正。
  * 
@@ -727,7 +730,7 @@ FTKR.CRD = FTKR.CRD || {};
     //=============================================================================
     // DataManager
     //=============================================================================
-
+    
     //カードゲーム設定用データクラスを登録
     var _CRD_DataManager_createGameObjects = DataManager.createGameObjects;
     DataManager.createGameObjects = function() {
@@ -736,20 +739,20 @@ FTKR.CRD = FTKR.CRD || {};
     };
 
     //画像ファイルの事前ロード
-    var _CRD_DataManager_loadDatabase = DataManager.loadDatabase;
-    DataManager.loadDatabase = function(name, src) {
-        _CRD_DataManager_loadDatabase.call(this, name, src);
-        this.loadCardImages();
+    var _CRD_Scene_Boot_loadSystemImages = Scene_Boot.loadSystemImages;
+    Scene_Boot.loadSystemImages = function() {
+        _CRD_Scene_Boot_loadSystemImages.call(this);
+        ImageManager.loadCardImages();
     };
 
-    DataManager.loadCardImages = function() {
+    ImageManager.loadCardImages = function() {
         ['spade', 'club', 'heart', 'diamond'].forEach( function(suit) {
             for( var i = 1; i < 14; i++) {
-                ImageManager.loadPicture(FTKR.CRD.image[suit].format(i.padZero(2)));
+                this.reservePicture(FTKR.CRD.image[suit].format(i.padZero(2)));
             }
-        });
-        ImageManager.loadPicture(FTKR.CRD.image.back);
-        ImageManager.loadPicture(FTKR.CRD.image.joker);
+        },this);
+        this.reservePicture(FTKR.CRD.image.back);
+        this.reservePicture(FTKR.CRD.image.joker);
     };
 
     //アクターの特徴タグを読み取る
@@ -924,6 +927,8 @@ FTKR.CRD = FTKR.CRD || {};
         this._joker = FTKR.CRD.card.jokerNum;
         this._points = ('0,' + FTKR.CRD.game.points).split(',').num();
         this._playerPoints = [0,0,0,0];
+        this._cardHeight = 0;
+        this._cardWidth = 0;
     };
 
     //プレイヤーの設定
@@ -1026,6 +1031,11 @@ FTKR.CRD = FTKR.CRD || {};
         this._playerPoints[index] += point;
     };
 
+    Game_CardData.prototype.setCardSize = function(card) {
+        this._cardHeight = card.height;
+        this._cardWidth = card.width;
+    };
+
     //=============================================================================
     // Scene_CRD
     // カードゲームシーン
@@ -1074,6 +1084,7 @@ FTKR.CRD = FTKR.CRD || {};
         Scene_MenuBase.prototype.initialize.call(this);
         this.clearGame();
         this.clearVariables();
+        ImageManager.loadCardImages();
         $gameCardData.resetPlayerPoints();
         this.setPlayerCharacteristics();
         this._setEnd = false;
@@ -1118,6 +1129,7 @@ FTKR.CRD = FTKR.CRD || {};
         this._hand = null;
         this._pickup = false;
         this._endPeople = 0;
+        this._cardNum = 0;
     };
 
     Scene_CRD.prototype.clearVariables = function() {
@@ -1186,6 +1198,9 @@ FTKR.CRD = FTKR.CRD || {};
             i++;
             if (i >= $gameCardData.playerNum()) i = 0;
         }
+        this._handWindows.forEach( function(window){
+            window.refreshHand();
+        });
         this.setTarget();
     };
 
@@ -1209,6 +1224,7 @@ FTKR.CRD = FTKR.CRD || {};
         for (var i = 0; i < jokerNum; i++) {
             this._stock.push({suit:'joker', rank:0});
         }
+        this._cardNum = this._stock.length;
     };
 
     Scene_CRD.prototype.setEnd = function() {
@@ -1262,7 +1278,7 @@ FTKR.CRD = FTKR.CRD || {};
         this._backgroundSprite = new Sprite();
         var bgiName = FTKR.CRD.image.background;
         this._backgroundSprite.bitmap = bgiName ?
-            ImageManager.loadPicture(bgiName) : SceneManager.backgroundBitmap();
+            ImageManager.reservePicture(bgiName) : SceneManager.backgroundBitmap();
         this.addChild(this._backgroundSprite);
     };
 
@@ -1768,11 +1784,11 @@ FTKR.CRD = FTKR.CRD || {};
     };
 
     Window_Base.prototype.standardCardWidth = function() {
-        return ImageManager.loadPicture(FTKR.CRD.image.joker).width;
+        return ImageManager.reservePicture(FTKR.CRD.image.joker).width;
     };
 
     Window_Base.prototype.standardCardHeight = function() {
-        return ImageManager.loadPicture(FTKR.CRD.image.joker).height;
+        return ImageManager.reservePicture(FTKR.CRD.image.joker).height;
     };
 
     Window_PlayerHand.prototype.itemWidth = function() {
@@ -1811,7 +1827,6 @@ FTKR.CRD = FTKR.CRD || {};
     Window_PlayerHand.prototype.pushHand = function(suit, rank, up) {
         var card = {suit:suit, rank:rank, up:up || false};
         this._hand.push(card);
-        this.refreshHand();
     };
 
     Window_PlayerHand.prototype.addHand = function(index, suit, rank, up) {
@@ -1875,7 +1890,7 @@ FTKR.CRD = FTKR.CRD || {};
             this._sprites[index] = new Sprite();
             this.addChild(this._sprites[index]);
         }
-        var bitmap = ImageManager.loadPicture(cade);
+        var bitmap = ImageManager.reservePicture(cade);
         this._sprites[index].bitmap = bitmap;
         this._sprites[index].x = dx + this.padding;
         var offset = this._hand[index].up ? this.padding / 2 : 0;
@@ -1899,6 +1914,18 @@ FTKR.CRD = FTKR.CRD || {};
                 this.show();
             } else {
                 this.hide();
+            }
+        }
+    };
+
+    Window_PlayerHand.prototype.drawAllItems = function() {
+        var topIndex = this.topIndex();
+        var maxCards = SceneManager._scene._cardNum;
+        var maxNum = Math.min(this.maxPageItems(), maxCards);
+        for (var i = 0; i < maxNum; i++) {
+            var index = topIndex + i;
+            if (index < this.maxItems()) {
+                this.drawItem(index);
             }
         }
     };
@@ -2087,7 +2114,7 @@ FTKR.CRD = FTKR.CRD || {};
             this._sprites[index] = new Sprite();
             this.addChild(this._sprites[index]);
         }
-        var bitmap = ImageManager.loadPicture(cade);
+        var bitmap = ImageManager.reservePicture(cade);
         this._sprites[index].bitmap = bitmap;
         var offset = this._hand[index].up ? this.padding / 2 : 0;
         if (this._playerId === 3) offset *= -1;
@@ -2171,6 +2198,8 @@ FTKR.CRD = FTKR.CRD || {};
         var targetId = SceneManager._scene.targetId();
         sign.anchor.x = 0;
         sign.anchor.y = 0;
+        sign.scale.x = 1.5;
+        sign.scale.y = 1.5;
         switch (this._index) {
             case 0:
                 switch (targetId) {
