@@ -6,6 +6,8 @@
 
 ダウンロード: [FTKR_SkillTreeSystem.js](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillTreeSystem.js)
 
+サンプルプロジェクト: [英語版(English)](sampleProject/SkillTreeSample.zip)
+
 # 目次
 
 以下の項目の順でプラグインの使い方を説明します。
