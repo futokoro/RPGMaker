@@ -3,8 +3,8 @@
 // FTKR_CSS_CustomizeBattleResults.js
 // 作成者     : フトコロ
 // 作成日     : 2017/06/07
-// 最終更新日 : 2017/06/23
-// バージョン : v1.0.2
+// 最終更新日 : 2017/07/13
+// バージョン : v1.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -14,7 +14,7 @@ var FTKR = FTKR || {};
 FTKR.CBR = FTKR.CBR || {};
 
 /*:
- * @plugindesc v1.0.2 カスタム可能な戦闘結果画面を表示する
+ * @plugindesc v1.1.0 カスタム可能な戦闘結果画面を表示する
  * @author フトコロ
  *
  * @param --タイトル設定--
@@ -241,6 +241,12 @@ FTKR.CBR = FTKR.CBR || {};
  * @param --入手アイテム設定--
  * @default
  *
+ * @param Combine Same Items
+ * @desc 同じアイテムを纏めて表示する
+ * 0 - まとめない, 1 - まとめる
+ * @type number
+ * @default 0
+ * 
  * @param Item Visible Rows
  * @desc ステータスウィンドウの縦の行数：デフォルト 8
  * @type number
@@ -322,6 +328,9 @@ FTKR.CBR = FTKR.CBR || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.0 - 2017/07/13 - 機能追加
+ *    1. 同じアイテムを入手した場合にまとめて表示する機能を追加。
+ * 
  * v1.0.2 - 2017/06/23 : 不具合修正
  *    1. 入手経験値が29以下の場合に、アクターが経験値を入手できない不具合を修正。
  *    2. 戦績画面タイトルの文字列の表示位置を修正。
@@ -402,6 +411,7 @@ if (Imported.FTKR_CSS) (function() {
             opacity     :Number(parameters['Item Opacity'] || 0),
             hideFrame   :Number(parameters['Item Hide Frame'] || 0),
             cursorHeight:Number(parameters['Item Cursor Lines'] || 0),
+            combine     :Number(parameters['Combine Same Items'] || 0),
         }
     };
 
@@ -981,44 +991,65 @@ if (Imported.FTKR_CSS) (function() {
     Window_BattleResultItem.prototype = Object.create(Window_Selectable.prototype);
     Window_BattleResultItem.prototype.constructor = Window_BattleResultItem;
 
+    Window_BattleResultItem.prototype.initialize = function(wx, wy, ww, wh) {
+        Window_Selectable.prototype.initialize.call(this, wx, wy, ww, wh);
+        this._datas = [];
+    };
+
     //ウィンドウの行数
     Window_BattleResultItem.prototype.numVisibleRows = function() {
         return FTKR.CBR.item.visibleRows;
     };
 
     Window_BattleResultItem.prototype.setDropItem = function(items) {
-        this._items = items;
+        this._datas = items.map(function(item){
+            return {item:item, number:1};
+        });
+        if (FTKR.CBR.item.combine) this.combineItems();
         this.refresh();
     };
 
-    Window_BattleResultItem.prototype.maxItems = function() {
-        return this._items ? this._items.length : 0;
-    };
-
-    Window_BattleResultItem.prototype.drawItem = function(index) {
-        if (!this._items) return;
-        var item = this._items[index];
-        if (item) {
-            var numberWidth = this.textWidth('000');
-            var rect = this.itemRect(index);
-            rect.width -= this.textPadding();
-            this.drawItemName(item, rect.x, rect.y, rect.width - numberWidth);
-            this.drawItemNumber(item, rect.x, rect.y, rect.width);
+    Window_BattleResultItem.prototype.combineItems = function() {
+        var count = this._datas.length;
+        var i = 0;
+        while(count >= i) {
+            for (var n = i + 1; n < count;) {
+                if (this._datas[n] && this._datas[i].item === this._datas[n].item) {
+                    this._datas[i].number += this._datas[n].number;
+                    this._datas.splice(n, 1);
+                    count--;
+                } else {
+                    n++;
+                }
+            }
+            i++;
         }
     };
 
-    Window_BattleResultItem.prototype.dropItemNumber = function(item) {
-        return 1;
+    Window_BattleResultItem.prototype.maxItems = function() {
+        return this._datas ? this._datas.length : 0;
+    };
+
+    Window_BattleResultItem.prototype.drawItem = function(index) {
+        if (!this._datas) return;
+        var data = this._datas[index];
+        if (data) {
+            var numberWidth = this.textWidth('000');
+            var rect = this.itemRect(index);
+            rect.width -= this.textPadding();
+            this.drawItemName(data.item, rect.x, rect.y, rect.width - numberWidth);
+            this.drawItemNumber(data.number, rect.x, rect.y, rect.width);
+        }
     };
 
     Window_BattleResultItem.prototype.needsNumber = function() {
         return true;
     };
 
-    Window_BattleResultItem.prototype.drawItemNumber = function(item, x, y, width) {
+    Window_BattleResultItem.prototype.drawItemNumber = function(number, x, y, width) {
         if (this.needsNumber()) {
             this.drawText(':', x, y, width - this.textWidth('00'), 'right');
-            this.drawText(this.dropItemNumber(item), x, y, width, 'right');
+            this.drawText(number, x, y, width, 'right');
         }
     };
 
