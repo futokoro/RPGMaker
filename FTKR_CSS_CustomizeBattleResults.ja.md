@@ -159,6 +159,7 @@ FTKR_CSS_CustomizeBattleResults.js
 
 ### 入手アイテムを纏めて表示
 `Combine Same Items`
+
 同じアイテムの場合に、纏めて表示するかどうか設定できます。
 * 0 - 纏めない(デフォルト)
 * 1 - 纏めて表示
