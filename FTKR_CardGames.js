@@ -3,8 +3,8 @@
 // FTKR_CardGames.js
 // 作成者     : フトコロ
 // 作成日     : 2017/07/02
-// 最終更新日 : 2017/07/11
-// バージョン : v1.0.2
+// 最終更新日 : 2017/07/19
+// バージョン : v1.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CRD = FTKR.CRD || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.2 トランプカードゲーム
+ * @plugindesc v1.1.0 トランプカードゲーム
  * @author フトコロ
  *
  * @param --カードの設定--
@@ -30,12 +30,16 @@ FTKR.CRD = FTKR.CRD || {};
  * @desc 使用する最大ランク(数字)を選択します。
  * 1 ~ 13 
  * @default 13
+ * @min 1
+ * @max 13
  * @type number
  *
  * @param Number Of Jokers
  * @desc 使用するジョーカーの数を選択します。
  * 0 ~ 2
  * @default 1
+ * @min 0
+ * @max 2
  * @type number
  *
  * @param --ゲームの設定--
@@ -43,8 +47,13 @@ FTKR.CRD = FTKR.CRD || {};
  * 
  * @param Subject Player Color
  * @desc 現在ターンのプレイヤーのカラーを設定します。
- * @default 17
+ * @default 18
  * @type number
+ * 
+ * @param Subject Window Tone
+ * @desc 現在ターンのプレイヤーのウィンドウカラーを設定します。
+ * R,G,B  とカンマ(,)で区切って入力してください。
+ * @default 255,255,0
  * 
  * @param Target Player Color
  * @desc 手札を引く相手プレイヤーのカラーを設定します。
@@ -56,11 +65,58 @@ FTKR.CRD = FTKR.CRD || {};
  * カンマ(,)で区切って、1位から4位まで設定してください。
  * @default 2,1,-1,-2
  * 
+ * @param Draw Speed
+ * @desc 手札を引く速さを設定します。
+ * @default 30
+ * @type number
+ * 
+ * @param Draw Height
+ * @desc 手札を引く高さを設定します。
+ * @default 60
+ * @type number
+ * 
+ * @param --サウンドの設定--
+ * @default
+ * 
+ * @param Game BGM Name
+ * @desc カードゲーム時のBGMを設定します。
+ * @default 
+ * @type file
+ * @require 1
+ * @dir audio/bgm
+ * 
+ * @param Game BGM Pitch
+ * @desc カードゲーム時のBGMのピッチを設定します。
+ * @default 100
+ * @min 50
+ * @max 150
+ * @type number
+ * 
+ * @param Draw SE Name
+ * @desc 手札を引く時のSEを設定します。
+ * @default Jump1
+ * @type file
+ * @require 1
+ * @dir audio/se
+ * 
+ * @param Draw SE Pitch
+ * @desc 手札を引く時のSEのピッチを設定します。
+ * @default 100
+ * @min 50
+ * @max 150
+ * @type number
+ * 
  * @param --ゲーム変数の設定--
  * @default
  * 
  * @param Game Count ID
  * @desc ゲーム数を設定する変数のIDを指定します。
+ * @default 
+ * @type number
+ *
+ * @param Draw Speed ID
+ * @desc カードを引く早さを設定する変数のIDを指定します。
+ * 設定しない場合は、Draw Speedの設定で固定します。
  * @default 
  * @type number
  *
@@ -386,7 +442,7 @@ FTKR.CRD = FTKR.CRD || {};
  * 
  * また、引いたカードは手札の任意の場所にセットすることができます。
  * 
- * 後述のNPCの特徴により、手札の中の位置に重要になるため
+ * 後述のNPCの特徴により、手札の中の位置が重要になるため
  * 配置する場所を考えながらゲームを進めましょう。
  * 
  * 
@@ -401,6 +457,10 @@ FTKR.CRD = FTKR.CRD || {};
  * その後、移したい場所にカーソルを合わせて、決定ボタンを押します。
  * 
  * この時、同じ場所を選択すると、カードを突き出した状態にすることができます。
+ * 
+ * 
+ * <NPCのターン>
+ * NPCのターンは自動で進みます。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -509,6 +569,13 @@ FTKR.CRD = FTKR.CRD || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.0 - 2017/07/19 : 機能追加
+ *    1. カードを引くときと手札に入れる時にカードに動きをつける機能を追加。
+ *    2. NPCのターンを自動で進めるように変更。
+ *    3. ターン中のキャラのステータスウィンドウの色を変更する機能を追加。
+ *    4. ２人プレイと、３人プレイの時の配置を見直し。
+ *    5. ゲーム中のBGMとカードを引くときのSEを設定する機能を追加。
+ * 
  * v1.0.2 - 2017/07/11 : 不具合修正
  *    1. カードゲーム画面表示時にゲームが進まない場合がある不具合を修正。
  * 
@@ -552,6 +619,13 @@ FTKR.CRD = FTKR.CRD || {};
 
 (function() {
 
+    //配列の要素を、すべて数値に変換する。
+    Array.prototype.num = function() {
+      return this.map(function(elm) {
+          return Number(elm);
+      });
+    }
+
     //=============================================================================
     // プラグイン パラメータ
     //=============================================================================
@@ -575,9 +649,26 @@ FTKR.CRD = FTKR.CRD || {};
             },
         },
         game:{
-            subjectColor :Number(parameters['Subject Player Color'] || 17),
+            subjectColor:Number(parameters['Subject Player Color'] || 18),
+            subjectTone :String(parameters['Subject Window Tone'] || '255,255,0').split(',').num(),
             targetColor :Number(parameters['Target Player Color'] || 29),
-            points     :String(parameters['Ranking Points'] || '2,1,-1,-2'),
+            points      :String(parameters['Ranking Points'] || '2,1,-1,-2'),
+            drawSpeed   :Number(parameters['Draw Speed'] || 40),
+            drawHeight  :Number(parameters['Draw Height'] || 60),
+        },
+        sound:{
+            bgm:{
+                name    :String(parameters['Game BGM Name'] || ''),
+                pitch   :Number(parameters['Game BGM Pitch'] || 100),
+                pan     :0,
+                volume  :90,
+            },
+            se:{
+                name    :String(parameters['Draw SE Name'] || ''),
+                pitch   :Number(parameters['Draw SE Pitch'] || 100),
+                pan     :0,
+                volume  :90,
+            },
         },
         setting:{
             playerId:[
@@ -591,6 +682,7 @@ FTKR.CRD = FTKR.CRD || {};
             dialogue   :Number(parameters['NPC Dialogues ID'] || 0),
             faces      :Number(parameters['NPC Facial Expressions ID'] || 0),
             chara      :Number(parameters['NPC Characteristics ID'] || 0),
+            drawSpeed  :Number(parameters['Draw Speed ID'] || 0),
         },
         command:{
             turnEnd    :String(parameters['Turn End Command'] || 'ターン終了'),
@@ -719,13 +811,6 @@ FTKR.CRD = FTKR.CRD || {};
     var switchOffId = function(prop) {
         $gameSwitches.setValue(FTKR.CRD.setting[prop], false);
     };
-
-    //配列の要素を、すべて数値に変換する。
-    Array.prototype.num = function() {
-      return this.map(function(elm) {
-          return Number(elm);
-      });
-    }
 
     //=============================================================================
     // DataManager
@@ -887,6 +972,8 @@ FTKR.CRD = FTKR.CRD || {};
         switch (command) {
             case 'カードゲーム表示':
             case 'OPEN_CARDGAME':
+                CardGameManager.saveBgmAndBgs();
+                CardGameManager.stopAudioOnStart();
                 SceneManager.push(Scene_CRD);
                 break;
             case 'プレイヤー設定':
@@ -900,6 +987,45 @@ FTKR.CRD = FTKR.CRD || {};
         }
     };
 
+    //=============================================================================
+    // CardGameManager
+    // カードゲームマネージャー
+    //=============================================================================
+
+    function CardGameManager() {
+        throw new Error('This is a static class');
+    }
+
+    CardGameManager.saveBgmAndBgs = function() {
+        this._mapBgm = AudioManager.saveBgm();
+        this._mapBgs = AudioManager.saveBgs();
+    };
+
+    CardGameManager.stopAudioOnStart = function() {
+        if (!AudioManager.isCurrentBgm(FTKR.CRD.sound.bgm.name)) {
+            AudioManager.stopBgm();
+        }
+        AudioManager.stopBgs();
+        AudioManager.stopMe();
+        AudioManager.stopSe();
+    };
+
+    CardGameManager.playGameBgm = function() {
+        AudioManager.playBgm(FTKR.CRD.sound.bgm);
+        AudioManager.stopBgs();
+    };
+    
+    CardGameManager.replayBgmAndBgs = function() {
+        if (this._mapBgm) {
+            AudioManager.replayBgm(this._mapBgm);
+        } else {
+            AudioManager.stopBgm();
+        }
+        if (this._mapBgs) {
+            AudioManager.replayBgs(this._mapBgs);
+        }
+    };
+    
     //=============================================================================
     // Game_Actor
     //=============================================================================
@@ -1084,11 +1210,16 @@ FTKR.CRD = FTKR.CRD || {};
         Scene_MenuBase.prototype.initialize.call(this);
         this.clearGame();
         this.clearVariables();
+        CardGameManager.playGameBgm();
         ImageManager.loadCardImages();
         $gameCardData.resetPlayerPoints();
         this.setPlayerCharacteristics();
         this._setEnd = false;
         this._gameCount = 1;
+    };
+
+    Scene_CRD.prototype.setBgm = function() {
+        
     };
 
     Scene_CRD.prototype.setRoute = function() {
@@ -1151,12 +1282,9 @@ FTKR.CRD = FTKR.CRD || {};
         this.discardPair();
         if (this.checkGameEnd()) return;
         this.refreshActor();
-        if (this._startId === 0) {
-            this.targetWindow().activate();
-            this.targetWindow().select(0);
-        } else {
-            this._messageBoxWindow.activate();
-        }
+        this._messageBoxWindow.activate();
+        this._phase = 'input';
+        this._input = 'start';
     };
 
     Scene_CRD.prototype.setStartPlayer = function() {
@@ -1263,7 +1391,91 @@ FTKR.CRD = FTKR.CRD || {};
         return this._subjectId;
     };
 
+    Scene_CRD.prototype.isBusy = function() {
+        return this._handWindows.some( function(window){
+            return window.isBusy();
+        });
+    };
+
+    Scene_CRD.prototype.updatePhase = function() {
+        if (!this.isBusy()) {
+            switch (this._phase) {
+                case 'input':
+                    if (this._input === 'draw') {
+                        var hand = this.reduceCard(this.targetId(), this._handIndex);
+                        var holdId = this.subjectWindow().cardNum();
+                        this.subjectWindow().addHand(holdId, hand.suit, hand.rank);
+                        this.subjectWindow().setHoldId(holdId);
+                        if (this.checkGameEnd()) return;
+                        this.targetWindow().deselect();
+                        this.targetWindow().refresh();
+                        this.subjectWindow().activate();
+                        this.subjectWindow().select(holdId);
+                        this._input = 'dispair';
+                    }
+                    break;
+                case 'select':
+                    this._messageBoxWindow.clearText();
+                    this._handIndex = this.selectCard(this.targetId(), false);
+                    AudioManager.playSe(FTKR.CRD.sound.se);
+                    this._phase = 'draw';
+                    break;
+                case 'draw':
+                    this.resetTempFace();
+                    this.resetDialogue();
+                    this._messageBoxWindow.clearText();
+                    var hand = this.reduceCard(this.targetId(), this._handIndex);
+                    this.addHand(this.subjectId(), hand);
+                    this._phase = 'dispair';
+                    break;
+                case 'dispair':
+                    this._messageBoxWindow.clearText();
+                    this.discardPairHand(this.subjectId());
+                    if (this.checkGameEnd()) return;
+                    this.shiftIndex();
+                    this.refreshActor();
+                    this._hand = null;
+                    if (this._subjectId === 0) {
+                        this.targetWindow().activate();
+                        this.targetWindow().select(0);
+                        this._phase = 'input';
+                        this._input = 'select';
+                    } else {
+                        this._phase = 'select';
+                    }
+                    break;
+                case 'gameEnd':
+                    this._messageBoxWindow.clearText();
+                    this._messageBoxWindow.activate();
+                    this._phase = 'input';
+                    this._input = 'gameEnd';
+                    break;
+                case 'setEnd':
+                    this._messageBoxWindow.clearText();
+                    this._messageBoxWindow.activate();
+                    this._phase = 'input';
+                    this._input = 'setEnd';
+                    break;
+            }
+        }
+    };
+
+    Scene_CRD.prototype.updateTouch = function() {
+        if (!this.isBusy()) return;
+        if (this._phase === 'input' && TouchInput.isTriggered()) {
+            switch (this._input) {
+                case 'setEnd':
+                case 'gameEnd':
+                case 'start':
+                    this.onMessageOk();
+                    break;
+            }
+        }
+    };
+
     Scene_CRD.prototype.update = function() {
+        this.updateTouch();
+        this.updatePhase();
         Scene_MenuBase.prototype.update.call(this);
     };
 
@@ -1299,103 +1511,127 @@ FTKR.CRD = FTKR.CRD || {};
     Scene_CRD.prototype.createHandWindows = function() {
         this._handWindows = [];
         var number = $gameCardData.playerNum();
-        this.createHandWindow1();
-        if (number > 1) this.createHandWindow2();
-        if (number > 2) this.createHandWindow3();
-        if (number > 3) this.createHandWindow4();
+        this.createHandWindowBottom(0);
+        switch (number) {
+            case 2:
+                this.createHandWindowTop(1);
+                break;
+            case 3:
+                this.createHandWindowTop(1);
+                this.createHandWindowRight(2);
+                break;
+            case 4:
+            default:
+                this.createHandWindowLeft(1);
+                this.createHandWindowTop(2);
+                this.createHandWindowRight(3);
+                break;
+        }
     };
 
-    Scene_CRD.prototype.createHandWindow1 = function() {
+    Scene_CRD.prototype.createHandWindowBottom = function(index) {
         var ww = FTKR.CRD.layout.width;
         var wh = FTKR.CRD.layout.height;
         var wx = (Graphics.boxWidth - ww) / 2;
         var wy = Graphics.boxHeight - wh;
-        this._handWindows[0] = new Window_PlayerHand(0, wx, wy, ww, wh, true);
-        this._handWindows[0].setHandler('ok',     this.onSelectOk.bind(this));
-        this._handWindows[0].setHandler('cancel', this.onShuffleEnd.bind(this));
-        this.addWindow(this._handWindows[0]);
+        this._handWindows[index] = new Window_PlayerHand(index, wx, wy, ww, wh, true, 0);
+        this._handWindows[index].setHandler('ok',     this.onSelectOk.bind(this));
+//        this._handWindows[index].setHandler('cancel', this.onShuffleEnd.bind(this));
+        this.addWindow(this._handWindows[index]);
     };
 
-    Scene_CRD.prototype.createHandWindow2 = function() {
+    Scene_CRD.prototype.createHandWindowLeft = function(index) {
         var wh = FTKR.CRD.layout.width;
         var ww = FTKR.CRD.layout.height;
         var wx = 0;
         var wy = (Graphics.boxHeight - wh) / 2;
         var open = FTKR.CRD.debug.open;
-        this._handWindows[1] = new Window_PlayerHandVar(1, wx, wy, ww, wh, open);
-        this._handWindows[1].setHandler('ok',     this.onSelectOk.bind(this));
-        this.addWindow(this._handWindows[1]);
+        this._handWindows[index] = new Window_PlayerHandVar(index, wx, wy, ww, wh, open, 1);
+        this._handWindows[index].setHandler('ok',     this.onSelectOk.bind(this));
+        this.addWindow(this._handWindows[index]);
     };
 
-    Scene_CRD.prototype.createHandWindow3 = function() {
+    Scene_CRD.prototype.createHandWindowTop = function(index) {
         var ww = FTKR.CRD.layout.width;
         var wh = FTKR.CRD.layout.height;
         var wx = (Graphics.boxWidth - ww) / 2;
         var wy = 0;
         var open = FTKR.CRD.debug.open;
-        this._handWindows[2] = new Window_PlayerHand(2, wx, wy, ww, wh, open);
-        this._handWindows[2].setHandler('ok',     this.onSelectOk.bind(this));
-        this.addWindow(this._handWindows[2]);
+        this._handWindows[index] = new Window_PlayerHand(index, wx, wy, ww, wh, open, 2);
+        this._handWindows[index].setHandler('ok',     this.onSelectOk.bind(this));
+        this.addWindow(this._handWindows[index]);
     };
 
-    Scene_CRD.prototype.createHandWindow4 = function() {
+    Scene_CRD.prototype.createHandWindowRight = function(index) {
         var wh = FTKR.CRD.layout.width;
         var ww = FTKR.CRD.layout.height;
         var wx = Graphics.boxWidth - ww;
         var wy = (Graphics.boxHeight - wh) / 2;
         var open = FTKR.CRD.debug.open;
-        this._handWindows[3] = new Window_PlayerHandVar(3, wx, wy, ww, wh, open);
-        this._handWindows[3].setHandler('ok',     this.onSelectOk.bind(this));
-        this.addWindow(this._handWindows[3]);
+        this._handWindows[index] = new Window_PlayerHandVar(index, wx, wy, ww, wh, open, 3);
+        this._handWindows[index].setHandler('ok',     this.onSelectOk.bind(this));
+        this.addWindow(this._handWindows[index]);
     };
 
     Scene_CRD.prototype.createActorWindows = function() {
         this._actorWindows = [];
         var number = $gameCardData.playerNum();
-        this.createActorWindow1();
-        if (number > 1) this.createActorWindow2();
-        if (number > 2) this.createActorWindow3();
-        if (number > 3) this.createActorWindow4();
+        this.createActorWindowBottom(0);
+        switch (number) {
+            case 2:
+                this.createActorWindowTop(1);
+                break;
+            case 3:
+                this.createActorWindowTop(1);
+                this.createActorWindowRight(2);
+                break;
+            case 4:
+            default:
+                this.createActorWindowLeft(1);
+                this.createActorWindowTop(2);
+                this.createActorWindowRight(3);
+                break;
+        }
     };
 
-    Scene_CRD.prototype.createActorWindow1 = function() {
+    Scene_CRD.prototype.createActorWindowBottom = function(index) {
         var wh = Window_Base._faceHeight / 2 + this._dummyWindow.standardPadding() * 2;
         var ww = Window_Base._faceHeight + this._dummyWindow.standardPadding() * 2;
         var wx = (Graphics.boxWidth - ww) / 2;
-        var wy = this._handWindows[0].y - wh;
-        var actor = this.player(0);
-        this._actorWindows[0] = new Window_PlayerStatus(actor, 0, wx, wy, ww, wh);
-        this.addWindow(this._actorWindows[0]);
+        var wy = this._handWindows[index].y - wh;
+        var actor = this.player(index);
+        this._actorWindows[index] = new Window_PlayerStatus(actor, index, wx, wy, ww, wh);
+        this.addWindow(this._actorWindows[index]);
     };
 
-    Scene_CRD.prototype.createActorWindow2 = function() {
+    Scene_CRD.prototype.createActorWindowLeft = function(index) {
         var wh = Window_Base._faceHeight + this._dummyWindow.standardPadding() * 2;
         var ww = Window_Base._faceHeight / 2 + this._dummyWindow.standardPadding() * 2;
-        var wx = this._handWindows[1].x + this._handWindows[1].width;
+        var wx = this._handWindows[index].x + this._handWindows[index].width;
         var wy = (Graphics.boxHeight - wh) / 2;
-        var actor = this.player(1);
-        this._actorWindows[1] = new Window_PlayerStatus(actor, 1, wx, wy, ww, wh);
-        this.addWindow(this._actorWindows[1]);
+        var actor = this.player(index);
+        this._actorWindows[index] = new Window_PlayerStatus(actor, index, wx, wy, ww, wh);
+        this.addWindow(this._actorWindows[index]);
     };
 
-    Scene_CRD.prototype.createActorWindow3 = function() {
+    Scene_CRD.prototype.createActorWindowTop = function(index) {
         var wh = Window_Base._faceHeight / 2 + this._dummyWindow.standardPadding() * 2;
         var ww = Window_Base._faceHeight + this._dummyWindow.standardPadding() * 2;
         var wx = (Graphics.boxWidth - ww) / 2;
-        var wy = this._handWindows[2].y + this._handWindows[2].height;
-        var actor = this.player(2);
-        this._actorWindows[2] = new Window_PlayerStatus(actor, 2, wx, wy, ww, wh);
-        this.addWindow(this._actorWindows[2]);
+        var wy = this._handWindows[index].y + this._handWindows[index].height;
+        var actor = this.player(index);
+        this._actorWindows[index] = new Window_PlayerStatus(actor, index, wx, wy, ww, wh);
+        this.addWindow(this._actorWindows[index]);
     };
 
-    Scene_CRD.prototype.createActorWindow4 = function() {
+    Scene_CRD.prototype.createActorWindowRight = function(index) {
         var wh = Window_Base._faceHeight + this._dummyWindow.standardPadding() * 2;
         var ww = Window_Base._faceHeight / 2+ this._dummyWindow.standardPadding() * 2;
-        var wx = this._handWindows[3].x - ww;
+        var wx = this._handWindows[index].x - ww;
         var wy = (Graphics.boxHeight - wh) / 2;
-        var actor = this.player(3);
-        this._actorWindows[3] = new Window_PlayerStatus(actor, 3, wx, wy, ww, wh);
-        this.addWindow(this._actorWindows[3]);
+        var actor = this.player(index);
+        this._actorWindows[index] = new Window_PlayerStatus(actor, index, wx, wy, ww, wh);
+        this.addWindow(this._actorWindows[index]);
     };
 
     Scene_CRD.prototype.createDialogueWindows = function() {
@@ -1434,12 +1670,13 @@ FTKR.CRD = FTKR.CRD || {};
         this._pickup = false;
         this.shiftIndex();
         this.refreshActor();
-        this._messageBoxWindow.activate();
+        this._phase = 'select';
     };
 
     Scene_CRD.prototype.onShuffle = function() {
         this._commandBoxWindow.deselect();
         this._commandBoxWindow.hide();
+        this._input = 'sortSelect';
         this.subjectWindow().activate();
         this.subjectWindow().select(0);
     }; 
@@ -1474,9 +1711,11 @@ FTKR.CRD = FTKR.CRD || {};
             this.setGameOutPoint(this.lastPlayer());
             this._actorWindows[this.lastPlayer()].setRank(this._endPeople);
             if (this._gameCount >= variableId('gameCount')) {
+                this._phase = 'setEnd';
                 this.setEnd();
             } else {
                 this.gameEnd();
+                this._phase = 'gameEnd';
                 this._gameCount++;
             }
             this._messageBoxWindow.setText('ゲーム終了です');
@@ -1489,29 +1728,35 @@ FTKR.CRD = FTKR.CRD || {};
         this._messageBoxWindow.clearText();
         this.resetTempFace();
         this.resetDialogue();
-        if (!this._hand && !this._pickup) {
-            this._hand = this.reduceHand(this.targetId(), true);
-            var holdId = this.subjectWindow().cardNum();
-            this.subjectWindow().addHand(holdId, this._hand.suit, this._hand.rank);
-            this.subjectWindow().setHoldId(holdId);
-            if (this.checkGameEnd()) return;
-            this.targetWindow().deactivate();
-            this.targetWindow().deselect();
-            this.targetWindow().refresh();
-            this.subjectWindow().activate();
-            this.subjectWindow().select(holdId);
-        } else if (!this._hand && this._pickup) {
-            var index = this.subjectWindow().index();
-            this._hand = this.subjectWindow()._hand[index];
-            this._sortHoldId = index;
-            this.subjectWindow().setHoldId(index);
-            this.subjectWindow().activate();
-        } else if (this._hand && this._pickup) {
-            var index = this.subjectWindow().index();
-            if (index === this._sortHoldId) this._hand.up = !this._hand.up;
-            this.onShuffleEnd();
-        } else {
-            this.onShuffleEnd();
+        switch (this._input) {
+            case 'select':
+                this._handIndex = this.selectCard(this.targetId(), true);
+                AudioManager.playSe(FTKR.CRD.sound.se);
+                this._input = 'draw';
+                break;
+            case 'dispair':
+                this._input = 'select';
+                SoundManager.playOk();
+                this.onShuffleEnd();
+                break;
+            case 'sortSelect':
+                var index = this.subjectWindow().index();
+                this._hand = this.subjectWindow()._hand[index];
+                this._sortHoldId = index;
+                this.subjectWindow().setHoldId(index);
+                this.subjectWindow().activate();
+                this._input = 'sortEnd';
+                break;
+            case 'sortEnd':
+                var index = this.subjectWindow().index();
+                if (index === this._sortHoldId) this._hand.up = !this._hand.up;
+                this._input = 'select';
+                this.onShuffleEnd();
+                break;
+            case 'sortCancel':
+                this._input = 'select';
+                this.onShuffleEnd();
+                break;
         }
     };
 
@@ -1542,29 +1787,46 @@ FTKR.CRD = FTKR.CRD || {};
 
     Scene_CRD.prototype.onMessageOk = function() {
         this._messageBoxWindow.clearText();
-        if (this.isGameEnd()) {
-            this.clearGame();
-            this.clearHands();
-            this.clearRanks();
-            this.settingGame();
-        } else if (this.isSetEnd()){
-            this.popScene();
-        } else {
-            this.resetTempFace();
-            this.resetDialogue();
-            var hand = this.reduceHand(this.targetId(), false);
-            this.addHand(this.subjectId(), hand);
-            this.discardPairHand(this.subjectId());
-            if (this.checkGameEnd()) return;
-            this.shiftIndex();
-            this.refreshActor();
-            if (this._subjectId === 0) {
-                this.targetWindow().activate();
-                this.targetWindow().select(0);
-            } else {
+        switch (this._input) {
+            case 'setEnd':
+                CardGameManager.replayBgmAndBgs();
+                this.popScene();
+                break;
+            case 'gameEnd':
+                this.clearGame();
+                this.clearHands();
+                this.clearRanks();
+                this.settingGame();
                 this._messageBoxWindow.activate();
-            }
+                this._input = 'start';
+                break;
+            case 'start':
+                if (this._startId === 0) {
+                    this._phase = 'input';
+                    this._input = 'select';
+                    this.targetWindow().activate();
+                    this.targetWindow().select(0);
+                } else {
+                    this._phase = 'select';
+                }
+                break;
         }
+    };
+
+    Scene_CRD.prototype.waitMoveCard = function() {
+        var count = 0;
+        while (this.isMovingCard()) {
+            count++;
+            if(count > 100000) break;
+        }
+    };
+
+    Scene_CRD.prototype.isMovingCard = function() {
+        return this._handWindows.some( function(window) {
+            return window._sprites.some( function(sprite){
+                return !!sprite && sprite.isMoving();
+            });
+        });
     };
 
     Scene_CRD.prototype.refreshActor = function() {
@@ -1653,6 +1915,26 @@ FTKR.CRD = FTKR.CRD || {};
         window.deselect();
     };
 
+    Scene_CRD.prototype.selectCard = function(index, isPlayer) {
+        var window = this._handWindows[index];
+        var handIndex = isPlayer ? window.index() :
+            this.drawNPCHand();
+        window.moveCardUp(handIndex);
+        return handIndex;
+    };
+
+    Scene_CRD.prototype.reduceCard = function(index, handIndex) {
+        var window = this._handWindows[index];
+        var hand = window.reduceHand(handIndex);
+        if (!window.cardNum()) {
+            this._endPeople++;
+            this.setGameOutPoint(index);
+            this._actorWindows[index].setRank(this._endPeople);
+            this.refreshRoute(index);
+        }
+        return hand;
+    };
+
     Scene_CRD.prototype.reduceHand = function(index, isPlayer) {
         var window = this._handWindows[index];
         var handIndex = isPlayer ? window.index() :
@@ -1703,12 +1985,12 @@ FTKR.CRD = FTKR.CRD || {};
                         break;
                     case Scene_CRD.DRAW_PICKUP:
                         hands = hands.filter(function(hand){
-                            return hand.up;
+                            return hand && hand.up;
                         });
                         break;
                     case Scene_CRD.NOT_DRAW_PICKUP:
                         hands = hands.filter(function(hand){
-                            return !hand.up;
+                            return hand && !hand.up;
                         });
                         break;
                 };
@@ -1732,6 +2014,7 @@ FTKR.CRD = FTKR.CRD || {};
 
     Scene_CRD.prototype.setGameOutPoint = function(index) {
         var point = $gameCardData.point(this._endPeople);
+        console.log(index, point, this._endPeople);
         $gameCardData.addPlayerPoint(index, point);
         var varId = FTKR.CRD.result.varId[index];
         if (varId) {
@@ -1759,11 +2042,12 @@ FTKR.CRD = FTKR.CRD || {};
     Window_PlayerHand.prototype = Object.create(Window_Selectable.prototype);
     Window_PlayerHand.prototype.constructor = Window_PlayerHand;
 
-    Window_PlayerHand.prototype.initialize = function(playerId, x, y, width, height, isPlayer) {
+    Window_PlayerHand.prototype.initialize = function(playerId, x, y, width, height, isPlayer, position) {
         this._playerId = playerId;
         this._hand = [];
         this._sprites = [];
         this._isPlayer = isPlayer;
+        this._position = position;
         this._holdId = -1;
         Window_Selectable.prototype.initialize.call(this, x, y, width, height);
         this.setCardSize();
@@ -1817,26 +2101,49 @@ FTKR.CRD = FTKR.CRD || {};
         return this.cardNum();
     };
 
-    Window_PlayerHand.prototype.drawItem = function(index) {
-        var card = this._hand[index];
-        if (!card) return;
-        var rect = this.itemRect(index);
-        this.drawCardImage(index, rect.x, rect.y, this._isPlayer, card.suit, card.rank);
-    };
-
     Window_PlayerHand.prototype.pushHand = function(suit, rank, up) {
-        var card = {suit:suit, rank:rank, up:up || false};
+        var card = {suit:suit, rank:rank, up:up || false, front:this._isPlayer};
         this._hand.push(card);
     };
 
     Window_PlayerHand.prototype.addHand = function(index, suit, rank, up) {
-        var card = {suit:suit, rank:rank, up:up || false};
+        var card = {suit:suit, rank:rank, up:up || false, front:this._isPlayer};
         this._hand.splice(index, 0, card);
+        var sprite = this._sprites[index];
+        if (!sprite) {
+            sprite = new Sprite_Card(card, this._position);
+            this._sprites[index] = sprite;
+            sprite.setCardSize(this.itemWidth(), this.itemHeight());
+            sprite.setScale(this.cardScale());
+            this.addChild(sprite);
+        } else {
+            sprite.setCard(card, this._position);
+        }
+        var offsetX = 0, offsetY = 0;
+        sprite.resetOffset();
+        if (FTKR.CRD.game.drawSpeed) {
+            var height = FTKR.CRD.game.drawHeight;
+            if (this._position % 2) {
+                offsetX = Math.pow(-1, Math.floor((this._position - 1)/2)) * height;
+            } else {
+                offsetY = -1 * Math.pow(-1, Math.floor(this._position/2)) * height;
+            }
+            sprite.setOffset(offsetX, offsetY);
+            sprite.moveCardDown();
+        }
         this.refreshHand();
+    };
+
+    Window_PlayerHand.prototype.moveCardUp = function(index) {
+        var sprite = this._sprites[index];
+        sprite.resetOffset();
+        sprite.moveCardUp();
     };
 
     Window_PlayerHand.prototype.reduceHand = function(index) {
         var hand = this._hand[index];
+        var sprite = this._sprites[index];
+        sprite.resetOffset();
         this._hand.splice(index, 1);
         this.refreshHand();
         return hand;
@@ -1884,21 +2191,27 @@ FTKR.CRD = FTKR.CRD || {};
         return Math.min(height, len);
     };
 
-    Window_PlayerHand.prototype.drawCardImage = function(index, dx, dy, front, suit, rank) {
-        var cade = front ? FTKR.CRD.image[suit].format(rank.padZero(2)) : FTKR.CRD.image.back;
-        if (!this._sprites[index]) {
-            this._sprites[index] = new Sprite();
-            this.addChild(this._sprites[index]);
+    Window_PlayerHand.prototype.drawItem = function(index) {
+        var card = this._hand[index];
+        if (!card) return;
+        var rect = this.itemRect(index);
+        this.drawCardImage(index, rect.x, rect.y);
+    };
+
+    Window_PlayerHand.prototype.drawCardImage = function(index, dx, dy) {
+        var sprite = this._sprites[index];
+        if (!sprite) {
+            sprite = new Sprite_Card(this._hand[index], this._position);
+            this._sprites[index] = sprite;
+            sprite.setCardSize(this.itemWidth(), this.itemHeight());
+            sprite.setScale(this.cardScale());
+            this.addChild(sprite);
+        } else {
+            sprite.setCard(this._hand[index], this._position);
         }
-        var bitmap = ImageManager.reservePicture(cade);
-        this._sprites[index].bitmap = bitmap;
-        this._sprites[index].x = dx + this.padding;
-        var offset = this._hand[index].up ? this.padding / 2 : 0;
-        if (this._playerId === 2) offset *= -1;
-        this._sprites[index].y = dy + this.padding - offset;
-        this._sprites[index].scale.x = this.cardScale();
-        this._sprites[index].scale.y = this.cardScale();
-        this._sprites[index].opacity = 255;
+        sprite.setHome(dx + this.padding, dy + this.padding);
+        var opacity = this.active ? 100 : 255;
+        sprite.changeOpacity(opacity);
     };
 
     Window_PlayerHand.prototype.refresh = function() {
@@ -1907,13 +2220,9 @@ FTKR.CRD = FTKR.CRD || {};
             this.drawAllItems();
             if (this.cardNum() < this._sprites.length) {
                 for (var i = this.cardNum(); i < this._sprites.length; i++) {
-                    this._sprites[i].bitmap = null;
+                    this.removeChild(this._sprites[i]);
+                    this._sprites[i] = null;
                 }
-            }
-            if (this.cardNum()) {
-                this.show();
-            } else {
-                this.hide();
             }
         }
     };
@@ -1948,7 +2257,7 @@ FTKR.CRD = FTKR.CRD || {};
             }
             this.refresh();
             this._sprites.forEach( function(sprite, i){
-                if (i !== index) sprite.opacity = 100;
+                if (i === index && sprite) sprite.changeOpacity(255);
             });
         }
     };
@@ -2040,6 +2349,16 @@ FTKR.CRD = FTKR.CRD || {};
     Window_PlayerHand.prototype._refreshFrame = function() {
     };
 
+    Window_PlayerHand.prototype.isBusy = function() {
+        return this._sprites.some( function(sprite){
+            return !!sprite && sprite.isMoving();
+        });
+    };
+
+    Window_PlayerHand.prototype.playOkSound = function() {
+        //SoundManager.playOk();
+    };
+
     //=============================================================================
     // Window_PlayerHandVar
     // 手札ウィンドウ
@@ -2108,24 +2427,6 @@ FTKR.CRD = FTKR.CRD || {};
         this.move(this.x, y, this.width, height);
     };
 
-    Window_PlayerHandVar.prototype.drawCardImage = function(index, dx, dy, front, suit, rank) {
-        var cade = front ? FTKR.CRD.image[suit].format(rank.padZero(2)) : FTKR.CRD.image.back;
-        if (!this._sprites[index]) {
-            this._sprites[index] = new Sprite();
-            this.addChild(this._sprites[index]);
-        }
-        var bitmap = ImageManager.reservePicture(cade);
-        this._sprites[index].bitmap = bitmap;
-        var offset = this._hand[index].up ? this.padding / 2 : 0;
-        if (this._playerId === 3) offset *= -1;
-        this._sprites[index].x = dx + this.padding + this.itemWidth() + offset;
-        this._sprites[index].y = dy + this.padding;
-        this._sprites[index].scale.x = this.cardScale();
-        this._sprites[index].scale.y = this.cardScale();
-        this._sprites[index].opacity = 255;
-        this._sprites[index].rotation = Math.PI / 2;
-    };
-
     //=============================================================================
     // Window_PlayerStatus
     // プレイヤーステータス
@@ -2152,10 +2453,20 @@ FTKR.CRD = FTKR.CRD || {};
         this.refresh();
     };
 
+    Window_PlayerStatus.prototype.updateTone = function() {
+        if (this._index === SceneManager._scene.subjectId()) {
+            var tone = FTKR.CRD.game.subjectTone;
+            this.setTone(tone[0], tone[1], tone[2]);
+        } else {
+            Window_Base.prototype.updateTone.call(this);
+        }
+    };
+
     Window_PlayerStatus.prototype.refresh = function() {
         if(this.contents) {
             this.contents.clear();
             var width = this.width - this.padding * 2;
+            var height = this.height - this.padding * 2;
             var x = 0, y = 0;
             if (this.width > this.height) {
                 width /= 2;
@@ -2171,8 +2482,14 @@ FTKR.CRD = FTKR.CRD || {};
                 var point = $gameCardData.playerPoint(this._index);
                 this.drawText(point, x, y + this.lineHeight(), width, 'right');
             }
-            this.setPauseSignPosition();
         }
+    };
+
+    Window_PlayerStatus.prototype.drawRect = function(x, y, width, thick, color1, color2, opacity) {
+        color2 = color2 || color1;
+        this.contents.paintOpacity = opacity || 255;
+        this.contents.gradientFillRect(x, y, width, thick, color1, color2);
+        this.contents.paintOpacity = 255;
     };
 
     Window_PlayerStatus.prototype.drawPlayerName = function(x, y, width) {
@@ -2183,85 +2500,6 @@ FTKR.CRD = FTKR.CRD || {};
         }
         this.drawText(this._actor.name(), x, y, width, 'center');
         this.resetTextColor();
-    };
-
-    var _CRD_Window_Dialogue_updatePauseSign = Window_PlayerStatus.prototype._updatePauseSign;
-    Window_PlayerStatus.prototype._updatePauseSign = function() {
-        _CRD_Window_Dialogue_updatePauseSign.call(this);
-        if (this._index === SceneManager._scene.subjectId()) {
-            this._windowPauseSignSprite.alpha = 1.0;
-        }
-    };
-
-    Window_PlayerStatus.prototype.setPauseSignPosition = function() {
-        var sign = this._windowPauseSignSprite;
-        var targetId = SceneManager._scene.targetId();
-        sign.anchor.x = 0;
-        sign.anchor.y = 0;
-        sign.scale.x = 1.5;
-        sign.scale.y = 1.5;
-        switch (this._index) {
-            case 0:
-                switch (targetId) {
-                    case 1:
-                        sign.move(0, 0);
-                        sign.rotation = 90 * Math.PI / 180;
-                        break;
-                    case 2:
-                        sign.move(this.width/2 + sign.width/2, 0);
-                        sign.rotation = 180 * Math.PI / 180;
-                        break;
-                    case 3:
-                        sign.move(this.width, 0);
-                        sign.rotation = 270 * Math.PI / 180;
-                        break;
-                }
-                break;
-            case 1:
-                sign.rotation = 270 * Math.PI / 180;
-                switch (targetId) {
-                    case 0:
-                        sign.move(this.width, this.height + sign.height);
-                        break;
-                    case 2:
-                        sign.move(this.width, sign.height);
-                        break;
-                    case 3:
-                        sign.move(this.width, this.height/2 + sign.height/2);
-                        break;
-                }
-                break;
-            case 2:
-                switch (targetId) {
-                    case 0:
-                        sign.move(this.width/2 - sign.width/2, this.height);
-                        sign.rotation = 0;
-                        break;
-                    case 1:
-                        sign.move(0, this.height);
-                        sign.rotation = 90 * Math.PI / 180;;
-                        break;
-                    case 3:
-                        sign.move(this.width, this.height);
-                        sign.rotation = 270 * Math.PI / 180;
-                        break;
-                }
-                break;
-            case 3:
-                sign.rotation = 90 * Math.PI / 180;
-                switch (targetId) {
-                    case 0:
-                        sign.move(0, this.height - sign.height);
-                        break;
-                    case 1:
-                        sign.move(0, this.height/2 - sign.height/2);
-                        break;
-                    case 2:
-                        sign.move(0, 0);
-                        break;
-                }
-                break;
-        }
     };
 
     Window_PlayerStatus.prototype.rank = function() {
@@ -2438,6 +2676,263 @@ FTKR.CRD = FTKR.CRD || {};
         var cmd = FTKR.CRD.command;
         this.addCommand(cmd.turnEnd, 'turnEnd', true);
         this.addCommand(cmd.sort, 'sort', true);
+    };
+
+        //=============================================================================
+    // Sprite_Card
+    // カード用スプライト
+    //=============================================================================
+
+    function Sprite_Card() {
+        this.initialize.apply(this, arguments);
+    }
+
+    Sprite_Card.prototype = Object.create(Sprite_Base.prototype);
+    Sprite_Card.prototype.constructor = Sprite_Card;
+
+    Sprite_Card.prototype.initialize = function(card, direction) {
+        Sprite_Base.prototype.initialize.call(this);
+        this.initMembers();
+        this.setCard(card, direction);
+    };
+
+    Sprite_Card.prototype.initMembers = function() {
+        this.anchor.x = 0.5;
+        this.anchor.y = 1;
+        this._card = null;
+        this._cardName = null;
+        this._direction = 0;
+        this._homeX = 0;
+        this._homeY = 0;
+        this._cardWidth = 0;
+        this._cardHeight = 0;
+        this._offsetX = 0;
+        this._offsetY = 0;
+        this._offsetX2 = 0;
+        this._offsetY2 = 0;
+        this._targetOffsetX = NaN;
+        this._targetOffsetY = NaN;
+        this._movementDuration = 0;
+        this._selectionEffectCount = 0;
+        this.createMainSprite();
+        this.setDrawSpeed();
+    };
+    
+    Sprite_Card.prototype.setDrawSpeed = function() {
+        this._drawSpeed = !FTKR.CRD.setting.drawSpeed ? 
+            FTKR.CRD.game.drawSpeed :
+            variableId('drawSpeed');
+    };
+
+    Sprite_Card.prototype.createMainSprite = function() {
+        this._mainSprite = new Sprite_Base();
+        this._mainSprite.anchor.x = 0.5;
+        this._mainSprite.anchor.y = 1;
+        this.addChild(this._mainSprite);
+        this._effectTarget = this._mainSprite;
+    };
+
+    Sprite_Card.prototype.setCard = function(card, direction) {
+        this._card = card;
+        this._direction = direction || 0;
+    };
+
+    Sprite_Card.prototype.setHome = function(x, y) {
+        this._homeX = x;
+        this._homeY = y;
+        this.updatePosition();
+    };
+
+    Sprite_Card.prototype.resetOffset = function() {
+        this._offsetX = 0;
+        this._offsetY = 0;
+        this._targetOffsetX = 0;
+        this._targetOffsetY = 0;
+        this._offsetX2 = 0;
+        this._offsetY2 = 0;
+    };
+
+    Sprite_Card.prototype.setOffset = function(x, y) {
+        this._offsetX2 = x;
+        this._offsetY2 = y;
+        this.updatePosition();
+    };
+
+    Sprite_Card.prototype.setScale = function(scale) {
+        this.scale.x = scale;
+        this.scale.y = scale;
+    };
+
+    Sprite_Card.prototype.setCardSize = function(width, height) {
+        this._cardWidth = width;
+        this._cardHeight = height;
+    };
+
+    Sprite_Card.prototype.changeOpacity = function(opacity) {
+        this._mainSprite.opacity = opacity;
+    };
+
+    Sprite_Card.prototype.update = function() {
+        Sprite_Base.prototype.update.call(this);
+        if (this._card) {
+            this.updateMain();
+        } else {
+            this.bitmap = null;
+        }
+    };
+
+    Sprite_Card.prototype.updateMain = function() {
+        this.updateBitmap();
+        this.updateDirection();
+        this.updateMove();
+        this.updatePosition();
+    };
+
+    Sprite_Card.prototype.updateBitmap = function() {
+        if (this._card) {
+            var name = this._card.front ?
+                FTKR.CRD.image[this._card.suit].format(this._card.rank.padZero(2)) :
+                FTKR.CRD.image.back;
+            if (this._cardName !== name) {
+                this._cardName = name;
+                this._mainSprite.bitmap = ImageManager.loadPicture(name);
+            }
+        } else {
+            this._mainSprite.bitmap = null;
+        }
+    };
+
+    Sprite_Card.prototype.updateDirection = function() {
+        if (!this._card) return;
+        if (this._direction * Math.PI / 2 !== this._mainSprite.rotation) {
+            this._mainSprite.rotation = this._direction * Math.PI / 2;
+        }
+    };
+
+    Sprite_Card.prototype.moveCardUp = function() {
+        var len = FTKR.CRD.game.drawHeight;
+        this._movementDuration = this._drawSpeed;
+        if (this._movementDuration) {
+            if (this._direction % 2) {
+                this._targetOffsetX = Math.pow(-1, Math.floor((this._direction - 1)/2)) * len;
+                this._targetOffsetY = 0;
+            } else {
+                this._targetOffsetY = -1 * Math.pow(-1, Math.floor(this._direction/2)) * len;
+                this._targetOffsetX = 0;
+            }
+        }
+    };
+
+    Sprite_Card.prototype.moveCardDown = function() {
+        var len = FTKR.CRD.game.drawHeight;
+        this._movementDuration = this._drawSpeed;
+        if (this._movementDuration) {
+            if (this._direction % 2) {
+                this._targetOffsetX = -1 * Math.pow(-1, Math.floor((this._direction - 1)/2)) * len;
+                this._targetOffsetY = 0;
+            } else {
+                this._targetOffsetY = Math.pow(-1, Math.floor(this._direction/2)) * len;
+                this._targetOffsetX = 0;
+            }
+        }
+    };
+
+    Sprite_Card.prototype.updateMove = function() {
+        var bitmap = this._mainSprite.bitmap;
+        if (!bitmap || bitmap.isReady()) {
+            if (this._movementDuration > 0) {
+                var d = this._movementDuration;
+                this._offsetX = (this._offsetX * (d - 1) + this._targetOffsetX) / d;
+                this._offsetY = (this._offsetY * (d - 1) + this._targetOffsetY) / d;
+                this._movementDuration--;
+                if (this._movementDuration === 0) {
+                    this.onMoveEnd();
+                }
+            }
+        }
+    };
+
+    Sprite_Card.prototype.updatePosition = function() {
+        var pushoutX = 0;
+        var pushoutY = 0;
+        if (this._card && this._card.up) {
+            if (this._direction % 2) {
+                pushoutX = Math.pow(-1, Math.floor((this._direction - 1)/2)) * 8;
+            } else {
+                pushoutY = Math.pow(-1, Math.floor(this._direction/2)) * 8;
+            }
+        }
+        var cardWidth = this._cardWidth;
+        var cardHeight = this._cardHeight;
+        if (this._direction % 2) {
+            cardHeight /= 2;
+            cardWidth = cardWidth * Math.floor((this._direction - 1)/2);
+        } else {
+            cardWidth /= 2;
+            cardHeight -= cardHeight * Math.floor(this._direction/2)
+        }
+        this.x = this._homeX + this._offsetX - pushoutX + cardWidth + this._offsetX2;
+        this.y = this._homeY + this._offsetY - pushoutY + cardHeight + this._offsetY2;
+    };
+
+    Sprite_Card.prototype.updateAnimation = function() {
+        this.setupAnimation();
+    };
+
+    Sprite_Card.prototype.updateSelectionEffect = function() {
+        var target = this._effectTarget;
+        if (this._card.isSelected()) {
+            this._selectionEffectCount++;
+            if (this._selectionEffectCount % 30 < 15) {
+                target.setBlendColor([255, 255, 255, 64]);
+            } else {
+                target.setBlendColor([0, 0, 0, 0]);
+            }
+        } else if (this._selectionEffectCount > 0) {
+            this._selectionEffectCount = 0;
+            target.setBlendColor([0, 0, 0, 0]);
+        }
+    };
+
+    Sprite_Card.prototype.setupAnimation = function() {
+        while (this._card.isAnimationRequested()) {
+            var data = this._card.shiftAnimation();
+            var animation = $dataAnimations[data.animationId];
+            var mirror = data.mirror;
+            var delay = animation.position === 3 ? 0 : data.delay;
+            this.startAnimation(animation, mirror, delay);
+            for (var i = 0; i < this._animationSprites.length; i++) {
+                var sprite = this._animationSprites[i];
+                sprite.visible = this._card.isSpriteVisible();
+            }
+        }
+    };
+
+    Sprite_Card.prototype.startMove = function(x, y, duration) {
+        if (this._targetOffsetX !== x || this._targetOffsetY !== y) {
+            this._targetOffsetX = x;
+            this._targetOffsetY = y;
+            this._movementDuration = duration;
+            if (duration === 0) {
+                this._offsetX = x;
+                this._offsetY = y;
+            }
+        }
+    };
+
+    Sprite_Card.prototype.onMoveEnd = function() {
+    };
+
+    Sprite_Card.prototype.isEffecting = function() {
+        return false;
+    };
+
+    Sprite_Card.prototype.isMoving = function() {
+        return this._movementDuration > 0;
+    };
+
+    Sprite_Card.prototype.inHomePosition = function() {
+        return this._offsetX === 0 && this._offsetY === 0;
     };
 
 }());//EOF
