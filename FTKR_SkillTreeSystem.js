@@ -4,7 +4,7 @@
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/02/25
 // 最終更新日 : 2017/07/21
-// バージョン : v1.8.2
+// バージョン : v1.8.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.8.2 ツリー型スキル習得システム
+ * @plugindesc v1.8.3 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -1253,6 +1253,9 @@ FTKR.STS = FTKR.STS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.8.3 - 2017/07/21 : 不具合修正
+ *    1. v1.8.2の変更に対する不具合修正
  * 
  * v1.8.2 - 2017/07/21 : 他プラグインとの競合回避
  *    1. 描画関係の関数名を変更。
@@ -2771,7 +2774,7 @@ Window_SkillTree.prototype.drawItem = function(index) {
   if (skill) {
     this.changePaintOpacity(this.isShowItem(data));
     this.drawTreeLine(data, nextList, rx, ry, rw, rh);
-    this.drawStsFrame(index, skill, data);
+    this.drawFrame(index, skill, data);
     var ssi = FTKR.STS.sFrame.icon;
     this.drawIcon(skill.iconIndex, rx + ssi.offsetX, ry + ssi.offsetY);
     this.drawSkillCount(skill, data, rx, ry, rw, fcolor);
@@ -2781,7 +2784,7 @@ Window_SkillTree.prototype.drawItem = function(index) {
   }
 };
 
-Window_SkillTree.prototype.drawStsFrame = function(index, skill, data) {
+Window_SkillTree.prototype.drawFrame = function(index, skill, data) {
     if (!FTKR.STS.sFrame.enabled) return;
     var fColor = data ? this.setFrameColor(data) : 0;
     var rect = this.itemRect(index);
