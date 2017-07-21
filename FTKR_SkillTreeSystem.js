@@ -3,8 +3,8 @@
 // FTKR_SkillTreeSystem.js
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/02/25
-// 最終更新日 : 2017/06/11
-// バージョン : v1.8.1
+// 最終更新日 : 2017/07/21
+// バージョン : v1.8.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.8.1 ツリー型スキル習得システム
+ * @plugindesc v1.8.2 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -1254,8 +1254,11 @@ FTKR.STS = FTKR.STS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.8.2 - 2017/07/21 : 他プラグインとの競合回避
+ *    1. 描画関係の関数名を変更。
+ * 
  * v1.8.1 - 2017/06/11 : 不具合修正
- *    1.ツリーリセットを繰り返すと通常よりも多くSPが戻る不具合を修正。
+ *    1. ツリーリセットを繰り返すと通常よりも多くSPが戻る不具合を修正。
  * 
  * v1.8.0 - 2017/06/09 : コアスクリプトv1.5.0の対応
  * 
@@ -1479,7 +1482,7 @@ FTKR.STS.cFrame = {
 };
 
 //ツリーの設定
-FTKR.STS.drawLineType = Number(FTKR.STS.parameters['Draw Line Type'] || 0);
+FTKR.STS.drawStsLineType = Number(FTKR.STS.parameters['Draw Line Type'] || 0);
 FTKR.STS.treeLineThick = Number(FTKR.STS.parameters['Tree Line Thick'] || 0);
 FTKR.STS.addFrameToLine = Number(FTKR.STS.parameters['Add Frame To Line'] || 0);
 FTKR.STS.lineColor = Number(FTKR.STS.parameters['Fit Line Color To Frame'] || 0);
@@ -1598,7 +1601,7 @@ FTKR.evalFormula = function(formula) {
 //=============================================================================
 
 //座標(x1,y1)から座標(x2,y2)までの線を引く
-Bitmap.prototype.drawLine = function(x1, y1, x2, y2, color, thick) {
+Bitmap.prototype.drawStsLine = function(x1, y1, x2, y2, color, thick) {
     var context = this._context;
     context.strokeStyle = color;
     context.lineWidth = thick;
@@ -1611,7 +1614,7 @@ Bitmap.prototype.drawLine = function(x1, y1, x2, y2, color, thick) {
 };
 
 //枠線を描く
-Bitmap.prototype.drawFrame = function(x, y, width, height, thick, color) {
+Bitmap.prototype.drawStsFrame = function(x, y, width, height, thick, color) {
     var context = this._context;
     context.strokeStyle = color;
     context.lineWidth = thick;
@@ -2437,7 +2440,7 @@ Window_Base.prototype.setStsCost = function(cost) {
 
 //斜線描画関数
 Window_Base.prototype.drawDiagLine = function(x1, y1, x2, y2, color, thick) {
-    this.contents.drawLine(x1, y1, x2, y2, this.textColor(color), thick);
+    this.contents.drawStsLine(x1, y1, x2, y2, this.textColor(color), thick);
 };
 
 //アイコンの表示スケールを指定できる表示関数
@@ -2785,7 +2788,7 @@ Window_SkillTree.prototype.drawStsFrame = function(index, skill, data) {
     if (Imported.FTKR_DCF) {
         this.drawDcfFrame(index, rect, skill, FTKR.STS.sFrame.type, fColor);
     } else {
-        this.drawFrame(rect.x, rect.y, rect.width, rect.height, fColor, FTKR.STS.treeLineThick);
+        this.drawStsFrame(rect.x, rect.y, rect.width, rect.height, fColor, FTKR.STS.treeLineThick);
     }
 };
 
@@ -2802,10 +2805,10 @@ Window_SkillTree.prototype.drawDcfFrame = function(index, rect, skill, type, col
     this.drawDcfFrameBase(FTKR.DCF.frame, rect, onCursor, item, type);
 };
 
-Window_SkillTree.prototype.drawFrame = function(x, y, width, height, colorNum, thick) {
+Window_SkillTree.prototype.drawStsFrame = function(x, y, width, height, colorNum, thick) {
   if (colorNum < 0) return false;
   var color = this.textColor(colorNum);
-  this.contents.drawFrame(x, y, width, height, thick, color);
+  this.contents.drawStsFrame(x, y, width, height, thick, color);
 };
 
 Window_SkillTree.prototype.drawSkillText = function(skill, x, y, width, color, sts) {
@@ -2839,7 +2842,7 @@ Window_SkillTree.prototype.drawSkillCount = function(skill, data, x, y, width, c
         var item = {defColor:fcolor,defIndex:cfl.defIndex};
         this.drawDcfFrameBase(FTKR.DCF.frame, rect, false, item, cfl.type);
       } else {
-        this.drawFrame(scx, scy, scw, sch, fcolor, thick);
+        this.drawStsFrame(scx, scy, scw, sch, fcolor, thick);
       }
     }
     this.changeTextColor(this.textColor(color));
@@ -2867,8 +2870,8 @@ Window_SkillTree.prototype.drawTreeLine = function(data, nextList, x, y, width, 
         var ccy = ncy - hs/2;
         var tlen = hs/2 * Math.code(next.x, data.x);
         var thick = FTKR.STS.treeLineThick;
-        if (FTKR.STS.drawLineType) {
-          if (FTKR.STS.drawLineType === 2) {
+        if (FTKR.STS.drawStsLineType) {
+          if (FTKR.STS.drawStsLineType === 2) {
             this.drawTreeLineBase(ic.x,        ic.y,        ic.x + tlen, ic.y + hs/2, color, thick);
             this.drawTreeLineBase(ic.x + tlen, ic.y + hs/2, ncx - tlen,  ic.y + hs/2, color, thick);
             this.drawTreeLineBase(ncx - tlen,  ic.y + hs/2, ncx,         ic.y + hs, color, thick);
