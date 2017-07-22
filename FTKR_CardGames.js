@@ -3,8 +3,8 @@
 // FTKR_CardGames.js
 // 作成者     : フトコロ
 // 作成日     : 2017/07/02
-// 最終更新日 : 2017/07/19
-// バージョン : v1.1.0
+// 最終更新日 : 2017/07/22
+// バージョン : v1.1.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CRD = FTKR.CRD || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.0 トランプカードゲーム
+ * @plugindesc v1.1.1 トランプカードゲーム
  * @author フトコロ
  *
  * @param --カードの設定--
@@ -75,6 +75,16 @@ FTKR.CRD = FTKR.CRD || {};
  * @default 60
  * @type number
  * 
+ * @param Deal Speed
+ * @desc 山札を配る時の速さを設定します。
+ * @default 5
+ * @type number
+ * 
+ * @param First Discard Speed
+ * @desc 初期の手札からカードを捨てる時の速さを設定します。
+ * @default 10
+ * @type number
+ * 
  * @param --サウンドの設定--
  * @default
  * 
@@ -92,9 +102,16 @@ FTKR.CRD = FTKR.CRD || {};
  * @max 150
  * @type number
  * 
+ * @param Game BGM Volume
+ * @desc カードゲーム時のBGMの音量を設定します。
+ * @default 90
+ * @min 0
+ * @max 100
+ * @type number
+ * 
  * @param Draw SE Name
  * @desc 手札を引く時のSEを設定します。
- * @default Jump1
+ * @default Book1
  * @type file
  * @require 1
  * @dir audio/se
@@ -104,6 +121,34 @@ FTKR.CRD = FTKR.CRD || {};
  * @default 100
  * @min 50
  * @max 150
+ * @type number
+ * 
+ * @param Draw SE Volume
+ * @desc 手札を引く時のSEの音量を設定します。
+ * @default 90
+ * @min 0
+ * @max 100
+ * @type number
+ * 
+ * @param Deal SE Name
+ * @desc カードを配る時のSEを設定します。
+ * @default Wind4
+ * @type file
+ * @require 1
+ * @dir audio/se
+ * 
+ * @param Deal SE Pitch
+ * @desc カードを配る時のSEのピッチを設定します。
+ * @default 100
+ * @min 50
+ * @max 150
+ * @type number
+ * 
+ * @param Deal SE Volume
+ * @desc カードを配る時のSEの音量を設定します。
+ * @default 30
+ * @min 0
+ * @max 100
  * @type number
  * 
  * @param --ゲーム変数の設定--
@@ -569,8 +614,12 @@ FTKR.CRD = FTKR.CRD || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.1 - 2017/07/22 : 機能追加
+ *    1. カードを配る時とペアを捨てる時にカードに動きをつける機能を追加。
+ *    2. カードを配る時のSEを設定する機能を追加。
+ * 
  * v1.1.0 - 2017/07/19 : 機能追加
- *    1. カードを引くときと手札に入れる時にカードに動きをつける機能を追加。
+ *    1. カードを引く時と手札に入れる時にカードに動きをつける機能を追加。
  *    2. NPCのターンを自動で進めるように変更。
  *    3. ターン中のキャラのステータスウィンドウの色を変更する機能を追加。
  *    4. ２人プレイと、３人プレイの時の配置を見直し。
@@ -653,21 +702,29 @@ FTKR.CRD = FTKR.CRD || {};
             subjectTone :String(parameters['Subject Window Tone'] || '255,255,0').split(',').num(),
             targetColor :Number(parameters['Target Player Color'] || 29),
             points      :String(parameters['Ranking Points'] || '2,1,-1,-2'),
-            drawSpeed   :Number(parameters['Draw Speed'] || 40),
+            drawSpeed   :Number(parameters['Draw Speed'] || 30),
             drawHeight  :Number(parameters['Draw Height'] || 60),
+            dealSpeed   :Number(parameters['Deal Speed'] || 5),
+            discardSpeed:Number(parameters['First Discard Speed'] || 10),
         },
         sound:{
             bgm:{
                 name    :String(parameters['Game BGM Name'] || ''),
                 pitch   :Number(parameters['Game BGM Pitch'] || 100),
                 pan     :0,
-                volume  :90,
+                volume  :Number(parameters['Game BGM Volume'] || 90),
             },
-            se:{
+            drawSe:{
                 name    :String(parameters['Draw SE Name'] || ''),
                 pitch   :Number(parameters['Draw SE Pitch'] || 100),
                 pan     :0,
-                volume  :90,
+                volume  :Number(parameters['Draw SE Volume'] || 90),
+            },
+            dealSe:{
+                name    :String(parameters['Deal SE Name'] || ''),
+                pitch   :Number(parameters['Deal SE Pitch'] || 100),
+                pan     :0,
+                volume  :Number(parameters['Deal SE Volume'] || 90),
             },
         },
         setting:{
@@ -1025,7 +1082,7 @@ FTKR.CRD = FTKR.CRD || {};
             AudioManager.replayBgs(this._mapBgs);
         }
     };
-    
+
     //=============================================================================
     // Game_Actor
     //=============================================================================
@@ -1208,59 +1265,38 @@ FTKR.CRD = FTKR.CRD || {};
 
     Scene_CRD.prototype.initialize = function() {
         Scene_MenuBase.prototype.initialize.call(this);
+        this.initMembers();
+    };
+
+    Scene_CRD.prototype.initMembers = function() {
         this.clearGame();
         this.clearVariables();
         CardGameManager.playGameBgm();
-        ImageManager.loadCardImages();
         $gameCardData.resetPlayerPoints();
         this.setPlayerCharacteristics();
         this._setEnd = false;
         this._gameCount = 1;
     };
 
-    Scene_CRD.prototype.setBgm = function() {
-        
+    Scene_CRD.prototype.clearGame = function() {
+        ImageManager.loadCardImages();
+        this._gameEnd = false;
+        this._hand = null;
+        this._endPeople = 0;
+        this._cardNum = 0;
+        this._startId = 0;
     };
 
-    Scene_CRD.prototype.setRoute = function() {
-        this._route = [];
-        this._players.forEach( function(player, i){
-            var n = i + 1;
-            if (n >= $gameCardData.playerNum()) n = 0;
-            this._route.push(n);
-        },this);
-    };
-
-    Scene_CRD.prototype.setSubjectId = function(id) {
-        this._subjectId = id;
-        this.setTarget();
-    };
-
-    Scene_CRD.prototype.shiftSubject = function() {
-        this._subjectId += 1;
-        if (this._subjectId >= $gameCardData.playerNum()) this._subjectId = 0;
-        this.setTarget();
-    };
-
-    Scene_CRD.prototype.setTarget = function() {
-        this._targetId = this._route[this._subjectId];
-    };
-
-    Scene_CRD.prototype.setPlayerCharacteristics = function() {
-        $gameCardData.players().forEach( function(id, i){
-            if (id === -1) id = $gameParty.leader().actorId();
-            var actor = $dataActors[id];
-            $gameCardData.setChara(i, DataManager.readCrdCharacteristics(actor));
-            $gameCardData.setDialogue(i, DataManager.readCrdDialogues(actor));
+    Scene_CRD.prototype.clearHands = function() {
+        this._handWindows.forEach( function(window){
+            window._hand = [];
         });
     };
 
-    Scene_CRD.prototype.clearGame = function() {
-        this._gameEnd = false;
-        this._hand = null;
-        this._pickup = false;
-        this._endPeople = 0;
-        this._cardNum = 0;
+    Scene_CRD.prototype.clearRanks = function() {
+        this._actorWindows.forEach( function(window){
+            window.setRank(0);
+        });
     };
 
     Scene_CRD.prototype.clearVariables = function() {
@@ -1272,27 +1308,65 @@ FTKR.CRD = FTKR.CRD || {};
             setVarId('gameCount', 1);
         }
     };
-
-    Scene_CRD.prototype.settingGame = function() {
-        this.setRoute();
-        this.setStartPlayer();
-        this.makeStock();
-        this.stockShuffle();
-        this.deal(-1);
-        this.discardPair();
-        if (this.checkGameEnd()) return;
-        this.refreshActor();
-        this._messageBoxWindow.activate();
-        this._phase = 'input';
-        this._input = 'start';
+      
+    Scene_CRD.prototype.targetId = function() {
+        return this._targetId;
     };
 
-    Scene_CRD.prototype.setStartPlayer = function() {
-        this._startId = switchId('randomStart') ?
-            Math.randomInt($gameCardData.playerNum()) : 0;
-        this.setSubjectId(this._startId);
-        var name = this.player(this.subjectId()).name();
-        this._messageBoxWindow.setText(name + 'から開始します');
+    Scene_CRD.prototype.subjectId = function() {
+        return this._subjectId;
+    };
+
+    Scene_CRD.prototype.targetWindow = function() {
+        return this._handWindows[this.targetId()];
+    };
+
+    Scene_CRD.prototype.subjectWindow = function() {
+        return this._handWindows[this.subjectId()];
+    };
+
+    Scene_CRD.prototype.setSubjectId = function(id) {
+        this._subjectId = id;
+        this.setTarget();
+    };
+
+    Scene_CRD.prototype.setTarget = function() {
+        this._targetId = this._route[this._subjectId];
+    };
+
+    Scene_CRD.prototype.shiftSubject = function() {
+        this._subjectId += 1;
+        if (this._subjectId >= $gameCardData.playerNum()) this._subjectId = 0;
+        this.setTarget();
+    };
+    
+    Scene_CRD.prototype.shiftIndex = function() {
+        do {
+            this.shiftSubject();
+            if (!this.targetWindow().cardNum()) {
+                this.refreshRoute(this._subjectId);
+                this.setTarget();
+            }
+        } while (!this.subjectWindow().cardNum());
+    };
+
+    Scene_CRD.prototype.refreshRoute = function(index) {
+        do {
+            this._route[index] += 1;
+            if (this._route[index] >= $gameCardData.playerNum()) this._route[index] = 0;
+        } while (!this._handWindows[this._route[index]].cardNum());
+    };
+
+    //------------------------------------------------------------------------
+    // プレイヤーの処理
+    //------------------------------------------------------------------------
+    Scene_CRD.prototype.setPlayerCharacteristics = function() {
+        $gameCardData.players().forEach( function(id, i){
+            if (id === -1) id = $gameParty.leader().actorId();
+            var actor = $dataActors[id];
+            $gameCardData.setChara(i, DataManager.readCrdCharacteristics(actor));
+            $gameCardData.setDialogue(i, DataManager.readCrdDialogues(actor));
+        });
     };
 
     Scene_CRD.prototype.player = function(id) {
@@ -1309,6 +1383,31 @@ FTKR.CRD = FTKR.CRD || {};
         },this);
     };
 
+    Scene_CRD.prototype.setStartPlayer = function() {
+        this._startId = switchId('randomStart') ?
+            Math.randomInt($gameCardData.playerNum()) : 0;
+        this.setSubjectId(this._startId);
+        var name = this.player(this.subjectId()).name();
+        this._messageBoxWindow.setText(name + 'から開始します');
+    };
+
+    Scene_CRD.prototype.remainingNum = function() {
+        return this._handWindows.filter( function(window, i){
+            return window.cardNum();
+        },this).length;
+    };
+
+    Scene_CRD.prototype.lastPlayer = function() {
+        var index = -1;
+        this._handWindows.some( function(window, i){
+            if(window.cardNum()) index = i;
+        },this);
+        return index;
+    };
+
+    //------------------------------------------------------------------------
+    // 山札
+    //------------------------------------------------------------------------
     Scene_CRD.prototype.stock = function() {
         return this._stock;
     };
@@ -1316,28 +1415,6 @@ FTKR.CRD = FTKR.CRD || {};
     Scene_CRD.prototype.stockNum = function() {
         return this._stock.length;
     }
-
-    Scene_CRD.prototype.deal = function(dealNum) {
-        var i = this._startId, num = this.stockNum();
-        for (var n = 0; n < num; n++) {
-            this._targetId = i;
-            var hand = this.stock().shift();
-            this.targetWindow().pushHand(hand.suit, hand.rank);
-            i++;
-            if (i >= $gameCardData.playerNum()) i = 0;
-        }
-        this._handWindows.forEach( function(window){
-            window.refreshHand();
-        });
-        this.setTarget();
-    };
-
-    Scene_CRD.prototype.discardPair = function() {
-        this._handWindows.forEach( function(window) {
-            window.discardPair();
-            window.refreshHand();
-        });
-    };
 
     Scene_CRD.prototype.makeStock = function() {
         var suitTypes = $gameCardData.suits();
@@ -1355,6 +1432,13 @@ FTKR.CRD = FTKR.CRD || {};
         this._cardNum = this._stock.length;
     };
 
+    Scene_CRD.prototype.stockShuffle = function() {
+        this._stock = shuffle(this._stock);
+    };
+
+    //------------------------------------------------------------------------
+    // ゲームとセットの終了
+    //------------------------------------------------------------------------
     Scene_CRD.prototype.setEnd = function() {
         this._setEnd = true;
     };
@@ -1371,110 +1455,27 @@ FTKR.CRD = FTKR.CRD || {};
         return this._gameEnd;
     };
 
-    Scene_CRD.prototype.stockShuffle = function() {
-        this._stock = shuffle(this._stock);
+    //------------------------------------------------------------------------
+    // ゲームの初期設定
+    //------------------------------------------------------------------------
+    Scene_CRD.prototype.setRoute = function() {
+        this._route = [];
+        this._players.forEach( function(player, i){
+            var n = i + 1;
+            if (n >= $gameCardData.playerNum()) n = 0;
+            this._route.push(n);
+        },this);
     };
 
-    Scene_CRD.prototype.targetWindow = function() {
-        return this._handWindows[this._targetId];
-    };
-
-    Scene_CRD.prototype.subjectWindow = function() {
-        return this._handWindows[this._subjectId];
-    };
-
-    Scene_CRD.prototype.targetId = function() {
-        return this._targetId;
-    };
-
-    Scene_CRD.prototype.subjectId = function() {
-        return this._subjectId;
-    };
-
-    Scene_CRD.prototype.isBusy = function() {
-        return this._handWindows.some( function(window){
-            return window.isBusy();
-        });
-    };
-
-    Scene_CRD.prototype.updatePhase = function() {
-        if (!this.isBusy()) {
-            switch (this._phase) {
-                case 'input':
-                    if (this._input === 'draw') {
-                        var hand = this.reduceCard(this.targetId(), this._handIndex);
-                        var holdId = this.subjectWindow().cardNum();
-                        this.subjectWindow().addHand(holdId, hand.suit, hand.rank);
-                        this.subjectWindow().setHoldId(holdId);
-                        if (this.checkGameEnd()) return;
-                        this.targetWindow().deselect();
-                        this.targetWindow().refresh();
-                        this.subjectWindow().activate();
-                        this.subjectWindow().select(holdId);
-                        this._input = 'dispair';
-                    }
-                    break;
-                case 'select':
-                    this._messageBoxWindow.clearText();
-                    this._handIndex = this.selectCard(this.targetId(), false);
-                    AudioManager.playSe(FTKR.CRD.sound.se);
-                    this._phase = 'draw';
-                    break;
-                case 'draw':
-                    this.resetTempFace();
-                    this.resetDialogue();
-                    this._messageBoxWindow.clearText();
-                    var hand = this.reduceCard(this.targetId(), this._handIndex);
-                    this.addHand(this.subjectId(), hand);
-                    this._phase = 'dispair';
-                    break;
-                case 'dispair':
-                    this._messageBoxWindow.clearText();
-                    this.discardPairHand(this.subjectId());
-                    if (this.checkGameEnd()) return;
-                    this.shiftIndex();
-                    this.refreshActor();
-                    this._hand = null;
-                    if (this._subjectId === 0) {
-                        this.targetWindow().activate();
-                        this.targetWindow().select(0);
-                        this._phase = 'input';
-                        this._input = 'select';
-                    } else {
-                        this._phase = 'select';
-                    }
-                    break;
-                case 'gameEnd':
-                    this._messageBoxWindow.clearText();
-                    this._messageBoxWindow.activate();
-                    this._phase = 'input';
-                    this._input = 'gameEnd';
-                    break;
-                case 'setEnd':
-                    this._messageBoxWindow.clearText();
-                    this._messageBoxWindow.activate();
-                    this._phase = 'input';
-                    this._input = 'setEnd';
-                    break;
-            }
-        }
-    };
-
-    Scene_CRD.prototype.updateTouch = function() {
-        if (!this.isBusy()) return;
-        if (this._phase === 'input' && TouchInput.isTriggered()) {
-            switch (this._input) {
-                case 'setEnd':
-                case 'gameEnd':
-                case 'start':
-                    this.onMessageOk();
-                    break;
-            }
-        }
+    Scene_CRD.prototype.settingGame = function() {
+        this.setRoute();
+        this.setStartPlayer();
+        this.makeStock();
+        this.stockShuffle();
+        this._phase = 'deal';
     };
 
     Scene_CRD.prototype.update = function() {
-        this.updateTouch();
         this.updatePhase();
         Scene_MenuBase.prototype.update.call(this);
     };
@@ -1536,7 +1537,6 @@ FTKR.CRD = FTKR.CRD || {};
         var wy = Graphics.boxHeight - wh;
         this._handWindows[index] = new Window_PlayerHand(index, wx, wy, ww, wh, true, 0);
         this._handWindows[index].setHandler('ok',     this.onSelectOk.bind(this));
-//        this._handWindows[index].setHandler('cancel', this.onShuffleEnd.bind(this));
         this.addWindow(this._handWindows[index]);
     };
 
@@ -1667,7 +1667,6 @@ FTKR.CRD = FTKR.CRD || {};
     Scene_CRD.prototype.onTurnEnd = function() {
         this._commandBoxWindow.deselect();
         this._commandBoxWindow.hide();
-        this._pickup = false;
         this.shiftIndex();
         this.refreshActor();
         this._phase = 'select';
@@ -1681,63 +1680,24 @@ FTKR.CRD = FTKR.CRD || {};
         this.subjectWindow().select(0);
     }; 
 
-    Scene_CRD.prototype.shiftIndex = function() {
-        do {
-            this.shiftSubject();
-            if (!this.targetWindow().cardNum()) {
-                this.refreshRoute(this._subjectId);
-                this.setTarget();
-            }
-        } while (!this.subjectWindow().cardNum());
-    };
-
-    Scene_CRD.prototype.remainingNum = function() {
-        return this._handWindows.filter( function(window, i){
-            return window._hand.length;
-        },this).length;
-    };
-
-    Scene_CRD.prototype.lastPlayer = function() {
-        var index = -1;
-        this._handWindows.some( function(window, i){
-            if(window._hand.length) index = i;
-        },this);
-        return index;
-    };
-
-    Scene_CRD.prototype.checkGameEnd = function() {
-        if (this.remainingNum() === 1) {
-            this._endPeople++;
-            this.setGameOutPoint(this.lastPlayer());
-            this._actorWindows[this.lastPlayer()].setRank(this._endPeople);
-            if (this._gameCount >= variableId('gameCount')) {
-                this._phase = 'setEnd';
-                this.setEnd();
-            } else {
-                this.gameEnd();
-                this._phase = 'gameEnd';
-                this._gameCount++;
-            }
-            this._messageBoxWindow.setText('ゲーム終了です');
-            this._messageBoxWindow.activate();
-            return true;
-        }
-    };
-
     Scene_CRD.prototype.onSelectOk = function() {
+        this.inputAction();
+    };
+
+    Scene_CRD.prototype.inputAction = function() {
         this._messageBoxWindow.clearText();
         this.resetTempFace();
         this.resetDialogue();
         switch (this._input) {
             case 'select':
                 this._handIndex = this.selectCard(this.targetId(), true);
-                AudioManager.playSe(FTKR.CRD.sound.se);
+                AudioManager.playSe(FTKR.CRD.sound.drawSe);
                 this._input = 'draw';
                 break;
             case 'dispair':
                 this._input = 'select';
+                this._phase = 'checkPair';
                 SoundManager.playOk();
-                this.onShuffleEnd();
                 break;
             case 'sortSelect':
                 var index = this.subjectWindow().index();
@@ -1751,38 +1711,22 @@ FTKR.CRD = FTKR.CRD || {};
                 var index = this.subjectWindow().index();
                 if (index === this._sortHoldId) this._hand.up = !this._hand.up;
                 this._input = 'select';
-                this.onShuffleEnd();
+                this.showCommand();
                 break;
             case 'sortCancel':
                 this._input = 'select';
-                this.onShuffleEnd();
+                this.showCommand();
                 break;
         }
     };
 
-    Scene_CRD.prototype.onShuffleEnd = function() {
-        this._hand = null;
-        this._pickup = true;
-        this.discardPairHand(this.subjectId());
-        if (this.checkGameEnd()) return;
+    Scene_CRD.prototype.showCommand = function() {
         this.subjectWindow().deselect();
         this.subjectWindow().refresh();
         this.subjectWindow().resetHoldId();
         this._commandBoxWindow.show();
         this._commandBoxWindow.activate();
         this._commandBoxWindow.select(0);
-    };
-
-    Scene_CRD.prototype.clearHands = function() {
-        this._handWindows.forEach( function(window){
-            window._hand = [];
-        });
-    };
-
-    Scene_CRD.prototype.clearRanks = function() {
-        this._actorWindows.forEach( function(window){
-            window.setRank(0);
-        });
     };
 
     Scene_CRD.prototype.onMessageOk = function() {
@@ -1792,41 +1736,203 @@ FTKR.CRD = FTKR.CRD || {};
                 CardGameManager.replayBgmAndBgs();
                 this.popScene();
                 break;
-            case 'gameEnd':
-                this.clearGame();
-                this.clearHands();
-                this.clearRanks();
-                this.settingGame();
-                this._messageBoxWindow.activate();
-                this._input = 'start';
+            case 'nextGame':
+                this.nextGame();
                 break;
             case 'start':
-                if (this._startId === 0) {
-                    this._phase = 'input';
-                    this._input = 'select';
-                    this.targetWindow().activate();
-                    this.targetWindow().select(0);
-                } else {
-                    this._phase = 'select';
-                }
+                this.gameStart();
                 break;
         }
     };
 
-    Scene_CRD.prototype.waitMoveCard = function() {
-        var count = 0;
-        while (this.isMovingCard()) {
-            count++;
-            if(count > 100000) break;
+    Scene_CRD.prototype.nextGame = function() {
+        this.clearGame();
+        this.clearHands();
+        this.clearRanks();
+        this.settingGame();
+        this._messageBoxWindow.activate();
+        this._input = 'start';
+    };
+
+    Scene_CRD.prototype.clearHands = function() {
+        this._handWindows.forEach( function(window){
+            window.clearHand();
+        });
+    };
+
+    Scene_CRD.prototype.clearRanks = function() {
+        this._actorWindows.forEach( function(window){
+            window.setRank(0);
+        });
+    };
+
+    Scene_CRD.prototype.gameStart = function() {
+        if (this._startId === 0) {
+            this._phase = 'input';
+            this._input = 'select';
+            this.targetWindow().activate();
+            this.targetWindow().select(0);
+        } else {
+            this._phase = 'select';
+        }
+    };
+    
+    //------------------------------------------------------------------------
+    // メイン処理
+    //------------------------------------------------------------------------
+    Scene_CRD.prototype.isBusy = function() {
+        return this._handWindows.some( function(window){
+            return window.isBusy();
+        });
+    };
+
+    Scene_CRD.prototype.updateTouch = function() {
+        if (this.isBusy()) return false;
+        if (this._phase === 'input' && TouchInput.isTriggered()) {
+            switch (this._input) {
+                case 'setEnd':
+                case 'nextGame':
+                case 'start':
+                    SceneManager._scene.onMessageOk();
+                    return true;
+            }
+        }
+        return false;
+    };
+
+    Scene_CRD.prototype.updatePhase = function() {
+        this.updateTouch();
+        if (!this.isBusy()) {
+            switch (this._phase) {
+                case 'deal':
+                    this.updateDeal();
+                    break;
+                case 'input':
+                    this.updateInput();
+                    break;
+                case 'select':
+                    this.updateSelect();
+                    break;
+                case 'draw':
+                    this.updateDraw();
+                    break;
+                case 'checkPair':
+                    this.subjectWindow().checkPair();
+                    this._phase = 'disCard';
+                    break;
+                case 'disCard':
+                    this.subjectWindow().discardPair();
+                    this.subjectWindow().refreshHand();
+                    this._phase = 'turnEnd';
+                    break;
+                case 'turnEnd':
+                    this.updateTurnEnd();
+                    break;
+                case 'nextGame':
+                    this._messageBoxWindow.clearText();
+                    this._messageBoxWindow.activate();
+                    this._phase = 'input';
+                    this._input = 'nextGame';
+                    break;
+                case 'setEnd':
+                    this._messageBoxWindow.clearText();
+                    this._messageBoxWindow.activate();
+                    this._phase = 'input';
+                    this._input = 'setEnd';
+                    break;
+            }
         }
     };
 
-    Scene_CRD.prototype.isMovingCard = function() {
-        return this._handWindows.some( function(window) {
-            return window._sprites.some( function(sprite){
-                return !!sprite && sprite.isMoving();
-            });
+    Scene_CRD.prototype.checkAllPairCard = function() {
+        return this._handWindows.some( function(window){
+            return window.hasPair().length;
         });
+    };
+
+    Scene_CRD.prototype.updateDeal = function() {
+        if (this.stockNum()) {
+            var hand = this.stock().shift();
+            if (this._subjectId === this._startId) AudioManager.playSe(FTKR.CRD.sound.dealSe);
+            this.subjectWindow().pushHand(hand.suit, hand.rank, false, FTKR.CRD.game.dealSpeed);
+            this.shiftSubject();
+        } else if (this.checkAllPairCard()) {
+            if (this.subjectWindow()._pair.length) {
+                this.subjectWindow().discardPair();
+                this.subjectWindow().refreshHand();
+                this.checkOutGame(this.subjectId());
+                this.shiftSubject();
+            } else {
+                var pair = this.subjectWindow().hasPair();
+                if (pair.length) {
+                    this.subjectWindow().picupPair(pair, FTKR.CRD.game.discardSpeed);
+                } else {
+                    this.shiftSubject();
+                }
+            }
+        } else {
+            this.setSubjectId(this._startId);
+            this.setTarget();
+            if (this.checkGameEnd()) return;
+            this.refreshActor();
+            this._messageBoxWindow.activate();
+            this._phase = 'input';
+            this._input = 'start';
+        }
+    };
+
+    Scene_CRD.prototype.updateInput = function() {
+        if (this._input === 'draw') {
+            var hand = this.reduceCard(this.targetId(), this._handIndex);
+            var holdId = this.subjectWindow().cardNum();
+            this.subjectWindow().addHand(holdId, hand.suit, hand.rank);
+            this.subjectWindow().setHoldId(holdId);
+            if (this.checkGameEnd()) return;
+            this.targetWindow().deselect();
+            this.targetWindow().refresh();
+            this.subjectWindow().activate();
+            this.subjectWindow().select(holdId);
+            this._input = 'dispair';
+        }
+    };
+
+    Scene_CRD.prototype.updateTurnEnd = function() {
+        this.checkOutGame(this.subjectId());
+        this.subjectWindow().deselect();
+        if (this.checkGameEnd()) return;
+        if (this._subjectId === 0) {
+            this._hand = null;
+            this._phase = 'input';
+            this.showCommand();
+        } else {
+            this.shiftIndex();
+            this.refreshActor();
+            this._hand = null;
+            if (this._subjectId === 0) {
+                this.targetWindow().activate();
+                this.targetWindow().select(0);
+                this._phase = 'input';
+                this._input = 'select';
+            } else {
+                this._phase = 'select';
+            }
+        }
+    };
+
+    Scene_CRD.prototype.updateSelect = function() {
+        this._messageBoxWindow.clearText();
+        this._handIndex = this.selectCard(this.targetId(), false);
+        AudioManager.playSe(FTKR.CRD.sound.drawSe);
+        this._phase = 'draw';
+    };
+
+    Scene_CRD.prototype.updateDraw = function() {
+        this.resetTempFace();
+        this.resetDialogue();
+        this._messageBoxWindow.clearText();
+        var hand = this.reduceCard(this.targetId(), this._handIndex);
+        this.addHand(this.subjectId(), hand);
+        this._phase = 'checkPair';
     };
 
     Scene_CRD.prototype.refreshActor = function() {
@@ -1845,6 +1951,25 @@ FTKR.CRD = FTKR.CRD || {};
         this._dialogueWindows.forEach(function(window){
             window.setDialogue('');
         });
+    };
+
+    Scene_CRD.prototype.checkGameEnd = function() {
+        if (this.remainingNum() === 1) {
+            this._endPeople++;
+            this.setGameOutPoint(this.lastPlayer());
+            this._actorWindows[this.lastPlayer()].setRank(this._endPeople);
+            if (this._gameCount >= variableId('gameCount')) {
+                this._phase = 'setEnd';
+                this.setEnd();
+            } else {
+                this.gameEnd();
+                this._phase = 'nextGame';
+                this._gameCount++;
+            }
+            this._messageBoxWindow.setText('ゲーム終了です');
+            this._messageBoxWindow.activate();
+            return true;
+        }
     };
 
     Scene_CRD.prototype.addHand = function(index, hand) {
@@ -1903,18 +2028,6 @@ FTKR.CRD = FTKR.CRD || {};
         return hands[Math.randomInt(hands.length)];
     };
 
-    Scene_CRD.prototype.discardPairHand = function(index) {
-        var window = this._handWindows[index];
-        window.discardPair();
-        window.refreshHand();
-        if (!window.cardNum()) {
-            this._endPeople++;
-            this.setGameOutPoint(index);
-            this._actorWindows[index].setRank(this._endPeople);
-        }
-        window.deselect();
-    };
-
     Scene_CRD.prototype.selectCard = function(index, isPlayer) {
         var window = this._handWindows[index];
         var handIndex = isPlayer ? window.index() :
@@ -1923,15 +2036,24 @@ FTKR.CRD = FTKR.CRD || {};
         return handIndex;
     };
 
+    Scene_CRD.prototype.checkOutGame = function(subjectId) {
+        var window = this._handWindows[subjectId];
+        if (!window.cardNum()) {
+            console.log('out', subjectId);
+            this._endPeople++;
+            this.setGameOutPoint(subjectId);
+            this._actorWindows[subjectId].setRank(this._endPeople);
+            this.refreshRoute(subjectId);
+            console.log(this._route);
+            return true;
+        }
+        return false;
+    };
+
     Scene_CRD.prototype.reduceCard = function(index, handIndex) {
         var window = this._handWindows[index];
         var hand = window.reduceHand(handIndex);
-        if (!window.cardNum()) {
-            this._endPeople++;
-            this.setGameOutPoint(index);
-            this._actorWindows[index].setRank(this._endPeople);
-            this.refreshRoute(index);
-        }
+        this.checkOutGame(index);
         return hand;
     };
 
@@ -1940,12 +2062,7 @@ FTKR.CRD = FTKR.CRD || {};
         var handIndex = isPlayer ? window.index() :
             this.drawNPCHand();
         var hand = window.reduceHand(handIndex);
-        if (!window.cardNum()) {
-            this._endPeople++;
-            this.setGameOutPoint(index);
-            this._actorWindows[index].setRank(this._endPeople);
-            this.refreshRoute(index);
-        }
+        this.checkOutGame(index);
         return hand;
     };
 
@@ -2014,20 +2131,12 @@ FTKR.CRD = FTKR.CRD || {};
 
     Scene_CRD.prototype.setGameOutPoint = function(index) {
         var point = $gameCardData.point(this._endPeople);
-        console.log(index, point, this._endPeople);
         $gameCardData.addPlayerPoint(index, point);
         var varId = FTKR.CRD.result.varId[index];
         if (varId) {
             var value = $gameVariables.value(varId) || 0;
             $gameVariables.setValue(varId, value + point);
         }
-    };
-
-    Scene_CRD.prototype.refreshRoute = function(index) {
-        do {
-            this._route[index] += 1;
-            if (this._route[index] >= $gameCardData.playerNum()) this._route[index] = 0;
-        } while (!this._handWindows[this._route[index]].cardNum());
     };
 
     //=============================================================================
@@ -2044,14 +2153,28 @@ FTKR.CRD = FTKR.CRD || {};
 
     Window_PlayerHand.prototype.initialize = function(playerId, x, y, width, height, isPlayer, position) {
         this._playerId = playerId;
-        this._hand = [];
-        this._sprites = [];
         this._isPlayer = isPlayer;
         this._position = position;
-        this._holdId = -1;
+        this.clearHand();
         Window_Selectable.prototype.initialize.call(this, x, y, width, height);
         this.setCardSize();
         this.refresh();
+    };
+
+    Window_PlayerHand.prototype.clearHand = function() {
+        this._hand = [];
+        this._pair = [];
+        this._holdId = -1;
+        this.removeAllSprites();
+    };
+
+    Window_PlayerHand.prototype.removeAllSprites = function() {
+        if (this._sprites && this._sprites.length) {
+            this._sprites.forEach( function(sprite){
+                this.removeChild(sprite);
+            },this);
+        }
+        this._sprites = [];
     };
 
     Window_PlayerHand.prototype.cardScale = function() {
@@ -2090,23 +2213,23 @@ FTKR.CRD = FTKR.CRD || {};
     };
 
     Window_PlayerHand.prototype.cardNum = function() {
-        return this._hand.length;
+        return this._hand.length === 1 && this._hand[0] === null ?
+            0 : this._hand.length;
     };
 
     Window_PlayerHand.prototype.maxCols = function() {
-        return this.cardNum();
+        return this._hand.length;
     };
 
     Window_PlayerHand.prototype.maxItems = function() {
-        return this.cardNum();
+        return this._hand.length;
     };
 
-    Window_PlayerHand.prototype.pushHand = function(suit, rank, up) {
-        var card = {suit:suit, rank:rank, up:up || false, front:this._isPlayer};
-        this._hand.push(card);
+    Window_PlayerHand.prototype.pushHand = function(suit, rank, up, speed) {
+        this.addHand(this.cardNum(), suit, rank, up, speed);
     };
 
-    Window_PlayerHand.prototype.addHand = function(index, suit, rank, up) {
+    Window_PlayerHand.prototype.addHand = function(index, suit, rank, up, speed) {
         var card = {suit:suit, rank:rank, up:up || false, front:this._isPlayer};
         this._hand.splice(index, 0, card);
         var sprite = this._sprites[index];
@@ -2129,15 +2252,16 @@ FTKR.CRD = FTKR.CRD || {};
                 offsetY = -1 * Math.pow(-1, Math.floor(this._position/2)) * height;
             }
             sprite.setOffset(offsetX, offsetY);
-            sprite.moveCardDown();
+            sprite.moveCardDown(speed);
         }
         this.refreshHand();
     };
 
-    Window_PlayerHand.prototype.moveCardUp = function(index) {
+    Window_PlayerHand.prototype.moveCardUp = function(index, speed) {
         var sprite = this._sprites[index];
+        if (!sprite) return;
         sprite.resetOffset();
-        sprite.moveCardUp();
+        sprite.moveCardUp(speed);
     };
 
     Window_PlayerHand.prototype.reduceHand = function(index) {
@@ -2145,30 +2269,53 @@ FTKR.CRD = FTKR.CRD || {};
         var sprite = this._sprites[index];
         sprite.resetOffset();
         this._hand.splice(index, 1);
+        if (!this._hand.length) this._hand.push(null);
         this.refreshHand();
         return hand;
     };
 
-    Window_PlayerHand.prototype.discardPair = function() {
+    Window_PlayerHand.prototype.hasPair = function() {
+        var pair = [];
         var count = this._hand.length, i = 0;
         while (count) {
             if (!this._hand.length || this._hand.length <= i) break;
             var rank = this._hand[i].rank;
             if (!this._hand.some( function(hand, n){
                 if (hand && i !== n && hand.rank === rank) {
-                    this._hand.splice(n, 1);
-                    this._hand.splice(i, 1);
+                    pair = [n, i];
+                    count = 0;
                     return true;
                 }
             },this)) i++;
-            count--;
+            if(count) count--;
         };
+        return pair;
+    };
+
+    Window_PlayerHand.prototype.picupPair = function(pair, speed) {
+        this._pair = pair;
+        pair.forEach( function(i){
+            this.moveCardUp(i, speed);
+        },this);
+    };
+
+    Window_PlayerHand.prototype.checkPair = function() {
+        this.picupPair(this.hasPair());
+    };
+
+    Window_PlayerHand.prototype.discardPair = function() {
+        this._pair.forEach( function(index){
+            this._hand.splice(index, 1);
+        },this);
+        this._sprites.forEach(function(sprite){
+            if(sprite) sprite.resetOffset();
+        });
+        this._pair = [];
     };
 
     Window_PlayerHand.prototype.refreshHand = function() {
         this.resetWindowSize();
         this.createContents();
-        this.resetScroll();
         this.refresh();
     };
 
@@ -2264,7 +2411,7 @@ FTKR.CRD = FTKR.CRD || {};
 
     Window_PlayerHand.prototype.pushoutNPCHand = function() {
         this._hand.forEach(function(hand){
-            hand.up = false;
+            if (hand) hand.up = false;
         });
         if (!switchId('chara')) return;
         $gameCardData.chara(this._playerId).pushouts.some( function(pushout){
@@ -2273,7 +2420,7 @@ FTKR.CRD = FTKR.CRD || {};
             switch (pushout.type) {
                 case Scene_CRD.PUSHOUT_JOKER:
                     this._hand.forEach( function(hand) {
-                        if (hand.suit === 'joker') hand.up = true;
+                        if (hand && hand.suit === 'joker') hand.up = true;
                     });;
                     break;
                 case Scene_CRD.PUSHOUT_NOT_JOKER:
@@ -2347,6 +2494,10 @@ FTKR.CRD = FTKR.CRD || {};
     };
 
     Window_PlayerHand.prototype._refreshFrame = function() {
+    };
+
+    Window_PlayerHand.prototype.updateArrows = function() {
+        this.downArrowVisible = false;
     };
 
     Window_PlayerHand.prototype.isBusy = function() {
@@ -2543,12 +2694,12 @@ FTKR.CRD = FTKR.CRD || {};
             switch (face.type) {
                 case Scene_CRD.FACE_HAS_JOKER:
                     if (hands.some( function(hand) {
-                        return hand.suit === 'joker';
+                        return hand && hand.suit === 'joker';
                     })) this._tempFaceIndex = face.index;
                     break;
                 case Scene_CRD.FACE_NOT_HAS_JOKER:
                     if (hands.every( function(hand) {
-                        return hand.suit !== 'joker';
+                        return hand && hand.suit !== 'joker';
                     })) this._tempFaceIndex = face.index;
                     break;
             }
@@ -2795,7 +2946,7 @@ FTKR.CRD = FTKR.CRD || {};
                 FTKR.CRD.image.back;
             if (this._cardName !== name) {
                 this._cardName = name;
-                this._mainSprite.bitmap = ImageManager.loadPicture(name);
+                this._mainSprite.bitmap = ImageManager.reservePicture(name);
             }
         } else {
             this._mainSprite.bitmap = null;
@@ -2809,9 +2960,9 @@ FTKR.CRD = FTKR.CRD || {};
         }
     };
 
-    Sprite_Card.prototype.moveCardUp = function() {
+    Sprite_Card.prototype.moveCardUp = function(speed) {
         var len = FTKR.CRD.game.drawHeight;
-        this._movementDuration = this._drawSpeed;
+        this._movementDuration = speed ? speed : this._drawSpeed;
         if (this._movementDuration) {
             if (this._direction % 2) {
                 this._targetOffsetX = Math.pow(-1, Math.floor((this._direction - 1)/2)) * len;
@@ -2823,9 +2974,9 @@ FTKR.CRD = FTKR.CRD || {};
         }
     };
 
-    Sprite_Card.prototype.moveCardDown = function() {
+    Sprite_Card.prototype.moveCardDown = function(speed) {
         var len = FTKR.CRD.game.drawHeight;
-        this._movementDuration = this._drawSpeed;
+        this._movementDuration = speed ? speed : this._drawSpeed;
         if (this._movementDuration) {
             if (this._direction % 2) {
                 this._targetOffsetX = -1 * Math.pow(-1, Math.floor((this._direction - 1)/2)) * len;
