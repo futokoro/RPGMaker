@@ -444,7 +444,7 @@ if (Imported.FTKR_CSS) (function() {
         }
     };
     
-    Window_Base.prototype.drawCssActorEquipDiff = function(actor, x, y, width, paramId, lss) {
+    Window_Base.prototype.drawCssActorEquipAopDiff = function(actor, x, y, width, paramId, lss) {
         if (!Imported.FTKR_AOP) return 1;
         if (paramId < 0 && FTKR.AOP.useParamNum > 7) return 1;
         var target = lss.target;
