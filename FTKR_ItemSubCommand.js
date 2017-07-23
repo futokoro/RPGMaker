@@ -3,12 +3,12 @@
 // FTKR_ItemSubCommand.js
 // 作成者     : フトコロ
 // 作成日     : 2017/06/04
-// 最終更新日 : 2017/06/11
-// バージョン : v1.1.0
+// 最終更新日 : 2017/07/23
+// バージョン : v1.2.0
 //=============================================================================
 
 /*:
- * @plugindesc v1.1.0 アイテムボックスにサブコマンドを追加する
+ * @plugindesc v1.2.0 アイテムボックスにサブコマンドを追加する
  * @author フトコロ
  *
  * @param --サブコマンド--
@@ -95,6 +95,30 @@
  * @desc 確認コマンドの「実行しない」のコマンド名を設定します。
  * @default 実行しない
  *
+ * @param --サウンド--
+ * @default
+ *
+ * @param Disposal SE Name
+ * @desc アイテムを捨てる時のSEを設定します。
+ * @default Dicision1
+ * @type file
+ * @require 1
+ * @dir audio/se
+ * 
+ * @param Disposal SE Pitch
+ * @desc アイテムを捨てる時のSEのピッチを設定します。
+ * @default 100
+ * @min 50
+ * @max 150
+ * @type number
+ * 
+ * @param Disposal SE Volume
+ * @desc アイテムを捨てる時のSEの音量を設定します。
+ * @default 90
+ * @min 0
+ * @max 100
+ * @type number
+ * 
  * @help 
  *-----------------------------------------------------------------------------
  * 概要
@@ -108,19 +132,36 @@
  * 3. やめる - サブコマンドを閉じます。
  * 
  * 
- * 「捨てる」を実行すると、捨てるアイテムの数を設定します。
- * 数を決めると確認画面を表示し、その画面で「実行する」を選択することで、
- * アイテムを捨てることができます。
- * 
- * 確認画面は、プラグインパラメータ<Enable Confirmation>で非表示設定に
- * することができます。
- * 
- * 
  *-----------------------------------------------------------------------------
  * 設定方法
  *-----------------------------------------------------------------------------
  * 1.「プラグインマネージャー(プラグイン管理)」に、本プラグインを追加して
  *    ください。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * アイテムを捨てる
+ *-----------------------------------------------------------------------------
+ * サブコマンドの「捨てる」を実行すると、捨てるアイテムの数を設定します。
+ * 数を決めると確認画面を表示し、その画面で「実行する」を選択することで、
+ * アイテムを捨てることができます。
+ * 捨てるときのＳＥはプラグインパラメータで設定できます。
+ * 
+ * 確認画面は、プラグインパラメータ<Enable Confirmation>で非表示設定に
+ * することができます。
+ * 
+ * 以下のタグをアイテムのメモ欄に記載すると、そのアイテムは捨てることが
+ * できません。
+ * 
+ * <捨てられない>
+ * <NOT_DISCARDABLE>
+ * 
+ * また、タグの後ろに数字をつけると、そのＩＤのスイッチがＯＮの間は
+ * 捨てることが出来なくなります。
+ * 
+ * <捨てられない: x>
+ * <NOT_DISCARDABLE: x>
+ *    x : スイッチＩＤ
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -137,9 +178,14 @@
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.2.0 - 2017/07/23 : 機能追加
+ *    1. アイテムに個別に捨てられるかどうか設定する機能を追加。
+ *    2. アイテムを捨てる時に任意のＳＥを鳴らす機能を追加。
+ * 
  * v1.1.0 - 2017/06/11 : 機能追加
  *    1. サブコマンドのウィンドウサイズと位置を調整する機能を追加。
  *    2. 数値入力画面の最大数の表示内容を変更する機能を追加。
+ * 
  * v1.0.0 - 2017/06/04 : 初版作成
  * 
  *-----------------------------------------------------------------------------
@@ -151,6 +197,10 @@ Imported.FTKR_ISC = true;
 
 var FTKR = FTKR || {};
 FTKR.ISC = FTKR.ISC || {};
+
+function Window_ItemSubCommand() {
+    this.initialize.apply(this, arguments);
+}
 
 (function() {
 
@@ -183,7 +233,35 @@ FTKR.ISC = FTKR.ISC || {};
                 okFormat    :String(parameters['Confirmation Ok Format'] || ''),
                 cancelFormat:String(parameters['Confirmation Cancel Format'] || ''),
             },
+            sound:{
+                disposal:{
+                    name    :String(parameters['Disposal SE Name'] || ''),
+                    pitch   :Number(parameters['Disposal SE Pitch'] || 100),
+                    pan     :0,
+                    volume  :Number(parameters['Disposal SE Volume'] || 90),
+                },
+            },
         },
+    };
+
+    var hasObjectMeta = function(obj, metacodes) {
+        if (!obj) return false;
+        return metacodes.some(function(metacode){
+            var metaReg = new RegExp('<' + metacode + '>', 'i');
+            return metaReg.test(obj.note);
+        }); 
+    };
+
+    //objのメモ欄から <metacode: x> の値を読み取って返す
+    var readObjectMeta = function(obj, metacodes) {
+        if (!obj) return false;
+        var match = {};
+        metacodes.some(function(metacode){
+            var metaReg = new RegExp('<' + metacode + ':[ ]*(.+)>', 'i');
+            match = metaReg.exec(obj.note);
+            return match;
+        }); 
+        return match ? match[1] : '';
     };
 
     //=============================================================================
@@ -294,6 +372,7 @@ FTKR.ISC = FTKR.ISC || {};
 
     Scene_Item.prototype.onNumberOk = function() {
         if (FTKR.ISC.subcom.enableConf) {
+            SoundManager.playOk();
             this._confTitleWindow.setItem(this._subCommandWindow._item, this._numberWindow.number());
             this._confTitleWindow.show();
             this._confWindow.show();
@@ -309,7 +388,7 @@ FTKR.ISC = FTKR.ISC || {};
     };
 
     Scene_Item.prototype.itemDiscard = function() {
-        SoundManager.playOk();
+        AudioManager.playSe(FTKR.ISC.subcom.sound.disposal);
         $gameParty.gainItem(this._subCommandWindow._item, -this._numberWindow.number());
         this.onSubComCancel();
     };
@@ -348,6 +427,7 @@ FTKR.ISC = FTKR.ISC || {};
             this._confWindow.deselect();
             this.itemDiscard();
         } else {
+            SoundManager.playCancel();
             this.onConfirmationCancel();
         }
     };
@@ -388,6 +468,10 @@ FTKR.ISC = FTKR.ISC || {};
         var text = FTKR.ISC.subcom.number.maxFormat.format(this._max);
         var x = width - this.textWidth(text);
         this.drawTextEx(text, x, this.itemY() + this.lineHeight());
+    };
+
+    Window_ItemNumber.prototype.playOkSound = function() {
+        //SoundManager.playOk();
     };
 
     //=============================================================================
@@ -507,72 +591,87 @@ FTKR.ISC = FTKR.ISC || {};
         this.refresh();
     };
 
+    Window_ItemConf.prototype.playOkSound = function() {
+        //SoundManager.playOk();
+    };
+
+    //=============================================================================
+    // Window_ItemSubCommand
+    // スキル選択後の実行用コマンドを表示・処理するウィンドウ
+    //=============================================================================
+
+    Window_ItemSubCommand.prototype = Object.create(Window_Selectable.prototype);
+    Window_ItemSubCommand.prototype.constructor = Window_ItemSubCommand;
+
+    Window_ItemSubCommand.prototype.initialize = function(x, y, width, height) {
+        Window_Selectable.prototype.initialize.call(this, x, y, width, height);
+        this._data = [];
+        this._enabled = false;
+        this._item = null;
+        this._symbol = '';
+    };
+
+    Window_ItemSubCommand.prototype.maxItems = function() {
+        return this._data ? this._data.length : 1;
+    };
+
+    Window_ItemSubCommand.prototype.item = function() {
+        return this._data && this.index() >= 0 ? this._data[this.index()] : null;
+    };
+
+    Window_ItemSubCommand.prototype.makeItemList = function() {
+        this._data = [];
+        if (!this._item) return;
+        var sep = FTKR.ISC.subcom.command;
+        this._data = [
+            {symbol:'use',     enabled:$gameParty.canUse(this._item), disp:sep.use},
+            {symbol:'discard', enabled:this.isDiscardable(), disp:sep.discard},
+            {symbol:'cancel',  enabled:true, disp:sep.cancel},
+        ];
+    };
+
+    Window_ItemSubCommand.prototype.isDiscardable = function() {
+        return this._item.itypeId !== 2 &&
+            !hasObjectMeta(this._item, ['捨てられない','Not_discardable']) &&
+            !this.checkSw();
+    };
+    
+    Window_ItemSubCommand.prototype.checkSw = function() {
+        var id = Number(readObjectMeta(this._item, ['捨てられない','Not_discardable']));
+        if (id > 0) {
+            return $gameSwitches.value(id);
+        } else {
+            return false;
+        }
+    };
+
+    Window_ItemSubCommand.prototype.isCurrentItemEnabled = function() {
+        return this.isEnabled(this.index());
+    };
+
+    Window_ItemSubCommand.prototype.isEnabled = function(index) {
+        return this._data[index].enabled;
+    };
+
+    Window_ItemSubCommand.prototype.drawItem = function(index) {
+        var rect = this.itemRectForText(index);
+        this.changePaintOpacity(this.isEnabled(index));
+        this.drawText(this._data[index].disp, rect.x, rect.y, rect.width);
+        this.changePaintOpacity(1);
+    };
+
+    Window_ItemSubCommand.prototype.refresh = function() {
+        this.makeItemList();
+        this.createContents();
+        this.drawAllItems();
+    };
+
+    Window_ItemSubCommand.prototype.setItem = function(item) {
+        if (this._item === item) return;
+        this._item = item;
+        this.refresh();
+    };
+
 }());//FTKR_ItemSubCommand.js END
-
-//=============================================================================
-// Window_ItemSubCommand
-// スキル選択後の実行用コマンドを表示・処理するウィンドウ
-//=============================================================================
-
-function Window_ItemSubCommand() {
-    this.initialize.apply(this, arguments);
-}
-
-Window_ItemSubCommand.prototype = Object.create(Window_Selectable.prototype);
-Window_ItemSubCommand.prototype.constructor = Window_ItemSubCommand;
-
-Window_ItemSubCommand.prototype.initialize = function(x, y, width, height) {
-    Window_Selectable.prototype.initialize.call(this, x, y, width, height);
-    this._data = [];
-    this._enabled = false;
-    this._item = null;
-    this._symbol = '';
-};
-
-Window_ItemSubCommand.prototype.maxItems = function() {
-    return this._data ? this._data.length : 1;
-};
-
-Window_ItemSubCommand.prototype.item = function() {
-    return this._data && this.index() >= 0 ? this._data[this.index()] : null;
-};
-
-Window_ItemSubCommand.prototype.makeItemList = function() {
-    this._data = [];
-    if (!this._item) return;
-    var sep = FTKR.ISC.subcom.command;
-    this._data = [
-        {symbol:'use',     enabled:$gameParty.canUse(this._item), disp:sep.use},
-        {symbol:'discard', enabled:this._item.itypeId !== 2, disp:sep.discard},
-        {symbol:'cancel',  enabled:true, disp:sep.cancel},
-    ];
-};
-
-Window_ItemSubCommand.prototype.isCurrentItemEnabled = function() {
-    return this.isEnabled(this.index());
-};
-
-Window_ItemSubCommand.prototype.isEnabled = function(index) {
-    return this._data[index].enabled;
-};
-
-Window_ItemSubCommand.prototype.drawItem = function(index) {
-    var rect = this.itemRectForText(index);
-    this.changePaintOpacity(this.isEnabled(index));
-    this.drawText(this._data[index].disp, rect.x, rect.y, rect.width);
-    this.changePaintOpacity(1);
-};
-
-Window_ItemSubCommand.prototype.refresh = function() {
-    this.makeItemList();
-    this.createContents();
-    this.drawAllItems();
-};
-
-Window_ItemSubCommand.prototype.setItem = function(item) {
-    if (this._item === item) return;
-    this._item = item;
-    this.refresh();
-};
 
 //EOF
