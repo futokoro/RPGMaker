@@ -1,11 +1,11 @@
 [トップページに戻る](README.md)
 
-# [FTKR_CSS_EquipStatus](FTKR_CSS_EquipStatus.js) プラグイン
+# [FTKR_CSS_ShopStatus](FTKR_CSS_ShopStatus.js) プラグイン
 
-アクターの装備画面のステータス表示を変更するプラグインです。<br>
+アクターのショップ画面のステータス表示を変更するプラグインです。<br>
 本プラグインは、[FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md)の拡張プラグインです。
 
-ダウンロード: [FTKR_CSS_EquipStatus.js](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_EquipStatus.js)
+ダウンロード: [FTKR_CSS_ShopStatus.js](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_ShopStatus.js)
 
 ## 目次
 
@@ -13,6 +13,7 @@
 1. [概要](#概要)
 2. [プラグインの登録](#プラグインの登録)
 3. [レイアウト設定](#レイアウト設定)
+3. [CSS表示コードの追加](#CSS表示コードの追加)
 4. [ウィンドウの設定](#ウィンドウの設定)
     1. [プラグインパラメータの設定](#プラグインパラメータの設定)
     2. [ウィンドウ設定における補足](#ウィンドウ設定における補足)
@@ -21,9 +22,7 @@
 
 ## 概要
 
-本プラグインを実装することで、装備画面で表示するアクターのステータス表示のレイアウトを変更できます。
-
-![画像](image/FTKR_CSS_EquipStatus/n01_001.png)
+本プラグインを実装することで、ショップ画面で表示するアクターのステータス表示のレイアウトを変更できます。
 
 [目次に戻る](#目次)
 
@@ -33,7 +32,7 @@
 プラグイン管理画面で、以下の順の配置になるように登録してください。
 ```
 FTKR_CustomSimpleActorStatus.js
-FTKR_CSS_EquipStatus.js
+FTKR_CSS_ShopStatus.js
 ```
 
 [目次に戻る](#目次)
@@ -45,6 +44,33 @@ FTKR_CSS_EquipStatus.js
 
 設定方法については、FTKR_CustomSimpleActorStatusの[マニュアル](#FTKR_CustomSimpleActorStatus.ja.md)を参照してください。
 
+ステータスの表示内容は、武器、防具、アイテムカテゴリー毎に設定します。
+共通レイアウトはどのカテゴリーでも共通して表示するステータスです。
+
+## CSS表示コードの追加
+本プラグインにより以下の表示コードを使用できます。
+
+### カーソルで選択中の装備をしたときのパラメータ差分
+`ediff(x)`
+
+指定した x の値に従い、下記のパラメータの差分を表示します。
+* 0 - 最大HP
+* 1 - 最大MP
+* 2 - 攻撃力
+* 3 - 防御力
+* 4 - 魔法攻撃
+* 5 - 魔法防御
+* 6 - 敏捷性
+* 7 - 運
+
+### カーソルで選択中の装備をしたときのAOPパラメータ差分
+`ediffaop(x)`
+
+指定した x の値に従い、AOPパラメータの差分を表示します。
+AOPパラメータとは、`FTKR_AddOriginalParameters.js`により作成したオリジナルパラメータのことです。
+
+x はオリジナルパラメータIDを指定してください。
+
 [目次に戻る](#目次)
 
 ## ウィンドウの設定
@@ -54,7 +80,7 @@ FTKR_CSS_EquipStatus.js
 ### 設定の有効化
 `Enabled Custom Window`
 
-装備画面のステータスウィンドウ変更機能を使うか指定します。
+ショップ画面のステータスウィンドウ変更機能を使うか指定します。
 * 0 - 無効(デフォルト)
 * 1 - 有効
 
@@ -62,7 +88,29 @@ FTKR_CSS_EquipStatus.js
 `Number Visible Rows`
 
 ステータスウィンドウの縦の行数を変更します。
-デフォルトは7行です。
+共通ウィンドウのデフォルトは1行です。
+アイテム別ウィンドウのデフォルトは8行です。
+
+### アクターを表示する数
+`Item Page Size`
+
+アクターを表示する数を変更します。
+デフォルトは 4 です。
+
+パーティーメンバーがこの数よりも多い場合は、別のページで表示します。
+ページの切り替えは、Shiftキーで行います。
+
+### アクター毎の縦の行数
+`Item Actor Status Rows`
+
+ステータスウィンドウのアクター毎の縦の行数を変更します。
+デフォルトは2行です。
+
+### アクター毎の間隔
+`Item Height Space`
+
+ステータスウィンドウのアクター毎の間隔を変更します。
+デフォルトは 5 です。(単位はpixel)
 
 ### フォントサイズ
 `Font Size`
@@ -113,7 +161,7 @@ FTKR_CSS_EquipStatus.js
 ### ウィンドウを消す方法
 以下の設定にすると、ウィンドウ枠とウィンドウの背景が消えて、アクターのステータスだけを表示します。
 
-`Window Opacity`     : 0 <br>
+`Window Opacity`   0 <br>
 `Hide Window Frame`  : 1
 
 [目次に戻る](#目次)
@@ -122,9 +170,7 @@ FTKR_CSS_EquipStatus.js
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.0.2](FTKR_CSS_EquipStatus.js) | 2017/07/23 | ウィンドウの設定が反映されない不具合を修正 |
-| ver1.0.1 | 2017/05/17 | 選択中の武器または防具を装備した時のパラメータを参照する機能を追加 |
-| ver1.0.0 | 2017/05/13 | 初版作成 |
+| [ver1.0.0](FTKR_CSS_ShopStatus.js) | 2017/07/23 | 初版作成 |
 
 ## ライセンス
 

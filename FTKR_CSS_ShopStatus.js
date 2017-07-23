@@ -1,0 +1,785 @@
+//=============================================================================
+// ショップ画面のステータスレイアウトを変更するプラグイン
+// FTKR_CSS_ShopStatus.js
+// 作成者     : フトコロ
+// 作成日     : 2017/07/23
+// 最終更新日 : 
+// バージョン : v1.0.0
+//=============================================================================
+
+var Imported = Imported || {};
+Imported.FTKR_CSS_ES = true;
+
+var FTKR = FTKR || {};
+FTKR.CSS = FTKR.CSS || {};
+FTKR.CSS.SpS = FTKR.CSS.SpS || {};
+
+/*:
+ * @plugindesc v1.0.0 ショップ画面のステータスレイアウトを変更する
+ * @author フトコロ
+ *
+ * @param --共通レイアウト設定--
+ * @default
+ * 
+ * @param Common Status Text1
+ * @desc Text1部に表示するステータスを指定します。
+ * 詳細はヘルプ参照
+ * @default text(\c[16]持っている数)
+ * 
+ * @param Common Status Text2
+ * @desc Text2部に表示するステータスを指定します。
+ * 詳細はヘルプ参照
+ * @default eval($gameParty.numItems(item))
+ * 
+ * @param Common Status Text3
+ * @desc Text3部に表示するステータスを指定します。
+ * 詳細はヘルプ参照
+ * @default 
+ * 
+ * @param Common Status Space
+ * @desc 各Textの間隔を指定します。
+ * @default 0,0,0,0
+ * 
+ * @param Common Status Space In Text
+ * @desc Text内で複数表示する場合の間隔を指定します。
+ * @default 5
+ * 
+ * @param Common Status Width Rate
+ * @desc Text1~Text3の表示幅の比率を指定します。
+ * 詳細はヘルプ参照
+ * @default 1,1,0
+ *
+ * @param --武器のレイアウト設定--
+ * @default
+ * 
+ * @param Weapon Status Text1
+ * @desc Text1部に表示するステータスを指定します。
+ * 詳細はヘルプ参照
+ * @default name,{equip(item.etypeId-1)}
+ * 
+ * @param Weapon Status Text2
+ * @desc Text2部に表示するステータスを指定します。
+ * 詳細はヘルプ参照
+ * @default eparam(2)
+ * 
+ * @param Weapon Status Text3
+ * @desc Text3部に表示するステータスを指定します。
+ * 詳細はヘルプ参照
+ * @default 
+ * 
+ * @param Weapon Status Space
+ * @desc 各Textの間隔を指定します。
+ * @default 0,0,0,0
+ * 
+ * @param Weapon Status Space In Text
+ * @desc Text内で複数表示する場合の間隔を指定します。
+ * @default 5
+ * 
+ * @param Weapon Status Width Rate
+ * @desc Text1~Text3の表示幅の比率を指定します。
+ * 詳細はヘルプ参照
+ * @default 1,1,0
+ *
+ * @param --防具のレイアウト設定--
+ * @default
+ * 
+ * @param Armor Status Text1
+ * @desc Text1部に表示するステータスを指定します。
+ * 詳細はヘルプ参照
+ * @default name,{equip(item.etypeId-1)}
+ * 
+ * @param Armor Status Text2
+ * @desc Text2部に表示するステータスを指定します。
+ * 詳細はヘルプ参照
+ * @default eparam(3)
+ * 
+ * @param Armor Status Text3
+ * @desc Text3部に表示するステータスを指定します。
+ * 詳細はヘルプ参照
+ * @default 
+ * 
+ * @param Armor Status Space
+ * @desc 各Textの間隔を指定します。
+ * @default 0,0,0,0
+ * 
+ * @param Armor Status Space In Text
+ * @desc Text内で複数表示する場合の間隔を指定します。
+ * @default 5
+ * 
+ * @param Armor Status Width Rate
+ * @desc Text1~Text3の表示幅の比率を指定します。
+ * 詳細はヘルプ参照
+ * @default 1,1,0
+ *
+ * @param --武器防具以外のレイアウト設定--
+ * @default
+ * 
+ * @param Item Status Text1
+ * @desc Text1部に表示するステータスを指定します。
+ * 詳細はヘルプ参照
+ * @default 
+ * 
+ * @param Item Status Text2
+ * @desc Text2部に表示するステータスを指定します。
+ * 詳細はヘルプ参照
+ * @default 
+ * 
+ * @param Item Status Text3
+ * @desc Text3部に表示するステータスを指定します。
+ * 詳細はヘルプ参照
+ * @default 
+ * 
+ * @param Item Status Space
+ * @desc 各Textの間隔を指定します。
+ * @default 0,0,0,0
+ * 
+ * @param Item Status Space In Text
+ * @desc Text内で複数表示する場合の間隔を指定します。
+ * @default 5
+ * 
+ * @param Item Status Width Rate
+ * @desc Text1~Text3の表示幅の比率を指定します。
+ * 詳細はヘルプ参照
+ * @default 1,0,0
+ *
+ * @param --共通ウィンドウ設定--
+ * @desc 
+ * 
+ * @param Common Number Visible Rows
+ * @desc ステータスウィンドウの縦の行数
+ * @default 1
+ * 
+ * @param Common Font Size
+ * @desc フォントサイズ
+ * @default 28
+ * 
+ * @param Common Window Padding
+ * @desc ウィンドウの周囲の余白
+ * @default 18
+ * 
+ * @param Common Window Line Height
+ * @desc ウィンドウ内の1行の高さ
+ * @default 36
+ * 
+ * @param Common Window Opacity
+ * @desc ウィンドウ内の背景の透明度
+ * @default 192
+ * 
+ * @param Common Hide Window Frame
+ * @desc ウィンドウ枠を非表示にするか
+ * 1 - 非表示にする、0 - 表示する
+ * @default 0
+ * 
+ * @param --アイテム別のウィンドウ設定--
+ * @desc 
+ * 
+ * @param Item Number Visible Rows
+ * @desc ステータスウィンドウの縦の行数
+ * @default 8
+ * 
+ * @param Item Page Size
+ * @desc 表示するアクターの数
+ * @default 4
+ * 
+ * @param Item Actor Status Rows
+ * @desc アクター毎の縦の行数
+ * @default 2
+ * 
+ * @param Item Height Space
+ * @desc アクター毎の間隔
+ * @default 5
+ * 
+ * @param Item Font Size
+ * @desc フォントサイズ
+ * @default 28
+ * 
+ * @param Item Window Padding
+ * @desc ウィンドウの周囲の余白
+ * @default 18
+ * 
+ * @param Item Window Line Height
+ * @desc ウィンドウ内の1行の高さ
+ * @default 36
+ * 
+ * @param Item Window Opacity
+ * @desc ウィンドウ内の背景の透明度
+ * @default 192
+ * 
+ * @param Item Hide Window Frame
+ * @desc ウィンドウ枠を非表示にするか
+ * 1 - 非表示にする、0 - 表示する
+ * @default 0
+ * 
+ * @help 
+ *-----------------------------------------------------------------------------
+ * 概要
+ *-----------------------------------------------------------------------------
+ * 本プラグインを実装することで、ショップ画面で表示するアクターの
+ * ステータス表示のレイアウトを変更できます。
+ * 
+ * また、ショップ画面のステータスウィンドウの設定を変更できます。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * 設定方法
+ *-----------------------------------------------------------------------------
+ * 1.「プラグインマネージャー(プラグイン管理)」に、本プラグインを追加して
+ *    ください。
+ * 
+ * 2. 本プラグインを動作させるためには、
+ *    FTKR_CustomSimpleActorStatus.jsが必要です。
+ *    本プラグインは、FTKR_CustomSimpleActorStatus.jsよりも下の位置に
+ *    なるように追加してください。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * ショップ画面のステータス表示の設定
+ *-----------------------------------------------------------------------------
+ * プラグインパラメータの設定により、ショップ画面で表示する
+ * ステータスの表示レイアウトを変更することができます。
+ * 
+ * ステータスの表示内容は、武器、防具、アイテムカテゴリー毎に設定します。
+ * 
+ * なお、共通レイアウトはどのカテゴリーでも共通して表示するステータスです。
+ * 
+ * 
+ * 各パラメータの意味と、設定方法は、
+ * FTKR_CustomSimpleActorStatus.jsのヘルプを参照してください。
+ * 
+ * なお、歩行キャラ、SV戦闘キャラ、カスタムパラメータ、カスタムゲージの
+ * 設定は、FTKR_CustomSimpleActorStatus.jsの設定に従います。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * CSS表示コードの追加
+ *-----------------------------------------------------------------------------
+ * 本プラグインにより以下の表示コードを使用できます。
+ * 
+ * 1. カーソルで選択中の装備をしたときのパラメータ差分
+ *    :ediff(x)
+ *    : 指定した x の値に従い、下記のパラメータの差分を表示します。
+ *    : 0 - 最大HP、1 - 最大MP、2 - 攻撃力、3 - 防御力、4 - 魔法攻撃、
+ *    : 5 - 魔法防御、6 - 敏捷性、7 - 運
+ * 
+ * 
+ * 2. カーソルで選択中の装備をしたときのAOPパラメータ差分
+ *    :ediffaop(x)
+ *    : 指定した x の値に従い、AOPパラメータの差分を表示します。
+ *    : AOPパラメータとは、FTKR_AddOriginalParameters.js により作成した
+ *    : オリジナルパラメータのことです。
+ *    : x は　オリジナルパラメータIDを指定してください。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * ステータスウィンドウの設定
+ *-----------------------------------------------------------------------------
+ * 以下のプラグインパラメータで設定できます。
+ * 
+ * <Enabled Custom Window>
+ *    :スキル画面のウィンドウ変更機能を使うか指定します。
+ *    :0 - 無効, 1 - 有効
+ * 
+ * <Number Visible Rows>
+ *    :ステータスウィンドウの縦の行数を変更します。
+ *    :共通ウィンドウのデフォルトは1行です。
+ *    :アイテム別ウィンドウのデフォルトは8行です。
+ * 
+ * <Font Size>
+ *    :ウィンドウ内のフォントサイズを変更します。
+ *    :デフォルトは 28 です。(単位はpixel)
+ * 
+ * <Window Padding>
+ *    :ウィンドウの周囲の余白を変更します。
+ *    :デフォルトは 18 です。(単位はpixel)
+ * 
+ * <Window Line Height>
+ *    :ウィンドウ内の1行の高さを変更します。
+ *    :デフォルトは 36 です。(単位はpixel)
+ * 
+ * <Window Opacity>
+ *    :ウィンドウ内の背景の透明度を変更します。
+ *    :デフォルトは 192 です。
+ *    :0 - 透明、255 - 不透明
+ * 
+ * <Hide Window Frame>
+ *    :ウィンドウ枠を非表示にするか指定します。
+ *    :1 - 非表示にする、0 - 表示する
+ *    :デフォルトは表示します。
+ * 
+ * 
+ * ＜ウィンドウの高さ＞
+ * ウィンドウの高さは、以下の計算式で算出します。
+ *    [ウィンドウ高さ] ＝ [縦の行数] × [1行の高さ] + [余白のサイズ] × 2
+ * 
+ * 
+ * ＜フォントサイズと行の高さ＞
+ * 基本的に、下の大小関係になるように設定しましょう。
+ *    フォントサイズ ＜ 1行の高さ
+ * 
+ * 
+ * ＜ウィンドウを消す方法＞
+ * 以下の設定にすると、ウィンドウ枠とウィンドウの背景が消えて
+ * アクターのステータスだけを表示します。
+ * 
+ * <Window Opacity>     : 0
+ * <Hide Window Frame>  : 1
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * 本プラグインのライセンスについて(License)
+ *-----------------------------------------------------------------------------
+ * 本プラグインはMITライセンスのもとで公開しています。
+ * This plugin is released under the MIT License.
+ * 
+ * Copyright (c) 2017 Futokoro
+ * http://opensource.org/licenses/mit-license.php
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * 変更来歴
+ *-----------------------------------------------------------------------------
+ * 
+ * v1.0.0 - 2017/07/23 : 初版作成
+ * 
+ *-----------------------------------------------------------------------------
+*/
+//=============================================================================
+
+if (Imported.FTKR_CSS) (function() {
+
+    //=============================================================================
+    // プラグイン パラメータ
+    //=============================================================================
+    var parameters = PluginManager.parameters('FTKR_CSS_ShopStatus');
+
+    //簡易ステータスオブジェクト
+    FTKR.CSS.SpS.comStatus = {
+        text1     :String(parameters['Common Status Text1'] || ''),
+        text2     :String(parameters['Common Status Text2'] || ''),
+        text3     :String(parameters['Common Status Text3'] || ''),
+        space     :String(parameters['Common Status Space'] || ''),
+        spaceIn   :Number(parameters['Common Status Space In Text'] || 0),
+        widthRate :String(parameters['Common Status Width Rate'] || ''),
+        target    :null,
+    };
+
+    FTKR.CSS.SpS.itemStatus = {
+        text1     :String(parameters['Item Status Text1'] || ''),
+        text2     :String(parameters['Item Status Text2'] || ''),
+        text3     :String(parameters['Item Status Text3'] || ''),
+        space     :String(parameters['Item Status Space'] || ''),
+        spaceIn   :Number(parameters['Item Status Space In Text'] || 0),
+        widthRate :String(parameters['Item Status Width Rate'] || ''),
+        target    :null,
+    };
+
+    FTKR.CSS.SpS.weaponStatus = {
+        text1     :String(parameters['Weapon Status Text1'] || ''),
+        text2     :String(parameters['Weapon Status Text2'] || ''),
+        text3     :String(parameters['Weapon Status Text3'] || ''),
+        space     :String(parameters['Weapon Status Space'] || ''),
+        spaceIn   :Number(parameters['Weapon Status Space In Text'] || 0),
+        widthRate :String(parameters['Weapon Status Width Rate'] || ''),
+        target    :null,
+    };
+
+    FTKR.CSS.SpS.armorStatus = {
+        text1     :String(parameters['Armor Status Text1'] || ''),
+        text2     :String(parameters['Armor Status Text2'] || ''),
+        text3     :String(parameters['Armor Status Text3'] || ''),
+        space     :String(parameters['Armor Status Space'] || ''),
+        spaceIn   :Number(parameters['Armor Status Space In Text'] || 0),
+        widthRate :String(parameters['Armor Status Width Rate'] || ''),
+        target    :null,
+    };
+
+    FTKR.CSS.SpS.comWindow = {
+        enabled       :true,
+        numVisibleRows:Number(parameters['Common Number Visible Rows'] || 0),
+        fontSize      :Number(parameters['Common Font Size'] || 0),
+        padding       :Number(parameters['Common Window Padding'] || 0),
+        lineHeight    :Number(parameters['Common Window Line Height'] || 0),
+        opacity       :Number(parameters['Common Window Opacity'] || 0),
+        hideFrame     :Number(parameters['Common Hide Window Frame'] || 0),
+    };
+
+    FTKR.CSS.SpS.itemWindow = {
+        enabled       :true,
+        numVisibleRows:Number(parameters['Item Number Visible Rows'] || 0),
+        maxCols       :Number(parameters['Item Page Size'] || 0),
+        actorRows     :Number(parameters['Item Actor Status Rows'] || 0),
+        fontSize      :Number(parameters['Item Font Size'] || 0),
+        padding       :Number(parameters['Item Window Padding'] || 0),
+        lineHeight    :Number(parameters['Item Window Line Height'] || 0),
+        opacity       :Number(parameters['Item Window Opacity'] || 0),
+        hideFrame     :Number(parameters['Item Hide Window Frame'] || 0),
+        hspace        :Number(parameters['Item Height Space'] || 0),
+    };
+
+    //=============================================================================
+    // CSS表示コードを追加
+    //=============================================================================
+
+    var _SpS_Window_Base_drawCssActorStatusBase_A1 = Window_Base.prototype.drawCssActorStatusBase_A1;
+    Window_Base.prototype.drawCssActorStatusBase_A1 = function(index, actor, x, y, width, match, lss, css) {
+        switch(match[1].toUpperCase()) {
+            case 'EDIFF':
+                return this.drawCssActorEquipDiff(actor, x, y, width, match[2], lss);
+            case 'EDIFFAOP':
+                return this.drawCssActorEquipAopDiff(actor, x, y, width, match[2], lss);
+        }
+        return _SpS_Window_Base_drawCssActorStatusBase_A1.call(this, index, actor, x, y, width, match, lss, css);
+    };
+
+    Window_Base.prototype.drawCssActorEquipDiff = function(actor, x, y, width, paramId, lss) {
+        if (paramId < 0 && paramId > 7) return 0;
+        var target = lss.target;
+        var item = FTKR.gameData.item;
+        if(target && item && actor.canEquip(item)) {
+            var newValue = target.param(paramId);
+            var diffvalue = newValue - actor.param(paramId);
+            this.changeTextColor(this.paramchangeTextColor(diffvalue));
+            if (diffvalue > 0) diffvalue = '+' + diffvalue;
+            this.drawText(diffvalue, x, y, width, 'right');
+        }
+    };
+    
+    Window_Base.prototype.drawCssActorEquipDiff = function(actor, x, y, width, paramId, lss) {
+        if (!Imported.FTKR_AOP) return 1;
+        if (paramId < 0 && FTKR.AOP.useParamNum > 7) return 1;
+        var target = lss.target;
+        var item = FTKR.gameData.item;
+        if(target && item && actor.canEquip(item)) {
+            var newValue = target.aopParam(paramId);
+            var diffvalue = newValue - actor.aopParam(paramId);
+            this.changeTextColor(this.paramchangeTextColor(diffvalue));
+            if (diffvalue > 0) diffvalue = '+' + diffvalue;
+            this.drawText(diffvalue, x, y, width, 'right');
+        }
+    };
+    
+    //=============================================================================
+    // Window_ShopStatus
+    //=============================================================================
+
+    var _SpS_Window_ShopStatus_initialize = Window_ShopStatus.prototype.initialize;
+    Window_ShopStatus.prototype.initialize = function(x, y, width, height) {
+        height = this.fittingHeight(this.numVisibleRows());
+        _SpS_Window_ShopStatus_initialize.call(this, x, y, width, height);
+    };
+
+    Window_ShopStatus.prototype.evalCssCustomFormula = function(actor, formula) {
+        if (!formula) return '';
+        FTKR.setGameData(actor, null, this._item);
+        return FTKR.evalFormula(formula);
+    };
+
+    //書き換え
+    Window_ShopStatus.prototype.refresh = function() {
+        this.contents.clear();
+        if (this._item) {
+            var w = this.width - this.padding * 2;
+            var h = this.height - this.padding * 2;
+            this.drawCssActorStatus(0, null, 0, 0, w, h, FTKR.CSS.SpS.comStatus);
+        }
+    };
+
+    //書き換え
+    //ウィンドウの行数
+    Window_ShopStatus.prototype.numVisibleRows = function() {
+        return FTKR.CSS.SpS.comWindow.numVisibleRows;
+    };
+
+    //書き換え
+    //ウィンドウのフォントサイズ
+    Window_ShopStatus.prototype.standardFontSize = function() {
+        return FTKR.CSS.SpS.comWindow.fontSize;
+    };
+
+    //書き換え
+    //ウィンドウに周囲の余白サイズ
+    Window_ShopStatus.prototype.standardPadding = function() {
+        return FTKR.CSS.SpS.comWindow.padding;
+    };
+
+    //書き換え
+    //ウィンドウ内の1行の高さ
+    Window_ShopStatus.prototype.lineHeight = function() {
+        return FTKR.CSS.SpS.comWindow.lineHeight;
+    };
+
+    //書き換え
+    //ウィンドウの背景の透明度
+    Window_ShopStatus.prototype.standardBackOpacity = function() {
+        return FTKR.CSS.SpS.comWindow.opacity;
+    };
+
+    //書き換え
+    //ウィンドウ枠の表示
+    Window_ShopStatus.prototype._refreshFrame = function() {
+        if (!FTKR.CSS.SpS.comWindow.hideFrame) Window.prototype._refreshFrame.call(this);
+    };
+
+    //=============================================================================
+    // Window_ShopBuy
+    //=============================================================================
+
+    Window_ShopBuy.prototype.setItemStatusWindow = function(statusWindow) {
+        this._itemStatusWindow = statusWindow;
+        this.callUpdateHelp();
+    };
+
+    var _SpS_Window_ShopBuy_updateHelp = Window_ShopBuy.prototype.updateHelp;
+    Window_ShopBuy.prototype.updateHelp = function() {
+        _SpS_Window_ShopBuy_updateHelp.call(this);
+        if (this._itemStatusWindow) {
+            this._itemStatusWindow.setItem(this.item());
+        }
+    };
+
+    //=============================================================================
+    // Window_ShopItemStatus
+    // アイテムステータスウィンドウ
+    //=============================================================================
+
+    function Window_ShopItemStatus() {
+        this.initialize.apply(this, arguments);
+    }
+
+    Window_ShopItemStatus.prototype = Object.create(Window_Base.prototype);
+    Window_ShopItemStatus.prototype.constructor = Window_ShopItemStatus;
+
+    Window_ShopItemStatus.prototype.initialize = function(x, y, width, height) {
+        Window_Base.prototype.initialize.call(this, x, y, width, height);
+        this._item = null;
+        this._actor = null;
+        this._tempActor = null;
+        this._pageIndex = 0;
+        this.refresh();
+    };
+
+    Window_ShopItemStatus.prototype.actorRows = function() {
+        return FTKR.CSS.SpS.itemWindow.actorRows;
+    };
+
+    Window_ShopItemStatus.prototype.pageSize = function() {
+        return FTKR.CSS.SpS.itemWindow.maxCols;
+    };
+
+    Window_ShopItemStatus.prototype.heightSpace = function() {
+        return FTKR.CSS.SpS.itemWindow.hspace;
+    };
+
+    Window_ShopItemStatus.prototype.setTempActor = function(actor) {
+        var tempActor = JsonEx.makeDeepCopy(actor);
+        tempActor.forceChangeEquip(this._item.etypeId - 1, this._item);
+        this._tempActor = tempActor;
+    };
+
+    Window_ShopItemStatus.prototype.evalCssCustomFormula = function(actor, formula) {
+        if (!formula) return '';
+        FTKR.setGameData(actor, this._tempActor, this._item);
+        return FTKR.evalFormula(formula);
+    };
+
+    Window_ShopItemStatus.prototype.drawItem = function(index, w, h) {
+        var lss = DataManager.isWeapon(this._item) ?
+            FTKR.CSS.SpS.weaponStatus :
+            FTKR.CSS.SpS.armorStatus;
+        var actor = $gameParty.members()[index];
+        this.setTempActor(actor);
+        var lineHeight = this.lineHeight() + this.heightSpace();
+        var y = lineHeight * this.actorRows() * (index % this.pageSize());
+        lss.target = this._tempActor;
+        this.drawCssActorStatus(index, actor, 0, y, w, h, lss);
+    };
+
+    Window_ShopItemStatus.prototype.topIndex = function() {
+        return this._pageIndex * this.pageSize();
+    };
+
+    Window_ShopItemStatus.prototype.drawAllItems = function(w, h) {
+        var topIndex = this.topIndex();
+        for (var i = 0; i < this.pageSize(); i++) {
+            var index = topIndex + i;
+            if (index < $gameParty.members().length) {
+                this.drawItem(index, w, h);
+            } else {
+                this.clearCssSprite(index % this.pageSize());
+            }
+        }
+    };
+
+    Window_ShopItemStatus.prototype.refresh = function() {
+        this.contents.clear();
+        if (this._item) {
+            var w = this.width - this.padding * 2;
+            var h = this.height - this.padding * 2;
+            if (this.isEquipItem()) {
+                this.drawAllItems(w, h);
+            } else {
+                this.drawCssActorStatus(0, null, 0, 0, w, h, FTKR.CSS.SpS.itemStatus);
+            }
+        }
+    };
+
+    Window_ShopItemStatus.prototype.setItem = function(item) {
+        this._item = item;
+        this.refresh();
+    };
+
+    Window_ShopItemStatus.prototype.isEquipItem = function() {
+        return DataManager.isWeapon(this._item) || DataManager.isArmor(this._item);
+    };
+
+    Window_ShopItemStatus.prototype.maxPages = function() {
+        return Math.floor(($gameParty.size() + this.pageSize() - 1) / this.pageSize());
+    };
+
+    Window_ShopItemStatus.prototype.update = function() {
+        Window_Base.prototype.update.call(this);
+        this.updatePage();
+    };
+
+    Window_ShopItemStatus.prototype.updatePage = function() {
+        if (this.isPageChangeEnabled() && this.isPageChangeRequested()) {
+            this.changePage();
+        }
+    };
+
+    Window_ShopItemStatus.prototype.isPageChangeEnabled = function() {
+        return this.visible && this.maxPages() >= 2;
+    };
+
+    Window_ShopItemStatus.prototype.isPageChangeRequested = function() {
+        if (Input.isTriggered('shift')) {
+            return true;
+        }
+        if (TouchInput.isTriggered() && this.isTouchedInsideFrame()) {
+            return true;
+        }
+        return false;
+    };
+
+    Window_ShopItemStatus.prototype.isTouchedInsideFrame = function() {
+        var x = this.canvasToLocalX(TouchInput.x);
+        var y = this.canvasToLocalY(TouchInput.y);
+        return x >= 0 && y >= 0 && x < this.width && y < this.height;
+    };
+
+    Window_ShopItemStatus.prototype.changePage = function() {
+        this._pageIndex = (this._pageIndex + 1) % this.maxPages();
+        this.refresh();
+        SoundManager.playCursor();
+    };
+
+    //書き換え
+    //ウィンドウの行数
+    Window_ShopItemStatus.prototype.numVisibleRows = function() {
+        return FTKR.CSS.SpS.itemWindow.numVisibleRows;
+    };
+
+    //書き換え
+    //ウィンドウのフォントサイズ
+    Window_ShopItemStatus.prototype.standardFontSize = function() {
+        return FTKR.CSS.SpS.itemWindow.fontSize;
+    };
+
+    //書き換え
+    //ウィンドウに周囲の余白サイズ
+    Window_ShopItemStatus.prototype.standardPadding = function() {
+        return FTKR.CSS.SpS.itemWindow.padding;
+    };
+
+    //書き換え
+    //ウィンドウ内の1行の高さ
+    Window_ShopItemStatus.prototype.lineHeight = function() {
+        return FTKR.CSS.SpS.itemWindow.lineHeight;
+    };
+
+    //書き換え
+    //ウィンドウの背景の透明度
+    Window_ShopItemStatus.prototype.standardBackOpacity = function() {
+        return FTKR.CSS.SpS.itemWindow.opacity;
+    };
+
+    //書き換え
+    //ウィンドウ枠の表示
+    Window_ShopItemStatus.prototype._refreshFrame = function() {
+        if (!FTKR.CSS.SpS.itemWindow.hideFrame) Window.prototype._refreshFrame.call(this);
+    };
+
+    //=============================================================================
+    // Scene_Shop
+    //=============================================================================
+
+    //書き換え
+    Scene_Shop.prototype.create = function() {
+        Scene_MenuBase.prototype.create.call(this);
+        this.createHelpWindow();
+        this.createGoldWindow();
+        this.createCommandWindow();
+        this.createDummyWindow();
+        this.createNumberWindow();
+        this.createStatusWindow();
+        this.createItemStatusWindow();
+        this.createBuyWindow();
+        this.createCategoryWindow();
+        this.createSellWindow();
+    };
+
+    Scene_Shop.prototype.createItemStatusWindow = function() {
+        var wx = this._numberWindow.width;
+        var wy = this._statusWindow.y + this._statusWindow.height;
+        var ww = Graphics.boxWidth - wx;
+        var wh = Graphics.boxHeight - wy;
+        this._itemStatusWindow = new Window_ShopItemStatus(wx, wy, ww, wh);
+        this._itemStatusWindow.hide();
+        this.addWindow(this._itemStatusWindow);
+    };
+
+    var _SpS_Scene_Shop_createBuyWindow = Scene_Shop.prototype.createBuyWindow;
+    Scene_Shop.prototype.createBuyWindow = function() {
+        _SpS_Scene_Shop_createBuyWindow.call(this);
+        this._buyWindow.setItemStatusWindow(this._itemStatusWindow);
+    };
+
+    var _SpS_Scene_Shop_activateBuyWindow = Scene_Shop.prototype.activateBuyWindow;
+    Scene_Shop.prototype.activateBuyWindow = function() {
+        _SpS_Scene_Shop_activateBuyWindow.call(this);
+        this._itemStatusWindow.show();
+    };
+
+    var _SpS_Scene_Shop_activateSellWindow = Scene_Shop.prototype.activateSellWindow;
+    Scene_Shop.prototype.activateSellWindow = function() {
+        _SpS_Scene_Shop_activateSellWindow.call(this);
+        this._itemStatusWindow.hide();
+    };
+
+    var _SpS_Scene_Shop_onBuyCancel = Scene_Shop.prototype.onBuyCancel;
+    Scene_Shop.prototype.onBuyCancel = function() {
+        _SpS_Scene_Shop_onBuyCancel.call(this);
+        this._itemStatusWindow.hide();
+        this._itemStatusWindow.setItem(null);
+    };
+
+    var _SpS_Scene_Shop_onSellOk = Scene_Shop.prototype.onSellOk;
+    Scene_Shop.prototype.onSellOk = function() {
+        _SpS_Scene_Shop_onSellOk.call(this);
+        this._itemStatusWindow.setItem(this._item);
+        this._itemStatusWindow.show();
+    };
+
+    var _SpS_Scene_Shop_onSellCancel = Scene_Shop.prototype.onSellCancel;
+    Scene_Shop.prototype.onSellCancel = function() {
+        _SpS_Scene_Shop_onSellCancel.call(this);
+        this._itemStatusWindow.setItem(null);
+    };
+
+    var _SpS_Scene_Shop_onNumberOk = Scene_Shop.prototype.onNumberOk;
+    Scene_Shop.prototype.onNumberOk = function() {
+        _SpS_Scene_Shop_onNumberOk.call(this);
+        this._itemStatusWindow.refresh();
+    };
+
+}());//FTKR_CustomSimpleActorStatus.jsが必要

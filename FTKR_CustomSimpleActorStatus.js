@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2017/06/20
-// バージョン : v2.2.0
+// 最終更新日 : 2017/07/23
+// バージョン : v2.3.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.2.0 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v2.3.0 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -807,7 +807,7 @@ FTKR.CSS = FTKR.CSS || {};
  *    :face(x), chara, sv, name, class, nickname, hp, mp, tp, level, 
  *    :state, state2(x), profile, param(x), custom(x), gauge(x), 
  *    :equip(x), text(x), image, eparam(x), agauge(x), cgauge(x)
- *    :eval(x) streval(x) です。
+ *    :eval(x), streval(x), eaop(x) です。
  *    :
  *    :face, face(x) -
  *    : 顔画像を表示します。
@@ -858,6 +858,14 @@ FTKR.CSS = FTKR.CSS || {};
  *    : 5 - 魔法防御、6 - 敏捷性、7 - 運
  *    : 矢印記号は、プラグインパラメータ<Equip Right Arror>で変更できます。
  *    :
+ *    :eaop(x) -
+ *    : 装備画面にて使用可能な、AOPパラメータ(*)表示用コードです。
+ *    : 選択したアイテムを装備した時のパラメータを表示します。
+ *    : AOPパラメータとは、FTKR_AddOriginalParameters.js により作成した
+ *    : オリジナルパラメータのことです。
+ *    : x は AOOPパラメータIDを指定します。
+ *    : 矢印記号は、プラグインパラメータ<Equip Right Arror>で変更できます。
+ *    :
  *    :agauge(x) - 
  *    : アクターのメモ欄で設定したカスタムゲージを表示します。
  *    :
@@ -869,6 +877,9 @@ FTKR.CSS = FTKR.CSS || {};
  *    :
  *    :streval(x) - 
  *    : JS計算式 x を評価して、その結果を文字列で表示します。
+ *    :
+ *    :icon(x) - 
+ *    : JS計算式 x を評価して、その値のアイコンを表示します。
  *    :
  *    :カンマ(,)で区切って複数のパラメータを入力した場合は、
  *    :行を変えてそれぞれのパラメータを表示します。
@@ -1250,6 +1261,13 @@ FTKR.CSS = FTKR.CSS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v2.3.0 - 2017/07/23 : 機能追加
+ *    1. 表示コードの判定部の記述を見直し。
+ *    2. 括弧で数値を指定する表示コードに対して、数値ではなくスクリプトで
+ *       指定できるように修正。
+ *    3. FTKR_AddOriginalParametersで作成したオリジナルパラメータの
+ *       装備パラメータを表示するコード「eaop(x)」を追加。
  * 
  * v2.2.0 - 2017/06/19 : 機能変更、機能追加
  *    1. テキストコードに、JS計算式の評価処理を追加。
@@ -1975,73 +1993,106 @@ FTKR.CSS = FTKR.CSS || {};
         return line;
     };
 
+    /*-------------------------------------------------------------
+    表示コードを判定する関数
+    drawCssActorStatusBase(index, actor, x, y, width, status, lss)
+    index       :アクターの表示番号
+    actor       :アクターオブジェクト
+    x           :描画エリアのx座標
+    y           :描画エリアのy座標
+    width       :描画エリアの幅
+    status    　:描画する表示コード
+    lss         :簡易ステータスオブジェクト
+    -------------------------------------------------------------*/
     Window_Base.prototype.drawCssActorStatusBase = function(index, actor, x, y, width, status, lss) {
         var css = FTKR.CSS.cssStatus;
-        var match = /(.+)\((.+)\)/.exec(status);
+        var match = /([^\(]+)\((.+)\)/.exec(status);
         if (match) {
-            switch(match[1].toUpperCase()) {
-                case 'EPARAM':
-                    return this.drawCssActorEquipParam(actor, x, y, width, Number(match[2]), lss);
-                case 'AGAUGE':
-                    return this.drawCssActorCustomGauge(actor, x, y, width, Number(match[2]));
-                case 'CGAUGE':
-                    return this.drawCssClassCustomGauge(actor, x, y, width, Number(match[2]));
-                case 'PARAM':
-                    return this.drawCssActorParam(actor, x, y, width, Number(match[2]));
-                case 'CUSTOM':
-                    var customId = Number(match[2]);
-                    return this.drawCssActorCustom(actor, x, y, width, css.customs[customId]);
-                case 'GAUGE':
-                    var gaugeId = Number(match[2]);
-                    return this.drawCssActorGauge(actor, x, y, width, css.gauges[gaugeId]);
-                case 'EQUIP':
-                    return this.drawCssActorEquip(actor, x, y, width, Number(match[2]));
-                case 'TEXT':
-                    return this.drawCssText(actor, x, y, width, match[2]);
-                case 'STATE2':
-                    return this.drawCssActorIcons(index, actor, x, y, width, Number(match[2]));
-                case 'FACE':
-                    return this.drawCssActorFace(actor, x, y, width, lss, Number(match[2]));
-                case 'STREVAL':
-                    return this.drawCssEval(actor, x, y, width, match[2], false);
-                case 'EVAL':
-                    return this.drawCssEval(actor, x, y, width, match[2], true);
-                case 'IMAGE':
-                    return this.drawCssActorImage(actor, x, y, width, Number(match[2]));
-            }
+            return this.drawCssActorStatusBase_A(index, actor, x, y, width, match, lss, css);
         } else {
-            switch (status.toUpperCase()) {
-                case 'FACE':
-                    return this.drawCssActorFace(actor, x, y, width, lss);
-                case 'CHARA':
-                    return this.drawCssActorChara(actor, x, y, width, css.chara);
-                case 'SV':
-                    return this.drawCssActorSvChara(index, actor, x, y, width, css.svChara);
-                case 'NICKNAME':
-                    return this.drawCssActorNickname(actor, x, y, width);
-                case 'NAME':
-                    return this.drawCssActorName(actor, x, y, width);
-                case 'LEVEL':
-                    return this.drawCssActorLevel(actor, x, y, width);
-                case 'HP':
-                    return this.drawCssActorHp(actor, x, y, width);
-                case 'MP':
-                    return this.drawCssActorMp(actor, x, y, width);
-                case 'TP':
-                    return this.drawCssActorTp(actor, x, y, width);
-                case 'CLASS':
-                    return this.drawCssActorClass(actor, x, y, width);
-                case 'STATE':
-                    return this.drawCssActorIcons(index, actor, x, y, width);
-                case 'PROFILE':
-                    return this.drawCssProfile(actor, x, y, width);
-                case 'IMAGE':
-                    return this.drawCssActorImage(actor, x, y, width, 0);
-                case 'MESSAGE':
-                    return this.drawCssActorMessage(actor, x, y, width);
-            }
+            return this.drawCssActorStatusBase_B(index, actor, x, y, width, status, lss, css);
         }
-        return 1;
+    };
+
+    // 括弧で表示する内容を指定する表示コード
+    Window_Base.prototype.drawCssActorStatusBase_A = function(index, actor, x, y, width, match, lss, css) {
+        switch(match[1].toUpperCase()) {
+            case 'STREVAL':
+                return this.drawCssEval(actor, x, y, width, match[2], false);
+            case 'EVAL':
+                return this.drawCssEval(actor, x, y, width, match[2], true);
+            case 'TEXT':
+                return this.drawCssText(actor, x, y, width, match[2]);
+            default:
+                match[2] = this.evalCssCustomFormula(actor, match[2]);
+                return this.drawCssActorStatusBase_A1(index, actor, x, y, width, match, lss, css);
+        }
+    };
+
+    // 括弧で表示する内容を指定する表示コード(括弧内をevalで計算させる場合)
+    Window_Base.prototype.drawCssActorStatusBase_A1 = function(index, actor, x, y, width, match, lss, css) {
+        switch(match[1].toUpperCase()) {
+            case 'EPARAM':
+                return this.drawCssActorEquipParam(actor, x, y, width, match[2], lss);
+            case 'EAOP':
+                return this.drawCssActorEquipAopParam(actor, x, y, width, match[2], lss);
+            case 'AGAUGE':
+                return this.drawCssActorCustomGauge(actor, x, y, width, match[2]);
+            case 'CGAUGE':
+                return this.drawCssClassCustomGauge(actor, x, y, width, match[2]);
+            case 'PARAM':
+                return this.drawCssActorParam(actor, x, y, width, match[2]);
+            case 'CUSTOM':
+                return this.drawCssActorCustom(actor, x, y, width, css.customs[match[2]]);
+            case 'GAUGE':
+                return this.drawCssActorGauge(actor, x, y, width, css.gauges[match[2]]);
+            case 'EQUIP':
+                return this.drawCssActorEquip(actor, x, y, width, match[2]);
+            case 'STATE2':
+                return this.drawCssActorIcons(index, actor, x, y, width, match[2]);
+            case 'FACE':
+                return this.drawCssActorFace(actor, x, y, width, lss, match[2]);
+            case 'IMAGE':
+                return this.drawCssActorImage(actor, x, y, width, match[2]);
+            default:
+                return 1;
+        }
+    };
+
+    // 括弧を使わない表示コード
+    Window_Base.prototype.drawCssActorStatusBase_B = function(index, actor, x, y, width, status, lss, css) {
+        switch (status.toUpperCase()) {
+            case 'FACE':
+                return this.drawCssActorFace(actor, x, y, width, lss);
+            case 'CHARA':
+                return this.drawCssActorChara(actor, x, y, width, css.chara);
+            case 'SV':
+                return this.drawCssActorSvChara(index, actor, x, y, width, css.svChara);
+            case 'NICKNAME':
+                return this.drawCssActorNickname(actor, x, y, width);
+            case 'NAME':
+                return this.drawCssActorName(actor, x, y, width);
+            case 'LEVEL':
+                return this.drawCssActorLevel(actor, x, y, width);
+            case 'HP':
+                return this.drawCssActorHp(actor, x, y, width);
+            case 'MP':
+                return this.drawCssActorMp(actor, x, y, width);
+            case 'TP':
+                return this.drawCssActorTp(actor, x, y, width);
+            case 'CLASS':
+                return this.drawCssActorClass(actor, x, y, width);
+            case 'STATE':
+                return this.drawCssActorIcons(index, actor, x, y, width);
+            case 'PROFILE':
+                return this.drawCssProfile(actor, x, y, width);
+            case 'IMAGE':
+                return this.drawCssActorImage(actor, x, y, width, 0);
+            case 'MESSAGE':
+                return this.drawCssActorMessage(actor, x, y, width);
+            default:
+                return 1;
+        }
     };
 
     //------------------------------------------------------------------------
@@ -2461,9 +2512,28 @@ FTKR.CSS = FTKR.CSS || {};
         if (paramId < 0 && paramId > 7) return 0;
         this.drawTextEx(FTKR.CSS.cssStatus.equip.arrow, x, y);
         var target = lss.target;
-        if(target) {
+        var item = FTKR.gameData.item;
+        if(target && item && actor.canEquip(item)) {
             var newValue = target.param(paramId);
             var diffvalue = newValue - actor.param(paramId);
+            this.changeTextColor(this.paramchangeTextColor(diffvalue));
+            this.drawText(newValue, x, y, width, 'right');
+        }
+        return 1;
+    };
+
+    //------------------------------------------------------------------------
+    //指定したアイテムを装備した時のAOPパラメータの表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorEquipAopParam = function(actor, x, y, width, paramId, lss) {
+        if (!Imported.FTKR_AOP) return 1;
+        if (paramId < 0 && FTKR.AOP.useParamNum > 7) return 1;
+        this.drawTextEx(FTKR.CSS.cssStatus.equip.arrow, x, y);
+        var target = lss.target;
+        var item = FTKR.gameData.item;
+        if(target && item && actor.canEquip(item)) {
+            var newValue = target.aopParam(paramId);
+            var diffvalue = newValue - actor.aopParam(paramId);
             this.changeTextColor(this.paramchangeTextColor(diffvalue));
             this.drawText(newValue, x, y, width, 'right');
         }

@@ -3,8 +3,8 @@
 // FTKR_CSS_EquipStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/05/13
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2017/07/23
+// バージョン : v1.0.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 FTKR.CSS.ES = FTKR.CSS.ES || {};
 
 /*:
- * @plugindesc v1.0.0 装備画面のステータスレイアウトを変更する
+ * @plugindesc v1.0.2 装備画面のステータスレイアウトを変更する
  * @author フトコロ
  *
  * @param --レイアウト設定--
@@ -43,6 +43,7 @@ FTKR.CSS.ES = FTKR.CSS.ES || {};
  * @param Actor Status Space In Text
  * @desc Text内で複数表示する場合の間隔を指定します。
  * @default 5
+ * @number
  * 
  * @param Actor Status Width Rate
  * @desc Text1~Text3の表示幅の比率を指定します。
@@ -56,31 +57,38 @@ FTKR.CSS.ES = FTKR.CSS.ES || {};
  * @desc ウィンドウのレイアウト変更機能を使うか。
  * 0 - 無効, 1 - 有効
  * @default 0
+ * @number
  * 
  * @param Number Visible Rows
  * @desc ステータスウィンドウの縦の行数
  * @default 7
+ * @number
  * 
  * @param Font Size
  * @desc フォントサイズ
  * @default 28
+ * @number
  * 
  * @param Window Padding
  * @desc ウィンドウの周囲の余白
  * @default 18
+ * @number
  * 
  * @param Window Line Height
  * @desc ウィンドウ内の1行の高さ
  * @default 36
+ * @number
  * 
  * @param Window Opacity
  * @desc ウィンドウ内の背景の透明度
  * @default 192
+ * @number
  * 
  * @param Hide Window Frame
  * @desc ウィンドウ枠を非表示にするか
  * 1 - 非表示にする、0 - 表示する
  * @default 0
+ * @number
  * 
  * @help 
  *-----------------------------------------------------------------------------
@@ -125,6 +133,18 @@ FTKR.CSS.ES = FTKR.CSS.ES || {};
  * 
  * 矢印記号を別のものに変えたい場合は、FTKR_CustomSimpleActorStatus.jsの
  * プラグインパラメータ<Equip Right Arrow>で指定してください。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * カスタムパラメータおよびカスタムゲージの計算式(eval)に使用できるコード
+ *-----------------------------------------------------------------------------
+ * 選択中の武器または防具を装備した時のパラメータは b.param で参照できます。
+ * 
+ * 補足)
+ * a.param は現在装備中のパラメータを参照する
+ * 
+ * よって、以下のコードで攻撃力の差分を取得できます。
+ *   b.atk - a.atk
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -195,95 +215,108 @@ FTKR.CSS.ES = FTKR.CSS.ES || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.2 - 2017/07/23 : 不具合修正
+ *    1. ウィンドウの設定が反映されない不具合を修正。
+ * 
+ * v1.0.1 - 2017/05/17 : 機能追加
+ *    1. 選択中の武器または防具を装備した時のパラメータを参照する機能を追加。
+ * 
  * v1.0.0 - 2017/05/13 : 初版作成
  * 
  *-----------------------------------------------------------------------------
 */
 //=============================================================================
 
-if (Imported.FTKR_CSS){
+if (Imported.FTKR_CSS) (function() {
 
-//=============================================================================
-// プラグイン パラメータ
-//=============================================================================
-FTKR.CSS.ES.parameters = PluginManager.parameters('FTKR_CSS_EquipStatus');
+    //=============================================================================
+    // プラグイン パラメータ
+    //=============================================================================
+    var parameters = PluginManager.parameters('FTKR_CSS_EquipStatus');
 
-//簡易ステータスオブジェクト
-FTKR.CSS.ES.simpleStatus = {
-    text1:String(FTKR.CSS.ES.parameters['Actor Status Text1'] || ''),
-    text2:String(FTKR.CSS.ES.parameters['Actor Status Text2'] || ''),
-    text3:String(FTKR.CSS.ES.parameters['Actor Status Text3'] || ''),
-    space:String(FTKR.CSS.ES.parameters['Actor Status Space'] || ''),
-    spaceIn:Number(FTKR.CSS.ES.parameters['Actor Status Space In Text'] || 0),
-    widthRate:String(FTKR.CSS.ES.parameters['Actor Status Width Rate'] || ''),
-    target:null,
-};
+    //簡易ステータスオブジェクト
+    FTKR.CSS.ES.simpleStatus = {
+        text1     :String(parameters['Actor Status Text1'] || ''),
+        text2     :String(parameters['Actor Status Text2'] || ''),
+        text3     :String(parameters['Actor Status Text3'] || ''),
+        space     :String(parameters['Actor Status Space'] || ''),
+        spaceIn   :Number(parameters['Actor Status Space In Text'] || 0),
+        widthRate :String(parameters['Actor Status Width Rate'] || ''),
+        target    :null,
+    };
 
-FTKR.CSS.ES.window = {
-    enabled:Number(FTKR.CSS.ES.parameters['Enabled Custom Window'] || 0),
-    numVisibleRows:Number(FTKR.CSS.ES.parameters['Number Visible Rows'] || 0),
-    maxCols:Number(FTKR.CSS.ES.parameters['Number Max Cols'] || 0),
-    fontSize:Number(FTKR.CSS.ES.parameters['Font Size'] || 0),
-    padding:Number(FTKR.CSS.ES.parameters['Window Padding'] || 0),
-    lineHeight:Number(FTKR.CSS.ES.parameters['Window Line Height'] || 0),
-    opacity:Number(FTKR.CSS.ES.parameters['Window Opacity'] || 0),
-    hideFrame:Number(FTKR.CSS.ES.parameters['Hide Window Frame'] || 0),
-    cursolHeight:Number(FTKR.CSS.ES.parameters['Cursol Line Number'] || 0),
-};
+    FTKR.CSS.ES.window = {
+        enabled       :Number(parameters['Enabled Custom Window'] || 0),
+        numVisibleRows:Number(parameters['Number Visible Rows'] || 0),
+        maxCols       :Number(parameters['Number Max Cols'] || 0),
+        fontSize      :Number(parameters['Font Size'] || 0),
+        padding       :Number(parameters['Window Padding'] || 0),
+        lineHeight    :Number(parameters['Window Line Height'] || 0),
+        opacity       :Number(parameters['Window Opacity'] || 0),
+        hideFrame     :Number(parameters['Hide Window Frame'] || 0),
+        cursolHeight  :Number(parameters['Cursol Line Number'] || 0),
+    };
 
-//=============================================================================
-// Window_EquipStatus
-//=============================================================================
+    //=============================================================================
+    // Window_EquipStatus
+    //=============================================================================
 
-//書き換え
-Window_EquipStatus.prototype.refresh = function() {
-    this.contents.clear();
-    if (this._actor) {
-        var w = this.width - this.padding * 2;
-        var h = this.height - this.padding * 2;
-        FTKR.CSS.ES.simpleStatus.target = this._tempActor;
-        this.drawCssActorStatus(0, this._actor, 0, 0, w, h, FTKR.CSS.ES.simpleStatus);
-    }
-};
+    //書き換え
+    Window_EquipStatus.prototype.evalCssCustomFormula = function(actor, formula) {
+        if (!formula) return '';
+        FTKR.setGameData(actor, this._tempActor);
+        return FTKR.evalFormula(formula);
+    };
 
-if(FTKR.CSS.ES.window.enabled) {
+    //書き換え
+    Window_EquipStatus.prototype.refresh = function() {
+        this.contents.clear();
+        if (this._actor) {
+            var w = this.width - this.padding * 2;
+            var h = this.height - this.padding * 2;
+            FTKR.CSS.ES.simpleStatus.target = this._tempActor;
+            this.drawCssActorStatus(0, this._actor, 0, 0, w, h, FTKR.CSS.ES.simpleStatus);
+        }
+    };
 
-//書き換え
-//ウィンドウの行数
-Window_BattleStatus.prototype.numVisibleRows = function() {
-    return FTKR.CSS.ES.window.numVisibleRows;
-};
+    if(FTKR.CSS.ES.window.enabled) {
 
-//書き換え
-//ウィンドウのフォントサイズ
-Window_BattleStatus.prototype.standardFontSize = function() {
-    return FTKR.CSS.ES.window.fontSize;
-};
+    //書き換え
+    //ウィンドウの行数
+    Window_EquipStatus.prototype.numVisibleRows = function() {
+        return FTKR.CSS.ES.window.numVisibleRows;
+    };
 
-//書き換え
-//ウィンドウに周囲の余白サイズ
-Window_BattleStatus.prototype.standardPadding = function() {
-    return FTKR.CSS.ES.window.padding;
-};
+    //書き換え
+    //ウィンドウのフォントサイズ
+    Window_EquipStatus.prototype.standardFontSize = function() {
+        return FTKR.CSS.ES.window.fontSize;
+    };
 
-//書き換え
-//ウィンドウ内の1行の高さ
-Window_BattleStatus.prototype.lineHeight = function() {
-    return FTKR.CSS.ES.window.lineHeight;
-};
+    //書き換え
+    //ウィンドウに周囲の余白サイズ
+    Window_EquipStatus.prototype.standardPadding = function() {
+        return FTKR.CSS.ES.window.padding;
+    };
 
-//書き換え
-//ウィンドウの背景の透明度
-Window_BattleStatus.prototype.standardBackOpacity = function() {
-    return FTKR.CSS.ES.window.opacity;
-};
+    //書き換え
+    //ウィンドウ内の1行の高さ
+    Window_EquipStatus.prototype.lineHeight = function() {
+        return FTKR.CSS.ES.window.lineHeight;
+    };
 
-//書き換え
-//ウィンドウ枠の表示
-Window_BattleStatus.prototype._refreshFrame = function() {
-    if (!FTKR.CSS.ES.window.hideFrame) Window.prototype._refreshFrame.call(this);
-};
+    //書き換え
+    //ウィンドウの背景の透明度
+    Window_EquipStatus.prototype.standardBackOpacity = function() {
+        return FTKR.CSS.ES.window.opacity;
+    };
 
-}//ウィンドウカスタム有効
+    //書き換え
+    //ウィンドウ枠の表示
+    Window_EquipStatus.prototype._refreshFrame = function() {
+        if (!FTKR.CSS.ES.window.hideFrame) Window.prototype._refreshFrame.call(this);
+    };
 
-};//FTKR_CustomSimpleActorStatus.jsが必要
+    }//ウィンドウカスタム有効
+
+}());//FTKR_CustomSimpleActorStatus.jsが必要
