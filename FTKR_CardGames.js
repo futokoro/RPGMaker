@@ -3,8 +3,8 @@
 // FTKR_CardGames.js
 // 作成者     : フトコロ
 // 作成日     : 2017/07/02
-// 最終更新日 : 2017/07/22
-// バージョン : v1.1.1
+// 最終更新日 : 2017/07/29
+// バージョン : v1.2.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CRD = FTKR.CRD || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.1 トランプカードゲーム
+ * @plugindesc v1.2.0 トランプカードゲーム
  * @author フトコロ
  *
  * @param --カードの設定--
@@ -242,7 +242,7 @@ FTKR.CRD = FTKR.CRD || {};
  * 
  * @param Hand Width
  * @desc 手札カードの表示幅を設定します。
- * @default 432
+ * @default 408
  * @type number
  *
  * @param Hand Height
@@ -324,6 +324,14 @@ FTKR.CRD = FTKR.CRD || {};
  * @dir img/pictures/
  * @type file
  *
+ * @param --イベントの設定--
+ * @default
+ * 
+ * @param Card Game Events
+ * @desc カードゲーム中に実行するコモンイベントのIDを設定します。
+ * 0 - 実行しない、カンマ(,)で区切って複数設定できます
+ * @default 0
+ * 
  * @param --デバッグ用--
  * @default
  * 
@@ -393,8 +401,6 @@ FTKR.CRD = FTKR.CRD || {};
  * 以下のトランプゲームで遊べます。
  * 
  *    1. ババ抜き(2～4人まで)
- * 
- * 当プラグインは試作版です。
  * 
  *-----------------------------------------------------------------------------
  * 設定方法
@@ -604,6 +610,95 @@ FTKR.CRD = FTKR.CRD || {};
  * 
  * 
  *-----------------------------------------------------------------------------
+ * カードゲーム中のコモンイベントについて
+ *-----------------------------------------------------------------------------
+ * プラグインパラメータ<Card Game Event>にコモンイベントIDを設定すると
+ * カードゲーム中にコモンイベントを実行できます。
+ * 
+ * プラグインパラメータ<Card Game Event>には、カンマ(,)とハイフン(-)を使うことで
+ * 複数のコモンイベントIDを設定できます。
+ * ハイフン(-)は、繋げた前後のIDの間のすべてのIDを登録します。
+ * 
+ * 入力例)
+ * 　1, 4, 5, 10-15
+ * 
+ * 複数のイベントIDを入力した場合、入力した順番(左から)に実行条件を
+ * 判定して、条件を満たしていればそのイベントを実行します。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * カードゲーム中のコモンイベントの実行条件の設定
+ *-----------------------------------------------------------------------------
+ * コモンイベントに以下の注釈を入力することで、実行条件を設定できます。
+ * 
+ * <スパン: [タイミング]>
+ * <SPAN: [TIMING]>
+ * 実行回数に関する条件を設定します。
+ * スパンを指定しない場合は、この設定を適用します。
+ * [タイミング] には以下を入力してください。
+ * 　ゲーム or GAME　　   - ゲーム中に１回だけ実行します。
+ * 　ターン or TURN　　   - ターン中に１回だけ実行します。
+ * 　モーメント or MOMENT - 条件を満たす度に実行します。
+ * 
+ * 
+ * <ターン終了>
+ * <TURNEND>
+ * ターン終了時に実行します。
+ * 
+ * <カード引く>
+ * <DRAWCARD>
+ * カードを引いた時に実行します。
+ * 
+ * <アクター:a>
+ * <ACTOR:a>
+ * アクターID a のターンに実行します。
+ * 
+ * <ターン:a + b *X>
+ * <TURN:a + b *X>
+ * 指定したターンに実行します。
+ * a と b に数値を入力してください。(* と X は半角, XはそのままXと入力)
+ * 　a - 最初に実行するターン数
+ * 　b - 次に何ターン後に実行するか(以降この値のターンが経過する毎に実行)
+ * 　例)
+ * 　　<ターン:1 + 2 *X>
+ * 　　<TURN:2 + 4 *X>
+ * 
+ * <カード枚数: #a b 枚以下>
+ * <CARD_NUMBERS: #a LESS THAN b>
+ * 指定したプレイヤーのカード枚数によって実行します。
+ * a と b に数値を入力してください。
+ * a と b の間には必ず半角スペースを入れてください。
+ * 　a - プレイヤーNo(1~4)
+ * 　b - 残りカード枚数
+ * 　例)
+ * 　　<カード枚数: #1 5 枚以下>
+ * 　　<CARD_NUMBERS: #2 LESS THAN 7>
+ * 
+ * <スイッチ: a>
+ * <SWITCH: a>
+ * 指定したスイッチがONの時に実行します。
+ * a に数値を入力してください。
+ * 　a - スイッチID
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * コモンイベントで使用できるスクリプト
+ *-----------------------------------------------------------------------------
+ * コモンイベントには以下のスクリプトが使用できます。
+ * 
+ * CardGameManager._turnCount
+ *    :ターン数
+ * 
+ * CardGameManager.drawCard()
+ *    :引いたカードの情報
+ *    : CardGameManager.drawCard().suit - カードのスート(マーク)
+ *    : CardGameManager.drawCard().rank - カードのランク
+ * 
+ * CardGameManager.isDrawJoker()
+ *    :ジョーカーを引いたかどうか判定する
+ * 
+ * 
+ *-----------------------------------------------------------------------------
  * 本プラグインのライセンスについて(License)
  *-----------------------------------------------------------------------------
  * 本プラグインはMITライセンスのもとで公開しています。
@@ -613,6 +708,9 @@ FTKR.CRD = FTKR.CRD || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.2.0 - 2017/07/29 : 機能追加
+ *    1. カードゲーム中にコモンイベントを実行する機能を追加。
  * 
  * v1.1.1 - 2017/07/22 : 機能追加
  *    1. カードを配る時とペアを捨てる時にカードに動きをつける機能を追加。
@@ -666,6 +764,10 @@ FTKR.CRD = FTKR.CRD || {};
 */
 //=============================================================================
 
+function CardGameManager() {
+    throw new Error('This is a static class');
+}
+
 (function() {
 
     //配列の要素を、すべて数値に変換する。
@@ -674,6 +776,21 @@ FTKR.CRD = FTKR.CRD || {};
           return Number(elm);
       });
     }
+
+    var splitConvertNumber = function(param) {
+        var results = [];
+        (param + '').split(',').forEach( function(split){
+            match = /[ ]*(\d+)[ ]*-[ ]*(\d+)/.exec(split);
+            if (match) {
+                for (var i = Number(match[1]); i <= Number(match[2]); i++) {
+                    results.push(i);
+                }
+            } else {
+                if(!isNaN(split)) results.push(Number(split));
+            }
+        });
+        return results;
+    };
 
     //=============================================================================
     // プラグイン パラメータ
@@ -763,6 +880,7 @@ FTKR.CRD = FTKR.CRD || {};
             back       :String(parameters['Back Image'] || ''),
             background :String(parameters['Background Image'] || ''),
         },
+        cardEvents     :splitConvertNumber(parameters['Card Game Events']),
         debug:{
             open       :Number(parameters['Open Card Mode'] || 0),
         }
@@ -1029,6 +1147,7 @@ FTKR.CRD = FTKR.CRD || {};
         switch (command) {
             case 'カードゲーム表示':
             case 'OPEN_CARDGAME':
+                CardGameManager.setGameType(0);
                 CardGameManager.saveBgmAndBgs();
                 CardGameManager.stopAudioOnStart();
                 SceneManager.push(Scene_CRD);
@@ -1049,9 +1168,34 @@ FTKR.CRD = FTKR.CRD || {};
     // カードゲームマネージャー
     //=============================================================================
 
-    function CardGameManager() {
-        throw new Error('This is a static class');
-    }
+    CardGameManager.initMembers = function() {
+        this._interpreter = new Game_Interpreter();
+        this._phase = 'init';
+        this._type = 0;
+        this._turnCount = 0;
+        this._mapBgm = null;
+        this._mapBgs = null;
+    };
+
+    CardGameManager.clearEventFlags = function() {
+        this._commonEventFlags = [];
+        var eventIds = FTKR.CRD.cardEvents;
+        eventIds.forEach( function(id, i) {
+            this._commonEventFlags[i] = false;
+        },this);
+    };
+
+    CardGameManager.setHandWindows = function(windows) {
+        this._handWindows = windows;
+    };
+
+    CardGameManager.setGameType = function(type){
+        this._type = type || 0;
+    };
+    
+    CardGameManager.gameType = function() {
+        return this._type;
+    };
 
     CardGameManager.saveBgmAndBgs = function() {
         this._mapBgm = AudioManager.saveBgm();
@@ -1081,6 +1225,225 @@ FTKR.CRD = FTKR.CRD || {};
         if (this._mapBgs) {
             AudioManager.replayBgs(this._mapBgs);
         }
+    };
+
+    CardGameManager.increaseTurn = function() {
+        var eventIds = FTKR.CRD.cardEvents;
+        for (var i = 0; i < eventIds.length; i++) {
+            if (eventIds[i]) {
+                var event = $dataCommonEvents[eventIds[i]];
+                if (this.commonEventSpan(event) === 1) {
+                    this._commonEventFlags[i] = false;
+                }
+            }
+        }
+    };
+
+    CardGameManager.updateEvent = function(phase) {
+        switch (phase) {
+            case 'turnStart':
+            case 'select':
+            case 'draw':
+            case 'checkPair':
+            case 'disCard':
+            case 'turnEnd':
+                return this.updateInterpreter();
+        }
+        return false;
+    };
+
+    CardGameManager.updateInterpreter = function() {
+        this._interpreter.update();
+        if (this._interpreter.isRunning()) {
+            return true;
+        }
+        this.setupStartingEvent()
+        if (this._interpreter.isRunning()) {
+            return true;
+        }
+        return false;
+    };
+
+   CardGameManager.setupStartingEvent = function() {
+        if (this._interpreter.setupReservedCommonEvent()) {
+            return;
+        }
+        var eventIds = FTKR.CRD.cardEvents;
+        for (var i = 0; i < eventIds.length; i++) {
+            if (eventIds[i]) {
+                var event = $dataCommonEvents[eventIds[i]];
+                if (this.meetsCommonEventCommentConditions(event) && !this._commonEventFlags[i]) {
+                    this._interpreter.setup(event.list, this.subjectId());
+                    if (this.commonEventSpan(event) <= 1) {
+                        this._commonEventFlags[i] = true;
+                    }
+                    break;
+                }
+            }
+        }
+    };
+
+    CardGameManager.commonEventSpan = function(event) {
+        for (var v = 0; v < event.list.length; v++) {
+            var list = event.list[v];
+            if (list && ([108, 408].contains(list.code))) {
+                var match = /<([^<>:]+)(:?)([^>]*)>/g.exec(list.parameters[0]);
+                switch((match[1] + '').toUpperCase()) {
+                    case 'スパン':
+                    case 'SPAN':
+                        switch((match[3] + '').toUpperCase()) {
+                            case 'ゲーム':
+                            case 'GAME':
+                                return 0;
+                            case 'ターン':
+                            case 'TURN':
+                                return 1;
+                            case 'モーメント':
+                            case 'MOMENT':
+                                return 2;
+                        }
+                }
+            }
+        }
+        return 0;
+    };
+
+    CardGameManager.meetsCommonEventCommentConditions = function(event) {
+        return this.meetsConditions(this.convertCommonEventConditions(event));
+    };
+
+    CardGameManager.convertCommonEventConditions = function(event) {
+        var conditions = {};
+        var code = false;
+        for (var i = 0; i < event.list.length; i++) {
+            var list = event.list[i];
+            if (list && ([108, 408].contains(list.code))) {
+                var match = /<([^<>:]+)(:?)([^>]*)>/g.exec(list.parameters[0]);
+                if (match) {
+                    switch((match[1] + '').toUpperCase()){
+                        case 'ターン終了':
+                        case 'TURNEND':
+                            conditions.turnEnding = true;
+                            break;
+                        case 'カード引く':
+                        case 'DRAWCARD':
+                            conditions.drawCarding = true;
+                            break;
+                        case 'アクター':
+                        case 'ACTOR':
+                            if (match[2] === ':') {
+                                conditions.actorValid = true;
+                                conditions.actorId = Number(match[3]);
+                            }
+                            break;
+                        case 'ターン':
+                        case 'TURN':
+                            if (match[2] === ':') {
+                                var turn = /(\d+)[ ]*\+[ ]*(\d+)[ ]*\*X/i.exec(match[3]);
+                                if (turn) {
+                                    conditions.turnValid = true;
+                                    conditions.turnA = Number(turn[1]);
+                                    conditions.turnB = Number(turn[2]);
+                                }
+                            }
+                            break;
+                        case 'カード枚数':
+                        case 'CARD_NUMBERS':
+                            if (match[2] === ':') {
+                                var value = /#(\d+)[ ]*(\d+)[ ]*枚以下/i.exec(match[3]);
+                                if (!value) value = /#(\d+)[ ]*less[ ]than[ ]*(\d+)[ ]*/i.exec(match[3]);
+                                if (value) {
+                                    conditions.cardValid = true;
+                                    conditions.actorId = Number(value[1]) - 1;
+                                    conditions.cardNum = Number(value[2]);
+                                }
+                            }
+                            break;
+                        case 'スイッチ':
+                        case 'SWITCH':
+                            if (match[2] === ':') {
+                                conditions.switchValid = true;
+                                conditions.switchId = Number(match[3]);
+                            }
+                            break;
+                    }
+                }
+            }
+        }
+        var page = {conditions:conditions};
+        return page;
+    };
+
+    CardGameManager.phase = function() {
+        return SceneManager._scene._phase;
+    };
+
+    CardGameManager.drawCard = function() {
+        return SceneManager._scene._hand;
+    };
+
+    CardGameManager.isDrawJoker = function() {
+        return this.drawCard() && this.drawCard().suit === 'joker';
+    };
+
+    CardGameManager.isTurnEnd = function() {
+        return this.phase() === 'turnEnd';
+    };
+
+    CardGameManager.isDrawCard = function() {
+        return this.phase() === 'checkPair';
+    };
+
+    CardGameManager.subjectId = function() {
+        return SceneManager._scene._subjectId;
+    };
+
+    CardGameManager.meetsConditions = function(page) {
+        var c = page.conditions;
+        if (!c.turnEnding && !c.drawCarding &&
+              !c.turnValid && !c.actorValid &&
+              !c.cardValid && !c.switchValid) {
+            return false;  // Conditions not set
+        }
+        if (c.turnEnding) {
+            if (!this.isTurnEnd()) {
+                return false;
+            }
+        }
+        if (c.drawCarding) {
+            if (!this.isDrawCard()) {
+                return false;
+            }
+        }
+        if (c.actorValid) {
+            var actor = $gameCardData.players()[this.subjectId()];
+            if (!actor || actor !== c.actorId) {
+                return false;
+            }
+        }
+        if (c.turnValid) {
+            var n = this._turnCount;
+            var a = c.turnA;
+            var b = c.turnB;
+            if ((b === 0 && n !== a)) {
+                return false;
+            }
+            if ((b > 0 && (n < 1 || n < a || n % b !== a % b))) {
+                return false;
+            }
+        }
+        if (c.cardValid) {
+            var actor = this._handWindows[c.actorId];
+            if (!actor || actor.cardNum() > c.cardNum) {
+                return false;
+            }
+        }
+        if (c.switchValid) {
+            if (!$gameSwitches.value(c.switchId)) {
+                return false;
+            }
+        }
+        return true;
     };
 
     //=============================================================================
@@ -1271,6 +1634,7 @@ FTKR.CRD = FTKR.CRD || {};
     Scene_CRD.prototype.initMembers = function() {
         this.clearGame();
         this.clearVariables();
+        CardGameManager.initMembers();
         CardGameManager.playGameBgm();
         $gameCardData.resetPlayerPoints();
         this.setPlayerCharacteristics();
@@ -1280,6 +1644,8 @@ FTKR.CRD = FTKR.CRD || {};
 
     Scene_CRD.prototype.clearGame = function() {
         ImageManager.loadCardImages();
+        CardGameManager.clearEventFlags();
+        CardGameManager._turnCount = 0;
         this._gameEnd = false;
         this._hand = null;
         this._endPeople = 0;
@@ -1475,11 +1841,6 @@ FTKR.CRD = FTKR.CRD || {};
         this._phase = 'deal';
     };
 
-    Scene_CRD.prototype.update = function() {
-        this.updatePhase();
-        Scene_MenuBase.prototype.update.call(this);
-    };
-
     Scene_CRD.prototype.create = function() {
         Scene_MenuBase.prototype.create.call(this);
         this.setPlayer();
@@ -1502,6 +1863,7 @@ FTKR.CRD = FTKR.CRD || {};
         this.createMessageBoxWindow();
         this.createDialogueWindows();
         this.createCommandBoxWindow();
+        this.createMessageWindow();
     };
 
     Scene_CRD.prototype.createDummyWindow = function() {
@@ -1528,6 +1890,7 @@ FTKR.CRD = FTKR.CRD || {};
                 this.createHandWindowRight(3);
                 break;
         }
+        CardGameManager.setHandWindows(this._handWindows);
     };
 
     Scene_CRD.prototype.createHandWindowBottom = function(index) {
@@ -1594,6 +1957,16 @@ FTKR.CRD = FTKR.CRD || {};
         }
     };
 
+    Scene_CRD.prototype.createActorWindowSide = function(index, x, y) {
+        var wh = Window_Base._faceHeight / 2 + this._dummyWindow.standardPadding() * 2;
+        var ww = Window_Base._faceHeight + this._dummyWindow.standardPadding() * 2;
+        var wx = (Graphics.boxWidth - ww) * x;
+        var wy = (Graphics.boxHeight - wh) * y;
+        var actor = this.player(index);
+        this._actorWindows[index] = new Window_PlayerStatus(actor, index, wx, wy, ww, wh);
+        this.addWindow(this._actorWindows[index]);
+    };
+
     Scene_CRD.prototype.createActorWindowBottom = function(index) {
         var wh = Window_Base._faceHeight / 2 + this._dummyWindow.standardPadding() * 2;
         var ww = Window_Base._faceHeight + this._dummyWindow.standardPadding() * 2;
@@ -1634,6 +2007,30 @@ FTKR.CRD = FTKR.CRD || {};
         this.addWindow(this._actorWindows[index]);
     };
 
+    Scene_CRD.prototype.createFieldWindows = function() {
+        this._fieldWindows = [];
+        this._suitIds = {};
+        if (CardGameManager.gameType()) {
+            $gameCardData.suits().forEach( function(suit, i){
+                this.createFieldWindow(i);
+                this._suitIds[suit] = i;
+            },this);
+        }
+    };
+
+    Scene_CRD.prototype.suitId = function(suit) {
+        return this._suitIds[suit];
+    };
+
+    Scene_CRD.prototype.createFieldWindow = function(index) {
+        var ww = FTKR.CRD.layout.width;
+        var wh = (Graphics.boxHeight - FTKR.CRD.layout.height * 2) / $gameCardData.suits().length;
+        var wx = (Graphics.boxWidth - ww) / 2;
+        var wy = wh * index + FTKR.CRD.layout.height;
+        this._fieldWindows[index] = new Window_PlayerHand(index, wx, wy, ww, wh, true, 0);
+        this.addWindow(this._fieldWindows[index]);
+    };
+
     Scene_CRD.prototype.createDialogueWindows = function() {
         this._dialogueWindows = [];
         var number = $gameCardData.playerNum();
@@ -1664,12 +2061,22 @@ FTKR.CRD = FTKR.CRD || {};
         this.addWindow(this._commandBoxWindow);
     };
 
+    Scene_CRD.prototype.createMessageWindow = function() {
+        this._messageWindow = new Window_Message();
+        this.addWindow(this._messageWindow);
+        this._messageWindow.subWindows().forEach(function(window) {
+            this.addWindow(window);
+        }, this);
+    };
+
     Scene_CRD.prototype.onTurnEnd = function() {
         this._commandBoxWindow.deselect();
         this._commandBoxWindow.hide();
+        CardGameManager._turnCount++;
+        CardGameManager.increaseTurn();
         this.shiftIndex();
         this.refreshActor();
-        this._phase = 'select';
+        this._phase = 'turnStart';
     };
 
     Scene_CRD.prototype.onShuffle = function() {
@@ -1690,9 +2097,7 @@ FTKR.CRD = FTKR.CRD || {};
         this.resetDialogue();
         switch (this._input) {
             case 'select':
-                this._handIndex = this.selectCard(this.targetId(), true);
-                AudioManager.playSe(FTKR.CRD.sound.drawSe);
-                this._input = 'draw';
+                this.inputSelect();
                 break;
             case 'dispair':
                 this._input = 'select';
@@ -1718,6 +2123,13 @@ FTKR.CRD = FTKR.CRD || {};
                 this.showCommand();
                 break;
         }
+    };
+
+    Scene_CRD.prototype.inputSelect = function() {
+        var cardId = this.targetId();
+        this._input = 'draw';
+        this._handIndex = this.selectCard(cardId, true);
+        AudioManager.playSe(FTKR.CRD.sound.drawSe);
     };
 
     Scene_CRD.prototype.showCommand = function() {
@@ -1767,20 +2179,23 @@ FTKR.CRD = FTKR.CRD || {};
     };
 
     Scene_CRD.prototype.gameStart = function() {
-        if (this._startId === 0) {
-            this._phase = 'input';
-            this._input = 'select';
-            this.targetWindow().activate();
-            this.targetWindow().select(0);
-        } else {
-            this._phase = 'select';
-        }
+        CardGameManager._turnCount = 1;
+        this._phase = 'turnStart';
     };
     
     //------------------------------------------------------------------------
     // メイン処理
     //------------------------------------------------------------------------
+    Scene_CRD.prototype.update = function() {
+        this.updatePhase();
+        Scene_MenuBase.prototype.update.call(this);
+    };
+
     Scene_CRD.prototype.isBusy = function() {
+        return this.isCardMoving() || $gameMessage.isBusy();
+    };
+
+    Scene_CRD.prototype.isCardMoving = function() {
         return this._handWindows.some( function(window){
             return window.isBusy();
         });
@@ -1800,12 +2215,19 @@ FTKR.CRD = FTKR.CRD || {};
         return false;
     };
 
+    Scene_CRD.prototype.updateEvent = function() {
+        return CardGameManager.updateEvent(this._phase);
+    };
+
     Scene_CRD.prototype.updatePhase = function() {
         this.updateTouch();
-        if (!this.isBusy()) {
+        if (!this.isBusy() && !this.updateEvent()) {
             switch (this._phase) {
                 case 'deal':
                     this.updateDeal();
+                    break;
+                case 'turnStart':
+                    this.updateTurnStart();
                     break;
                 case 'input':
                     this.updateInput();
@@ -1821,9 +2243,7 @@ FTKR.CRD = FTKR.CRD || {};
                     this._phase = 'disCard';
                     break;
                 case 'disCard':
-                    this.subjectWindow().discardPair();
-                    this.subjectWindow().refreshHand();
-                    this._phase = 'turnEnd';
+                    this.updateDiscard();
                     break;
                 case 'turnEnd':
                     this.updateTurnEnd();
@@ -1845,6 +2265,7 @@ FTKR.CRD = FTKR.CRD || {};
     };
 
     Scene_CRD.prototype.checkAllPairCard = function() {
+        if (CardGameManager.gameType()) return false;
         return this._handWindows.some( function(window){
             return window.hasPair().length;
         });
@@ -1881,18 +2302,31 @@ FTKR.CRD = FTKR.CRD || {};
         }
     };
 
+    Scene_CRD.prototype.updateTurnStart = function() {
+        if (this._subjectId === 0) {
+            this.targetWindow().activate();
+            this.targetWindow().select(0);
+            this._phase = 'input';
+            this._input = 'select';
+        } else {
+            this._phase = 'select';
+        }
+    };
+
     Scene_CRD.prototype.updateInput = function() {
-        if (this._input === 'draw') {
-            var hand = this.reduceCard(this.targetId(), this._handIndex);
-            var holdId = this.subjectWindow().cardNum();
-            this.subjectWindow().addHand(holdId, hand.suit, hand.rank);
-            this.subjectWindow().setHoldId(holdId);
-            if (this.checkGameEnd()) return;
-            this.targetWindow().deselect();
-            this.targetWindow().refresh();
-            this.subjectWindow().activate();
-            this.subjectWindow().select(holdId);
-            this._input = 'dispair';
+        switch (this._input) {
+            case 'draw':
+                var hand = this.reduceCard(this.targetId(), this._handIndex);
+                var holdId = this.subjectWindow().cardNum();
+                this.subjectWindow().addHand(holdId, hand.suit, hand.rank);
+                this.subjectWindow().setHoldId(holdId);
+                if (this.checkGameEnd()) return;
+                this.targetWindow().deselect();
+                this.targetWindow().refresh();
+                this.subjectWindow().activate();
+                this.subjectWindow().select(holdId);
+                this._input = 'dispair';
+                break;
         }
     };
 
@@ -1908,31 +2342,41 @@ FTKR.CRD = FTKR.CRD || {};
             this.shiftIndex();
             this.refreshActor();
             this._hand = null;
-            if (this._subjectId === 0) {
-                this.targetWindow().activate();
-                this.targetWindow().select(0);
-                this._phase = 'input';
-                this._input = 'select';
-            } else {
-                this._phase = 'select';
-            }
+            CardGameManager._turnCount++;
+            CardGameManager.increaseTurn();
+            this._phase = 'turnStart';
         }
     };
-
+    
     Scene_CRD.prototype.updateSelect = function() {
         this._messageBoxWindow.clearText();
-        this._handIndex = this.selectCard(this.targetId(), false);
+        switch (CardGameManager.gameType()) {
+            case 1:
+                var cardId = this.subjectId();
+                this._phase = 'discard';
+                break;
+            case 0:
+                var cardId = this.targetId();
+                this._phase = 'draw';
+                break;
+        }
+        this._handIndex = this.selectCard(cardId, false);
         AudioManager.playSe(FTKR.CRD.sound.drawSe);
-        this._phase = 'draw';
     };
 
     Scene_CRD.prototype.updateDraw = function() {
         this.resetTempFace();
         this.resetDialogue();
         this._messageBoxWindow.clearText();
-        var hand = this.reduceCard(this.targetId(), this._handIndex);
-        this.addHand(this.subjectId(), hand);
+        this._hand = this.reduceCard(this.targetId(), this._handIndex);
+        this.addHand(this.subjectId(), this._hand);
         this._phase = 'checkPair';
+    };
+
+    Scene_CRD.prototype.updateDiscard = function() {
+        this.subjectWindow().discardPair();
+        this.subjectWindow().refreshHand();
+        this._phase = 'turnEnd';
     };
 
     Scene_CRD.prototype.refreshActor = function() {
@@ -2039,12 +2483,10 @@ FTKR.CRD = FTKR.CRD || {};
     Scene_CRD.prototype.checkOutGame = function(subjectId) {
         var window = this._handWindows[subjectId];
         if (!window.cardNum()) {
-            console.log('out', subjectId);
             this._endPeople++;
             this.setGameOutPoint(subjectId);
             this._actorWindows[subjectId].setRank(this._endPeople);
             this.refreshRoute(subjectId);
-            console.log(this._route);
             return true;
         }
         return false;
@@ -2307,6 +2749,7 @@ FTKR.CRD = FTKR.CRD || {};
         this._pair.forEach( function(index){
             this._hand.splice(index, 1);
         },this);
+        if (!this._hand.length) this._hand.push(null);
         this._sprites.forEach(function(sprite){
             if(sprite) sprite.resetOffset();
         });
@@ -2488,14 +2931,14 @@ FTKR.CRD = FTKR.CRD || {};
         },this);
         return logText;
     };
-
+/*
     Window_PlayerHand.prototype.standardBackOpacity = function() {
         return 0
     };
 
     Window_PlayerHand.prototype._refreshFrame = function() {
     };
-
+*/
     Window_PlayerHand.prototype.updateArrows = function() {
         this.downArrowVisible = false;
     };
@@ -2829,7 +3272,7 @@ FTKR.CRD = FTKR.CRD || {};
         this.addCommand(cmd.sort, 'sort', true);
     };
 
-        //=============================================================================
+    //=============================================================================
     // Sprite_Card
     // カード用スプライト
     //=============================================================================

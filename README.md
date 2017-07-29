@@ -9,6 +9,7 @@
 1. [アイテム_スキル仕様拡張](#アイテム_スキル仕様拡張)
 1. [スキル](#スキル)
 1. [アイテム](#アイテム)
+1. [ステート](#ステート)
 1. [敵グループ](#敵グループ)
 1. [バトル](#バトル)
 1. [イベント](#イベント)
@@ -165,7 +166,7 @@
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
-| [FTKR_CardGames](FTKR_CardGames.js) | [仮版](FTKR_CardGames.ja.md) | [v1.1.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CardGames.js) | 2017/07/22 | カードゲーム |
+| [FTKR_CardGames](FTKR_CardGames.js) | [仮版](FTKR_CardGames.ja.md) | [v1.2.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CardGames.js) | 2017/07/29 | カードゲーム |
 
 [目次に戻る](#目次)
 
