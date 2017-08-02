@@ -130,7 +130,7 @@
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
-| [FTKR_TransformationState](FTKR_TransformationState.js) | なし | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_TransformationState.js) | 2017/05/03 | ステートが掛かっている間SV画像を変更する |
+| [FTKR_TransformationState](FTKR_TransformationState.js) | なし | [v1.0.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_TransformationState.js) | 2017/08/02 | ステートが掛かっている間SV画像を変更する |
 | [FTKR_AutoStateConditions](FTKR_AutoStateConditions.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AutoStateConditions.js) | 2017/05/02 | ステートに自動付与条件および自動解除条件を設定する |
 
 [目次に戻る](#目次)

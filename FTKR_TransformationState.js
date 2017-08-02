@@ -3,8 +3,8 @@
 // FTKR_TransformationState.js
 // 作成者     : フトコロ
 // 作成日     : 2017/05/02
-// 最終更新日 : 2017/05/03
-// バージョン : v1.0.1
+// 最終更新日 : 2017/08/02
+// バージョン : v1.0.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.TFS = FTKR.TFS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.1 ステートが掛かっている間キャラ画像を変えるプラグイン
+ * @plugindesc v1.0.2 ステートが掛かっている間キャラ画像を変えるプラグイン
  * @author フトコロ
  *
  * @help 
@@ -61,6 +61,9 @@ FTKR.TFS = FTKR.TFS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.2 - 2017/08/02 : 不具合修正
+ *    1. 他プラグインとの競合回避処理を追加。
+ * 
  * v1.0.1 - 2017/05/03 : ヘルプ追記
  * v1.0.0 - 2017/05/02 : 初版作成
  * 
@@ -68,82 +71,88 @@ FTKR.TFS = FTKR.TFS || {};
 */
 //=============================================================================
 
-//=============================================================================
-// プラグイン パラメータ
-//=============================================================================
-FTKR.TFS.parameters = PluginManager.parameters('FTKR_TransformationState');
+(function() {
 
-//objのメモ欄から <metacode: x> の値を読み取って配列で返す
-var readObjectMetaData = function(obj, metacodes) {
-    if (!obj) return false;
-    metacodes.some(function(metacode){
-        var metaReg = new RegExp('<' + metacode + ':[ ]*(.+)>', 'i');
-        return obj.note.match(metaReg);
-    }); 
-    return RegExp.$1 ? RegExp.$1 : false;
-};
+    //=============================================================================
+    // プラグイン パラメータ
+    //=============================================================================
+    var parameters = PluginManager.parameters('FTKR_TransformationState');
 
-//objのメモ欄から <metacode> の値を読み取って真偽で返す
-var readObjectMeta = function(obj, metacodes) {
-    if (!obj) return false;
-    return metacodes.some(function(metacode){
-        var metaReg = new RegExp('<' + metacode + '>', 'i');
-        return metaReg.test(obj.note);
-    }); 
-};
+    //objのメモ欄に <metacode> があれば真を返す
+    var hasObjectMeta = function(obj, metacodes) {
+        if (!obj) return false;
+        return metacodes.some(function(metacode){
+            var metaReg = new RegExp('<' + metacode + '>', 'i');
+            return metaReg.test(obj.note);
+        }); 
+    };
 
-//=============================================================================
-// ステートのメモ欄の読み取り
-//=============================================================================
+    //objのメモ欄から <metacode: x> の値を読み取って返す
+    var readObjectMeta = function(obj, metacodes) {
+        if (!obj) return false;
+        var match = {};
+        metacodes.some(function(metacode){
+            var metaReg = new RegExp('<' + metacode + ':[ ]*(.+)>', 'i');
+            match = metaReg.exec(obj.note);
+            return match;
+        }); 
+        return match ? match[1] : '';
+    };
 
-Sprite_Actor.prototype.clearTransformData = function() {
-    this._transformName = '';
-    this._transformWeaponLess = false;
-};
+    //=============================================================================
+    // ステートのメモ欄の読み取り
+    //=============================================================================
 
-Sprite_Actor.prototype.checkTfState = function() {
-    if (this._actor) {
-        return this.readTransformData();
-    }
-    return null;
-};
+    Sprite_Actor.prototype.clearTransformData = function() {
+        this._transformName = '';
+        this._transformWeaponLess = false;
+    };
 
-Sprite_Actor.prototype.readTransformData = function() {
-    return this._actor.states().some( function(state) {
-        this._transformName = readObjectMetaData(state, ['TFS_変身', 'TFS_TRANSFORM']);
-        this._transformWeaponLess = readObjectMeta(state, ['TFS_武器非表示', 'TFS_WEAPON_LESS']);
-        return this._transformName;
-    },this);
-};
-
-//=============================================================================
-// アクターのSV戦闘画像を変える
-//=============================================================================
-
-FTKR.TFS.Sprite_Actor_updateBitmap = Sprite_Actor.prototype.updateBitmap;
-Sprite_Actor.prototype.updateBitmap = function() {
-    if (this.checkTfState() && this._transformName) {
-        Sprite_Battler.prototype.updateBitmap.call(this);
-        var name = this._transformName;
-        if (this._battlerName !== name) {
-            this._battlerName = name;
-            this._mainSprite.bitmap = ImageManager.loadSvActor(name);
+    Sprite_Actor.prototype.checkTfState = function() {
+        if (this._actor) {
+            return this.readTransformData();
         }
-    } else {
-        this.clearTransformData();
-        FTKR.TFS.Sprite_Actor_updateBitmap.call(this);
-    }
-};
+        return null;
+    };
 
-//=============================================================================
-// アクターの武器画像を表示させない
-//=============================================================================
+    Sprite_Actor.prototype.readTransformData = function() {
+        return this._actor.states().some( function(state) {
+            this._transformName = readObjectMeta(state, ['TFS_変身', 'TFS_TRANSFORM']);
+            this._transformWeaponLess = hasObjectMeta(state, ['TFS_武器非表示', 'TFS_WEAPON_LESS']);
+            return this._transformName;
+        },this);
+    };
 
-FTKR.TFS.Sprite_Actor_setupWeaponAnimation = Sprite_Actor.prototype.setupWeaponAnimation;
-Sprite_Actor.prototype.setupWeaponAnimation = function() {
-    if (this._transformWeaponLess) {
-        this._weaponSprite.setup();
-    } else {
-        FTKR.TFS.Sprite_Actor_setupWeaponAnimation.call(this);
-    }
-};
+    //=============================================================================
+    // アクターのSV戦闘画像を変える
+    //=============================================================================
+
+    var _TFS_Sprite_Actor_updateBitmap = Sprite_Actor.prototype.updateBitmap;
+    Sprite_Actor.prototype.updateBitmap = function() {
+        if (this.checkTfState() && this._transformName) {
+            Sprite_Battler.prototype.updateBitmap.call(this);
+            var name = this._transformName;
+            if (this._battlerName !== name) {
+                this._battlerName = name;
+                this._mainSprite.bitmap = ImageManager.loadSvActor(name);
+            }
+        } else {
+            this.clearTransformData();
+            _TFS_Sprite_Actor_updateBitmap.call(this);
+        }
+    };
+
+    //=============================================================================
+    // アクターの武器画像を表示させない
+    //=============================================================================
+
+    var _TFS_Sprite_Actor_setupWeaponAnimation = Sprite_Actor.prototype.setupWeaponAnimation;
+    Sprite_Actor.prototype.setupWeaponAnimation = function() {
+        if (this._transformWeaponLess) {
+            this._weaponSprite.setup();
+        } else {
+            _TFS_Sprite_Actor_setupWeaponAnimation.call(this);
+        }
+    };
+
+}());//EOF
