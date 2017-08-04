@@ -3,8 +3,8 @@
 // FTKR_ExItemConfig_Effect.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/14
-// 最終更新日 : 2017/05/11
-// バージョン : v1.1.0
+// 最終更新日 : 2017/08/04
+// バージョン : v1.1.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EIE = FTKR.EIE || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.0 アイテムとスキルの使用効果を拡張するプラグイン
+ * @plugindesc v1.1.1 アイテムとスキルの使用効果を拡張するプラグイン
  * @author フトコロ
  *
  * @help
@@ -59,9 +59,9 @@ FTKR.EIE = FTKR.EIE || {};
  * 対象: y
  *    :使用効果の対象を、y に変えることができます。
  *    :y に使用できるコードは以下の通りです。
- *    : user - 使用者
- *    : randomFriends - 味方からランダムで1体選択
- *    : randomOpponents - 敵からランダムで1体選択
+ *    : user or 使用者 - 使用者を対象にする
+ *    : randomFriends or 味方ランダム - 味方からランダムで1体選択
+ *    : randomOpponents or 敵ランダム - 敵からランダムで1体選択
  * 
  * Value1: eval
  * 内容1: 計算式
@@ -122,6 +122,8 @@ FTKR.EIE = FTKR.EIE || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.1.1 - 2017/08/04 : 不要なコメント削除
  * 
  * v1.1.0 - 2017/05/11 : 不具合修正、タグ変更、ヘルプ修正
  * 
@@ -292,87 +294,7 @@ DataManager.readEicEffectMetaDatas = function(obj, metaDatas) {
         }
     }
 };
-/*
-DataManager.eieEffectIdNoteTags = function(group) {
-    var note1a = /<(?:EIC_使用効果):[ ]*(\d+)>/i;
-    var note1aj = /<(?:EIC_EFFECT):[ ]*(\d+)>/i;
-    var note1b = /<\/(?:EIC_使用効果)>/i;
-    var note1bj = /<\/(?:EIC_EFFECT)>/i;
 
-    for (var n = 1; n < group.length; n++) {
-        var obj = group[n];
-        var notedata = obj.note.split(/[\r\n]+/);
-
-        var setMode = 'none';
-        obj.eieEffects = [];
-
-        for (var i = 0; i < notedata.length; i++) {
-            var line = notedata[i];
-            if (line.match(note1a) || line.match(note1aj)) {
-                var data = {
-                  id:Number(RegExp.$1),
-                  text:''
-                };
-                setMode = 'anydata';
-            } else if (note1b.test(line) || note1bj.test(line)) {
-                setMode = 'none';
-                obj.eieEffects.push(data);
-            } else if (setMode === 'anydata') {
-                data.text += line + ';';
-            }
-        }
-        this.makeEieData(obj);
-        obj.eieEffects = [];
-    }
-};
-
-DataManager.makeEieData = function(item) {
-    this.makeSepEffectsBase(item);
-    this.setSepEffects(item);
-};
-
-DataManager.makeSepEffectsBase = function(item) {
-    item.effects.forEach( function(effect) {
-        effect.target = '';
-        effect.baseValue1 = effect.value1;
-        effect.baseValue2 = effect.value2;
-        effect.sepValue1 = '';
-        effect.sepValue2 = '';
-        effect.enabled = '';
-    });
-};
-
-DataManager.setSepEffects = function(item) {
-    for (var t = 0; t < item.eieEffects.length; t++) {
-        var sepdata = item.eieEffects[t];
-        if (sepdata) {
-            var case1 = /(?:TARGET):[ ]*(.+)/i;
-            var case1j = /(?:対象):[ ]*(.+)/i;
-            var case2 = /(?:VALUE1):[ ]*(.+)/i;
-            var case2j = /(?:内容1):[ ]*(.+)/i;
-            var case3 = /(?:VALUE2):[ ]*(.+)/i;
-            var case3j = /(?:内容2):[ ]*(.+)/i;
-            var case5 = /(?:ENABLED):[ ]*(.+)/i;
-            var case5j = /(?:有効条件):[ ]*(.+)/i;
-
-            var datas = sepdata.text.split(';');
-            for (var i = 0; i < datas.length; i++) {
-                var data = datas[i];
-                var dataId = sepdata.id;
-                if (data.match(case1) || data.match(case1j)) {
-                    item.effects[dataId].target = String(RegExp.$1);
-                } else if(data.match(case2) || data.match(case2j)) {
-                    item.effects[dataId].sepValue1 = String(RegExp.$1);
-                } else if(data.match(case3) || data.match(case3j)) {
-                    item.effects[dataId].sepValue2 = String(RegExp.$1);
-                } else if(data.match(case5) || data.match(case5j)) {
-                    item.effects[dataId].enabled = String(RegExp.$1);
-                }
-            }
-        }
-    }
-};
-*/
 //=============================================================================
 // BattleManager
 //=============================================================================
@@ -417,14 +339,17 @@ Game_Action.prototype.changeTargetEffect = function(target, effect) {
     if (effect.target) {
         switch (effect.target) {
             case 'user':
+            case '使用者':
                 this._targetSepEffect = this.subject();
                 this._targetSepEffect.result().used = true;
                 return this._targetSepEffect;
             case 'randomOpponents':
+            case '敵ランダム':
                 this._targetSepEffect = this.changeTargetForRandom(target.isEnemy());
                 this._targetSepEffect.result().used = true;
                 return this._targetSepEffect;
             case 'randomFriends':
+            case '味方ランダム':
                 this._targetSepEffect = this.changeTargetForRandom(!target.isEnemy());
                 this._targetSepEffect.result().used = true;
                 return this._targetSepEffect;
