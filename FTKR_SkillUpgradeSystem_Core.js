@@ -3,8 +3,8 @@
 // FTKR_SkillUpgradeSystem_Core.js
 // 作成者     : フトコロ
 // 作成日     : 2017/02/06
-// 最終更新日 : 2017/03/16
-// バージョン : v1.4.0
+// 最終更新日 : 2017/08/05
+// バージョン : v1.4.1
 //=======↑本プラグインを改変した場合でも、この欄は消さないでください↑===============
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.SUS = FTKR.SUS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.4.0 スキル強化システム 本体プラグイン
+ * @plugindesc v1.4.1 スキル強化システム 本体プラグイン
  * @author フトコロ
  *
  * @param ---Skill Name Format---
@@ -989,6 +989,9 @@ FTKR.SUS = FTKR.SUS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.4.1 - 2017/08/05 : 不具合修正
+ *    1. 強化出来ない設定の強化タイプに対して、最大強化レベルを0にする処理を追加。
+ * 
  * v1.4.0 - 2017/03/16 : 処理見直し、機能追加
  *    1. FTKR_SEP_ShowSkillStatus.js v1.3.0 に合わせて処理を見直し。
  *    2. 強化コストの値にjs計算式を使用できる機能を追加。
@@ -1714,7 +1717,9 @@ Game_Actor.prototype.setUpgradeSkillLimitBase = function(skillId, typeId) {
 Game_Actor.prototype.setUpgradeSkillLimit = function(skillId, typeId, value) {
   var limit = this.setUpgradeSkillLimitBase(skillId, typeId);
   var skill = $dataSkills[skillId];
-  if (this.matchUtype(typeId, 'damages')&& !skill.damages[0].type) {
+  if (skill.susNotUpgrade[typeId]) {
+    limit = 0;
+  } else if (this.matchUtype(typeId, 'damages')&& !skill.damages[0].type) {
     limit = 0;
   } else if (this.matchUtype(typeId, 'mpCost')) {
     var defMpCost = skill.mpCost;

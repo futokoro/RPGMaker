@@ -3,8 +3,8 @@
 // FTKR_SkillUpgradeSystem_Window.js
 // 作成者     : フトコロ
 // 作成日     : 2017/02/08
-// 最終更新日 : 2017/03/16
-// バージョン : v1.4.0
+// 最終更新日 : 2017/08/05
+// バージョン : v1.4.1
 //=======↑本プラグインを改変した場合でも、この欄は消さないでください↑===============
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.SUS = FTKR.SUS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.4.0 スキル強化システム ウィンドウ関係プラグイン
+ * @plugindesc v1.4.1 スキル強化システム ウィンドウ関係プラグイン
  * @author フトコロ
  *
  * @param ---Show Command---
@@ -703,6 +703,12 @@ FTKR.SUS = FTKR.SUS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.4.1 - 2017/08/05 : 不具合修正
+ *    1. スキルに対して強化できない設定にした強化タイプを
+ *       非表示にできない不具合修正。
+ *    2. 強化実行時に確認しない設定の場合に、コストや最大レベルを無視して
+ *       強化できてしまう不具合修正。
+ * 
  * v1.4.0 - 2017/03/16 : 処理見直し、機能追加
  *    1. FTKR_SEP_ShowSkillStatus.js v1.3.0 に合わせて処理を見直し。
  *    2. 枠の表示処理を、FTKR_SEP_ShowSkillStatus.jsから読み取る方式に変更。
@@ -823,6 +829,15 @@ Game_Actor.prototype.isNonUpgradeItem = function(skillId, typeId, dataId) {
       (this.isUpgradeLimit(udata) && FTKR.SUS.hideLimitUgItem > 0) ||
       this.isHideSkillStatus(typeId, sepSkill, sepSkill.effects.length, dataId) ||
       !this.isSusShowSwitchOn(udata);
+};
+
+Game_Actor.prototype.isLightUpgradeItem = function(skillId, typeId, dataId) {
+  var sepSkill = this.sepSkill(skillId);
+  var udata = this.getSusUdata(skillId, typeId, dataId);
+  if (!udata) return false;
+  return (this.isNotUpgrade(udata, skillId, dataId) ||
+      !this.canPayUpgradeCost(udata) ||
+      this.isUpgradeLimit(udata)) && FTKR.SUS.showNonUgItem;
 };
 
 //=============================================================================
@@ -1175,16 +1190,53 @@ Window_UpgradeTypeList.prototype.defineUpgradeSound = function() {
   this.setUpgradeSound();
 };
 
-Window_SepTypeList.prototype.drawSkillLine = function(x, y, width, skillId, typeId, dataId) {
+Window_UpgradeTypeList.prototype.isCurrentItemEnabled = function() {
+  return this._actor.canSusUpgrade(this._skillId, this._typeId, this._dataId);
+};
+
+Window_UpgradeTypeList.prototype.isEnabled = function(typeId, dataId) {
+  return this._actor && !this._actor.isNonUpgradeItem(this._skillId, typeId, dataId);
+};
+
+Window_UpgradeTypeList.prototype.makeItemList = function() {
+  this._data = [];
+  var actor = this._actor;
+  if (!actor) return false;
+  var count = 0;
+  var data = {};
+  if (this._skillId === null) return false;
+  var skill = actor.getSkill(this._skillId);
+  for(var t = 1; t < FTKR.SSS.maxSepTypeNum + 1; t++) {
+    for (var prop in skill) {
+      if (prop === FTKR.SSS.sepTypes[t].type) {
+        var len = prop === 'damages' || prop === 'effects' ? skill[prop].length : 1;
+        for (var i = 0; i < len; i++) {
+          if (prop === 'damages' && skill.damages[i].type < 1) continue;
+          if (this.isEnabled(t, i)) {
+            data = { typeId:t, dataId:i };
+            this._data.push(data);
+          }
+        }
+        continue;
+      }
+    }
+  }
+};
+
+Window_UpgradeTypeList.prototype.isShowItem = function(typeId, dataId) {
+  return this._actor && !this._actor.isLightUpgradeItem(this._skillId, typeId, dataId);
+};
+
+Window_UpgradeTypeList.prototype.drawSkillLine = function(x, y, width, skillId, typeId, dataId) {
     var udata = this._actor.getSusUdata(skillId, typeId, dataId);
     this.drawSusSkillGauge(x, y, width, udata);
 };
 
-Window_SepTypeList.prototype.drawSkillStatus = function(tx, ty, tw, rect, skill, typeId, dataId){
+Window_UpgradeTypeList.prototype.drawSkillStatus = function(tx, ty, tw, rect, skill, typeId, dataId){
     this.drawSepSkillStatus(tx, ty, tw, rect, typeId, skill, dataId);
 };
 
-Window_SepTypeList.prototype.drawStatusIcon = function(x, y, typeId) {
+Window_UpgradeTypeList.prototype.drawStatusIcon = function(x, y, typeId) {
     var utype = FTKR.SUS.utypes[typeId];
     var icon = utype.icon ? utype.icon : FTKR.SUS.utypes[0].icon;
     this.drawIcon(icon, x, y);
