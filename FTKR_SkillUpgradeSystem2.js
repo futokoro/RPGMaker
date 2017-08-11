@@ -2,7 +2,7 @@
 // スキル強化システムを実装するプラグイン
 // FTKR_SkillUpgradeSystem2.js
 // 作成者     : フトコロ
-// 作成日     : 2017/05/13
+// 作成日     : 2017/08/05
 // 最終更新日 : 
 // バージョン : v2.0.0
 //=============================================================================
@@ -742,7 +742,7 @@ FTKR.SUS = FTKR.SUS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
- * v2.0.0 - 2017/05/13 : 初版作成
+ * v2.0.0 - 2017/08/05 : 初版作成
  * 
  *-----------------------------------------------------------------------------
 */
@@ -1902,7 +1902,9 @@ Game_Actor.prototype.setUpgradeSkillLimitBase = function(skillId, typeId) {
 Game_Actor.prototype.setUpgradeSkillLimit = function(skillId, typeId, value) {
   var limit = this.setUpgradeSkillLimitBase(skillId, typeId);
   var skill = $dataSkills[skillId];
-  if (this.matchUtype(typeId, 'damages')&& !skill.damages[0].type) {
+  if (skill.susNotUpgrade[typeId]) {
+    limit = 0;
+  } else if (this.matchUtype(typeId, 'damages')&& !skill.damages[0].type) {
     limit = 0;
   } else if (this.matchUtype(typeId, 'mpCost')) {
     var defMpCost = skill.mpCost;
@@ -1982,6 +1984,7 @@ Game_Actor.prototype.upgradeSepSkill = function(skillId, typeId, dataId) {
   return this.susUpgradeSepSkill(skillId, typeId, dataId);
 };
 
+//スキルを強化する
 Game_Actor.prototype.susUpgradeSepSkill = function(skillId, typeId, dataId) {
   var sepSkill = this.sepSkill(skillId);
   var udata = this.getSusUdata(skillId, typeId, dataId);
@@ -2060,6 +2063,15 @@ Game_Actor.prototype.isNonUpgradeItem = function(skillId, typeId, dataId) {
       (this.isUpgradeLimit(udata) && FTKR.SUS.hideLimitUgItem > 0) ||
       this.isHideSkillStatus(typeId, sepSkill, sepSkill.effects.length, dataId) ||
       !this.isSusShowSwitchOn(udata);
+};
+
+Game_Actor.prototype.isLightUpgradeItem = function(skillId, typeId, dataId) {
+  var sepSkill = this.sepSkill(skillId);
+  var udata = this.getSusUdata(skillId, typeId, dataId);
+  if (!udata) return false;
+  return (this.isNotUpgrade(udata, skillId, dataId) ||
+      !this.canPayUpgradeCost(udata) ||
+      this.isUpgradeLimit(udata)) && FTKR.SUS.showNonUgItem;
 };
 
 //=============================================================================
@@ -2773,8 +2785,16 @@ Window_UpgradeTypeList.prototype.item = function() {
   return this._data && this.index() >= 0 ? this._data[this.index()] : null;
 };
 
+Window_UpgradeTypeList.prototype.isCurrentItemEnabled = function() {
+  return this._actor.canSusUpgrade(this._skillId, this._typeId, this._dataId);
+};
+
+Window_UpgradeTypeList.prototype.isEnabled = function(typeId, dataId) {
+  return this._actor && !this._actor.isNonUpgradeItem(this._skillId, typeId, dataId);
+};
+
 Window_UpgradeTypeList.prototype.isShowItem = function(typeId, dataId) {
-  return this._actor && this._actor.isSepEnabled(this._skillId, typeId, dataId);
+  return this._actor && !this._actor.isLightUpgradeItem(this._skillId, typeId, dataId);
 };
 
 Window_UpgradeTypeList.prototype.makeItemList = function() {
@@ -2791,7 +2811,7 @@ Window_UpgradeTypeList.prototype.makeItemList = function() {
         var len = prop === 'damages' || prop === 'effects' ? skill[prop].length : 1;
         for (var i = 0; i < len; i++) {
           if (prop === 'damages' && skill.damages[i].type < 1) continue;
-          if (this.isShowItem(t, i) || FTKR.SUS.showDisabledItem) {
+          if (this.isEnabled(t, i)) {
             data = { typeId:t, dataId:i };
             this._data.push(data);
           }
