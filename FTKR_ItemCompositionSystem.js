@@ -3,8 +3,8 @@
 // FTKR_ItemConpositionSystem.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/08
-// 最終更新日 : 2017/08/19
-// バージョン : v1.0.6
+// 最終更新日 : 2017/08/21
+// バージョン : v1.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ICS = FTKR.ICS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.6 アイテム合成システム
+ * @plugindesc v1.1.0 アイテム合成システム
  * @author フトコロ
  *
  * @param --基本設定--
@@ -52,6 +52,10 @@ FTKR.ICS = FTKR.ICS || {};
  * @desc レシピが無い組み合わせの場合の結果を設定します。
  * lost - 消失, reset - 復元
  * @default lost
+ *
+ * @param Recipe Matching Pattern
+ * @desc レシピに対してセットした素材がどの程度合致すると合成成功するか設定します。1 - レシピと同一, 0 - レシピを含む
+ * @default 0
  *
  * @param --合成成功率の設定--
  * @default
@@ -116,6 +120,18 @@ FTKR.ICS = FTKR.ICS || {};
  * @param End Cmd Name
  * @desc 「合成を止める」コマンドの表示内容を設定します。
  * @default 合成を止める
+ * 
+ * @param Item Cmd Name
+ * @desc 「アイテム」コマンドの表示内容を設定します。
+ * @default アイテム
+ * 
+ * @param Weapon Cmd Name
+ * @desc 「武器」コマンドの表示内容を設定します。
+ * @default 武器
+ * 
+ * @param Armor Cmd Name
+ * @desc 「防具」コマンドの表示内容を設定します。
+ * @default 防具
  * 
  * @param --素材数指定ウィンドウの設定--
  * @default
@@ -362,8 +378,13 @@ FTKR.ICS = FTKR.ICS || {};
  * 手持ちのアイテム(大事なもの以外)であれば、何にでも合成スロットに
  * 移すことができます。
  * 
- * 合成スロットにある素材アイテムの組み合わせが、設定したレシピに合致して
+ * 合成スロットにある素材アイテムの組み合わせが、設定したレシピに合致(*1)して
  * いれば、レシピを覚えていなくても合成することができます。
+ * 
+ * (*1)合致するパターンは、プラグインパラメータ<Recipe Matching Pattern>で
+ *     以下の様に設定できます。
+ *      0 - レシピと同じ素材を含んでいれば、不要な素材をセットしても合致
+ *      1 - レシピと素材アイテムの組み合わせが同一の場合に合致
  * 
  * レシピを覚えていない場合は、合成情報欄は「？？？？」という表示になります。
  * 
@@ -660,7 +681,7 @@ FTKR.ICS = FTKR.ICS || {};
  * slot   :素材スロットのアイテムを戻すコマンド
  * end    :合成を止めるコマンド
  * 
- * action,change,slot,end のコマンド名は、プラグインパラメータで設定できます。
+ * 各コマンド名は、プラグインパラメータで設定できます。
  * 
  *-----------------------------------------------------------------------------
  * プラグインコマンド
@@ -717,6 +738,12 @@ FTKR.ICS = FTKR.ICS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.1.0 - 2017/08/22 : 機能追加
+ *    1. 合成コマンドの、「アイテム」「武器」「防具」の表示名を
+ *       プラグインパラメータで設定できる機能を追加。
+ *    2. 合成レシピと使用素材の合致条件を設定する機能を追加。
+ *    3. 素材を何もセットしていない場合に、合成実行できないように変更。
  * 
  * v1.0.6 - 2017/08/19 : 不具合修正
  *    1. 確認ウィンドウを無効にして合成を実行するとエラーになる不具合を修正。
@@ -805,6 +832,7 @@ function Game_IcsRecipeBook() {
         },
         notApp        :String(parameters['Not Applicable to Recipe'] || 'lost'),
         category      :String(parameters['Category Format'] || 'カテゴリー %1'),
+        match         :Number(parameters['Recipe Matching Pattern'] || 0),
     };
 
     //合成成功率の設定
@@ -837,7 +865,10 @@ function Game_IcsRecipeBook() {
             slot      :String(parameters['Slot Cmd Name'] || ''),
             action    :String(parameters['Action Cmd Name'] || ''),
             end       :String(parameters['End Cmd Name'] || ''),
-        },
+            item      :String(parameters['Item Cmd Name'] || ''),
+            weapon    :String(parameters['Weapon Cmd Name'] || ''),
+            armor     :String(parameters['Armor Cmd Name'] || ''),
+          },
     };
 
     //素材数指定ウィンドウ設定
@@ -1858,6 +1889,7 @@ function Game_IcsRecipeBook() {
         this._cmdId = null;
         this._itemCount = 0;
         this._showResipe = false;
+        this._setMaterials = false;
         this.refresh();
     };
 
@@ -1884,19 +1916,19 @@ function Game_IcsRecipeBook() {
         var format = FTKR.ICS.command.format;
         switch (symbol){
             case 'item':
-                this.addCommand(TextManager.item,   'item');
+                this.addCommand(format.item,   'item');
                 break;
             case 'weapon':
-                this.addCommand(TextManager.weapon, 'weapon');
+                this.addCommand(format.weapon, 'weapon');
                 break;
             case 'armor':
-                this.addCommand(TextManager.armor,  'armor');
+                this.addCommand(format.armor,  'armor');
                 break;
             case 'slot':
-                this.addCommand(format.slot,        'slot');
+                this.addCommand(format.slot, 'slot');
                 break;
             case 'action':
-                this.addCommand(format.action,      'action');
+                this.addCommand(format.action, 'action', this._setMaterials);
                 break;
             case 'change':
                 if (this._showResipe) {
@@ -1916,11 +1948,16 @@ function Game_IcsRecipeBook() {
         if (this._itemWindow) {
             this._itemWindow.setCategory(this.currentSymbol());
         }
-    };
+  };
 
     Window_IcsCommand.prototype.setItemWindow = function(window) {
         this._itemWindow = window;
         this.update();
+    };
+
+    Window_IcsCommand.prototype.refreshCom = function(materials) {
+        this._setMaterials = !!materials.length
+        Window_Command.prototype.refresh.call(this);
     };
 
     //=============================================================================
@@ -2359,7 +2396,8 @@ function Game_IcsRecipeBook() {
 
     //指定したアイテムのレシピの中で、合成素材と合っているものがあるか判定
     Window_IcsCompsiState.prototype.hasMaterials = function(materials) {
-        slotMaterials = this._slotMaterials.clone();
+        var slotMaterials = this._slotMaterials.clone();
+        if (FTKR.ICS.basic.match && materials.length !== slotMaterials.length) return false;
         var result = materials.every(function(material) {
             var index = this.hasMaterial(material, slotMaterials);
             if (index > -1) {
@@ -2816,6 +2854,7 @@ function Game_IcsRecipeBook() {
         this._itemWindow.refresh();
         this._compositionSlotWindow.clearWindow();
         this._compositionStateWindow.clearWindow();
+        this._categoryWindow.refreshCom(this._compositionSlotWindow.materials());
         this._resultWindow.clearWindow();
     }
 
@@ -2828,7 +2867,7 @@ function Game_IcsRecipeBook() {
     Scene_ICS.prototype.slotsReset = function() {
         this.resetItems();
         this.slotsClear();
-    };
+      };
 
     Scene_ICS.prototype.onCategoryCancel = function() {
         this.slotsReset();
@@ -2842,8 +2881,10 @@ function Game_IcsRecipeBook() {
                 this._compositionSlotWindow.actSelect(0);
                 break;
             case 'action':
-                if (FTKR.ICS.basic.enableConf) {
-                    var materials = this._compositionSlotWindow.materials();
+                var materials = this._compositionSlotWindow.materials();
+                if (!materials.length) {
+                    this._categoryWindow.actSelect(-1);
+                } else if (FTKR.ICS.basic.enableConf) {
                     this._stsConfWindow.setEnabled(materials.length);
                     this.stsConfShow();
                     this._stsConfWindow.actSelect(0);
@@ -2924,7 +2965,9 @@ function Game_IcsRecipeBook() {
             csw._itemCount++;
         }
         $gameParty.loseItem(item, number);
-    };
+        this._categoryWindow._setMaterials = true;
+        this._categoryWindow.refresh();
+      };
 
     Scene_ICS.prototype.onNumberCancel = function() {
         SoundManager.playCancel();
@@ -2953,6 +2996,7 @@ function Game_IcsRecipeBook() {
         this._itemWindow.refresh();
         this._compositionSlotWindow.refresh();
         this._compositionStateWindow.setItems(this._compositionSlotWindow.materials());
+        this._categoryWindow.refreshCom(this._compositionSlotWindow.materials());
     };
 
     Scene_ICS.prototype.onIcsSlotCancel = function() {

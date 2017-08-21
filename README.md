@@ -121,7 +121,7 @@
 | [FTKR_ItemSubCommand](FTKR_ItemSubCommand.js) | [仮版](FTKR_ItemSubCommand.ja.md) | [v1.2.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ItemSubCommand.js) | 2017/08/19 | アイテムボックスにサブコマンドを追加するプラグイン |
 | [FTKR_ItemBoxCapacity](FTKR_ItemBoxCapacity.js) | [仮版](FTKR_ItemBoxCapacity.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ItemBoxCapacity.js) | 2017/06/09 | アイテムボックスに所持容量を追加するプラグイン |
 | [FTKR_ItemBoxCategory](FTKR_ItemBoxCategory.js) | [あり](FTKR_ItemBoxCategory.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ItemBoxCategory.js) | 2017/07/01 | アイテムボックスのカテゴリーを追加変更するプラグイン<br>FTKR_ItemCategoryFixedと組み合わせて使用できません |
-| [FTKR_ItemCompositionSystem](FTKR_ItemCompositionSystem.js) | [仮版](FTKR_ItemCompositionSystem.ja.md) | [v1.0.6](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ItemCompositionSystem.js) | 2017/08/19 | アイテム合成システム |
+| [FTKR_ItemCompositionSystem](FTKR_ItemCompositionSystem.js) | [仮版](FTKR_ItemCompositionSystem.ja.md) | [v1.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ItemCompositionSystem.js) | 2017/08/21 | アイテム合成システム |
 | [FTKR_ExEquipSlot](FTKR_ExEquipSlot.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExEquipSlot.js) | 2017/06/30 | 同じ装備タイプの装備を２つ以上装備できるようにする |
 
 [目次に戻る](#目次)
