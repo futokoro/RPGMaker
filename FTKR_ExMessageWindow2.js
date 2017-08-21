@@ -3,8 +3,8 @@
 // FTKR_ExMessageWindow2.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/24
-// 最終更新日 : 2017/07/06
-// バージョン : v2.3.1
+// 最終更新日 : 2017/08/21
+// バージョン : v2.4.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EMW = FTKR.EMW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.3.1 一度に複数のメッセージウィンドウを表示するプラグイン
+ * @plugindesc v2.4.0 一度に複数のメッセージウィンドウを表示するプラグイン
  * @author フトコロ
  * 
  * @param --初期設定--
@@ -550,6 +550,9 @@ FTKR.EMW = FTKR.EMW || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v2.4.0 - 2017/08/21 : 機能追加
+ *    1. バトル画面に対応。
  * 
  * v2.3.1 - 2017/07/06 : 不具合修正
  *    1. v2.3.0の不具合(戦闘開始時にエラー)修正。
@@ -1564,6 +1567,7 @@ Window_EventItemEx.prototype.onCancel = function() {
 };
 
 //=============================================================================
+// DataManager
 // 拡張メッセージを登録
 //=============================================================================
 //ゲームオブジェクトに登録
@@ -1573,7 +1577,10 @@ DataManager.createGameObjects = function() {
     $gameMessageEx = new Game_MessageEx();
 };
 
+//=============================================================================
+// Scene_Map
 //マップ画面で拡張メッセージウィンドウを生成
+//=============================================================================
 FTKR.EMW.Scene_Map_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function() {
     this.createMessageExWindowAll();
@@ -1619,6 +1626,55 @@ Scene_Map.prototype.terminate = function() {
             if (i > 0) message.terminate();
         });
     }
+};
+
+//=============================================================================
+// Scene_Battle
+// バトル画面で拡張メッセージウィンドウを生成
+//=============================================================================
+FTKR.EMW.Scene_Battle_createMessagewindow = Scene_Battle.prototype.createMessageWindow;
+Scene_Battle.prototype.createMessageWindow = function() {
+    this.createMessageExWindowAll();
+    FTKR.EMW.Scene_Battle_createMessagewindow.call(this);
+    this._messageExWindows[0] = this._messageWindow;
+    $gameMessageEx.window(0)._window_MessageEx = this._messageExWindows[0];
+    FTKR.EMW.scene.startTerminate ? $gameMessageEx.window(0).terminate() :
+        $gameMessageEx.window(0).firstText();
+};
+
+Scene_Battle.prototype.readMapMeta = function() {
+    return readObjectMeta($dataMap, ['EMW_生成数', 'EMW_NUMBER']);
+};
+
+//プラグインパラメータで指定した数の拡張メッセージウィンドウを生成
+//またはマップデータのメモ欄の設定を読み込む
+Scene_Battle.prototype.createMessageExWindowAll = function() {
+    this._messageExWindows = [];
+    var number = this.readMapMeta() || FTKR.EMW.exwindowNum;
+    for (var i = 1; i < number + 1; i++) {
+        this.createMessageExWindow(i);
+    }
+};
+
+//拡張メッセージウィンドウを生成
+Scene_Battle.prototype.createMessageExWindow = function(windowId) {
+    this._messageExWindows[windowId] = new Window_MessageEx(windowId);
+    $gameMessageEx.window(windowId)._window_MessageEx = this._messageExWindows[windowId];
+    FTKR.EMW.scene.startTerminate ? $gameMessageEx.window(windowId).terminate() :
+        $gameMessageEx.window(windowId).firstText();
+    this.addWindow(this._messageExWindows[windowId]);
+    this._messageExWindows[windowId].subWindows().forEach(function(window) {
+        this.addWindow(window);
+    }, this);
+};
+
+//シーン終了時にすべてのウィンドウIDを強制終了
+FTKR.EMW.Scene_Battle_terminate = Scene_Battle.prototype.terminate;
+Scene_Battle.prototype.terminate = function() {
+    FTKR.EMW.Scene_Battle_terminate.call(this);
+    $gameMessageEx.windows().forEach( function(message, i){
+        if (i > 0) message.terminate();
+    });
 };
 
 //=============================================================================
