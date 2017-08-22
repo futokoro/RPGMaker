@@ -3,8 +3,8 @@
 // FTKR_CSS_ShopStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/07/23
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2017/08/22
+// バージョン : v1.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 FTKR.CSS.SpS = FTKR.CSS.SpS || {};
 
 /*:
- * @plugindesc v1.0.0 ショップ画面のステータスレイアウトを変更する
+ * @plugindesc v1.1.0 ショップ画面のステータスレイアウトを変更する
  * @author フトコロ
  *
  * @param --共通レイアウト設定--
@@ -270,6 +270,12 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
  *    : x は　オリジナルパラメータIDを指定してください。
  * 
  * 
+ * 3. カーソルで選択中のアイテムの画像表示
+ *    :itemimage(x)
+ *    : アイテムのメモ欄で設定した画像id x を表示します。
+ *    : 設定方法は、FTKR_CustomSimpleActorStatus.jsのカスタム画像コードを
+ *    : 参照してください。
+ * 
  *-----------------------------------------------------------------------------
  * ステータスウィンドウの設定
  *-----------------------------------------------------------------------------
@@ -338,6 +344,9 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.1.0 - 2017/08/22 : 機能追加
+ *    1. カーソル選択中のアイテムの画像を表示するコードを追加。
  * 
  * v1.0.0 - 2017/07/23 : 初版作成
  * 
@@ -420,6 +429,19 @@ if (Imported.FTKR_CSS) (function() {
     // CSS表示コードを追加
     //=============================================================================
 
+    var _SpS_DatabaseLoaded = false;
+    var _SpS_DataManager_isDatabaseLoaded = DataManager.isDatabaseLoaded;
+    DataManager.isDatabaseLoaded = function() {
+        if (!_SpS_DataManager_isDatabaseLoaded.call(this)) return false;
+        if (!_SpS_DatabaseLoaded) {
+            this.cssActorImageNotetags($dataItems);
+            this.cssActorImageNotetags($dataWeapons);
+            this.cssActorImageNotetags($dataArmors);
+            _SpS_DatabaseLoaded = true;
+        }
+        return true;
+    };
+
     var _SpS_Window_Base_drawCssActorStatusBase_A1 = Window_Base.prototype.drawCssActorStatusBase_A1;
     Window_Base.prototype.drawCssActorStatusBase_A1 = function(index, actor, x, y, width, match, lss, css) {
         switch(match[1].toUpperCase()) {
@@ -427,6 +449,8 @@ if (Imported.FTKR_CSS) (function() {
                 return this.drawCssActorEquipDiff(actor, x, y, width, match[2], lss);
             case 'EDIFFAOP':
                 return this.drawCssActorEquipAopDiff(actor, x, y, width, match[2], lss);
+            case 'ITEMIMAGE':
+                return this.drawCssItemImage(actor, x, y, width, match[2]);
         }
         return _SpS_Window_Base_drawCssActorStatusBase_A1.call(this, index, actor, x, y, width, match, lss, css);
     };
@@ -458,6 +482,26 @@ if (Imported.FTKR_CSS) (function() {
         }
     };
     
+    Window_Base.prototype.drawCssItemImage = function(actor, dx, dy, width, id) {
+        var item = FTKR.gameData.item;
+        if (!item) return 1;
+        id = id || 0;
+        var bgi = item.cssbgi[id];
+        var bitmap = ImageManager.loadPicture(bgi.name);
+        if (!bitmap) return 1;
+        var sw = bgi.width || bitmap.width;
+        var sh = bgi.height || bitmap.height;
+        var sx = bgi.offsetX || 0;
+        var sy = bgi.offsetY || 0;
+
+        var dh = sh * bgi.scale / 100;
+        var dw = sw * bgi.scale / 100;
+        var offsetX = FTKR.CSS.cssStatus.image.posiX * (width - dw) / 2;
+        dx = Math.floor(dx + offsetX);
+        this.contents.blt(bitmap, sx, sy, sw, sh, dx, dy, dw, dh);
+        return Math.ceil(dh / this.lineHeight()) || 1;
+    };
+
     //=============================================================================
     // Window_ShopStatus
     //=============================================================================
@@ -712,7 +756,30 @@ if (Imported.FTKR_CSS) (function() {
     //=============================================================================
     // Scene_Shop
     //=============================================================================
-
+    var _SpS_Scene_Shop_prepare = Scene_Shop.prototype.prepare;
+    Scene_Shop.prototype.prepare = function(goods, purchaseOnly) {
+        _SpS_Scene_Shop_prepare.call(this, goods, purchaseOnly);
+        this._goods.forEach(function(goods) {
+            var item = null;
+            switch (goods[0]) {
+            case 0:
+                item = $dataItems[goods[1]];
+                break;
+            case 1:
+                item = $dataWeapons[goods[1]];
+                break;
+            case 2:
+                item = $dataArmors[goods[1]];
+                break;
+            }
+            if (item) {
+                item.cssbgi.forEach(function(bgi){
+                    ImageManager.loadPicture(bgi.name);
+                });
+            }
+        }, this);
+    };
+  
     //書き換え
     Scene_Shop.prototype.create = function() {
         Scene_MenuBase.prototype.create.call(this);
