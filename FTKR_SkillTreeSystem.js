@@ -3,8 +3,8 @@
 // FTKR_SkillTreeSystem.js
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/02/25
-// 最終更新日 : 2017/07/25
-// バージョン : v1.9.0
+// 最終更新日 : 2017/08/22
+// バージョン : v1.10.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.9.0 ツリー型スキル習得システム
+ * @plugindesc v1.10.0 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -569,6 +569,14 @@ FTKR.STS = FTKR.STS || {};
  *    :空欄になります。
  *    :起点スキルID(0を含む)を登録できる数は、プラグインパラメータ
  *    :<Skill Tree Max Cols>の設定値までです。
+ * 
+ * skill y: x1,x2,...
+ * スキル y: x1,x2,...
+ *    :スキルツリーの起点となるスキルとして、ID x1,x2,...を
+ *    :y行目に登録します。
+ *    :この設定は、別の起点スキルから派生するスキルツリーの
+ *    :情報と競合します。
+ *    :派生スキルの表示位置と被らないように設定してください。
  * 
  * required: eval
  * 習得条件: 条件式
@@ -1324,6 +1332,9 @@ FTKR.STS = FTKR.STS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.10.0 - 2017/08/22 : 機能追加
+ *    1. スキルツリーの起点スキルに対して行を指定して登録する機能を追加。
+ * 
  * v1.9.0 - 2017/07/25 : 機能追加
  *    1. コアスクリプトv1.5.0以前にも仮対応。
  *    2. プラグインパラメータに@type適用
@@ -1944,6 +1955,7 @@ function Scene_STS() {
             obj.sts = {
                 skillIds:[],
                 tree:[{},],
+                subtree:[],
                 data:'',
                 required:'',
                 costs:[],
@@ -1987,6 +1999,8 @@ function Scene_STS() {
             var case3aj = /ツリータイプ (\d+) スキル:[ ]*(\d+(?:\s*,\s*\d+)*)/i;
             var case3b = /(?:SKILL):[ ]*(\d+(?:\s*,\s*\d+)*)/i;
             var case3bj = /スキル:[ ]*(\d+(?:\s*,\s*\d+)*)/i;
+            var case3c = /(?:SKILL)[ ](\d+):[ ]*(\d+(?:\s*,\s*\d+)*)/i;
+            var case3cj = /スキル[ ](\d+):[ ]*(\d+(?:\s*,\s*\d+)*)/i;
             var case4 = /(?:COST ITEM\[)(\d+)\]:[ ]*(.+)/i;
             var case4j = /コスト アイテム\[(\d+)\]:[ ]*(.+)/i;
             var case4a = /(?:COST WEAPON\[)(\d+)\]:[ ]*(.+)/i;
@@ -2023,6 +2037,10 @@ function Scene_STS() {
                     var tree = this.readTree(obj, 0, RegExp.$1);
                     obj.sts.tree[0] = tree;
                     obj.sts.skillIds = tree.skillIds;
+                } else if(data.match(case3c) || data.match(case3cj)) {
+                    var line = Number(RegExp.$1);
+                    var tree = this.readTree(obj, 0, RegExp.$2);
+                    obj.sts.subtree[line] = tree.skillIds;
                 } else if(data.match(case4) || data.match(case4j)) {
                     obj.sts.costs.push(this.setCost('item', RegExp.$1, RegExp.$2));
                 } else if(data.match(case4a) || data.match(case4aj)) {
@@ -2332,11 +2350,17 @@ function Scene_STS() {
     Game_Actor.prototype.getSkillTree = function(tree) {
         var results = [];
         var list = tree.sts.skillIds;
+        var subtree = tree.sts.subtree;
         var nextlist = [];
         var count = 0;
         while (count < FTKR.STS.MAX_DEVSKILL_COUNT) {
             dupCount = 0;
             var text = '';
+            if (subtree[count + 1]) {
+              subtree[count + 1].forEach( function(sub, i){
+                  if (sub) list[i] = sub;
+              });
+            }
             for (var i = 0; i < FTKR.STS.skillTree.maxCols - dupCount; i++) {
                 var id = list[i];
                 if (!id) {
@@ -2372,7 +2396,7 @@ function Scene_STS() {
                     }
                 }
             }
-            if (!nextlist.length) break;
+            if (!nextlist.length && subtree.length - 1 < count + 1) break;
             list = nextlist;
             nextlist = [];
             count++;
