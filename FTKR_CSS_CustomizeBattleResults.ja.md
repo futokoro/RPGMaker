@@ -149,6 +149,16 @@ FTKR_CSS_CustomizeBattleResults.js
 ### 表示するステータス
 `Actor Status Text1` から `Actor Status Width Rate`の設定方法は、[FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md)と同じです。
 
+### 追加コード
+当プラグインでは以下のコードをプラグインパラメータ`Actor Status Text*`に使用できます。
+
+コード：`message2`
+
+デフォルトで設定している`message`コードから変更することで、レベルアップ時のスキル習得のメッセージを表示させることができます。
+
+ただし、表示行数が２行に変わるため、使用する場合はプラグインパラメータ`Actor Cursor Lines`の設定の見直しが必要です。
+
+
 その他のプラグインパラメータは、[共通設定](#共通設定)を参照してください。
 
 ![画像](image/FTKR_CSS_CustomizeBattleResults/n06_001.png)
@@ -265,7 +275,8 @@ CBR_SHOW_BATTLE_RESULT
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.1.0](FTKR_CSS_CustomizeBattleResults.js) | 2017/07/13 | 同じアイテムの場合に纏めて表示する機能を追加 |
+| [ver1.2.0](FTKR_CSS_CustomizeBattleResults.js) | 2017/08/22 | レベルアップ時のスキル習得状態を表示するメッセージコードを追加 |
+| ver1.1.0 | 2017/07/13 | 同じアイテムの場合に纏めて表示する機能を追加 |
 | ver1.0.2 | 2017/06/23 | 入手経験値が29以下の場合に、アクターが経験値を入手できない不具合を修正<br>戦績画面タイトルの文字列の表示位置を修正<br>プラグインパラメータに@typeを適用 |
 | ver1.0.1 | 2017/06/08 | 不要なプラグインパラメータを削除 |
 | ver1.0.0 | 2017/06/07 | 初版作成 |

@@ -3,8 +3,8 @@
 // FTKR_CSS_CustomizeBattleResults.js
 // 作成者     : フトコロ
 // 作成日     : 2017/06/07
-// 最終更新日 : 2017/07/13
-// バージョン : v1.1.0
+// 最終更新日 : 2017/08/22
+// バージョン : v1.2.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -14,7 +14,7 @@ var FTKR = FTKR || {};
 FTKR.CBR = FTKR.CBR || {};
 
 /*:
- * @plugindesc v1.1.0 カスタム可能な戦闘結果画面を表示する
+ * @plugindesc v1.2.0 カスタム可能な戦闘結果画面を表示する
  * @author フトコロ
  *
  * @param --タイトル設定--
@@ -293,6 +293,19 @@ FTKR.CBR = FTKR.CBR || {};
  * @type number
  * @default 0
  * 
+ * @param --CSSメッセージの設定--
+ * @default
+ * 
+ * @param Display LevelUp Message
+ * @desc レベルアップ時のメッセージを設定します。
+ * %1 - アクター名, %2 - 現在レベル, %3 - 上昇したレベル
+ * @default \C[17]%3 Level Up!
+ * 
+ * @param Display NewSkill Message
+ * @desc レベルアップ時のスキル習得メッセージを設定します。
+ * %1 - アクター名, %2 - 習得したスキル名, %3 - 習得したスキル数
+ * @default \C[17]%3 New Skill!
+ * 
  * @help 
  *-----------------------------------------------------------------------------
  * 概要
@@ -300,7 +313,8 @@ FTKR.CBR = FTKR.CBR || {};
  * 本プラグインを実装することで、戦闘終了時にカスタム可能な戦闘結果画面を
  * 表示します。
  * 
- * 
+ * マニュアルは以下のサイトをご覧ください。
+ * https://github.com/futokoro/RPGMaker/blob/master/FTKR_CSS_CustomizeBattleResults.ja.md
  * 
  *-----------------------------------------------------------------------------
  * 設定方法
@@ -328,7 +342,10 @@ FTKR.CBR = FTKR.CBR || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
- * v1.1.0 - 2017/07/13 - 機能追加
+ * v1.2.0 - 2017/08/22 : 機能追加
+ *    1. レベルアップ時のスキル習得状態を表示するメッセージコードを追加。
+ * 
+ * v1.1.0 - 2017/07/13 : 機能追加
  *    1. 同じアイテムを入手した場合にまとめて表示する機能を追加。
  * 
  * v1.0.2 - 2017/06/23 : 不具合修正
@@ -412,7 +429,11 @@ if (Imported.FTKR_CSS) (function() {
             hideFrame   :Number(parameters['Item Hide Frame'] || 0),
             cursorHeight:Number(parameters['Item Cursor Lines'] || 0),
             combine     :Number(parameters['Combine Same Items'] || 0),
-        }
+        },
+        message:{
+            levelUp     :String(parameters['Display LevelUp Message'] || ''),
+            newSkill    :String(parameters['Display NewSkill Message'] || ''),
+        },
     };
 
     Scene_Battle.CBR_SPLIT_NUMBER = 30;
@@ -481,6 +502,56 @@ if (Imported.FTKR_CSS) (function() {
                 BattleManager.showCBR();
                 break;
         }
+    };
+
+    //=============================================================================
+    // FTKR_CustomSimpleActorStatus.jsの修正
+    //=============================================================================
+    var _CBR_Window_Base_drawCssActorStatusBase_B = Window_Base.prototype.drawCssActorStatusBase_B;
+    Window_Base.prototype.drawCssActorStatusBase_B = function(index, actor, x, y, width, status, lss, css) {
+        switch (status.toUpperCase()) {
+            case 'MESSAGE2':
+                return this.drawCssActorMessageCBR(actor, x, y, width);
+            default:
+                return _CBR_Window_Base_drawCssActorStatusBase_B.call(this, index, actor, x, y, width, status, lss, css);
+        }
+    };
+
+    // アクターの状態の変化に対するメッセージの表示関数
+    Window_Base.prototype.drawCssActorMessageCBR = function(actor, x, y, width) {
+        if (!actor._levelUpCount) return 1;
+        var text = FTKR.CBR.message.levelUp.format(actor.name(), actor.level, actor._levelUpCount);
+        if (actor._newSkills && actor._newSkills.length) {
+            var newSkills= [];
+            actor._newSkills.forEach(function(newSkill){
+                if (newSkill) newSkills.push(newSkill.name);
+            });
+            skills = newSkills.join();
+            var text2 = FTKR.CBR.message.newSkill.format(actor.name(), skills, actor._newSkills.length);
+        }
+        this.drawTextEx(text, x, y);
+        if (text2) this.drawTextEx(text2, x, y + this.lineHeight());
+        actor._levelUpMessage = true;
+        return 2;
+    };
+
+    var _CBR_Game_Actor_findNewSkills = Game_Actor.prototype.findNewSkills;
+    Game_Actor.prototype.findNewSkills = function(lastSkills) {
+        if (!this._newSkills) this._newSkills = [];
+        this._newSkills = this._newSkills.concat(_CBR_Game_Actor_findNewSkills.call(this, lastSkills));
+        return this._newSkills;
+    };
+
+    var _CBR_Scene_Base_start = Scene_Base.prototype.start;
+    Scene_Base.prototype.start = function() {
+        if ($gameParty) {
+            $gameParty.members().forEach( function(actor){
+                if (actor && actor._levelUpMessage) {
+                    actor._newSkills = [];
+                  }
+            });
+        }
+        _CBR_Scene_Base_start.call(this);
     };
 
     //=============================================================================
