@@ -3,8 +3,8 @@
 // FTKR_ExSvMotion.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/19
-// 最終更新日 : 2017/07/09
-// バージョン : v1.2.4
+// 最終更新日 : 2017/08/24
+// バージョン : v1.2.5
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ESM = FTKR.ESM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.4 SVキャラのモーションを拡張するプラグイン
+ * @plugindesc v1.2.5 SVキャラのモーションを拡張するプラグイン
  * @author フトコロ
  *
  * @noteParam ESM_画像
@@ -584,9 +584,11 @@ FTKR.ESM = FTKR.ESM || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
- * v1.2.4 - 2017/07/09 : 不具合修正
+ * v1.2.5 - 2017/08/24 : 不具合修正
+ *    1. メモ欄の読み取り処理を見直し。
+ * 
+ * v1.2.4 - 2017/07/07 : 不具合修正
  *    1. 状態モーションのescapeが、戦闘時以外でも有効になる不具合を修正。
- *    2. 戦闘終了時に、アクターのアクションをリセットする機能を追加。
  * 
  * v1.2.3 - 2017/05/19 : 不具合修正
  *    1. 防御モーションの優先度が反映されない不具合を修正。
@@ -728,11 +730,13 @@ Game_BattlerBase.ESM_MOTION_NUMBER = 16;
 //objのメモ欄から <metacode: x> の値を読み取って配列で返す
 var readObjectMeta = function(obj, metacodes) {
     if (!obj) return false;
+    var match = {};
     metacodes.some(function(metacode){
         var metaReg = new RegExp('<' + metacode + ':[ ]*(.+)>', 'i');
-        return obj.note.match(metaReg);
+        match = metaReg.exec(obj.note);
+        return match;
     }); 
-    return RegExp.$1 ? RegExp.$1 : false;
+    return match ? match[1] : '';
 };
 
 //objのメモ欄から <metacode> があるか真偽を返す
@@ -786,19 +790,6 @@ FTKR.evalFormula = function(formula) {
     }
 };
 }
-
-//=============================================================================
-// 戦闘終了時にアクターのアクションをリセット
-//=============================================================================
-
-FTKR.ESM.BattleManager_updateBattleEnd = BattleManager.updateBattleEnd;
-BattleManager.updateBattleEnd = function() {
-    $gameParty.members().forEach( function(member){
-        member.clearActions();
-        member._actionState = '';
-    });
-    FTKR.ESM.BattleManager_updateBattleEnd.call(this);
-};
 
 //=============================================================================
 // 基本モーションの設定を変更
