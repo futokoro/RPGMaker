@@ -3,8 +3,8 @@
 // FTKR_ExVariablesChange.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/18
-// 最終更新日 : 2017/06/08
-// バージョン : v1.2.2
+// 最終更新日 : 2017/08/24
+// バージョン : v1.2.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EVC = FTKR.EVC || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.2 変数の操作を拡張するプラグイン
+ * @plugindesc v1.2.3 変数の操作を拡張するプラグイン
  * @author フトコロ
  *
  * @param --アイテム増減時--
@@ -335,6 +335,9 @@ FTKR.EVC = FTKR.EVC || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.2.3 - 2017/08/24 : 不具合修正
+ *    1. アクターの職業IDを正しく取得できていない不具合を修正。
+ * 
  * v1.2.2 - 2017/06/07 : 不具合修正
  *    1. 被ダメージ時の処理タイミングを修正。(v1.2.1の修正による不具合)
  * 
@@ -505,7 +508,7 @@ FTKR.EVC = FTKR.EVC || {};
         if(target.isActor()) {
             return result.concat(
                 readSplitAnyEntrapmentCode(target.actor(), codeTitles),
-                readSplitAnyEntrapmentCode($dataClasses[target.actor().classId], codeTitles),
+                readSplitAnyEntrapmentCode($dataClasses[target._classId], codeTitles),
                 readItemsEntrapmentCodeSplitTotal(target.equips(), codeTitles),
                 readItemsEntrapmentCodeSplitTotal(target.states(), codeTitles)
             );
