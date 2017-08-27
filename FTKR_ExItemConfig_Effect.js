@@ -3,8 +3,8 @@
 // FTKR_ExItemConfig_Effect.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/14
-// 最終更新日 : 2017/08/04
-// バージョン : v1.1.1
+// 最終更新日 : 2017/08/27
+// バージョン : v1.2.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EIE = FTKR.EIE || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.1 アイテムとスキルの使用効果を拡張するプラグイン
+ * @plugindesc v1.2.0 アイテムとスキルの使用効果を拡張するプラグイン
  * @author フトコロ
  *
  * @help
@@ -29,7 +29,7 @@ FTKR.EIE = FTKR.EIE || {};
  * 
  * 2. 使用効果の効果量にJS計算式が使用できます。
  * 
- * 3. 使用効果が発生させるための有効条件を設定できます。
+ * 3. 使用効果を発生させるための有効条件を設定できます。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -39,6 +39,9 @@ FTKR.EIE = FTKR.EIE || {};
  *    ください。
  * 
  * 2. 本プラグインは、FTKR_SkillExpansion.jsと組み合わせて使用できません。
+ * 
+ * 3. YEP_BattleEngineCore.jsと組み合わせて使用する場合は、
+ *    本プラグインを、YEP_BattleEngineCore.jsよりも下に配置してください。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -122,6 +125,9 @@ FTKR.EIE = FTKR.EIE || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.2.0 - 2017/08/27 : 機能追加
+ *    1. コモンイベントに有効条件を設定する機能を追加。
  * 
  * v1.1.1 - 2017/08/04 : 不要なコメント削除
  * 
@@ -379,6 +385,27 @@ Game_Action.prototype.setSepEffectValue1 = function(effect) {
 Game_Action.prototype.setSepEffectValue2 = function(effect) {
     return effect.sepValue2 ? FTKR.evalFormula(effect.sepValue2) : effect.baseValue2;
 };
+
+//書き換え
+Game_Action.prototype.applyGlobal = function() {
+    if (Imported.YEP_BattleEngineCore && $gameParty.inBattle()) return;
+    this.item().effects.forEach(function(effect) {
+        if (effect.code === Game_Action.EFFECT_COMMON_EVENT && this.evalEffectEnabled(effect)) {
+            $gameTemp.reserveCommonEvent(effect.dataId);
+        }
+    }, this);
+};
+
+if (Imported.YEP_BattleEngineCore) {
+BattleManager.actionActionCommonEvent = function() {
+    this._action.item().effects.forEach(function(effect) {
+        if (effect.code === Game_Action.EFFECT_COMMON_EVENT && this._action.evalEffectEnabled(effect)) {
+            $gameTemp.reserveCommonEvent(effect.dataId);
+        }
+    }, this);
+    return false;
+};
+}
 
 //=============================================================================
 // Window_BattleLog
