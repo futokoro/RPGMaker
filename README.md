@@ -13,6 +13,7 @@
 1. [敵グループ](#敵グループ)
 1. [バトル](#バトル)
 1. [イベント](#イベント)
+1. [マップ](#マップ)
 1. [ミニゲーム](#ミニゲーム)
 1. [デバッグ](#デバッグ)
 1. [その他備忘録](#その他備忘録)
@@ -161,6 +162,14 @@
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_EventSmoothStart](FTKR_EventSmoothStart.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_EventSmoothStart.js) | 2017/06/25 | イベント起動時のプレイヤーの移動停止を無視する |
+
+[目次に戻る](#目次)
+
+# マップ
+
+| プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
+|:-----------|:-----------:|:-------------|:-------------|:-------------|
+| [FTKR_ExTileSettingForRegion](FTKR_ExTileSettingForRegion.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExTileSettingForRegion.js) | 2017/08/27 | 指定したリージョンの通行設定を一時的に変更する |
 
 [目次に戻る](#目次)
 
