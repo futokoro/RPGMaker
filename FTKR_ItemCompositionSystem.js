@@ -3,8 +3,8 @@
 // FTKR_ItemConpositionSystem.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/08
-// 最終更新日 : 2017/08/21
-// バージョン : v1.1.0
+// 最終更新日 : 2017/08/29
+// バージョン : v1.2.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ICS = FTKR.ICS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.0 アイテム合成システム
+ * @plugindesc v1.2.0 アイテム合成システム
  * @author フトコロ
  *
  * @param --基本設定--
@@ -123,14 +123,17 @@ FTKR.ICS = FTKR.ICS || {};
  * 
  * @param Item Cmd Name
  * @desc 「アイテム」コマンドの表示内容を設定します。
+ * ';'で区切ると、素材選択時とレシピ選択時の表示が変わります。
  * @default アイテム
  * 
  * @param Weapon Cmd Name
  * @desc 「武器」コマンドの表示内容を設定します。
+ * ';'で区切ると、素材選択時とレシピ選択時の表示が変わります。
  * @default 武器
  * 
  * @param Armor Cmd Name
  * @desc 「防具」コマンドの表示内容を設定します。
+ * ';'で区切ると、素材選択時とレシピ選択時の表示が変わります。
  * @default 防具
  * 
  * @param --素材数指定ウィンドウの設定--
@@ -739,6 +742,11 @@ FTKR.ICS = FTKR.ICS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.2.0 - 2017/08/29 : 不具合修正、機能追加
+ *    1. １つのアイテムに複数設定したレシピを正しく読み取れない不具合を修正。
+ *    2. 合成コマンドの、「アイテム」「武器」「防具」の表示名を
+ *       素材選択時とレシピ選択時で変える機能を追加。
+ * 
  * v1.1.0 - 2017/08/22 : 機能追加
  *    1. 合成コマンドの、「アイテム」「武器」「防具」の表示名を
  *       プラグインパラメータで設定できる機能を追加。
@@ -1002,38 +1010,41 @@ function Game_IcsRecipeBook() {
         return newObj;
     };
 
-    //挟み込み形式のメタデータを読み取ってtextを返す
-    var readEntrapmentCodeToText = function(obj, codeTitles) {
-        regs = convertEntrapmentRegArray(codeTitles);
+    var readEntrapmentCodeToTextEx = function(obj, codeTitles) {
+        var regs = convertEntrapmentRegArrayEx(codeTitles);
         var notedata = obj.note.split(/[\r\n]+/);
         var setMode = 'none';
-        var text = '';
-        notedata.forEach( function(line) {
-            if (testRegs(line, regs, 'start')) {
+        var results = [];
+
+        for (var i = 0; i < notedata.length; i++) {
+            var line = notedata[i];
+            if (matchRegs(line, regs, 'start')) {
+                var data = {
+                    text:''
+                };
                 setMode = 'read';
-            } else if (testRegs(line, regs, 'end')) {
+            } else if (matchRegs(line, regs, 'end')) {
                 setMode = 'none';
+                results.push(data);
             } else if (setMode === 'read') {
-                text += line + ';';
+                data.text += line + ';';
             }
-        });
-        return text;
+        }
+        return results;
     };
 
-    //文字列の配列を挟み込み形式用の正規表現オブジェクトの配列に変換する
-    var convertEntrapmentRegArray = function(codeTitles) {
+    var convertEntrapmentRegArrayEx = function(codeTitles) {
         return codeTitles.map(function(codeTitle) {
             return {
                 start:new RegExp('<' + codeTitle + '>', 'i'),
-                end:new RegExp('<\/' + codeTitle + '>', 'i')
+                end  :new RegExp('<\/' + codeTitle + '>', 'i')
             };
         });
     };
 
-    //正規表現オブジェクトの配列regsとdataをテストする
-    var testRegs = function(data, regs, prop) {
-        return regs.some(function(reg) {
-            return prop ? reg[prop].test(data) : reg.test(data);
+    var matchRegs = function(data, regs, prop) {
+        return regs.some(function(reg){
+            return prop ? data.match(reg[prop]) : data.match(reg);
         });
     };
 
@@ -1283,8 +1294,9 @@ function Game_IcsRecipeBook() {
                 } else if (hasObjectMeta(obj, ['ICS ARMOR', 'ICS 防具'])) {
                     obj.ics.setDataClass('armor');
                 }
-                var data = readEntrapmentCodeToText(obj, ['ICS RECIPES', 'ICS レシピ']);
-                this.setIcsRecipes(obj, data);
+                var datas = readEntrapmentCodeToTextEx(obj, ['ICS RECIPES', 'ICS レシピ']);
+                if(datas) console.log(datas);
+                this.setIcsRecipes(obj, datas);
             }
         }
     };
@@ -1298,14 +1310,15 @@ function Game_IcsRecipeBook() {
                 obj.ics.setCategory(readObjectMeta(obj, ['ICS CATEGORY','ICS カテゴリー']));
                 obj.ics.setRank(Number(readObjectMeta(obj, ['ICS RANK','ICS ランク'])));
 
-                var datas = readEntrapmentCodeToText(obj, ['ICS RECIPES', 'ICS レシピ']);
+                var datas = readEntrapmentCodeToTextEx(obj, ['ICS RECIPES', 'ICS レシピ']);
                 this.setIcsRecipes(obj, datas);
             }
         }
     };
 
     DataManager.setIcsRecipes = function(obj, metaDatas) {
-        var datas = metaDatas.split(';');
+      for (var t = 0; t < metaDatas.length; t++) {
+        var datas = metaDatas[t].text.split(';');
         var recipe = new Game_IcsRecipe();
         for (var i = 0; i < datas.length; i++) {
             var match = /(.+):[ ]*(.+)/.exec(datas[i]);
@@ -1367,6 +1380,7 @@ function Game_IcsRecipeBook() {
             }
         }
         obj.ics.addRecipe(recipe);
+      }
     };
 
     FTKR.ICS.DataManager_makeSaveContents = DataManager.makeSaveContents;
@@ -1552,7 +1566,7 @@ function Game_IcsRecipeBook() {
     };
 
     Game_Composit.prototype.hasRecipe = function() {
-        return this.recipe(0).materials().length;
+        return this.recipe(0) && this.recipe(0).materials().length;
     };
 
     //=============================================================================
@@ -1912,17 +1926,22 @@ function Game_IcsRecipeBook() {
         },this);
     };
 
+    Window_IcsCommand.prototype.icsCmd = function(cmd) {
+        var cmds = cmd.split(';');
+        return this._showResipe && cmds.length > 1 ? cmds[1] : cmds[0];
+    };
+
     Window_IcsCommand.prototype.setCommand = function(symbol) {
         var format = FTKR.ICS.command.format;
         switch (symbol){
             case 'item':
-                this.addCommand(format.item,   'item');
+                this.addCommand(this.icsCmd(format.item),   'item');
                 break;
             case 'weapon':
-                this.addCommand(format.weapon, 'weapon');
+                this.addCommand(this.icsCmd(format.weapon),   'weapon');
                 break;
             case 'armor':
-                this.addCommand(format.armor,  'armor');
+                this.addCommand(this.icsCmd(format.armor),   'armor');
                 break;
             case 'slot':
                 this.addCommand(format.slot, 'slot');
