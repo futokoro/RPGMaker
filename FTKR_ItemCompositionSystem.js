@@ -322,6 +322,18 @@ FTKR.ICS = FTKR.ICS || {};
  * @desc 確認コマンドの「実行しない」の表示内容を記述します。
  * @default 実行しない
  *
+ * @param Confirmation Opacity
+ * @desc 確認ウィンドウの透明率を指定します。
+ * @default 192
+ * @type number
+ *
+ * @param Confirmation Frame Hide
+ * @desc 確認ウィンドウの枠を非表示にするか。
+ * @type select
+ * @default 表示する(show)
+ * @option 表示する(show)
+ * @option 表示しない(hide)
+ *
  * @param --合成結果ウィンドウの設定--
  * @default
  *
@@ -353,6 +365,18 @@ FTKR.ICS = FTKR.ICS || {};
  * @desc 確認コマンドの表示内容を記述します。
  * @default 確認
  * 
+ * @param Result Opacity
+ * @desc 合成結果ウィンドウの透明率を指定します。
+ * @default 192
+ * @type number
+ *
+ * @param Result Frame Hide
+ * @desc 合成結果ウィンドウの枠を非表示にするか。
+ * @type select
+ * @default 表示する(show)
+ * @option 表示する(show)
+ * @option 表示しない(hide)
+ *
  * @param --合成成功時のSEの設定--
  * @default
  * 
@@ -1043,6 +1067,8 @@ function Game_IcsRecipeBook() {
     FTKR.ICS.conf = {
         okFormat      :String(parameters['Confirmation Ok Format'] || ''),
         cancelFormat  :String(parameters['Confirmation Cancel Format'] || ''),
+        opacity       :Number(parameters['Confirmation Opacity'] || 192),
+        frame         :String(parameters['Confirmation Frame Hide'] || '表示する(show)'),
     };
 
     //合成結果ウィンドウ設定
@@ -1054,6 +1080,8 @@ function Game_IcsRecipeBook() {
         reset         :String(parameters['Result Reset'] || ''),
         lost          :String(parameters['Result Lost'] || ''),
         okFormat      :String(parameters['Result Ok Format'] || ''),
+        opacity       :Number(parameters['Result Opacity'] || 192),
+        frame         :String(parameters['Result Frame Hide'] || '表示する(show)'),
     };
 
     //SE
@@ -2694,7 +2722,14 @@ function Game_IcsRecipeBook() {
         this.drawTextEx(FTKR.ICS.confTitle.format, 0, 0);
     };
 
+    Window_IcsConfTitle.prototype.standardBackOpacity = function() {
+        return FTKR.ICS.conf.opacity;
+    };
 
+    Window_IcsConfTitle.prototype._refreshFrame = function() {
+        if (FTKR.ICS.comf.frame === '表示する(show)') Window.prototype._refreshFrame.call(this);
+    };
+  
     //=============================================================================
     // Window_IcsConf
     //=============================================================================
@@ -2719,6 +2754,14 @@ function Game_IcsRecipeBook() {
         return 2;
     };
 
+    Window_IcsConf.prototype.standardBackOpacity = function() {
+        return FTKR.ICS.conf.opacity;
+    };
+
+    Window_IcsConf.prototype._refreshFrame = function() {
+        if (FTKR.ICS.comf.frame === '表示する(show)') Window.prototype._refreshFrame.call(this);
+    };
+  
     Window_IcsConf.prototype.maxItems = function() {
         return this._data ? this._data.length : 1;
     };
@@ -2777,6 +2820,14 @@ function Game_IcsRecipeBook() {
         this.clearWindow();
     };
 
+    Window_IcsResult.prototype.standardBackOpacity = function() {
+        return FTKR.ICS.result.opacity;
+    };
+
+    Window_IcsResult.prototype._refreshFrame = function() {
+        if (FTKR.ICS.result.frame === '表示する(show)') Window.prototype._refreshFrame.call(this);
+    };
+  
     Window_IcsResult.prototype.clearWindow = function () {
         this._item = null;
         this._number = 0;
@@ -2841,6 +2892,14 @@ function Game_IcsRecipeBook() {
         return 1;
     };
 
+    Window_IcsResultConf.prototype.standardBackOpacity = function() {
+        return FTKR.ICS.result.opacity;
+    };
+
+    Window_IcsResultConf.prototype._refreshFrame = function() {
+        if (FTKR.ICS.result.frame === '表示する(show)') Window.prototype._refreshFrame.call(this);
+    };
+  
     Window_IcsResultConf.prototype.maxItems = function() {
         return this._data ? this._data.length : 1;
     };
