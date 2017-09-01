@@ -3,8 +3,8 @@
 // FTKR_ItemConpositionSystem.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/08
-// 最終更新日 : 2017/08/29
-// バージョン : v1.2.0
+// 最終更新日 : 2017/09/01
+// バージョン : v1.3.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ICS = FTKR.ICS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.0 アイテム合成システム
+ * @plugindesc v1.3.0 アイテム合成システム
  * @author フトコロ
  *
  * @param --基本設定--
@@ -94,6 +94,18 @@ FTKR.ICS = FTKR.ICS || {};
  * @desc 合成画面のタイトルの表示内容を設定します。
  * @default \c[16]合成
  * 
+ * @param Comp Title Opacity
+ * @desc 合成タイトルウィンドウの透明率を指定します。
+ * @default 192
+ * @type number
+ *
+ * @param Comp Title Frame Hide
+ * @desc 合成タイトルウィンドウの枠を非表示にするか。
+ * @type select
+ * @default 表示する(show)
+ * @option 表示する(show)
+ * @option 表示しない(hide)
+ *
  * @param --合成コマンドウィンドウの設定--
  *
  * @param Command List
@@ -136,6 +148,33 @@ FTKR.ICS = FTKR.ICS || {};
  * ';'で区切ると、素材選択時とレシピ選択時の表示が変わります。
  * @default 防具
  * 
+ * @param Comp Cmd Opacity
+ * @desc 合成コマンドウィンドウの透明率を指定します。
+ * @default 192
+ * @type number
+ *
+ * @param Comp Cmd Frame Hide
+ * @desc 合成コマンドウィンドウの枠を非表示にするか。
+ * @type select
+ * @default 表示する(show)
+ * @option 表示する(show)
+ * @option 表示しない(hide)
+ *
+ * @param --アイテムリストウィンドウの設定--
+ * @default
+ *
+ * @param Item List Opacity
+ * @desc アイテムリストウィンドウの透明率を指定します。
+ * @default 192
+ * @type number
+ *
+ * @param Item List Frame Hide
+ * @desc アイテムリストウィンドウの枠を非表示にするか。
+ * @type select
+ * @default 表示する(show)
+ * @option 表示する(show)
+ * @option 表示しない(hide)
+ *
  * @param --素材数指定ウィンドウの設定--
  * @default
  *
@@ -149,14 +188,38 @@ FTKR.ICS = FTKR.ICS || {};
  * 0 - 表示させない, 1 - 表示する
  * @default 1
  * 
- * @param --素材スロットウィンドウの設定--
+ * @param Number Opacity
+ * @desc 素材数指定ウィンドウの透明率を指定します。
+ * @default 192
+ * @type number
+ *
+ * @param Number Frame Hide
+ * @desc 素材数指定ウィンドウの枠を非表示にするか。
+ * @type select
+ * @default 表示する(show)
+ * @option 表示する(show)
+ * @option 表示しない(hide)
+ *
+ * @param --スロットタイトルウィンドウの設定--
  * @default
  *
  * @param Slot Title Format
- * @desc 素材スロットウィンドウのタイトル表示内容を設定します。
+ * @desc スロットタイトルウィンドウのタイトル表示内容を設定します。
  * @default \c[16]合成アイテム
  * 
- * @param --スロットウィンドウの設定--
+ * @param Slot Title Opacity
+ * @desc スロットタイトルウィンドウの透明率を指定します。
+ * @default 192
+ * @type number
+ *
+ * @param Slot Title Frame Hide
+ * @desc スロットタイトルウィンドウの枠を非表示にするか。
+ * @type select
+ * @default 表示する(show)
+ * @option 表示する(show)
+ * @option 表示しない(hide)
+ *
+ * @param --素材スロットウィンドウの設定--
  * @default
  *
  * @param Empty Format
@@ -171,6 +234,18 @@ FTKR.ICS = FTKR.ICS || {};
  * @desc アイテムをすべて戻すコマンドの表示名を設定します。
  * @default アイテムをすべて戻す
  * 
+ * @param Slot Opacity
+ * @desc 素材スロットウィンドウの透明率を指定します。
+ * @default 192
+ * @type number
+ *
+ * @param Slot Frame Hide
+ * @desc 素材スロットウィンドウの枠を非表示にするか。
+ * @type select
+ * @default 表示する(show)
+ * @option 表示する(show)
+ * @option 表示しない(hide)
+ *
  * @param --合成情報タイトルウィンドウの設定--
  * @default
  *
@@ -178,7 +253,19 @@ FTKR.ICS = FTKR.ICS || {};
  * @desc 合成情報ウィンドウのタイトル表示内容を設定します。
  * @default \c[16]合成情報
  * 
- * @param --合成情報タイトルウィンドウの設定--
+ * @param Status Title Opacity
+ * @desc 合成情報タイトルウィンドウの透明率を指定します。
+ * @default 192
+ * @type number
+ *
+ * @param Status Title Frame Hide
+ * @desc 合成情報タイトルウィンドウの枠を非表示にするか。
+ * @type select
+ * @default 表示する(show)
+ * @option 表示する(show)
+ * @option 表示しない(hide)
+ *
+ * @param --合成情報ウィンドウの設定--
  * @default
  *
  * @param Unkouwn Item Name
@@ -208,6 +295,18 @@ FTKR.ICS = FTKR.ICS || {};
  * @desc 必要素材を表示する時のタイトル文字列を設定します。
  * @default 必要素材
  * 
+ * @param Status Opacity
+ * @desc 合成情報ウィンドウの透明率を指定します。
+ * @default 192
+ * @type number
+ *
+ * @param Status Frame Hide
+ * @desc 合成情報ウィンドウの枠を非表示にするか。
+ * @type select
+ * @default 表示する(show)
+ * @option 表示する(show)
+ * @option 表示しない(hide)
+ *
  * @param --確認ウィンドウの設定(Confirmation Window)--
  * @default
  *
@@ -742,6 +841,9 @@ FTKR.ICS = FTKR.ICS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.3.0 - 2017/09/01 : 機能追加
+ *    1. ウィンドウ背景の透明度と枠の有無を設定する機能を追加。
+ * 
  * v1.2.0 - 2017/08/29 : 不具合修正、機能追加
  *    1. １つのアイテムに複数設定したレシピを正しく読み取れない不具合を修正。
  *    2. 合成コマンドの、「アイテム」「武器」「防具」の表示名を
@@ -856,11 +958,15 @@ function Game_IcsRecipeBook() {
     //合成タイトルウィンドウ設定
     FTKR.ICS.compositTitle = {
         format        :String(parameters['Composit Title Format'] || ''),
+        opacity       :Number(parameters['Comp Title Opacity'] || 192),
+        frame         :String(parameters['Comp Title Frame Hide'] || '表示する(show)'),
     };
 
     //合成コストウィンドウ設定
     FTKR.ICS.cost = {
         format        :String(parameters['Composit Cost Format'] || ''),
+        opacity       :Number(parameters['Comp Title Opacity'] || 192),
+        frame         :String(parameters['Comp Title Frame Hide'] || '表示する(show)'),
     };
 
     //合成コマンド設定
@@ -876,18 +982,30 @@ function Game_IcsRecipeBook() {
             item      :String(parameters['Item Cmd Name'] || ''),
             weapon    :String(parameters['Weapon Cmd Name'] || ''),
             armor     :String(parameters['Armor Cmd Name'] || ''),
-          },
+        },
+        opacity       :Number(parameters['Comp Cmd Opacity'] || 192),
+        frame         :String(parameters['Comp Cmd Frame Hide'] || '表示する(show)'),
+    };
+
+    //合成コストウィンドウ設定
+    FTKR.ICS.itemList = {
+        opacity       :Number(parameters['Item List Opacity'] || 192),
+        frame         :String(parameters['Item List Frame Hide'] || '表示する(show)'),
     };
 
     //素材数指定ウィンドウ設定
     FTKR.ICS.number = {
         showButton    :Number(parameters['Show Number Button'] || 0),
         dispMaterials :Number(parameters['Display Materials On Number'] || 0),
+        opacity       :Number(parameters['Number Opacity'] || 192),
+        frame         :String(parameters['Number Frame Hide'] || '表示する(show)'),
     };
 
     //素材スロットタイトルウィンドウ設定
     FTKR.ICS.slotTitle = {
         format        :String(parameters['Slot Title Format'] || ''),
+        opacity       :Number(parameters['Slot Title Opacity'] || 192),
+        frame         :String(parameters['Slot Title Frame Hide'] || '表示する(show)'),
     };
 
     //素材スロットウィンドウ設定
@@ -895,11 +1013,15 @@ function Game_IcsRecipeBook() {
         emptyIcon     :String(parameters['Empty Icon'] || ''),
         emptyFormat   :String(parameters['Empty Format'] || ''),
         return        :String(parameters['Return All Slot'] || ''),
+        opacity       :Number(parameters['Slot Opacity'] || 192),
+        frame         :String(parameters['Slot Frame Hide'] || '表示する(show)'),
     };
 
     //合成情報タイトルウィンドウ設定
     FTKR.ICS.statusTitle = {
         format        :String(parameters['Status Title Format'] || ''),
+        opacity       :Number(parameters['Status Title Opacity'] || 192),
+        frame         :String(parameters['Status Title Frame Hide'] || '表示する(show)'),
     };
 
     //合成情報ウィンドウ設定
@@ -910,6 +1032,8 @@ function Game_IcsRecipeBook() {
         recipeTitle   :String(parameters['Recipe Title Format'] || ''),
         dispDiff      :Number(parameters['Display Difficulty'] || 0),
         diffFormat    :String(parameters['Difficulty Format'] || ''),
+        opacity       :Number(parameters['Status Opacity'] || 192),
+        frame         :String(parameters['Status Frame Hide'] || '表示する(show)'),
     };
 
     //確認ウィンドウ設定
@@ -1882,6 +2006,14 @@ function Game_IcsRecipeBook() {
         this.drawTextEx(text, 0, 0);
     };
 
+    Window_IcsCompsiTitle.prototype.standardBackOpacity = function() {
+        return FTKR.ICS.compositTitle.opacity;
+    };
+
+    Window_IcsCompsiTitle.prototype._refreshFrame = function() {
+        if (FTKR.ICS.compositTitle.frame === '表示する(show)') Window.prototype._refreshFrame.call(this);
+    };
+  
     //=============================================================================
     // Window_IcsCommand
     //=============================================================================
@@ -1915,6 +2047,14 @@ function Game_IcsRecipeBook() {
         return 5;
     };
 
+    Window_IcsCommand.prototype.standardBackOpacity = function() {
+        return FTKR.ICS.command.opacity;
+    };
+
+    Window_IcsCommand.prototype._refreshFrame = function() {
+        if (FTKR.ICS.command.frame === '表示する(show)') Window.prototype._refreshFrame.call(this);
+    };
+  
     Window_IcsCommand.prototype.maxCols = function() {
         return Math.max(FTKR.ICS.command.maxCols, 1);
     };
@@ -1997,6 +2137,14 @@ function Game_IcsRecipeBook() {
         this._showResipe = false;
     };
 
+    Window_IcsItemList.prototype.standardBackOpacity = function() {
+        return FTKR.ICS.itemList.opacity;
+    };
+
+    Window_IcsItemList.prototype._refreshFrame = function() {
+        if (FTKR.ICS.itemList.frame === '表示する(show)') Window.prototype._refreshFrame.call(this);
+    };
+  
     Window_IcsItemList.prototype.isEnabled = function(item) {
         return this._showResipe ? $gameParty.hasRequiredRecipeMaterials(item) : item;
     };
@@ -2087,6 +2235,14 @@ function Game_IcsRecipeBook() {
         this.drawTextEx(text, 0, 0);
     };
 
+    Window_IcsCompsiSlotTitle.prototype.standardBackOpacity = function() {
+        return FTKR.ICS.slotTitle.opacity;
+    };
+
+    Window_IcsCompsiSlotTitle.prototype._refreshFrame = function() {
+        if (FTKR.ICS.slotTitle.frame === '表示する(show)') Window.prototype._refreshFrame.call(this);
+    };
+  
     //=============================================================================
     // Window_IcsCompsiSlot
     //=============================================================================
@@ -2113,6 +2269,14 @@ function Game_IcsRecipeBook() {
         return 1;
     };
 
+    Window_IcsCompsiSlot.prototype.standardBackOpacity = function() {
+        return FTKR.ICS.slot.opacity;
+    };
+
+    Window_IcsCompsiSlot.prototype._refreshFrame = function() {
+        if (FTKR.ICS.slot.frame === '表示する(show)') Window.prototype._refreshFrame.call(this);
+    };
+  
     Window_IcsCompsiSlot.prototype.maxItems = function() {
         return this._data ? this._data.length : 0;
     };
@@ -2199,6 +2363,14 @@ function Game_IcsRecipeBook() {
         this.createButtons();
     };
 
+    Window_IcsNumber.prototype.standardBackOpacity = function() {
+        return FTKR.ICS.number.opacity;
+    };
+
+    Window_IcsNumber.prototype._refreshFrame = function() {
+        if (FTKR.ICS.number.frame === '表示する(show)') Window.prototype._refreshFrame.call(this);
+    };
+  
     Window_IcsNumber.prototype.updateButtonsVisiblity = function() {
         if (FTKR.ICS.number.showButton) {
             this.showButtons();
@@ -2263,6 +2435,14 @@ function Game_IcsRecipeBook() {
         this.drawTextEx(text, 0, 0);
     };
 
+    Window_IcsCompsiStateTitle.prototype.standardBackOpacity = function() {
+        return FTKR.ICS.statusTitle.opacity;
+    };
+
+    Window_IcsCompsiStateTitle.prototype._refreshFrame = function() {
+        if (FTKR.ICS.statusTitle.frame === '表示する(show)') Window.prototype._refreshFrame.call(this);
+    };
+  
     //=============================================================================
     // Window_IcsCompsiState
     //=============================================================================
@@ -2280,6 +2460,14 @@ function Game_IcsRecipeBook() {
         this.clearWindow();
     };
 
+    Window_IcsCompsiState.prototype.standardBackOpacity = function() {
+        return FTKR.ICS.status.opacity;
+    };
+
+    Window_IcsCompsiState.prototype._refreshFrame = function() {
+        if (FTKR.ICS.status.frame === '表示する(show)') Window.prototype._refreshFrame.call(this);
+    };
+  
     Window_IcsCompsiState.prototype.clearWindow = function() {
         this._slotMaterials = [];
         this._comps = [];
