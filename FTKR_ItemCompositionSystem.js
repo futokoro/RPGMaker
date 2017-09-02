@@ -3,8 +3,8 @@
 // FTKR_ItemConpositionSystem.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/08
-// 最終更新日 : 2017/09/01
-// バージョン : v1.3.0
+// 最終更新日 : 2017/09/02
+// バージョン : v1.3.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ICS = FTKR.ICS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.3.0 アイテム合成システム
+ * @plugindesc v1.3.1 アイテム合成システム
  * @author フトコロ
  *
  * @param --基本設定--
@@ -377,6 +377,17 @@ FTKR.ICS = FTKR.ICS || {};
  * @option 表示する(show)
  * @option 表示しない(hide)
  *
+ * @param --背景設定(Background Window)--
+ * @default 
+ * 
+ * @param Background Image Name
+ * @desc 背景に使用する画像ファイル名を指定します。
+ * 画像ファイルは/img/systemに保存すること
+ * @default 
+ * @require 1
+ * @dir img/system/
+ * @type file
+ * 
  * @param --合成成功時のSEの設定--
  * @default
  * 
@@ -865,6 +876,9 @@ FTKR.ICS = FTKR.ICS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.3.1 - 2017/09/02 : 機能追加
+ *    1. 背景画像を設定する機能を追加。
+ * 
  * v1.3.0 - 2017/09/01 : 機能追加
  *    1. ウィンドウ背景の透明度と枠の有無を設定する機能を追加。
  * 
@@ -977,6 +991,11 @@ function Game_IcsRecipeBook() {
         downRate      :Number(parameters['Downer Reduce Rate'] || ''),
         maxRate       :Number(parameters['Max Success Rate'] || ''),
         defDiff       :String(parameters['Default Difficulty'] || ''),
+    };
+
+    //背景設定
+    FTKR.ICS.background = {
+        name          :String(parameters['Background Image Name'] || ''),
     };
 
     //合成タイトルウィンドウ設定
@@ -2965,6 +2984,14 @@ function Game_IcsRecipeBook() {
 
     Scene_ICS.prototype.initialize = function() {
         Scene_Item.prototype.initialize.call(this);
+    };
+
+    Scene_ICS.prototype.createBackground = function() {
+        this._backgroundSprite = new Sprite();
+        var bgiName = FTKR.ICS.background.name;
+        this._backgroundSprite.bitmap = bgiName ?
+            ImageManager.loadSystem(bgiName) : SceneManager.backgroundBitmap();
+        this.addChild(this._backgroundSprite);
     };
 
     Scene_ICS.prototype.create = function() {
