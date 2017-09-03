@@ -3,8 +3,8 @@
 // FTKR_ItemConpositionSystem.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/08
-// 最終更新日 : 2017/09/02
-// バージョン : v1.3.1
+// 最終更新日 : 2017/09/03
+// バージョン : v1.3.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ICS = FTKR.ICS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.3.1 アイテム合成システム
+ * @plugindesc v1.3.2 アイテム合成システム
  * @author フトコロ
  *
  * @param --基本設定--
@@ -875,6 +875,9 @@ FTKR.ICS = FTKR.ICS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.3.2 - 2017/09/03 : 不具合修正
+ *    1. 1.3.0の変更部の不具合修正
  * 
  * v1.3.1 - 2017/09/02 : 機能追加
  *    1. 背景画像を設定する機能を追加。
@@ -2746,7 +2749,7 @@ function Game_IcsRecipeBook() {
     };
 
     Window_IcsConfTitle.prototype._refreshFrame = function() {
-        if (FTKR.ICS.comf.frame === '表示する(show)') Window.prototype._refreshFrame.call(this);
+        if (FTKR.ICS.conf.frame === '表示する(show)') Window.prototype._refreshFrame.call(this);
     };
   
     //=============================================================================
@@ -2778,7 +2781,7 @@ function Game_IcsRecipeBook() {
     };
 
     Window_IcsConf.prototype._refreshFrame = function() {
-        if (FTKR.ICS.comf.frame === '表示する(show)') Window.prototype._refreshFrame.call(this);
+        if (FTKR.ICS.conf.frame === '表示する(show)') Window.prototype._refreshFrame.call(this);
     };
   
     Window_IcsConf.prototype.maxItems = function() {
