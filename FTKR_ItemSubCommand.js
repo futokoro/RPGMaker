@@ -3,16 +3,28 @@
 // FTKR_ItemSubCommand.js
 // 作成者     : フトコロ
 // 作成日     : 2017/06/04
-// 最終更新日 : 2017/08/19
-// バージョン : v1.2.1
+// 最終更新日 : 2017/09/19
+// バージョン : v1.3.0
 //=============================================================================
 
 /*:
- * @plugindesc v1.2.1 アイテムボックスにサブコマンドを追加する
+ * @plugindesc v1.3.0 アイテムボックスにサブコマンドを追加する
  * @author フトコロ
+ *
+ * @param --アイテム情報取得--
+ * @default
+ *
+ * @param Use Item Id
+ * @desc 選択したアイテムのIDを指定した変数に格納します。
+ * @default 
+ * @type number
  *
  * @param --サブコマンド--
  * @default
+ *
+ * @param Command List
+ * @desc 実行コマンドの表示する対象と順番を設定します。
+ * @default use,discard,cancel
  *
  * @param Command Use Format
  * @desc 実行コマンドの「使う」のコマンド名を設定します。
@@ -119,6 +131,106 @@
  * @max 100
  * @type number
  * 
+ * @param --カスタムコマンド0--
+ * @default
+ *
+ * @param Custom0 Format
+ * @desc 実行コマンドの「カスタムコマンド0」のコマンド名を設定します。
+ * @default 
+ *
+ * @param Custom0 EventID
+ * @desc カスタムコマンド0で実行するコモンイベントのIDを設定します。
+ * @default 
+ * @type number
+ *
+ * @param Custom0 Show Condition
+ * @desc カスタムコマンド0を表示する条件を設定します。
+ * @default 
+ *
+ * @param Custom0 Enabled Condition
+ * @desc カスタムコマンド0を実行する条件を設定します。
+ * @default 
+ *
+ * @param --カスタムコマンド1--
+ * @default
+ *
+ * @param Custom1 Format
+ * @desc 実行コマンドの「カスタムコマンド1」のコマンド名を設定します。
+ * @default 
+ *
+ * @param Custom1 EventID
+ * @desc カスタムコマンド1で実行するコモンイベントのIDを設定します。
+ * @default 
+ * @type number
+ *
+ * @param Custom1 Show Condition
+ * @desc カスタムコマンド1を表示する条件を設定します。
+ * @default 
+ *
+ * @param Custom1 Enabled Condition
+ * @desc カスタムコマンド1を実行する条件を設定します。
+ * @default 
+ *
+ * @param --カスタムコマンド2--
+ * @default
+ *
+ * @param Custom2 Format
+ * @desc 実行コマンドの「カスタムコマンド2」のコマンド名を設定します。
+ * @default 
+ *
+ * @param Custom2 EventID
+ * @desc カスタムコマンド2で実行するコモンイベントのIDを設定します。
+ * @default 
+ * @type number
+ *
+ * @param Custom2 Show Condition
+ * @desc カスタムコマンド2を表示する条件を設定します。
+ * @default 
+ *
+ * @param Custom2 Enabled Condition
+ * @desc カスタムコマンド2を実行する条件を設定します。
+ * @default 
+ *
+ * @param --カスタムコマンド3--
+ * @default
+ *
+ * @param Custom3 Format
+ * @desc 実行コマンドの「カスタムコマンド3」のコマンド名を設定します。
+ * @default 
+ *
+ * @param Custom3 EventID
+ * @desc カスタムコマンド3で実行するコモンイベントのIDを設定します。
+ * @default 
+ * @type number
+ *
+ * @param Custom3 Show Condition
+ * @desc カスタムコマンド3を表示する条件を設定します。
+ * @default 
+ *
+ * @param Custom3 Enabled Condition
+ * @desc カスタムコマンド3を実行する条件を設定します。
+ * @default 
+ *
+ * @param --カスタムコマンド4--
+ * @default
+ *
+ * @param Custom4 Format
+ * @desc 実行コマンドの「カスタムコマンド4」のコマンド名を設定します。
+ * @default 
+ *
+ * @param Custom4 EventID
+ * @desc カスタムコマンド4で実行するコモンイベントのIDを設定します。
+ * @default 
+ * @type number
+ *
+ * @param Custom4 Show Condition
+ * @desc カスタムコマンド4を表示する条件を設定します。
+ * @default 
+ *
+ * @param Custom4 Enabled Condition
+ * @desc カスタムコマンド4を実行する条件を設定します。
+ * @default 
+ *
  * @help 
  *-----------------------------------------------------------------------------
  * 概要
@@ -127,9 +239,10 @@
  * 実行内容を選択できます。
  * 
  * サブコマンドには以下のコマンドがあります。
- * 1. 使う　 - アイテムを使用します。使用できない場合はグレー表示になります。
- * 2. 捨てる - アイテムを捨てます。「大事なもの」は捨てることが出来ません。
- * 3. やめる - サブコマンドを閉じます。
+ * 1. 使う　　 - アイテムを使用します。使用できない場合はグレー表示になります。
+ * 2. 捨てる　 - アイテムを捨てます。「大事なもの」は捨てることが出来ません。
+ * 3. やめる　 - サブコマンドを閉じます。
+ * 4. カスタム - プラグインパラメータで設定したコモンイベントを実行します。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -137,6 +250,23 @@
  *-----------------------------------------------------------------------------
  * 1.「プラグインマネージャー(プラグイン管理)」に、本プラグインを追加して
  *    ください。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * 表示するサブコマンドの設定
+ *-----------------------------------------------------------------------------
+ * プラグインパラメータ<Command List>で、表示するコマンドを設定します。
+ * 表示させたいコマンドのコードを、カンマ(,)で区切って入力すると
+ * 入力した順番にコマンドを表示します。(すべて小文字)
+ * 
+ * <コマンド>　<コード>
+ * 使う　　　　use
+ * 捨てる　　　discard
+ * やめる　　　cancel
+ * カスタム　　custom*　　(*は各カスタムコマンド番号)
+ * 
+ * 例)
+ *  use,discard,custom0,cancel
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -165,6 +295,52 @@
  * 
  * 
  *-----------------------------------------------------------------------------
+ * カスタムコマンド
+ *-----------------------------------------------------------------------------
+ * 任意のコモンイベントを実行するカスタムコマンドを設定することができます。
+ * 設定したコマンドは、プラグインパラメータ<Command List>に追加してください。
+ * 
+ * コマンド名
+ *    プラグインパラメータ<Custom* Format>で設定します。
+ * 
+ * 実行するコモンイベントＩＤ
+ *    プラグインパラメータ<Custom* EventID>で設定します。
+ * 
+ * 表示条件：サブコマンドウィンドウに表示するための条件
+ *    プラグインパラメータ<Custom* Show Condition>と
+ *    アイテム毎の個別条件(*1)を設定できます。
+ *    スクリプト形式の条件式を入力します(*2)。
+ *    設定しない場合は、表示しません。
+ *    プラグインパラメータとアイテムの個別設定が両方ある場合は
+ *    両方の条件を満たした場合にのみ表示します。
+ * 
+ * 有効条件：サブコマンドウィンドウを実行するための条件
+ *    プラグインパラメータ<Custom* Enabled Condition>と
+ *    アイテム毎の個別条件(*1)を設定できます。
+ *    スクリプト形式の条件式を入力します(*2)。
+ *    設定しない場合は、実行できません。
+ *    プラグインパラメータとアイテムの個別設定が両方ある場合は
+ *    両方の条件を満たした場合にのみ実行できます。
+ * 
+ * (*1)アイテム毎の個別条件の設定方法
+ *    以下のタグをメモ欄に記入することで、アイテム別に条件を設定できます。
+ *    <カスタムコマンド:x>
+ *    表示条件: 条件式
+ *    有効条件: 条件式
+ *    </カスタムコマンド>
+ *        x : カスタムコマンドの番号
+ * 
+ * (*2)条件式の入力方法
+ *    ダメージ計算式のように、スクリプト形式の計算式を入力することで、
+ *    固定値以外の値を使用することができます。以下のコードを使用できます。
+ *      item   - 使用するアイテムのデータを参照します。(item.id でアイテムＩＤ)
+ *      number - 使用するアイテムの所持数を参照します。
+ *      v[x]   - 変数ID x の値を参照します。
+ *      s[x]   - スイッチID x の値を参照します。
+ *      true   - 常に有効になります。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
  * 本プラグインのライセンスについて(License)
  *-----------------------------------------------------------------------------
  * 本プラグインはMITライセンスのもとで公開しています。
@@ -177,6 +353,9 @@
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.3.0 - 2017/09/19 : 機能追加
+ *    1. 任意のコモンイベントを実行するコマンドの追加機能を追加。
  * 
  * v1.2.1 - 2017/08/19 : 不具合修正
  *    1. アイテム無所持でもサブコマンドウィンドウを表示できてしまう不具合修正
@@ -215,7 +394,11 @@ function Window_ItemSubCommand() {
     FTKR.ISC = {
         subcom:{
             enableConf:Number(parameters['Enable Confirmation'] || 0),
+            data:{
+                itemId  :Number(parameters['Use Item Id'] || 0),
+            },
             command:{
+                list    :(parameters['Command List'] || 'use,cancel').split(','),
                 use     :String(parameters['Command Use Format'] || ''),
                 discard :String(parameters['Command Discard Format'] || ''),
                 cancel  :String(parameters['Command Cancel Format'] || ''),
@@ -224,6 +407,38 @@ function Window_ItemSubCommand() {
                 width   :Number(parameters['Command Width'] || 0),
                 height  :Number(parameters['Command Height'] || 0),
             },
+            custom:[
+                {//cmd0
+                format  :String(parameters['Custom0 Format'] || ''),
+                eventId :Number(parameters['Custom0 EventID'] || 0),
+                show    :String(parameters['Custom0 Show Condition'] || ''),
+                enabled :String(parameters['Custom0 Enabled Condition'] || ''),
+                },
+                {//cmd1
+                format  :String(parameters['Custom1 Format'] || ''),
+                eventId :Number(parameters['Custom1 EventID'] || 0),
+                show    :String(parameters['Custom1 Show Condition'] || ''),
+                enabled :String(parameters['Custom1 Enabled Condition'] || ''),
+                },
+                {//cmd2
+                format  :String(parameters['Custom2 Format'] || ''),
+                eventId :Number(parameters['Custom2 EventID'] || 0),
+                show    :String(parameters['Custom2 Show Condition'] || ''),
+                enabled :String(parameters['Custom2 Enabled Condition'] || ''),
+                },
+                {//cmd3
+                format  :String(parameters['Custom3 Format'] || ''),
+                eventId :Number(parameters['Custom3 EventID'] || 0),
+                show    :String(parameters['Custom3 Show Condition'] || ''),
+                enabled :String(parameters['Custom3 Enabled Condition'] || ''),
+                },
+                {//cmd4
+                format  :String(parameters['Custom4 Format'] || ''),
+                eventId :Number(parameters['Custom4 EventID'] || 0),
+                show    :String(parameters['Custom4 Show Condition'] || ''),
+                enabled :String(parameters['Custom4 Enabled Condition'] || ''),
+                },
+            ],
             number:{
                 maxFormat:String(parameters['Max Number Format'] || ''),
                 posiX   :Number(parameters['Number Position X'] || 0),
@@ -247,6 +462,49 @@ function Window_ItemSubCommand() {
         },
     };
 
+    //=============================================================================
+    // 自作関数(グローバル)
+    //=============================================================================
+
+    FTKR.gameData = FTKR.gameData || {
+        user   :null,
+        target :null,
+        item   :null,
+        number :0,
+    };
+
+    if (!FTKR.setGameData) {
+    FTKR.setGameData = function(user, target, item, number) {
+        FTKR.gameData = {
+            user   :user || null,
+            target :target || null,
+            item   :item || null,
+            number :number || 0
+        };
+    };
+    }
+
+    if (!FTKR.evalFormula) {
+    FTKR.evalFormula = function(formula) {
+        var datas = FTKR.gameData;
+        try {
+            var s = $gameSwitches._data;
+            var v = $gameVariables._data;
+            var a = datas.user;
+            var b = datas.target;
+            var item   = datas.item;
+            var number = datas.number;
+            if (b) var result = b.result();
+            var value = eval(formula);
+            if (isNaN(value)) value = 0;
+            return value;
+        } catch (e) {
+            console.error(e);
+            return 0;
+        }
+    };
+    }
+
     var hasObjectMeta = function(obj, metacodes) {
         if (!obj) return false;
         return metacodes.some(function(metacode){
@@ -265,6 +523,100 @@ function Window_ItemSubCommand() {
             return match;
         }); 
         return match ? match[1] : '';
+    };
+
+    var readEntrapmentCodeToTextEx = function(obj, codeTitles) {
+        var regs = convertEntrapmentRegArrayEx(codeTitles);
+        var notedata = obj.note.split(/[\r\n]+/);
+        var setMode = 'none';
+        var results = [];
+
+        for (var i = 0; i < notedata.length; i++) {
+            var line = notedata[i];
+            if (matchRegs(line, regs, 'start')) {
+                var data = {
+                    id:RegExp.$1,
+                    text:''
+                };
+                setMode = 'read';
+            } else if (matchRegs(line, regs, 'end')) {
+                setMode = 'none';
+                results.push(data);
+            } else if (setMode === 'read') {
+                data.text += line + ';';
+            }
+        }
+        return results;
+    };
+
+    var convertEntrapmentRegArrayEx = function(codeTitles) {
+        return codeTitles.map(function(codeTitle) {
+            return {
+                start:new RegExp('<' + codeTitle + ':[ ]*(.+)>', 'i'),
+                end  :new RegExp('<\/' + codeTitle + '>', 'i')
+            };
+        });
+    };
+
+    var matchRegs = function(data, regs, prop) {
+        return regs.some(function(reg){
+            return prop ? data.match(reg[prop]) : data.match(reg);
+        });
+    };
+
+    //=============================================================================
+    // DataManager
+    //=============================================================================
+
+    var _ISC_DatabaseLoaded = false;
+    var _ISC_DataManager_isDatabaseLoaded = DataManager.isDatabaseLoaded;
+    DataManager.isDatabaseLoaded = function() {
+        if (!_ISC_DataManager_isDatabaseLoaded.call(this)) return false;
+        if (!_ISC_DatabaseLoaded) {
+            this.ItemSubCommandNotetags($dataItems);
+            this.ItemSubCommandNotetags($dataWeapons);
+            this.ItemSubCommandNotetags($dataArmors);
+            _ISC_DatabaseLoaded = true;
+        }
+        return true;
+    };
+
+    DataManager.ItemSubCommandNotetags = function(group) {
+        for (var n = 1; n < group.length; n++) {
+            var obj = group[n];
+            obj.isc = [];
+            var datas = readEntrapmentCodeToTextEx(obj, ['カスタムコマンド', 'CUSTOM_COMMAND']);
+            this.readIscMetaDatas(obj, datas);
+        }
+    };
+
+    DataManager.setIscBase = function(obj, index) {
+        obj.isc[index] = {
+            show    :true,
+            enabled :true,
+        };
+    };
+
+    DataManager.readIscMetaDatas = function(obj, metaDatas) {
+        for (var t = 0; t < metaDatas.length; t++) {
+            this.setIscBase(obj, metaDatas[t].id);
+            var datas = metaDatas[t].text.split(';');
+            for (var i = 0; i < datas.length; i++) {
+                var data = datas[i];
+                var match = /(.+):[ ]*(.+)/.exec(data);
+                if (!match) continue;
+                switch (match[1].toUpperCase()) {
+                    case '表示条件':
+                    case 'SHOW_CONDITION':
+                        obj.isc[t].show = match[2];
+                        break;
+                    case '有効条件':
+                    case 'ENABLED_CONDITION':
+                        obj.isc[t].enabled = match[2];
+                        break;
+                }
+            }
+        }
     };
 
     //=============================================================================
@@ -334,19 +686,31 @@ function Window_ItemSubCommand() {
     };
 
     Scene_Item.prototype.onSubComOk = function() {
-        switch (this._subCommandWindow.item().symbol) {
+        var symbol = this._subCommandWindow.item().symbol;
+        var item = this._subCommandWindow._item;
+        if (FTKR.ISC.subcom.data.itemId) {
+            $gameVariables.setValue(FTKR.ISC.subcom.data.itemId, item.id);
+        }
+        switch (symbol) {
             case 'use':
                 this._subCommandWindow.hide();
                 _ISC_Scene_Item_onitemOk.call(this);
                 break;
             case 'discard':
-                var item = this._subCommandWindow._item;
                 this._numberWindow.setup(item, $gameParty.numItems(item));
                 this._numberWindow.show();
                 this._numberWindow.activate();
                 break;
             default:
-                this.onSubComCancel();
+                var match = /custom(\d+)/i.exec(symbol);
+                if (match) {
+                    var cmd = FTKR.ISC.subcom.custom[Number(match[1])];
+                    $gameParty.setLastItem(item);
+                    $gameTemp.reserveCommonEvent(cmd.eventId);
+                    this.checkCommonEvent();
+                } else {
+                    this.onSubComCancel();
+                }
                 break;
         }
     };
@@ -626,11 +990,38 @@ function Window_ItemSubCommand() {
         this._data = [];
         if (!this._item) return;
         var sep = FTKR.ISC.subcom.command;
-        this._data = [
-            {symbol:'use',     enabled:$gameParty.canUse(this._item), disp:sep.use},
-            {symbol:'discard', enabled:this.isDiscardable(), disp:sep.discard},
-            {symbol:'cancel',  enabled:true, disp:sep.cancel},
-        ];
+        var ctm = FTKR.ISC.subcom.custom;
+        sep.list.forEach( function(list){
+            switch (list) {
+                case 'use':
+                    this._data.push({symbol:'use', enabled:this.isUsable(this._item), disp:sep.use});
+                    break;
+                case 'discard':
+                    this._data.push({symbol:'discard', enabled:this.isDiscardable(), disp:sep.discard});
+                    break;
+                case 'cancel':
+                    this._data.push({symbol:'cancel',  enabled:true, disp:sep.cancel});
+                    break;
+                default:
+                    var match = /custom(\d+)/i.exec(list);
+                    if (match) {
+                        var cmdId = Number(match[1]);
+                        var cmd = ctm[cmdId];
+                        if (cmd && this.isCustomShow(this._item,cmdId,cmd)) {
+                            this._data.push({
+                                symbol:list,
+                                enabled:this.isCustomEnabled(this._item,cmdId,cmd),
+                                disp:cmd.format,
+                            });
+                        }
+                    }
+                    break;
+            }
+        },this);
+    };
+
+    Window_ItemSubCommand.prototype.isUsable = function(item) {
+        return $gameParty.canUse(item);
     };
 
     Window_ItemSubCommand.prototype.isDiscardable = function() {
@@ -638,6 +1029,20 @@ function Window_ItemSubCommand() {
             !hasObjectMeta(this._item, ['捨てられない','Not_discardable']) &&
             !this.checkSw();
     };
+
+    Window_ItemSubCommand.prototype.isCustomShow = function(item,cmdId,cmd) {
+        FTKR.setGameData(null, null, item, $gameParty.numItems(item));
+        return !(!cmd.show && !item.isc[cmdId] ||
+            cmd.show && !FTKR.evalFormula(cmd.show) ||
+            item.isc[cmdId] && !FTKR.evalFormula(item.isc[cmdId].show));
+    };
+    
+    Window_ItemSubCommand.prototype.isCustomEnabled = function(item,cmdId,cmd) {
+        FTKR.setGameData(null, null, item, $gameParty.numItems(item));
+        return !(!cmd.enabled && !item.isc[cmdId] ||
+            cmd.enabled && !FTKR.evalFormula(cmd.enabled) ||
+            item.isc[cmdId] && !FTKR.evalFormula(item.isc[cmdId].enabled));
+  };
     
     Window_ItemSubCommand.prototype.checkSw = function() {
         var id = Number(readObjectMeta(this._item, ['捨てられない','Not_discardable']));
