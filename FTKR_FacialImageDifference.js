@@ -3,8 +3,8 @@
 // FTKR_FacialImageDifference.js
 // 作成者     : フトコロ
 // 作成日     : 2017/05/10
-// 最終更新日 : 2017/07/08
-// バージョン : v1.1.2
+// 最終更新日 : 2017/09/24
+// バージョン : v1.1.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.FID = FTKR.FID || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.2 アクターの状態によって顔画像を変えるプラグイン
+ * @plugindesc v1.1.3 アクターの状態によって顔画像を変えるプラグイン
  * @author フトコロ
  *
  * @noteParam FID_画像
@@ -280,6 +280,9 @@ FTKR.FID = FTKR.FID || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.3 - 2017/09/24 : 機能追加
+ *    1. 顔画像を初期化する関数を追加。
+ * 
  * v1.1.2 - 2017/07/08 : 不具合修正
  *    1. シーン変更時に現在の顔画像をリセットする機能を追加。
  * 
@@ -493,6 +496,12 @@ FTKR.FID.Window_Base_clearCssSprite = Window_Base.prototype.clearCssSprite;
 Window_Base.prototype.clearCssSprite = function(index) {
     FTKR.FID.Window_Base_clearCssSprite.call(this, index);
     if (this._faceSprite[index]) this._faceSprite[index].setBattler();
+};
+
+Window_Base.prototype.clearFaceSprites = function() {
+    this._faceSprite.forEach( function(sprite){
+        sprite.setBattler();
+    });
 };
 
 //=============================================================================
