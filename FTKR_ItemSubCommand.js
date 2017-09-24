@@ -3,12 +3,12 @@
 // FTKR_ItemSubCommand.js
 // 作成者     : フトコロ
 // 作成日     : 2017/06/04
-// 最終更新日 : 2017/09/19
-// バージョン : v1.3.0
+// 最終更新日 : 2017/09/24
+// バージョン : v1.4.0
 //=============================================================================
 
 /*:
- * @plugindesc v1.3.0 アイテムボックスにサブコマンドを追加する
+ * @plugindesc v1.4.0 アイテムボックスにサブコマンドを追加する
  * @author フトコロ
  *
  * @param --アイテム情報取得--
@@ -55,7 +55,7 @@
  *
  * @param Command Height
  * @desc コマンドウィンドウの高さを指定します。
- * (参考値：1行 = 36、余白 = 18)(-1 で、画面下端まで)
+ * (参考値：1行 = 36、余白 = 18)(-1 :画面下端まで、0 :自動調整)
  * @default -1
  * 
  * @param --数値入力画面--
@@ -305,6 +305,9 @@
  * 
  * 実行するコモンイベントＩＤ
  *    プラグインパラメータ<Custom* EventID>で設定します。
+ *    アイテム毎に実行するコモンイベントＩＤを設定することもできます。(*1)
+ *    プラグインパラメータとアイテムの個別設定が両方ある場合は
+ *    アイテムの設定を優先します。
  * 
  * 表示条件：サブコマンドウィンドウに表示するための条件
  *    プラグインパラメータ<Custom* Show Condition>と
@@ -323,12 +326,14 @@
  *    両方の条件を満たした場合にのみ実行できます。
  * 
  * (*1)アイテム毎の個別条件の設定方法
- *    以下のタグをメモ欄に記入することで、アイテム別に条件を設定できます。
+ *    以下のタグをメモ欄に記入することで、アイテム別にs設定できます。
  *    <カスタムコマンド:x>
  *    表示条件: 条件式
  *    有効条件: 条件式
+ *    コモンイベントID: y
  *    </カスタムコマンド>
  *        x : カスタムコマンドの番号
+ *        y : 実行するコモンイベントID
  * 
  * (*2)条件式の入力方法
  *    ダメージ計算式のように、スクリプト形式の計算式を入力することで、
@@ -353,6 +358,10 @@
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.4.0 - 2017/09/24 : 機能追加
+ *    1. アイテム別に実行するコモンイベントIDを設定する機能を追加。
+ *    2. サブコマンドウィンドウの高さをコマンドの数で自動調整する機能を追加。
  * 
  * v1.3.0 - 2017/09/19 : 機能追加
  *    1. 任意のコモンイベントを実行するコマンドの追加機能を追加。
@@ -594,6 +603,7 @@ function Window_ItemSubCommand() {
         obj.isc[index] = {
             show    :true,
             enabled :true,
+            eventId :0,
         };
     };
 
@@ -613,6 +623,10 @@ function Window_ItemSubCommand() {
                     case '有効条件':
                     case 'ENABLED_CONDITION':
                         obj.isc[t].enabled = match[2];
+                        break;
+                    case 'コモンイベントID':
+                    case 'COMMON_EVENT_ID':
+                        obj.isc[t].eventId = Number(match[2]);
                         break;
                 }
             }
@@ -681,9 +695,10 @@ function Window_ItemSubCommand() {
     var _ISC_Scene_Item_onitemOk = Scene_Item.prototype.onItemOk;
     Scene_Item.prototype.onItemOk = function() {
         this._subCommandWindow._item = this._itemWindow.item();
+        if (!FTKR.ISC.subcom.command.height) this._subCommandWindow.refreshHeight();
         this._subCommandWindow.show();
         this._subCommandWindow.actSelect(0);
-    };
+      };
 
     Scene_Item.prototype.onSubComOk = function() {
         var symbol = this._subCommandWindow.item().symbol;
@@ -704,9 +719,12 @@ function Window_ItemSubCommand() {
             default:
                 var match = /custom(\d+)/i.exec(symbol);
                 if (match) {
-                    var cmd = FTKR.ISC.subcom.custom[Number(match[1])];
+                    var cmdId = Number(match[1]);
+                    var eventId = item.isc[cmdId] && item.isc[cmdId].eventId ?
+                        item.isc[cmdId].eventId :
+                        FTKR.ISC.subcom.custom[cmdId].eventId;
                     $gameParty.setLastItem(item);
-                    $gameTemp.reserveCommonEvent(cmd.eventId);
+                    $gameTemp.reserveCommonEvent(eventId);
                     this.checkCommonEvent();
                 } else {
                     this.onSubComCancel();
@@ -984,6 +1002,12 @@ function Window_ItemSubCommand() {
 
     Window_ItemSubCommand.prototype.item = function() {
         return this._data && this.index() >= 0 ? this._data[this.index()] : null;
+    };
+
+    Window_ItemSubCommand.prototype.refreshHeight = function() {
+        this.refresh();
+        var height = Math.min(this.fittingHeight(this._data.length), Graphics.boxHeight - this.y);
+        this.move(this.x, this.y, this.width, height);
     };
 
     Window_ItemSubCommand.prototype.makeItemList = function() {
