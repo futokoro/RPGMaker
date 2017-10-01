@@ -4,7 +4,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2017/05/10
 // 最終更新日 : 2017/10/01
-// バージョン : v1.1.4
+// バージョン : v1.1.5
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.FID = FTKR.FID || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.4 アクターの状態によって顔画像を変えるプラグイン
+ * @plugindesc v1.1.5 アクターの状態によって顔画像を変えるプラグイン
  * @author フトコロ
  *
  * @noteParam FID_画像
@@ -282,6 +282,10 @@ FTKR.FID = FTKR.FID || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.5 - 2017/10/01 : 不具合修正
+ *    1. フロントビューモードで、ダメージ時の顔画像の変更が動作しない不具合を修正。
+ *    2. 睡眠ステート時の顔画像変更が動作しない不具合を修正。
+ * 
  * v1.1.4 - 2017/10/01 : 不具合修正
  *    1. ステータス画面でキャラチェンジした場合に、前のキャラの顔画像が
  *       残る不具合を修正。
@@ -367,11 +371,13 @@ FTKR.FID.faces = {
 //objのメモ欄から <metacode: x> の値を読み取って配列で返す
 var readObjectMeta = function(obj, metacodes) {
     if (!obj) return false;
+    var match = {};
     metacodes.some(function(metacode){
         var metaReg = new RegExp('<' + metacode + ':[ ]*(.+)>', 'i');
-        return obj.note.match(metaReg);
+        match = metaReg.exec(obj.note);
+        return match;
     }); 
-    return RegExp.$1 ? RegExp.$1 : false;
+    return match ? match[1] : '';
 };
 
 //=============================================================================
@@ -630,7 +636,6 @@ Sprite_ActorFace.prototype.startMotion = function(motionType) {
     Sprite_Actor.prototype.startMotion.call(this, motionType);
     if (this._faceType !== motionType) {
         this._faceType = motionType;
-        console.log(motionType);
         if (Imported.FTKR_ESM) this.setNewMotion(this._actor, motionType);
     }
 };
@@ -666,6 +671,13 @@ Sprite_ActorFace.prototype.setScale = function(scale) {
 //------------------------------------------------------------------------
 // フロントビュー戦闘でも顔画像を表示させる
 //------------------------------------------------------------------------
+//書き換え
+Game_Actor.prototype.performDamage = function() {
+    Game_Battler.prototype.performDamage.call(this);
+    this.requestMotion('damage');
+    SoundManager.playActorDamage();
+};
+
 Sprite_ActorFace.prototype.updateVisibility = function() {
     Sprite_Base.prototype.updateVisibility.call(this);
     if (!this._actor) {
