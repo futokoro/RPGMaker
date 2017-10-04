@@ -3,8 +3,8 @@
 // FTKR_SkillUpgradeSystem_Window.js
 // 作成者     : フトコロ
 // 作成日     : 2017/02/08
-// 最終更新日 : 2017/08/05
-// バージョン : v1.4.1
+// 最終更新日 : 2017/10/04
+// バージョン : v1.5.0
 //=======↑本プラグインを改変した場合でも、この欄は消さないでください↑===============
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.SUS = FTKR.SUS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.4.1 スキル強化システム ウィンドウ関係プラグイン
+ * @plugindesc v1.5.0 スキル強化システム ウィンドウ関係プラグイン
  * @author フトコロ
  *
  * @param ---Show Command---
@@ -201,7 +201,6 @@ FTKR.SUS = FTKR.SUS || {};
  * @param Upgrade SE Pan
  * @desc 強化実行時に鳴らすSEの位相を指定します。
  * @default 0
- *
  *
  * @help
  *-----------------------------------------------------------------------------
@@ -703,6 +702,9 @@ FTKR.SUS = FTKR.SUS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.5.0 - 2017/10/04 : 機能追加
+ *    1. 一括強化機能を追加
+ * 
  * v1.4.1 - 2017/08/05 : 不具合修正
  *    1. スキルに対して強化できない設定にした強化タイプを
  *       非表示にできない不具合修正。
@@ -895,6 +897,8 @@ Window_Base.prototype.setSusUparam = function(type, sepSkill, level, dataId, efl
   var skill = $dataSkills[id];
   if (type === 'scope' && !actor.isRandomScope(sepSkill)) {
     return this.getScopeName(actor, skill, level);
+  } else if (type === 'all'){
+    return '';
   } else {
     var uparam = actor.getSusUparamBase(id, type, level, dataId);
     if (type === 'damages') {
@@ -1206,18 +1210,22 @@ Window_UpgradeTypeList.prototype.makeItemList = function() {
   var data = {};
   if (this._skillId === null) return false;
   var skill = actor.getSkill(this._skillId);
-  for(var t = 1; t < FTKR.SSS.maxSepTypeNum + 1; t++) {
-    for (var prop in skill) {
-      if (prop === FTKR.SSS.sepTypes[t].type) {
-        var len = prop === 'damages' || prop === 'effects' ? skill[prop].length : 1;
-        for (var i = 0; i < len; i++) {
-          if (prop === 'damages' && skill.damages[i].type < 1) continue;
-          if (this.isEnabled(t, i)) {
-            data = { typeId:t, dataId:i };
-            this._data.push(data);
+  for(var t = 1; t < FTKR.SUS.maxUtypeNum + 1; t++) {
+    if (FTKR.SUS.utypes[t].type === 'all') {
+       this._data.push({typeId:t, dataId:0});
+    } else {
+      for (var prop in skill) {
+        if (prop === FTKR.SSS.sepTypes[t].type) {
+          var len = prop === 'damages' || prop === 'effects' ? skill[prop].length : 1;
+          for (var i = 0; i < len; i++) {
+            if (prop === 'damages' && skill.damages[i].type < 1) continue;
+            if (this.isEnabled(t, i)) {
+              data = { typeId:t, dataId:i };
+              this._data.push(data);
+            }
           }
+          continue;
         }
-        continue;
       }
     }
   }

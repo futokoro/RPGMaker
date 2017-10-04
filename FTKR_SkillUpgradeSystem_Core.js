@@ -3,8 +3,8 @@
 // FTKR_SkillUpgradeSystem_Core.js
 // 作成者     : フトコロ
 // 作成日     : 2017/02/06
-// 最終更新日 : 2017/08/05
-// バージョン : v1.4.1
+// 最終更新日 : 2017/10/04
+// バージョン : v1.5.0
 //=======↑本プラグインを改変した場合でも、この欄は消さないでください↑===============
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.SUS = FTKR.SUS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.4.1 スキル強化システム 本体プラグイン
+ * @plugindesc v1.5.0 スキル強化システム 本体プラグイン
  * @author フトコロ
  *
  * @param ---Skill Name Format---
@@ -33,6 +33,18 @@ FTKR.SUS = FTKR.SUS || {};
  * @desc 強化可能なパラメータの種類を設定します。
  * 上級者向け設定
  * @default 8
+ *
+ * @param --Upgrade ALL--
+ * @default
+ * 
+ * @param Upgrade All Name
+ * @desc 一括強化の表示名。
+ * @default 一括強化
+ *
+ * @param Upgrade All Types
+ * @desc 一括強化の対象となる強化タイプを設定します。
+ * カンマ(,)で区切って強化タイプの番号を入力してください。
+ * @default 1,2,3,4,5,6,7,8
  *
  * @param ---Default Param---
  * @default
@@ -975,6 +987,26 @@ FTKR.SUS = FTKR.SUS || {};
  *  「ダメージ」と「範囲」の強化タイプの表示順も入れ替わります。
  * 
  * 
+ * 3. 一括強化機能
+ *  ※FTKR_SkillUpgradeSystem_Window.jsが必要
+ * 
+ *  プラグインパラメータ<Upgrade Type X Type>の内容を "all" にすると
+ *  一括強化が可能になります。
+ *  一括強化を実行すると、一度の強化レベルアップで複数の強化タイプの
+ *  パラメータを上昇させることができます。
+ *  
+ *  一括強化用のコマンドとして表示される名称は、
+ *  プラグインパラメータ<Upgrade All Name>で設定します。
+ * 
+ *  一括強化で強化されるパラメータは、<Upgrade All Types>で指定します。
+ *  カンマを使って強化タイプの番号を入力してください。
+ * 
+ *  なお、スキル名に付加する強化レベルの値には、一括強化レベルは反映されません。
+ * 
+ *  一括強化で消費するコストは、一括強化用に設定したコストのみです。
+ *  一括強化で上昇するパラメータの強化コストは消費しません。
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * 本プラグインのライセンスについて(License)
  *-----------------------------------------------------------------------------
@@ -988,6 +1020,9 @@ FTKR.SUS = FTKR.SUS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.5.0 - 2017/10/04 : 機能追加
+ *    1. 一括強化機能を追加
  * 
  * v1.4.1 - 2017/08/05 : 不具合修正
  *    1. 強化出来ない設定の強化タイプに対して、最大強化レベルを0にする処理を追加。
@@ -1199,6 +1234,13 @@ var paramType10 = {
 };
 FTKR.SUS.utypes.push(paramType10);
 
+//All
+FTKR.SUS.upgradeAll = {
+  name : String(FTKR.SUS.parameters['Upgrade All Name'] || '一括強化'),
+  types: String(FTKR.SUS.parameters['Upgrade All Types'] || '1,2,3,4,5,6,7,8'),
+};
+
+
 //=============================================================================
 // プラグイン 定数
 //=============================================================================
@@ -1208,6 +1250,20 @@ Game_BattlerBase.MAX_SUS_UPGRADE_TYPES = 10;
 if (FTKR.SUS.maxUtypeNum > Game_BattlerBase.MAX_SUS_UPGRADE_TYPES) {
   FTKR.SUS.maxUtypeNum = Game_BattlerBase.MAX_SUS_UPGRADE_TYPES;
 ;}
+
+//=============================================================================
+// TextManager
+//=============================================================================
+
+FTKR.SUS.TextManager_skillParam = TextManager.skillParam;
+TextManager.skillParam = function(type, skill, dataId) {
+  switch (type) {
+    case 'all':
+      return FTKR.SUS.upgradeAll.name;
+    default:
+      return FTKR.SUS.TextManager_skillParam.call(this, type, skill, dataId);
+  }
+};
 
 //=============================================================================
 // DataManager
@@ -1423,6 +1479,8 @@ Game_Actor.prototype.isUpgradeTypes  = function(typename) {
       return 3;
     case 'effects':
       return 4;
+    case 'all':
+      return 5;
     case 'default':
       return 0;
   }
@@ -1796,6 +1854,25 @@ Game_Actor.prototype.setUpgradeSkillFormat = function(skillId, typeId) {
 
 Game_Actor.prototype.upgradeSepSkill = function(skillId, typeId, dataId) {
   this.payUpgradeCost(skillId, typeId, dataId);
+  if (this.matchUtype(typeId, 'all')) {
+    var skill = this.getSkill(skillId);
+    FTKR.SUS.upgradeAll.types.split(',').forEach( function(i){
+      i = Number(i);
+      if (i !== typeId) {
+        var len = this.matchUtype(i, 'damages') || this.matchUtype(i, 'effects') ?
+          skill[FTKR.SUS.utypes[i].type].length : 1;
+        for (var j = 0; j < len; j++) {
+          console.log(i, j, typeId, len);
+          if (this.matchUtype(i, 'damages') && skill.damages[j].type < 1) continue;
+          console.log(skillId, i, j, typeId, len);
+          if (this.canSusUpgrade(skillId, i, j)) {
+            console.log(i, j, typeId, len);
+            this.susUpgradeSepSkill(skillId, i, j);
+          }
+        }
+      }
+    },this);
+  }
   return this.susUpgradeSepSkill(skillId, typeId, dataId);
 };
 
@@ -1805,7 +1882,7 @@ Game_Actor.prototype.susUpgradeSepSkill = function(skillId, typeId, dataId) {
   if (!udata) return false;
   udata.count += 1;
   udata.cost.forEach( function(cost, i) {
-      udata.cost[i].count += 1;
+    udata.cost[i].count += 1;
   });
   var type = FTKR.SUS.utypes[typeId].type;
   var value = this.getSusUparam(skillId, type, dataId);
@@ -1819,7 +1896,9 @@ Game_Actor.prototype.getSusTotalCount = function(sepSkill) {
   var totalcount = 0;
   sepSkill.udata.forEach( function(udata) {
     totalcount += udata.count;
-  });
+  },this);
+  var typeId = this.getSusTypeId('all');
+  if (typeId) totalcount -= this.getSusUdata(sepSkill.id, typeId, 0).count
   return totalcount;
 };
 
