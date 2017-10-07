@@ -3,8 +3,8 @@
 // FTKR_TransformationState.js
 // 作成者     : フトコロ
 // 作成日     : 2017/05/02
-// 最終更新日 : 2017/08/02
-// バージョン : v1.0.2
+// 最終更新日 : 2017/10/08
+// バージョン : v1.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.TFS = FTKR.TFS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.2 ステートが掛かっている間キャラ画像を変えるプラグイン
+ * @plugindesc v1.1.0 ステートが掛かっている間キャラ画像を変えるプラグイン
  * @author フトコロ
  *
  * @help 
@@ -32,6 +32,16 @@ FTKR.TFS = FTKR.TFS || {};
  * 
  * アクターのSVキャラ画像を filename.png に変えます。
  * 画像ファイルは、img/sv_actors内に保存してください。
+ * 
+ * なお、ファイル名に filename%1と "%1"と付けて指定すると
+ * %1の部分がステートが掛かっているアクターのID(4桁表示)に
+ * 変換された画像ファイルを読み込むことが出来ます。
+ * 
+ * 例) アクターID1のキャラに<TFS_変身:変身_%1>のタグが付いたステートが
+ *     掛かっている場合
+ * 
+ *     読み込む画像は、 変身_0001.png になります。
+ *     （ID1 を 4桁表示の 0001 に変換しています）
  * 
  * 
  * 変身中に武器を振らせたくない場合は、以下のタグをステートに記入してください。
@@ -118,6 +128,9 @@ FTKR.TFS = FTKR.TFS || {};
     Sprite_Actor.prototype.readTransformData = function() {
         return this._actor.states().some( function(state) {
             this._transformName = readObjectMeta(state, ['TFS_変身', 'TFS_TRANSFORM']);
+            if (this._transformName) {
+                this._transformName = this._transformName.format(this._actor.actorId().padZero(4));
+            }
             this._transformWeaponLess = hasObjectMeta(state, ['TFS_武器非表示', 'TFS_WEAPON_LESS']);
             return this._transformName;
         },this);
