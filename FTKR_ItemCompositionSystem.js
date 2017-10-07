@@ -3,8 +3,8 @@
 // FTKR_ItemConpositionSystem.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/08
-// 最終更新日 : 2017/09/03
-// バージョン : v1.3.2
+// 最終更新日 : 2017/10/07
+// バージョン : v1.4.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ICS = FTKR.ICS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.3.2 アイテム合成システム
+ * @plugindesc v1.4.0 アイテム合成システム
  * @author フトコロ
  *
  * @param --基本設定--
@@ -464,6 +464,59 @@ FTKR.ICS = FTKR.ICS || {};
  * @desc アイテム合成実行時に鳴らすSEの位相を指定します。
  * @default 0
  *
+ * @param --カテゴリー別の合成コマンドの設定--
+ * @default
+ * 
+ * @param Custom Cmd 1 Name
+ * @desc カテゴリー別のコマンド1の表示内容を設定します。
+ * ';'で区切ると、素材選択時とレシピ選択時の表示が変わります。
+ * @default 
+ * 
+ * @param Custom Cmd 1 Category
+ * @desc コマンド1のカテゴリーを設定します。
+ * 合成カテゴリーで設定したカテゴリー名と同じ文字列を入力します。
+ * @default 
+ * 
+ * @param Custom Cmd 2 Name
+ * @desc カテゴリー別のコマンド2の表示内容を設定します。
+ * ';'で区切ると、素材選択時とレシピ選択時の表示が変わります。
+ * @default 
+ * 
+ * @param Custom Cmd 2 Category
+ * @desc コマンド2のカテゴリーを設定します。
+ * 合成カテゴリーで設定したカテゴリー名と同じ文字列を入力します。
+ * @default 
+ * 
+ * @param Custom Cmd 3 Name
+ * @desc カテゴリー別のコマンド3の表示内容を設定します。
+ * ';'で区切ると、素材選択時とレシピ選択時の表示が変わります。
+ * @default 
+ * 
+ * @param Custom Cmd 3 Category
+ * @desc コマンド3のカテゴリーを設定します。
+ * 合成カテゴリーで設定したカテゴリー名と同じ文字列を入力します。
+ * @default 
+ * 
+ * @param Custom Cmd 4 Name
+ * @desc カテゴリー別のコマンド4の表示内容を設定します。
+ * ';'で区切ると、素材選択時とレシピ選択時の表示が変わります。
+ * @default 
+ * 
+ * @param Custom Cmd 4 Category
+ * @desc コマンド4のカテゴリーを設定します。
+ * 合成カテゴリーで設定したカテゴリー名と同じ文字列を入力します。
+ * @default 
+ * 
+ * @param Custom Cmd 5 Name
+ * @desc カテゴリー別のコマンド5の表示内容を設定します。
+ * ';'で区切ると、素材選択時とレシピ選択時の表示が変わります。
+ * @default 
+ * 
+ * @param Custom Cmd 5 Category
+ * @desc コマンド5のカテゴリーを設定します。
+ * 合成カテゴリーで設定したカテゴリー名と同じ文字列を入力します。
+ * @default 
+ * 
  * @help
  *-----------------------------------------------------------------------------
  * 概要
@@ -683,6 +736,10 @@ FTKR.ICS = FTKR.ICS || {};
  * <ICS 防具>
  *    :合成カテゴリーの分類を設定します。
  *    :設定しない場合は、アイテムと見なします。
+ * <ICS カテゴリー: カテゴリー名>
+ *    :合成カテゴリーの分類を、アイテム、武器、防具以外に設定します。
+ *    :ここで設定したカテゴリー名は、カスタム選択コマンドで表示する
+ *    :カテゴリーに使用します。
  * 
  * <ICS 特殊合成>
  *    :合成結果が通常の合成と変わります。
@@ -810,15 +867,38 @@ FTKR.ICS = FTKR.ICS || {};
  * 入力する文字列は、必ず小文字にしてください。
  * 
  * action :合成を実行するコマンド
- * item   :アイテム分類の選択コマンド
- * weapon :武器分類の選択コマンド
- * armor  :防具分類の選択コマンド
+ * item   :アイテム分類の選択コマンド(*1)
+ * weapon :武器分類の選択コマンド(*1)
+ * armor  :防具分類の選択コマンド(*1)
  * change :右側のアイテムウィンドウに、アイテムを表示するか、
  *         レシピを表示するか変えるコマンド
  * slot   :素材スロットのアイテムを戻すコマンド
  * end    :合成を止めるコマンド
+ * custom*:特定のカテゴリーだけ表示する選択コマンドで、
+ *         *の番号はプラグインパラメータの設定番号と同じ(*1)(*2)
  * 
  * 各コマンド名は、プラグインパラメータで設定できます。
+ * 
+ * (*1)
+ * このコマンドは、素材選択時とレシピ選択時で表示名を変えることが出来ます。
+ * セミコロン(;)で区切って２つのコマンド名を入力してください。
+ * 入力方法は「(素材選択時の表示名) ; (レシピ選択時の表示名)」です。
+ * 
+ * なお、セミコロンの片側を空欄にした場合は、空欄にした側の選択時に
+ * コマンドを表示しません。
+ * 
+ * 例）アイテムの選択コマンド名を「アイテム;」とした場合、
+ * 　　素材選択時は「アイテム」コマンドを表示するが、
+ * 　　レシピ選択時は表示しません。
+ * 
+ * (*2)
+ * customコマンドで表示できるカテゴリーは、アイテム等のメモ欄で
+ * <ICS カテゴリー: カテゴリー名>のタグで設定したカテゴリーです。
+ * 
+ * プラグインパラメータ<Cusotm Cmd * Category>に、上記タグで設定した
+ * カテゴリーを入力すると、そのカテゴリーのアイテムやレシピのみを
+ * 表示するコマンドを作成します。
+ * 
  * 
  *-----------------------------------------------------------------------------
  * プラグインコマンド
@@ -826,13 +906,14 @@ FTKR.ICS = FTKR.ICS || {};
  * 以下のプラグインコマンドが使用できます。
  * 
  * 1. アイテム合成画面の表示
- * ICS_Open [compositTitle] [slotTitle] [statusTitle] [commandList]
- * ICS_合成画面表示 [合成タイトル] [スロットタイトル] [情報タイトル] [コマンドリスト]
+ * ICS_Open [compositTitle] [slotTitle] [statusTitle] [commandList] [backGroundImage]
+ * ICS_合成画面表示 [合成タイトル] [スロットタイトル] [情報タイトル] [コマンドリスト] [背景画像]
  *    :[]部の入力は必須ではありません。
  *    :入力した場合、合成画面の各表示を変更します。
  *    :タイトルの文字列に制御文字を使用できます。
  *    :
  *    :コマンドリスト - プラグインパラメータ<Command List>と同じ入力方式です。
+ *    :背景画像 - プラグインパラメータ<BackGround Image Name>と同じ入力方式です。
  * 
  * 2. レシピを追加
  * ICS_ADD_RECIPE ITEMNAME RecipeId
@@ -875,6 +956,12 @@ FTKR.ICS = FTKR.ICS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.4.0 - 2017/10/07 : 機能追加
+ *    1. プラグインコマンドで背景画像を設定する機能を追加。
+ *    2. 特定のカテゴリーのアイテムだけ表示する合成コマンドを作成する機能を追加。
+ *    3. 合成コマンドの、素材選択時とレシピ選択時で変える機能を拡張し、
+ *       素材選択時だけ、またはレシピ選択時だけ表示できる機能を追加。
  * 
  * v1.3.2 - 2017/09/03 : 不具合修正
  *    1. 1.3.0の変更部の不具合修正
@@ -1031,6 +1118,19 @@ function Game_IcsRecipeBook() {
         },
         opacity       :Number(parameters['Comp Cmd Opacity'] || 192),
         frame         :String(parameters['Comp Cmd Frame Hide'] || '表示する(show)'),
+        custom:[
+            {},
+            { format  :String(parameters['Custom Cmd 1 Name'] || ''),
+              category:String(parameters['Custom Cmd 1 Category'] || ''),},
+            { format  :String(parameters['Custom Cmd 2 Name'] || ''),
+              category:String(parameters['Custom Cmd 2 Category'] || ''),},
+            { format  :String(parameters['Custom Cmd 3 Name'] || ''),
+              category:String(parameters['Custom Cmd 3 Category'] || ''),},
+            { format  :String(parameters['Custom Cmd 4 Name'] || ''),
+              category:String(parameters['Custom Cmd 4 Category'] || ''),},
+            { format  :String(parameters['Custom Cmd 5 Name'] || ''),
+              category:String(parameters['Custom Cmd 5 Category'] || ''),},
+        ],
     };
 
     //合成コストウィンドウ設定
@@ -1399,7 +1499,8 @@ function Game_IcsRecipeBook() {
                 if (args[0]) FTKR.ICS.windowText.title = args[0];
                 if (args[1]) FTKR.ICS.windowText.slotTitle = args[1];
                 if (args[2]) FTKR.ICS.windowText.statusTitle = args[2];
-                if (args[3]) FTKR.ICS.windowText.command = args[3];
+                if (args[3]) FTKR.ICS.windowText.command = setArgStr(args[3]);
+                if (args[4]) FTKR.ICS.windowText.background = setArgStr(args[4]);
                 SceneManager.push(Scene_ICS);
                 break;
             case 'ADD_RECIPE':
@@ -1467,6 +1568,9 @@ function Game_IcsRecipeBook() {
                     obj.ics.setDataClass('weapon');
                 } else if (hasObjectMeta(obj, ['ICS ARMOR', 'ICS 防具'])) {
                     obj.ics.setDataClass('armor');
+                } else {
+                    var category = readObjectMeta(obj, ['ICS CATEGORY','ICS カテゴリー']);
+                    if (category) obj.ics.setDataClass(category);
                 }
                 var datas = readEntrapmentCodeToTextEx(obj, ['ICS RECIPES', 'ICS レシピ']);
                 if(datas) console.log(datas);
@@ -2125,13 +2229,16 @@ function Game_IcsRecipeBook() {
         var format = FTKR.ICS.command.format;
         switch (symbol){
             case 'item':
-                this.addCommand(this.icsCmd(format.item),   'item');
+                var name = this.icsCmd(format.item);
+                if (name) this.addCommand(name,   'item');
                 break;
             case 'weapon':
-                this.addCommand(this.icsCmd(format.weapon),   'weapon');
+                var name = this.icsCmd(format.weapon);
+                if (name) this.addCommand(name,   'weapon');
                 break;
             case 'armor':
-                this.addCommand(this.icsCmd(format.armor),   'armor');
+                var name = this.icsCmd(format.armor);
+                if (name) this.addCommand(name,   'armor');
                 break;
             case 'slot':
                 this.addCommand(format.slot, 'slot');
@@ -2149,7 +2256,15 @@ function Game_IcsRecipeBook() {
             case 'end':
                 this.addCommand(format.end,         'end');
                 break;
-        }
+            default:
+                var match = /custom(\d+)/i.exec(symbol);
+                if (match) {
+                    var custom = FTKR.ICS.command.custom[Number(match[1])];
+                    var name = this.icsCmd(custom.format);
+                    if (name) this.addCommand(name, custom.category);
+                }
+                break;
+            }
     };
 
     Window_IcsCommand.prototype.update = function() {
@@ -2201,6 +2316,14 @@ function Game_IcsRecipeBook() {
 
     Window_IcsItemList.prototype.typeId = function() {
         return this._typeId[this.index()];
+    };
+
+    Window_IcsItemList.prototype.includes = function(item) {
+        if (item && item.ics.category() === this._category) {
+            return true;
+        } else {
+            return Window_ItemList.prototype.includes.call(this, item);
+        }
     };
 
     Window_IcsItemList.prototype.makeItemList = function() {
@@ -2991,10 +3114,14 @@ function Game_IcsRecipeBook() {
 
     Scene_ICS.prototype.createBackground = function() {
         this._backgroundSprite = new Sprite();
-        var bgiName = FTKR.ICS.background.name;
+        var bgiName = this.loadBackGroundImage();
         this._backgroundSprite.bitmap = bgiName ?
             ImageManager.loadSystem(bgiName) : SceneManager.backgroundBitmap();
         this.addChild(this._backgroundSprite);
+    };
+
+    Scene_ICS.prototype.loadBackGroundImage = function() {
+        return FTKR.ICS.windowText.background || FTKR.ICS.background.name;
     };
 
     Scene_ICS.prototype.create = function() {
