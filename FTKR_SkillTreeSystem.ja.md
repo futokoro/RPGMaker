@@ -7,6 +7,7 @@
 ダウンロード: [FTKR_SkillTreeSystem.js](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillTreeSystem.js)
 
 サンプルプロジェクト: [英語版(English)](sampleProject/SkillTreeSample.zip)
+※2017/10/08更新(MVコアスクリプト v1.5.1対応)
 
 # 目次
 
