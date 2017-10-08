@@ -3,8 +3,8 @@
 // FTKR_SkillTreeSystem.js
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/02/25
-// 最終更新日 : 2017/08/22
-// バージョン : v1.10.0
+// 最終更新日 : 2017/10/09
+// バージョン : v1.11.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.10.0 ツリー型スキル習得システム
+ * @plugindesc v1.11.0 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -1095,30 +1095,32 @@ FTKR.STS = FTKR.STS || {};
  * スキルツリーの初期化
  *-----------------------------------------------------------------------------
  * 以下のプラグインコマンドで、スキルツリーを初期化できます。
- * リセットと初期化で使用したSP(*1)が戻るかどうか変わります。
+ * リセットと初期化で使用したコスト(*1)が戻るかどうか変わります。
  * 
- * (*1)使用したSPとは、スキルの習得にSPを消費した値の合計です。
- *     SPを消費せずにスキルを習得した場合は 0 と計算します。
+ * (*1)使用したコストとは、スキルの習得時に消費したコストのことです。
+ *     コストを消費せずにスキルを習得した場合は 0 と計算します。
+ *     ただし、初期レベルで習得済みのスキルについては
+ *     コストを消費しているものとして計算します。
  * 
  * <STS Reset Actor(x) ALL>
  * <STS リセット アクター(x) すべて>
  *        :アクターID'x'のスキルツリーをすべて初期化します。
- *        :使用したSPはすべて戻ります。
+ *        :使用したコストはすべて戻ります。
  * 
  * <STS Reset Actor(x) TreeType(y)>
  * <STS リセット アクター(x) ツリータイプ(y)>
  *        :アクターID'x'のスキルツリーID'y'をすべて初期化します。
- *        :使用したSPはすべて戻ります。
+ *        :使用したコストはすべて戻ります。
  * 
  * <STS Clear Actor(x) ALL>
  * <STS 初期化 アクター(x) すべて>
  *        :アクターID'x'のスキルツリーをすべて初期化します。
- *        :使用したSPは戻りません。
+ *        :使用したコストは戻りません。
  * 
  * <STS Clear Actor(x) TreeType(y)>
  * <STS 初期化 アクター(x) ツリータイプ(y)>
  *        :アクターID'x'のスキルツリーID'y'をすべて初期化します。
- *        :使用したSPは戻りません。
+ *        :使用したコストは戻りません。
  * 
  * 
  * また、以下のタグをアイテムのメモ欄に入力することで、ツリーを初期化する
@@ -1271,7 +1273,7 @@ FTKR.STS = FTKR.STS || {};
  * STS リセット アクター(x) ツリータイプ(y)
  *    :指定したアクターのスキルツリーを、すべてまたは指定した対象のみ
  *    :リセットします。
- *    :リセットしたツリーに使用したSPはアクターに戻ります。
+ *    :リセットしたツリーに使用したコストはアクターに戻ります。
  *    : x - アクターID
  *    : y - ツリータイプID
  * 
@@ -1284,7 +1286,7 @@ FTKR.STS = FTKR.STS || {};
  * STS 初期化 アクター(x) ツリータイプ(y)
  *    :指定したアクターのスキルツリーを、すべてまたは指定したツリーのみ
  *    :初期化します。
- *    :初期化したツリーに使用したSPはアクターに戻りません。
+ *    :初期化したツリーに使用したコストはアクターに戻りません。
  *    : x - アクターID
  *    : y - ツリータイプID
  * 
@@ -1331,6 +1333,11 @@ FTKR.STS = FTKR.STS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.11.0 - 2017/10/09 : 機能追加、不具合修正
+ *    1. スキルツリーリセット時に、コストとして消費したSP以外のアイテムや
+ *       お金等も戻るように変更。
+ *    2. コストに設定したお金が反映されない不具合を修正。
  * 
  * v1.10.0 - 2017/08/22 : 機能追加
  *    1. スキルツリーの起点スキルに対して行を指定して登録する機能を追加。
@@ -2050,7 +2057,7 @@ function Scene_STS() {
                 } else if(data.match(case5) || data.match(case5j)) {
                     obj.sts.costs.push(this.setCost('var', RegExp.$1, RegExp.$2));
                 } else if(data.match(case6) || data.match(case6j)) {
-                    obj.sts.costs.push(this.setCost('gold', 0, RegExp.$2));
+                    obj.sts.costs.push(this.setCost('gold', 0, RegExp.$1));
                 } else if(data.match(case7) || data.match(case7j)) {
                     obj.sts.maxCount = Number(RegExp.$1);
                 } else if(data.match(case8) || data.match(case8j)) {
@@ -2098,6 +2105,11 @@ function Scene_STS() {
         this._stsTrees = [];
         this._stsCount = [];
         this._stsUsedSp = [];
+        this._stsUsedItem = [];
+        this._stsUsedWeapon = [];
+        this._stsUsedArmor = [];
+        this._stsUsedVar = [];
+        this._stsUsedGold = [];
     };
 
     var _STS_Game_Actor_setup = Game_Actor.prototype.setup;
@@ -2105,6 +2117,13 @@ function Scene_STS() {
         _STS_Game_Actor_setup.call(this, actorId);
         if (isMVver_1_4()) ImageManager.loadFace(this.faceName());
         this.getSp(this.actor().sts.initsp);
+    };
+
+    var _STS_Game_Actor_initSkills = Game_Actor.prototype.initSkills;
+    Game_Actor.prototype.initSkills = function() {
+        this._initFlag = true;
+        _STS_Game_Actor_initSkills.call(this);
+        this._initFlag = false;
     };
 
     var _STS_Game_Actor_levelUp = Game_Actor.prototype.levelUp;
@@ -2126,6 +2145,9 @@ function Scene_STS() {
             this.stsCountUp(skillId);
             this._stsLearnSkills[skillId] = true;
         }
+        if (this._initFlag) {
+            this.stsUsedCost(skillId);
+        }
     };
 
     var _STS_Game_Actor_forgetSkill = Game_Actor.prototype.forgetSkill;
@@ -2146,27 +2168,135 @@ function Scene_STS() {
     };
 
     Game_Actor.prototype.setStsSkillCount = function(skillId, value) {
-        return this._stsCount[skillId] = value;
+        this._stsCount[skillId] = value;
     };
 
     Game_Actor.prototype.stsCountUp = function(skillId) {
         if (FTKR.STS.enableSkillCount) {
             this.setStsSkillCount(skillId, this.stsCount(skillId) + 1);
+        } else {
+            this.setStsSkillCount(skillId, 1);
         }
     };
 
+    Game_Actor.prototype.stsUsedCost = function(skillId) {
+        var skill = this.stsSkill(skillId);
+        FTKR.setGameData(this, null, skill);
+        skill.sts.costs.forEach( function(cost){
+            var value = this.evalStsFormula(cost.value,0,0);
+            switch (cost.type) {
+                case 'item':
+                  this.stsAddUsedItem(skill.id, cost.id, value);
+                  break;
+                case 'var':
+                  this.stsAddUsedVar(skill.id, cost.id, value);
+                  break;
+                case 'gold':
+                  this.stsAddUsedGold(skill.id, value);
+                  break;
+                case 'weapon':
+                  this.stsAddUsedWeapon(skill.id, cost.id, value);
+                  break;
+                case 'armor':
+                  this.stsAddUsedArmor(skill.id, cost.id, value);
+                  break;
+                case 'sp':
+                  this.stsAddUsedSp(skill.id, value);
+                  break;
+            }
+        },this);
+    };
+    
     Game_Actor.prototype.setStsUsedSp = function(skillId, value) {
         this._stsUsedSp[skillId] = value;
     };
 
     Game_Actor.prototype.stsUsedSp = function(skillId) {
         if (!this.isLearnedSkill(skillId)) return 0;
-        return this._stsUsedSp[skillId];
+        return this._stsUsedSp[skillId] || 0;
     };
 
     Game_Actor.prototype.stsAddUsedSp = function(skillId, value) {
         if (!this._stsUsedSp[skillId]) this._stsUsedSp[skillId] = 0;
         this._stsUsedSp[skillId] += value;
+    };
+
+    Game_Actor.prototype.setStsUsedGold = function(skillId, value) {
+        this._stsUsedGold[skillId] = value;
+    };
+
+    Game_Actor.prototype.stsUsedGold = function(skillId) {
+        if (!this.isLearnedSkill(skillId)) return 0;
+        return this._stsUsedGold[skillId] || 0;
+    };
+
+    Game_Actor.prototype.stsAddUsedGold = function(skillId, value) {
+        if (!this._stsUsedGold[skillId]) this._stsUsedGold[skillId] = 0;
+        this._stsUsedGold[skillId] += value;
+    };
+
+    Game_Actor.prototype.setStsUsedItem = function(skillId, itemId, value) {
+        this._stsUsedItem[skillId][itemId] = value;
+    };
+
+    Game_Actor.prototype.stsUsedItems = function(skillId) {
+        if (!this.isLearnedSkill(skillId)) return [];
+        if (!this._stsUsedItem[skillId]) this._stsUsedItem[skillId] = [];
+        return this._stsUsedItem[skillId];
+    };
+
+    Game_Actor.prototype.stsAddUsedItem = function(skillId, itemId, value) {
+        if (!this._stsUsedItem[skillId]) this._stsUsedItem[skillId] = [];
+        if (!this._stsUsedItem[skillId][itemId]) this._stsUsedItem[skillId][itemId] = 0;
+        this._stsUsedItem[skillId][itemId] += value;
+    };
+
+    Game_Actor.prototype.setStsUsedWeapon = function(skillId, itemId, value) {
+        this._stsUsedWeapon[skillId][itemId] = value;
+    };
+
+    Game_Actor.prototype.stsUsedWeapons = function(skillId) {
+        if (!this.isLearnedSkill(skillId)) return [];
+        if (!this._stsUsedWeapon[skillId]) this._stsUsedWeapon[skillId] = [];
+        return this._stsUsedWeapon[skillId];
+    };
+
+    Game_Actor.prototype.stsAddUsedWeapon = function(skillId, itemId, value) {
+        if (!this._stsUsedWeapon[skillId]) this._stsUsedWeapon[skillId] = [];
+        if (!this._stsUsedWeapon[skillId][itemId]) this._stsUsedWeapon[skillId][itemId] = 0;
+        this._stsUsedWeapon[skillId][itemId] += value;
+    };
+
+    Game_Actor.prototype.setStsUsedArmor = function(skillId, itemId, value) {
+        this._stsUsedArmor[skillId][itemId] = value;
+    };
+
+    Game_Actor.prototype.stsUsedArmors = function(skillId) {
+        if (!this.isLearnedSkill(skillId)) return [];
+        if (!this._stsUsedArmor[skillId]) this._stsUsedArmor[skillId] = [];
+        return this._stsUsedArmor[skillId];
+    };
+
+    Game_Actor.prototype.stsAddUsedArmor = function(skillId, itemId, value) {
+        if (!this._stsUsedArmor[skillId]) this._stsUsedArmor[skillId] = [];
+        if (!this._stsUsedArmor[skillId][itemId]) this._stsUsedArmor[skillId][itemId] = 0;
+        this._stsUsedArmor[skillId][itemId] += value;
+    };
+
+    Game_Actor.prototype.setStsUsedVar = function(skillId, varId, value) {
+        this._stsUsedVar[skillId][varId] = value;
+    };
+
+    Game_Actor.prototype.stsUsedVars = function(skillId) {
+        if (!this.isLearnedSkill(skillId)) return [];
+        if (!this._stsUsedVar[skillId]) this._stsUsedVar[skillId] = [];
+        return this._stsUsedVar[skillId];
+    };
+
+    Game_Actor.prototype.stsAddUsedVar = function(skillId, varId, value) {
+        if (!this._stsUsedVar[skillId]) this._stsUsedVar[skillId] = [];
+        if (!this._stsUsedVar[skillId][varId]) this._stsUsedVar[skillId][varId] = 0;
+        this._stsUsedVar[skillId][varId] += value;
     };
 
     Game_Actor.prototype.evalStsFormula = function(formula, result1, result2) {
@@ -2190,14 +2320,19 @@ function Scene_STS() {
         var value = this.evalStsFormula(cost.value,0,0);
         switch (cost.type) {
             case 'item':
+              this.stsAddUsedItem(FTKR.gameData.item.id, cost.id, value);
               return $gameParty.loseItem($dataItems[cost.id], value);
             case 'var':
+              this.stsAddUsedVar(FTKR.gameData.item.id, cost.id, value);
               return $gameVariables.setValue(cost.id, $gameVariables.value(cost.id) - value);
             case 'gold':
+              this.stsAddUsedGold(FTKR.gameData.item.id, value);
               return $gameParty.loseGold(value);
             case 'weapon':
+              this.stsAddUsedWeapon(FTKR.gameData.item.id, cost.id, value);
               return $gameParty.loseItem($dataWeapons[cost.id], value);
             case 'armor':
+              this.stsAddUsedArmor(FTKR.gameData.item.id, cost.id, value);
               return $gameParty.loseItem($dataArmors[cost.id], value);
             case 'sp':
               this.stsAddUsedSp(FTKR.gameData.item.id, value);
@@ -2300,37 +2435,55 @@ function Scene_STS() {
         if (index > -1) this._stsTrees.splice(index, 1);
     };
 
-    Game_Actor.prototype.resetAllTree = function() {
-        var totalSp = 0;
+    /*-------------------------------------------------------------
+      スキルツリーのリセット処理
+      flag : 1 - 消費したコストが戻る, 0 - 消費したコストは戻らない
+    -------------------------------------------------------------*/
+    Game_Actor.prototype.resetAllTree = function(flag) {
         this.getTreeTypes().forEach( function(tType) {
-            totalSp += this.resetTree(tType);
+            this.resetTree(flag, tType);
         },this);
-        return totalSp;
     };
 
-    Game_Actor.prototype.resetTree = function(treeType) {
+    Game_Actor.prototype.resetTree = function(flag, treeType) {
         var totalSp = 0;
-        var datas = this.getTreeDatas(treeType);
-        if (!datas.length) return 0;
-        datas.forEach( function(data) {
-            if (!data) return;
-            totalSp += this.stsUsedSp(data.id);
-            this.forgetSkill(data.id);
-            this.resetStsSkill(data.id);
-            this.setStsUsedSp(data.id, 0);
+        var skillTree = this.getTreeDatas(treeType);
+        if (!skillTree.length) return 0;
+        skillTree.forEach( function(skill) {
+            if (!skill) return;
+            if (flag) {
+                this.getSp(this.stsUsedSp(skill.id));
+                $gameParty.gainGold(this.stsUsedGold(skill.id));
+            }
+            this.setStsUsedSp(skill.id, 0);
+            this.setStsUsedGold(skill.id, 0);
+
+            this.stsUsedItems(skill.id).forEach( function(itemNum, i){
+                if (!itemNum) return;
+                if (flag)$gameParty.gainItem($dataItems[i], itemNum);
+                this.setStsUsedItem(skill.id, i, 0);
+            },this);
+            this.stsUsedWeapons(skill.id).forEach( function(itemNum, i){
+                if (!itemNum) return;
+                if (flag)$gameParty.gainItem($dataWeapons[i], itemNum);
+                this.setStsUsedWeapon(skill.id, i, 0);
+            },this);
+            this.stsUsedArmors(skill.id).forEach( function(itemNum, i){
+                if (!itemNum) return;
+                if (flag)$gameParty.gainItem($dataArmors[i], itemNum);
+                this.setStsUsedArmor(skill.id, i, 0);
+            },this);
+            this.stsUsedVars(skill.id).forEach( function(itemNum, i){
+                if (!itemNum) return;
+                if (flag)$gameVariables.setValue(i, itemNum + $gameVariables.value(i));
+                this.setStsUsedVar(skill.id, i, 0);
+            },this);
+            this.forgetSkill(skill.id);
+            this.resetStsSkill(skill.id);
         },this);
-        return totalSp;
     };
 
-    Game_Actor.prototype.totalUsedSp = function(skill) {
-        var totalSp = 0;
-        var skill = this.stsSkill(skillId);
-        FTKR.setGameData(this, null, skill);
-        for (var c = 0; c < this.stsCount(skill.id); c++) {
-            totalSp += this.evalStsFormula(skill.sts.costs[0].value, 0, 0);
-        };
-        return totalSp;
-    };
+    //-------------------------------------------------------------
 
     Game_Actor.prototype.getTreeDatas = function(treeType) {
         var tree = $dataWeapons[treeType];
@@ -2404,6 +2557,7 @@ function Scene_STS() {
         return results;
     };
 
+    //派生スキルのIDリストを取得
     Game_Actor.prototype.getDevSkillId = function(item, tree) {
         var skillIds = item.sts.skillIds;
         if (item.sts.tree.length > 1) {
@@ -2468,12 +2622,12 @@ function Scene_STS() {
     };
 
     Game_Action.prototype.itemEffectResetTree = function(target, effect) {
-        target.getSp(target.resetAllTree());
+        target.resetAllTree(1);
         this.makeSuccess(target);
     };
 
     Game_Action.prototype.itemEffectClearTree = function(target, effect) {
-        target.resetAllTree();
+        target.resetAllTree(0);
         this.makeSuccess(target);
     };
 
@@ -3728,17 +3882,24 @@ function Scene_STS() {
                 // スキルツリーを初期化する
                 case /RESET/i.test(com):
                 case /リセット/i.test(com):
-                case /CLEAR/i.test(com):
-                case /初期化/i.test(com):
                     var actor = this.setActor(args[1]);
                     if (!actor) break;
                     var sp = 0;
                     if (args[2].match(/ALL/i) || args[2].match(/すべて/i)) {
-                      sp = actor.resetAllTree();
+                      actor.resetAllTree(1);
                     } else if (args[2].match(case1) || args[2].match(case1j)) {
-                      sp = actor.resetTree(this.setNum(RegExp.$1));
+                      actor.resetTree(1, this.setNum(RegExp.$1));
                     }
-                    if (/RESET/i.test(com) || /リセット/i.test(com)) actor.getSp(sp);
+                    break;
+                case /CLEAR/i.test(com):
+                case /初期化/i.test(com):
+                    var actor = this.setActor(args[1]);
+                    if (!actor) break;
+                    if (args[2].match(/ALL/i) || args[2].match(/すべて/i)) {
+                      actor.resetAllTree(0);
+                    } else if (args[2].match(case1) || args[2].match(case1j)) {
+                      actor.resetTree(0, this.setNum(RegExp.$1));
+                    }
                     break;
                 case /Learn/i.test(com):
                 case /スキル習得/i.test(com):
