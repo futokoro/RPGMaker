@@ -4,7 +4,7 @@
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/02/25
 // 最終更新日 : 2017/10/09
-// バージョン : v1.11.0
+// バージョン : v1.11.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.11.0 ツリー型スキル習得システム
+ * @plugindesc v1.11.1 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -1334,6 +1334,9 @@ FTKR.STS = FTKR.STS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.11.1 - 2017/10/09 : 不具合修正
+ *    1. リセット実行時にエラーで止まる不具合を修正。
+ * 
  * v1.11.0 - 2017/10/09 : 機能追加、不具合修正
  *    1. スキルツリーリセット時に、コストとして消費したSP以外のアイテムや
  *       お金等も戻るように変更。
@@ -2208,6 +2211,7 @@ function Scene_STS() {
     };
     
     Game_Actor.prototype.setStsUsedSp = function(skillId, value) {
+        if (!this._stsUsedSp) this._stsUsedSp = [];
         this._stsUsedSp[skillId] = value;
     };
 
@@ -2222,6 +2226,7 @@ function Scene_STS() {
     };
 
     Game_Actor.prototype.setStsUsedGold = function(skillId, value) {
+        if (!this._stsUsedGold) this._stsUsedSp = [];
         this._stsUsedGold[skillId] = value;
     };
 
@@ -2236,6 +2241,8 @@ function Scene_STS() {
     };
 
     Game_Actor.prototype.setStsUsedItem = function(skillId, itemId, value) {
+        if (!this._stsUsedItem) this._stsUsedItem = [];
+        if (!this._stsUsedItem[skillId]) this._stsUsedItem[skillId] = [];
         this._stsUsedItem[skillId][itemId] = value;
     };
 
@@ -2252,6 +2259,8 @@ function Scene_STS() {
     };
 
     Game_Actor.prototype.setStsUsedWeapon = function(skillId, itemId, value) {
+        if (!this._stsUsedWeapon) this._stsUsedWeapon = [];
+        if (!this._stsUsedWeapon[skillId]) this._stsUsedWeapon[skillId] = [];
         this._stsUsedWeapon[skillId][itemId] = value;
     };
 
@@ -2268,6 +2277,8 @@ function Scene_STS() {
     };
 
     Game_Actor.prototype.setStsUsedArmor = function(skillId, itemId, value) {
+        if (!this._stsUsedArmor) this._stsUsedArmor = [];
+        if (!this._stsUsedArmor[skillId]) this._stsUsedArmor[skillId] = [];
         this._stsUsedArmor[skillId][itemId] = value;
     };
 
@@ -2284,6 +2295,8 @@ function Scene_STS() {
     };
 
     Game_Actor.prototype.setStsUsedVar = function(skillId, varId, value) {
+        if (!this._stsUsedVar) this._stsUsedVar = [];
+        if (!this._stsUsedVar[skillId]) this._stsUsedVar[skillId] = [];
         this._stsUsedVar[skillId][varId] = value;
     };
 
