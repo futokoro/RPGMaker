@@ -3,8 +3,8 @@
 // FTKR_SkillTreeSystem.js
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/02/25
-// 最終更新日 : 2017/10/09
-// バージョン : v1.11.1
+// 最終更新日 : 2017/10/10
+// バージョン : v1.11.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.11.1 ツリー型スキル習得システム
+ * @plugindesc v1.11.2 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -1334,6 +1334,9 @@ FTKR.STS = FTKR.STS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.11.2 - 2017/10/10 : 不具合修正
+ *    1. リセット実行時にエラーで止まる不具合を修正。
+ * 
  * v1.11.1 - 2017/10/09 : 不具合修正
  *    1. リセット実行時にエラーで止まる不具合を修正。
  * 
@@ -2124,9 +2127,9 @@ function Scene_STS() {
 
     var _STS_Game_Actor_initSkills = Game_Actor.prototype.initSkills;
     Game_Actor.prototype.initSkills = function() {
-        this._initFlag = true;
+        this._initStsFlag = true;
         _STS_Game_Actor_initSkills.call(this);
-        this._initFlag = false;
+        this._initStsFlag = false;
     };
 
     var _STS_Game_Actor_levelUp = Game_Actor.prototype.levelUp;
@@ -2148,7 +2151,7 @@ function Scene_STS() {
             this.stsCountUp(skillId);
             this._stsLearnSkills[skillId] = true;
         }
-        if (this._initFlag) {
+        if (this._initStsFlag) {
             this.stsUsedCost(skillId);
         }
     };
@@ -2189,22 +2192,22 @@ function Scene_STS() {
             var value = this.evalStsFormula(cost.value,0,0);
             switch (cost.type) {
                 case 'item':
-                  this.stsAddUsedItem(skill.id, cost.id, value);
+                  this.addStsUsedItem(skill.id, cost.id, value);
                   break;
                 case 'var':
-                  this.stsAddUsedVar(skill.id, cost.id, value);
+                  this.addStsUsedVar(skill.id, cost.id, value);
                   break;
                 case 'gold':
-                  this.stsAddUsedGold(skill.id, value);
+                  this.addStsUsedGold(skill.id, value);
                   break;
                 case 'weapon':
-                  this.stsAddUsedWeapon(skill.id, cost.id, value);
+                  this.addStsUsedWeapon(skill.id, cost.id, value);
                   break;
                 case 'armor':
-                  this.stsAddUsedArmor(skill.id, cost.id, value);
+                  this.addStsUsedArmor(skill.id, cost.id, value);
                   break;
                 case 'sp':
-                  this.stsAddUsedSp(skill.id, value);
+                  this.addStsUsedSp(skill.id, value);
                   break;
             }
         },this);
@@ -2217,99 +2220,115 @@ function Scene_STS() {
 
     Game_Actor.prototype.stsUsedSp = function(skillId) {
         if (!this.isLearnedSkill(skillId)) return 0;
+        if (!this._stsUsedSp) this._stsUsedSp = [];
         return this._stsUsedSp[skillId] || 0;
     };
 
-    Game_Actor.prototype.stsAddUsedSp = function(skillId, value) {
-        if (!this._stsUsedSp[skillId]) this._stsUsedSp[skillId] = 0;
-        this._stsUsedSp[skillId] += value;
+    Game_Actor.prototype.addStsUsedSp = function(skillId, value) {
+        this.setStsUsedSp(skillId, this.stsUsedSp(skillId) + value);
     };
 
     Game_Actor.prototype.setStsUsedGold = function(skillId, value) {
-        if (!this._stsUsedGold) this._stsUsedSp = [];
+        if (!this._stsUsedGold) this._stsUsedGold = [];
         this._stsUsedGold[skillId] = value;
     };
 
     Game_Actor.prototype.stsUsedGold = function(skillId) {
         if (!this.isLearnedSkill(skillId)) return 0;
+        if (!this._stsUsedGold) this._stsUsedGold = [];
         return this._stsUsedGold[skillId] || 0;
     };
 
-    Game_Actor.prototype.stsAddUsedGold = function(skillId, value) {
-        if (!this._stsUsedGold[skillId]) this._stsUsedGold[skillId] = 0;
-        this._stsUsedGold[skillId] += value;
+    Game_Actor.prototype.addStsUsedGold = function(skillId, value) {
+        this.setStsUsedGold(skillId, this.stsUsedGold(skillId) + value);
+    };
+
+    Game_Actor.prototype.initStsUsedItem = function(skillId, itemId) {
+        if (!this._stsUsedItem) this._stsUsedItem = [];
+        if (skillId && !this._stsUsedItem[skillId]) this._stsUsedItem[skillId] = [];
+        if (itemId && !this._stsUsedItem[skillId][itemId]) this._stsUsedItem[skillId][itemId] = 0;
     };
 
     Game_Actor.prototype.setStsUsedItem = function(skillId, itemId, value) {
-        if (!this._stsUsedItem) this._stsUsedItem = [];
-        if (!this._stsUsedItem[skillId]) this._stsUsedItem[skillId] = [];
+        this.initStsUsedItem(skillId);
         this._stsUsedItem[skillId][itemId] = value;
     };
 
     Game_Actor.prototype.stsUsedItems = function(skillId) {
         if (!this.isLearnedSkill(skillId)) return [];
-        if (!this._stsUsedItem[skillId]) this._stsUsedItem[skillId] = [];
+        this.initStsUsedItem(skillId);
         return this._stsUsedItem[skillId];
     };
 
-    Game_Actor.prototype.stsAddUsedItem = function(skillId, itemId, value) {
-        if (!this._stsUsedItem[skillId]) this._stsUsedItem[skillId] = [];
-        if (!this._stsUsedItem[skillId][itemId]) this._stsUsedItem[skillId][itemId] = 0;
-        this._stsUsedItem[skillId][itemId] += value;
+    Game_Actor.prototype.addStsUsedItem = function(skillId, itemId, value) {
+        this.initStsUsedItem(skillId, itemId);
+        this.setStsUsedItem(skillId, itemId, this.stsUsedItems(skillId)[itemId] + value);
+    };
+
+    Game_Actor.prototype.initStsUsedWeapon = function(skillId, itemId) {
+        if (!this._stsUsedWeapon) this._stsUsedWeapon = [];
+        if (skillId && !this._stsUsedWeapon[skillId]) this._stsUsedWeapon[skillId] = [];
+        if (itemId && !this._stsUsedWeapon[skillId][itemId]) this._stsUsedWeapon[skillId][itemId] = 0;
     };
 
     Game_Actor.prototype.setStsUsedWeapon = function(skillId, itemId, value) {
-        if (!this._stsUsedWeapon) this._stsUsedWeapon = [];
-        if (!this._stsUsedWeapon[skillId]) this._stsUsedWeapon[skillId] = [];
+        this.initStsUsedWeapon(skillId);
         this._stsUsedWeapon[skillId][itemId] = value;
     };
 
     Game_Actor.prototype.stsUsedWeapons = function(skillId) {
         if (!this.isLearnedSkill(skillId)) return [];
-        if (!this._stsUsedWeapon[skillId]) this._stsUsedWeapon[skillId] = [];
+        this.initStsUsedWeapon(skillId);
         return this._stsUsedWeapon[skillId];
     };
 
-    Game_Actor.prototype.stsAddUsedWeapon = function(skillId, itemId, value) {
-        if (!this._stsUsedWeapon[skillId]) this._stsUsedWeapon[skillId] = [];
-        if (!this._stsUsedWeapon[skillId][itemId]) this._stsUsedWeapon[skillId][itemId] = 0;
-        this._stsUsedWeapon[skillId][itemId] += value;
+    Game_Actor.prototype.addStsUsedWeapon = function(skillId, itemId, value) {
+        this.initStsUsedWeapon(skillId, itemId);
+        this.setStsUsedWeapon(skillId, itemId, this.stsUsedWeapons(skillId)[itemId] + value);
+    };
+
+    Game_Actor.prototype.initStsUsedArmor = function(skillId, itemId) {
+        if (!this._stsUsedArmor) this._stsUsedArmor = [];
+        if (skillId && !this._stsUsedArmor[skillId]) this._stsUsedArmor[skillId] = [];
+        if (itemId && !this._stsUsedArmor[skillId][itemId]) this._stsUsedArmor[skillId][itemId] = 0;
     };
 
     Game_Actor.prototype.setStsUsedArmor = function(skillId, itemId, value) {
-        if (!this._stsUsedArmor) this._stsUsedArmor = [];
-        if (!this._stsUsedArmor[skillId]) this._stsUsedArmor[skillId] = [];
+        this.initStsUsedArmor(skillId);
         this._stsUsedArmor[skillId][itemId] = value;
     };
 
     Game_Actor.prototype.stsUsedArmors = function(skillId) {
         if (!this.isLearnedSkill(skillId)) return [];
-        if (!this._stsUsedArmor[skillId]) this._stsUsedArmor[skillId] = [];
+        this.initStsUsedArmor(skillId);
         return this._stsUsedArmor[skillId];
     };
 
-    Game_Actor.prototype.stsAddUsedArmor = function(skillId, itemId, value) {
-        if (!this._stsUsedArmor[skillId]) this._stsUsedArmor[skillId] = [];
-        if (!this._stsUsedArmor[skillId][itemId]) this._stsUsedArmor[skillId][itemId] = 0;
-        this._stsUsedArmor[skillId][itemId] += value;
+    Game_Actor.prototype.addStsUsedArmor = function(skillId, itemId, value) {
+        this.initStsUsedArmor(skillId, itemId);
+        this.setStsUsedArmor(skillId, itemId, this.stsUsedArmors(skillId)[itemId] + value);
+    };
+
+    Game_Actor.prototype.initStsUsedVar = function(skillId, varId) {
+        if (!this._stsUsedVar) this._stsUsedVar = [];
+        if (skillId && !this._stsUsedVar[skillId]) this._stsUsedVar[skillId] = [];
+        if (varId && !this._stsUsedVar[skillId][varId]) this._stsUsedVar[skillId][varId] = 0;
     };
 
     Game_Actor.prototype.setStsUsedVar = function(skillId, varId, value) {
-        if (!this._stsUsedVar) this._stsUsedVar = [];
-        if (!this._stsUsedVar[skillId]) this._stsUsedVar[skillId] = [];
+        this.initStsUsedVar(skillId);
         this._stsUsedVar[skillId][varId] = value;
     };
 
     Game_Actor.prototype.stsUsedVars = function(skillId) {
         if (!this.isLearnedSkill(skillId)) return [];
-        if (!this._stsUsedVar[skillId]) this._stsUsedVar[skillId] = [];
+        this.initStsUsedVar(skillId);
         return this._stsUsedVar[skillId];
     };
 
-    Game_Actor.prototype.stsAddUsedVar = function(skillId, varId, value) {
-        if (!this._stsUsedVar[skillId]) this._stsUsedVar[skillId] = [];
-        if (!this._stsUsedVar[skillId][varId]) this._stsUsedVar[skillId][varId] = 0;
-        this._stsUsedVar[skillId][varId] += value;
+    Game_Actor.prototype.addStsUsedVar = function(skillId, varId, value) {
+        this.initStsUsedVar(skillId, varId);
+        this.setStsUsedVar(skillId, varId, this.stsUsedVars(skillId)[varId] + value);
     };
 
     Game_Actor.prototype.evalStsFormula = function(formula, result1, result2) {
@@ -2333,22 +2352,22 @@ function Scene_STS() {
         var value = this.evalStsFormula(cost.value,0,0);
         switch (cost.type) {
             case 'item':
-              this.stsAddUsedItem(FTKR.gameData.item.id, cost.id, value);
+              this.addStsUsedItem(FTKR.gameData.item.id, cost.id, value);
               return $gameParty.loseItem($dataItems[cost.id], value);
             case 'var':
-              this.stsAddUsedVar(FTKR.gameData.item.id, cost.id, value);
+              this.addStsUsedVar(FTKR.gameData.item.id, cost.id, value);
               return $gameVariables.setValue(cost.id, $gameVariables.value(cost.id) - value);
             case 'gold':
-              this.stsAddUsedGold(FTKR.gameData.item.id, value);
+              this.addStsUsedGold(FTKR.gameData.item.id, value);
               return $gameParty.loseGold(value);
             case 'weapon':
-              this.stsAddUsedWeapon(FTKR.gameData.item.id, cost.id, value);
+              this.addStsUsedWeapon(FTKR.gameData.item.id, cost.id, value);
               return $gameParty.loseItem($dataWeapons[cost.id], value);
             case 'armor':
-              this.stsAddUsedArmor(FTKR.gameData.item.id, cost.id, value);
+              this.addStsUsedArmor(FTKR.gameData.item.id, cost.id, value);
               return $gameParty.loseItem($dataArmors[cost.id], value);
             case 'sp':
-              this.stsAddUsedSp(FTKR.gameData.item.id, value);
+              this.addStsUsedSp(FTKR.gameData.item.id, value);
               return this.loseSp(value);
         }
     };
