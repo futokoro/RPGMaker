@@ -3,8 +3,8 @@
 // FTKR_SkillExpansion.js
 // 作成者     : フトコロ
 // 作成日     : 2017/02/18
-// 最終更新日 : 2017/04/09
-// バージョン : v1.3.3
+// 最終更新日 : 2017/10/16
+// バージョン : v1.3.4
 //=======↑本プラグインを改変した場合でも、この欄は消さないでください↑===============
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.SEP = FTKR.SEP || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.3.3 スキル拡張プラグイン
+ * @plugindesc v1.3.4 スキル拡張プラグイン
  * @author フトコロ
  *
  * @param Elements Damage Calc
@@ -633,6 +633,10 @@ FTKR.SEP = FTKR.SEP || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.3.4 - 2017/10/16 : 不具合修正
+ *    1. イベントコマンドの条件分岐で、スキルを覚えていることを
+ *       正しく判定できない不具合を修正。
  * 
  * v1.3.3 - 2017/04/09 : 不具合修正
  *    1. ダメージが設定されていない場合の例外処理を追加。
@@ -1294,6 +1298,13 @@ Game_Actor.prototype.skills = function() {
         }
     },this);
     return newlist;
+};
+
+FTKR.SEP.Game_Actor_hasSkill = Game_Actor.prototype.hasSkill;
+Game_Actor.prototype.hasSkill = function(skillId) {
+    return this.isMakedSepSkill(skillId) ? 
+        this.skills().contains(this.sepSkill(skillId)) :
+        FTKR.SEP.Game_Actor_hasSkill.call(this, skillId);
 };
 
 FTKR.SEP.Game_Actor_forgetSkill = Game_Actor.prototype.forgetSkill;

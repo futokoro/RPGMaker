@@ -3,8 +3,8 @@
 // FTKR_SEP_ShowSkillStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/02/24
-// 最終更新日 : 2017/04/04
-// バージョン : v1.4.2
+// 最終更新日 : 2017/10/16
+// バージョン : v1.4.3
 //=======↑本プラグインを改変した場合でも、この欄は消さないでください↑===============
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.SSS = FTKR.SSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.4.2 スキルのステータスを表示するプラグイン
+ * @plugindesc v1.4.3 スキルのステータスを表示するプラグイン
  * @author フトコロ
  *
  * @param ---Layout---
@@ -927,6 +927,9 @@ FTKR.SSS = FTKR.SSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  *
+ * v1.4.3 - 2017/10/16 : 不具合修正
+ *    1. 装備アイテムでスキルを追加すると、スキル画面でエラーが発生する不具合を修正
+ * 
  * v1.4.2 - 2017/04/04 : 不具合修正
  *    1. <Enabled Sub Command>が有効の場合、スキル画面に何もスキルが無い
  *       場合でも選択できてしまう不具合を修正。
@@ -2093,7 +2096,7 @@ Window_SepTypeList.prototype.drawItem = function(index) {
   var ty = this.lineHeight();
   var tw = rect.width - iw;
 
-  if (typeId) {
+  if (typeId && actor.isLearnedSkill(skillId)) {
     this.changePaintOpacity(this.isShowItem(typeId, dataId));
     this.drawSepFrame(index);
     this.drawSkillLine(tx, rect.y, tw-4, skillId, typeId, dataId);

@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2017/07/23
-// バージョン : v2.3.0
+// 最終更新日 : 2017/10/216
+// バージョン : v2.4.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.3.0 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v2.4.0 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -482,12 +482,12 @@ FTKR.CSS = FTKR.CSS || {};
  * @param Gauge 0 Current
  * @desc Gauge(0)の現在値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
- * @default a.currentExp()
+ * @default a.isMaxLevel() ? '--------' : a.currentExp()
  * 
  * @param Gauge 0 Max
  * @desc Gauge(0)の最大値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
- * @default a.nextLevelExp()
+ * @default a.isMaxLevel() ? '--------' : a.nextLevelExp()
  * 
  * @param Gauge 0 Color1
  * @desc Gauge(0)のゲージの色1を設定します。
@@ -1261,6 +1261,9 @@ FTKR.CSS = FTKR.CSS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v2.4.0 - 2017/10/16 : 仕様変更
+ *    1. カスタムゲージで、現在値および最大値に文字列を表示できるように変更。
  * 
  * v2.3.0 - 2017/07/23 : 機能追加
  *    1. 表示コードの判定部の記述を見直し。
@@ -2382,10 +2385,10 @@ FTKR.CSS = FTKR.CSS || {};
     //------------------------------------------------------------------------
     Window_Base.prototype.drawCssActorGauge = function(actor, x, y, width, gauge) {
         if (!gauge) return 1;
-        var current = this.evalCssCustomFormula(actor, gauge.current);
-        var max = this.evalCssCustomFormula(actor, gauge.max);
+        var current = this.evalCssStrFormula(actor, gauge.current);
+        var max = this.evalCssStrFormula(actor, gauge.max);
         if (gauge.color1 >= 0 && gauge.color2 >= 0) {
-            var rate = current / max;
+            var rate = isNaN(max) ? 1 : current / max;
             var color1 = this.textColor(gauge.color1);
             var color2 = this.textColor(gauge.color2);
             this.drawGauge(x, y, width, rate, color1, color2);
@@ -2393,7 +2396,7 @@ FTKR.CSS = FTKR.CSS || {};
         this.changeTextColor(this.systemColor());
         var tx = this.drawTextEx(gauge.name, x, y, width);
         if (gauge.ref) {
-            var ref = this.evalCssCustomFormula(actor, gauge.ref);
+            var ref = this.evalCssStrFormula(actor, gauge.ref);
             this.resetTextColor();
             this.drawText(ref, x + tx, y, width - tx, 'right');
         } else {

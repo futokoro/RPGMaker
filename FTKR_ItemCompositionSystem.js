@@ -3,8 +3,8 @@
 // FTKR_ItemConpositionSystem.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/08
-// 最終更新日 : 2017/10/11
-// バージョン : v1.5.0
+// 最終更新日 : 2017/10/16
+// バージョン : v1.5.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,25 +15,17 @@ FTKR.ICS = FTKR.ICS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.5.0 アイテム合成システム
+ * @plugindesc v1.5.1 アイテム合成システム
  * @author フトコロ
  *
  * @param --基本設定--
  * @default
  * 
- * @param Enabled Show Command
- * @desc メニューにアイテム合成コマンドを表示するか。
- *  1 - 表示する, 0 - 表示しない
- * @default 1
- *
- * @param Command Name
- * @desc アイテム合成コマンドのコマンド名を設定します。
- * @default アイテム合成
- *
- * @param Show Command Switch ID
- * @desc メニュー欄の表示のON/OFFを制御するスイッチIDを指定します。
- * @default 0
- *
+ * @param Menu Command
+ * @desc メニューに表示するコマンドを設定します。
+ * @default ["{\"enabled\":\"1\",\"name\":\"アイテム合成\",\"switchId\":\"0\"}"]
+ * @type struct<menu>[]
+ * 
  * @param Enable Confirmation
  * @desc アイテム合成実行時に確認画面で実行確認するか。
  *  1 - 確認する, 0 - 確認しない
@@ -547,18 +539,25 @@ FTKR.ICS = FTKR.ICS || {};
  * アイテム合成画面は、以下の手段で呼び出します。
  * 
  * 1. メニューから呼び出す。
- * プラグインパラメータ<Enabled Show Command>により、メニュー上にコマンドを
+ * プラグインパラメータ<Menu Command>を設定することで、メニュー上にコマンドを
  * 表示させることができます。
+ * また、複数のコマンドを設定した場合、他のプラグインパラメータにて、リスト方式で
+ * 設定した番号の入力内容を反映します。
  * 
- * コマンド名は、<Command Name>で設定できます。
- * また、<Show Command Switch ID>にID番号を登録することで、メニューへの表示を
- * スイッチで制御できます。
+ * パラメータの構造
+ * <enable>   :メニュー上に表示するか設定します。
+ * <name>     :メニューで表示するコマンド名を設定します。
+ * <switchId> :設定した番号のスイッチIDがONの時にコマンドを表示します。
  * 
  *  
  * 2. プラグインコマンドから呼び出す。
  * 以下のプラグインコマンドで画面を表示できます。
- * <ICS_Open>
- * <ICS_合成画面表示>
+ * ICS_Open [listNumber]
+ * ICS_合成画面表示 [リスト番号]
+ * 
+ * リスト番号を指定すると、プラグインパラメータでリスト方式で設定した入力内容を
+ * 反映します。
+ * 指定しない場合は、リストの１番の設定が適用されます。
  * 
  * 
  * [その他の設定]
@@ -894,15 +893,23 @@ FTKR.ICS = FTKR.ICS || {};
  * 入力する文字列は、必ず小文字にしてください。
  * 
  * action :合成を実行するコマンド
- * item   :アイテム分類の選択コマンド
- * weapon :武器分類の選択コマンド
- * armor  :防具分類の選択コマンド
+ * item   :アイテム分類の選択コマンド(*1)
+ * weapon :武器分類の選択コマンド(*1)
+ * armor  :防具分類の選択コマンド(*1)
  * change :右側のアイテムウィンドウに、アイテムを表示するか、
  *         レシピを表示するか変えるコマンド
  * slot   :素材スロットのアイテムを戻すコマンド
  * end    :合成を止めるコマンド
+ * custom*:特定のカテゴリーだけ表示する選択コマンドで、
+ *         *の番号はプラグインパラメータの設定番号と同じ(*1)(*2)
  * 
  * 各コマンド名は、プラグインパラメータで設定できます。
+ * 
+ * (*1)';'で入力したコマンド名を区切って２種類設定すると、素材選択時と
+ * レシピ選択時でコマンド名を変えることが出来ます。
+ * 
+ * (*2)customコマンドで表示できるカテゴリーは、アイテム等のメモ欄で、
+ * <ICS カテゴリー: カテゴリー名>のタグで設定したカテゴリーです。
  * 
  *-----------------------------------------------------------------------------
  * プラグインコマンド
@@ -964,6 +971,10 @@ FTKR.ICS = FTKR.ICS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.5.1 - 2017/10/16 : 機能追加
+ *    1. 合成画面を表示するメニューコマンドの設定方式をリスト方式に変更。
+ *    2. メニュー画面に複数の合成コマンドを設定する機能を追加。
  * 
  * v1.5.0 - 2017/10/11 : 機能追加、仕様変更
  *    1. 合成画面の表示内容を設定するプラグインパラメータの入力方式を
@@ -1076,6 +1087,26 @@ FTKR.ICS = FTKR.ICS || {};
  * @min -100
  *
 */
+/*~struct~menu:
+ * @param enabled
+ * @desc メニューにコマンドを表示するか。
+ *  1 - 表示する, 0 - 表示しない
+ * @type select
+ * @option 表示する
+ * @value 1
+ * @option 表示しない
+ * @value 0
+ * @default 0
+ *
+ * @param name
+ * @desc コマンド名を設定します。
+ * @default アイテム合成
+ * 
+ * @param switchId
+ * @desc メニュー欄の表示のON/OFFを制御するスイッチIDを指定します。
+ * @default 0
+ *
+*/
 
 function Game_Composit() {
     this.initialize.apply(this, arguments);
@@ -1114,10 +1145,8 @@ function Game_IcsRecipeBook() {
 
     //基本設定
     FTKR.ICS.basic = {
-        showCmd       :Number(parameters['Enabled Show Command'] || 0),
-        cmdName       :String(parameters['Command Name'] || 'アイテム合成'),
+        menuCmd       :paramParse(parameters['Menu Command']),
         categoryId    :Number(parameters['Category Type ID'] || 0),
-        menuSwId      :Number(parameters['Show Command Switch ID'] || 0),
         enableConf    :Number(parameters['Enable Confirmation'] || 0),
         enableEndConf :Number(parameters['Enable End Confirmation'] || 0),
         varId:{
@@ -2164,14 +2193,16 @@ function Game_IcsRecipeBook() {
         Window_MenuCommand.prototype.addOriginalCommands;
     Window_MenuCommand.prototype.addOriginalCommands = function() {
         FTKR.ICS.Window_MenuCommand_addOriginalCommands.call(this);
-        if (FTKR.ICS.basic.showCmd === 1) {
-            if (FTKR.ICS.basic.menuSwId === 0) {
-                this.addCommand(FTKR.ICS.basic.cmdName, 'composition', true);
-            } else if (FTKR.ICS.basic.menuSwId > 0 &&
-                $gameSwitches.value(FTKR.ICS.basic.menuSwId)) {
-                this.addCommand(FTKR.ICS.basic.cmdName, 'composition', true);
+        FTKR.ICS.basic.menuCmd.forEach(function(cmd, i){
+            if (cmd.enabled === 1) {
+                if (cmd.switchId === 0) {
+                    this.addCommand(cmd.name, 'composition', true, i);
+                } else if (cmd.switchId > 0 &&
+                    $gameSwitches.value(cmd.switchId)) {
+                    this.addCommand(cmd.name, 'composition', true, i);
+                }
             }
-        }
+        },this);
     };
 
     //=============================================================================
@@ -3218,13 +3249,22 @@ function Game_IcsRecipeBook() {
         Scene_Menu.prototype.createCommandWindow;
     Scene_Menu.prototype.createCommandWindow = function() {
         FTKR.ICS.Scene_Menu_createCommandWindow.call(this);
+        if (this.isIcsShowCommand()){
+            this._commandWindow.setHandler('composition', this.commandIcs.bind(this));
+        };/*
         if (FTKR.ICS.basic.showCmd === 1) {
             this._commandWindow.setHandler('composition', this.commandIcs.bind(this));
-        }
+        }*/
+    };
+
+    Scene_Menu.prototype.isIcsShowCommand = function() {
+        return FTKR.ICS.basic.menuCmd.some( function(cmd){
+            return cmd.enabled;
+        });
     };
 
     Scene_Menu.prototype.commandIcs = function() {
-        FTKR.ICS.openType = 1;
+        FTKR.ICS.openType = 1 + Number(this._commandWindow.currentExt());
         SceneManager.push(Scene_ICS);
     };
 
