@@ -3,8 +3,8 @@
 // FTKR_ItemSelfVariables.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/26
-// 最終更新日 : 2017/05/03
-// バージョン : v1.1.3
+// 最終更新日 : 2017/10/20
+// バージョン : v1.2.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ISV = FTKR.ISV || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.3 アイテムやスキルにセルフ変数を実装するプラグイン
+ * @plugindesc v1.2.0 アイテムやスキルにセルフ変数を実装するプラグイン
  * @author フトコロ
  *
  * @param --セーブ設定--
@@ -82,6 +82,8 @@ FTKR.ISV = FTKR.ISV || {};
  * 5. アクター
  * 6. エネミー
  * 
+ * セルフ変数は、制御文字で表示させることができます。
+ * 
  * 
  *-----------------------------------------------------------------------------
  * 設定方法
@@ -103,10 +105,10 @@ FTKR.ISV = FTKR.ISV || {};
  * <Enabled Save>
  *    :セーブ時にセルフ変数を保存するか指定します。
  *    :保存しない場合、ゲーム起動毎にリセットします。
- *    :この設定は、アイテム、武器、防具、スキル共通です。
+ *    :この設定は、アイテム、武器、防具、スキル、アクター、エネミー共通です。
  * 
  * 
- * 以下の、ノートタグをアイテム(武器・防具含む)やスキル、アクターのメモ欄に
+ * 以下の、タグをアイテム(武器・防具含む)やスキル、アクターのメモ欄に
  * 追記すると初期値を設定できます。
  * 
  * <ISV IV[x]: y>
@@ -127,7 +129,7 @@ FTKR.ISV = FTKR.ISV || {};
  *    :アイテムID x のセルフ変数 y の値を取得します。
  * 
  * ２．セルフ変数の値の変更
- * $gameSelfVariables.item(x).setValue(y, value (, code) )
+ * $gameSelfVariables.item(x).setValue(y, value (, 'code') )
  *    :アイテムID x のセルフ変数 y に value を代入します。
  *    :code部に以下の文字を入力することで、代入以外の計算が可能です。
  *    : 加算(+) - セルフ変数 y の値に value を加算します。
@@ -143,6 +145,7 @@ FTKR.ISV = FTKR.ISV || {};
  *    : $gameSelfVariables.weapon(12).setValue(2, 6, '加算')
  *    : $gameSelfVariables.weapon(12).setValue(2, 6, '+')
  *    :   武器ID 12 のセルフ変数 2 に 6 を加算する
+ *    :   
  * 
  * ３．セルフ変数の削除
  * $gameSelfVariables.item(x).clear()
@@ -218,6 +221,22 @@ FTKR.ISV = FTKR.ISV || {};
  * 
  * 
  *-----------------------------------------------------------------------------
+ * 制御文字
+ *-----------------------------------------------------------------------------
+ * 本プラグインでは、以下の制御文字を使用できます。
+ * なお、大文字小文字は区別しないため、どちらを使用しても構いません。
+ * 
+ * \ITV[x,y]   : アイテムID x のセルフ変数ID y の値を参照する。
+ * \WEV[x,y]   : 武器ID x のセルフ変数ID y の値を参照する。
+ * \ARV[x,y]   : 防具ID x のセルフ変数ID y の値を参照する。
+ * \SKV[x,y]   : スキルID x のセルフ変数ID y の値を参照する。
+ * \ACV[x,y]   : アクターID x のセルフ変数ID y の値を参照する。
+ * \ENV[x,y]   : エネミーID x のセルフ変数ID y の値を参照する。
+ * 
+ * 注意) x と y の数字はどちらも必要です
+ * 
+ * 
+ *-----------------------------------------------------------------------------
  * 本プラグインのライセンスについて(License)
  *-----------------------------------------------------------------------------
  * 本プラグインはMITライセンスのもとで公開しています。
@@ -230,6 +249,8 @@ FTKR.ISV = FTKR.ISV || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.2.0 - 2017/10/20 : 制御文字に対応
  * 
  * v1.1.3 - 2017/05/03 : 計算式の機能追加
  * 
@@ -253,503 +274,534 @@ FTKR.ISV = FTKR.ISV || {};
 */
 //=============================================================================
 
-
-//=============================================================================
-// プラグイン パラメータ
-//=============================================================================
-FTKR.ISV.parameters = PluginManager.parameters('FTKR_ItemSelfVariables');
-
-FTKR.ISV.enabledSave = Number(FTKR.ISV.parameters['Enabled Save'] || 0);
-FTKR.ISV.number = {
-    item:Number(FTKR.ISV.parameters['Item Number'] || 0),
-    weapon:Number(FTKR.ISV.parameters['Weapon Number'] || 0),
-    armor:Number(FTKR.ISV.parameters['Armor Number'] || 0),
-    skill:Number(FTKR.ISV.parameters['Skill Number'] || 0),
-    actor:Number(FTKR.ISV.parameters['Actor Number'] || 0),
-    enemy:Number(FTKR.ISV.parameters['Enemy Number'] || 0),
-};
-
-//=============================================================================
-// 自作関数(グローバル)
-//=============================================================================
-
-FTKR.gameData = FTKR.gameData || {
-    user   :null,
-    target :null,
-    item   :null,
-    number :0,
-};
-
-if (!FTKR.setGameData) {
-FTKR.setGameData = function(user, target, item, number) {
-    FTKR.gameData = {
-        user   :user || null,
-        target :target || null,
-        item   :item || null,
-        number :number || 0
-    };
-};
-}
-
-FTKR.evalFormula = function(formula) {
-    var datas = FTKR.gameData;
-    try {
-        var s = $gameSwitches._data;
-        var v = $gameVariables._data;
-        var a = datas.user;
-        var b = datas.target;
-        var item   = datas.item;
-        var number = datas.number;
-        if (a) {
-            var aData = a.isActor() ? a.actor() : a.enemy();
-            if (aData._selfVariables) var av = aData._selfVariables._data;
-        }
-        if (b) {
-            var result = b.result();
-            var bData = b.isActor() ? b.actor() : b.enemy();
-            if (bData._selfVariables) var bv = bData._selfVariables._data;
-        }
-        if (item && item._selfVariables) var iv = item._selfVariables._data;
-        var value = eval(formula);
-        if (isNaN(value)) value = 0;
-        return value;
-    } catch (e) {
-        console.error(e);
-        return 0;
-    }
-};
-
-FTKR.evalCalcFormula = function(formula) {
-    var datas = FTKR.gameData;
-    try {
-        var s = $gameSwitches._data;
-        var v = $gameVariables._data;
-        var a = datas.user;
-        var b = datas.target;
-        var item   = datas.item;
-        var number = datas.number;
-        if (a) {
-            var aData = a.isActor() ? a.actor() : a.enemy();
-            if (aData._selfVariables) var av = aData._selfVariables._data;
-        }
-        if (b) {
-            var result = b.result();
-            var bData = b.isActor() ? b.actor() : b.enemy();
-            if (bData._selfVariables) var bv = bData._selfVariables._data;
-        }
-        if (item && item._selfVariables) var iv = item._selfVariables._data;
-        eval(formula);
-    } catch (e) {
-        console.error(e);
-    }
-};
-
-//=============================================================================
-// Array
-//=============================================================================
-
-Array.prototype.setIsv = function() {
-    return this.map(function(item) {
-        return item ? item._selfVariables : null;
-    });
-};
-
-//=============================================================================
-// DataManager
-//=============================================================================
-
-FTKR.ISV.DatabaseLoaded = false;
-FTKR.ISV.DataManager_isDatabaseLoaded = DataManager.isDatabaseLoaded;
-DataManager.isDatabaseLoaded = function() {
-    if (!FTKR.ISV.DataManager_isDatabaseLoaded.call(this)) return false;
-    if (!FTKR.ISV.DatabaseLoaded) {
-        var isv = FTKR.ISV.number;
-        if (isv.item) this.setSelfVariables($dataItems, isv.item);
-        if (isv.weapon) this.setSelfVariables($dataWeapons, isv.weapon);
-        if (isv.armor) this.setSelfVariables($dataArmors, isv.armor);
-        if (isv.skill) this.setSelfVariables($dataSkills, isv.skill);
-        if (isv.actor) this.setSelfVariables($dataActors, isv.actor);
-        if (isv.enemy) this.setSelfVariables($dataEnemies, isv.enemy);
-        FTKR.ISV.DatabaseLoaded = true;
-    }
-    return true;
-};
-
-DataManager.setSelfVariables = function(group, number) {
-    for (var n = 1; n < group.length; n++) {
-        var obj = group[n];
-        
-        obj._selfVariables = new Game_IsvSelfVariables(number);
-        obj._selfVariables.allReset(0);
-
-        var notedata = obj.note.split(/[\r\n]+/);
-
-        for (var i = 0; i < notedata.length; i++) {
-            var line = notedata[i];
-            if (line.match(/<ISV IV\[(\d+)\]:[ ]*(.+)>/i) ||
-                line.match(/<ISV セルフ変数\[(\d+)\]:[ ]*(.+)>/i)) {
-                var id = Number(RegExp.$1);
-                var value = RegExp.$2;
-                obj._selfVariables.setValue(id, value);
-            }
-        }
-    }
-};
-
-FTKR.ISV.DataManager_createGameObjects = DataManager.createGameObjects;
-DataManager.createGameObjects = function() {
-    FTKR.ISV.DataManager_createGameObjects.call(this);
-    $gameSelfVariables = new Game_IsvItems();
-};
-
-FTKR.ISV.DataManager_makeSaveContents = DataManager.makeSaveContents;
-DataManager.makeSaveContents = function() {
-    var contents = FTKR.ISV.DataManager_makeSaveContents.call(this);
-    if (FTKR.ISV.enabledSave) {
-        var isv = FTKR.ISV.number;
-        if (isv.item) {
-            contents.iepItemSelf = $dataItems.setIsv();
-        }
-        if (isv.weapon) {
-            contents.iepWeaponSelf = $dataWeapons.setIsv();
-        }
-        if (isv.armor) {
-            contents.iepArmorSelf = $dataArmors.setIsv();
-        }
-        if (isv.skill) {
-            contents.iepSkillSelf = $dataSkills.setIsv();
-        }
-        if (isv.actor) {
-            contents.iepActorSelf = $dataActors.setIsv();
-        }
-        if (isv.enemy) {
-            contents.iepEnemySelf = $dataEnemies.setIsv();
-        }
-    }
-    return contents;
-};
-
-FTKR.ISV.DataManager_extractSaveContents = DataManager.extractSaveContents;
-DataManager.extractSaveContents = function(contents) {
-    FTKR.ISV.DataManager_extractSaveContents.call(this, contents);
-    if (FTKR.ISV.enabledSave) {
-        var isv = FTKR.ISV.number;
-        if(isv.item) {
-            $dataItems.forEach( function(item, i) {
-                if(item) item._selfVariables = contents.iepItemSelf[i];
-            });
-        }
-        if(isv.weapon) {
-            $dataWeapons.forEach( function(item, i) {
-                if(item) item._selfVariables = contents.iepWeaponSelf[i];
-            });
-        }
-        if(isv.armor) {
-            $dataArmors.forEach( function(item, i) {
-                if(item) item._selfVariables = contents.iepArmorSelf[i];
-            });
-        }
-        if(isv.skill) {
-            $dataSkills.forEach( function(item, i) {
-                if(item) item._selfVariables = contents.iepSkillSelf[i];
-            });
-        }
-        if(isv.actor) {
-            $dataActors.forEach( function(item, i) {
-                if(item) item._selfVariables = contents.iepActorSelf[i];
-            });
-        }
-        if(isv.enemy) {
-            $dataEnemies.forEach( function(item, i) {
-                if(item) item._selfVariables = contents.iepEnemySelf[i];
-            });
-        }
-    }
-};
-
-//=============================================================================
-// Game_Action
-//=============================================================================
-
-//書き換え
-Game_Action.prototype.evalDamageFormula = function(target) {
-    var item = this.item();
-    FTKR.setGameData(this.subject(), target, item);
-    var value = FTKR.evalFormula(item.damage.formula);
-    if (value) {
-        var sign = ([3, 4].contains(item.damage.type) ? -1 : 1);
-        value = Math.max(value, 0) * sign;
-    }
-    return value;
-};
-
-//=============================================================================
-// Game_IsvItems
-//=============================================================================
-
 function Game_IsvItems() {
-    this.initialize.apply(this, arguments);
+  this.initialize.apply(this, arguments);
 }
-
-Game_IsvItems.prototype.initialize = function() {
-    this._data = [[],[],[],[],[],[]];
-};
-
-Game_IsvItems.prototype.item = function(itemId) {
-    if ($dataItems[itemId]) {
-        if (!this._data[0][itemId]) {
-            this._data[0][itemId] = $dataItems[itemId];
-        }
-        return this._data[0][itemId]._selfVariables;
-    }
-    return null;
-};
-
-Game_IsvItems.prototype.weapon = function(itemId) {
-    if ($dataWeapons[itemId]) {
-        if (!this._data[1][itemId]) {
-            this._data[1][itemId] = $dataWeapons[itemId];
-        }
-        return this._data[1][itemId]._selfVariables;
-    }
-    return null;
-};
-
-Game_IsvItems.prototype.armor = function(itemId) {
-    if ($dataArmors[itemId]) {
-        if (!this._data[2][itemId]) {
-            this._data[2][itemId] = $dataArmors[itemId];
-        }
-        return this._data[2][itemId]._selfVariables;
-    }
-    return null;
-};
-
-Game_IsvItems.prototype.skill = function(itemId) {
-    if ($dataSkills[itemId]) {
-        if (!this._data[3][itemId]) {
-            this._data[3][itemId] = $dataSkills[itemId];
-        }
-        return this._data[3][itemId]._selfVariables;
-    }
-    return null;
-};
-
-Game_IsvItems.prototype.actor = function(itemId) {
-    if ($dataActors[itemId]) {
-        if (!this._data[4][itemId]) {
-            this._data[4][itemId] = $dataActors[itemId];
-        }
-        return this._data[4][itemId]._selfVariables;
-    }
-    return null;
-};
-
-Game_IsvItems.prototype.enemy = function(itemId) {
-    if ($dataEnemies[itemId]) {
-        if (!this._data[5][itemId]) {
-            this._data[5][itemId] = $dataEnemies[itemId];
-        }
-        return this._data[5][itemId]._selfVariables;
-    }
-    return null;
-};
-
-//=============================================================================
-// Game_IsvSelfVariables
-//=============================================================================
 
 function Game_IsvSelfVariables() {
-    this.initialize.apply(this, arguments);
+  this.initialize.apply(this, arguments);
 }
 
-Game_IsvSelfVariables.prototype.initialize = function(number) {
-    this.clear();
-    this._number = number || 1;
-};
+(function() {
+  
+    //=============================================================================
+    // プラグイン パラメータ
+    //=============================================================================
+    var parameters = PluginManager.parameters('FTKR_ItemSelfVariables');
 
-Game_IsvSelfVariables.prototype.clear = function() {
-    this._data = [];
-};
+    FTKR.ISV.enabledSave = Number(parameters['Enabled Save'] || 0);
+    FTKR.ISV.number = {
+        item:Number(parameters['Item Number'] || 0),
+        weapon:Number(parameters['Weapon Number'] || 0),
+        armor:Number(parameters['Armor Number'] || 0),
+        skill:Number(parameters['Skill Number'] || 0),
+        actor:Number(parameters['Actor Number'] || 0),
+        enemy:Number(parameters['Enemy Number'] || 0),
+    };
 
-Game_IsvSelfVariables.prototype.allReset = function(value) {
-    for (var i = 0; i < this._number + 1; i++) {
-        this._data[i] = value;
+    //=============================================================================
+    // 自作関数(グローバル)
+    //=============================================================================
+
+    FTKR.gameData = FTKR.gameData || {
+        user   :null,
+        target :null,
+        item   :null,
+        number :0,
+    };
+
+    if (!FTKR.setGameData) {
+    FTKR.setGameData = function(user, target, item, number) {
+        FTKR.gameData = {
+            user   :user || null,
+            target :target || null,
+            item   :item || null,
+            number :number || 0
+        };
+    };
     }
-};
 
-Game_IsvSelfVariables.prototype.value = function(variableId) {
-    return this._data[variableId] || 0;
-};
-
-Game_IsvSelfVariables.prototype.setValue = function(variableId, value, code) {
-    if (variableId > 0 && variableId < this._number + 1) {
-        if (!isNaN(parseInt(value))) {
-            value = parseInt(value);
+    FTKR.evalFormula = function(formula) {
+        var datas = FTKR.gameData;
+        try {
+            var s = $gameSwitches._data;
+            var v = $gameVariables._data;
+            var a = datas.user;
+            var b = datas.target;
+            var item   = datas.item;
+            var number = datas.number;
+            if (a) {
+                var aData = a.isActor() ? a.actor() : a.enemy();
+                if (aData._selfVariables) var av = aData._selfVariables._data;
+            }
+            if (b) {
+                var result = b.result();
+                var bData = b.isActor() ? b.actor() : b.enemy();
+                if (bData._selfVariables) var bv = bData._selfVariables._data;
+            }
+            if (item && item._selfVariables) var iv = item._selfVariables._data;
+            var value = eval(formula);
+            if (isNaN(value)) value = 0;
+            return value;
+        } catch (e) {
+            console.error(e);
+            return 0;
         }
-        this._data[variableId] = this.calcValue(this._data[variableId], value, code);
-        this.onChange();
-    }
-};
+    };
 
-Game_IsvSelfVariables.prototype.calcValue = function(value1, value2, code) {
-    switch (code) {
-    case '加算':
-    case '+':
-        return value1 + value2;
-    case '減算':
-    case '-':
-        return value1 - value2;
-    case '積算':
-    case '×':
-    case '*':
-        return value1 * value2;
-    case '除算':
-    case '／':
-    case '/':
-        return value1 / value2;
-    case '剰余':
-    case '％':
-    case '%':
-        return value1 % value2;
-    case '代入':
-    case '＝':
-    case '=':
-    default:
-        return value2;
-    }
-};
+    FTKR.evalCalcFormula = function(formula) {
+        var datas = FTKR.gameData;
+        try {
+            var s = $gameSwitches._data;
+            var v = $gameVariables._data;
+            var a = datas.user;
+            var b = datas.target;
+            var item   = datas.item;
+            var number = datas.number;
+            if (a) {
+                var aData = a.isActor() ? a.actor() : a.enemy();
+                if (aData._selfVariables) var av = aData._selfVariables._data;
+            }
+            if (b) {
+                var result = b.result();
+                var bData = b.isActor() ? b.actor() : b.enemy();
+                if (bData._selfVariables) var bv = bData._selfVariables._data;
+            }
+            if (item && item._selfVariables) var iv = item._selfVariables._data;
+            eval(formula);
+        } catch (e) {
+            console.error(e);
+        }
+    };
 
-Game_IsvSelfVariables.prototype.onChange = function() {
-    if($gameMap) $gameMap.requestRefresh();
-};
+    //=============================================================================
+    // Array
+    //=============================================================================
 
-//=============================================================================
-// Game_Interpreter
-//=============================================================================
+    Array.prototype.setIsv = function() {
+        return this.map(function(item) {
+            return item ? item._selfVariables : null;
+        });
+    };
 
-var _ISV_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
-    _ISV_Game_Interpreter_pluginCommand.call(this, command, args);
-    if (/ISV_/i.test(command)) {
-        command = command.replace(/ISV_/i, '');
-        switch (true) {
-            case /セルフ変数変更/i.test(command):
-            case /set_Self_Variables/i.test(command):
+    //=============================================================================
+    // Game_Interpreter
+    //=============================================================================
+
+    var _ISV_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+    Game_Interpreter.prototype.pluginCommand = function(command, args) {
+        _ISV_Game_Interpreter_pluginCommand.call(this, command, args);
+        if (!command.match(/ISV_(.+)/i)) return;
+        command = (RegExp.$1 + '').toUpperCase();
+        switch (command) {
+            case 'セルフ変数変更':
+            case 'set_Self_Variables':
                 this.setSeflVariables(command, args);
                 break;
-            case /セルフ変数取得/i.test(command):
-            case /get_Self_Variables/i.test(command):
+            case 'セルフ変数取得':
+            case 'get_Self_Variables':
                 this.getSeflVariables(command, args);
                 break;
         }
-    }
-};
+    };
 
-Game_Interpreter.prototype.setSeflVariables = function(command, args) {
-    var itemId = this.setNum(args[1]);
-    var selfId = this.setNum(args[2]);
-    var value = this.setNum(args[4]);
-    if (!itemId || !selfId) return this.showLog(command, args, [0,1,1,0,1]);
-    switch (true) {
-        case /アイテム/.test(args[0]):
-        case /item/i.test(args[0]):
-            $gameSelfVariables.item(itemId).setValue(selfId, value, args[3]);
-            break;
-        case /武器/.test(args[0]):
-        case /weapon/i.test(args[0]):
-            $gameSelfVariables.weapon(itemId).setValue(selfId, value, args[3]);
-            break;
-        case /防具/.test(args[0]):
-        case /armor/i.test(args[0]):
-            $gameSelfVariables.armor(itemId).setValue(selfId, value, args[3]);
-            break;
-        case /スキル/.test(args[0]):
-        case /skill/i.test(args[0]):
-            $gameSelfVariables.skill(itemId).setValue(selfId, value, args[3]);
-            break;
-        case /アクター/.test(args[0]):
-        case /actor/i.test(args[0]):
-            $gameSelfVariables.actor(itemId).setValue(selfId, value, args[3]);
-            break;
-        case /エネミー/.test(args[0]):
-        case /enemy/i.test(args[0]):
-            $gameSelfVariables.enemy(itemId).setValue(selfId, value, args[3]);
-            break;
+    Game_Interpreter.prototype.setSeflVariables = function(command, args) {
+        var itemId = this.setNum(args[1]);
+        var selfId = this.setNum(args[2]);
+        var value = this.setNum(args[4]);
+        if (!itemId || !selfId) return this.showLog(command, args, [0,1,1,0,1]);
+        switch (true) {
+            case /アイテム/.test(args[0]):
+            case /item/i.test(args[0]):
+                $gameSelfVariables.item(itemId).setValue(selfId, value, args[3]);
+                break;
+            case /武器/.test(args[0]):
+            case /weapon/i.test(args[0]):
+                $gameSelfVariables.weapon(itemId).setValue(selfId, value, args[3]);
+                break;
+            case /防具/.test(args[0]):
+            case /armor/i.test(args[0]):
+                $gameSelfVariables.armor(itemId).setValue(selfId, value, args[3]);
+                break;
+            case /スキル/.test(args[0]):
+            case /skill/i.test(args[0]):
+                $gameSelfVariables.skill(itemId).setValue(selfId, value, args[3]);
+                break;
+            case /アクター/.test(args[0]):
+            case /actor/i.test(args[0]):
+                $gameSelfVariables.actor(itemId).setValue(selfId, value, args[3]);
+                break;
+            case /エネミー/.test(args[0]):
+            case /enemy/i.test(args[0]):
+                $gameSelfVariables.enemy(itemId).setValue(selfId, value, args[3]);
+                break;
+            default:
+                this.showLog(command, args, [1,0,0,0,0]);
+                break;
+        }
+    };
+
+    Game_Interpreter.prototype.getSeflVariables = function(command, args) {
+        var varId = this.setNum(args[0]);
+        var itemId = this.setNum(args[2]);
+        var selfId = this.setValue(args[3]);
+        if (!varId || !itemId || !selfId) return this.showLog(command, args, [1,0,1,1]);
+        var value = null;
+        switch (true) {
+            case /アイテム/.test(args[1]):
+            case /item/i.test(args[1]):
+                value = $gameSelfVariables.item(itemId).value(selfId);
+                break;
+            case /武器/.test(args[1]):
+            case /weapon/i.test(args[1]):
+                value = $gameSelfVariables.weapon(itemId).value(selfId);
+                break;
+            case /防具/.test(args[1]):
+            case /armor/i.test(args[1]):
+                value = $gameSelfVariables.armor(itemId).value(selfId);
+                break;
+            case /スキル/.test(args[1]):
+            case /skill/i.test(args[1]):
+                value = $gameSelfVariables.skill(itemId).value(selfId);
+                break;
+            case /アクター/.test(args[1]):
+            case /actor/i.test(args[1]):
+                value = $gameSelfVariables.actor(itemId).value(selfId);
+                break;
+            case /エネミー/.test(args[1]):
+            case /enemy/i.test(args[1]):
+                value = $gameSelfVariables.enemy(itemId).value(selfId);
+                break;
+            default:
+                this.showLog(command, args, [0,1,0,0]);
+                break;
+        }
+        $gameVariables.setValue(varId, value);
+    };
+
+    Game_Interpreter.prototype.setNum = function(data) {
+        var data1 = /v\[(\d+)\]/i;
+        var data2 = /(\d+)/i;
+        if (data.match(data1)) {
+            return $gameVariables.value(Number(RegExp.$1));
+        } else if (data.match(data2)) {
+            return Number(RegExp.$1);
+        } else {
+            return 0;
+        }
+    };
+
+    Game_Interpreter.prototype.setValue = function(data) {
+        var data1 = /v\[(\d+)\]/i;
+        var data2 = /(.+)/i;
+        if (data.match(data1)) {
+            return $gameVariables.value(Number(RegExp.$1));
+        } else if (data.match(data2)) {
+            var value = RegExp.$1;
+            return isNaN(parseInt(value)) ? value : parseInt(value);
+        } else {
+            return 0;
+        }
+    };
+
+    Game_Interpreter.prototype.showLog = function(command, args, errors) {
+        console.log('プラグイン名:','FTKR_ItemSelfVariables.js');
+        console.log('コマンド名  :', command);
+        console.log('エラー内容  :','不正な値を入力しています');
+        for (var i = 0; i < errors.length; i++) {
+            if (errors[i]) console.log('エラーINDEX:', i, '引数:', args[i]);
+        }
+    };
+
+    //=============================================================================
+    // DataManager
+    //=============================================================================
+
+    var _ISV_DatabaseLoaded = false;
+    var _ISV_DataManager_isDatabaseLoaded = DataManager.isDatabaseLoaded;
+    DataManager.isDatabaseLoaded = function() {
+        if (!_ISV_DataManager_isDatabaseLoaded.call(this)) return false;
+        if (!_ISV_DatabaseLoaded) {
+            var isv = FTKR.ISV.number;
+            if (isv.item) this.setSelfVariables($dataItems, isv.item);
+            if (isv.weapon) this.setSelfVariables($dataWeapons, isv.weapon);
+            if (isv.armor) this.setSelfVariables($dataArmors, isv.armor);
+            if (isv.skill) this.setSelfVariables($dataSkills, isv.skill);
+            if (isv.actor) this.setSelfVariables($dataActors, isv.actor);
+            if (isv.enemy) this.setSelfVariables($dataEnemies, isv.enemy);
+            _ISV_DatabaseLoaded = true;
+        }
+        return true;
+    };
+
+    DataManager.setSelfVariables = function(group, number) {
+        for (var n = 1; n < group.length; n++) {
+            var obj = group[n];
+            
+            obj._selfVariables = new Game_IsvSelfVariables(number);
+            obj._selfVariables.allReset(0);
+
+            var notedata = obj.note.split(/[\r\n]+/);
+
+            for (var i = 0; i < notedata.length; i++) {
+                var line = notedata[i];
+                if (line.match(/<ISV IV\[(\d+)\]:[ ]*(.+)>/i) ||
+                    line.match(/<ISV セルフ変数\[(\d+)\]:[ ]*(.+)>/i)) {
+                    var id = Number(RegExp.$1);
+                    var value = RegExp.$2;
+                    obj._selfVariables.setValue(id, value);
+                }
+            }
+        }
+    };
+
+    var _ISV_DataManager_createGameObjects = DataManager.createGameObjects;
+    DataManager.createGameObjects = function() {
+        _ISV_DataManager_createGameObjects.call(this);
+        $gameSelfVariables = new Game_IsvItems();
+    };
+
+    var _ISV_DataManager_makeSaveContents = DataManager.makeSaveContents;
+    DataManager.makeSaveContents = function() {
+        var contents = _ISV_DataManager_makeSaveContents.call(this);
+        if (FTKR.ISV.enabledSave) {
+            var isv = FTKR.ISV.number;
+            if (isv.item) {
+                contents.iepItemSelf = $dataItems.setIsv();
+            }
+            if (isv.weapon) {
+                contents.iepWeaponSelf = $dataWeapons.setIsv();
+            }
+            if (isv.armor) {
+                contents.iepArmorSelf = $dataArmors.setIsv();
+            }
+            if (isv.skill) {
+                contents.iepSkillSelf = $dataSkills.setIsv();
+            }
+            if (isv.actor) {
+                contents.iepActorSelf = $dataActors.setIsv();
+            }
+            if (isv.enemy) {
+                contents.iepEnemySelf = $dataEnemies.setIsv();
+            }
+        }
+        return contents;
+    };
+
+    var _ISV_DataManager_extractSaveContents = DataManager.extractSaveContents;
+    DataManager.extractSaveContents = function(contents) {
+        _ISV_DataManager_extractSaveContents.call(this, contents);
+        if (FTKR.ISV.enabledSave) {
+            var isv = FTKR.ISV.number;
+            if(isv.item) {
+                $dataItems.forEach( function(item, i) {
+                    if(item) item._selfVariables = contents.iepItemSelf[i];
+                });
+            }
+            if(isv.weapon) {
+                $dataWeapons.forEach( function(item, i) {
+                    if(item) item._selfVariables = contents.iepWeaponSelf[i];
+                });
+            }
+            if(isv.armor) {
+                $dataArmors.forEach( function(item, i) {
+                    if(item) item._selfVariables = contents.iepArmorSelf[i];
+                });
+            }
+            if(isv.skill) {
+                $dataSkills.forEach( function(item, i) {
+                    if(item) item._selfVariables = contents.iepSkillSelf[i];
+                });
+            }
+            if(isv.actor) {
+                $dataActors.forEach( function(item, i) {
+                    if(item) item._selfVariables = contents.iepActorSelf[i];
+                });
+            }
+            if(isv.enemy) {
+                $dataEnemies.forEach( function(item, i) {
+                    if(item) item._selfVariables = contents.iepEnemySelf[i];
+                });
+            }
+        }
+    };
+
+    //=============================================================================
+    // Game_Action
+    //=============================================================================
+
+    //書き換え
+    Game_Action.prototype.evalDamageFormula = function(target) {
+        var item = this.item();
+        FTKR.setGameData(this.subject(), target, item);
+        var value = FTKR.evalFormula(item.damage.formula);
+        if (value) {
+            var sign = ([3, 4].contains(item.damage.type) ? -1 : 1);
+            value = Math.max(value, 0) * sign;
+        }
+        return value;
+    };
+
+    //=============================================================================
+    // Game_IsvItems
+    //=============================================================================
+
+    Game_IsvItems.prototype.initialize = function() {
+        this._data = [[],[],[],[],[],[]];
+    };
+
+    Game_IsvItems.prototype.item = function(itemId) {
+        if ($dataItems[itemId]) {
+            if (!this._data[0][itemId]) {
+                this._data[0][itemId] = $dataItems[itemId];
+            }
+            return this._data[0][itemId]._selfVariables;
+        }
+        return null;
+    };
+
+    Game_IsvItems.prototype.weapon = function(itemId) {
+        if ($dataWeapons[itemId]) {
+            if (!this._data[1][itemId]) {
+                this._data[1][itemId] = $dataWeapons[itemId];
+            }
+            return this._data[1][itemId]._selfVariables;
+        }
+        return null;
+    };
+
+    Game_IsvItems.prototype.armor = function(itemId) {
+        if ($dataArmors[itemId]) {
+            if (!this._data[2][itemId]) {
+                this._data[2][itemId] = $dataArmors[itemId];
+            }
+            return this._data[2][itemId]._selfVariables;
+        }
+        return null;
+    };
+
+    Game_IsvItems.prototype.skill = function(itemId) {
+        if ($dataSkills[itemId]) {
+            if (!this._data[3][itemId]) {
+                this._data[3][itemId] = $dataSkills[itemId];
+            }
+            return this._data[3][itemId]._selfVariables;
+        }
+        return null;
+    };
+
+    Game_IsvItems.prototype.actor = function(itemId) {
+        if ($dataActors[itemId]) {
+            if (!this._data[4][itemId]) {
+                this._data[4][itemId] = $dataActors[itemId];
+            }
+            return this._data[4][itemId]._selfVariables;
+        }
+        return null;
+    };
+
+    Game_IsvItems.prototype.enemy = function(itemId) {
+        if ($dataEnemies[itemId]) {
+            if (!this._data[5][itemId]) {
+                this._data[5][itemId] = $dataEnemies[itemId];
+            }
+            return this._data[5][itemId]._selfVariables;
+        }
+        return null;
+    };
+
+    //=============================================================================
+    // Game_IsvSelfVariables
+    //=============================================================================
+
+    Game_IsvSelfVariables.prototype.initialize = function(number) {
+        this.clear();
+        this._number = number || 1;
+    };
+
+    Game_IsvSelfVariables.prototype.clear = function() {
+        this._data = [];
+    };
+
+    Game_IsvSelfVariables.prototype.allReset = function(value) {
+        for (var i = 0; i < this._number + 1; i++) {
+            this._data[i] = value;
+        }
+    };
+
+    Game_IsvSelfVariables.prototype.value = function(variableId) {
+        return this._data[variableId] || 0;
+    };
+
+    Game_IsvSelfVariables.prototype.setValue = function(variableId, value, code) {
+        if (variableId > 0 && variableId < this._number + 1) {
+            if (!isNaN(parseInt(value))) {
+                value = parseInt(value);
+            }
+            this._data[variableId] = this.calcValue(this._data[variableId], value, code);
+            this.onChange();
+        }
+    };
+
+    Game_IsvSelfVariables.prototype.calcValue = function(value1, value2, code) {
+        switch (code) {
+        case '加算':
+        case '+':
+            return value1 + value2;
+        case '減算':
+        case '-':
+            return value1 - value2;
+        case '積算':
+        case '×':
+        case '*':
+            return value1 * value2;
+        case '除算':
+        case '／':
+        case '/':
+            return value1 / value2;
+        case '剰余':
+        case '％':
+        case '%':
+            return value1 % value2;
+        case '代入':
+        case '＝':
+        case '=':
         default:
-            this.showLog(command, args, [1,0,0,0,0]);
-            break;
-    }
-};
+            return value2;
+        }
+    };
 
-Game_Interpreter.prototype.getSeflVariables = function(command, args) {
-    var varId = this.setNum(args[0]);
-    var itemId = this.setNum(args[2]);
-    var selfId = this.setValue(args[3]);
-    if (!varId || !itemId || !selfId) return this.showLog(command, args, [1,0,1,1]);
-    var value = null;
-    switch (true) {
-        case /アイテム/.test(args[1]):
-        case /item/i.test(args[1]):
-            value = $gameSelfVariables.item(itemId).value(selfId);
-            break;
-        case /武器/.test(args[1]):
-        case /weapon/i.test(args[1]):
-            value = $gameSelfVariables.weapon(itemId).value(selfId);
-            break;
-        case /防具/.test(args[1]):
-        case /armor/i.test(args[1]):
-            value = $gameSelfVariables.armor(itemId).value(selfId);
-            break;
-        case /スキル/.test(args[1]):
-        case /skill/i.test(args[1]):
-            value = $gameSelfVariables.skill(itemId).value(selfId);
-            break;
-        case /アクター/.test(args[1]):
-        case /actor/i.test(args[1]):
-            value = $gameSelfVariables.actor(itemId).value(selfId);
-            break;
-        case /エネミー/.test(args[1]):
-        case /enemy/i.test(args[1]):
-            value = $gameSelfVariables.enemy(itemId).value(selfId);
-            break;
-        default:
-            this.showLog(command, args, [0,1,0,0]);
-            break;
-    }
-    $gameVariables.setValue(varId, value);
-};
+    Game_IsvSelfVariables.prototype.onChange = function() {
+        if($gameMap) $gameMap.requestRefresh();
+    };
 
-Game_Interpreter.prototype.setNum = function(data) {
-    var data1 = /v\[(\d+)\]/i;
-    var data2 = /(\d+)/i;
-    if (data.match(data1)) {
-        return $gameVariables.value(Number(RegExp.$1));
-    } else if (data.match(data2)) {
-        return Number(RegExp.$1);
-    } else {
-        return 0;
-    }
-};
+    //=============================================================================
+    // Window_Base
+    //=============================================================================
 
-Game_Interpreter.prototype.setValue = function(data) {
-    var data1 = /v\[(\d+)\]/i;
-    var data2 = /(.+)/i;
-    if (data.match(data1)) {
-        return $gameVariables.value(Number(RegExp.$1));
-    } else if (data.match(data2)) {
-        var value = RegExp.$1;
-        return isNaN(parseInt(value)) ? value : parseInt(value);
-    } else {
-        return 0;
-    }
-};
+    //制御文字の表示処理の修正
+    var _ISV_Window_Base_convertEscapeCharacters = Window_Base.prototype.convertEscapeCharacters;
+    Window_Base.prototype.convertEscapeCharacters = function(text) {
+        text = _ISV_Window_Base_convertEscapeCharacters.call(this, text);
+        text = text.replace(/\x1bITV\[(\d+),(\d+)\]/gi, function() {
+            return $gameSelfVariables.item(parseInt(arguments[1])).value(arguments[2]);
+        }.bind(this));
+        text = text.replace(/\x1bWEV\[(\d+),(\d+)\]/gi, function() {
+            return $gameSelfVariables.weapon(parseInt(arguments[1])).value(arguments[2]);
+        }.bind(this));
+        text = text.replace(/\x1bARV\[(\d+),(\d+)\]/gi, function() {
+            return $gameSelfVariables.armor(parseInt(arguments[1])).value(arguments[2]);
+        }.bind(this));
+        text = text.replace(/\x1bSKV\[(\d+),(\d+)\]/gi, function() {
+            return $gameSelfVariables.skill(parseInt(arguments[1])).value(arguments[2]);
+        }.bind(this));
+        text = text.replace(/\x1bACV\[(\d+),(\d+)\]/gi, function() {
+            return $gameSelfVariables.actor(parseInt(arguments[1])).value(arguments[2]);
+        }.bind(this));
+        text = text.replace(/\x1bENV\[(\d+),(\d+)\]/gi, function() {
+            return $gameSelfVariables.enemy(parseInt(arguments[1])).value(arguments[2]);
+        }.bind(this));
+        return text;
+    };
 
-Game_Interpreter.prototype.showLog = function(command, args, errors) {
-    console.log('プラグイン名:','FTKR_ItemSelfVariables.js');
-    console.log('コマンド名  :', command);
-    console.log('エラー内容  :','不正な値を入力しています');
-    for (var i = 0; i < errors.length; i++) {
-        if (errors[i]) console.log('エラーINDEX:', i, '引数:', args[i]);
-    }
-};
+}());//EOF
