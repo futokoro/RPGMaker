@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2017/10/216
-// バージョン : v2.4.0
+// 最終更新日 : 2017/10/19
+// バージョン : v2.4.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.4.0 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v2.4.1 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -1262,6 +1262,10 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.4.1 - 2017/10/19 : 不具合修正
+ *    1. カスタムパラメータとカスタムゲージで、制御文字を使用したときに
+ *       表示位置がずれる場合がある不具合を修正。
+ * 
  * v2.4.0 - 2017/10/16 : 仕様変更
  *    1. カスタムゲージで、現在値および最大値に文字列を表示できるように変更。
  * 
@@ -1697,6 +1701,26 @@ FTKR.CSS = FTKR.CSS || {};
         return regs.some(function(reg){
             return prop ? data.match(reg[prop]) : data.match(reg);
         });
+    };
+
+    var convertTextWidth = function(text) {
+        var tw = 0;
+        var window = SceneManager._scene._windowLayer.children[0];
+        var conv = window.convertEscapeCharacters(text);
+        var reg = /i\[(\d+)\]/i
+        while (reg.test(conv)) {
+            conv = (conv.toUpperCase()).replace(reg, '');
+            tw += Window_Base._iconWidth + 4;
+        }
+        if (/c\[(\d+)\]/i.test(conv)) {
+            conv = (conv.toUpperCase()).replace(/c\[(\d+)\]/ig, '');
+        }
+        if (conv.match(/lw\[(\d+),?([^\]]+)\]/i)) {
+            tw += RegExp.$1;
+            conv = (conv.toUpperCase()).replace(/lw\[(\d+),?([^\]]+)\]/ig, '');
+        }
+        tw += window.textWidth(conv);
+        return tw;
     };
 
     // 配列の要素の合計
@@ -2370,10 +2394,10 @@ FTKR.CSS = FTKR.CSS || {};
         var name = custom.name || '';
         var formula = custom.formula || '';
         var unit = custom.unit || '';
-        var tux = this.textWidth(this.convertEscapeCharacters(unit));
+        var tux = convertTextWidth(unit);
         var value = this.evalCssCustomFormula(actor, formula);
         this.changeTextColor(this.systemColor());
-        var tx = this.drawTextEx(name, x, y);
+        var tx = convertTextWidth(name, x, y);
         this.resetTextColor();
         this.drawText(value, x + tx, y, width - tx - tux, 'right');
         if (unit) this.drawTextEx(unit, x + width - tux, y);
@@ -2394,7 +2418,7 @@ FTKR.CSS = FTKR.CSS || {};
             this.drawGauge(x, y, width, rate, color1, color2);
         }
         this.changeTextColor(this.systemColor());
-        var tx = this.drawTextEx(gauge.name, x, y, width);
+        var tx = convertTextWidth(gauge.name, x, y);
         if (gauge.ref) {
             var ref = this.evalCssStrFormula(actor, gauge.ref);
             this.resetTextColor();
