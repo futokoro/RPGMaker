@@ -1,10 +1,10 @@
-//=======↓本プラグインを改変した場合でも、この欄は消さないでください↓===============
+﻿//=======↓本プラグインを改変した場合でも、この欄は消さないでください↓===============
 // スキルのステータスを表示するプラグイン
 // FTKR_SEP_ShowSkillStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/02/24
-// 最終更新日 : 2017/10/17
-// バージョン : v1.4.4
+// 最終更新日 : 2017/10/19
+// バージョン : v1.4.5
 //=======↑本プラグインを改変した場合でも、この欄は消さないでください↑===============
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.SSS = FTKR.SSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.4.4 スキルのステータスを表示するプラグイン
+ * @plugindesc v1.4.5 スキルのステータスを表示するプラグイン
  * @author フトコロ
  *
  * @param ---Layout---
@@ -927,6 +927,10 @@ FTKR.SSS = FTKR.SSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  *
+ * v1.4.5 - 2017/10/19 : 不具合修正
+ *    1. スキルステータスウィンドウを非表示設定にしていても、内部で
+ *       描画処理されていた不具合を修正
+ * 
  * v1.4.4 - 2017/10/17 : 不具合修正
  *    1. スキルの個別データがない場合に、スキル画面でエラーが発生する不具合を修正
  * 
@@ -2069,7 +2073,7 @@ Window_SepTypeList.prototype.makeItemList = function() {
   var data = {};
   if (this._skillId === null) return false;
   var skill = actor.getSkill(this._skillId);
-  for(var t = 1; t < FTKR.SSS.maxSepTypeNum + 1; t++) {
+  for(var t = 1; t < this.maxTypeNum(); t++) {
     for (var prop in skill) {
       if (prop === FTKR.SSS.sepTypes[t].type) {
         var len = prop === 'damages' || prop === 'effects' ? skill[prop].length : 1;
@@ -2084,6 +2088,10 @@ Window_SepTypeList.prototype.makeItemList = function() {
       }
     }
   }
+};
+
+Window_SepTypeList.prototype.maxTypeNum = function() {
+    return FTKR.SSS.maxSepTypeNum + 1;
 };
 
 Window_SepTypeList.prototype.drawItem = function(index) {
@@ -2454,10 +2462,12 @@ Scene_Base.prototype.onsssSkillCancel = function() {
 FTKR.SSS.Scene_Skill_create = Scene_Skill.prototype.create;
 Scene_Skill.prototype.create = function() {
   FTKR.SSS.Scene_Skill_create.call(this);
-  this.ssscreateSkillStatusTitleWindow();
-  this.sssCreateSkillStatusWindow(this._itemWindow);
-  if (FTKR.SSS.applySSSLayout === 2) {
-    this.ssscreateActorStatusWindow();
+  if (FTKR.SSS.applySSSLayout) {
+    this.ssscreateSkillStatusTitleWindow();
+    this.sssCreateSkillStatusWindow(this._itemWindow);
+    if (FTKR.SSS.applySSSLayout === 2) {
+      this.ssscreateActorStatusWindow();
+    }
   }
   if (FTKR.SSS.enabledSubCommand) {
     this.ssscreateSepSubCommandWindow();
@@ -2570,8 +2580,10 @@ Scene_Skill.prototype.onItemOk = function() {
 
 FTKR.SSS.Scene_Skill_onitemCancel = Scene_Skill.prototype.onItemCancel;
 Scene_Skill.prototype.onItemCancel = function() {
-    this._sssStatusTitleWindow.clearWindow();
-    this._sssSkillStatusWindow.clearWindow();
+    if (FTKR.SSS.applySSSLayout) {
+      this._sssStatusTitleWindow.clearWindow();
+      this._sssSkillStatusWindow.clearWindow();
+    }
     FTKR.SSS.Scene_Skill_onitemCancel.call(this);
 };
 
@@ -2594,8 +2606,10 @@ Scene_Skill.prototype.onSubComOk = function() {
 
 Scene_Skill.prototype.onSubComCancel = function() {
     FTKR.SSS.subComOk = false;
-    this._sssStatusTitleWindow.clearWindow();
-    this._sssSkillStatusWindow.clearWindow();
+    if (FTKR.SSS.applySSSLayout) {
+      this._sssStatusTitleWindow.clearWindow();
+      this._sssSkillStatusWindow.clearWindow();
+    }
     this._sepSubCommandWindow.deselect();
     this._itemWindow.actSelect(this._itemWindow.index());
 };

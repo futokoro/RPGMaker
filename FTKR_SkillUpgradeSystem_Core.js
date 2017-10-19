@@ -1,10 +1,10 @@
-//=======↓本プラグインを改変した場合でも、この欄は消さないでください↓===============
+﻿//=======↓本プラグインを改変した場合でも、この欄は消さないでください↓===============
 // スキル強化システム 本体プラグイン
 // FTKR_SkillUpgradeSystem_Core.js
 // 作成者     : フトコロ
 // 作成日     : 2017/02/06
-// 最終更新日 : 2017/10/04
-// バージョン : v1.5.0
+// 最終更新日 : 2017/10/19
+// バージョン : v1.5.1
 //=======↑本プラグインを改変した場合でも、この欄は消さないでください↑===============
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.SUS = FTKR.SUS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.5.0 スキル強化システム 本体プラグイン
+ * @plugindesc v1.5.1 スキル強化システム 本体プラグイン
  * @author フトコロ
  *
  * @param ---Skill Name Format---
@@ -1025,6 +1025,10 @@ FTKR.SUS = FTKR.SUS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.5.1 - 2017/10/19 : 不具合修正
+ *    1. 強化可能なパラメータの数を８よりも減らしたときに、
+ *       FTKR_SEP_ShowSkillStatus.jsの処理と競合してエラーになる不具合を修正。
+ * 
  * v1.5.0 - 2017/10/04 : 機能追加
  *    1. 一括強化機能を追加
  * 
@@ -1253,7 +1257,12 @@ Game_BattlerBase.MAX_SUS_UPGRADE_TYPES = 10;
 
 if (FTKR.SUS.maxUtypeNum > Game_BattlerBase.MAX_SUS_UPGRADE_TYPES) {
   FTKR.SUS.maxUtypeNum = Game_BattlerBase.MAX_SUS_UPGRADE_TYPES;
-;}
+}
+
+//書き換え
+Window_SepTypeList.prototype.maxTypeNum = function() {
+  return FTKR.SUS.maxUtypeNum + 1;
+};
 
 //=============================================================================
 // TextManager
@@ -2018,4 +2027,3 @@ Game_Interpreter.prototype.getSusUdata = function(Actor, SkillId, TypeId, Effect
 };
 
 };//FTKR_SkillUpgradeSystem END
-
