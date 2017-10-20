@@ -4,7 +4,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2017/03/26
 // 最終更新日 : 2017/10/20
-// バージョン : v1.2.0
+// バージョン : v1.2.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ISV = FTKR.ISV || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.0 アイテムやスキルにセルフ変数を実装するプラグイン
+ * @plugindesc v1.2.1 アイテムやスキルにセルフ変数を実装するプラグイン
  * @author フトコロ
  *
  * @param --セーブ設定--
@@ -235,6 +235,10 @@ FTKR.ISV = FTKR.ISV || {};
  * 
  * 注意) x と y の数字はどちらも必要です
  * 
+ * 説明文やプロフィールで、上記制御文字を使う場合に
+ * []内の "x,"部分を省略することが可能です。
+ * 省略した場合は、例えばアイテムならそのアイテムのセルフ変数を参照します。
+ * 
  * 
  *-----------------------------------------------------------------------------
  * 本プラグインのライセンスについて(License)
@@ -250,7 +254,11 @@ FTKR.ISV = FTKR.ISV || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
- * v1.2.0 - 2017/10/20 : 制御文字に対応
+ * v1.2.1 - 2017/10/20 : 機能追加
+ *    1. アイテムの説明欄に制御文字を使用する場合に、アイテムIDを
+ *       省略できる機能を追加。
+ * 
+ * v1.2.0 - 2017/10/19 : 制御文字に対応
  * 
  * v1.1.3 - 2017/05/03 : 計算式の機能追加
  * 
@@ -783,25 +791,55 @@ function Game_IsvSelfVariables() {
     var _ISV_Window_Base_convertEscapeCharacters = Window_Base.prototype.convertEscapeCharacters;
     Window_Base.prototype.convertEscapeCharacters = function(text) {
         text = _ISV_Window_Base_convertEscapeCharacters.call(this, text);
+        if (this._setItem) {
+            text = text.replace(/\x1bITV\[(\d+)\]/gi, function() {
+                return $gameSelfVariables.item(parseInt(this._setItem.id)).value(parseInt(arguments[1]));
+            }.bind(this));
+            text = text.replace(/\x1bWEV\[(\d+)\]/gi, function() {
+                return $gameSelfVariables.weapon(parseInt(this._setItem.id)).value(parseInt(arguments[1]));
+            }.bind(this));
+            text = text.replace(/\x1bARV\[(\d+)\]/gi, function() {
+                return $gameSelfVariables.armor(parseInt(this._setItem.id)).value(parseInt(arguments[1]));
+            }.bind(this));
+            text = text.replace(/\x1bSKV\[(\d+)\]/gi, function() {
+                return $gameSelfVariables.skill(parseInt(this._setItem.id)).value(parseInt(arguments[1]));
+            }.bind(this));
+            text = text.replace(/\x1bACV\[(\d+)\]/gi, function() {
+                return $gameSelfVariables.actor(parseInt(this._setItem.id)).value(parseInt(arguments[1]));
+            }.bind(this));
+        }
         text = text.replace(/\x1bITV\[(\d+),(\d+)\]/gi, function() {
-            return $gameSelfVariables.item(parseInt(arguments[1])).value(arguments[2]);
+            return $gameSelfVariables.item(parseInt(arguments[1])).value(parseInt(arguments[2]));
         }.bind(this));
         text = text.replace(/\x1bWEV\[(\d+),(\d+)\]/gi, function() {
-            return $gameSelfVariables.weapon(parseInt(arguments[1])).value(arguments[2]);
+            return $gameSelfVariables.weapon(parseInt(arguments[1])).value(parseInt(arguments[2]));
         }.bind(this));
         text = text.replace(/\x1bARV\[(\d+),(\d+)\]/gi, function() {
-            return $gameSelfVariables.armor(parseInt(arguments[1])).value(arguments[2]);
+            return $gameSelfVariables.armor(parseInt(arguments[1])).value(parseInt(arguments[2]));
         }.bind(this));
         text = text.replace(/\x1bSKV\[(\d+),(\d+)\]/gi, function() {
-            return $gameSelfVariables.skill(parseInt(arguments[1])).value(arguments[2]);
+            return $gameSelfVariables.skill(parseInt(arguments[1])).value(parseInt(arguments[2]));
         }.bind(this));
         text = text.replace(/\x1bACV\[(\d+),(\d+)\]/gi, function() {
-            return $gameSelfVariables.actor(parseInt(arguments[1])).value(arguments[2]);
+            return $gameSelfVariables.actor(parseInt(arguments[1])).value(parseInt(arguments[2]));
         }.bind(this));
         text = text.replace(/\x1bENV\[(\d+),(\d+)\]/gi, function() {
-            return $gameSelfVariables.enemy(parseInt(arguments[1])).value(arguments[2]);
+            return $gameSelfVariables.enemy(parseInt(arguments[1])).value(parseInt(arguments[2]));
         }.bind(this));
         return text;
     };
 
+    var _ISV_Window_Help_setItem = Window_Help.prototype.setItem;
+    Window_Help.prototype.setItem = function(item) {
+        this._setItem = item;
+        _ISV_Window_Help_setItem.call(this, item);
+    };
+
+    var _ISV_Window_Status_drawProfile = Window_Status.prototype.drawProfile;
+    Window_Status.prototype.drawProfile = function(x, y) {
+        this._setItem = this._actor.actor();
+        _ISV_Window_Status_drawProfile.call(this, x, y);
+    };
+
+    
 }());//EOF
