@@ -3,8 +3,8 @@
 // FTKR_SkillUpgradeSystem_Core.js
 // 作成者     : フトコロ
 // 作成日     : 2017/02/06
-// 最終更新日 : 2017/10/19
-// バージョン : v1.5.1
+// 最終更新日 : 2017/10/21
+// バージョン : v1.5.2
 //=======↑本プラグインを改変した場合でも、この欄は消さないでください↑===============
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.SUS = FTKR.SUS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.5.1 スキル強化システム 本体プラグイン
+ * @plugindesc v1.5.2 スキル強化システム 本体プラグイン
  * @author フトコロ
  *
  * @param ---Skill Name Format---
@@ -1025,6 +1025,9 @@ FTKR.SUS = FTKR.SUS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.5.2 - 2017/10/21 : 不具合修正
+ *    1. 強化コストが設定されていない場合にエラーになる現象を回避。
+ * 
  * v1.5.1 - 2017/10/19 : 不具合修正
  *    1. 強化可能なパラメータの数を８よりも減らしたときに、
  *       FTKR_SEP_ShowSkillStatus.jsの処理と競合してエラーになる不具合を修正。
@@ -1944,8 +1947,8 @@ Game_Actor.prototype.paySepCost = function(cost) {
 
 Game_Actor.prototype.payUpgradeCost = function(skillId, typeId, dataId) {
   var udata = this.getSusUdata(skillId, typeId, dataId);
-  udata.cost.forEach( function(cost){
-    return this.paySepCost(cost);
+  udata.cost.forEach( function(arr){
+    return arr instanceof Object ? this.paySepCost(arr) : true;
   },this);
   return true;
 };

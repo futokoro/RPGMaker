@@ -3,8 +3,8 @@
 // FTKR_SkillTreeSystem.js
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/02/25
-// 最終更新日 : 2017/10/10
-// バージョン : v1.11.2
+// 最終更新日 : 2017/10/21
+// バージョン : v1.11.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.11.2 ツリー型スキル習得システム
+ * @plugindesc v1.11.3 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -1334,6 +1334,9 @@ FTKR.STS = FTKR.STS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.11.3 - 2017/10/21 : 不具合修正
+ *    1. FTKR_SkillUpgradeSystemとの競合回避。
+ * 
  * v1.11.2 - 2017/10/10 : 不具合修正
  *    1. リセット実行時にエラーで止まる不具合を修正。
  * 
@@ -2344,11 +2347,11 @@ function Scene_STS() {
 
     Game_Actor.prototype.payLearnedAnyCost = function(costs) {
         costs.forEach( function(cost){
-            return this.paySepCost(cost);
+            return this.payStsCost(cost);
         },this);
     };
 
-    Game_Actor.prototype.paySepCost = function(cost) {
+    Game_Actor.prototype.payStsCost = function(cost) {
         var value = this.evalStsFormula(cost.value,0,0);
         switch (cost.type) {
             case 'item':
