@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2017/10/19
-// バージョン : v2.4.1
+// 最終更新日 : 2017/11/01
+// バージョン : v2.4.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.4.1 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v2.4.2 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -1262,8 +1262,12 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.4.2 - 2017/11/01 : 不具合修正
+ *    1. カスタムパラメータとカスタムゲージで、名前が表示されない不具合を修正。
+ *    2. 装備のパラメータが表示されない不具合を修正。
+ * 
  * v2.4.1 - 2017/10/19 : 不具合修正
- *    1. カスタムパラメータとカスタムゲージで、制御文字を使用したときに
+ *    1. カスタムパラメータとカスタムゲージで、アイコンを表示したときに
  *       表示位置がずれる場合がある不具合を修正。
  * 
  * v2.4.0 - 2017/10/16 : 仕様変更
@@ -2398,6 +2402,7 @@ FTKR.CSS = FTKR.CSS || {};
         var value = this.evalCssCustomFormula(actor, formula);
         this.changeTextColor(this.systemColor());
         var tx = convertTextWidth(name, x, y);
+        this.drawTextEx(name, x, y);
         this.resetTextColor();
         this.drawText(value, x + tx, y, width - tx - tux, 'right');
         if (unit) this.drawTextEx(unit, x + width - tux, y);
@@ -2419,6 +2424,7 @@ FTKR.CSS = FTKR.CSS || {};
         }
         this.changeTextColor(this.systemColor());
         var tx = convertTextWidth(gauge.name, x, y);
+        this.drawTextEx(gauge.name, x, y);
         if (gauge.ref) {
             var ref = this.evalCssStrFormula(actor, gauge.ref);
             this.resetTextColor();
@@ -2468,6 +2474,7 @@ FTKR.CSS = FTKR.CSS || {};
     //プロフィールの表示関数
     //------------------------------------------------------------------------
     Window_Base.prototype.drawCssProfile = function(actor, x, y, width) {
+        this._setItem = actor.actor();
         var texts = actor.profile().split('\n');
         var dy = this.lineHeight();
         texts.forEach( function(text, i) {
@@ -2539,14 +2546,17 @@ FTKR.CSS = FTKR.CSS || {};
         if (paramId < 0 && paramId > 7) return 0;
         this.drawTextEx(FTKR.CSS.cssStatus.equip.arrow, x, y);
         var target = lss.target;
-        var item = FTKR.gameData.item;
-        if(target && item && actor.canEquip(item)) {
+        if(this.checkShowEquipParam(actor, target)) {
             var newValue = target.param(paramId);
             var diffvalue = newValue - actor.param(paramId);
             this.changeTextColor(this.paramchangeTextColor(diffvalue));
             this.drawText(newValue, x, y, width, 'right');
         }
         return 1;
+    };
+
+    Window_Base.prototype.checkShowEquipParam = function(target) {
+        return !!target;
     };
 
     //------------------------------------------------------------------------
@@ -2557,8 +2567,7 @@ FTKR.CSS = FTKR.CSS || {};
         if (paramId < 0 && FTKR.AOP.useParamNum > 7) return 1;
         this.drawTextEx(FTKR.CSS.cssStatus.equip.arrow, x, y);
         var target = lss.target;
-        var item = FTKR.gameData.item;
-        if(target && item && actor.canEquip(item)) {
+        if(this.checkShowEquipParam(actor, target)) {
             var newValue = target.aopParam(paramId);
             var diffvalue = newValue - actor.aopParam(paramId);
             this.changeTextColor(this.paramchangeTextColor(diffvalue));

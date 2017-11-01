@@ -3,8 +3,8 @@
 // FTKR_CSS_ShopStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/07/23
-// 最終更新日 : 2017/08/23
-// バージョン : v1.1.1
+// 最終更新日 : 2017/11/01
+// バージョン : v1.1.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 FTKR.CSS.SpS = FTKR.CSS.SpS || {};
 
 /*:
- * @plugindesc v1.1.1 ショップ画面のステータスレイアウトを変更する
+ * @plugindesc v1.1.2 ショップ画面のステータスレイアウトを変更する
  * @author フトコロ
  *
  * @param --共通レイアウト設定--
@@ -364,6 +364,9 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.2 - 2017/11/01 : 不具合修正
+ *    1. 装備のパラメータが正しく表示できない場合がある不具合を修正。
+ * 
  * v1.1.1 - 2017/08/23 : 機能追加
  *    1. ディプロイメントの「未使用ファイルを含まない」に対応。
  * 
@@ -540,6 +543,11 @@ if (Imported.FTKR_CSS) (function() {
         return FTKR.evalFormula(formula);
     };
 
+    Window_ShopStatus.prototype.checkShowEquipParam = function(actor, target) {
+        var item = this._item;
+        return !!target && item && actor.canEquip(item);
+    };
+
     //書き換え
     Window_ShopStatus.prototype.refresh = function() {
         this.contents.clear();
@@ -646,6 +654,11 @@ if (Imported.FTKR_CSS) (function() {
         if (!formula) return '';
         FTKR.setGameData(actor, this._tempActor, this._item);
         return FTKR.evalFormula(formula);
+    };
+
+    Window_ShopItemStatus.prototype.checkShowEquipParam = function(actor, target) {
+        var item = this._item;
+        return !!target && item && actor.canEquip(item);
     };
 
     Window_ShopItemStatus.prototype.drawItem = function(index, w, h) {
