@@ -3,8 +3,8 @@
 // FTKR_AutoInvokeSkill.js
 // 作成者     : フトコロ
 // 作成日     : 2017/05/03
-// 最終更新日 : 2017/06/28
-// バージョン : v1.1.0
+// 最終更新日 : 2017/11/02
+// バージョン : v1.2.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.AIS = FTKR.AIS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.0 特定条件で自動でスキルを発動させるプラグイン
+ * @plugindesc v1.2.0 特定条件で自動でスキルを発動させるプラグイン
  * @author フトコロ
  *
  * @param 
@@ -48,10 +48,10 @@ FTKR.AIS = FTKR.AIS || {};
  * 
  * 
  *-----------------------------------------------------------------------------
- * アクターに設定
+ * アクター、職業、装備、ステートに設定し、行動後に発動させる
  *-----------------------------------------------------------------------------
- * 以下のタグをアクターのメモ欄に追記すると、設定した条件式を満たした時に
- * スキルを自動発動します。
+ * 以下のタグをアクターや職号、装備、ステートのメモ欄に追記すると
+ * 各キャラが行動する度に、設定した条件式を満たした時にスキルを自動発動します。
  * 
  * <AIS_発動条件: x>
  * 条件式
@@ -68,6 +68,13 @@ FTKR.AIS = FTKR.AIS || {};
  * 
  * [条件判定するタイミング]
  * 条件判定は、各キャラが行動しする度に毎回行います。
+ * そして、スキルを発動する相手は、そのキャラが行動するときの対象です。
+ * 
+ * 例えば、味方が敵を攻撃した時の場合は、スキルが発動すると、その攻撃する敵に
+ * 対して発動します。
+ * 逆に、味方が防御するなど、自分を対象とする行動をした場合、スキルを発動する
+ * 対象は、そのキャラ自身になります。
+ * 
  * このため、条件式には設定したアクターと、行動したキャラ、行動の対象のキャラの
  * パラメータを参照することができます。
  * 判定はパーティーの先頭から順番に行い、条件を満たしたキャラのスキルを
@@ -82,6 +89,19 @@ FTKR.AIS = FTKR.AIS || {};
  *  s[x]    - スイッチID x の状態を参照します。
  *  v[x]    - 変数ID x の値を参照します。
  * 
+ * 
+ * 例)武器に設定し、その武器を装備したキャラが、敵を攻撃したときのみ
+ *    スキルID10を発動させる場合
+ *    <AIS_発動条件: 10>
+ *    a !== b && a == item
+ *    </AIS_発動条件>
+ *    上の条件では、a は装備したキャラ、b は攻撃する相手、
+ *    item は攻撃したキャラを意味します。
+ *    a !== b で装備したキャラが攻撃する相手ではない、
+ *    a == item で装備したキャラが攻撃したキャラである
+ *    という条件を満たす場合に、スキルID 10 が発動する、となります。
+ * 
+ *    
  * 
  *-----------------------------------------------------------------------------
  * 行動後に指定した条件式を満たした時に発動
@@ -179,6 +199,9 @@ FTKR.AIS = FTKR.AIS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.2.0 - 2017/11/02 : 機能追加
+ *    1. 職業や装備、ステートにもスキル発動条件を設定する機能を追加。
  * 
  * v1.1.0 - 2017/06/28 : 機能追加、タグの名称変更
  *    1. アクターに任意のスキルの自動発動条件を設定する機能を追加。
@@ -282,6 +305,7 @@ FTKR.AIS = FTKR.AIS || {};
 
     var readEntrapmentCodeToTextEx = function(obj, codeTitles) {
         var regs = convertEntrapmentRegArrayEx(codeTitles);
+        if (!obj) return [];
         var notedata = obj.note.split(/[\r\n]+/);
         var setMode = 'none';
         var results = [];
@@ -583,8 +607,24 @@ FTKR.AIS = FTKR.AIS || {};
     // Game_Actor
     //=============================================================================
 
+    var readEntrapmentCodeToTextExTotal = function(objs, metacodes) {
+        var result = [];
+        objs.forEach( function(obj) {
+            var metas = readEntrapmentCodeToTextEx(obj, metacodes);
+            Array.prototype.push.apply(result, metas);
+        });
+        return result;
+    };
+
     Game_Actor.prototype.checkAutoSkill = function() {
-        var datas = readEntrapmentCodeToTextEx(this.actor(), ['AIS_発動条件', 'AIS_INVOKE_CONDITIONS']);
+        var datas = [];
+        var metacodes = ['AIS_発動条件', 'AIS_INVOKE_CONDITIONS'];
+        datas = datas.concat(
+            readEntrapmentCodeToTextEx(this.actor(), metacodes),
+            readEntrapmentCodeToTextEx($dataClasses[this.actor().classId], metacodes),
+            readEntrapmentCodeToTextExTotal(this.equips(), metacodes),
+            readEntrapmentCodeToTextExTotal(this.states(), metacodes)
+        );
         return datas.some( function(data) {
             if (evalCheckConditions(data.text)) {
                 this._revenge.skillId = data.id;
@@ -610,10 +650,12 @@ FTKR.AIS = FTKR.AIS || {};
         }
         if (!BattleManager._aisPhase) {
             $gameParty.members().forEach( function(member) {
-                if (member.isDead() || member === this.subject()) return;
+//                if (member.isDead() || member === this.subject()) return;
+                if (member.isDead()) return;
                 FTKR.setGameData(member, target, this.subject());
                 this.setRevengeTarget(target, member)
                 member.checkAutoSkill();
+                console.log("check");
             },this);
         }
     };
