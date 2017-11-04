@@ -3,8 +3,8 @@
 // FTKR_SkillTreeSystem.js
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/02/25
-// 最終更新日 : 2017/10/21
-// バージョン : v1.11.3
+// 最終更新日 : 2017/11/04
+// バージョン : v1.11.4
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.11.3 ツリー型スキル習得システム
+ * @plugindesc v1.11.4 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -1334,6 +1334,10 @@ FTKR.STS = FTKR.STS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.11.4 - 2017/11/04 : 不具合修正
+ *    1. プラグイン適用前のセーブデータを使用した時に
+ *       レベルアップ等でスキルを習得した際に発生するエラーを回避する処理を追加。
+ * 
  * v1.11.3 - 2017/10/21 : 不具合修正
  *    1. FTKR_SkillUpgradeSystemとの競合回避。
  * 
@@ -2121,6 +2125,18 @@ function Scene_STS() {
         this._stsUsedGold = [];
     };
 
+    Game_Actor.prototype.checkInitSts = function() {
+        if (!this._stsCount) this._stsCount = [];
+        if (!this._stsLearnSkills) this._stsLearnSkills = [];
+        if (!this._stsTrees) this._stsTrees = [];
+        if (!this._stsUsedSp) this._stsUsedSp = [];
+        if (!this._stsUsedItem) this._stsUsedItem = [];
+        if (!this._stsUsedWeapon) this._stsUsedWeapon = [];
+        if (!this._stsUsedArmor) this._stsUsedArmor = [];
+        if (!this._stsUsedVar) this._stsUsedVar = [];
+        if (!this._stsUsedGold) this._stsUsedGold = [];
+    };
+
     var _STS_Game_Actor_setup = Game_Actor.prototype.setup;
     Game_Actor.prototype.setup = function(actorId) {
         _STS_Game_Actor_setup.call(this, actorId);
@@ -2148,6 +2164,7 @@ function Scene_STS() {
             this.setStsSkillCount(skillId, 0);
         }
         _STS_Game_Actor_learnSkill.call(this, skillId);
+        this.checkInitSts();
         if (this.isLearnedSkill(skillId) && !this.stsCount(skillId)) {
             if (FTKR.STS.learnedActorVarID) $gameVariables.setValue(FTKR.STS.learnedActorVarID, this.actorId());
             if (FTKR.STS.learnedSkillVarID) $gameVariables.setValue(FTKR.STS.learnedSkillVarID, skillId);
@@ -2162,6 +2179,7 @@ function Scene_STS() {
     var _STS_Game_Actor_forgetSkill = Game_Actor.prototype.forgetSkill;
     Game_Actor.prototype.forgetSkill = function(skillId) {
         if (FTKR.STS.resetWhenForgottenSkill) {
+            this.checkInitSts();
             this.resetStsSkill(skillId);
         }
         _STS_Game_Actor_forgetSkill.call(this, skillId);
