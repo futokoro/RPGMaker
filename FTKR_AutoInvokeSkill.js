@@ -3,8 +3,8 @@
 // FTKR_AutoInvokeSkill.js
 // 作成者     : フトコロ
 // 作成日     : 2017/05/03
-// 最終更新日 : 2017/11/02
-// バージョン : v1.2.0
+// 最終更新日 : 2017/11/04
+// バージョン : v1.3.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,12 +15,8 @@ FTKR.AIS = FTKR.AIS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.0 特定条件で自動でスキルを発動させるプラグイン
+ * @plugindesc v1.3.0 特定条件で自動でスキルを発動させるプラグイン
  * @author フトコロ
- *
- * @param 
- * @desc 
- * @default 
  *
  * @help 
  *-----------------------------------------------------------------------------
@@ -45,6 +41,7 @@ FTKR.AIS = FTKR.AIS || {};
  *    当プラグインは以下のプラグインよりも下にしてください。
  *      YEP_BattleEngineCore.js
  *      YEP_X_BattleSysATB.js
+ *      および、他のFTKR系プラグイン
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -85,7 +82,8 @@ FTKR.AIS = FTKR.AIS || {};
  * 条件式には、以下のコードを使うことができます。
  *  a.param - 設定したアクターのパラメータを参照します。(a.hp で現在HPを参照)
  *  b.param - 行動の対象キャラのパラメータを参照します。
- *  item.param - 行動したキャラのパラメータを参照します。
+ *  c.param - 行動したキャラのパラメータを参照します。
+ *  item    - 使用したスキルのデータを参照します。
  *  s[x]    - スイッチID x の状態を参照します。
  *  v[x]    - 変数ID x の値を参照します。
  * 
@@ -93,15 +91,31 @@ FTKR.AIS = FTKR.AIS || {};
  * 例)武器に設定し、その武器を装備したキャラが、敵を攻撃したときのみ
  *    スキルID10を発動させる場合
  *    <AIS_発動条件: 10>
- *    a !== b && a == item
+ *    a !== b && a == c
  *    </AIS_発動条件>
  *    上の条件では、a は装備したキャラ、b は攻撃する相手、
- *    item は攻撃したキャラを意味します。
+ *    c は攻撃したキャラを意味します。
  *    a !== b で装備したキャラが攻撃する相手ではない、
- *    a == item で装備したキャラが攻撃したキャラである
+ *    a == c で装備したキャラが攻撃したキャラである
  *    という条件を満たす場合に、スキルID 10 が発動する、となります。
  * 
- *    
+ *    使用したスキルの設定で発動条件を変えることが出来ます。
+ *     item.stypeId         - スキルタイプのIDを参照します
+ *                            0:なし, 1~:データベースのスキルタイプ
+ *     item.hitType         - 命中タイプを参照します
+ *                            0:必中, 1:物理, 2:魔法
+ *     item.damage.element  - ダメージの属性IDを参照します
+ *                            -1:通常攻撃, 0:なし, 1~:データベースの属性
+ *     item.damage.type     - ダメージタイプを参照します
+ *                            1:HPダメージ, 2:MPダメージ, 3:HP回復,
+ *                            4:MP回復, 5:HP吸収, 6:MP吸収, 0:なし
+ *    例)
+ *    <AIS_発動条件: 10>
+ *    a !== b && a == c
+ *    item.hitType == 1
+ *    </AIS_発動条件>
+ *    この設定で、物理攻撃タイプのスキルを使用した時のみ発動するようになります。
+ * 
  * 
  *-----------------------------------------------------------------------------
  * 行動後に指定した条件式を満たした時に発動
@@ -200,6 +214,10 @@ FTKR.AIS = FTKR.AIS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.3.0 - 2017/11/04 : 機能追加、仕様変更
+ *    1. 発動条件の条件式で、行動したキャラのパラメータを参照するコードを変更。
+ *    2. 発動条件の条件式で、使用したスキルをitemコードで参照できる機能を追加。
+ * 
  * v1.2.0 - 2017/11/02 : 機能追加
  *    1. 職業や装備、ステートにもスキル発動条件を設定する機能を追加。
  * 
@@ -229,20 +247,19 @@ FTKR.AIS = FTKR.AIS || {};
         target :null,
         item   :null,
         number :0,
+        owner  :null,
     };
 
-    if (!FTKR.setGameData) {
-    FTKR.setGameData = function(user, target, item, number) {
+    FTKR.setGameData = function(user, target, item, number, owner) {
         FTKR.gameData = {
             user   :user || null,
             target :target || null,
             item   :item || null,
-            number :number || 0
+            number :number || 0,
+            owner  :owner || null
         };
     };
-    }
 
-    if (!FTKR.evalFormula) {
     FTKR.evalFormula = function(formula) {
         var datas = FTKR.gameData;
         try {
@@ -250,9 +267,27 @@ FTKR.AIS = FTKR.AIS || {};
             var v = $gameVariables._data;
             var a = datas.user;
             var b = datas.target;
+            var c = datas.owner;
             var item   = datas.item;
             var number = datas.number;
-            if (b) var result = b.result();
+            if (Imported.FTKR_ISV) {
+                if (a) {
+                    var aData = a.isActor() ? a.actor() : a.enemy();
+                    if (aData._selfVariables) var av = aData._selfVariables._data;
+                }
+                if (b) {
+                    var result = b.result();
+                    var bData = b.isActor() ? b.actor() : b.enemy();
+                    if (bData._selfVariables) var bv = bData._selfVariables._data;
+                }
+                if (c) {
+                    var cData = c.isActor() ? c.actor() : c.enemy();
+                    if (cData._selfVariables) var cv = cData._selfVariables._data;
+                }
+                if (item && item._selfVariables) var iv = item._selfVariables._data;
+            } else {
+                if (b) var result = b.result();
+            }
             var value = eval(formula);
             if (isNaN(value)) value = 0;
             return value;
@@ -261,7 +296,6 @@ FTKR.AIS = FTKR.AIS || {};
             return 0;
         }
     };
-    }
 
     //=============================================================================
     // 自作関数(ローカル)
@@ -652,10 +686,9 @@ FTKR.AIS = FTKR.AIS || {};
             $gameParty.members().forEach( function(member) {
 //                if (member.isDead() || member === this.subject()) return;
                 if (member.isDead()) return;
-                FTKR.setGameData(member, target, this.subject());
+                FTKR.setGameData(member, target, this.item(), null, this.subject());
                 this.setRevengeTarget(target, member)
                 member.checkAutoSkill();
-                console.log("check");
             },this);
         }
     };
