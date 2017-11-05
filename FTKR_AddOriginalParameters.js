@@ -3,8 +3,8 @@
 // FTKR_AddOriginalParameters.js
 // 作成者     : フトコロ
 // 作成日     : 2017/02/16
-// 最終更新日 : 2017/04/30
-// バージョン : v1.1.4
+// 最終更新日 : 2017/11/05
+// バージョン : v1.2.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.AOP = FTKR.AOP || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.4 オリジナルのパラメータを追加するプラグイン
+ * @plugindesc v1.2.0 オリジナルのパラメータを追加するプラグイン
  * @author フトコロ
  *
  * @param Use Param Num
@@ -238,6 +238,9 @@ FTKR.AOP = FTKR.AOP || {};
  * ダメージの計算式に使用できる、オリジナルのパラメータを追加します。
  * 
  * 
+ * オンラインマニュアル
+ * https://github.com/futokoro/RPGMaker/blob/master/FTKR_AddOriginalParameters.ja.md
+ * 
  *-----------------------------------------------------------------------------
  * 設定方法
  *-----------------------------------------------------------------------------
@@ -353,23 +356,25 @@ FTKR.AOP = FTKR.AOP || {};
  * 
  * 
  * 3. ゲーム内で、オリジナルパラメータの値を取得できます。
- *    以下のスクリプトを使用すると、取得できます。
+ *    以下のスクリプトを使用すると、取得できます。(*1)
  * 
- *    $gameActors._data[x].aopParam(y)
- *    $gameActors._data[x].code
+ *    $gameActors.actor[x].aopParam(y)
+ *    $gameActors.actor[x].code
  *      :アクター x の パラメータ y (または'code')の値を取得します。
  *      :'code'は、プラグインパラメータで設定したコード名です。
  * 
  *    取得した値は、$gameVariables.setValue()等を使って利用してください。
  * 
+ *    (*1)$gameActors.actor[x]を$gameParty.members()[n]に変えると
+ *     パーティーの並び順で先頭を n=0 としてパラメータを取得できます。
  * 
  * 4. ゲーム内で、オリジナルパラメータの現在値を操作できます。
- *    以下のスクリプトを使用できます。
+ *    以下のスクリプトを使用できます。(*1)
  * 
- *    $gameActors._data[x].setCAop(y, value)
+ *    $gameActors.actor[x].setCAop(y, value)
  *      :アクター x の パラメータ y の現在値を value に変更します。
  * 
- *    $gameActors._data[x].gainCAop(y, value)
+ *    $gameActors.actor[x].gainCAop(y, value)
  *      :アクター x の パラメータ y の現在値を value分加算します。
  *      :value が負の値ならば、減算します。
  * 
@@ -385,7 +390,12 @@ FTKR.AOP = FTKR.AOP || {};
  * AOP_パラメータ変更 アクター(x) コード名 演算方法 値
  * AOP_set_Parameters Actor(x) code CALCTYPE value
  * 
+ * AOP_パラメータ変更 パーティー(n) コード名 演算方法 値
+ * AOP_set_Parameters Party(n) code CALCTYPE value
+ * 
  * x にはアクターIDを代入してください。
+ * n にはパーティーの先頭を 0 とした並び順の番号を代入してください。
+ * 
  * コード名には、プラグインパラメータで設定したコード名、または
  * パラメータIDを代入してください。
  * 演算方法には、代入(=)、加算(+)、減算(-)、積算(*)、除算(/)、剰余(%)を
@@ -405,7 +415,12 @@ FTKR.AOP = FTKR.AOP || {};
  * AOP_パラメータ取得 ゲーム内変数ID アクター(x) コード名
  * AOP_GET_Parameters variableId Actor(x) code
  * 
+ * AOP_パラメータ取得 ゲーム内変数ID パーティー(n) コード名
+ * AOP_GET_Parameters variableId Party(n) code
+ * 
  * x にはアクターIDを代入してください。
+ * n にはパーティーの先頭を 0 とした並び順の番号を代入してください。
+ * 
  * コード名には、プラグインパラメータで設定したコード名、または
  * パラメータIDを代入してください。
  * ゲーム内変数ID、アクターID、パラメータIDには、ゲーム内変数を指定できます。
@@ -441,6 +456,11 @@ FTKR.AOP = FTKR.AOP || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.1.5 - 2017/11/05 : 不具合修正、機能追加
+ *    1. レベルアップやプラグインコマンドによるパラメータの増減が
+ *       セーブデータに記録されない不具合を修正。
+ *    2. プラグインコマンドに、パーティーの並び順を指定できる機能を追加。
  * 
  * v1.1.4 - 2017/04/30 : 不具合修正
  *    1. 現在値を回復させるアイテムが最大値の状態でも使用可能な不具合を修正。
@@ -769,29 +789,15 @@ Game_Actor.prototype.levelUp = function() {
     this.aopParamGrows();
 };
 
-FTKR.AOP.Game_Actor_levelDown = Game_Actor.prototype.levelDown;
-Game_Actor.prototype.levelDown = function() {
-    this.aopParamDowns();
-    FTKR.AOP.Game_Actor_levelDown.call(this);
-};
-
 Game_Actor.prototype.aopParamGrows = function() {
+    if (!this._aopParamPlus) this._aopParamPlus = [];
     for (var i = 0; i < FTKR.AOP.useParamNum; i++) {
-        this.actor().aopParams[i] += this.aopParamGrow(i);
-    }
-};
-
-Game_Actor.prototype.aopParamDowns = function() {
-    for (var i = 0; i < FTKR.AOP.useParamNum; i++) {
-        this.actor().aopParams[i] -= this.aopParamGrow(i);
+        this._aopParamPlus[i] += this.aopParamGrow(i);
     }
 };
 
 Game_Actor.prototype.aopParamGrow = function(paramId) {
-    var value = this.actor().aopParamValues[paramId][this._level];
-    value += this.currentClass().aopParamValues[paramId][this._level];
-    value += this.aopParamItemGrow(paramId);
-    return value;
+    return this.aopParamItemGrow(paramId);
 };
 
 Game_Actor.prototype.aopParamItemGrow = function(paramId) {
@@ -806,18 +812,20 @@ Game_Actor.prototype.aopParamBase = function(paramId) {
     return this.aopActorParamBase(paramId) + this.aopClassParamBase(paramId);
 };
 
-Game_Actor.prototype.setAopParamBase = function(paramId, value) {
-    if (paramId > -1 && FTKR.AOP.useParamNum > paramId ) {
-        this.actor().aopParams[paramId] = value;
-    }
-};
-
 Game_Actor.prototype.aopActorParamBase = function(paramId) {
-    return this.actor().aopParams[paramId];
+    var value = 0;
+    for(var i = 1; i <= this._level; i++){
+        value += this.actor().aopParamValues[paramId][i];
+    }
+    return value;
 };
 
 Game_Actor.prototype.aopClassParamBase = function(paramId) {
-    return this.currentClass().aopParams[paramId];
+    var value = 0;
+    for(var i = 1; i <= this._level; i++){
+        value += this.currentClass().aopParamValues[paramId][i];
+    }
+    return value;
 };
 
 Game_Actor.prototype.aopParamPlus = function(paramId) {
@@ -962,6 +970,29 @@ Game_BattlerBase.prototype.clearAopBuffs = function() {
     this._aopBuffTurns = [0,0,0,0,0,0,0,0,0,0];
 };
 
+Game_BattlerBase.prototype.setAopParamPlus = function(paramId, value) {
+    this._aopParamPlus[paramId] = value || 0;
+    this.refresh();
+};
+
+/*-----------------------------------
+aopParamBase()     :レベルアップ、装備等による固定値
+aopParamPlus()     :特徴による成長、プラグインコマンドによる増減値
+aopParamRate()     :装備等の特徴による積算値
+aopParamBuffRate() :強化による積算値
+
+$gameActor
+_aop              :現在値
+_maop             :最大値
+_aopParamPlus     :増減値
+
+$dataActors,$dataClasses
+aopParamValues    :各レベルでの増加値
+
+$dataItems,他
+aopParams         :初期値(固定値)
+
+-----------------------------------*/
 Game_BattlerBase.prototype.aopParam = function(paramId) {
     if (paramId >= FTKR.AOP.useParamNum) return 0;
     var value = this.aopParamBase(paramId) + this.aopParamPlus(paramId);
@@ -1061,7 +1092,9 @@ Game_Interpreter.prototype.setAopParams = function(command, args) {
     var actor = this.setActor(args[0]);
     if(!actor) return;
     var paramId = DataManager.getParamId(args[1]);
-    actor.setAopParamBase(paramId, this.calcValue(actor.aopParamBase(paramId), this.setNum(args[3]), args[2]))
+    var base = actor._aopParamPlus[paramId];
+    var value = this.calcValue(base, this.setNum(args[3]), args[2]);
+    actor.setAopParamPlus(paramId, value);
 };
 
 Game_Interpreter.prototype.getAopParams = function(command, args) {
@@ -1074,10 +1107,14 @@ Game_Interpreter.prototype.getAopParams = function(command, args) {
 Game_Interpreter.prototype.setActor = function(arg) {
     var case1 = /ACTOR\((.+)\)/i;
     var case1j = /アクター\((.+)\)/i;
+    var case2 = /PARTY\((.+)\)/i;
+    var case2j = /パーティー\((.+)\)/i;
     if (arg.match(case1) || arg.match(case1j)) {
         return $gameActors.actor(this.setNum(RegExp.$1));
+    } else if (arg.match(case2) || arg.match(case2j)) {
+        return $gameParty.members()[this.setNum(RegExp.$1)];
     } else {
-        return false;
+        return null;
     }
 };
 
