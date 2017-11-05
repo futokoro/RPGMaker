@@ -4,7 +4,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2017/02/16
 // 最終更新日 : 2017/11/05
-// バージョン : v1.2.0
+// バージョン : v1.1.6
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.AOP = FTKR.AOP || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.0 オリジナルのパラメータを追加するプラグイン
+ * @plugindesc v1.1.6 オリジナルのパラメータを追加するプラグイン
  * @author フトコロ
  *
  * @param Use Param Num
@@ -324,10 +324,10 @@ FTKR.AOP = FTKR.AOP || {};
  *      :対象のエネミーのパラメータ x (または'code')を、y に設定します。
  * 
  * 
- * [アクター、スキル]
+ * [アイテム、スキル]
  * <AOP Param x Get: y(%)>
  * <AOP 'code' Get: y(%)>
- *      :アクターまたはスキルを使用すると、対象者のパラメータ x 
+ *      :アイテムまたはスキルを使用すると、対象者のパラメータ x 
  *      :(または'code')の現在値に y 加算します。
  *      :y に負の数字を入れた場合、減算します。
  *      :y に'%'を付けた場合、パラメータ x (または'code')の最大値の
@@ -457,6 +457,9 @@ FTKR.AOP = FTKR.AOP || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.6 - 2017/11/05 : 不具合修正
+ *    1. アイテム等に設定した現在値の減少効果が発生しない不具合を修正。
+ * 
  * v1.1.5 - 2017/11/05 : 不具合修正、機能追加
  *    1. レベルアップやプラグインコマンドによるパラメータの増減が
  *       セーブデータに記録されない不具合を修正。
@@ -490,8 +493,6 @@ FTKR.AOP = FTKR.AOP || {};
  *-----------------------------------------------------------------------------
 */
 //=============================================================================
-
-
 
 //=============================================================================
 // プラグイン パラメータ
@@ -636,6 +637,7 @@ DataManager.aopParamNotetags = function(group) {
 
 DataManager.aopParamPlusNotetags = function(group) {
     var note1 = /<(?:AOP)[ ](.+)[ ](?:PLUS):[ ]*(\d+)>/i;
+    var note1a = /<(?:AOP)[ ](.+)[ ](?:PLUS):[ ]*(?:-)(\d+)>/i;
     var note2 = /<(?:AOP)[ ](.+)[ ](?:RATE):[ ]*(\d+)>/i;
 
     for (var n = 1; n < group.length; n++) {
@@ -655,6 +657,10 @@ DataManager.aopParamPlusNotetags = function(group) {
                 var value = Number(RegExp.$2);
                 var paramId =this.getParamId(RegExp.$1);
                 obj.aopParams[paramId] = value;
+            } else if (line.match(note1a)) {
+                var value = Number(RegExp.$2);
+                var paramId =this.getParamId(RegExp.$1);
+                obj.aopParams[paramId] = -value;
             } else if (line.match(note2)) {
                 var value = Number(RegExp.$2);
                 var paramId =this.getParamId(RegExp.$1);
@@ -722,7 +728,8 @@ DataManager.aopParamEnemyNotetags = function(group) {
 DataManager.aopGetNotetags = function(group) {
     var note1 = /<(?:AOP)[ ](.+)[ ](?:GET):[ ]*(\d+)(?:%)>/i;
     var note2 = /<(?:AOP)[ ](.+)[ ](?:GET):[ ]*(\d+)>/i;
-
+    var note3 = /<(?:AOP)[ ](.+)[ ](?:GET):[ ]*(?:-)(\d+)>/i;
+    
     for (var n = 1; n < group.length; n++) {
         var obj = group[n];
         var notedata = obj.note.split(/[\r\n]+/);
@@ -737,6 +744,10 @@ DataManager.aopGetNotetags = function(group) {
                 var value = Number(RegExp.$2);
                 var paramId =this.getParamId(RegExp.$1);
                 obj.effects.push(this.setGetAopEffect(paramId, 0, value));
+            } else if (line.match(note3)) {
+                var value = Number(RegExp.$2);
+                var paramId =this.getParamId(RegExp.$1);
+                obj.effects.push(this.setGetAopEffect(paramId, 0, -value));
             }
         }
     }
