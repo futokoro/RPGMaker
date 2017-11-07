@@ -3,8 +3,8 @@
 // FTKR_CSS_CustomizeBattleResults.js
 // 作成者     : フトコロ
 // 作成日     : 2017/06/07
-// 最終更新日 : 2017/11/08
-// バージョン : v1.3.0
+// 最終更新日 : 2017/08/22
+// バージョン : v1.2.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -14,7 +14,7 @@ var FTKR = FTKR || {};
 FTKR.CBR = FTKR.CBR || {};
 
 /*:
- * @plugindesc v1.3.0 カスタム可能な戦闘結果画面を表示する
+ * @plugindesc v1.2.0 カスタム可能な戦闘結果画面を表示する
  * @author フトコロ
  *
  * @param --タイトル設定--
@@ -327,11 +327,6 @@ FTKR.CBR = FTKR.CBR || {};
  *    本プラグインは、FTKR_CustomSimpleActorStatus.jsよりも下の位置に
  *    なるように追加してください。
  * 
- * 3. ゲーム画面でレイアウトを変更する場合は、以下のプラグインが必要です。
- * 
- *    GraphicalDesignMode.js
- *    FTKR_CSS_GDM.js
- * 
  * 
  *-----------------------------------------------------------------------------
  * 本プラグインのライセンスについて(License)
@@ -346,10 +341,6 @@ FTKR.CBR = FTKR.CBR || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
- * 
- * v1.3.0 - 2017/11/08 : 機能追加
- *    1. GraphicalDesignMode.jsとFTKR_CSS_GDM.jsにより、デザインモード中に
- *       ゲーム内でレイアウトを変更する機能を追加。
  * 
  * v1.2.0 - 2017/08/22 : 機能追加
  *    1. レベルアップ時のスキル習得状態を表示するメッセージコードを追加。
@@ -369,14 +360,6 @@ FTKR.CBR = FTKR.CBR || {};
  *-----------------------------------------------------------------------------
 */
 //=============================================================================
-
-function Window_BattleResultParty() {
-    this.initialize.apply(this, arguments);
-}
-
-function Window_BattleResultActor() {
-    this.initialize.apply(this, arguments);
-}
 
 if (Imported.FTKR_CSS) (function() {
 
@@ -851,25 +834,19 @@ if (Imported.FTKR_CSS) (function() {
     //Window_BattleResultParty
     //=============================================================================
 
+    function Window_BattleResultParty() {
+        this.initialize.apply(this, arguments);
+    }
+
     Window_BattleResultParty.prototype = Object.create(Window_Base.prototype);
     Window_BattleResultParty.prototype.constructor = Window_BattleResultParty;
 
-    Window_BattleResultParty.prototype.initialize = function(x, y, width, height) {
-        this._lssStatus = this.standardCssStatus();
-        Window_Base.prototype.initialize.call(this, x, y, width, height);
-    };
-
-    Window_BattleResultParty.prototype.standardCssStatus = function() {
-        return FTKR.CBR.party;
-    };
-      
     Window_BattleResultParty.prototype.refresh = function() {
         this.contents.clear();
-        var lss = this._lssStatus;
         var actor = $gameParty.members()[0];
         var w = this.width - this.padding * 2;
         var h = this.height - this.padding * 2;
-        this.drawCssActorStatus(0, actor, 0, 0, w, h, lss);
+        this.drawCssActorStatus(0, actor, 0, 0, w, h, FTKR.CBR.party);
     };
 
     //書き換え
@@ -998,27 +975,21 @@ if (Imported.FTKR_CSS) (function() {
     //Window_BattleResultActor
     //=============================================================================
 
+    function Window_BattleResultActor() {
+        this.initialize.apply(this, arguments);
+    }
+
     Window_BattleResultActor.prototype = Object.create(Window_Selectable.prototype);
     Window_BattleResultActor.prototype.constructor = Window_BattleResultActor;
 
-    Window_BattleResultActor.prototype.initialize = function(x, y, width, height) {
-        this._lssStatus = this.standardCssStatus();
-        Window_Selectable.prototype.initialize.call(this, x, y, width, height);
-    };
-
-    Window_BattleResultActor.prototype.standardCssStatus = function() {
-        return FTKR.CBR.actor;
-    };
-      
     Window_BattleResultActor.prototype.maxItems = function() {
         return $gameParty.size();
     };
 
     Window_BattleResultActor.prototype.drawItem = function(index) {
-        var lss = this._lssStatus;
         var actor = $gameParty.members()[index];
         var rect = this.itemRect(index);
-        this.drawCssActorStatus(index, actor, rect.x, rect.y, rect.width, rect.height, lss);
+        this.drawCssActorStatus(index, actor, rect.x, rect.y, rect.width, rect.height, FTKR.CBR.actor);
     };
 
     //ウィンドウの行数

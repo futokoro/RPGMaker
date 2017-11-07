@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2017/11/08
-// バージョン : v2.5.0
+// 最終更新日 : 2017/11/02
+// バージョン : v2.4.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.5.0 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v2.4.3 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -1262,11 +1262,6 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
- * v2.5.0 - 2017/11/08 : 機能追加
- *    1. 横線を表示するコード「line」を追加。
- *    2. GraphicalDesignMode.jsとFTKR_CSS_GDM.jsにより、デザインモード中に
- *       ゲーム内でレイアウトを変更する機能を追加。
- * 
  * v2.4.3 - 2017/11/02 : 不具合修正
  *    1. 装備画面でフリーズする不具合を修正。
  * 
@@ -2129,8 +2124,6 @@ FTKR.CSS = FTKR.CSS || {};
                 return this.drawCssActorImage(actor, x, y, width, 0);
             case 'MESSAGE':
                 return this.drawCssActorMessage(actor, x, y, width);
-            case 'LINE':
-                return this.drawCssLine(x, y, width);
             default:
                 return 1;
         }
@@ -2625,85 +2618,6 @@ FTKR.CSS = FTKR.CSS || {};
                     actor._levelUpMessage = false;
                 }
             });
-        }
-    };
-
-    //------------------------------------------------------------------------
-    //横線の表示関数
-    //------------------------------------------------------------------------
-    Window_Base.prototype.drawCssLine = function(x, y, width, thick, color) {
-        var thick = thick > 0 ? thick : 2;
-        var color = color > 0 ? color : 0;
-        var lineY = y + this.lineHeight() / 2 - thick / 2;
-        this.contents.paintOpacity = 48;
-        this.contents.fillRect(x, lineY, width, thick, this.textColor(color));
-        this.contents.paintOpacity = 255;
-        return 1;
-    };
-
-    //=============================================================================
-    // Sprite_Battlerの修正
-    // Sprite_Actorの修正
-    //=============================================================================
-
-    Window_Selectable.prototype.cursorHeight = function() {
-        return 1;
-    };
-
-    Window_Selectable.prototype.itemHeightSpace = function() {
-        return 0;
-    };
-
-    Window_Selectable.prototype.unitHeight = function() {
-        return this.itemHeight() + this.itemHeightSpace();
-    };
-
-    Window_Selectable.prototype.unitWidth = function() {
-        return this.itemWidth() + this.spacing();
-    };
-
-    var _CSS_Window_Selectable_maxPageRows = Window_Selectable.prototype.maxPageRows;
-    Window_Selectable.prototype.maxPageRows = function() {
-        if (this.itemHeightSpace()) {
-            var pageHeight = this.height - this.padding * 2;
-            return Math.floor(pageHeight / this.unitHeight());
-        } else {
-            return _CSS_Window_Selectable_maxPageRows.call(this);
-        }
-    };
-
-    var _CSS_Window_Selectable_topRow = Window_Selectable.prototype.topRow;
-    Window_Selectable.prototype.topRow = function() {
-        return this.itemHeightSpace() ? Math.floor(this._scrollY / this.unitHeight()) :
-            _CSS_Window_Selectable_topRow.call(this);
-    };
-
-    var _CSS_Window_Selectable_setTopRow = Window_Selectable.prototype.setTopRow;
-    Window_Selectable.prototype.setTopRow = function(row) {
-        if (this.itemHeightSpace()) {
-            var scrollY = row.clamp(0, this.maxTopRow()) * this.unitHeight();
-            if (this._scrollY !== scrollY) {
-                this._scrollY = scrollY;
-                this.refresh();
-                this.updateCursor();
-            }
-        } else {
-            return _CSS_Window_Selectable_setTopRow.call(this, row);
-        }
-    };
-
-    var _CSS_Window_Selectable_itemRect = Window_Selectable.prototype.itemRect;
-    Window_Selectable.prototype.itemRect = function(index) {
-        if (this.itemHeightSpace()) {
-            var rect = new Rectangle();
-            var maxCols = this.maxCols();
-            rect.width = this.itemWidth();
-            rect.height = this.itemHeight();
-            rect.x = index % maxCols * this.unitWidth() - this._scrollX;
-            rect.y = Math.floor(index / maxCols) * this.unitHeight() - this._scrollY;
-            return rect;
-        } else {
-            return _CSS_Window_Selectable_itemRect.call(this, index);
         }
     };
 
