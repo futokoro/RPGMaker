@@ -113,6 +113,7 @@ FTKR_FacialImageDifference.js
 | テキスト | text(x) | ○ | 文字列 x を表示します<br>x はパラメータの参照コードを入力することが可能です<br>text($dataItems[1].name) で、アイテムID1の名前を表示 |
 | JS計算式 | eval(x) | × | 文字列 x をJS関数のeval()で評価しその結果を数値で表示します |
 | JS計算式 | streval(x) | × | 文字列 x をJS関数のeval()で評価しその結果を文字列で表示します |
+| 横線を引く | line | × | 横線を引きます |
 
 [目次に戻る](#目次)
 
@@ -711,7 +712,7 @@ a.hit.parcent()
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver2.5.0](FTKR_CustomSimpleActorStatus.js) | 2017/11/08| GraphicalDesignMode.jsとFTKR_CSS_GDM.jsにより、デザインモード中にゲーム内でレイアウトを変更する機能を追加 |
+| [ver2.5.0](FTKR_CustomSimpleActorStatus.js) | 2017/11/08| 横線を表示するコードを追加<br>GraphicalDesignMode.jsとFTKR_CSS_GDM.jsにより、デザインモード中にゲーム内でレイアウトを変更する機能を追加 |
 | ver2.4.3 | 2017/11/02| 装備画面でフリーズする不具合を修正 |
 | ver2.4.2 | 2017/11/01| カスタムパラメータとカスタムゲージで、名前が表示されない不具合を修正<br>装備のパラメータが表示されない不具合を修正 |
 | ver2.4.1 | 2017/10/16 | カスタムパラメータとカスタムゲージで、制御文字を使用した時に、表示位置がずれる場合がある不具合を修正 |
