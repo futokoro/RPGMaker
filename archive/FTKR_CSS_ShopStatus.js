@@ -3,19 +3,19 @@
 // FTKR_CSS_ShopStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/07/23
-// 最終更新日 : 2017/11/08
-// バージョン : v1.2.0
+// 最終更新日 : 2017/11/01
+// バージョン : v1.1.2
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.FTKR_CSS_SpS = true;
+Imported.FTKR_CSS_ES = true;
 
 var FTKR = FTKR || {};
 FTKR.CSS = FTKR.CSS || {};
 FTKR.CSS.SpS = FTKR.CSS.SpS || {};
 
 /*:
- * @plugindesc v1.2.0 ショップ画面のステータスレイアウトを変更する
+ * @plugindesc v1.1.2 ショップ画面のステータスレイアウトを変更する
  * @author フトコロ
  *
  * @param --共通レイアウト設定--
@@ -210,6 +210,24 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
  * 1 - 非表示にする、0 - 表示する
  * @default 0
  * 
+ * @noteParam CSS_画像
+ * @noteRequire 1
+ * @noteDir img/pictures/
+ * @noteType file
+ * @noteData items
+ * 
+ * @noteParam CSS_画像
+ * @noteRequire 1
+ * @noteDir img/pictures/
+ * @noteType file
+ * @noteData weapons
+ * 
+ * @noteParam CSS_画像
+ * @noteRequire 1
+ * @noteDir img/pictures/
+ * @noteType file
+ * @noteData armors
+ * 
  * @help 
  *-----------------------------------------------------------------------------
  * 概要
@@ -230,11 +248,6 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
  *    FTKR_CustomSimpleActorStatus.jsが必要です。
  *    本プラグインは、FTKR_CustomSimpleActorStatus.jsよりも下の位置に
  *    なるように追加してください。
- * 
- * 3. ゲーム画面でレイアウトを変更する場合は、以下のプラグインが必要です。
- * 
- *    GraphicalDesignMode.js
- *    FTKR_CSS_GDM.js
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -280,6 +293,7 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
  *    : アイテムのメモ欄で設定した画像id x を表示します。
  *    : 設定方法は、FTKR_CustomSimpleActorStatus.jsのカスタム画像コードを
  *    : 参照してください。
+ *    : 画像ファイルは、img/picturesフォルダに保存してください。
  * 
  *-----------------------------------------------------------------------------
  * ステータスウィンドウの設定
@@ -350,12 +364,11 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
- * v1.2.0 - 2017/11/08 : 機能追加
- *    1. GraphicalDesignMode.jsとFTKR_CSS_GDM.jsにより、デザインモード中に
- *       ゲーム内でレイアウトを変更する機能を追加。
- * 
- * v1.1.1 - 2017/11/01 : 不具合修正
+ * v1.1.2 - 2017/11/01 : 不具合修正
  *    1. 装備のパラメータが正しく表示できない場合がある不具合を修正。
+ * 
+ * v1.1.1 - 2017/08/23 : 機能追加
+ *    1. ディプロイメントの「未使用ファイルを含まない」に対応。
  * 
  * v1.1.0 - 2017/08/22 : 機能追加
  *    1. カーソル選択中のアイテムの画像を表示するコードを追加。
@@ -365,18 +378,6 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
  *-----------------------------------------------------------------------------
 */
 //=============================================================================
-
-function Window_ShopItemStatus() {
-  this.initialize.apply(this, arguments);
-}
-
-function Window_ShopWeaponStatus() {
-  this.initialize.apply(this, arguments);
-}
-
-function Window_ShopArmorStatus() {
-  this.initialize.apply(this, arguments);
-}
 
 if (Imported.FTKR_CSS) (function() {
 
@@ -532,13 +533,8 @@ if (Imported.FTKR_CSS) (function() {
 
     var _SpS_Window_ShopStatus_initialize = Window_ShopStatus.prototype.initialize;
     Window_ShopStatus.prototype.initialize = function(x, y, width, height) {
-        this._lssStatus = this.standardCssStatus();
         height = this.fittingHeight(this.numVisibleRows());
         _SpS_Window_ShopStatus_initialize.call(this, x, y, width, height);
-    };
-
-    Window_ShopStatus.prototype.standardCssStatus = function() {
-        return FTKR.CSS.SpS.comStatus;
     };
 
     Window_ShopStatus.prototype.evalCssCustomFormula = function(actor, formula) {
@@ -556,10 +552,9 @@ if (Imported.FTKR_CSS) (function() {
     Window_ShopStatus.prototype.refresh = function() {
         this.contents.clear();
         if (this._item) {
-            var lss = this._lssStatus;
             var w = this.width - this.padding * 2;
             var h = this.height - this.padding * 2;
-            this.drawCssActorStatus(0, null, 0, 0, w, h, lss);
+            this.drawCssActorStatus(0, null, 0, 0, w, h, FTKR.CSS.SpS.comStatus);
         }
     };
 
@@ -603,39 +598,8 @@ if (Imported.FTKR_CSS) (function() {
     // Window_ShopBuy
     //=============================================================================
 
-    Window_ShopBuy.prototype.showItemstatusWindows = function(item) {
-        if (DataManager.isWeapon(item)) {
-            this._itemStatusWindow.hide();
-            this._weaponStatusWindow.show();
-            this._armorStatusWindow.hide();
-        } else if (DataManager.isArmor(item)) {
-            this._itemStatusWindow.hide();
-            this._weaponStatusWindow.hide();
-            this._armorStatusWindow.show();
-        } else {
-            this._itemStatusWindow.show();
-            this._weaponStatusWindow.hide();
-            this._armorStatusWindow.hide();
-        }
-    };
-
-    Window_ShopBuy.prototype.select = function(index) {
-        Window_Selectable.prototype.select.call(this, index);
-        if (this.index() >= 0 && this._itemStatusWindow) this.showItemstatusWindows(this.item())
-    };
-
     Window_ShopBuy.prototype.setItemStatusWindow = function(statusWindow) {
         this._itemStatusWindow = statusWindow;
-        this.callUpdateHelp();
-    };
-
-    Window_ShopBuy.prototype.setWeaponStatusWindow = function(statusWindow) {
-        this._weaponStatusWindow = statusWindow;
-        this.callUpdateHelp();
-    };
-
-    Window_ShopBuy.prototype.setArmorStatusWindow = function(statusWindow) {
-        this._armorStatusWindow = statusWindow;
         this.callUpdateHelp();
     };
 
@@ -645,12 +609,6 @@ if (Imported.FTKR_CSS) (function() {
         if (this._itemStatusWindow) {
             this._itemStatusWindow.setItem(this.item());
         }
-        if (this._weaponStatusWindow) {
-            this._weaponStatusWindow.setItem(this.item());
-        }
-        if (this._armorStatusWindow) {
-            this._armorStatusWindow.setItem(this.item());
-        }
     };
 
     //=============================================================================
@@ -658,21 +616,20 @@ if (Imported.FTKR_CSS) (function() {
     // アイテムステータスウィンドウ
     //=============================================================================
 
+    function Window_ShopItemStatus() {
+        this.initialize.apply(this, arguments);
+    }
+
     Window_ShopItemStatus.prototype = Object.create(Window_Base.prototype);
     Window_ShopItemStatus.prototype.constructor = Window_ShopItemStatus;
 
     Window_ShopItemStatus.prototype.initialize = function(x, y, width, height) {
-        this._lssStatus = this.standardCssStatus();
         Window_Base.prototype.initialize.call(this, x, y, width, height);
         this._item = null;
         this._actor = null;
         this._tempActor = null;
         this._pageIndex = 0;
         this.refresh();
-    };
-
-    Window_ShopItemStatus.prototype.standardCssStatus = function() {
-        return FTKR.CSS.SpS.itemStatus;
     };
 
     Window_ShopItemStatus.prototype.actorRows = function() {
@@ -705,7 +662,9 @@ if (Imported.FTKR_CSS) (function() {
     };
 
     Window_ShopItemStatus.prototype.drawItem = function(index, w, h) {
-        var lss = this._lssStatus;
+        var lss = DataManager.isWeapon(this._item) ?
+            FTKR.CSS.SpS.weaponStatus :
+            FTKR.CSS.SpS.armorStatus;
         var actor = $gameParty.members()[index];
         this.setTempActor(actor);
         var lineHeight = this.lineHeight() + this.heightSpace();
@@ -735,9 +694,10 @@ if (Imported.FTKR_CSS) (function() {
         if (this._item) {
             var w = this.width - this.padding * 2;
             var h = this.height - this.padding * 2;
-            if (!this.isEquipItem()) {
-                var lss = this._lssStatus;
-                this.drawCssActorStatus(0, null, 0, 0, w, h, lss);
+            if (this.isEquipItem()) {
+                this.drawAllItems(w, h);
+            } else {
+                this.drawCssActorStatus(0, null, 0, 0, w, h, FTKR.CSS.SpS.itemStatus);
             }
         }
     };
@@ -829,52 +789,6 @@ if (Imported.FTKR_CSS) (function() {
     };
 
     //=============================================================================
-    // Window_ShopWeaponStatus
-    // 武器ステータスウィンドウ
-    //=============================================================================
-
-    Window_ShopWeaponStatus.prototype = Object.create(Window_ShopItemStatus.prototype);
-    Window_ShopWeaponStatus.prototype.constructor = Window_ShopWeaponStatus;
-
-    Window_ShopWeaponStatus.prototype.standardCssStatus = function() {
-        return FTKR.CSS.SpS.weaponStatus;
-    };
-
-    Window_ShopWeaponStatus.prototype.refresh = function() {
-        this.contents.clear();
-        if (this._item) {
-            var w = this.width - this.padding * 2;
-            var h = this.height - this.padding * 2;
-            if (this.isEquipItem()) {
-                this.drawAllItems(w, h);
-            }
-        }
-    };
-    
-    //=============================================================================
-    // Window_ShopArmorStatus
-    // 防具ステータスウィンドウ
-    //=============================================================================
-
-    Window_ShopArmorStatus.prototype = Object.create(Window_ShopItemStatus.prototype);
-    Window_ShopArmorStatus.prototype.constructor = Window_ShopArmorStatus;
-
-    Window_ShopArmorStatus.prototype.standardCssStatus = function() {
-        return FTKR.CSS.SpS.weaponStatus;
-    };
-
-    Window_ShopArmorStatus.prototype.refresh = function() {
-        this.contents.clear();
-        if (this._item) {
-            var w = this.width - this.padding * 2;
-            var h = this.height - this.padding * 2;
-            if (this.isEquipItem()) {
-                this.drawAllItems(w, h);
-            }
-        }
-    };
-
-    //=============================================================================
     // Scene_Shop
     //=============================================================================
     var _SpS_Scene_Shop_prepare = Scene_Shop.prototype.prepare;
@@ -911,8 +825,6 @@ if (Imported.FTKR_CSS) (function() {
         this.createNumberWindow();
         this.createStatusWindow();
         this.createItemStatusWindow();
-        this.createWeaponStatusWindow();
-        this.createArmorStatusWindow();
         this.createBuyWindow();
         this.createCategoryWindow();
         this.createSellWindow();
@@ -928,104 +840,48 @@ if (Imported.FTKR_CSS) (function() {
         this.addWindow(this._itemStatusWindow);
     };
 
-    Scene_Shop.prototype.createWeaponStatusWindow = function() {
-        var wx = this._numberWindow.width;
-        var wy = this._statusWindow.y + this._statusWindow.height;
-        var ww = Graphics.boxWidth - wx;
-        var wh = Graphics.boxHeight - wy;
-        this._weaponStatusWindow = new Window_ShopWeaponStatus(wx, wy, ww, wh);
-        this._weaponStatusWindow.hide();
-        this.addWindow(this._weaponStatusWindow);
-    };
-
-    Scene_Shop.prototype.createArmorStatusWindow = function() {
-        var wx = this._numberWindow.width;
-        var wy = this._statusWindow.y + this._statusWindow.height;
-        var ww = Graphics.boxWidth - wx;
-        var wh = Graphics.boxHeight - wy;
-        this._armorStatusWindow = new Window_ShopArmorStatus(wx, wy, ww, wh);
-        this._armorStatusWindow.hide();
-        this.addWindow(this._armorStatusWindow);
-    };
-
     var _SpS_Scene_Shop_createBuyWindow = Scene_Shop.prototype.createBuyWindow;
     Scene_Shop.prototype.createBuyWindow = function() {
         _SpS_Scene_Shop_createBuyWindow.call(this);
         this._buyWindow.setItemStatusWindow(this._itemStatusWindow);
-        this._buyWindow.setWeaponStatusWindow(this._weaponStatusWindow);
-        this._buyWindow.setArmorStatusWindow(this._armorStatusWindow);
-    };
-
-    Scene_Shop.prototype.showItemstatusWindows = function(item) {
-        if (DataManager.isWeapon(item)) {
-            this._weaponStatusWindow.show();
-        } else if (DataManager.isArmor(item)) {
-            this._armorStatusWindow.show();
-        } else {
-            this._itemStatusWindow.show();
-        }
-    };
-
-    Scene_Shop.prototype.hideItemstatusWindows = function() {
-        this._itemStatusWindow.hide();
-        this._weaponStatusWindow.hide();
-        this._armorStatusWindow.hide();
-    };
-
-    Scene_Shop.prototype.setItemstatusWindows = function(item) {
-        this._itemStatusWindow.setItem(item);
-        this._weaponStatusWindow.setItem(item);
-        this._armorStatusWindow.setItem(item);
-    };
-
-    Scene_Shop.prototype.clearItemstatusWindows = function() {
-        this._itemStatusWindow.setItem(null);
-        this._weaponStatusWindow.setItem(null);
-        this._armorStatusWindow.setItem(null);
-    };
-
-    Scene_Shop.prototype.refreshItemstatusWindows = function() {
-        this._itemStatusWindow.refresh();
-        this._weaponStatusWindow.refresh();
-        this._armorStatusWindow.refresh();
     };
 
     var _SpS_Scene_Shop_activateBuyWindow = Scene_Shop.prototype.activateBuyWindow;
     Scene_Shop.prototype.activateBuyWindow = function() {
         _SpS_Scene_Shop_activateBuyWindow.call(this);
-        this.showItemstatusWindows(this._buyWindow.item());
+        this._itemStatusWindow.show();
     };
 
     var _SpS_Scene_Shop_activateSellWindow = Scene_Shop.prototype.activateSellWindow;
     Scene_Shop.prototype.activateSellWindow = function() {
         _SpS_Scene_Shop_activateSellWindow.call(this);
-        this.hideItemstatusWindows();
+        this._itemStatusWindow.hide();
     };
 
     var _SpS_Scene_Shop_onBuyCancel = Scene_Shop.prototype.onBuyCancel;
     Scene_Shop.prototype.onBuyCancel = function() {
         _SpS_Scene_Shop_onBuyCancel.call(this);
-        this.hideItemstatusWindows();
-        this.clearItemstatusWindows();
+        this._itemStatusWindow.hide();
+        this._itemStatusWindow.setItem(null);
     };
 
     var _SpS_Scene_Shop_onSellOk = Scene_Shop.prototype.onSellOk;
     Scene_Shop.prototype.onSellOk = function() {
         _SpS_Scene_Shop_onSellOk.call(this);
-        this.setItemstatusWindows(this._item);
-        this.showItemstatusWindows(this._item);
+        this._itemStatusWindow.setItem(this._item);
+        this._itemStatusWindow.show();
     };
 
     var _SpS_Scene_Shop_onSellCancel = Scene_Shop.prototype.onSellCancel;
     Scene_Shop.prototype.onSellCancel = function() {
         _SpS_Scene_Shop_onSellCancel.call(this);
-        this.clearItemstatusWindows();
+        this._itemStatusWindow.setItem(null);
     };
 
     var _SpS_Scene_Shop_onNumberOk = Scene_Shop.prototype.onNumberOk;
     Scene_Shop.prototype.onNumberOk = function() {
         _SpS_Scene_Shop_onNumberOk.call(this);
-        this.refreshItemstatusWindows();
+        this._itemStatusWindow.refresh();
     };
 
 }());//FTKR_CustomSimpleActorStatus.jsが必要
