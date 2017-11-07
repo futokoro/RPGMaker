@@ -1003,6 +1003,9 @@ if (Imported.FTKR_CSS) (function() {
 
     Window_BattleResultActor.prototype.initialize = function(x, y, width, height) {
         this._lssStatus = this.standardCssStatus();
+        this._maxCols = FTKR.CBR.actor.maxCols;
+        this._cursorHeight = FTKR.CBR.actor.cursorHeight;
+        this._hSpace = FTKR.CBR.actor.hspace;
         Window_Selectable.prototype.initialize.call(this, x, y, width, height);
     };
 
@@ -1029,13 +1032,17 @@ if (Imported.FTKR_CSS) (function() {
     //書き換え
     //ウィンドウに横に並べるアクター数
     Window_BattleResultActor.prototype.maxCols = function() {
-        return FTKR.CBR.actor.maxCols;
+        return this._maxCols
+    };
+
+    Window_BattleStatus.prototype.cursorHeight = function() {
+        return this._cursorHeight;
     };
 
     //書き換え
     //カーソルの高さ
     Window_BattleResultActor.prototype.itemHeight = function() {
-        return this.lineHeight() * FTKR.CBR.actor.cursorHeight;
+        return this.lineHeight() * this.cursorHeight();
     };
 
     //書き換え
@@ -1076,7 +1083,7 @@ if (Imported.FTKR_CSS) (function() {
     };
 
     Window_BattleResultActor.prototype.itemHeightSpace = function() {
-        return FTKR.CBR.actor.hspace;
+        return this._hSpace;
     };
 
     //=============================================================================
