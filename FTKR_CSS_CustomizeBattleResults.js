@@ -1035,7 +1035,7 @@ if (Imported.FTKR_CSS) (function() {
         return this._maxCols
     };
 
-    Window_BattleStatus.prototype.cursorHeight = function() {
+    Window_BattleResultActor.prototype.cursorHeight = function() {
         return this._cursorHeight;
     };
 
