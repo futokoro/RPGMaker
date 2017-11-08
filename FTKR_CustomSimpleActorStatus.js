@@ -4,7 +4,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
 // 最終更新日 : 2017/11/08
-// バージョン : v2.5.0
+// バージョン : v2.5.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.5.0 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v2.5.1 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -1262,6 +1262,10 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.5.1 - 2017/11/08 : 不具合修正
+ *    1. FTKR_OriginalSceneWindow.jsで生成したウィンドウが有る場合に
+ *       シーン開始時にエラーになる不具合を修正。
+ * 
  * v2.5.0 - 2017/11/08 : 機能追加
  *    1. 横線を表示するコード「line」を追加。
  *    2. GraphicalDesignMode.jsとFTKR_CSS_GDM.jsにより、デザインモード中に
@@ -1718,6 +1722,7 @@ FTKR.CSS = FTKR.CSS || {};
     var convertTextWidth = function(text) {
         var tw = 0;
         var window = SceneManager._scene._windowLayer.children[0];
+        if (!window) return tw;
         var conv = window.convertEscapeCharacters(text);
         var reg = /i\[(\d+)\]/i
         while (reg.test(conv)) {
