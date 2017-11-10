@@ -4,7 +4,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2017/11/08
 // 最終更新日 : 2017/11/10
-// バージョン : v1.0.1
+// バージョン : v1.0.2
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.1 GDMを使ってFTKR_CSSステータス表示を変更するプラグイン
+ * @plugindesc v1.0.2 GDMを使ってFTKR_CSSステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @help
@@ -110,6 +110,10 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.2 - 2017/11/10 : 機能追加
+ *    1. FTKR_CSS_MenuStatus.jsとFTKR_CSS_BattleStatus.jsの
+ *       ウィンドウ設定をデフォルトとして読み込む機能を追加。
  * 
  * v1.0.1 - 2017/11/10 : 不具合修正、機能追加、ヘルプ修正
  *    1. FTKR_FacialImageDifference.jsと組み合わた場合、顔画像の表示を
@@ -246,9 +250,9 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
     var _CSS_Window_MenuStatus_initialize = Window_MenuStatus.prototype.initialize;
     Window_MenuStatus.prototype.initialize = function(x, y) {
         this._lssStatus = this.standardCssStatus();
-        this._maxCols = 1;
-        this._cursorHeight = 4;
-        this._hSpace = 0;
+        this._maxCols = FTKR.CSS.MS ? FTKR.CSS.MS.window.maxCols : 1;
+        this._cursorHeight = FTKR.CSS.MS ? FTKR.CSS.MS.window.cursolHeight:  4;
+        this._hSpace = FTKR.CSS.MS ? FTKR.CSS.MS.window.hspace :  0;
         _CSS_Window_MenuStatus_initialize.call(this, x, y);
     };
 
@@ -383,9 +387,9 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
     var _CSS_Window_BattleStatus_initialize = Window_BattleStatus.prototype.initialize;
     Window_BattleStatus.prototype.initialize = function() {
         this._lssStatus = this.standardCssStatus();
-        this._maxCols = 1;
-        this._cursorHeight = 1;
-        this._hSpace = 0;
+        this._maxCols = FTKR.CSS.BS ? FTKR.CSS.BS.window.maxCols : 1;
+        this._cursorHeight = FTKR.CSS.BS ? FTKR.CSS.BS.window.cursolHeight:  1;
+        this._hSpace = FTKR.CSS.BS ? FTKR.CSS.BS.window.hspace :  0;
         _CSS_Window_BattleStatus_initialize.call(this);
     };
 
