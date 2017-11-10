@@ -3,8 +3,8 @@
 // FTKR_CSS_GDM.js
 // 作成者     : フトコロ
 // 作成日     : 2017/11/08
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2017/11/10
+// バージョン : v1.0.1
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 GDMを使ってFTKR_CSSステータス表示を変更するプラグイン
+ * @plugindesc v1.0.1 GDMを使ってFTKR_CSSステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @help
@@ -32,8 +32,8 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
  * トリアコンタンさん製作のGraphicalDesignMode.jsを使って
  * FTKR_CSSプラグインのステータス表示のレイアウトをゲーム画面上で変更できます。
  * 
- * デザインモードにて、ウィンドウ内で英字キーを押下すると、
- * 各プロパティを変更できます。
+ * デザインモードにて、ウィンドウ内にマウスカーソルを合わせて
+ * 英字キーを押下すると、各プロパティを変更できます。
  * 
  * ※英字とプロパティの対応
  *
@@ -54,12 +54,16 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
  * ・メニュー画面
  * ・スキル画面
  * ・装備画面
- * ・ステータス画面
+ * ・ステータス画面(*1)
  * ・バトル画面
  * ・戦績画面(FTKR_CSS_CustomizeBattleResults.jsが必要)
  * ・ショップ画面(FTKR_CSS_ShopStatus.jsが必要)
  * 
+ * (*1)ステータス画面の設定は、FTKR_CSS_DetailedStatus.jsと異なります。
+ *     ステータス画面を縦に４分割した表示エリアごとに個別に設定します。
+ *     設定する際には、マウスカーソル位置を各表示エリアに合わせてください。
  *  
+ * 
  *-----------------------------------------------------------------------------
  * 設定方法
  *-----------------------------------------------------------------------------
@@ -75,8 +79,22 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
  * 3. 以下のプラグインと組み合わせる場合は、本プラグインはこれらよりも
  *    下に配置してください。
  * 
+ *    FTKR_CSS_MenuStatus.js
+ *    FTKR_CSS_SkillStatus.js
+ *    FTKR_CSS_DetailedStatus.js
+ *    FTKR_CSS_EquipStatus.js
+ *    FTKR_CSS_BattleStatus.js(*1)
  *    FTKR_CSS_CustomizeBattleResults.js
  *    FTKR_CSS_ShopStatus.js
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * 補足情報
+ *-----------------------------------------------------------------------------
+ * 1．Text1～Text3の表示を消したい場合。
+ * 
+ *    半角スペースだけを入力することで、無表示になります。
+ *    何も入力しない(空欄)の場合は、デフォルトの表示になります。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -92,6 +110,12 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.1 - 2017/11/10 : 不具合修正、機能追加、ヘルプ修正
+ *    1. FTKR_FacialImageDifference.jsと組み合わた場合、顔画像の表示を
+ *       削除しても表示が残ってしまう不具合を修正。
+ *    2. FTKR_CSS系の拡張プラグインの設定を読み込む機能を追加。
+ *    3. ヘルプに、ステータス画面の設定に関する注意を追記。
  * 
  * v1.0.0 - 2017/11/08 : 初版作成
  * 
@@ -181,8 +205,15 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
         return false
     };
     
+    Window_Base.prototype.clearCssSpriteAll = function() {
+        $gameParty.allMembers().forEach( function(member, i) {
+            this.clearCssSprite(i);
+        },this);
+    };
+
     Window_Base.prototype.setCssStatus = function() {
         if (this._lssStatus) {
+            this.clearCssSpriteAll();
             if (this._customCssText1) this._lssStatus.text1 = this._customCssText1;
             if (this._customCssText2) this._lssStatus.text2 = this._customCssText2;
             if (this._customCssText3) this._lssStatus.text3 = this._customCssText3;
@@ -193,14 +224,17 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
     };
 
     Window_Base.prototype.setMaxCols = function() {
+        this.clearCssSpriteAll();
         if (this._customCssMaxCols) this._maxCols = Number(this._customCssMaxCols);
     };
 
     Window_Base.prototype.setCursorHeight = function() {
+        this.clearCssSpriteAll();
         if (this._customCssCursorHeight) this._cursorHeight = Number(this._customCssCursorHeight);
     };
 
     Window_Base.prototype.setHSpace = function(){
+        this.clearCssSpriteAll();
         if (this._customCssHSpace) this._hSpace = Number(this._customCssHSpace);
     };
 
@@ -219,7 +253,7 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
     };
 
     Window_MenuStatus.prototype.standardCssStatus = function() {
-        return {
+        return FTKR.CSS.MS ? FTKR.CSS.MS.simpleStatus : {
             text1     :'face',
             text2     :'name,level,state',
             text3     :'class,hp,mp',
@@ -279,7 +313,7 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
     };
 
     Window_EquipStatus.prototype.standardCssStatus = function() {
-        return {
+        return FTKR.CSS.ES ? FTKR.CSS.ES.simpleStatus : {
             text1     :'name,param(2),param(3),param(4),param(5),param(6),param(7)',
             text2     :',eparam(2),eparam(3),eparam(4),eparam(5),eparam(6),eparam(7)',
             text3     :'',
@@ -320,7 +354,7 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
     };
 
     Window_SkillStatus.prototype.standardCssStatus = function() {
-        return {
+        return FTKR.CSS.SS ? FTKR.CSS.SS.simpleStatus : {
             text1     :'face',
             text2     :'name,level,state',
             text3     :'class,hp,mp',
@@ -372,7 +406,7 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
     };
 
     Window_BattleStatus.prototype.standardCssStatus = function() {
-        return {
+        return FTKR.CSS.BS ? FTKR.CSS.BS.simpleStatus : {
             text1     :'name',
             text2     :'state',
             text3     :'[hp/mp/tp]',
@@ -467,8 +501,22 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
         this.addWindow(this._statusArea1Window);
     };
 
-    Scene_Status.prototype.cssStatusArea1 = function() {
+    Scene_Status.prototype.detailedStatus = function(index) {
+        var ds = FTKR.CSS.DS.detailedStatus;
+        index -= 1;
+        var texts = ds.line[index].split(';');
         return {
+            text1     :texts[0] + ',{line}',
+            text2     :texts[1],
+            text3     :texts[2],
+            space     :ds.space[index],
+            spaceIn   :ds.spaceIn[index],
+            widthRate :ds.widthRate[index],
+        };
+    };
+
+    Scene_Status.prototype.cssStatusArea1 = function() {
+        return FTKR.CSS.DS ? this.detailedStatus(1) : {
             text1     :'name,{line}',
             text2     :'class',
             text3     :'nickname',
@@ -491,7 +539,7 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
     };
 
     Scene_Status.prototype.cssStatusArea2 = function() {
-        return {
+        return FTKR.CSS.DS ? this.detailedStatus(2) : {
             text1     :'face(4),{line}',
             text2     :'level,state,hp,mp',
             text3     :'custom(0),custom(1),custom(2),custom(3)',
@@ -514,7 +562,7 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
     };
 
     Scene_Status.prototype.cssStatusArea3 = function() {
-        return {
+        return FTKR.CSS.DS ? this.detailedStatus(3) : {
             text1     :'param(2),param(3),param(4),param(5),param(6),param(7),{line}',
             text2     :'',
             text3     :'equip(0),equip(1),equip(2),equip(3),equip(4)',
@@ -537,7 +585,7 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
     };
 
     Scene_Status.prototype.cssStatusArea4 = function() {
-        return {
+        return FTKR.CSS.DS ? this.detailedStatus(4) : {
             text1     :'profile',
             text2     :'',
             text3     :'',
@@ -563,7 +611,7 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
     if (Imported.FTKR_CBR) {
 
     Window_BattleResultParty.prototype.standardCssStatus = function() {
-        return {
+        return FTKR.CBR ? FTKR.CBR.party : {
             text1     :'text(入手経験値),text(入手ゴールド)',
             text2     :'eval(BattleManager._rewards.exp),eval(BattleManager._rewards.gold)',
             text3     :'',
@@ -574,7 +622,7 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
     };
 
     Window_BattleResultActor.prototype.standardCssStatus = function() {
-        return {
+        return FTKR.CBR ? FTKR.CBR.actor : {
             text1     :'face(3)',
             text2     :'name,{gauge(0)},{message}',
             text3     :'level',
@@ -592,7 +640,7 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
     if (Imported.FTKR_CSS_SpS) {
 
     Window_ShopStatus.prototype.standardCssStatus = function() {
-        return {
+        return FTKR.CSS.SpS ? FTKR.CSS.SpS.comStatus : {
             text1     :'text(\\c[16]持っている数)',
             text2     :'eval($gameParty.numItems(item))',
             text3     :'',
@@ -603,7 +651,7 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
     };
 
     Window_ShopItemStatus.prototype.standardCssStatus = function() {
-        return {
+        return FTKR.CSS.SpS ? FTKR.CSS.SpS.itemStatus : {
             text1     :'',
             text2     :'',
             text3     :'',
@@ -614,7 +662,7 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
     };
 
     Window_ShopWeaponStatus.prototype.standardCssStatus = function() {
-        return {
+        return FTKR.CSS.SpS ? FTKR.CSS.SpS.weaponStatus : {
             text1     :'name,{equip(item.etypeId-1)}',
             text2     :'eparam(2)',
             text3     :'',
@@ -625,7 +673,7 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
     };
 
     Window_ShopArmorStatus.prototype.standardCssStatus = function() {
-        return {
+        return FTKR.CSS.SpS ? FTKR.CSS.SpS.armorStatus : {
             text1     :'name,{equip(item.etypeId-1)}',
             text2     :'eparam(3)',
             text3     :'',
