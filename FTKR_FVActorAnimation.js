@@ -3,8 +3,8 @@
 // FTKR_FVActorAnimation.js
 // 作成者     : フトコロ
 // 作成日     : 2017/11/12
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2017/11/13
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,9 +15,12 @@ FTKR.FAA = FTKR.FAA || {};
 
 //=============================================================================
 /*:ja
- * @plugindesc v1.0.0 フロントビューモードでアクター側にアニメーションを表示するプラグイン
+ * @plugindesc v1.0.1 フロントビューモードでアクター側にアニメーションを表示するプラグイン
  * @author フトコロ
  *
+ * @param --アニメーション--
+ * @desc 
+ * 
  * @param アニメーションの表示先
  * @desc アニメーションの表示先を、顔画像かカスタム画像(*1)のどちらかを選択します。(*1)FTKR_CustomSimpleActorStatus.jsが必要
  * @type select
@@ -42,11 +45,11 @@ FTKR.FAA = FTKR.FAA || {};
  * @default 1
  * 
  * @param X座標のずれ
- * @desc 顔画像に対するダメージポップアップ位置のX座標のずれ
+ * @desc 画像に対するダメージポップアップ位置のX座標のずれ
  * @default -32
  * 
  * @param Y座標のずれ
- * @desc 顔画像に対するダメージポップアップ位置のY座標のずれ
+ * @desc 画像に対するダメージポップアップ位置のY座標のずれ
  * @default 0
  * 
  * @param 画面揺れ効果
@@ -58,6 +61,22 @@ FTKR.FAA = FTKR.FAA || {};
  * @value 0
  * @default 1
  * 
+ * @param --選択中のアクターエフェクト--
+ * @desc この設定はバトル画面のみ有効です。
+ * 
+ * @param トーン設定
+ * @desc 選択中のアクターのトーンを変化させます。
+ * @type struct<tone>
+ * @default {"enable":"0","color":"0,0,0,0","pattern":"6","count":"10"}
+ * 
+ * @param カーソル設定
+ * @desc 選択中のアクターのトーンをカーソル表示を設定します。
+ * @type select
+ * @option カーソル表示あり
+ * @value 1
+ * @option カーソル表示なし
+ * @value 0
+ * @default 1
  * 
  * @help
  *-----------------------------------------------------------------------------
@@ -91,6 +110,11 @@ FTKR.FAA = FTKR.FAA || {};
  *    顔画像またはカスタム画像を表示させることができます。
  * 
  * 
+ * 3. FTKR_CustomSimpleActorStatus.jsと組み合わせて使用する場合は
+ *    「プラグインマネージャー(プラグイン管理)」で、本プラグインが
+ *    下になるように追加してください。
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * プラグインの注意点
  *-----------------------------------------------------------------------------
@@ -118,15 +142,53 @@ FTKR.FAA = FTKR.FAA || {};
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
+ * プラグイン公開元
+ * https://github.com/futokoro/RPGMaker/blob/master/README.md
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.1 - 2017/11/13 : 不具合修正、機能追加、ヘルプ修正
+ *    1. 顔画像が正しく表示されない不具合を修正。
+ *    2. カスタム画像のトリミング設定がない場合にエラーになる不具合を修正。
+ *    3. カスタム画像にスケールを設定したときに、画像の表示位置が
+ *       ずれる不具合を修正。
+ *    4. 選択中のアクターのカーソル表示の有無を設定する機能を追加。
+ *    5. 選択中のアクターの画像のトーンを変化させる機能を追加。
  * 
  * v1.0.0 - 2017/11/12 : 初版作成
  * 
  *-----------------------------------------------------------------------------
  */
 //=============================================================================
+/*~struct~tone:
+ * @param enable
+ * @desc トーン設定を有効にするか設定します。
+ * @type select
+ * @option 有効にする
+ * @value 1
+ * @option 無効にする
+ * @value 0
+ * @default 0
+ * 
+ * @param color
+ * @desc トーンカラーの設定。「R,G,B,明度」の順にカンマで区切って設定してください。
+ * @default 0,0,0,0
+ * 
+ * @param pattern
+ * @desc 設定したトーンカラーに何段階で変化させるか設定します。
+ * @type number
+ * @min 1
+ * @default 6
+ * 
+ * @param count
+ * @desc トーンカラーの段階変化の間隔を設定します。
+ * @type number
+ * @min 1
+ * @default 10
+ */
 
 function Sprite_ActorFace() {
   this.initialize.apply(this, arguments);
@@ -142,23 +204,46 @@ function Sprite_FaceAnimation() {
 
 (function() {
 
+    //配列の要素を、すべて数値に変換する。
+    Array.prototype.num = function() {
+      return this.map(function(elm) {
+          return Number(elm);
+      });
+    }
+
+    var paramParse = function(obj) {
+        return JSON.parse(JSON.stringify(obj, paramReplace));
+    };
+
+    var paramReplace = function(key, value) {
+        try {
+            return JSON.parse(value || null);
+        } catch (e) {
+            return value;
+        }
+    };
+
     //=============================================================================
     // プラグイン パラメータ
     //=============================================================================
     var parameters = PluginManager.parameters('FTKR_FVActorAnimation');
 
     FTKR.FAA = {
-        destination : Number(parameters['アニメーションの表示先'] || 0),
+        destination :Number(parameters['アニメーションの表示先'] || 0),
         damage : {
             enable  :Number(parameters['ポップアップ表示'] || 0),
             offsetX :Number(parameters['X座標のずれ'] || 0),
             offsetY :Number(parameters['Y座標のずれ'] || 0),
             shake   :Number(parameters['画面揺れ効果'] || 0),
         },
+        select : {
+            tone    :paramParse(parameters['トーン設定']),
+            cursor  :Number(parameters['カーソル設定'] || 0),
+        },
     };
 
     //=============================================================================
-    // アクター側のアニメーション表示用レイヤーを追加
+    // フロントビューモードでも、アクター側にダメージエフェクトが発生するように修正
     //=============================================================================
 
     //書き換え
@@ -191,7 +276,7 @@ function Sprite_FaceAnimation() {
         this._windowSpriteContainer.addChild(this._windowBackSprite);
         this._windowSpriteContainer.addChild(this._windowFrameSprite);
         this.addChild(this._windowCursorSprite);
-        this.addChild(this._windowCssSprite); //追加
+        this.addChild(this._windowCssSprite); //カーソルとステータスの間に追加
         this.addChild(this._windowContentsSprite);
         this.addChild(this._downArrowSprite);
         this.addChild(this._upArrowSprite);
@@ -247,8 +332,8 @@ function Sprite_FaceAnimation() {
                 var dw = len || Window_Base._faceWidth * scale;
                 dx += FTKR.CSS.cssStatus.face.posiX * (width - dw) / 2;
             }
-            var sx = Math.floor(dx);
-            var sy = Math.floor(dy + height + this.padding);
+            var sx = dx;
+            var sy = dy + height + this.padding;
             sprite.setHome(sx, sy);
             sprite.startEntryMotion();
             sprite.setScale(scale);
@@ -262,17 +347,17 @@ function Sprite_FaceAnimation() {
             return _FAA_Window_Base_drawCssImage.call(this, actor, dx, dy, width, id);
         } else {
             var bgi = actor.actor().cssbgi[id];
-            if (!bgi.name) return 1;
+            var bitmap = ImageManager.loadPicture(bgi.name);
+            if (!bitmap) return 1;
             var index = actor.index() % this.showActorNum();
             var sprite = this._faceSprite[index];
-            width = bgi.width || bitmap.width;
+            var fw = bgi.width || bitmap.width;
             var fh = bgi.height || bitmap.height;
             var scale = bgi.scale / 100;
             var dh = fh * scale;
-            var dw = width * scale;
+            var dw = fw * scale;
             if (!sprite) {
                 sprite = new Sprite_ActorImage(actor, this);
-                console.log(sprite);
                 this._windowCssSprite.addChild(sprite);
                 this._faceSprite[index] = sprite;
             } else if (sprite._actor !== actor){
@@ -280,8 +365,8 @@ function Sprite_FaceAnimation() {
             }
             dx = dx + dw / 2 + this.padding;
             dx += FTKR.CSS.cssStatus.image.posiX * (width - dw) / 2;
-            var sx = Math.floor(dx);
-            var sy = Math.floor(dy + dh + this.padding);
+            var sx = dx;
+            var sy = dy + height + this.padding;
             sprite.setHome(sx, sy);
             sprite.startEntryMotion();
             sprite.setScale(scale);
@@ -320,15 +405,45 @@ function Sprite_FaceAnimation() {
         this._spriteWindow = window;
     };
 
+    Sprite_ActorFace._imageWidth  = 144;
+    Sprite_ActorFace._imageHeight = 144;
+
+    Sprite_ActorFace.prototype.setBattler = function(battler) {
+        Sprite_Battler.prototype.setBattler.call(this, battler);
+        var changed = (battler !== this._actor);
+        if (changed) {
+            this._actor = battler;
+            this.startEntryMotion();
+        }
+    };
+
+    Sprite_ActorFace.prototype.startEntryMotion = function() {
+    };
+
     Sprite_ActorFace.prototype.updateMain = function() {
           this.updateBitmap();
           this.updateFrame();
+    };
+
+    Sprite_ActorFace.prototype.initMembers = function() {
+        Sprite_Battler.prototype.initMembers.call(this);
+        this._battlerName = '';
+        this._motion = null;
+        this._motionCount = 0;
+        this._pattern = 0;
+        this._tone = [0, 0, 0, 0];
+        this._toneCount = 0;
+        this._tonePattern = 0;
+        this._code = 1;
+        this._requestUpdateTone = false;
+        this.createMainSprite();
     };
 
     Sprite_ActorFace.prototype.update = function() {
         Sprite_Base.prototype.update.call(this);
         if (this._actor) {
             this.updateMain();
+            this.updateTone();
             if (FTKR.FAA.destination > 0) this.updateAnimation();
             if (FTKR.FAA.damage.enable) this.updateDamagePopup();
             this.updateSelectionEffect();
@@ -340,6 +455,39 @@ function Sprite_FaceAnimation() {
         }
         if (this._actor) {
             this.updateMotion();
+        }
+    };
+
+    Sprite_ActorFace.prototype.startToneChange = function() {
+        this._requestUpdateTone = true;
+    };
+
+    Sprite_ActorFace.prototype.stopToneChange = function() {
+        this._requestUpdateTone = false;
+        if (this._mainSprite) this._mainSprite.setColorTone([0,0,0,0]);
+    };
+
+    Sprite_ActorFace.prototype.updateTone = function() {
+        var toneSet = FTKR.FAA.select.tone;
+        if (!toneSet.enable || !this._mainSprite || !this._requestUpdateTone) return;
+        var tone = toneSet.color.split(',').num();
+        if (this._toneCount >= toneSet.count) {
+            var pattern = toneSet.pattern;
+            if (this._tonePattern == pattern) {
+                this._code *= -1;
+                this._tonePattern = 0;
+            }
+            this._tone = [
+                this._tone[0] + this._code * tone[0] / pattern,
+                this._tone[1] + this._code * tone[1] / pattern,
+                this._tone[2] + this._code * tone[2] / pattern,
+                this._tone[3] + this._code * tone[3] / pattern
+            ];
+            this._tonePattern += 1;
+            this._mainSprite.setColorTone(this._tone);
+            this._toneCount = 0;
+        } else {
+            this._toneCount += 1;
         }
     };
 
@@ -504,6 +652,19 @@ function Sprite_FaceAnimation() {
         return this._faceSprite.some( function(sprite) {
             return sprite.isAnimationPlaying();
         });
+    };
+
+    var _FAA_Window_BattleStatus_select = Window_BattleStatus.prototype.select;
+    Window_BattleStatus.prototype.select = function(index) {
+        _FAA_Window_BattleStatus_select.call(this, index);
+        if (!FTKR.FAA.select.cursor) {
+            this.setCursorRect(0, 0, 0, 0);
+        }
+        if (FTKR.FAA.select.tone.enable) {
+            this._faceSprite.forEach( function(sprite, i){
+                i === index ? sprite.startToneChange() : sprite.stopToneChange();
+            });
+        }
     };
 
     //=============================================================================
