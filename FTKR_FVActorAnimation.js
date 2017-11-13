@@ -333,7 +333,7 @@ function Sprite_FaceAnimation() {
                 dx += FTKR.CSS.cssStatus.face.posiX * (width - dw) / 2;
             }
             var sx = dx;
-            var sy = dy + height + this.padding;
+            var sy = dy + height * scale + this.padding;
             sprite.setHome(sx, sy);
             sprite.startEntryMotion();
             sprite.setScale(scale);
@@ -366,7 +366,7 @@ function Sprite_FaceAnimation() {
             dx = dx + dw / 2 + this.padding;
             dx += FTKR.CSS.cssStatus.image.posiX * (width - dw) / 2;
             var sx = dx;
-            var sy = dy + height + this.padding;
+            var sy = dy + dh + this.padding;
             sprite.setHome(sx, sy);
             sprite.startEntryMotion();
             sprite.setScale(scale);
