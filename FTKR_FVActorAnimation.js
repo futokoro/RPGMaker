@@ -64,13 +64,13 @@ FTKR.FAA = FTKR.FAA || {};
  * @param --選択中のアクターエフェクト--
  * @desc この設定はバトル画面のみ有効です。
  * 
- * @param トーン設定
- * @desc 選択中のアクターのトーンを変化させます。
+ * @param 色調設定
+ * @desc 選択中のアクター画像の色調をデフォルトから設定した色調に交互に変化させます。
  * @type struct<tone>
  * @default {"enable":"0","color":"0,0,0,0","pattern":"6","count":"10"}
  * 
  * @param カーソル設定
- * @desc 選択中のアクターのトーンをカーソル表示を設定します。
+ * @desc 選択中のアクターのカーソル表示を設定します。
  * @type select
  * @option カーソル表示あり
  * @value 1
@@ -168,7 +168,7 @@ FTKR.FAA = FTKR.FAA || {};
 //=============================================================================
 /*~struct~tone:
  * @param enable
- * @desc トーン設定を有効にするか設定します。
+ * @desc 色調設定を有効にするか設定します。
  * @type select
  * @option 有効にする
  * @value 1
@@ -177,17 +177,17 @@ FTKR.FAA = FTKR.FAA || {};
  * @default 0
  * 
  * @param color
- * @desc トーンカラーの設定。「R,G,B,明度」の順にカンマで区切って設定してください。
+ * @desc 色調の設定。「赤,緑,青,グレー」の順にカンマで区切って設定してください。
  * @default 0,0,0,0
  * 
  * @param pattern
- * @desc 設定したトーンカラーに何段階で変化させるか設定します。
+ * @desc 設定した色調に何段階で変化させるか設定します。
  * @type number
  * @min 1
  * @default 6
  * 
  * @param count
- * @desc トーンカラーの段階変化の間隔を設定します。
+ * @desc 色調の段階変化の間隔を設定します。
  * @type number
  * @min 1
  * @default 10
