@@ -4,7 +4,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2017/11/12
 // 最終更新日 : 2017/11/13
-// バージョン : v1.0.1
+// バージョン : v1.0.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.FAA = FTKR.FAA || {};
 
 //=============================================================================
 /*:ja
- * @plugindesc v1.0.1 フロントビューモードでアクター側にアニメーションを表示するプラグイン
+ * @plugindesc v1.0.2 フロントビューモードでアクター側にアニメーションを表示するプラグイン
  * @author フトコロ
  *
  * @param --アニメーション--
@@ -149,6 +149,9 @@ FTKR.FAA = FTKR.FAA || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.2 - 2017/11/13 : 不具合修正
+ *    1. カスタム画像のID指定が反映されない不具合を修正。
  * 
  * v1.0.1 - 2017/11/13 : 不具合修正、機能追加、ヘルプ修正
  *    1. 顔画像が正しく表示されない不具合を修正。
@@ -367,6 +370,7 @@ function Sprite_FaceAnimation() {
             dx += FTKR.CSS.cssStatus.image.posiX * (width - dw) / 2;
             var sx = dx;
             var sy = dy + dh + this.padding;
+            sprite.setImageId(id);
             sprite.setHome(sx, sy);
             sprite.startEntryMotion();
             sprite.setScale(scale);
@@ -577,18 +581,24 @@ function Sprite_FaceAnimation() {
 
     Sprite_ActorImage.prototype.updateBitmap = function() {
         Sprite_Battler.prototype.updateBitmap.call(this);
-        var name = this._actor.actor().cssbgi[0].name;
+        var id = this._imageId || 0;
+        var name = this._actor.actor().cssbgi[id].name;
         if (this._battlerName !== name) {
             this._battlerName = name;
             this._mainSprite.bitmap = ImageManager.loadPicture(name);
         }
     };
 
+    Sprite_ActorImage.prototype.setImageId = function(id) {
+        this._imageId = id;
+    };
+
     Sprite_ActorImage.prototype.updateFrame = function() {
         Sprite_Battler.prototype.updateFrame.call(this);
         var bitmap = this._mainSprite.bitmap;
         if (bitmap) {
-            var bgi = this._actor.actor().cssbgi[0];
+            var id = this._imageId || 0;
+            var bgi = this._actor.actor().cssbgi[id];
             var sw = bgi.width || bitmap.width;
             var sh = bgi.height || bitmap.height;
             var sx = bgi.offsetX || 0;
