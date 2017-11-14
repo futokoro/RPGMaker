@@ -4,7 +4,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2017/11/12
 // 最終更新日 : 2017/11/14
-// バージョン : v1.0.3
+// バージョン : v1.0.4
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.FAA = FTKR.FAA || {};
 
 //=============================================================================
 /*:ja
- * @plugindesc v1.0.3 フロントビューモードでアクター側にアニメーションを表示するプラグイン
+ * @plugindesc v1.0.4 フロントビューモードでアクター側にアニメーションを表示するプラグイン
  * @author フトコロ
  *
  * @param --アニメーション--
@@ -188,6 +188,10 @@ FTKR.FAA = FTKR.FAA || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.4 - 2017/11/14 : 不具合修正
+ *    1. 色調設定が正常に読み込まれない不具合を修正。
+ *    2. 顔画像の表示位置を調整。
+ * 
  * v1.0.3 - 2017/11/14 : 不具合修正、ヘルプ修正
  *    1. バトル画面で行動選択後にエラーになる不具合を修正。
  * 
@@ -282,7 +286,7 @@ function Sprite_FaceAnimation() {
             shake   :Number(parameters['画面揺れ効果'] || 0),
         },
         select : {
-            tone    :paramParse(parameters['トーン設定']),
+            tone    :paramParse(parameters['色調設定']) || {},
             cursor  :Number(parameters['カーソル設定'] || 0),
         },
     };
@@ -363,7 +367,8 @@ function Sprite_FaceAnimation() {
             var index = actor.index() % this.showActorNum();
             var sprite = this._faceSprite[index];
             var fh = Window_Base._faceHeight;
-            var scale = Imported.FTKR_CSS ? (Math.min(width, height) || fh) / fh : 1;
+            var fsize = Math.min(height, fh);
+            var scale = Imported.FTKR_CSS ? fsize / fh : 1;
             if (!sprite) {
                 sprite = new Sprite_ActorFace(actor, this);
                 this._windowCssSprite.addChild(sprite);
@@ -371,14 +376,12 @@ function Sprite_FaceAnimation() {
             } else if (sprite._actor !== actor){
                 sprite.setBattler(actor);
             }
-            dx = dx + fh * scale / 2 + this.padding;
+            dx = dx + fsize * scale / 2 + this.padding;
             if (Imported.FTKR_CSS) {
-                var len = Math.min(width, height);
-                var dw = len || Window_Base._faceWidth * scale;
-                dx += FTKR.CSS.cssStatus.face.posiX * (width - dw) / 2;
+                dx += FTKR.CSS.cssStatus.face.posiX * (width - fsize * scale) / 2;
             }
-            var sx = dx;
-            var sy = dy + height * scale + this.padding;
+            var sx = Math.floor(dx);
+            var sy = dy + fsize + this.padding;
             sprite.setHome(sx, sy);
             sprite.startEntryMotion();
             sprite.setScale(scale);
@@ -476,6 +479,7 @@ function Sprite_FaceAnimation() {
     Sprite_ActorFace.prototype.setScale = function(scale) {
         this.scale._x = scale;
         this.scale._y = scale;
+        console.log(this._mainSprite);
     };
 
     Sprite_ActorFace.prototype.startToneChange = function() {
@@ -694,10 +698,10 @@ function Sprite_FaceAnimation() {
     var _FAA_Window_BattleStatus_select = Window_BattleStatus.prototype.select;
     Window_BattleStatus.prototype.select = function(index) {
         _FAA_Window_BattleStatus_select.call(this, index);
-        this.setActorImageEffect();
+        this.setActorImageEffect(index);
     };
 
-    Window_BattleStatus.prototype.setActorImageEffect = function() {
+    Window_BattleStatus.prototype.setActorImageEffect = function(index) {
         if (!FTKR.FAA.select.cursor) {
             this.setCursorRect(0, 0, 0, 0);
         }
