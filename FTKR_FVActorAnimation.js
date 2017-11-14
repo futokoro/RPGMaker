@@ -3,8 +3,8 @@
 // FTKR_FVActorAnimation.js
 // 作成者     : フトコロ
 // 作成日     : 2017/11/12
-// 最終更新日 : 2017/11/13
-// バージョン : v1.0.2
+// 最終更新日 : 2017/11/14
+// バージョン : v1.0.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.FAA = FTKR.FAA || {};
 
 //=============================================================================
 /*:ja
- * @plugindesc v1.0.2 フロントビューモードでアクター側にアニメーションを表示するプラグイン
+ * @plugindesc v1.0.3 フロントビューモードでアクター側にアニメーションを表示するプラグイン
  * @author フトコロ
  *
  * @param --アニメーション--
@@ -65,7 +65,7 @@ FTKR.FAA = FTKR.FAA || {};
  * @desc この設定はバトル画面のみ有効です。
  * 
  * @param 色調設定
- * @desc 選択中のアクター画像の色調をデフォルトから設定した色調に交互に変化させます。
+ * @desc 選択中のアクター画像の色調をデフォルトから設定した色調に交互に変化させます。詳細はヘルプ参照。
  * @type struct<tone>
  * @default {"enable":"0","color":"0,0,0,0","pattern":"6","count":"10"}
  * 
@@ -84,6 +84,9 @@ FTKR.FAA = FTKR.FAA || {};
  *-----------------------------------------------------------------------------
  * 本プラグインを実装することで、フロントビューモードで
  * アクター側にもアニメーションやダメージポップアップを表示します。
+ * 
+ * また、行動選択中のアクターの画像に対して、色調を変化させるエフェクトを
+ * 発生させることができます。
  * 
  * 
  * このプラグインは、FTKR_FacialImageDifference.jsと
@@ -113,6 +116,41 @@ FTKR.FAA = FTKR.FAA || {};
  * 3. FTKR_CustomSimpleActorStatus.jsと組み合わせて使用する場合は
  *    「プラグインマネージャー(プラグイン管理)」で、本プラグインが
  *    下になるように追加してください。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * 選択中のアクターエフェクトについて
+ *-----------------------------------------------------------------------------
+ * 行動選択中のアクターの画像に対して、プラグインパラメータの設定で
+ * 以下のエフェクトを発生させることができます。
+ * 
+ * 1. 色調設定
+ * 
+ * 有効にすると、設定した色調とデフォルトの色調[赤:0,緑:0,青:0,グレー:0]を
+ * 交互に変化させることができます。
+ * 
+ * pattern の値により、変化を複数の段階に分けて徐々に変化させることができます。
+ * 
+ * 例) プラグインパラメータの設定を以下にした場合
+ *    color = 赤:100,緑:100,青:100,グレー:0 (画像が白くなる)
+ *    parttrn = 10
+ * 
+ * デフォルトの色調との差が 100 あるため、10段階に分けると下のように
+ * 10ずつ色調が変化します。
+ * 
+ * [0,0,0,0] ⇒ [10,10,10,0] ⇒ [20,20,20,0] ⇒ ...
+ *  ... ⇒ [90,90,90,0] ⇒ [100,100,100,0] ⇒ [90,90,90,0] ⇒ ...
+ * 
+ * 
+ * count の値により、変化ごとの表示時間を設定することができます。
+ * 数値が大きいほど、色調が１段階変わる時間が長くなります。
+ * 
+ * 
+ * 2. カーソル設定
+ * 
+ * これはMVのデフォルトの表示で、アクター１人分のエリアが薄く光る状態に
+ * なることです。
+ * 表示なしにすることで、この効果を無効にできます。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -149,6 +187,9 @@ FTKR.FAA = FTKR.FAA || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.3 - 2017/11/14 : 不具合修正、ヘルプ修正
+ *    1. バトル画面で行動選択後にエラーになる不具合を修正。
  * 
  * v1.0.2 - 2017/11/13 : 不具合修正
  *    1. カスタム画像のID指定が反映されない不具合を修正。
@@ -192,6 +233,7 @@ FTKR.FAA = FTKR.FAA || {};
  * @min 1
  * @default 10
  */
+//=============================================================================
 
 function Sprite_ActorFace() {
   this.initialize.apply(this, arguments);
@@ -209,9 +251,9 @@ function Sprite_FaceAnimation() {
 
     //配列の要素を、すべて数値に変換する。
     Array.prototype.num = function() {
-      return this.map(function(elm) {
-          return Number(elm);
-      });
+        return this.map(function(elm) {
+            return Number(elm);
+        });
     }
 
     var paramParse = function(obj) {
@@ -243,16 +285,6 @@ function Sprite_FaceAnimation() {
             tone    :paramParse(parameters['トーン設定']),
             cursor  :Number(parameters['カーソル設定'] || 0),
         },
-    };
-
-    //=============================================================================
-    // バトル終了後に、逃走フラグを削除
-    //=============================================================================
-
-    var _FAA_Scene_Map_start = Scene_Map.prototype.start;
-    Scene_Map.prototype.start = function() {
-        _FAA_Scene_Map_start.call(this);
-        BattleManager._escaped = false;
     };
 
     //=============================================================================
@@ -297,7 +329,7 @@ function Sprite_FaceAnimation() {
     };
 
     //=============================================================================
-    // アクターの顔画像表示処理を修正
+    // アクターの顔画像表示処理をスプライト方式に修正
     //=============================================================================
 
     var _FAA_Window_Base_initialize = Window_Base.prototype.initialize;
@@ -408,7 +440,7 @@ function Sprite_FaceAnimation() {
 
     //=============================================================================
     // Sprite_ActorFace
-    // アクターの顔画像表示スプライト
+    // アクターの顔画像表示スプライトクラスを定義
     //=============================================================================
 
     Sprite_ActorFace.prototype = Object.create(Sprite_Actor.prototype);
@@ -422,35 +454,37 @@ function Sprite_FaceAnimation() {
     Sprite_ActorFace._imageWidth  = 144;
     Sprite_ActorFace._imageHeight = 144;
 
-    Sprite_ActorFace.prototype.setBattler = function(battler) {
-        Sprite_Battler.prototype.setBattler.call(this, battler);
-        var changed = (battler !== this._actor);
-        if (changed) {
-            this._actor = battler;
-            this.startEntryMotion();
-        }
-    };
-
-    Sprite_ActorFace.prototype.startEntryMotion = function() {
-    };
-
-    Sprite_ActorFace.prototype.updateMain = function() {
-          this.updateBitmap();
-          this.updateFrame();
-    };
-
     Sprite_ActorFace.prototype.initMembers = function() {
         Sprite_Battler.prototype.initMembers.call(this);
         this._battlerName = '';
-        this._motion = null;
-        this._motionCount = 0;
-        this._pattern = 0;
         this._tone = [0, 0, 0, 0];
         this._toneCount = 0;
         this._tonePattern = 0;
         this._code = 1;
         this._requestUpdateTone = false;
         this.createMainSprite();
+    };
+
+    Sprite_ActorFace.prototype.setBattler = function(battler) {
+        Sprite_Battler.prototype.setBattler.call(this, battler);
+        var changed = (battler !== this._actor);
+        if (changed) {
+            this._actor = battler;
+        }
+    };
+
+    Sprite_ActorFace.prototype.setScale = function(scale) {
+        this.scale._x = scale;
+        this.scale._y = scale;
+    };
+
+    Sprite_ActorFace.prototype.startToneChange = function() {
+        this._requestUpdateTone = true;
+    };
+
+    Sprite_ActorFace.prototype.stopToneChange = function() {
+        this._requestUpdateTone = false;
+        if (this._mainSprite) this._mainSprite.setColorTone([0,0,0,0]);
     };
 
     Sprite_ActorFace.prototype.update = function() {
@@ -464,21 +498,11 @@ function Sprite_FaceAnimation() {
         } else {
             this.bitmap = null;
         }
-        if (Imported.YEP_BattleEngineCore) {
-            if (!this._postSpriteInitialized) this.postSpriteInitialize();
-        }
-        if (this._actor) {
-            this.updateMotion();
-        }
     };
 
-    Sprite_ActorFace.prototype.startToneChange = function() {
-        this._requestUpdateTone = true;
-    };
-
-    Sprite_ActorFace.prototype.stopToneChange = function() {
-        this._requestUpdateTone = false;
-        if (this._mainSprite) this._mainSprite.setColorTone([0,0,0,0]);
+    Sprite_ActorFace.prototype.updateMain = function() {
+          this.updateBitmap();
+          this.updateFrame();
     };
 
     Sprite_ActorFace.prototype.updateTone = function() {
@@ -527,14 +551,6 @@ function Sprite_FaceAnimation() {
         }
     };
 
-    Sprite_ActorFace.prototype.setScale = function(scale) {
-        this.scale._x = scale;
-        this.scale._y = scale;
-    };
-
-    //------------------------------------------------------------------------
-    // フロントビュー戦闘でも顔画像を表示させる
-    //------------------------------------------------------------------------
     Sprite_ActorFace.prototype.updateVisibility = function() {
         Sprite_Base.prototype.updateVisibility.call(this);
         if (!this._actor) {
@@ -583,7 +599,7 @@ function Sprite_FaceAnimation() {
 
     //=============================================================================
     // Sprite_ActorImage
-    // アクターの顔画像表示スプライト
+    // アクターのカスタム画像表示スプライトクラスの定義
     //=============================================================================
 
     Sprite_ActorImage.prototype = Object.create(Sprite_ActorFace.prototype);
@@ -619,7 +635,7 @@ function Sprite_FaceAnimation() {
 
     //=============================================================================
     // Sprite_FaceAnimation
-    // アクターの顔画像用アニメーション表示スプライト
+    // アクターの顔画像用アニメーション表示スプライトクラスを定義
     //=============================================================================
 
     Sprite_FaceAnimation.prototype = Object.create(Sprite_Animation.prototype);
@@ -661,7 +677,7 @@ function Sprite_FaceAnimation() {
 
     //=============================================================================
     // Window_BattleStatus
-    // バトル画面のステータス表示用ウィンドウクラス
+    // バトル画面のステータス表示用ウィンドウクラスの修正
     //=============================================================================
 
     Window_BattleStatus.prototype.isBusy = function() {
@@ -674,9 +690,14 @@ function Sprite_FaceAnimation() {
         });
     };
 
+    //アクター選択中のエフェクト表示を追加
     var _FAA_Window_BattleStatus_select = Window_BattleStatus.prototype.select;
     Window_BattleStatus.prototype.select = function(index) {
         _FAA_Window_BattleStatus_select.call(this, index);
+        this.setActorImageEffect();
+    };
+
+    Window_BattleStatus.prototype.setActorImageEffect = function() {
         if (!FTKR.FAA.select.cursor) {
             this.setCursorRect(0, 0, 0, 0);
         }
@@ -692,9 +713,20 @@ function Sprite_FaceAnimation() {
     // バトルマネージャー
     //=============================================================================
 
+    //ステータスウィンドウにアニメーションを表示している間、次の処理に移らないようにする
     var _FAA_BattleManager_isBusy = BattleManager.isBusy;
     BattleManager.isBusy = function() {
         return (_FAA_BattleManager_isBusy.call(this) || this._statusWindow.isBusy());
+    };
+
+    //=============================================================================
+    // バトル終了後に、逃走フラグを削除
+    //=============================================================================
+
+    var _FAA_Scene_Map_start = Scene_Map.prototype.start;
+    Scene_Map.prototype.start = function() {
+        _FAA_Scene_Map_start.call(this);
+        BattleManager._escaped = false;
     };
 
 }());//EOF

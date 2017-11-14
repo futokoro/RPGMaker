@@ -3,8 +3,8 @@
 // FTKR_CSS_SkillStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/21
-// 最終更新日 : 2017/05/08
-// バージョン : v1.0.1
+// 最終更新日 : 2017/11/14
+// バージョン : v1.0.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.CSS.SS = FTKR.CSS.SS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.1 スキル画面のステータス表示を変更するプラグイン
+ * @plugindesc v1.0.2 スキル画面のステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @param --レイアウト設定--
@@ -187,6 +187,9 @@ FTKR.CSS.SS = FTKR.CSS.SS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.2 - 2017/11/14 : 不具合修正
+ *    1. レイアウト設定が反映されない不具合を修正。
+ * 
  * v1.0.1 - 2017/05/08 : 不具合修正、デフォルト設定を変更。
  * 
  * v1.0.0 - 2017/04/21 : 初版作成
@@ -243,37 +246,37 @@ if(FTKR.CSS.SS.window.enabled) {
 
 //書き換え
 //ウィンドウの行数
-Window_BattleStatus.prototype.numVisibleRows = function() {
+Window_SkillStatus.prototype.numVisibleRows = function() {
     return FTKR.CSS.SS.window.numVisibleRows;
 };
 
 //書き換え
 //ウィンドウのフォントサイズ
-Window_BattleStatus.prototype.standardFontSize = function() {
+Window_SkillStatus.prototype.standardFontSize = function() {
     return FTKR.CSS.SS.window.fontSize;
 };
 
 //書き換え
 //ウィンドウに周囲の余白サイズ
-Window_BattleStatus.prototype.standardPadding = function() {
+Window_SkillStatus.prototype.standardPadding = function() {
     return FTKR.CSS.SS.window.padding;
 };
 
 //書き換え
 //ウィンドウ内の1行の高さ
-Window_BattleStatus.prototype.lineHeight = function() {
+Window_SkillStatus.prototype.lineHeight = function() {
     return FTKR.CSS.SS.window.lineHeight;
 };
 
 //書き換え
 //ウィンドウの背景の透明度
-Window_BattleStatus.prototype.standardBackOpacity = function() {
+Window_SkillStatus.prototype.standardBackOpacity = function() {
     return FTKR.CSS.SS.window.opacity;
 };
 
 //書き換え
 //ウィンドウ枠の表示
-Window_BattleStatus.prototype._refreshFrame = function() {
+Window_SkillStatus.prototype._refreshFrame = function() {
     if (!FTKR.CSS.SS.window.hideFrame) Window.prototype._refreshFrame.call(this);
 };
 
