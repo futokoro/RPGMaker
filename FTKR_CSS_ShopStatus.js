@@ -813,6 +813,15 @@ if (Imported.FTKR_CSS) (function() {
         return FTKR.CSS.SpS.weaponStatus;
     };
 
+    Window_ShopWeaponStatus.prototype.initialize = function(x, y, width, height) {
+        Window_ShopItemStatus.prototype.initialize.apply(this, arguments);
+        if ($dataContainerProperties) {
+            if(this.pageSize) this._customCssMaxCols = this.pageSize();
+            if(this.actorRows) this._customCssCursorHeight = this.actorRows();
+            if(this.heightSpace) this._customCssHSpace = this.heightSpace();
+        }
+    };
+
     Window_ShopWeaponStatus.prototype.refresh = function() {
         this.contents.clear();
         if (this._item) {

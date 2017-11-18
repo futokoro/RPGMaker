@@ -449,3 +449,190 @@ if (Imported.FTKR_CSS) (function(){
     };
 
 }());//TKR_CustomSimpleActorStatus.jsが必要
+
+//=============================================================================
+// GraphicalDesignMode.jsに対応
+// 
+//=============================================================================
+if (typeof $dataContainerProperties !== 'undefined') (function() {
+  
+    //=============================================================================
+    // Window_Status
+    // ステータス画面のステータスウィンドウの表示クラス
+    //=============================================================================
+
+    //書き換え
+    Window_Status.prototype.refresh = function() {
+    };
+
+    //=============================================================================
+    // Window_StatusArea
+    // ステータス画面の表示エリアごとのステータスウィンドウの表示クラス
+    //=============================================================================
+
+    function Window_StatusArea() {
+        this.initialize.apply(this, arguments);
+    }
+
+    Window_StatusArea.prototype = Object.create(Window_Status.prototype);
+    Window_StatusArea.prototype.constructor = Window_StatusArea;
+    
+    Window_StatusArea.prototype.initialize = function(x, y, width, height, lss) {
+        this._lssStatus = lss;
+        Window_Selectable.prototype.initialize.call(this, x, y, width, height);
+        this._actor = null;
+        this.refresh();
+    };
+
+    Window_StatusArea.prototype.standardCssStatus = function() {
+        return this._lssStatus;
+    };
+
+    Window_StatusArea.prototype.standardPadding = function() {
+        return 0;
+    };
+
+    Window_StatusArea.prototype._refreshFrame = function() {
+        this._margin = 0;
+    };
+
+    Window_StatusArea.prototype.refresh = function() {
+        this.contents.clear();
+        if (this._actor) {
+            var lss = this._lssStatus;
+            var w = this.width - this.padding * 2;
+            var h = this.height - this.padding * 2;
+            this.drawCssActorStatus(0, this._actor, 0, 0, w, h, lss);
+        }
+    };
+
+    //=============================================================================
+    // Scene_Status
+    // ステータス画面のシーンクラス
+    //=============================================================================
+
+    var _CSS_Scene_Status_create = Scene_Status.prototype.create;
+    Scene_Status.prototype.create = function() {
+        _CSS_Scene_Status_create.call(this);
+        this.createCssArea1();
+        this.createCssArea2();
+        this.createCssArea3();
+        this.createCssArea4();
+    };
+
+    Scene_Status.prototype.createCssArea1 = function() {
+        var stw = this._statusWindow;
+        var x = stw.x + stw.standardPadding();
+        var y = stw.y + stw.standardPadding();
+        var width = Graphics.boxWidth - stw.standardPadding() * 2;
+        var height = stw.lineHeight() * 2;
+        var lss = this.cssStatusArea1();
+        this._statusArea1Window = new Window_StatusArea(x, y, width, height, lss);
+        this._statusArea1Window.reserveFaceImages();
+        this.addWindow(this._statusArea1Window);
+    };
+
+    Scene_Status.prototype.detailedStatus = function(index) {
+        var ds = FTKR.CSS.DS.detailedStatus;
+        index -= 1;
+        var texts = ds.line[index].split(';');
+        return {
+            text1     :texts[0] + ',{line}',
+            text2     :texts[1],
+            text3     :texts[2],
+            space     :ds.space[index],
+            spaceIn   :ds.spaceIn[index],
+            widthRate :ds.widthRate[index],
+        };
+    };
+
+    Scene_Status.prototype.cssStatusArea1 = function() {
+        return FTKR.CSS.DS ? this.detailedStatus(1) : {
+            text1     :'name,{line}',
+            text2     :'class',
+            text3     :'nickname',
+            space     :'0,20,50,0',
+            spaceIn   :'5',
+            widthRate :'1,1,1',
+        };
+    };
+
+    Scene_Status.prototype.createCssArea2 = function() {
+        var stw = this._statusArea1Window;
+        var x = stw.x;
+        var y = stw.y + stw.height;
+        var width = stw.width;
+        var height = stw.lineHeight() * 5;
+        var lss = this.cssStatusArea2();
+        this._statusArea2Window = new Window_StatusArea(x, y, width, height, lss);
+        this._statusArea2Window.reserveFaceImages();
+        this.addWindow(this._statusArea2Window);
+    };
+
+    Scene_Status.prototype.cssStatusArea2 = function() {
+        return FTKR.CSS.DS ? this.detailedStatus(2) : {
+            text1     :'face(4),{line}',
+            text2     :'level,state,hp,mp',
+            text3     :'custom(0),custom(1),custom(2),custom(3)',
+            space     :'0,20,50,0',
+            spaceIn   :'5',
+            widthRate :'2,2,3',
+        };
+    };
+
+    Scene_Status.prototype.createCssArea3 = function() {
+        var stw = this._statusArea2Window;
+        var x = stw.x;
+        var y = stw.y + stw.height;
+        var width = stw.width;
+        var height = stw.lineHeight() * 7;
+        var lss = this.cssStatusArea3();
+        this._statusArea3Window = new Window_StatusArea(x, y, width, height, lss);
+        this._statusArea3Window.reserveFaceImages();
+        this.addWindow(this._statusArea3Window);
+    };
+
+    Scene_Status.prototype.cssStatusArea3 = function() {
+        return FTKR.CSS.DS ? this.detailedStatus(3) : {
+            text1     :'param(2),param(3),param(4),param(5),param(6),param(7),{line}',
+            text2     :'',
+            text3     :'equip(0),equip(1),equip(2),equip(3),equip(4)',
+            space     :'0,100,0,0',
+            spaceIn   :'5',
+            widthRate :'4,1,5',
+        };
+    };
+
+    Scene_Status.prototype.createCssArea4 = function() {
+        var stw = this._statusArea3Window;
+        var x = stw.x;
+        var y = stw.y + stw.height;
+        var width = stw.width;
+        var height = stw.lineHeight() * 2;
+        var lss = this.cssStatusArea4();
+        this._statusArea4Window = new Window_StatusArea(x, y, width, height, lss);
+        this._statusArea4Window.reserveFaceImages();
+        this.addWindow(this._statusArea4Window);
+    };
+
+    Scene_Status.prototype.cssStatusArea4 = function() {
+        return FTKR.CSS.DS ? this.detailedStatus(4) : {
+            text1     :'profile',
+            text2     :'',
+            text3     :'',
+            space     :'0,20,50,0',
+            spaceIn   :'5',
+            widthRate :'1,0,0',
+        };
+    };
+
+    var _CSS_Scene_Status_refreshActor = Scene_Status.prototype.refreshActor;
+    Scene_Status.prototype.refreshActor = function() {
+        _CSS_Scene_Status_refreshActor.call(this);
+        var actor = this.actor();
+        this._statusArea1Window.setActor(actor);
+        this._statusArea2Window.setActor(actor);
+        this._statusArea3Window.setActor(actor);
+        this._statusArea4Window.setActor(actor);
+    };
+}()); 

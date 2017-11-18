@@ -6,6 +6,12 @@
 // 最終更新日 : 2017/11/18
 // バージョン : v2.6.0
 //=============================================================================
+// GraphicalDesignMode.js
+// ----------------------------------------------------------------------------
+// Copyright (c) 2015 Triacontane
+// This software is released under the MIT License.
+// http://opensource.org/licenses/mit-license.php
+//=============================================================================
 
 var Imported = Imported || {};
 Imported.FTKR_CSS = true;
@@ -779,6 +785,10 @@ FTKR.CSS = FTKR.CSS || {};
  * なります。
  * 
  * 
+ * また、トリアコンタンさん製作のGraphicalDesignMode.jsを使って
+ * 拡張プラグインのステータス表示のレイアウトをゲーム画面上で変更できます。
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * 設定方法
  *-----------------------------------------------------------------------------
@@ -787,6 +797,9 @@ FTKR.CSS = FTKR.CSS || {};
  * 
  * 2. 拡張プラグインと組み合わせる場合は、当プラグインが上になるように
  *    配置してください。
+ * 
+ * 3. GraphicalDesignMode.jsと組み合わせる場合は、
+ *    本プラグインが下になるように配置してください。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -1243,6 +1256,51 @@ FTKR.CSS = FTKR.CSS || {};
  * <CSS_CUSTOM:x>
  * code
  * </CSS_CUSTOM>
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * 概要
+ *-----------------------------------------------------------------------------
+ * トリアコンタンさん製作のGraphicalDesignMode.jsを使って
+ * FTKR_CSSプラグインのステータス表示のレイアウトをゲーム画面上で変更できます。
+ * 
+ * デザインモードにて、ウィンドウ内にマウスカーソルを合わせて
+ * 英字キーを押下すると、各プロパティを変更できます。
+ * 
+ * ※英字とプロパティの対応
+ *
+ * R. Text1部に表示するステータス
+ * F. Text2部に表示するステータス
+ * V. Text3部に表示するステータス
+ * T. 各Textの間隔
+ * G. Text内で複数表示する場合の間隔
+ * B. Text1~Text3の表示幅の比率
+ * 
+ * 以下のキー操作はメニュー画面、バトル画面、戦績画面のみ有効
+ * Y. アクターを横に並べる数
+ * H. アクター１人分の表示高さ
+ * N. 縦のカーソル間隔
+ * 
+ * 
+ * 設定可能なステータスウィンドウ
+ * ・メニュー画面
+ * ・スキル画面
+ * ・装備画面
+ * ・ステータス画面(*1)
+ * ・バトル画面
+ * ・戦績画面(FTKR_CSS_CustomizeBattleResults.jsが必要)
+ * ・ショップ画面(FTKR_CSS_ShopStatus.jsが必要)
+ * 
+ * (*1)ステータス画面の設定は、FTKR_CSS_DetailedStatus.jsと異なります。
+ *     ステータス画面を縦に４分割した表示エリアごとに個別に設定します。
+ *     設定する際には、マウスカーソル位置を各表示エリアに合わせてください。
+ *  
+ * 
+ * 補足情報
+ * 1．Text1～Text3の表示を消したい場合。
+ * 
+ *    半角スペースだけを入力することで、無表示になります。
+ *    何も入力しない(空欄)の場合は、デフォルトの表示になります。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -2830,6 +2888,127 @@ FTKR.CSS = FTKR.CSS || {};
         if (!this.canMove()) return;
         FTKR.CSS.Sprite_Actor_updateTargetPosition.call(this);
     };
+
+    //=============================================================================
+    // GraphicalDesignMode.jsに対応
+    //=============================================================================
+    if (typeof $dataContainerProperties !== 'undefined') {
+    
+    Input.keyMapper[82] = 'keyR';
+    Input.keyMapper[70] = 'keyF';
+    Input.keyMapper[86] = 'keyV';
+    Input.keyMapper[84] = 'keyT';
+    Input.keyMapper[71] = 'keyG';
+    Input.keyMapper[66] = 'keyB';
+    Input.keyMapper[89] = 'keyY';
+    Input.keyMapper[72] = 'keyH';
+    Input.keyMapper[78] = 'keyN';
+    
+    var _Window_Base_loadProperty = Window_Base.prototype.loadProperty;
+    Window_Base.prototype.loadProperty = function(containerInfo) {
+        _Window_Base_loadProperty.apply(this, arguments);
+        if (containerInfo._customCssText1) this._customCssText1    = containerInfo._customCssText1;
+        if (containerInfo._customCssText2) this._customCssText2    = containerInfo._customCssText2;
+        if (containerInfo._customCssText3) this._customCssText3    = containerInfo._customCssText3;
+        if (containerInfo._customCssSpace) this._customCssSpace    = containerInfo._customCssSpace;
+        if (containerInfo._customCssSpaceIn) this._customCssSpaceIn   = containerInfo._customCssSpaceIn;
+        if (containerInfo._customCssWidthRate) this._customCssWidthRate = containerInfo._customCssWidthRate;
+        if (containerInfo._customCssMaxCols) this._customCssMaxCols = containerInfo._customCssMaxCols;
+        if (containerInfo._customCssCursorHeight) this._customCssCursorHeight = containerInfo._customCssCursorHeight;
+        if (containerInfo._customCssHSpace) this._customCssHSpace = containerInfo._customCssHSpace;
+        this.setCssStatus();
+        this.setMaxCols();
+        this.setCursorHeight();
+        this.setHSpace();
+        this.refresh();
+    };
+    
+    var _Window_Base_saveProperty = Window_Base.prototype.saveProperty;
+    Window_Base.prototype.saveProperty = function(containerInfo) {
+        _Window_Base_saveProperty.apply(this, arguments);
+        containerInfo._customCssText1    = this._customCssText1;
+        containerInfo._customCssText2    = this._customCssText2;
+        containerInfo._customCssText3    = this._customCssText3;
+        containerInfo._customCssSpace    = this._customCssSpace;
+        containerInfo._customCssSpaceIn    = this._customCssSpaceIn;
+        containerInfo._customCssWidthRate  = this._customCssWidthRate;
+        containerInfo._customCssMaxCols  = this._customCssMaxCols;
+        containerInfo._customCssCursorHeight  = this._customCssCursorHeight;
+        containerInfo._customCssHSpace  = this._customCssHSpace;
+      };
+      
+    var _Window_Base_initialize      = Window_Base.prototype.initialize;
+    Window_Base.prototype.initialize = function(x, y, width, height) {
+        _Window_Base_initialize.apply(this, arguments);
+        if (this._lssStatus) {
+            var lss = this.standardCssStatus();
+            this._customCssText1    = lss.text1;
+            this._customCssText2    = lss.text2;
+            this._customCssText3    = lss.text3;
+            this._customCssSpace    = lss.space;
+            this._customCssSpaceIn   = lss.spaceIn;
+            this._customCssWidthRate = lss.widthRate;
+        }
+        if(this.maxCols) this._customCssMaxCols = this.maxCols();
+        if(this.cursorHeight) this._customCssCursorHeight = this.cursorHeight();
+        if(this.itemHeightSpace) this._customCssHSpace = this.itemHeightSpace();
+    };
+
+    var _CSS_Window_Base_processInput = Window_Base.prototype.processInput;
+    Window_Base.prototype.processInput = function() {
+        if (this.isPreparedEvent()) {
+            var cssparams = [
+                ['keyR', 'Text1', '_customCssText1', null, null, this.setCssStatus.bind(this), true],
+                ['keyF', 'Text2', '_customCssText2', null, null, this.setCssStatus.bind(this), true],
+                ['keyV', 'Text3', '_customCssText3', null, null, this.setCssStatus.bind(this), true],
+                ['keyT', '列間隔',  '_customCssSpace', null, null, this.setCssStatus.bind(this), true],
+                ['keyG', '列内の間隔', '_customCssSpaceIn', null, null, this.setCssStatus.bind(this), true],
+                ['keyB', '表示幅の比率', '_customCssWidthRate', null, null, this.setCssStatus.bind(this), true],
+                ['keyY', 'アクターの列数', '_customCssMaxCols', null, null, this.setMaxCols.bind(this), true],
+                ['keyH', 'アクター１人分の行数', '_customCssCursorHeight', null, null, this.setCursorHeight.bind(this), true],
+                ['keyN', '縦のカーソル間隔', '_customCssHSpace', null, null, this.setHSpace.bind(this), true],
+            ];
+            return cssparams.some(function(param) {
+                return this.processSetProperty.apply(this, param);
+            }.bind(this)) ? true : _CSS_Window_Base_processInput.apply(this);
+        }
+        return false
+    };
+    
+    Window_Base.prototype.clearCssSpriteAll = function() {
+        $gameParty.allMembers().forEach( function(member, i) {
+            this.clearCssSprite(i);
+        },this);
+    };
+
+    Window_Base.prototype.setCssStatus = function() {
+        if (this._lssStatus) {
+            this.clearCssSpriteAll();
+            if (this._customCssText1) this._lssStatus.text1 = this._customCssText1;
+            if (this._customCssText2) this._lssStatus.text2 = this._customCssText2;
+            if (this._customCssText3) this._lssStatus.text3 = this._customCssText3;
+            if (this._customCssSpace) this._lssStatus.space = this._customCssSpace;
+            if (this._customCssSpaceIn) this._lssStatus.spaceIn = this._customCssSpaceIn;
+            if (this._customCssWidthRate) this._lssStatus.widthRate = this._customCssWidthRate;
+        }
+    };
+
+    Window_Base.prototype.setMaxCols = function() {
+        this.clearCssSpriteAll();
+        if (this._customCssMaxCols) this._css_maxCols = Number(this._customCssMaxCols);
+    };
+
+    Window_Base.prototype.setCursorHeight = function() {
+        this.clearCssSpriteAll();
+        if (this._customCssCursorHeight) this._css_cursorHeight = Number(this._customCssCursorHeight);
+    };
+
+    Window_Base.prototype.setHSpace = function(){
+        this.clearCssSpriteAll();
+        if (this._customCssHSpace) this._css_hSpace = Number(this._customCssHSpace);
+    };
+
+    }//GraphicalDesignMode.js
 
 }());//END
 
