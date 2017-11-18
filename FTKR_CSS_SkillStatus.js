@@ -3,8 +3,8 @@
 // FTKR_CSS_SkillStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/21
-// 最終更新日 : 2017/11/14
-// バージョン : v1.0.2
+// 最終更新日 : 2017/11/18
+// バージョン : v1.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.CSS.SS = FTKR.CSS.SS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.2 スキル画面のステータス表示を変更するプラグイン
+ * @plugindesc v1.1.0 スキル画面のステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @param --レイアウト設定--
@@ -183,9 +183,15 @@ FTKR.CSS.SS = FTKR.CSS.SS || {};
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
+ * プラグイン公開元
+ * https://github.com/futokoro/RPGMaker/blob/master/README.md
+ * 
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.1.0 - 2017/11/18 : 仕様変更
+ *    1. FTKR_CustomSimpleActorStatus.js の v2.6.0に対応。
  * 
  * v1.0.2 - 2017/11/14 : 不具合修正
  *    1. レイアウト設定が反映されない不具合を修正。
@@ -198,88 +204,62 @@ FTKR.CSS.SS = FTKR.CSS.SS || {};
  */
 //=============================================================================
 
-if (Imported.FTKR_CSS) {
+if (Imported.FTKR_CSS) (function() {
 
-//=============================================================================
-// プラグイン パラメータ
-//=============================================================================
-FTKR.CSS.SS.parameters = PluginManager.parameters('FTKR_CSS_SkillStatus');
+    //=============================================================================
+    // プラグイン パラメータ
+    //=============================================================================
+    var parameters = PluginManager.parameters('FTKR_CSS_SkillStatus');
 
-FTKR.CSS.SS.window = {
-    enabled:Number(FTKR.CSS.SS.parameters['Enabled Custom Window'] || 0),
-    numVisibleRows:Number(FTKR.CSS.SS.parameters['Number Visible Rows'] || 0),
-    maxCols:Number(FTKR.CSS.SS.parameters['Number Max Cols'] || 0),
-    fontSize:Number(FTKR.CSS.SS.parameters['Font Size'] || 0),
-    padding:Number(FTKR.CSS.SS.parameters['Window Padding'] || 0),
-    lineHeight:Number(FTKR.CSS.SS.parameters['Window Line Height'] || 0),
-    opacity:Number(FTKR.CSS.SS.parameters['Window Opacity'] || 0),
-    hideFrame:Number(FTKR.CSS.SS.parameters['Hide Window Frame'] || 0),
-    cursolHeight:Number(FTKR.CSS.SS.parameters['Cursol Line Number'] || 0),
-};
+    FTKR.CSS.SS.window = {
+        enabled       :Number(parameters['Enabled Custom Window'] || 0),
+        numVisibleRows:Number(parameters['Number Visible Rows'] || 0),
+        fontSize      :Number(parameters['Font Size'] || 0),
+        padding       :Number(parameters['Window Padding'] || 0),
+        lineHeight    :Number(parameters['Window Line Height'] || 0),
+        opacity       :Number(parameters['Window Opacity'] || 0),
+        hideFrame     :Number(parameters['Hide Window Frame'] || 0),
+    };
 
-//簡易ステータスオブジェクト
-FTKR.CSS.SS.simpleStatus = {
-    text1:String(FTKR.CSS.SS.parameters['Actor Status Text1'] || ''),
-    text2:String(FTKR.CSS.SS.parameters['Actor Status Text2'] || ''),
-    text3:String(FTKR.CSS.SS.parameters['Actor Status Text3'] || ''),
-    space:String(FTKR.CSS.SS.parameters['Actor Status Space'] || ''),
-    spaceIn:Number(FTKR.CSS.SS.parameters['Actor Status Space In Text'] || 0),
-    widthRate:String(FTKR.CSS.SS.parameters['Actor Status Width Rate'] || ''),
-};
+    //簡易ステータスオブジェクト
+    FTKR.CSS.SS.simpleStatus = {
+        text1     :String(parameters['Actor Status Text1'] || ''),
+        text2     :String(parameters['Actor Status Text2'] || ''),
+        text3     :String(parameters['Actor Status Text3'] || ''),
+        space     :String(parameters['Actor Status Space'] || ''),
+        spaceIn   :Number(parameters['Actor Status Space In Text'] || 0),
+        widthRate :String(parameters['Actor Status Width Rate'] || ''),
+    };
 
-//=============================================================================
-// Window_SkillStatus
-// スキル画面のステータスウィンドウの表示クラス
-//=============================================================================
+    //=============================================================================
+    // Window_SkillStatus
+    // スキル画面のステータスウィンドウの表示クラス
+    //=============================================================================
 
-//書き換え
-Window_SkillStatus.prototype.refresh = function() {
-    this.contents.clear();
-    if (this._actor) {
-        var w = this.width - this.padding * 2;
-        var h = this.height - this.padding * 2;
-        this.drawCssActorStatus(0, this._actor, 0, 0, w, h, FTKR.CSS.SS.simpleStatus);
-    }
-};
+    Window_SkillStatus.prototype.standardCssLayout = function() {
+        return FTKR.CSS.SS.window;
+    };
 
-if(FTKR.CSS.SS.window.enabled) {
+    Window_SkillStatus.prototype.standardCssStatus = function() {
+        return FTKR.CSS.SS.simpleStatus;
+    };
 
-//書き換え
-//ウィンドウの行数
-Window_SkillStatus.prototype.numVisibleRows = function() {
-    return FTKR.CSS.SS.window.numVisibleRows;
-};
+    //ウィンドウの行数
+    var _DS_Window_SkillStatus_numVisibleRows = Window_SkillStatus.prototype.numVisibleRows;
+    Window_SkillStatus.prototype.numVisibleRows = function() {
+        return FTKR.CSS.SS.window.enable ? FTKR.CSS.SS.window.numVisibleRows :
+        _DS_Window_SkillStatus_numVisibleRows.call(this);
+    };
 
-//書き換え
-//ウィンドウのフォントサイズ
-Window_SkillStatus.prototype.standardFontSize = function() {
-    return FTKR.CSS.SS.window.fontSize;
-};
-
-//書き換え
-//ウィンドウに周囲の余白サイズ
-Window_SkillStatus.prototype.standardPadding = function() {
-    return FTKR.CSS.SS.window.padding;
-};
-
-//書き換え
-//ウィンドウ内の1行の高さ
-Window_SkillStatus.prototype.lineHeight = function() {
-    return FTKR.CSS.SS.window.lineHeight;
-};
-
-//書き換え
-//ウィンドウの背景の透明度
-Window_SkillStatus.prototype.standardBackOpacity = function() {
-    return FTKR.CSS.SS.window.opacity;
-};
-
-//書き換え
-//ウィンドウ枠の表示
-Window_SkillStatus.prototype._refreshFrame = function() {
-    if (!FTKR.CSS.SS.window.hideFrame) Window.prototype._refreshFrame.call(this);
-};
-
-}//ウィンドウカスタム有効
-
-};//TKR_CustomSimpleActorStatus.jsが必要
+    //書き換え
+    Window_SkillStatus.prototype.refresh = function() {
+        this.contents.clear();
+        if (this._actor) {
+            var lss = this._lssStatus;
+            var w = this.width - this.padding * 2;
+            var h = this.height - this.padding * 2;
+            this.drawCssActorStatus(0, this._actor, 0, 0, w, h, lss);
+        }
+    };
+    
+}());//TKR_CustomSimpleActorStatus.jsが必要

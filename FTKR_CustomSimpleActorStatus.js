@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2017/11/08
-// バージョン : v2.5.1
+// 最終更新日 : 2017/11/18
+// バージョン : v2.6.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.5.1 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v2.6.0 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -878,9 +878,6 @@ FTKR.CSS = FTKR.CSS || {};
  *    :streval(x) - 
  *    : JS計算式 x を評価して、その結果を文字列で表示します。
  *    :
- *    :icon(x) - 
- *    : JS計算式 x を評価して、その値のアイコンを表示します。
- *    :
  *    :カンマ(,)で区切って複数のパラメータを入力した場合は、
  *    :行を変えてそれぞれのパラメータを表示します。
  *    :表示に必要な行数は、 faceが4、charaとsvが2、それ以外が1行です。
@@ -1258,9 +1255,17 @@ FTKR.CSS = FTKR.CSS || {};
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
+ * プラグイン公開元
+ * https://github.com/futokoro/RPGMaker/blob/master/README.md
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v2.6.0 - 2017/11/18 : 機能追加
+ *    1. FTKR_CSS_***Status系の拡張プラグインをGraphicalDesignMode.jsに
+ *       対応する処理を追加。
  * 
  * v2.5.1 - 2017/11/08 : 不具合修正
  *    1. FTKR_OriginalSceneWindow.jsで生成したウィンドウが有る場合に
@@ -1918,7 +1923,10 @@ FTKR.CSS = FTKR.CSS || {};
     FTKR.CSS.Game_Actor_setup = Game_Actor.prototype.setup;
     Game_Actor.prototype.setup = function(actorId) {
         FTKR.CSS.Game_Actor_setup.call(this, actorId);
-        ImageManager.loadPicture(this.actor().cssbgi.name);
+        ImageManager.loadFace(this.faceName());
+        this.actor().cssbgi.forEach( function(bgi){
+            if (bgi) ImageManager.loadPicture(bgi.name);
+        });
         ImageManager.loadSvActor(this.battlerName());
     };
 
@@ -2646,17 +2654,100 @@ FTKR.CSS = FTKR.CSS || {};
         return 1;
     };
 
+    //------------------------------------------------------------------------
+    // ウィンドウレイアウトの初期値設定用の修正
+    //------------------------------------------------------------------------
+
+    var _CSS_Window_Base_initialize = Window_Base.prototype.initialize;
+    Window_Base.prototype.initialize = function(x, y, width, height) {
+        this.initCssLayout();
+        _CSS_Window_Base_initialize.call(this, x, y, width, height);
+    };
+
+    Window_Base.prototype.initCssLayout = function() {
+        var lss = this.standardCssLayout();
+        if (lss && lss.enabled) {
+            this._css_spacing = 0;
+            this._css_fontSize = lss.fontSize;
+            this._css_numVisibleRows = lss.numVisibleRows;
+            this._css_padding = lss.padding;
+            this._css_lineHeight = lss.lineHeight;
+            this._css_opacity = lss.opacity;
+            this._css_hideFrame = lss.hideFrame;
+        }
+        this._lssStatus = this.standardCssStatus();
+    };
+
+    Window_Base.prototype.standardCssLayout = function() {
+        return {};
+    }
+
+    Window_Base.prototype.standardCssStatus = function() {
+        return {};
+    };
+
+    var _CSS_Window_Base_numVisibleRows = Window_Base.prototype.numVisibleRows;
+    Window_Base.prototype.numVisibleRows = function() {
+        return this._css_numVisibleRows ? this._css_numVisibleRows :
+            _CSS_Window_Base_numVisibleRows.call(this);
+    };
+
+    var _CSS_Window_Base_standardFontSize = Window_Base.prototype.standardFontSize;
+    Window_Base.prototype.standardFontSize = function() {
+        return this._css_fontSize ? this._css_fontSize : _CSS_Window_Base_standardFontSize.call(this);
+    };
+
+    var _CSS_Window_Base_standardPadding = Window_Base.prototype.standardPadding;
+    Window_Base.prototype.standardPadding = function() {
+        return this._css_padding ? this._css_padding : _CSS_Window_Base_standardPadding.call(this);
+    };
+
+    var _CSS_Window_Base_lineHeight = Window_Base.prototype.lineHeight;
+    Window_Base.prototype.lineHeight = function() {
+        return this._css_lineHeight ? this._css_lineHeight : _CSS_Window_Base_lineHeight.call(this);
+    };
+
+    var _CSS_Window_Base_standardBackOpacity = Window_Base.prototype.standardBackOpacity;
+    Window_Base.prototype.standardBackOpacity = function() {
+        return this._css_opacity ? this._css_opacity : _CSS_Window_Base_standardBackOpacity.call(this);
+    };
+
+    //書き換え
+    //ウィンドウ枠の表示
+    Window_Base.prototype._refreshFrame = function() {
+        if (!this._css_hideFrame) Window.prototype._refreshFrame.call(this);
+    };
+
     //=============================================================================
-    // Sprite_Battlerの修正
-    // Sprite_Actorの修正
+    // Window_Selectableの修正
     //=============================================================================
 
+    Window_Selectable.prototype.initCssLayout = function() {
+        Window_Base.prototype.initCssLayout.call(this);
+        var lss = this.standardCssLayout();
+        if (lss && lss.enabled) {
+            this._css_maxCols = lss.maxCols;
+            this._css_cursorHeight = lss.cursorHeight;
+            this._css_hSpace = lss.hspace;
+        }
+    };
+
+    var _CSS_Window_Selectable_spacing = Window_Selectable.prototype.spacing;
+    Window_Selectable.prototype.spacing = function() {
+        return this._css_spacing ? this._css_spacing : _CSS_Window_Selectable_spacing.call(this);
+    };
+
+    var _CSS_Window_Selectable_maxCols = Window_Selectable.prototype.maxCols;
+    Window_Selectable.prototype.maxCols = function() {
+        return this._css_maxCols ? this._css_maxCols : _CSS_Window_Selectable_maxCols.call(this);
+    };
+
     Window_Selectable.prototype.cursorHeight = function() {
-        return 1;
+        return this._css_cursorHeight;
     };
 
     Window_Selectable.prototype.itemHeightSpace = function() {
-        return 0;
+        return this._css_hSpace;
     };
 
     Window_Selectable.prototype.unitHeight = function() {

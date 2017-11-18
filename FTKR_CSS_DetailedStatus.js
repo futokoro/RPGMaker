@@ -3,8 +3,8 @@
 // FTKR_CSS_DetailedStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/21
-// 最終更新日 : 2017/05/13
-// バージョン : v1.0.2
+// 最終更新日 : 2017/11/18
+// バージョン : v1.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS.DS = FTKR.CSS.DS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.2 詳細ステータス画面の表示内容を変更するプラグイン
+ * @plugindesc v1.1.0 詳細ステータス画面の表示内容を変更するプラグイン
  * @author フトコロ
  *
  * @param --詳細ステータスの表示設定--
@@ -303,9 +303,15 @@ FTKR.CSS.DS = FTKR.CSS.DS || {};
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
+ * プラグイン公開元
+ * https://github.com/futokoro/RPGMaker/blob/master/README.md
+ * 
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.1.0 - 2017/11/18 : 仕様変更
+ *    1. FTKR_CustomSimpleActorStatus.js の v2.6.0に対応。
  * 
  * v1.0.2 - 2017/05/13 : 不具合修正
  *    1. ウィンドウ設定が正常に機能していない不具合を修正。
@@ -319,158 +325,127 @@ FTKR.CSS.DS = FTKR.CSS.DS || {};
  */
 //=============================================================================
 
-if (Imported.FTKR_CSS) {
+if (Imported.FTKR_CSS) (function(){
 
-//=============================================================================
-// プラグイン パラメータ
-//=============================================================================
-FTKR.CSS.DS.parameters = PluginManager.parameters('FTKR_CSS_DetailedStatus');
+    //=============================================================================
+    // プラグイン パラメータ
+    //=============================================================================
+    var parameters = PluginManager.parameters('FTKR_CSS_DetailedStatus');
 
-//詳細ステータスオブジェクト
-FTKR.CSS.DS.detailedStatus = {
-    lineNum:String(FTKR.CSS.DS.parameters['DS Lines Number'] || ''),
-    horz:{
-      thick:Number(FTKR.CSS.DS.parameters['DS Horz Line Thick'] || 0),
-      color:Number(FTKR.CSS.DS.parameters['DS Horz Line Color'] || 0),
-      opacity:Number(FTKR.CSS.DS.parameters['DS Horz Line Opacity'] || 0),
-    },
-    line:[
-      String(FTKR.CSS.DS.parameters['DS Line0 Status'] || ''),
-      String(FTKR.CSS.DS.parameters['DS Line1 Status'] || ''),
-      String(FTKR.CSS.DS.parameters['DS Line2 Status'] || ''),
-      String(FTKR.CSS.DS.parameters['DS Line3 Status'] || ''),
-    ],
-    space:[
-      String(FTKR.CSS.DS.parameters['DS Space0'] || ''),
-      String(FTKR.CSS.DS.parameters['DS Space1'] || ''),
-      String(FTKR.CSS.DS.parameters['DS Space2'] || ''),
-      String(FTKR.CSS.DS.parameters['DS Space3'] || ''),
-    ],
-    spaceIn:[
-      Number(FTKR.CSS.DS.parameters['DS Space In Text0'] || 0),
-      Number(FTKR.CSS.DS.parameters['DS Space In Text1'] || 0),
-      Number(FTKR.CSS.DS.parameters['DS Space In Text2'] || 0),
-      Number(FTKR.CSS.DS.parameters['DS Space In Text3'] || 0),
-    ],
-    widthRate:[
-      String(FTKR.CSS.DS.parameters['DS Width Rate0'] || ''),
-      String(FTKR.CSS.DS.parameters['DS Width Rate1'] || ''),
-      String(FTKR.CSS.DS.parameters['DS Width Rate2'] || ''),
-      String(FTKR.CSS.DS.parameters['DS Width Rate3'] || ''),
-    ],
-};
+    //詳細ステータスオブジェクト
+    FTKR.CSS.DS.detailedStatus = {
+        lineNum   :String(parameters['DS Lines Number'] || ''),
+        horz:{
+          thick   :Number(parameters['DS Horz Line Thick'] || 0),
+          color   :Number(parameters['DS Horz Line Color'] || 0),
+          opacity :Number(parameters['DS Horz Line Opacity'] || 0),
+        },
+        line:[
+          String(parameters['DS Line0 Status'] || ''),
+          String(parameters['DS Line1 Status'] || ''),
+          String(parameters['DS Line2 Status'] || ''),
+          String(parameters['DS Line3 Status'] || ''),
+        ],
+        space:[
+          String(parameters['DS Space0'] || ''),
+          String(parameters['DS Space1'] || ''),
+          String(parameters['DS Space2'] || ''),
+          String(parameters['DS Space3'] || ''),
+        ],
+        spaceIn:[
+          Number(parameters['DS Space In Text0'] || 0),
+          Number(parameters['DS Space In Text1'] || 0),
+          Number(parameters['DS Space In Text2'] || 0),
+          Number(parameters['DS Space In Text3'] || 0),
+        ],
+        widthRate:[
+          String(parameters['DS Width Rate0'] || ''),
+          String(parameters['DS Width Rate1'] || ''),
+          String(parameters['DS Width Rate2'] || ''),
+          String(parameters['DS Width Rate3'] || ''),
+        ],
+    };
 
-FTKR.CSS.DS.window = {
-    enabled:Number(FTKR.CSS.DS.parameters['Enabled Custom Window'] || 0),
-    numVisibleRows:Number(FTKR.CSS.DS.parameters['Number Visible Rows'] || 0),
-    maxCols:Number(FTKR.CSS.DS.parameters['Number Max Cols'] || 0),
-    fontSize:Number(FTKR.CSS.DS.parameters['Font Size'] || 0),
-    padding:Number(FTKR.CSS.DS.parameters['Window Padding'] || 0),
-    lineHeight:Number(FTKR.CSS.DS.parameters['Window Line Height'] || 0),
-    opacity:Number(FTKR.CSS.DS.parameters['Window Opacity'] || 0),
-    hideFrame:Number(FTKR.CSS.DS.parameters['Hide Window Frame'] || 0),
-    cursolHeight:Number(FTKR.CSS.DS.parameters['Cursol Line Number'] || 0),
-};
+    FTKR.CSS.DS.window = {
+        enabled       :Number(parameters['Enabled Custom Window'] || 0),
+        numVisibleRows:Number(parameters['Number Visible Rows'] || 0),
+        fontSize      :Number(parameters['Font Size'] || 0),
+        padding       :Number(parameters['Window Padding'] || 0),
+        lineHeight    :Number(parameters['Window Line Height'] || 0),
+        opacity       :Number(parameters['Window Opacity'] || 0),
+        hideFrame     :Number(parameters['Hide Window Frame'] || 0),
+    };
 
-//=============================================================================
-// Window_Base
-//=============================================================================
+    //=============================================================================
+    // Window_Base
+    //=============================================================================
 
-/*-------------------------------------------------------------
-アクターの詳細ステータスを表示する関数
-drawCssDetailedStatus(actor, x, y, width, dss)
-actor :アクターオブジェクト
-x     :x座標
-y     :y座標
-width :表示エリアの幅
-dss   :詳細ステータスオブジェクト
--------------------------------------------------------------*/
-Window_Base.prototype.drawCssDetailedStatus = function(actor, x, y, width, dss) {
-    if (!dss) dss = FTKR.CSS.DS.detailedStatus;
-    var lineHeight = this.lineHeight();
-    var lineNums = dss.lineNum.split(',').num();
-    var ays = []; var ahs = [];
-    for (var t = 0; t < 4; t++) {
-        var text = dss.line[t].split(';');
-        var lss = {
-            text1:text[0] || '',
-            text2:text[1] || '',
-            text3:text[2] || '',
-            space:dss.space[t],
-            spaceIn:dss.spaceIn[t],
-            widthRate:dss.widthRate[t],
-            faceLine:dss.faceLine,
-        };
-        ahs[t] = lineHeight * lineNums[t];
-        ays[t] = t > 0 ? ays[t-1] + ahs[t-1]: y;
-        this.drawCssActorStatus(0, actor, x, ays[t], width, ahs[t], lss);
-        ahs[t] += this.drawCssHorzLine(ays[t] + ahs[t]) * lineHeight;
-    }
-};
+    /*-------------------------------------------------------------
+    アクターの詳細ステータスを表示する関数
+    drawCssDetailedStatus(actor, x, y, width, dss)
+    actor :アクターオブジェクト
+    x     :x座標
+    y     :y座標
+    width :表示エリアの幅
+    dss   :詳細ステータスオブジェクト
+    -------------------------------------------------------------*/
+    Window_Base.prototype.drawCssDetailedStatus = function(actor, x, y, width, dss) {
+        if (!dss) dss = FTKR.CSS.DS.detailedStatus;
+        var lineHeight = this.lineHeight();
+        var lineNums = dss.lineNum.split(',').num();
+        var ays = []; var ahs = [];
+        for (var t = 0; t < 4; t++) {
+            var text = dss.line[t].split(';');
+            var lss = {
+                text1:text[0] || '',
+                text2:text[1] || '',
+                text3:text[2] || '',
+                space:dss.space[t],
+                spaceIn:dss.spaceIn[t],
+                widthRate:dss.widthRate[t],
+                faceLine:dss.faceLine,
+            };
+            ahs[t] = lineHeight * lineNums[t];
+            ays[t] = t > 0 ? ays[t-1] + ahs[t-1]: y;
+            this.drawCssActorStatus(0, actor, x, ays[t], width, ahs[t], lss);
+            ahs[t] += this.drawCssHorzLine(ays[t] + ahs[t]) * lineHeight;
+        }
+    };
 
-//表示エリア間のラインの表示関数
-Window_Status.prototype.drawCssHorzLine = function(y, horz) {
-    horz = horz || FTKR.CSS.DS.detailedStatus.horz;
-    if (horz.color === -1) return 0;
-    var lineY = y + this.lineHeight() / 2 - 1;
-    this.contents.paintOpacity = horz.opacity;
-    this.contents.fillRect(0, lineY, this.contentsWidth(), horz.thick, this.textColor(horz.color));
-    this.contents.paintOpacity = 255;
-    return 1;
-};
+    //表示エリア間のラインの表示関数
+    Window_Status.prototype.drawCssHorzLine = function(y, horz) {
+        horz = horz || FTKR.CSS.DS.detailedStatus.horz;
+        if (horz.color === -1) return 0;
+        var lineY = y + this.lineHeight() / 2 - 1;
+        this.contents.paintOpacity = horz.opacity;
+        this.contents.fillRect(0, lineY, this.contentsWidth(), horz.thick, this.textColor(horz.color));
+        this.contents.paintOpacity = 255;
+        return 1;
+    };
 
-//=============================================================================
-// Window_Status
-// ステータス画面のステータスウィンドウの表示クラス
-//=============================================================================
+    //=============================================================================
+    // Window_Status
+    // ステータス画面のステータスウィンドウの表示クラス
+    //=============================================================================
 
-//書き換え
-Window_Status.prototype.refresh = function() {
-    this.contents.clear();
-    if (this._actor) {
-        var w = this.width - this.padding * 2;
-        this.drawCssDetailedStatus(this._actor, 0, 0, w);
-    }
-};
+    //書き換え
+    Window_Status.prototype.refresh = function() {
+        this.contents.clear();
+        if (this._actor) {
+            var w = this.width - this.padding * 2;
+            this.drawCssDetailedStatus(this._actor, 0, 0, w);
+        }
+    };
 
-if(FTKR.CSS.DS.window.enabled) {
+    Window_Status.prototype.standardCssLayout = function() {
+        return FTKR.CSS.DS.window;
+    };
 
-//書き換え
-//ウィンドウの行数
-Window_Status.prototype.numVisibleRows = function() {
-    return FTKR.CSS.DS.window.numVisibleRows;
-};
+    //ウィンドウの行数
+    var _DS_Window_Status_numVisibleRows = Window_Status.prototype.numVisibleRows;
+    Window_Status.prototype.numVisibleRows = function() {
+        return FTKR.CSS.DS.window.enable ? FTKR.CSS.DS.window.numVisibleRows :
+        _DS_Window_Status_numVisibleRows.call(this);
+    };
 
-//書き換え
-//ウィンドウのフォントサイズ
-Window_Status.prototype.standardFontSize = function() {
-    return FTKR.CSS.DS.window.fontSize;
-};
-
-//書き換え
-//ウィンドウに周囲の余白サイズ
-Window_Status.prototype.standardPadding = function() {
-    return FTKR.CSS.DS.window.padding;
-};
-
-//書き換え
-//ウィンドウ内の1行の高さ
-Window_Status.prototype.lineHeight = function() {
-    return FTKR.CSS.DS.window.lineHeight;
-};
-
-//書き換え
-//ウィンドウの背景の透明度
-Window_Status.prototype.standardBackOpacity = function() {
-    return FTKR.CSS.DS.window.opacity;
-};
-
-//書き換え
-//ウィンドウ枠の表示
-Window_Status.prototype._refreshFrame = function() {
-    if (!FTKR.CSS.DS.window.hideFrame) Window.prototype._refreshFrame.call(this);
-};
-
-}//ウィンドウカスタム有効
-
-};//TKR_CustomSimpleActorStatus.jsが必要
+}());//TKR_CustomSimpleActorStatus.jsが必要

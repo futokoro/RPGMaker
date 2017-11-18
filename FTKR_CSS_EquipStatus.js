@@ -3,8 +3,8 @@
 // FTKR_CSS_EquipStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/05/13
-// 最終更新日 : 2017/07/23
-// バージョン : v1.0.2
+// 最終更新日 : 2017/11/18
+// バージョン : v1.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 FTKR.CSS.ES = FTKR.CSS.ES || {};
 
 /*:
- * @plugindesc v1.0.2 装備画面のステータスレイアウトを変更する
+ * @plugindesc v1.1.0 装備画面のステータスレイアウトを変更する
  * @author フトコロ
  *
  * @param --レイアウト設定--
@@ -211,9 +211,15 @@ FTKR.CSS.ES = FTKR.CSS.ES || {};
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
+ * プラグイン公開元
+ * https://github.com/futokoro/RPGMaker/blob/master/README.md
+ * 
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.1.0 - 2017/11/18 : 仕様変更
+ *    1. FTKR_CustomSimpleActorStatus.js の v2.6.0に対応。
  * 
  * v1.0.2 - 2017/07/23 : 不具合修正
  *    1. ウィンドウの設定が反映されない不具合を修正。
@@ -248,18 +254,24 @@ if (Imported.FTKR_CSS) (function() {
     FTKR.CSS.ES.window = {
         enabled       :Number(parameters['Enabled Custom Window'] || 0),
         numVisibleRows:Number(parameters['Number Visible Rows'] || 0),
-        maxCols       :Number(parameters['Number Max Cols'] || 0),
         fontSize      :Number(parameters['Font Size'] || 0),
         padding       :Number(parameters['Window Padding'] || 0),
         lineHeight    :Number(parameters['Window Line Height'] || 0),
         opacity       :Number(parameters['Window Opacity'] || 0),
         hideFrame     :Number(parameters['Hide Window Frame'] || 0),
-        cursolHeight  :Number(parameters['Cursol Line Number'] || 0),
     };
 
     //=============================================================================
     // Window_EquipStatus
     //=============================================================================
+
+    Window_EquipStatus.prototype.standardCssLayout = function() {
+        return FTKR.CSS.ES.window;
+    };
+
+    Window_EquipStatus.prototype.standardCssStatus = function() {
+        return FTKR.CSS.ES.simpleStatus;
+    };
 
     //書き換え
     Window_EquipStatus.prototype.evalCssCustomFormula = function(actor, formula) {
@@ -272,51 +284,19 @@ if (Imported.FTKR_CSS) (function() {
     Window_EquipStatus.prototype.refresh = function() {
         this.contents.clear();
         if (this._actor) {
+            var lss = this._lssStatus;
             var w = this.width - this.padding * 2;
             var h = this.height - this.padding * 2;
-            FTKR.CSS.ES.simpleStatus.target = this._tempActor;
-            this.drawCssActorStatus(0, this._actor, 0, 0, w, h, FTKR.CSS.ES.simpleStatus);
+            lss.target = this._tempActor;
+            this.drawCssActorStatus(0, this._actor, 0, 0, w, h, lss);
         }
     };
 
-    if(FTKR.CSS.ES.window.enabled) {
-
-    //書き換え
     //ウィンドウの行数
+    var _DS_Window_EquipStatus_numVisibleRows = Window_EquipStatus.prototype.numVisibleRows;
     Window_EquipStatus.prototype.numVisibleRows = function() {
-        return FTKR.CSS.ES.window.numVisibleRows;
+        return FTKR.CSS.ES.window.enable ? FTKR.CSS.ES.window.numVisibleRows :
+        _DS_Window_EquipStatus_numVisibleRows.call(this);
     };
-
-    //書き換え
-    //ウィンドウのフォントサイズ
-    Window_EquipStatus.prototype.standardFontSize = function() {
-        return FTKR.CSS.ES.window.fontSize;
-    };
-
-    //書き換え
-    //ウィンドウに周囲の余白サイズ
-    Window_EquipStatus.prototype.standardPadding = function() {
-        return FTKR.CSS.ES.window.padding;
-    };
-
-    //書き換え
-    //ウィンドウ内の1行の高さ
-    Window_EquipStatus.prototype.lineHeight = function() {
-        return FTKR.CSS.ES.window.lineHeight;
-    };
-
-    //書き換え
-    //ウィンドウの背景の透明度
-    Window_EquipStatus.prototype.standardBackOpacity = function() {
-        return FTKR.CSS.ES.window.opacity;
-    };
-
-    //書き換え
-    //ウィンドウ枠の表示
-    Window_EquipStatus.prototype._refreshFrame = function() {
-        if (!FTKR.CSS.ES.window.hideFrame) Window.prototype._refreshFrame.call(this);
-    };
-
-    }//ウィンドウカスタム有効
-
+    
 }());//FTKR_CustomSimpleActorStatus.jsが必要

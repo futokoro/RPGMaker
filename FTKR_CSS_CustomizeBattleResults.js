@@ -3,8 +3,8 @@
 // FTKR_CSS_CustomizeBattleResults.js
 // 作成者     : フトコロ
 // 作成日     : 2017/06/07
-// 最終更新日 : 2017/11/08
-// バージョン : v1.3.0
+// 最終更新日 : 2017/11/18
+// バージョン : v1.3.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -14,7 +14,7 @@ var FTKR = FTKR || {};
 FTKR.CBR = FTKR.CBR || {};
 
 /*:
- * @plugindesc v1.3.0 カスタム可能な戦闘結果画面を表示する
+ * @plugindesc v1.3.1 カスタム可能な戦闘結果画面を表示する
  * @author フトコロ
  *
  * @param --タイトル設定--
@@ -347,6 +347,9 @@ FTKR.CBR = FTKR.CBR || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.3.1 - 2017/11/18 : 不具合修正
+ *    1. GraphicalDesignMode.jsのレイアウト変更が一部反映されない不具合を修正。
+ * 
  * v1.3.0 - 2017/11/08 : 機能追加
  *    1. GraphicalDesignMode.jsとFTKR_CSS_GDM.jsにより、デザインモード中に
  *       ゲーム内でレイアウトを変更する機能を追加。
@@ -420,6 +423,7 @@ if (Imported.FTKR_CSS) (function() {
             hideFrame   :Number(parameters['Command Hide Frame'] || 0),
         },
         actor:{
+            enabled     :true,
             visibleRows :Number(parameters['Actor Visible Rows'] || 0),
             maxCols     :Number(parameters['Actor Max Cols'] || 0),
             fontSize    :Number(parameters['Actor Font Size'] || 0),
@@ -437,6 +441,7 @@ if (Imported.FTKR_CSS) (function() {
             widthRate   :String(parameters['Actor Status Width Rate'] || ''),
         },
         item:{
+            enabled     :true,
             visibleRows :Number(parameters['Item Visible Rows'] || 0),
             maxCols     :Number(parameters['Item Max Cols'] || 0),
             fontSize    :Number(parameters['Item Font Size'] || 0),
@@ -810,42 +815,16 @@ if (Imported.FTKR_CSS) (function() {
         this.drawTitle();
     };
 
+    Window_BattleResultTitle.prototype.standardCssLayout = function() {
+        return FTKR.CBR.title;
+    };
+
     Window_BattleResultTitle.prototype.drawTitle = function() {
         var textWidth = convertTextWidth(FTKR.CBR.title.text);
         var x = FTKR.CBR.title.position * (this.width - textWidth) / 2;
         this.drawTextEx(FTKR.CBR.title.text, x, 0);
     };
 
-    //書き換え
-    //ウィンドウのフォントサイズ
-    Window_BattleResultTitle.prototype.standardFontSize = function() {
-        return FTKR.CBR.title.fontSize;
-    };
-
-    //書き換え
-    //ウィンドウに周囲の余白サイズ
-    Window_BattleResultTitle.prototype.standardPadding = function() {
-        return FTKR.CBR.title.padding;
-    };
-
-    //書き換え
-    //ウィンドウ内の1行の高さ
-    Window_BattleResultTitle.prototype.lineHeight = function() {
-        return FTKR.CBR.title.lineHeight;
-    };
-
-    //書き換え
-    //ウィンドウの背景の透明度
-    Window_BattleResultTitle.prototype.standardBackOpacity = function() {
-        return FTKR.CBR.title.opacity;
-    };
-
-    //書き換え
-    //ウィンドウ枠の表示
-    Window_BattleResultTitle.prototype._refreshFrame = function() {
-        if (!FTKR.CBR.title.hideFrame) Window.prototype._refreshFrame.call(this);
-    };
-    
     //=============================================================================
     // 共通戦績結果ウィンドウクラス
     //Window_BattleResultParty
@@ -854,15 +833,14 @@ if (Imported.FTKR_CSS) (function() {
     Window_BattleResultParty.prototype = Object.create(Window_Base.prototype);
     Window_BattleResultParty.prototype.constructor = Window_BattleResultParty;
 
-    Window_BattleResultParty.prototype.initialize = function(x, y, width, height) {
-        this._lssStatus = this.standardCssStatus();
-        Window_Base.prototype.initialize.call(this, x, y, width, height);
-    };
-
     Window_BattleResultParty.prototype.standardCssStatus = function() {
         return FTKR.CBR.party;
     };
       
+    Window_BattleResultTitle.prototype.standardCssLayout = function() {
+        return FTKR.CBR.party;
+    };
+
     Window_BattleResultParty.prototype.refresh = function() {
         this.contents.clear();
         var lss = this._lssStatus;
@@ -870,36 +848,6 @@ if (Imported.FTKR_CSS) (function() {
         var w = this.width - this.padding * 2;
         var h = this.height - this.padding * 2;
         this.drawCssActorStatus(0, actor, 0, 0, w, h, lss);
-    };
-
-    //書き換え
-    //ウィンドウのフォントサイズ
-    Window_BattleResultParty.prototype.standardFontSize = function() {
-        return FTKR.CBR.party.fontSize;
-    };
-
-    //書き換え
-    //ウィンドウに周囲の余白サイズ
-    Window_BattleResultParty.prototype.standardPadding = function() {
-        return FTKR.CBR.party.padding;
-    };
-
-    //書き換え
-    //ウィンドウ内の1行の高さ
-    Window_BattleResultParty.prototype.lineHeight = function() {
-        return FTKR.CBR.party.lineHeight;
-    };
-
-    //書き換え
-    //ウィンドウの背景の透明度
-    Window_BattleResultParty.prototype.standardBackOpacity = function() {
-        return FTKR.CBR.party.opacity;
-    };
-
-    //書き換え
-    //ウィンドウ枠の表示
-    Window_BattleResultParty.prototype._refreshFrame = function() {
-        if (!FTKR.CBR.party.hideFrame) Window.prototype._refreshFrame.call(this);
     };
 
     //=============================================================================
@@ -929,34 +877,8 @@ if (Imported.FTKR_CSS) (function() {
         return 3;
     };
 
-    //書き換え
-    //ウィンドウのフォントサイズ
-    Window_BattleResultCommand.prototype.standardFontSize = function() {
-        return FTKR.CBR.command.fontSize;
-    };
-
-    //書き換え
-    //ウィンドウに周囲の余白サイズ
-    Window_BattleResultCommand.prototype.standardPadding = function() {
-        return FTKR.CBR.command.padding;
-    };
-
-    //書き換え
-    //ウィンドウ内の1行の高さ
-    Window_BattleResultCommand.prototype.lineHeight = function() {
-        return FTKR.CBR.command.lineHeight;
-    };
-
-    //書き換え
-    //ウィンドウの背景の透明度
-    Window_BattleResultCommand.prototype.standardBackOpacity = function() {
-        return FTKR.CBR.command.opacity;
-    };
-
-    //書き換え
-    //ウィンドウ枠の表示
-    Window_BattleResultCommand.prototype._refreshFrame = function() {
-        if (!FTKR.CBR.command.hideFrame) Window.prototype._refreshFrame.call(this);
+    Window_BattleResultCommand.prototype.standardCssLayout = function() {
+        return FTKR.CBR.command;
     };
 
     Window_BattleResultCommand.prototype.makeCommandList = function() {
@@ -1001,18 +923,14 @@ if (Imported.FTKR_CSS) (function() {
     Window_BattleResultActor.prototype = Object.create(Window_Selectable.prototype);
     Window_BattleResultActor.prototype.constructor = Window_BattleResultActor;
 
-    Window_BattleResultActor.prototype.initialize = function(x, y, width, height) {
-        this._lssStatus = this.standardCssStatus();
-        this._maxCols = FTKR.CBR.actor.maxCols;
-        this._cursorHeight = FTKR.CBR.actor.cursorHeight;
-        this._hSpace = FTKR.CBR.actor.hspace;
-        Window_Selectable.prototype.initialize.call(this, x, y, width, height);
-    };
-
     Window_BattleResultActor.prototype.standardCssStatus = function() {
         return FTKR.CBR.actor;
     };
       
+    Window_BattleResultActor.prototype.standardCssLayout = function() {
+        return FTKR.CBR.actor;
+    };
+
     Window_BattleResultActor.prototype.maxItems = function() {
         return $gameParty.size();
     };
@@ -1024,66 +942,15 @@ if (Imported.FTKR_CSS) (function() {
         this.drawCssActorStatus(index, actor, rect.x, rect.y, rect.width, rect.height, lss);
     };
 
-    //ウィンドウの行数
-    Window_BattleResultActor.prototype.numVisibleRows = function() {
-        return FTKR.CBR.actor.visibleRows;
-    };
-
-    //書き換え
-    //ウィンドウに横に並べるアクター数
-    Window_BattleResultActor.prototype.maxCols = function() {
-        return this._maxCols
-    };
-
-    Window_BattleResultActor.prototype.cursorHeight = function() {
-        return this._cursorHeight;
-    };
-
-    //書き換え
-    //カーソルの高さ
-    Window_BattleResultActor.prototype.itemHeight = function() {
-        return this.lineHeight() * this.cursorHeight();
-    };
-
-    //書き換え
     //ウィンドウに横に並べるアクターの表示間隔
     //ステータスレイアウト側で変更できるのでここでは 0 とする。
     Window_BattleResultActor.prototype.spacing = function() {
         return 0;
     };
 
-    //書き換え
-    //ウィンドウのフォントサイズ
-    Window_BattleResultActor.prototype.standardFontSize = function() {
-        return FTKR.CBR.actor.fontSize;
-    };
-
-    //書き換え
-    //ウィンドウに周囲の余白サイズ
-    Window_BattleResultActor.prototype.standardPadding = function() {
-        return FTKR.CBR.actor.padding;
-    };
-
-    //書き換え
-    //ウィンドウ内の1行の高さ
-    Window_BattleResultActor.prototype.lineHeight = function() {
-        return FTKR.CBR.actor.lineHeight;
-    };
-
-    //書き換え
-    //ウィンドウの背景の透明度
-    Window_BattleResultActor.prototype.standardBackOpacity = function() {
-        return FTKR.CBR.actor.opacity;
-    };
-
-    //書き換え
-    //ウィンドウ枠の表示
-    Window_BattleResultActor.prototype._refreshFrame = function() {
-        if (!FTKR.CBR.actor.hideFrame) Window.prototype._refreshFrame.call(this);
-    };
-
-    Window_BattleResultActor.prototype.itemHeightSpace = function() {
-        return this._hSpace;
+    //カーソルの高さ
+    Window_BattleResultActor.prototype.itemHeight = function() {
+        return this.lineHeight() * this.cursorHeight();
     };
 
     //=============================================================================
@@ -1103,9 +970,8 @@ if (Imported.FTKR_CSS) (function() {
         this._datas = [];
     };
 
-    //ウィンドウの行数
-    Window_BattleResultItem.prototype.numVisibleRows = function() {
-        return FTKR.CBR.item.visibleRows;
+    Window_BattleResultItem.prototype.standardCssLayout = function() {
+        return FTKR.CBR.item;
     };
 
     Window_BattleResultItem.prototype.setDropItem = function(items) {
@@ -1160,53 +1026,15 @@ if (Imported.FTKR_CSS) (function() {
         }
     };
 
-    //書き換え
-    //ウィンドウに横に並べるアクター数
-    Window_BattleResultItem.prototype.maxCols = function() {
-        return FTKR.CBR.item.maxCols;
-    };
-
-    //書き換え
     //カーソルの高さ
     Window_BattleResultItem.prototype.itemHeight = function() {
-        return this.lineHeight() * FTKR.CBR.item.cursorHeight;
+        return this.lineHeight() * this.cursorHeight();
     };
 
-    //書き換え
     //ウィンドウに横に並べるアクターの表示間隔
     //ステータスレイアウト側で変更できるのでここでは 0 とする。
     Window_BattleResultItem.prototype.spacing = function() {
         return 0;
-    };
-
-    //書き換え
-    //ウィンドウのフォントサイズ
-    Window_BattleResultItem.prototype.standardFontSize = function() {
-        return FTKR.CBR.item.fontSize;
-    };
-
-    //書き換え
-    //ウィンドウに周囲の余白サイズ
-    Window_BattleResultItem.prototype.standardPadding = function() {
-        return FTKR.CBR.item.padding;
-    };
-
-    //書き換え
-    //ウィンドウ内の1行の高さ
-    Window_BattleResultItem.prototype.lineHeight = function() {
-        return FTKR.CBR.item.lineHeight;
-    };
-
-    //書き換え
-    //ウィンドウの背景の透明度
-    Window_BattleResultItem.prototype.standardBackOpacity = function() {
-        return FTKR.CBR.item.opacity;
-    };
-
-    //書き換え
-    //ウィンドウ枠の表示
-    Window_BattleResultItem.prototype._refreshFrame = function() {
-        if (!FTKR.CBR.item.hideFrame) Window.prototype._refreshFrame.call(this);
     };
     
 }());//FTKR_CustomizeBattleResults.js END

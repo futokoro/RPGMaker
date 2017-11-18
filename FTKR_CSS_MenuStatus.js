@@ -3,8 +3,8 @@
 // FTKR_CSS_MenuStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/06/18
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2017/11/18
+// バージョン : v1.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.CSS.MS = FTKR.CSS.MS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 メニュー画面のステータス表示を変更するプラグイン
+ * @plugindesc v1.1.0 メニュー画面のステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @param --簡易ステータス表示--
@@ -206,9 +206,15 @@ FTKR.CSS.MS = FTKR.CSS.MS || {};
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
+ * プラグイン公開元
+ * https://github.com/futokoro/RPGMaker/blob/master/README.md
+ * 
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.1.0 - 2017/11/18 : 仕様変更
+ *    1. FTKR_CustomSimpleActorStatus.js の v2.6.0に対応。
  * 
  * v1.0.0 - 2017/06/18 : 初版作成
  *    FTKR_CustomSimpleActorStatus.js v1.8.0 から分離
@@ -217,7 +223,7 @@ FTKR.CSS.MS = FTKR.CSS.MS || {};
  */
 //=============================================================================
 
-(function() {
+if (Imported.FTKR_CSS) (function() {
 
     //=============================================================================
     // プラグイン パラメータ
@@ -244,7 +250,7 @@ FTKR.CSS.MS = FTKR.CSS.MS || {};
         lineHeight      :Number(parameters['Window Line Height'] || 0),
         opacity         :Number(parameters['Window Opacity'] || 0),
         hideFrame       :Number(parameters['Hide Window Frame'] || 0),
-        cursolHeight    :Number(parameters['Cursor Line Number'] || 0),
+        cursorHeight    :Number(parameters['Cursor Line Number'] || 0),
         hspace          :Number(parameters['Cursor Height Space'] || 0),
     };
 
@@ -252,6 +258,27 @@ FTKR.CSS.MS = FTKR.CSS.MS || {};
     // Window_MenuStatus
     // メニュー画面のステータスウィンドウの表示クラス
     //=============================================================================
+    Window_MenuStatus.prototype.standardCssLayout = function() {
+        return FTKR.CSS.MS.window;
+    };
+
+    Window_MenuStatus.prototype.standardCssStatus = function() {
+        return FTKR.CSS.MS.simpleStatus;
+    };
+
+    var _Window_MenuStatus_itemHeight = Window_MenuStatus.prototype.itemHeight;
+    Window_MenuStatus.prototype.itemHeight = function() {
+        return FTKR.CSS.MS.window.enabled ? 
+            this.lineHeight() * this.cursorHeight() :
+            _Window_MenuStatus_itemHeight.call(this);
+    };
+
+    //ウィンドウの行数
+    var _DS_Window_MenuStatus_numVisibleRows = Window_MenuStatus.prototype.numVisibleRows;
+    Window_MenuStatus.prototype.numVisibleRows = function() {
+        return FTKR.CSS.MS.window.enable ? FTKR.CSS.MS.window.numVisibleRows :
+        _DS_Window_MenuStatus_numVisibleRows.call(this);
+    };
 
     //書き換え
     Window_MenuStatus.prototype.drawItemImage = function(index) {
@@ -259,7 +286,7 @@ FTKR.CSS.MS = FTKR.CSS.MS || {};
 
     //書き換え
     Window_MenuStatus.prototype.drawItemStatus = function(index) {
-        var lss = FTKR.CSS.MS.simpleStatus;
+        var lss = this._lssStatus;
         var actor = $gameParty.members()[index];
         var rect = this.itemRect(index);
         this.drawCssActorStatus(index, actor, rect.x, rect.y, rect.width, rect.height, lss);
@@ -277,110 +304,5 @@ FTKR.CSS.MS = FTKR.CSS.MS || {};
             }
         }
     };
-
-    if(FTKR.CSS.MS.window.enabled) {
-
-    //書き換え
-    //ウィンドウの行数
-    Window_MenuStatus.prototype.numVisibleRows = function() {
-        return FTKR.CSS.MS.window.numVisibleRows;
-    };
-
-    //書き換え
-    //ウィンドウに横に並べるアクター数
-    Window_MenuStatus.prototype.maxCols = function() {
-        return FTKR.CSS.MS.window.maxCols;
-    };
-
-    //書き換え
-    //カーソルの高さ
-    Window_MenuStatus.prototype.itemHeight = function() {
-        return this.lineHeight() * FTKR.CSS.MS.window.cursolHeight;
-    };
-
-    //書き換え
-    //ウィンドウに横に並べるアクターの表示間隔
-    //ステータスレイアウト側で変更できるのでここでは 0 とする。
-    Window_MenuStatus.prototype.spacing = function() {
-        return 0;
-    };
-
-    //書き換え
-    //ウィンドウのフォントサイズ
-    Window_MenuStatus.prototype.standardFontSize = function() {
-        return FTKR.CSS.MS.window.fontSize;
-    };
-
-    //書き換え
-    //ウィンドウに周囲の余白サイズ
-    Window_MenuStatus.prototype.standardPadding = function() {
-        return FTKR.CSS.MS.window.padding;
-    };
-
-    //書き換え
-    //ウィンドウ内の1行の高さ
-    Window_MenuStatus.prototype.lineHeight = function() {
-        return FTKR.CSS.MS.window.lineHeight;
-    };
-
-    //書き換え
-    //ウィンドウの背景の透明度
-    Window_MenuStatus.prototype.standardBackOpacity = function() {
-        return FTKR.CSS.MS.window.opacity;
-    };
-
-    //書き換え
-    //ウィンドウ枠の表示
-    Window_MenuStatus.prototype._refreshFrame = function() {
-        if (!FTKR.CSS.MS.window.hideFrame) Window.prototype._refreshFrame.call(this);
-    };
-
-    Window_MenuStatus.prototype.itemHeightSpace = function() {
-        return FTKR.CSS.MS.window.hspace;
-    };
-
-    Window_MenuStatus.prototype.unitHeight = function() {
-        return this.itemHeight() + this.itemHeightSpace();
-    };
-
-    Window_MenuStatus.prototype.unitWidth = function() {
-        return this.itemWidth() + this.spacing();
-    };
-
-    if (FTKR.CSS.MS.window.hspace) {
-    //書き換え
-    Window_MenuStatus.prototype.maxPageRows = function() {
-        var pageHeight = this.height - this.padding * 2;
-        return Math.floor(pageHeight / this.unitHeight());
-    };
-
-    //書き換え
-    Window_MenuStatus.prototype.topRow = function() {
-        return Math.floor(this._scrollY / this.unitHeight());
-    };
-
-    //書き換え
-    Window_MenuStatus.prototype.setTopRow = function(row) {
-        var scrollY = row.clamp(0, this.maxTopRow()) * this.unitHeight();
-        if (this._scrollY !== scrollY) {
-            this._scrollY = scrollY;
-            this.refresh();
-            this.updateCursor();
-        }
-    };
-
-    //書き換え
-    Window_MenuStatus.prototype.itemRect = function(index) {
-        var rect = new Rectangle();
-        var maxCols = this.maxCols();
-        rect.width = this.itemWidth();
-        rect.height = this.itemHeight();
-        rect.x = index % maxCols * this.unitWidth() - this._scrollX;
-        rect.y = Math.floor(index / maxCols) * this.unitHeight() - this._scrollY;
-        return rect;
-    };
-    }//FTKR.CSS.MS.window.hspace
-
-    }//ウィンドウカスタム有効
 
 }());//EOF

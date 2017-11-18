@@ -310,7 +310,8 @@ FTKR_CustomSimpleActorStatus.js
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.0.0](FTKR_CSS_MenuStatus.js) | 2017/06/18 | 初版作成 |
+| [ver1.1.0](FTKR_CSS_MenuStatus.js) | 2017/11/18 | FTKR_CustomSimpleActorStatus.js の v2.6.0に対応 |
+| ver1.0.0 | 2017/06/18 | 初版作成 |
 
 ## ライセンス
 

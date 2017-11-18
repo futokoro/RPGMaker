@@ -275,7 +275,8 @@ CBR_SHOW_BATTLE_RESULT
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.3.0](FTKR_CSS_CustomizeBattleResults.js) | 2017/11/08 | GraphicalDesignMode.jsとFTKR_CSS_GDM.jsにより、デザインモード中にゲーム内でレイアウトを変更する機能を追加 |
+| [ver1.3.1](FTKR_CSS_CustomizeBattleResults.js) | 2017/11/18 | GraphicalDesignMode.jsのレイアウト変更が一部反映されない不具合を修正 |
+| ver1.3.0 | 2017/11/08 | GraphicalDesignMode.jsとFTKR_CSS_GDM.jsにより、デザインモード中にゲーム内でレイアウトを変更する機能を追加 |
 | ver1.2.0 | 2017/08/22 | レベルアップ時のスキル習得状態を表示するメッセージコードを追加 |
 | ver1.1.0 | 2017/07/13 | 同じアイテムの場合に纏めて表示する機能を追加 |
 | ver1.0.2 | 2017/06/23 | 入手経験値が29以下の場合に、アクターが経験値を入手できない不具合を修正<br>戦績画面タイトルの文字列の表示位置を修正<br>プラグインパラメータに@typeを適用 |

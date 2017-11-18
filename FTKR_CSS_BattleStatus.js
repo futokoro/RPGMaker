@@ -3,8 +3,8 @@
 // FTKR_CSS_BattleStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/11
-// 最終更新日 : 2017/06/11
-// バージョン : v1.2.1
+// 最終更新日 : 2017/11/18
+// バージョン : v1.3.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.0 バトル画面のステータス表示を変更するプラグイン
+ * @plugindesc v1.3.0 バトル画面のステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @param --バトルパーティー設定--
@@ -271,9 +271,15 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
+ * プラグイン公開元
+ * https://github.com/futokoro/RPGMaker/blob/master/README.md
+ * 
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.3.0 - 2017/11/18 : 仕様変更
+ *    1. FTKR_CustomSimpleActorStatus.js の v2.6.0に対応。
  * 
  * v1.2.1 - 2017/06/11 : 機能追加
  *    1. バトルに参加する最大人数を設定する機能を追加。
@@ -301,217 +307,136 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  */
 //=============================================================================
 
-//=============================================================================
-// プラグイン パラメータ
-//=============================================================================
-FTKR.CSS.BS.parameters = PluginManager.parameters('FTKR_CSS_BattleStatus');
+(function() {
 
-FTKR.CSS.BS.party = {
-    maxMembers:Number(FTKR.CSS.BS.parameters['Max Battle Members'] || 0),
-};
+    //=============================================================================
+    // プラグイン パラメータ
+    //=============================================================================
+    var parameters = PluginManager.parameters('FTKR_CSS_BattleStatus');
 
-//ウィンドウ設定オブジェクト
-FTKR.CSS.BS.window = {
-    enabled:Number(FTKR.CSS.BS.parameters['Enabled Custom Window'] || 0),
-    numVisibleRows:Number(FTKR.CSS.BS.parameters['Number Visible Rows'] || 0),
-    maxCols:Number(FTKR.CSS.BS.parameters['Number Max Cols'] || 0),
-    fontSize:Number(FTKR.CSS.BS.parameters['Font Size'] || 0),
-    padding:Number(FTKR.CSS.BS.parameters['Window Padding'] || 0),
-    lineHeight:Number(FTKR.CSS.BS.parameters['Window Line Height'] || 0),
-    opacity:Number(FTKR.CSS.BS.parameters['Window Opacity'] || 0),
-    hideFrame:Number(FTKR.CSS.BS.parameters['Hide Window Frame'] || 0),
-    cursolHeight:Number(FTKR.CSS.BS.parameters['Cursol Line Number'] || 0),
-    hspace:Number(FTKR.CSS.BS.parameters['Cursol Height Space'] || 0),
-};
+    FTKR.CSS.BS.party = {
+        maxMembers    :Number(parameters['Max Battle Members'] || 0),
+    };
 
-//簡易ステータスオブジェクト
-FTKR.CSS.BS.simpleStatus = {
-    text1:String(FTKR.CSS.BS.parameters['Actor Status Text1'] || ''),
-    text2:String(FTKR.CSS.BS.parameters['Actor Status Text2'] || ''),
-    text3:String(FTKR.CSS.BS.parameters['Actor Status Text3'] || ''),
-    space:String(FTKR.CSS.BS.parameters['Actor Status Space'] || ''),
-    spaceIn:Number(FTKR.CSS.BS.parameters['Actor Status Space In Text'] || 0),
-    widthRate:String(FTKR.CSS.BS.parameters['Actor Status Width Rate'] || ''),
-};
+    //ウィンドウ設定オブジェクト
+    FTKR.CSS.BS.window = {
+        enabled       :Number(parameters['Enabled Custom Window'] || 0),
+        numVisibleRows:Number(parameters['Number Visible Rows'] || 0),
+        fontSize      :Number(parameters['Font Size'] || 0),
+        padding       :Number(parameters['Window Padding'] || 0),
+        lineHeight    :Number(parameters['Window Line Height'] || 0),
+        opacity       :Number(parameters['Window Opacity'] || 0),
+        hideFrame     :Number(parameters['Hide Window Frame'] || 0),
+        maxCols       :Number(parameters['Number Max Cols'] || 0),
+        cursorHeight  :Number(parameters['Cursol Line Number'] || 0),
+        hspace        :Number(parameters['Cursol Height Space'] || 0),
+    };
 
-FTKR.CSS.BS.position = {
-    enable:Number(FTKR.CSS.BS.parameters['Enable Custom Position'] || 0),
-    diffX:Number(FTKR.CSS.BS.parameters['Diff Position X'] || 0),
-    diffY:Number(FTKR.CSS.BS.parameters['Diff Position Y'] || 0),
-    diffCol:Number(FTKR.CSS.BS.parameters['Diff Column'] || 0),
-    centerX:Number(FTKR.CSS.BS.parameters['Center Position X'] || 0),
-    centerY:Number(FTKR.CSS.BS.parameters['Center Position Y'] || 0),
-    maxVer:Number(FTKR.CSS.BS.parameters['Max Number of Vertical'] || 0),
-};
+    //簡易ステータスオブジェクト
+    FTKR.CSS.BS.simpleStatus = {
+        text1     :String(parameters['Actor Status Text1'] || ''),
+        text2     :String(parameters['Actor Status Text2'] || ''),
+        text3     :String(parameters['Actor Status Text3'] || ''),
+        space     :String(parameters['Actor Status Space'] || ''),
+        spaceIn   :Number(parameters['Actor Status Space In Text'] || 0),
+        widthRate :String(parameters['Actor Status Width Rate'] || ''),
+    };
 
-//=============================================================================
-// Game_Party
-//=============================================================================
+    FTKR.CSS.BS.position = {
+        enable    :Number(parameters['Enable Custom Position'] || 0),
+        diffX     :Number(parameters['Diff Position X'] || 0),
+        diffY     :Number(parameters['Diff Position Y'] || 0),
+        diffCol   :Number(parameters['Diff Column'] || 0),
+        centerX   :Number(parameters['Center Position X'] || 0),
+        centerY   :Number(parameters['Center Position Y'] || 0),
+        maxVer    :Number(parameters['Max Number of Vertical'] || 0),
+    };
 
-if (FTKR.CSS.BS.party.maxMembers) {
+    //=============================================================================
+    // Game_Party
+    //=============================================================================
+    if (FTKR.CSS.BS.party.maxMembers) {
 
-Game_Party.prototype.maxBattleMembers = function() {
-    return FTKR.CSS.BS.party.maxMembers;
-};
+    Game_Party.prototype.maxBattleMembers = function() {
+        return FTKR.CSS.BS.party.maxMembers;
+    };
 
-}
-
-//=============================================================================
-// Window_BattleStatus
-// バトル画面のステータスウィンドウの表示クラス
-//=============================================================================
-
-if(FTKR.CSS.BS.window.enabled) {
-
-//書き換え
-//ウィンドウの行数
-Window_BattleStatus.prototype.numVisibleRows = function() {
-    return FTKR.CSS.BS.window.numVisibleRows;
-};
-
-//書き換え
-//ウィンドウに横に並べるアクター数
-Window_BattleStatus.prototype.maxCols = function() {
-    return FTKR.CSS.BS.window.maxCols;
-};
-
-//書き換え
-//カーソルの高さ
-Window_BattleStatus.prototype.itemHeight = function() {
-    return this.lineHeight() * FTKR.CSS.BS.window.cursolHeight;
-};
-
-//書き換え
-//ウィンドウに横に並べるアクターの表示間隔
-//ステータスレイアウト側で変更できるのでここでは 0 とする。
-Window_BattleStatus.prototype.spacing = function() {
-    return 0;
-};
-
-//書き換え
-//ウィンドウのフォントサイズ
-Window_BattleStatus.prototype.standardFontSize = function() {
-    return FTKR.CSS.BS.window.fontSize;
-};
-
-//書き換え
-//ウィンドウに周囲の余白サイズ
-Window_BattleStatus.prototype.standardPadding = function() {
-    return FTKR.CSS.BS.window.padding;
-};
-
-//書き換え
-//ウィンドウ内の1行の高さ
-Window_BattleStatus.prototype.lineHeight = function() {
-    return FTKR.CSS.BS.window.lineHeight;
-};
-
-//書き換え
-//ウィンドウの背景の透明度
-Window_BattleStatus.prototype.standardBackOpacity = function() {
-    return FTKR.CSS.BS.window.opacity;
-};
-
-//書き換え
-//ウィンドウ枠の表示
-Window_BattleStatus.prototype._refreshFrame = function() {
-    if (!FTKR.CSS.BS.window.hideFrame) Window.prototype._refreshFrame.call(this);
-};
-
-Window_BattleStatus.prototype.itemHeightSpace = function() {
-    return FTKR.CSS.BS.window.hspace;
-};
-
-Window_BattleStatus.prototype.unitHeight = function() {
-    return this.itemHeight() + this.itemHeightSpace();
-};
-
-Window_BattleStatus.prototype.unitWidth = function() {
-    return this.itemWidth() + this.spacing();
-};
-
-if (FTKR.CSS.BS.window.hspace) {
-//書き換え
-Window_BattleStatus.prototype.maxPageRows = function() {
-    var pageHeight = this.height - this.padding * 2;
-    return Math.floor(pageHeight / this.unitHeight());
-};
-
-//書き換え
-Window_BattleStatus.prototype.topRow = function() {
-    return Math.floor(this._scrollY / this.unitHeight());
-};
-
-//書き換え
-Window_BattleStatus.prototype.setTopRow = function(row) {
-    var scrollY = row.clamp(0, this.maxTopRow()) * this.unitHeight();
-    if (this._scrollY !== scrollY) {
-        this._scrollY = scrollY;
-        this.refresh();
-        this.updateCursor();
     }
-};
 
-//書き換え
-Window_BattleStatus.prototype.itemRect = function(index) {
-    var rect = new Rectangle();
-    var maxCols = this.maxCols();
-    rect.width = this.itemWidth();
-    rect.height = this.itemHeight();
-    rect.x = index % maxCols * this.unitWidth() - this._scrollX;
-    rect.y = Math.floor(index / maxCols) * this.unitHeight() - this._scrollY;
-    return rect;
-};
-}//FTKR.CSS.BS.window.hspace
+    //=============================================================================
+    // Window_BattleStatus
+    // バトル画面のステータスウィンドウの表示クラス
+    //=============================================================================
+    if (Imported.FTKR_CSS) {
 
-}//ウィンドウカスタム有効
+    Window_BattleStatus.prototype.standardCssLayout = function() {
+      return FTKR.CSS.BS.window;
+    };
 
-//書き換え
-//アクター1人分のステータス表示
-if (Imported.FTKR_CSS) {
-  Window_BattleStatus.prototype.drawItem = function(index) {
-      var actor = $gameParty.battleMembers()[index];
-      var rect = this.itemRectForText(index);
-      var lss = FTKR.CSS.BS.simpleStatus;
-      this.drawCssActorStatus(index, actor, rect.x, rect.y, rect.width, rect.height, lss);
-  };
-};//FTKR_CustomSimpleActorStatus.jsが必要
+    Window_BattleStatus.prototype.standardCssStatus = function() {
+      return FTKR.CSS.BS.simpleStatus;
+    };
 
-//=============================================================================
-// Sprite_Actor
-// バトルフィールド上のSVキャラの位置変更
-//=============================================================================
-FTKR.CSS.BS.Sprite_Actor_setActorHome = Sprite_Actor.prototype.setActorHome;
-Sprite_Actor.prototype.setActorHome = function(index) {
-    FTKR.CSS.BS.Sprite_Actor_setActorHome.call(this, index);
-    if (FTKR.CSS.BS.position.enable) {
-        this.setHome(this.partyPositionX(index), this.partyPositionY(index));
-    }
-};
+    Window_BattleStatus.prototype.itemHeight = function() {
+        return this.cursorHeight() ? 
+            this.lineHeight() * this.cursorHeight() :
+            Window_Selectable.prototype.itemHeight.call(this);
+    };
 
-Sprite_Actor.prototype.partyPositionX = function(index) {
-    var party = Math.min($gameParty.battleMembers().length, FTKR.CSS.BS.position.maxVer);
-    var col = Math.floor(index / party);
-    var centerX = FTKR.CSS.BS.position.centerX - this.centerDiffX(party) + col * FTKR.CSS.BS.position.diffCol;
-    var positionX = centerX + (index % party) * FTKR.CSS.BS.position.diffX;
-    return positionX;
-};
+    //ウィンドウの行数
+    var _DS_Window_BattleStatus_numVisibleRows = Window_BattleStatus.prototype.numVisibleRows;
+    Window_BattleStatus.prototype.numVisibleRows = function() {
+        return FTKR.CSS.BS.window.enable ? FTKR.CSS.BS.window.numVisibleRows :
+        _DS_Window_BattleStatus_numVisibleRows.call(this);
+    };
 
-Sprite_Actor.prototype.partyPositionY = function(index) {
-    var party = Math.min($gameParty.battleMembers().length, FTKR.CSS.BS.position.maxVer);
-    var centerY = FTKR.CSS.BS.position.centerY - this.centerDiffY(party);
-    var positionY = centerY + (index % party) * FTKR.CSS.BS.position.diffY;
-    return positionY;
-};
+    //書き換え
+    //アクター1人分のステータス表示
+    Window_BattleStatus.prototype.drawItem = function(index) {
+        var lss = this._lssStatus;
+        var actor = $gameParty.battleMembers()[index];
+        var rect = this.itemRectForText(index);
+        this.drawCssActorStatus(index, actor, rect.x, rect.y, rect.width, rect.height, lss);
+    };
+    };//FTKR_CustomSimpleActorStatus.jsが必要
 
-Sprite_Actor.prototype.centerDiffY = function(party) {
-    var value1 = Math.floor((party + 1) / 2) * FTKR.CSS.BS.position.diffY;
-    var value2 = (Math.floor(party / 2 - 1) * 2 + 1) * FTKR.CSS.BS.position.diffY / 2;
-    return party % 2 ? value1 : value2;
-};
+    //=============================================================================
+    // Sprite_Actor
+    // バトルフィールド上のSVキャラの位置変更
+    //=============================================================================
+    var _BS_Sprite_Actor_setActorHome = Sprite_Actor.prototype.setActorHome;
+    Sprite_Actor.prototype.setActorHome = function(index) {
+        _BS_Sprite_Actor_setActorHome.call(this, index);
+        if (FTKR.CSS.BS.position.enable) {
+            this.setHome(this.partyPositionX(index), this.partyPositionY(index));
+        }
+    };
 
-Sprite_Actor.prototype.centerDiffX = function(party) {
-    var value1 = Math.floor((party + 1) / 2) * FTKR.CSS.BS.position.diffX;
-    var value2 = (Math.floor(party / 2 - 1) * 2 + 1) * FTKR.CSS.BS.position.diffX / 2;
-    return party % 2 ? value1 : value2;
-};
+    Sprite_Actor.prototype.partyPositionX = function(index) {
+        var party = Math.min($gameParty.battleMembers().length, FTKR.CSS.BS.position.maxVer);
+        var col = Math.floor(index / party);
+        var centerX = FTKR.CSS.BS.position.centerX - this.centerDiffX(party) + col * FTKR.CSS.BS.position.diffCol;
+        var positionX = centerX + (index % party) * FTKR.CSS.BS.position.diffX;
+        return positionX;
+    };
+
+    Sprite_Actor.prototype.partyPositionY = function(index) {
+        var party = Math.min($gameParty.battleMembers().length, FTKR.CSS.BS.position.maxVer);
+        var centerY = FTKR.CSS.BS.position.centerY - this.centerDiffY(party);
+        var positionY = centerY + (index % party) * FTKR.CSS.BS.position.diffY;
+        return positionY;
+    };
+
+    Sprite_Actor.prototype.centerDiffY = function(party) {
+        var value1 = Math.floor((party + 1) / 2) * FTKR.CSS.BS.position.diffY;
+        var value2 = (Math.floor(party / 2 - 1) * 2 + 1) * FTKR.CSS.BS.position.diffY / 2;
+        return party % 2 ? value1 : value2;
+    };
+
+    Sprite_Actor.prototype.centerDiffX = function(party) {
+        var value1 = Math.floor((party + 1) / 2) * FTKR.CSS.BS.position.diffX;
+        var value2 = (Math.floor(party / 2 - 1) * 2 + 1) * FTKR.CSS.BS.position.diffX / 2;
+        return party % 2 ? value1 : value2;
+    };
+
+}());//EOF

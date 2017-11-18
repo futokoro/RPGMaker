@@ -3,8 +3,8 @@
 // FTKR_CSS_ShopStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/07/23
-// 最終更新日 : 2017/11/08
-// バージョン : v1.2.0
+// 最終更新日 : 2017/11/18
+// バージョン : v1.2.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 FTKR.CSS.SpS = FTKR.CSS.SpS || {};
 
 /*:
- * @plugindesc v1.2.0 ショップ画面のステータスレイアウトを変更する
+ * @plugindesc v1.2.1 ショップ画面のステータスレイアウトを変更する
  * @author フトコロ
  *
  * @param --共通レイアウト設定--
@@ -350,6 +350,9 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.2.1 - 2017/11/14 : 不具合修正
+ *    1. GraphicalDesignMode.jsのレイアウト変更が一部反映されない不具合を修正。
+ * 
  * v1.2.0 - 2017/11/08 : 機能追加
  *    1. GraphicalDesignMode.jsとFTKR_CSS_GDM.jsにより、デザインモード中に
  *       ゲーム内でレイアウトを変更する機能を追加。
@@ -427,7 +430,6 @@ if (Imported.FTKR_CSS) (function() {
     };
 
     FTKR.CSS.SpS.comWindow = {
-        enabled       :true,
         numVisibleRows:Number(parameters['Common Number Visible Rows'] || 0),
         fontSize      :Number(parameters['Common Font Size'] || 0),
         padding       :Number(parameters['Common Window Padding'] || 0),
@@ -532,13 +534,22 @@ if (Imported.FTKR_CSS) (function() {
 
     var _SpS_Window_ShopStatus_initialize = Window_ShopStatus.prototype.initialize;
     Window_ShopStatus.prototype.initialize = function(x, y, width, height) {
-        this._lssStatus = this.standardCssStatus();
         height = this.fittingHeight(this.numVisibleRows());
         _SpS_Window_ShopStatus_initialize.call(this, x, y, width, height);
     };
 
     Window_ShopStatus.prototype.standardCssStatus = function() {
         return FTKR.CSS.SpS.comStatus;
+    };
+
+    Window_ShopStatus.prototype.standardCssLayout = function() {
+        return FTKR.CSS.SpS.comWindow;
+    };
+
+    Window_ShopStatus.prototype.evalCssStrFormula = function(actor, formula) {
+        if (!formula) return '';
+        FTKR.setGameData(actor, null, this._item);
+        return FTKR.evalStrFormula(formula);
     };
 
     Window_ShopStatus.prototype.evalCssCustomFormula = function(actor, formula) {
@@ -567,36 +578,6 @@ if (Imported.FTKR_CSS) (function() {
     //ウィンドウの行数
     Window_ShopStatus.prototype.numVisibleRows = function() {
         return FTKR.CSS.SpS.comWindow.numVisibleRows;
-    };
-
-    //書き換え
-    //ウィンドウのフォントサイズ
-    Window_ShopStatus.prototype.standardFontSize = function() {
-        return FTKR.CSS.SpS.comWindow.fontSize;
-    };
-
-    //書き換え
-    //ウィンドウに周囲の余白サイズ
-    Window_ShopStatus.prototype.standardPadding = function() {
-        return FTKR.CSS.SpS.comWindow.padding;
-    };
-
-    //書き換え
-    //ウィンドウ内の1行の高さ
-    Window_ShopStatus.prototype.lineHeight = function() {
-        return FTKR.CSS.SpS.comWindow.lineHeight;
-    };
-
-    //書き換え
-    //ウィンドウの背景の透明度
-    Window_ShopStatus.prototype.standardBackOpacity = function() {
-        return FTKR.CSS.SpS.comWindow.opacity;
-    };
-
-    //書き換え
-    //ウィンドウ枠の表示
-    Window_ShopStatus.prototype._refreshFrame = function() {
-        if (!FTKR.CSS.SpS.comWindow.hideFrame) Window.prototype._refreshFrame.call(this);
     };
 
     //=============================================================================
@@ -662,7 +643,6 @@ if (Imported.FTKR_CSS) (function() {
     Window_ShopItemStatus.prototype.constructor = Window_ShopItemStatus;
 
     Window_ShopItemStatus.prototype.initialize = function(x, y, width, height) {
-        this._lssStatus = this.standardCssStatus();
         Window_Base.prototype.initialize.call(this, x, y, width, height);
         this._item = null;
         this._actor = null;
@@ -671,26 +651,49 @@ if (Imported.FTKR_CSS) (function() {
         this.refresh();
     };
 
+    Window_ShopItemStatus.prototype.initCssLayout = function() {
+        Window_Base.prototype.initCssLayout.call(this);
+        var lss = this.standardCssLayout();
+        if (lss) {
+            this._css_maxCols = lss.maxCols;
+            this._css_cursorHeight = lss.actorRows;
+            this._css_hSpace = lss.hspace;
+        }
+    };
+
+    Window_ShopItemStatus.prototype.standardCssLayout = function() {
+        return FTKR.CSS.SpS.itemWindow;
+    };
+
     Window_ShopItemStatus.prototype.standardCssStatus = function() {
         return FTKR.CSS.SpS.itemStatus;
     };
 
     Window_ShopItemStatus.prototype.actorRows = function() {
-        return FTKR.CSS.SpS.itemWindow.actorRows;
+        return this._css_cursorHeight ?
+            this._css_cursorHeight : FTKR.CSS.SpS.itemWindow.actorRows;
     };
 
     Window_ShopItemStatus.prototype.pageSize = function() {
-        return FTKR.CSS.SpS.itemWindow.maxCols;
+        return this._css_maxCols ? this._css_maxCols :
+            FTKR.CSS.SpS.itemWindow.maxCols;
     };
 
     Window_ShopItemStatus.prototype.heightSpace = function() {
-        return FTKR.CSS.SpS.itemWindow.hspace;
+        return this._css_hSpace ? this._css_hSpace :
+            FTKR.CSS.SpS.itemWindow.hspace;
     };
 
     Window_ShopItemStatus.prototype.setTempActor = function(actor) {
         var tempActor = JsonEx.makeDeepCopy(actor);
         tempActor.forceChangeEquip(this._item.etypeId - 1, this._item);
         this._tempActor = tempActor;
+    };
+
+    Window_ShopItemStatus.prototype.evalCssStrFormula = function(actor, formula) {
+        if (!formula) return '';
+        FTKR.setGameData(actor, this._tempActor, this._item);
+        return FTKR.evalStrFormula(formula);
     };
 
     Window_ShopItemStatus.prototype.evalCssCustomFormula = function(actor, formula) {
@@ -798,36 +801,6 @@ if (Imported.FTKR_CSS) (function() {
         return FTKR.CSS.SpS.itemWindow.numVisibleRows;
     };
 
-    //書き換え
-    //ウィンドウのフォントサイズ
-    Window_ShopItemStatus.prototype.standardFontSize = function() {
-        return FTKR.CSS.SpS.itemWindow.fontSize;
-    };
-
-    //書き換え
-    //ウィンドウに周囲の余白サイズ
-    Window_ShopItemStatus.prototype.standardPadding = function() {
-        return FTKR.CSS.SpS.itemWindow.padding;
-    };
-
-    //書き換え
-    //ウィンドウ内の1行の高さ
-    Window_ShopItemStatus.prototype.lineHeight = function() {
-        return FTKR.CSS.SpS.itemWindow.lineHeight;
-    };
-
-    //書き換え
-    //ウィンドウの背景の透明度
-    Window_ShopItemStatus.prototype.standardBackOpacity = function() {
-        return FTKR.CSS.SpS.itemWindow.opacity;
-    };
-
-    //書き換え
-    //ウィンドウ枠の表示
-    Window_ShopItemStatus.prototype._refreshFrame = function() {
-        if (!FTKR.CSS.SpS.itemWindow.hideFrame) Window.prototype._refreshFrame.call(this);
-    };
-
     //=============================================================================
     // Window_ShopWeaponStatus
     // 武器ステータスウィンドウ
@@ -856,22 +829,11 @@ if (Imported.FTKR_CSS) (function() {
     // 防具ステータスウィンドウ
     //=============================================================================
 
-    Window_ShopArmorStatus.prototype = Object.create(Window_ShopItemStatus.prototype);
+    Window_ShopArmorStatus.prototype = Object.create(Window_ShopWeaponStatus.prototype);
     Window_ShopArmorStatus.prototype.constructor = Window_ShopArmorStatus;
 
     Window_ShopArmorStatus.prototype.standardCssStatus = function() {
-        return FTKR.CSS.SpS.weaponStatus;
-    };
-
-    Window_ShopArmorStatus.prototype.refresh = function() {
-        this.contents.clear();
-        if (this._item) {
-            var w = this.width - this.padding * 2;
-            var h = this.height - this.padding * 2;
-            if (this.isEquipItem()) {
-                this.drawAllItems(w, h);
-            }
-        }
+        return FTKR.CSS.SpS.armorStatus;
     };
 
     //=============================================================================

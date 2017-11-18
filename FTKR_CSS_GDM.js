@@ -3,8 +3,8 @@
 // FTKR_CSS_GDM.js
 // 作成者     : フトコロ
 // 作成日     : 2017/11/08
-// 最終更新日 : 2017/11/10
-// バージョン : v1.0.2
+// 最終更新日 : 2017/11/14
+// バージョン : v1.1.0
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.2 GDMを使ってFTKR_CSSステータス表示を変更するプラグイン
+ * @plugindesc v1.1.0 GDMを使ってFTKR_CSSステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @help
@@ -107,9 +107,15 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
+ * プラグイン公開元
+ * https://github.com/futokoro/RPGMaker/blob/master/README.md
+ * 
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.1.0 - 2017/11/18 : 仕様変更
+ *    1. FTKR_CustomSimpleActorStatus.jsの v2.6.0 に対応。
  * 
  * v1.0.2 - 2017/11/10 : 機能追加
  *    1. FTKR_CSS_MenuStatus.jsとFTKR_CSS_BattleStatus.jsの
@@ -229,35 +235,25 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
 
     Window_Base.prototype.setMaxCols = function() {
         this.clearCssSpriteAll();
-        if (this._customCssMaxCols) this._maxCols = Number(this._customCssMaxCols);
+        if (this._customCssMaxCols) this._css_maxCols = Number(this._customCssMaxCols);
     };
 
     Window_Base.prototype.setCursorHeight = function() {
         this.clearCssSpriteAll();
-        if (this._customCssCursorHeight) this._cursorHeight = Number(this._customCssCursorHeight);
+        if (this._customCssCursorHeight) this._css_cursorHeight = Number(this._customCssCursorHeight);
     };
 
     Window_Base.prototype.setHSpace = function(){
         this.clearCssSpriteAll();
-        if (this._customCssHSpace) this._hSpace = Number(this._customCssHSpace);
+        if (this._customCssHSpace) this._css_hSpace = Number(this._customCssHSpace);
     };
 
     //=============================================================================
     // Window_MenuStatus
     // メニュー画面のステータスウィンドウの表示クラス
     //=============================================================================
-
-    var _CSS_Window_MenuStatus_initialize = Window_MenuStatus.prototype.initialize;
-    Window_MenuStatus.prototype.initialize = function(x, y) {
-        this._lssStatus = this.standardCssStatus();
-        this._maxCols = FTKR.CSS.MS ? FTKR.CSS.MS.window.maxCols : 1;
-        this._cursorHeight = FTKR.CSS.MS ? FTKR.CSS.MS.window.cursolHeight:  4;
-        this._hSpace = FTKR.CSS.MS ? FTKR.CSS.MS.window.hspace :  0;
-        _CSS_Window_MenuStatus_initialize.call(this, x, y);
-    };
-
     Window_MenuStatus.prototype.standardCssStatus = function() {
-        return FTKR.CSS.MS ? FTKR.CSS.MS.simpleStatus : {
+        return {
             text1     :'face',
             text2     :'name,level,state',
             text3     :'class,hp,mp',
@@ -267,20 +263,11 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
         };
     };
 
-    Window_MenuStatus.prototype.maxCols = function() {
-        return this._maxCols;
-    };
-
-    Window_MenuStatus.prototype.cursorHeight = function() {
-        return this._cursorHeight;
-    };
-
+    var _Window_MenuStatus_itemHeight = Window_MenuStatus.prototype.itemHeight;
     Window_MenuStatus.prototype.itemHeight = function() {
-        return this.lineHeight() * this.cursorHeight();
-    };
-
-    Window_MenuStatus.prototype.itemHeightSpace = function() {
-        return this._hSpace;
+        return this.cursorHeight() ? 
+            this.lineHeight() * this.cursorHeight() :
+            _Window_MenuStatus_itemHeight.call(this);
     };
 
     Window_MenuStatus.prototype.drawItemImage = function(index) {
@@ -293,7 +280,6 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
         this.drawCssActorStatus(index, actor, rect.x, rect.y, rect.width, rect.height, lss);
     };
 
-    //書き換え
     Window_MenuStatus.prototype.drawAllItems = function() {
         var topIndex = this.topIndex();
         for (var i = 0; i < this.maxPageItems(); i++) {
@@ -309,15 +295,8 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
     //=============================================================================
     // Window_EquipStatus
     //=============================================================================
-
-    var _CSS_Window_EquipStatus_initialize = Window_EquipStatus.prototype.initialize;
-    Window_EquipStatus.prototype.initialize = function(x, y) {
-        this._lssStatus = this.standardCssStatus();
-        _CSS_Window_EquipStatus_initialize.call(this, x, y);
-    };
-
     Window_EquipStatus.prototype.standardCssStatus = function() {
-        return FTKR.CSS.ES ? FTKR.CSS.ES.simpleStatus : {
+        return {
             text1     :'name,param(2),param(3),param(4),param(5),param(6),param(7)',
             text2     :',eparam(2),eparam(3),eparam(4),eparam(5),eparam(6),eparam(7)',
             text3     :'',
@@ -350,15 +329,8 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
     // Window_SkillStatus
     // スキル画面のステータスウィンドウの表示クラス
     //=============================================================================
-
-    var _CSS_Window_SkillStatus_initialize = Window_SkillStatus.prototype.initialize;
-    Window_SkillStatus.prototype.initialize = function(x, y, width, height) {
-        this._lssStatus = this.standardCssStatus();
-        _CSS_Window_SkillStatus_initialize.call(this, x, y, width, height);
-    };
-
     Window_SkillStatus.prototype.standardCssStatus = function() {
-        return FTKR.CSS.SS ? FTKR.CSS.SS.simpleStatus : {
+        return {
             text1     :'face',
             text2     :'name,level,state',
             text3     :'class,hp,mp',
@@ -383,34 +355,8 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
     // Window_BattleStatus
     // バトル画面のステータスウィンドウの表示クラス
     //=============================================================================
-
-    var _CSS_Window_BattleStatus_initialize = Window_BattleStatus.prototype.initialize;
-    Window_BattleStatus.prototype.initialize = function() {
-        this._lssStatus = this.standardCssStatus();
-        this._maxCols = FTKR.CSS.BS ? FTKR.CSS.BS.window.maxCols : 1;
-        this._cursorHeight = FTKR.CSS.BS ? FTKR.CSS.BS.window.cursolHeight:  1;
-        this._hSpace = FTKR.CSS.BS ? FTKR.CSS.BS.window.hspace :  0;
-        _CSS_Window_BattleStatus_initialize.call(this);
-    };
-
-    Window_BattleStatus.prototype.maxCols = function() {
-        return this._maxCols;
-    };
-
-    Window_BattleStatus.prototype.cursorHeight = function() {
-        return this._cursorHeight;
-    };
-
-    Window_BattleStatus.prototype.itemHeight = function() {
-        return this.lineHeight() * this.cursorHeight();
-    };
-
-    Window_BattleStatus.prototype.itemHeightSpace = function() {
-        return this._hSpace;
-    };
-
     Window_BattleStatus.prototype.standardCssStatus = function() {
-        return FTKR.CSS.BS ? FTKR.CSS.BS.simpleStatus : {
+        return {
             text1     :'name',
             text2     :'state',
             text3     :'[hp/mp/tp]',
@@ -418,6 +364,12 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
             spaceIn   :'5',
             widthRate :'1,1,3',
         };
+    };
+
+    Window_BattleStatus.prototype.itemHeight = function() {
+        return this.cursorHeight() ? 
+            this.lineHeight() * this.cursorHeight() :
+            Window_Selectable.prototype.itemHeight.call(this);
     };
 
     //書き換え
@@ -610,81 +562,15 @@ FTKR.CSS.GDM = FTKR.CSS.GDM || {};
     };
 
     //=============================================================================
-    // FTKR_CSS_CustomizeBattleResults.jsの修正
-    //=============================================================================
-    if (Imported.FTKR_CBR) {
-
-    Window_BattleResultParty.prototype.standardCssStatus = function() {
-        return FTKR.CBR ? FTKR.CBR.party : {
-            text1     :'text(入手経験値),text(入手ゴールド)',
-            text2     :'eval(BattleManager._rewards.exp),eval(BattleManager._rewards.gold)',
-            text3     :'',
-            space     :'0,0,0,0',
-            spaceIn   :'5',
-            widthRate :'1,1,1',
-        };
-    };
-
-    Window_BattleResultActor.prototype.standardCssStatus = function() {
-        return FTKR.CBR ? FTKR.CBR.actor : {
-            text1     :'face(3)',
-            text2     :'name,{gauge(0)},{message}',
-            text3     :'level',
-            space     :'0,0,0,0',
-            spaceIn   :'5',
-            widthRate :'1,1,1',
-        };
-    };
-
-    };//FTKR_CSS_CustomizeBattleResults.js
-    
-    //=============================================================================
     // FTKR_CSS_ShopStatus.jsの修正
     //=============================================================================
     if (Imported.FTKR_CSS_SpS) {
 
-    Window_ShopStatus.prototype.standardCssStatus = function() {
-        return FTKR.CSS.SpS ? FTKR.CSS.SpS.comStatus : {
-            text1     :'text(\\c[16]持っている数)',
-            text2     :'eval($gameParty.numItems(item))',
-            text3     :'',
-            space     :'0,0,0,0',
-            spaceIn   :'5',
-            widthRate :'1,1,0',
-        };
-    };
-
-    Window_ShopItemStatus.prototype.standardCssStatus = function() {
-        return FTKR.CSS.SpS ? FTKR.CSS.SpS.itemStatus : {
-            text1     :'',
-            text2     :'',
-            text3     :'',
-            space     :'0,0,0,0',
-            spaceIn   :'5',
-            widthRate :'1,0,0',
-        };
-    };
-
-    Window_ShopWeaponStatus.prototype.standardCssStatus = function() {
-        return FTKR.CSS.SpS ? FTKR.CSS.SpS.weaponStatus : {
-            text1     :'name,{equip(item.etypeId-1)}',
-            text2     :'eparam(2)',
-            text3     :'',
-            space     :'0,0,0,0',
-            spaceIn   :'5',
-            widthRate :'1,1,0',
-        };
-    };
-
-    Window_ShopArmorStatus.prototype.standardCssStatus = function() {
-        return FTKR.CSS.SpS ? FTKR.CSS.SpS.armorStatus : {
-            text1     :'name,{equip(item.etypeId-1)}',
-            text2     :'eparam(3)',
-            text3     :'',
-            space     :'0,0,0,0',
-            spaceIn   :'5',
-            widthRate :'1,1,0',
-        };
+    Window_ShopWeaponStatus.prototype.initialize = function(x, y, width, height) {
+        Window_ShopItemStatus.prototype.initialize.apply(this, arguments);
+        if(this.pageSize) this._customCssMaxCols = this.pageSize();
+        if(this.actorRows) this._customCssCursorHeight = this.actorRows();
+        if(this.heightSpace) this._customCssHSpace = this.heightSpace();
     };
 
     };//FTKR_CSS_ShopStatus.js
