@@ -3,8 +3,8 @@
 // FTKR_CSS_CustomizeBattleResults.js
 // 作成者     : フトコロ
 // 作成日     : 2017/06/07
-// 最終更新日 : 2017/11/18
-// バージョン : v1.3.1
+// 最終更新日 : 2017/11/20
+// バージョン : v1.4.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -14,7 +14,7 @@ var FTKR = FTKR || {};
 FTKR.CBR = FTKR.CBR || {};
 
 /*:
- * @plugindesc v1.3.1 カスタム可能な戦闘結果画面を表示する
+ * @plugindesc v1.4.0 カスタム可能な戦闘結果画面を表示する
  * @author フトコロ
  *
  * @param --タイトル設定--
@@ -241,6 +241,15 @@ FTKR.CBR = FTKR.CBR || {};
  * @param --入手アイテム設定--
  * @default
  *
+ * @param Enable Change Paint Opacity
+ * @desc アイテムを入手しなかった場合に、グレー表示にして選択できないようにするか
+ * @type select
+ * @option 無効
+ * @value 0
+ * @option 有効
+ * @value 1
+ * @default 0
+ * 
  * @param Combine Same Items
  * @desc 同じアイテムを纏めて表示する
  * 0 - まとめない, 1 - まとめる
@@ -330,7 +339,6 @@ FTKR.CBR = FTKR.CBR || {};
  * 3. ゲーム画面でレイアウトを変更する場合は、以下のプラグインが必要です。
  * 
  *    GraphicalDesignMode.js
- *    FTKR_CSS_GDM.js
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -343,9 +351,16 @@ FTKR.CBR = FTKR.CBR || {};
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
+ * プラグイン公開元
+ * https://github.com/futokoro/RPGMaker/blob/master/README.md
+ * 
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.4.0 - 2017/11/20 : 機能追加
+ *    1. アイテムを入手しなかった場合に、アイテムコマンドをグレー表示にして
+ *       選択できないようにする機能を追加。
  * 
  * v1.3.1 - 2017/11/18 : 不具合修正
  *    1. GraphicalDesignMode.jsのレイアウト変更が一部反映されない不具合を修正。
@@ -442,6 +457,7 @@ if (Imported.FTKR_CSS) (function() {
         },
         item:{
             enabled     :true,
+            changeOpacity:Number(parameters['Enable Change Paint Opacity'] || 0),
             visibleRows :Number(parameters['Item Visible Rows'] || 0),
             maxCols     :Number(parameters['Item Max Cols'] || 0),
             fontSize    :Number(parameters['Item Font Size'] || 0),
@@ -749,6 +765,7 @@ if (Imported.FTKR_CSS) (function() {
         this._battleResultTitleWindow.show();
         this._battleResultPartyWindow.show();
         this._battleResultPartyWindow.refresh();
+        this._battleResultCommandWindow.setDropItem(rewards.items);
         this._battleResultCommandWindow.show();
         this._battleResultCommandWindow.activate();
         this._battleResultActorWindow.show();
@@ -866,6 +883,7 @@ if (Imported.FTKR_CSS) (function() {
         this._windowWidth = width;
         Window_HorzCommand.prototype.initialize.call(this, x, y);
         this._symbol = 'status';
+        this._items = [];
         this.deactivate();
     };
 
@@ -883,8 +901,18 @@ if (Imported.FTKR_CSS) (function() {
 
     Window_BattleResultCommand.prototype.makeCommandList = function() {
         this.addCommand(FTKR.CBR.command.status, 'status');
-        this.addCommand(FTKR.CBR.command.item,   'item');
+        this.addCommand(FTKR.CBR.command.item,   'item'   ,this.isGotItems());
         this.addCommand(FTKR.CBR.command.finish, 'finish');
+    };
+
+    Window_BattleResultCommand.prototype.isGotItems = function() {
+        var flag = FTKR.CBR.item.changeOpacity;
+        return !flag ? true : this._items && this._items.length > 0;
+    };
+
+    Window_BattleResultCommand.prototype.setDropItem = function(items) {
+        this._items = items;
+        this.refresh();
     };
 
     Window_BattleResultCommand.prototype.update = function() {
