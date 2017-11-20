@@ -3,8 +3,8 @@
 // FTKR_DisplayCommandFrame.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/08
-// 最終更新日 : 2017/04/21
-// バージョン : v1.1.1
+// 最終更新日 : 2017/11/20
+// バージョン : v1.2.0
 //=======↑本プラグインを改変した場合でも、この欄は消さないでください↑===============
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.DCF = FTKR.DCF || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.1 コマンドに枠を付けるプラグイン
+ * @plugindesc v1.2.0 コマンドに枠を付けるプラグイン
  * @author フトコロ
  *
  * @param --Basic Setting--
@@ -23,22 +23,52 @@ FTKR.DCF = FTKR.DCF || {};
  * 
  * @param Display Frame Type
  * @desc 表示するコマンド枠のタイプを設定します
- * 0 - 非表示, 1 ~ 7 - ヘルプ参照
+ * @type select
+ * @option 非表示
+ * @value 0
+ * @option 単線
+ * @value 1
+ * @option 複線
+ * @value 2
+ * @option 画像
+ * @value 3
+ * @option 単線＋画像
+ * @value 4
+ * @option 複線＋画像
+ * @value 5
+ * @option 単線＋塗潰し
+ * @value 6
+ * @option 複線＋塗潰し
+ * @value 7
  * @default 1
  * 
  * @param When To Display Frame
  * @desc コマンド枠を表示するタイミング
- * 0 - 常時, 1 - カーソルと重なる時, 2 - カーソルと重ならない時
+ * @type select
+ * @option 常時
+ * @value 0
+ * @option カーソルと重なる時
+ * @value 1
+ * @option カーソルと重ならない時
+ * @value 2
  * @default 1
  * 
  * @param Change Frame On Cursor
  * @desc カーソルと重なった時に枠を変更する機能
- * 0 - 無効, 1 - 有効
+ * @type select
+ * @option 無効
+ * @value 0
+ * @option 有効
+ * @value 1
  * @default 1
  * 
  * @param Hide Cursor
  * @desc コマンドカーソルを非表示にする機能
- * 0 - 無効, 1 - 有効
+ * @type select
+ * @option 無効
+ * @value 0
+ * @option 有効
+ * @value 1
  * @default 0
  * 
  * @param --Frame Line Setting--
@@ -113,7 +143,11 @@ FTKR.DCF = FTKR.DCF || {};
  * 
  * @param Enabled Change Scale
  * @desc 枠画像とカーソルサイズが異なる時の自動サイズ調整機能
- * 0 - 無効, 1 - 有効
+ * @type select
+ * @option 無効
+ * @value 0
+ * @option 有効
+ * @value 1
  * @default 1
  * 
  * @param Image Offset X
@@ -145,60 +179,118 @@ FTKR.DCF = FTKR.DCF || {};
  * 
  * @param Enabled Title Command
  * @desc タイトルコマンドに枠を付けるか
- * 0 - 無効, 1 - 有効
+ * @type select
+ * @option 無効
+ * @value 0
+ * @option 有効
+ * @value 1
  * @default 1
  *
  * @param Enabled Menu Command
  * @desc メニューコマンドに枠を付けるか
- * 0 - 無効, 1 - 有効
+ * @type select
+ * @option 無効
+ * @value 0
+ * @option 有効
+ * @value 1
  * @default 1
  *
  * @param Enabled Item Command
  * @desc アイテムコマンドに枠を付けるか
- * 0 - 無効, 1 - 有効
+ * @type select
+ * @option 無効
+ * @value 0
+ * @option 有効
+ * @value 1
  * @default 1
  *
  * @param Enabled Skill Command
  * @desc スキルコマンドに枠を付けるか
- * 0 - 無効, 1 - 有効
+ * @type select
+ * @option 無効
+ * @value 0
+ * @option 有効
+ * @value 1
  * @default 1
  *
  * @param Enabled Equip Command
  * @desc 装備コマンドに枠を付けるか
- * 0 - 無効, 1 - 有効
+ * @type select
+ * @option 無効
+ * @value 0
+ * @option 有効
+ * @value 1
  * @default 1
  *
  * @param Enabled Option Command
  * @desc オプションコマンドに枠を付けるか
- * 0 - 無効, 1 - 有効
+ * @type select
+ * @option 無効
+ * @value 0
+ * @option 有効
+ * @value 1
  * @default 1
  *
  * @param Enabled Shop Command
  * @desc ショップコマンドに枠を付けるか
- * 0 - 無効, 1 - 有効
+ * @type select
+ * @option 無効
+ * @value 0
+ * @option 有効
+ * @value 1
  * @default 1
  *
  * @param Enabled Choice Command
  * @desc ショップコマンドに枠を付けるか
- * 0 - 無効, 1 - 有効
+ * @type select
+ * @option 無効
+ * @value 0
+ * @option 有効
+ * @value 1
  * @default 1
  *
  * @param Enabled Battle Command
  * @desc 戦闘コマンドに枠を付けるか
- * 0 - 無効, 1 - 有効
+ * @type select
+ * @option 無効
+ * @value 0
+ * @option 有効
+ * @value 1
  * @default 1
  *
  * @param Enabled GameEnd Command
  * @desc ショップコマンドに枠を付けるか
- * 0 - 無効, 1 - 有効
+ * @type select
+ * @option 無効
+ * @value 0
+ * @option 有効
+ * @value 1
  * @default 1
+ *
+ * @param Enabled Menu Skill List
+ * @desc メニュー画面のスキルリストに枠を付けるか
+ * @type select
+ * @option 無効
+ * @value 0
+ * @option 有効
+ * @value 1
+ * @default 0
+ *
+ * @param Enabled Battle Skill List
+ * @desc バトル画面のスキルリストに枠を付けるか
+ * @type select
+ * @option 無効
+ * @value 0
+ * @option 有効
+ * @value 1
+ * @default 0
  *
  * @help
  *-----------------------------------------------------------------------------
  * 概要
  *-----------------------------------------------------------------------------
- * 本プラグインを実装することで、メニュー等のコマンド(*1)に枠を付けることが
- * できます。
+ * 本プラグインを実装することで、メニュー等のコマンド(*1)やリスト(*2)に
+ * 枠を付けることができます。
  * 
  * 枠は、単線や複線、画像などから選ぶことが出来ます。
  * また、どのタイミングで枠を付けるかも選ぶことが出来ます。
@@ -216,6 +308,12 @@ FTKR.DCF = FTKR.DCF || {};
  *      8.選択肢コマンド
  *      9.戦闘コマンド
  *      10.ゲームエンドコマンド
+ *    それぞれに対して、プラグインパラメータで個別に機能のON/OFFを設定可能。
+ * 
+ * 
+ * (*2)本プラグインにおけるリストとは、以下のウィンドウが相当します。
+ *      1.メニュー画面のスキルリスト
+ *      2.バトル画面のスキルリスト
  *    それぞれに対して、プラグインパラメータで個別に機能のON/OFFを設定可能。
  * 
  * 
@@ -356,9 +454,16 @@ FTKR.DCF = FTKR.DCF || {};
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
+ * プラグイン公開元
+ * https://github.com/futokoro/RPGMaker/blob/master/README.md
+ * 
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.2.0 - 2017/11/20 : 機能追加
+ *    1. スキルリストに枠を表示する機能を追加。
+ *    2. プラグインパラメータの入力方式を見直し。
  * 
  * v1.1.1 - 2017/04/21 : 枠画像ディプロイメント対応
  * 
@@ -392,450 +497,485 @@ FTKR.DCF = FTKR.DCF || {};
  */
 //=============================================================================
 
-//=============================================================================
-// プラグイン パラメータ
-//=============================================================================
-FTKR.DCF.parameters = PluginManager.parameters('FTKR_DisplayCommandFrame');
+(function() {
 
-//フレームオブジェクト
-FTKR.DCF.frame = {
-    //基本設定
-    type:Number(FTKR.DCF.parameters['Display Frame Type'] || 0),
-    whenToDisplay:Number(FTKR.DCF.parameters['When To Display Frame'] || 0),
-    changeOnCursor:Number(FTKR.DCF.parameters['Change Frame On Cursor'] || 0),
-    hideCursor:Number(FTKR.DCF.parameters['Hide Cursor'] || 0),
-    //枠線の設定
-    line:{
-        defColor:Number(FTKR.DCF.parameters['Default Line Color'] || 0),
-        csrColor:Number(FTKR.DCF.parameters['Line Color On Cursor'] || 0),
-        thick:Number(FTKR.DCF.parameters['Line Thick'] || 0),
-        subColor:Number(FTKR.DCF.parameters['Sub Line Color'] || 0),
-        subThick:Number(FTKR.DCF.parameters['Sub Line Thick'] || 0),
-    },
-    //枠内塗りつぶしの設定
-    fill:{
-        defColor:Number(FTKR.DCF.parameters['Default Rect Color'] || 0),
-        csrColor:Number(FTKR.DCF.parameters['Rect Color On Cursor'] || 0),
-        defColor2:Number(FTKR.DCF.parameters['Default Rect Color2'] || 0),
-        csrColor2:Number(FTKR.DCF.parameters['Rect Color On Cursor2'] || 0),
-        opacity:Number(FTKR.DCF.parameters['Rect Color Opacity'] || 0),
-    },
-    //枠画像の設定
-    image:{
-        name:String(FTKR.DCF.parameters['Image Name'] || ''),
-        width:Number(FTKR.DCF.parameters['Image Width'] || 0),
-        height:Number(FTKR.DCF.parameters['Image Height'] || 0),
-        offsetX:Number(FTKR.DCF.parameters['Image Offset X'] || 0),
-        offsetY:Number(FTKR.DCF.parameters['Image Offset Y'] || 0),
-        offsetW:Number(FTKR.DCF.parameters['Image Offset Width'] || 0),
-        offsetH:Number(FTKR.DCF.parameters['Image Offset Height'] || 0),
-        enabledScale:Number(FTKR.DCF.parameters['Enabled Change Scale'] || 0),
-        defIndex:Number(FTKR.DCF.parameters['Default Image Index'] || 0),
-        csrIndex:Number(FTKR.DCF.parameters['Image Index On Cursor'] || 0),
-    },
-};
+    //=============================================================================
+    // プラグイン パラメータ
+    //=============================================================================
+    var parameters = PluginManager.parameters('FTKR_DisplayCommandFrame');
 
-//コマンド別の有効設定
-FTKR.DCF.enabled = {
-  title:Number(FTKR.DCF.parameters['Enabled Title Command'] || 0),
-  menu:Number(FTKR.DCF.parameters['Enabled Menu Command'] || 0),
-  item:Number(FTKR.DCF.parameters['Enabled Item Command'] || 0),
-  skill:Number(FTKR.DCF.parameters['Enabled Skill Command'] || 0),
-  equip:Number(FTKR.DCF.parameters['Enabled Equip Command'] || 0),
-  option:Number(FTKR.DCF.parameters['Enabled Option Command'] || 0),
-  shop:Number(FTKR.DCF.parameters['Enabled Shop Command'] || 0),
-  choice:Number(FTKR.DCF.parameters['Enabled Choice Command'] || 0),
-  battle:Number(FTKR.DCF.parameters['Enabled Battle Command'] || 0),
-  gameEnd:Number(FTKR.DCF.parameters['Enabled GameEnd Command'] || 0),
-};
+    //フレームオブジェクト
+    FTKR.DCF.frame = {
+        //基本設定
+        type          :Number(parameters['Display Frame Type'] || 0),
+        whenToDisplay :Number(parameters['When To Display Frame'] || 0),
+        changeOnCursor:Number(parameters['Change Frame On Cursor'] || 0),
+        hideCursor    :Number(parameters['Hide Cursor'] || 0),
+        //枠線の設定
+        line:{
+            defColor  :Number(parameters['Default Line Color'] || 0),
+            csrColor  :Number(parameters['Line Color On Cursor'] || 0),
+            thick     :Number(parameters['Line Thick'] || 0),
+            subColor  :Number(parameters['Sub Line Color'] || 0),
+            subThick  :Number(parameters['Sub Line Thick'] || 0),
+        },
+        //枠内塗りつぶしの設定
+        fill:{
+            defColor  :Number(parameters['Default Rect Color'] || 0),
+            csrColor  :Number(parameters['Rect Color On Cursor'] || 0),
+            defColor2 :Number(parameters['Default Rect Color2'] || 0),
+            csrColor2 :Number(parameters['Rect Color On Cursor2'] || 0),
+            opacity   :Number(parameters['Rect Color Opacity'] || 0),
+        },
+        //枠画像の設定
+        image:{
+            name      :String(parameters['Image Name'] || ''),
+            width     :Number(parameters['Image Width'] || 0),
+            height    :Number(parameters['Image Height'] || 0),
+            offsetX   :Number(parameters['Image Offset X'] || 0),
+            offsetY   :Number(parameters['Image Offset Y'] || 0),
+            offsetW   :Number(parameters['Image Offset Width'] || 0),
+            offsetH   :Number(parameters['Image Offset Height'] || 0),
+            enabledScale:Number(parameters['Enabled Change Scale'] || 0),
+            defIndex  :Number(parameters['Default Image Index'] || 0),
+            csrIndex  :Number(parameters['Image Index On Cursor'] || 0),
+        },
+    };
 
-//画像ファイル内に横に並べられる枠画像の数
-Window_Base.IMAGE_INDEX_COLS = 4;
+    //コマンド別の有効設定
+    FTKR.DCF.enabled = {
+        title   :Number(parameters['Enabled Title Command'] || 0),
+        menu    :Number(parameters['Enabled Menu Command'] || 0),
+        item    :Number(parameters['Enabled Item Command'] || 0),
+        skill   :Number(parameters['Enabled Skill Command'] || 0),
+        equip   :Number(parameters['Enabled Equip Command'] || 0),
+        option  :Number(parameters['Enabled Option Command'] || 0),
+        shop    :Number(parameters['Enabled Shop Command'] || 0),
+        choice  :Number(parameters['Enabled Choice Command'] || 0),
+        battle  :Number(parameters['Enabled Battle Command'] || 0),
+        gameEnd :Number(parameters['Enabled GameEnd Command'] || 0),
+        list : {
+            menuSkill   : Number(parameters['Enabled Menu Skill List'] || 0),
+            battleSkill : Number(parameters['Enabled Battle Skill List'] || 0),
+        },
+    };
 
-//枠画像の4隅の固定部分のサイズ(pixel)
-Window_Base.IMAGE_FIXED_SIZE = 6;
+    //画像ファイル内に横に並べられる枠画像の数
+    Window_Base.IMAGE_INDEX_COLS = 4;
 
-//=============================================================================
-// Bitmap
-//=============================================================================
+    //枠画像の4隅の固定部分のサイズ(pixel)
+    Window_Base.IMAGE_FIXED_SIZE = 6;
 
-//枠線を描く
-Bitmap.prototype.drawFrame = function(x, y, width, height, thick, color) {
-    var context = this._context;
-    context.strokeStyle = color;
-    context.lineWidth = thick;
-    context.strokeRect(x + thick/2, y + thick/2, width - thick, height - thick);
-    this._setDirty();
-};
+    //=============================================================================
+    // Bitmap
+    //=============================================================================
 
-//=============================================================================
-// DataManager
-//=============================================================================
+    //枠線を描く
+    Bitmap.prototype.drawDcfFrame = function(x, y, width, height, thick, color) {
+        var context = this._context;
+        context.strokeStyle = color;
+        context.lineWidth = thick;
+        context.strokeRect(x + thick/2, y + thick/2, width - thick, height - thick);
+        this._setDirty();
+    };
 
-//枠画像ファイルの事前ロード
-FTKR.DCF.DataManager_loadDatabase = DataManager.loadDatabase;
-DataManager.loadDatabase = function(name, src) {
-    FTKR.DCF.DataManager_loadDatabase.call(this, name, src);
-    ImageManager.loadSystem(FTKR.DCF.frame.image.name);
-};
+    //=============================================================================
+    // DataManager
+    //=============================================================================
 
-//=============================================================================
-// Window_Base
-//=============================================================================
+    //枠画像ファイルの事前ロード
+    var _DCF_DataManager_loadDatabase = DataManager.loadDatabase;
+    DataManager.loadDatabase = function(name, src) {
+        _DCF_DataManager_loadDatabase.call(this, name, src);
+        ImageManager.loadSystem(FTKR.DCF.frame.image.name);
+    };
 
-/*-------------------------------------------------------------
-枠表示関数 drawDcfFrameBase(frame, rect, onCursor, item, type)
-frame   :フレームオブジェクト
-rect    :カーソル枠オブジェクト
-onCursor:カーソルと重なっているか(boolean)
-item    :アイテムオブジェクト、表示項目毎に枠を変えたい場合に入れる
-type    :枠タイプ(Number)、プラグインパラメータの設定を使うなら false
--------------------------------------------------------------*/
-Window_Base.prototype.drawDcfFrameBase = function(frame, rect, onCursor, item, type) {
-    switch (type || frame.type) {
-        case 1:
-            return this.drawLineFrame(false, frame, rect, onCursor, item);
-        case 2:
-            return this.drawLineFrame(true, frame, rect, onCursor, item);
-        case 3:
-            return this.drawImageFrame(frame, rect, onCursor, item);
-        case 4:
-            this.drawImageFrame(frame, rect, onCursor, item);
-            return this.drawLineFrame(false, frame, rect, onCursor, item);
-        case 5:
-            this.drawImageFrame(frame, rect, onCursor, item);
-            return this.drawLineFrame(true, frame, rect, onCursor, item);
-        case 6:
-            this.drawInFrame(frame, rect, onCursor, item);
-            return this.drawLineFrame(false, frame, rect, onCursor, item);
-        case 7:
-            this.drawInFrame(frame, rect, onCursor, item);
-            return this.drawLineFrame(true, frame, rect, onCursor, item);
-    }
-};
+    //=============================================================================
+    // Window_Base
+    //=============================================================================
 
-/*-------------------------------------------------------------
-枠画像表示関数 drawImageFrame()
-frame   :フレームオブジェクト
-rect    :カーソル枠オブジェクト
-onCursor:カーソルと重なっているか(boolean)
-item    :アイテムオブジェクト、枠を表示する項目別に画像を変えたい場合に入れる
-画像の6*6の四つ角はそのまま使い、それ以外の部分を拡大縮小してサイズ調整する。
-ただし、画像が12*12より大きくない場合は、そのまま拡大縮小する。
--------------------------------------------------------------*/
-Window_Base.prototype.drawImageFrame = function(frame, rect, onCursor, item) {
-    if (!frame) return;
-    var image = frame.image;
-    if (image && image.name) {
-        var iic = Window_Base.IMAGE_INDEX_COLS;
-        var ifs = Window_Base.IMAGE_FIXED_SIZE; 
-
-        var bitmap = ImageManager.loadSystem(image.name);
-        var rx = rect.x + image.offsetX;
-        var ry = rect.y + image.offsetY;
-        var rw = rect.width;
-        var rh = rect.height;
-        var csrIndex = item ? item.csrIndex : 0;
-        var defIndex = item ? item.defIndex : 0;
-        var index = frame.changeOnCursor && onCursor ?
-            csrIndex || image.csrIndex : defIndex || image.defIndex;
-        var iw = image.width;
-        var ih = image.height;
-        var ix = index % iic * iw;
-        var iy = Math.floor(index / iic) * ih;
-        var flag = image.enabledScale;
-        var dx = flag ? rx : rx - (iw - rw) / 2;
-        var dy = flag ? ry : ry - (ih - rh) / 2;
-        var dw = flag ? rw + image.offsetW : iw;
-        var dh = flag ? rh + image.offsetH : ih;
-        if (iw > ifs * 2 && ih > ifs * 2) {
-            //上側
-            this.contents.blt(bitmap, ix, iy, ifs, ifs, dx, dy, ifs, ifs);
-            this.contents.blt(bitmap, ix + ifs, iy, iw - ifs*2, ifs, dx + ifs, dy, dw - ifs*2, ifs);
-            this.contents.blt(bitmap, ix + iw - ifs, iy, ifs, ifs, dx + dw - ifs, dy, ifs, ifs);
-            //中央
-            this.contents.blt(bitmap, ix, iy + ifs, ifs, ih - ifs*2, dx, dy + ifs, ifs, dh - ifs*2);
-            this.contents.blt(bitmap, ix + ifs, iy + ifs, iw - ifs*2, ih - ifs*2, dx + ifs, dy + ifs, dw - ifs*2, dh - ifs*2);
-            this.contents.blt(bitmap, ix + iw - ifs, iy + ifs, ifs, ih - ifs*2, dx + dw - ifs, dy + ifs, ifs, dh - ifs*2);
-            //下側
-            this.contents.blt(bitmap, ix, iy + ih - ifs, ifs, ifs, dx, dy + dh - ifs, ifs, ifs);
-            this.contents.blt(bitmap, ix + ifs, iy + ih - ifs, iw - ifs*2, ifs, dx + ifs, dy + dh - ifs, dw - ifs*2, ifs);
-            this.contents.blt(bitmap, ix + iw - ifs, iy + ih - ifs, ifs, ifs, dx + dw - ifs, dy + dh - ifs, ifs, ifs);
-        } else {
-            this.contents.blt(bitmap, ix, iy, iw, iw, dx, dy, dw, dh);
+    /*-------------------------------------------------------------
+    枠表示関数 drawDcfFrameBase(frame, rect, onCursor, item, type)
+    frame   :フレームオブジェクト
+    rect    :カーソル枠オブジェクト
+    onCursor:カーソルと重なっているか(boolean)
+    item    :アイテムオブジェクト、表示項目毎に枠を変えたい場合に入れる
+    type    :枠タイプ(Number)、プラグインパラメータの設定を使うなら false
+    -------------------------------------------------------------*/
+    Window_Base.prototype.drawDcfFrameBase = function(frame, rect, onCursor, item, type) {
+        switch (type || frame.type) {
+            case 1:
+                return this.drawLineFrame(false, frame, rect, onCursor, item);
+            case 2:
+                return this.drawLineFrame(true, frame, rect, onCursor, item);
+            case 3:
+                return this.drawImageFrame(frame, rect, onCursor, item);
+            case 4:
+                this.drawImageFrame(frame, rect, onCursor, item);
+                return this.drawLineFrame(false, frame, rect, onCursor, item);
+            case 5:
+                this.drawImageFrame(frame, rect, onCursor, item);
+                return this.drawLineFrame(true, frame, rect, onCursor, item);
+            case 6:
+                this.drawInFrame(frame, rect, onCursor, item);
+                return this.drawLineFrame(false, frame, rect, onCursor, item);
+            case 7:
+                this.drawInFrame(frame, rect, onCursor, item);
+                return this.drawLineFrame(true, frame, rect, onCursor, item);
         }
-    }
-};
+    };
 
-/*-------------------------------------------------------------
-枠線表示関数 drawLineFrame()
-double  :複線タイプか(boolean)
-frame   :フレームオブジェクト
-rect    :カーソル枠オブジェクト
-onCursor:カーソルと重なっているか(boolean)
-item    :アイテムオブジェクト、枠を表示する項目別に枠線色を変えたい場合に入れる
--------------------------------------------------------------*/
-Window_Base.prototype.drawLineFrame = function(double, frame, rect, onCursor, item) {
-    if (!frame) return;
-    var line = frame.line;
-    if (line && line.thick) {
-        var offset = double ? line.subThick : 0;
-        var csrColor = item ? item.csrColor : 0;
-        var defColor = item ? item.defColor : 0;
-        var color = frame.changeOnCursor && onCursor ?
-            csrColor || line.csrColor : defColor || line.defColor;
-        if (double) this.drawLineFrameBase(rect, 0, line.subColor, line.subThick);
-        this.drawLineFrameBase(rect, offset, color, line.thick);
-        if (double) {
-            offset += line.thick;
-            this.drawLineFrameBase(rect, offset, line.subColor, line.subThick);
+    /*-------------------------------------------------------------
+    枠画像表示関数 drawImageFrame()
+    frame   :フレームオブジェクト
+    rect    :カーソル枠オブジェクト
+    onCursor:カーソルと重なっているか(boolean)
+    item    :アイテムオブジェクト、枠を表示する項目別に画像を変えたい場合に入れる
+    画像の6*6の四つ角はそのまま使い、それ以外の部分を拡大縮小してサイズ調整する。
+    ただし、画像が12*12より大きくない場合は、そのまま拡大縮小する。
+    -------------------------------------------------------------*/
+    Window_Base.prototype.drawImageFrame = function(frame, rect, onCursor, item) {
+        if (!frame) return;
+        var image = frame.image;
+        if (image && image.name) {
+            var iic = Window_Base.IMAGE_INDEX_COLS;
+            var ifs = Window_Base.IMAGE_FIXED_SIZE; 
+
+            var bitmap = ImageManager.loadSystem(image.name);
+            var rx = rect.x + image.offsetX;
+            var ry = rect.y + image.offsetY;
+            var rw = rect.width;
+            var rh = rect.height;
+            var csrIndex = item ? item.csrIndex : 0;
+            var defIndex = item ? item.defIndex : 0;
+            var index = frame.changeOnCursor && onCursor ?
+                csrIndex || image.csrIndex : defIndex || image.defIndex;
+            var iw = image.width;
+            var ih = image.height;
+            var ix = index % iic * iw;
+            var iy = Math.floor(index / iic) * ih;
+            var flag = image.enabledScale;
+            var dx = flag ? rx : rx - (iw - rw) / 2;
+            var dy = flag ? ry : ry - (ih - rh) / 2;
+            var dw = flag ? rw + image.offsetW : iw;
+            var dh = flag ? rh + image.offsetH : ih;
+            if (iw > ifs * 2 && ih > ifs * 2) {
+                //上側
+                this.contents.blt(bitmap, ix, iy, ifs, ifs, dx, dy, ifs, ifs);
+                this.contents.blt(bitmap, ix + ifs, iy, iw - ifs*2, ifs, dx + ifs, dy, dw - ifs*2, ifs);
+                this.contents.blt(bitmap, ix + iw - ifs, iy, ifs, ifs, dx + dw - ifs, dy, ifs, ifs);
+                //中央
+                this.contents.blt(bitmap, ix, iy + ifs, ifs, ih - ifs*2, dx, dy + ifs, ifs, dh - ifs*2);
+                this.contents.blt(bitmap, ix + ifs, iy + ifs, iw - ifs*2, ih - ifs*2, dx + ifs, dy + ifs, dw - ifs*2, dh - ifs*2);
+                this.contents.blt(bitmap, ix + iw - ifs, iy + ifs, ifs, ih - ifs*2, dx + dw - ifs, dy + ifs, ifs, dh - ifs*2);
+                //下側
+                this.contents.blt(bitmap, ix, iy + ih - ifs, ifs, ifs, dx, dy + dh - ifs, ifs, ifs);
+                this.contents.blt(bitmap, ix + ifs, iy + ih - ifs, iw - ifs*2, ifs, dx + ifs, dy + dh - ifs, dw - ifs*2, ifs);
+                this.contents.blt(bitmap, ix + iw - ifs, iy + ih - ifs, ifs, ifs, dx + dw - ifs, dy + dh - ifs, ifs, ifs);
+            } else {
+                this.contents.blt(bitmap, ix, iy, iw, iw, dx, dy, dw, dh);
+            }
         }
-    }
-};
+    };
 
-/*-------------------------------------------------------------
-枠内塗潰し関数 drawInFrame()
-frame   :フレームオブジェクト
-rect    :カーソル枠オブジェクト
-onCursor:カーソルと重なっているか(boolean)
-item    :アイテムオブジェクト、枠を表示する項目別に枠内色を変えたい場合に入れる
--------------------------------------------------------------*/
-Window_Base.prototype.drawInFrame = function(frame, rect, onCursor, item) {
-    if (!frame) return;
-    var fill = frame.fill;
-    if (fill) {
-        var csrColor = item ? item.csrInColor : 0;
-        var defColor = item ? item.defInColor : 0;
-        var csrColor2 = item ? item.csrInColor2 : csrColor;
-        var defColor2 = item ? item.defInColor2 : defColor;
-        var color1 = frame.changeOnCursor && onCursor ?
-            csrColor || fill.csrColor : defColor || fill.defColor;
-        var color2 = frame.changeOnCursor && onCursor ?
-            csrColor2 || fill.csrColor2 || fill.csrColor :
-            defColor2 || fill.defColor2 || fill.defColor;
-        var opacity = item ? item.opacity : fill.opacity;
-        this.drawRect(rect.x, rect.y, rect.width, rect.height, this.textColor(color1), this.textColor(color2), opacity);
-    }
-};
+    /*-------------------------------------------------------------
+    枠線表示関数 drawLineFrame()
+    double  :複線タイプか(boolean)
+    frame   :フレームオブジェクト
+    rect    :カーソル枠オブジェクト
+    onCursor:カーソルと重なっているか(boolean)
+    item    :アイテムオブジェクト、枠を表示する項目別に枠線色を変えたい場合に入れる
+    -------------------------------------------------------------*/
+    Window_Base.prototype.drawLineFrame = function(double, frame, rect, onCursor, item) {
+        if (!frame) return;
+        var line = frame.line;
+        if (line && line.thick) {
+            var offset = double ? line.subThick : 0;
+            var csrColor = item ? item.csrColor : 0;
+            var defColor = item ? item.defColor : 0;
+            var color = frame.changeOnCursor && onCursor ?
+                csrColor || line.csrColor : defColor || line.defColor;
+            if (double) this.drawLineFrameBase(rect, 0, line.subColor, line.subThick);
+            this.drawLineFrameBase(rect, offset, color, line.thick);
+            if (double) {
+                offset += line.thick;
+                this.drawLineFrameBase(rect, offset, line.subColor, line.subThick);
+            }
+        }
+    };
 
-//カーソルサイズに枠線を描画
-Window_Base.prototype.drawLineFrameBase = function(rect, offset, color, thick) {
-    var sx = rect.x + offset;
-    var sy = rect.y + offset;
-    var sw = rect.width - offset * 2;
-    var sh = rect.height - offset * 2;
-    this.drawFrame(sx, sy, sw, sh, color, thick);
-};
+    /*-------------------------------------------------------------
+    枠内塗潰し関数 drawInFrame()
+    frame   :フレームオブジェクト
+    rect    :カーソル枠オブジェクト
+    onCursor:カーソルと重なっているか(boolean)
+    item    :アイテムオブジェクト、枠を表示する項目別に枠内色を変えたい場合に入れる
+    -------------------------------------------------------------*/
+    Window_Base.prototype.drawInFrame = function(frame, rect, onCursor, item) {
+        if (!frame) return;
+        var fill = frame.fill;
+        if (fill) {
+            var csrColor = item ? item.csrInColor : 0;
+            var defColor = item ? item.defInColor : 0;
+            var csrColor2 = item ? item.csrInColor2 : csrColor;
+            var defColor2 = item ? item.defInColor2 : defColor;
+            var color1 = frame.changeOnCursor && onCursor ?
+                csrColor || fill.csrColor : defColor || fill.defColor;
+            var color2 = frame.changeOnCursor && onCursor ?
+                csrColor2 || fill.csrColor2 || fill.csrColor :
+                defColor2 || fill.defColor2 || fill.defColor;
+            var opacity = item ? item.opacity : fill.opacity;
+            this.drawRect(rect.x, rect.y, rect.width, rect.height, this.textColor(color1), this.textColor(color2), opacity);
+        }
+    };
 
-//枠線を描画
-Window_Base.prototype.drawFrame = function(x, y, width, height, colorNum, thick) {
-  if (colorNum < 0) return false;
-  var color = this.textColor(colorNum);
-  this.contents.drawFrame(x, y, width, height, thick, color);
-};
+    //カーソルサイズに枠線を描画
+    Window_Base.prototype.drawLineFrameBase = function(rect, offset, color, thick) {
+        var sx = rect.x + offset;
+        var sy = rect.y + offset;
+        var sw = rect.width - offset * 2;
+        var sh = rect.height - offset * 2;
+        this.drawDcfFrameLine(sx, sy, sw, sh, color, thick);
+    };
 
-//矩形を描画
-Window_Base.prototype.drawRect = function(x, y, width, thick, color1, color2, opacity) {
-    color2 = color2 || color1;
-    this.contents.paintOpacity = opacity || 255;
-    this.contents.gradientFillRect(x, y, width, thick, color1, color2);
-    this.contents.paintOpacity = 255;
-};
+    //枠線を描画
+    Window_Base.prototype.drawDcfFrameLine = function(x, y, width, height, colorNum, thick) {
+      if (colorNum < 0) return false;
+      var color = this.textColor(colorNum);
+      this.contents.drawDcfFrame(x, y, width, height, thick, color);
+    };
 
-//=============================================================================
-// Window_Selectable
-//=============================================================================
+    //矩形を描画
+    Window_Base.prototype.drawRect = function(x, y, width, thick, color1, color2, opacity) {
+        color2 = color2 || color1;
+        this.contents.paintOpacity = opacity || 255;
+        this.contents.gradientFillRect(x, y, width, thick, color1, color2);
+        this.contents.paintOpacity = 255;
+    };
 
-/*-------------------------------------------------------------
-枠表示関数 drawDcfFrame(index, frame, type)
-index   :表示項目の番号、基本的にdrawItem(index)の引数をそのまま使う。
-frame   :フレームオブジェクト、false で本プラグインの設定を使用する。
-type    :枠タイプ(Number)、プラグインパラメータの設定を使うなら false
-item    :アイテムオブジェクト、表示項目毎に枠を変えたい場合に入れる
-表示項目毎に枠を表示する関数。基本的に、drawItem関数内の最初に追加する。
--------------------------------------------------------------*/
-Window_Selectable.prototype.drawDcfFrame = function(index, frame, type, item) {
-    frame = frame || FTKR.DCF.frame;
-    var onCursor = index === this.index();
-    var rect = this.itemRect(index);
-    if (frame.whenToDisplay === 1 && !onCursor ||
-        frame.whenToDisplay === 2 && onCursor) {
-        return;
-    }
-    this.drawDcfFrameBase(frame, rect, onCursor, item, type);
-};
+    //=============================================================================
+    // Window_Selectable
+    //=============================================================================
 
-/*-------------------------------------------------------------
-枠表示を更新する関数 updateDcfFrame(index, frame, hide)
-index   :表示項目の番号、基本的にselect(index)の引数をそのまま使う。
-frame   :フレームオブジェクト、false で本プラグインの設定を使用する。
-hide    :カーソル非表示フラグ(boolean)
-カーソルに連動して枠の表示を変える関数。
-基本的に、select関数内の最後に追加する。
--------------------------------------------------------------*/
-Window_Selectable.prototype.updateDcfFrame = function(index, frame, hide) {
-    frame = frame || FTKR.DCF.frame;
-    if (hide || frame.hideCursor) {
-        this.setCursorRect(0, 0, 0, 0);
-    }
-    var onCursor = index === this.index();
-    if (frame.changeOnCursor && onCursor ||
-        frame.whenToDisplay === 1 && onCursor ||
-        frame.whenToDisplay === 2 && !onCursor) {
-        this.refresh();
-    }
-};
+    /*-------------------------------------------------------------
+    枠表示関数 drawDcfFrame(index, frame, type)
+    index   :表示項目の番号、基本的にdrawItem(index)の引数をそのまま使う。
+    frame   :フレームオブジェクト、false で本プラグインの設定を使用する。
+    type    :枠タイプ(Number)、プラグインパラメータの設定を使うなら false
+    item    :アイテムオブジェクト、表示項目毎に枠を変えたい場合に入れる
+    表示項目毎に枠を表示する関数。基本的に、drawItem関数内の最初に追加する。
+    -------------------------------------------------------------*/
+    Window_Selectable.prototype.drawDcfFrame = function(index, frame, type, item) {
+        frame = frame || FTKR.DCF.frame;
+        var onCursor = index === this.index();
+        var rect = this.itemRect(index);
+        if (frame.whenToDisplay === 1 && !onCursor ||
+            frame.whenToDisplay === 2 && onCursor) {
+            return;
+        }
+        this.drawDcfFrameBase(frame, rect, onCursor, item, type);
+    };
 
-//=============================================================================
-// Window_Command
-//=============================================================================
-/*
-コマンド別に設定するため、コメントアウト
-FTKR.DCF.Window_Command_drawItem = Window_Command.prototype.drawItem;
-Window_Command.prototype.drawItem = function(index) {
-    this.changePaintOpacity(this.isCommandEnabled(index));
-    this.drawDcfFrame(index);
-    FTKR.DCF.Window_Command_drawItem.call(this, index);
-};
-*/
+    /*-------------------------------------------------------------
+    枠表示を更新する関数 updateDcfFrame(index, frame, hide)
+    index   :表示項目の番号、基本的にselect(index)の引数をそのまま使う。
+    frame   :フレームオブジェクト、false で本プラグインの設定を使用する。
+    hide    :カーソル非表示フラグ(boolean)
+    カーソルに連動して枠の表示を変える関数。
+    基本的に、select関数内の最後に追加する。
+    -------------------------------------------------------------*/
+    Window_Selectable.prototype.updateDcfFrame = function(index, frame, hide) {
+        frame = frame || FTKR.DCF.frame;
+        if (hide || frame.hideCursor) {
+            this.setCursorRect(0, 0, 0, 0);
+        }
+        var onCursor = index === this.index();
+        if (frame.changeOnCursor && onCursor ||
+            frame.whenToDisplay === 1 && onCursor ||
+            frame.whenToDisplay === 2 && !onCursor) {
+            this.refresh();
+        }
+    };
 
-//コマンド枠の更新処理を追加
-Window_Command.prototype.select = function(index) {
-    Window_Selectable.prototype.select.call(this, index);
-    this.updateDcfFrame(index);
-};
-
-//=============================================================================
-// Window_TitleCommand
-//=============================================================================
-
-Window_TitleCommand.prototype.drawItem = function(index) {
-    if (FTKR.DCF.enabled.title) {
+    //=============================================================================
+    // Window_Command
+    //=============================================================================
+    /*
+    コマンド別に設定するため、コメントアウト
+    FTKR.DCF.Window_Command_drawItem = Window_Command.prototype.drawItem;
+    Window_Command.prototype.drawItem = function(index) {
         this.changePaintOpacity(this.isCommandEnabled(index));
         this.drawDcfFrame(index);
-    }
-    Window_Command.prototype.drawItem.call(this, index);
-};
+        FTKR.DCF.Window_Command_drawItem.call(this, index);
+    };
+    */
+    
+    //コマンド枠の更新処理を追加
+    Window_Command.prototype.select = function(index) {
+        Window_Selectable.prototype.select.call(this, index);
+        this.updateDcfFrame(index);
+    };
+    
+    //=============================================================================
+    // Window_TitleCommand
+    //=============================================================================
 
-//=============================================================================
-// Window_MenuCommand
-//=============================================================================
+    Window_TitleCommand.prototype.drawItem = function(index) {
+        if (FTKR.DCF.enabled.title) {
+            this.changePaintOpacity(this.isCommandEnabled(index));
+            this.drawDcfFrame(index);
+        }
+        Window_Command.prototype.drawItem.call(this, index);
+    };
 
-Window_MenuCommand.prototype.drawItem = function(index) {
-    if (FTKR.DCF.enabled.menu) {
-        this.changePaintOpacity(this.isCommandEnabled(index));
-        this.drawDcfFrame(index);
-    }
-    Window_Command.prototype.drawItem.call(this, index);
-};
+    //=============================================================================
+    // Window_MenuCommand
+    //=============================================================================
 
-//=============================================================================
-// Window_ItemCategory
-//=============================================================================
+    Window_MenuCommand.prototype.drawItem = function(index) {
+        if (FTKR.DCF.enabled.menu) {
+            this.changePaintOpacity(this.isCommandEnabled(index));
+            this.drawDcfFrame(index);
+        }
+        Window_Command.prototype.drawItem.call(this, index);
+    };
 
-Window_ItemCategory.prototype.drawItem = function(index) {
-    if (FTKR.DCF.enabled.item) {
-        this.changePaintOpacity(this.isCommandEnabled(index));
-        this.drawDcfFrame(index);
-    }
-    Window_Command.prototype.drawItem.call(this, index);
-};
+    //=============================================================================
+    // Window_ItemCategory
+    //=============================================================================
 
-//=============================================================================
-// Window_SkillType
-//=============================================================================
+    Window_ItemCategory.prototype.drawItem = function(index) {
+        if (FTKR.DCF.enabled.item) {
+            this.changePaintOpacity(this.isCommandEnabled(index));
+            this.drawDcfFrame(index);
+        }
+        Window_Command.prototype.drawItem.call(this, index);
+    };
 
-Window_SkillType.prototype.drawItem = function(index) {
-    if (FTKR.DCF.enabled.skill) {
-        this.changePaintOpacity(this.isCommandEnabled(index));
-        this.drawDcfFrame(index);
-    }
-    Window_Command.prototype.drawItem.call(this, index);
-};
+    //=============================================================================
+    // Window_SkillType
+    //=============================================================================
 
-//=============================================================================
-// Window_EquipCommand
-//=============================================================================
+    Window_SkillType.prototype.drawItem = function(index) {
+        if (FTKR.DCF.enabled.skill) {
+            this.changePaintOpacity(this.isCommandEnabled(index));
+            this.drawDcfFrame(index);
+        }
+        Window_Command.prototype.drawItem.call(this, index);
+    };
 
-Window_EquipCommand.prototype.drawItem = function(index) {
-    if (FTKR.DCF.enabled.equip) {
-        this.changePaintOpacity(this.isCommandEnabled(index));
-        this.drawDcfFrame(index);
-    }
-    Window_Command.prototype.drawItem.call(this, index);
-};
+    //=============================================================================
+    // Window_EquipCommand
+    //=============================================================================
 
-//=============================================================================
-// Window_Options
-//=============================================================================
+    Window_EquipCommand.prototype.drawItem = function(index) {
+        if (FTKR.DCF.enabled.equip) {
+            this.changePaintOpacity(this.isCommandEnabled(index));
+            this.drawDcfFrame(index);
+        }
+        Window_Command.prototype.drawItem.call(this, index);
+    };
 
-FTKR.DCF.Window_Options_drawItem = Window_Options.prototype.drawItem;
-Window_Options.prototype.drawItem = function(index) {
-    if (FTKR.DCF.enabled.option) {
-        this.changePaintOpacity(this.isCommandEnabled(index));
-        this.drawDcfFrame(index);
-    }
-    FTKR.DCF.Window_Options_drawItem.call(this, index);
-};
+    //=============================================================================
+    // Window_Options
+    //=============================================================================
 
-//=============================================================================
-// Window_ShopCommand
-//=============================================================================
+    var _DCF_Window_Options_drawItem = Window_Options.prototype.drawItem;
+    Window_Options.prototype.drawItem = function(index) {
+        if (FTKR.DCF.enabled.option) {
+            this.changePaintOpacity(this.isCommandEnabled(index));
+            this.drawDcfFrame(index);
+        }
+        _DCF_Window_Options_drawItem.call(this, index);
+    };
 
-Window_ShopCommand.prototype.drawItem = function(index) {
-    if (FTKR.DCF.enabled.shop) {
-        this.changePaintOpacity(this.isCommandEnabled(index));
-        this.drawDcfFrame(index);
-    }
-    Window_Command.prototype.drawItem.call(this, index);
-};
+    //=============================================================================
+    // Window_ShopCommand
+    //=============================================================================
 
-//=============================================================================
-// Window_ChoiceList
-//=============================================================================
+    Window_ShopCommand.prototype.drawItem = function(index) {
+        if (FTKR.DCF.enabled.shop) {
+            this.changePaintOpacity(this.isCommandEnabled(index));
+            this.drawDcfFrame(index);
+        }
+        Window_Command.prototype.drawItem.call(this, index);
+    };
 
-FTKR.DCF.Window_ChoiceList_drawItem = Window_ChoiceList.prototype.drawItem;
-Window_ChoiceList.prototype.drawItem = function(index) {
-    if (FTKR.DCF.enabled.choice) {
-        this.changePaintOpacity(this.isCommandEnabled(index));
-        this.drawDcfFrame(index);
-    }
-    FTKR.DCF.Window_ChoiceList_drawItem.call(this, index);
-};
+    //=============================================================================
+    // Window_ChoiceList
+    //=============================================================================
 
-//=============================================================================
-// Window_PartyCommand
-//=============================================================================
+    var _DCF_Window_ChoiceList_drawItem = Window_ChoiceList.prototype.drawItem;
+    Window_ChoiceList.prototype.drawItem = function(index) {
+        if (FTKR.DCF.enabled.choice) {
+            this.changePaintOpacity(this.isCommandEnabled(index));
+            this.drawDcfFrame(index);
+        }
+        _DCF_Window_ChoiceList_drawItem.call(this, index);
+    };
 
-Window_PartyCommand.prototype.drawItem = function(index) {
-    if (FTKR.DCF.enabled.battle) {
-        this.changePaintOpacity(this.isCommandEnabled(index));
-        this.drawDcfFrame(index);
-    }
-    Window_Command.prototype.drawItem.call(this, index);
-};
+    //=============================================================================
+    // Window_PartyCommand
+    //=============================================================================
 
-//=============================================================================
-// Window_ActorCommand
-//=============================================================================
+    Window_PartyCommand.prototype.drawItem = function(index) {
+        if (FTKR.DCF.enabled.battle) {
+            this.changePaintOpacity(this.isCommandEnabled(index));
+            this.drawDcfFrame(index);
+        }
+        Window_Command.prototype.drawItem.call(this, index);
+    };
 
-Window_ActorCommand.prototype.drawItem = function(index) {
-    if (FTKR.DCF.enabled.battle) {
-        this.changePaintOpacity(this.isCommandEnabled(index));
-        this.drawDcfFrame(index);
-    }
-    Window_Command.prototype.drawItem.call(this, index);
-};
+    //=============================================================================
+    // Window_ActorCommand
+    //=============================================================================
 
-//=============================================================================
-// Window_GameEnd
-//=============================================================================
+    Window_ActorCommand.prototype.drawItem = function(index) {
+        if (FTKR.DCF.enabled.battle) {
+            this.changePaintOpacity(this.isCommandEnabled(index));
+            this.drawDcfFrame(index);
+        }
+        Window_Command.prototype.drawItem.call(this, index);
+    };
 
-Window_GameEnd.prototype.drawItem = function(index) {
-    if (FTKR.DCF.enabled.gameEnd) {
-        this.changePaintOpacity(this.isCommandEnabled(index));
-        this.drawDcfFrame(index);
-    }
-    Window_Command.prototype.drawItem.call(this, index);
-};
+    //=============================================================================
+    // Window_GameEnd
+    //=============================================================================
 
+    Window_GameEnd.prototype.drawItem = function(index) {
+        if (FTKR.DCF.enabled.gameEnd) {
+            this.changePaintOpacity(this.isCommandEnabled(index));
+            this.drawDcfFrame(index);
+        }
+        Window_Command.prototype.drawItem.call(this, index);
+    };
+
+    //=============================================================================
+    // Window_SkillList
+    //=============================================================================
+
+    var _DCF_Window_SkillList_drawItem = Window_SkillList.prototype.drawItem;
+    Window_SkillList.prototype.drawItem = function(index) {
+        var skill = this._data[index];
+        if (skill) {
+            if (this.checkEnableDcf()) {
+                this.changePaintOpacity(this.isEnabled(skill));
+                this.drawDcfFrame(index);
+            }
+            _DCF_Window_SkillList_drawItem.call(this, index);
+        }
+    };
+
+    Window_SkillList.prototype.checkEnableDcf = function() {
+        return $gameParty.inBattle() ? 
+            FTKR.DCF.enabled.list.battleSkill :
+            FTKR.DCF.enabled.list.menuSkill;
+    };
+
+    Window_SkillList.prototype.select = function(index) {
+        Window_Selectable.prototype.select.call(this, index);
+        this.updateDcfFrame(index);
+    };
+
+
+}());//EOF
