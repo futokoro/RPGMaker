@@ -3,8 +3,8 @@
 // FTKR_FacialImageDifference.js
 // 作成者     : フトコロ
 // 作成日     : 2017/05/10
-// 最終更新日 : 2017/10/01
-// バージョン : v1.1.5
+// 最終更新日 : 2017/11/24
+// バージョン : v1.1.6
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.FID = FTKR.FID || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.5 アクターの状態によって顔画像を変えるプラグイン
+ * @plugindesc v1.1.6 アクターの状態によって顔画像を変えるプラグイン
  * @author フトコロ
  *
  * @noteParam FID_画像
@@ -278,9 +278,15 @@ FTKR.FID = FTKR.FID || {};
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
+ * プラグイン公開元
+ * https://github.com/futokoro/RPGMaker/blob/master/README.md
+ * 
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.1.6 - 2017/11/24 : 不具合修正
+ *    1. 5人パーティー以上で並べ替えを実施すると、正しく表示できない不具合を修正。
  * 
  * v1.1.5 - 2017/10/01 : 不具合修正
  *    1. フロントビューモードで、ダメージ時の顔画像の変更が動作しない不具合を修正。
@@ -324,491 +330,506 @@ FTKR.FID = FTKR.FID || {};
  */
 //=============================================================================
 
-//=============================================================================
-// プラグイン パラメータ
-//=============================================================================
-FTKR.FID.parameters = PluginManager.parameters('FTKR_FacialImageDifference');
+(function (){
 
-FTKR.FID.enableAnimation = Number(FTKR.FID.parameters['Enable Animation'] || 0);
-FTKR.FID.enableFaceDifference = Number(FTKR.FID.parameters['Enable Face Difference'] || 0);
+    //=============================================================================
+    // プラグイン パラメータ
+    //=============================================================================
+    var parameters = PluginManager.parameters('FTKR_FacialImageDifference');
 
-FTKR.FID.damage = {
-    offsetX :Number(FTKR.FID.parameters['Offset X'] || 0),
-    offsetY :Number(FTKR.FID.parameters['Offset Y'] || 0),
-};
+    FTKR.FID.enableAnimation = Number(parameters['Enable Animation'] || 0);
+    FTKR.FID.enableFaceDifference = Number(parameters['Enable Face Difference'] || 0);
 
-//オリジナルステータス設定オブジェクト
-FTKR.FID.faces = {
-    wait    :Number(FTKR.FID.parameters['Wait Face Index'] || 0),
-    walk    :Number(FTKR.FID.parameters['Walk Face Index'] || 0),
-    chant   :Number(FTKR.FID.parameters['Chant Face Index'] || 0),
-    guard   :Number(FTKR.FID.parameters['Guard Face Index'] || 0),
-    damage  :Number(FTKR.FID.parameters['Damage Face Index'] || 0),
-    evade   :Number(FTKR.FID.parameters['Evade Face Index'] || 0),
-    thrust  :Number(FTKR.FID.parameters['Thrust Face Index'] || 0),
-    swing   :Number(FTKR.FID.parameters['Swing Face Index'] || 0),
-    missile :Number(FTKR.FID.parameters['Missile Face Index'] || 0),
-    skill   :Number(FTKR.FID.parameters['Skill Face Index'] || 0),
-    spell   :Number(FTKR.FID.parameters['Spell Face Index'] || 0),
-    item    :Number(FTKR.FID.parameters['Item Face Index'] || 0),
-    escape  :Number(FTKR.FID.parameters['Escape Face Index'] || 0),
-    victory :Number(FTKR.FID.parameters['Victory Face Index'] || 0),
-    dying   :Number(FTKR.FID.parameters['Dying Face Index'] || 0),
-    abnormal:Number(FTKR.FID.parameters['Abnormal Face Index'] || 0),
-    sleep   :Number(FTKR.FID.parameters['Sleep Face Index'] || 0),
-    dead    :Number(FTKR.FID.parameters['Dead Face Index'] || 0),
-    recovery:Number(FTKR.FID.parameters['recovery Face Index'] || 0),
-    custom1 :Number(FTKR.FID.parameters['Custom1 Face Index'] || 0),
-    custom2 :Number(FTKR.FID.parameters['Custom2 Face Index'] || 0),
-    custom3 :Number(FTKR.FID.parameters['Custom3 Face Index'] || 0),
-    custom4 :Number(FTKR.FID.parameters['Custom4 Face Index'] || 0),
-    custom5 :Number(FTKR.FID.parameters['Custom5 Face Index'] || 0),
-    custom6 :Number(FTKR.FID.parameters['Custom6 Face Index'] || 0),
-    custom7 :Number(FTKR.FID.parameters['Custom7 Face Index'] || 0),
-    custom8 :Number(FTKR.FID.parameters['Custom8 Face Index'] || 0),
-};
+    FTKR.FID.damage = {
+        offsetX :Number(parameters['Offset X'] || 0),
+        offsetY :Number(parameters['Offset Y'] || 0),
+    };
 
-//objのメモ欄から <metacode: x> の値を読み取って配列で返す
-var readObjectMeta = function(obj, metacodes) {
-    if (!obj) return false;
-    var match = {};
-    metacodes.some(function(metacode){
-        var metaReg = new RegExp('<' + metacode + ':[ ]*(.+)>', 'i');
-        match = metaReg.exec(obj.note);
-        return match;
-    }); 
-    return match ? match[1] : '';
-};
+    //オリジナルステータス設定オブジェクト
+    FTKR.FID.faces = {
+        wait    :Number(parameters['Wait Face Index'] || 0),
+        walk    :Number(parameters['Walk Face Index'] || 0),
+        chant   :Number(parameters['Chant Face Index'] || 0),
+        guard   :Number(parameters['Guard Face Index'] || 0),
+        damage  :Number(parameters['Damage Face Index'] || 0),
+        evade   :Number(parameters['Evade Face Index'] || 0),
+        thrust  :Number(parameters['Thrust Face Index'] || 0),
+        swing   :Number(parameters['Swing Face Index'] || 0),
+        missile :Number(parameters['Missile Face Index'] || 0),
+        skill   :Number(parameters['Skill Face Index'] || 0),
+        spell   :Number(parameters['Spell Face Index'] || 0),
+        item    :Number(parameters['Item Face Index'] || 0),
+        escape  :Number(parameters['Escape Face Index'] || 0),
+        victory :Number(parameters['Victory Face Index'] || 0),
+        dying   :Number(parameters['Dying Face Index'] || 0),
+        abnormal:Number(parameters['Abnormal Face Index'] || 0),
+        sleep   :Number(parameters['Sleep Face Index'] || 0),
+        dead    :Number(parameters['Dead Face Index'] || 0),
+        recovery:Number(parameters['recovery Face Index'] || 0),
+        custom1 :Number(parameters['Custom1 Face Index'] || 0),
+        custom2 :Number(parameters['Custom2 Face Index'] || 0),
+        custom3 :Number(parameters['Custom3 Face Index'] || 0),
+        custom4 :Number(parameters['Custom4 Face Index'] || 0),
+        custom5 :Number(parameters['Custom5 Face Index'] || 0),
+        custom6 :Number(parameters['Custom6 Face Index'] || 0),
+        custom7 :Number(parameters['Custom7 Face Index'] || 0),
+        custom8 :Number(parameters['Custom8 Face Index'] || 0),
+    };
 
-//=============================================================================
-// バトラーに顔画像の設定を追加
-//=============================================================================
+    //objのメモ欄から <metacode: x> の値を読み取って配列で返す
+    var readObjectMeta = function(obj, metacodes) {
+        if (!obj) return false;
+        var match = {};
+        metacodes.some(function(metacode){
+            var metaReg = new RegExp('<' + metacode + ':[ ]*(.+)>', 'i');
+            match = metaReg.exec(obj.note);
+            return match;
+        }); 
+        return match ? match[1] : '';
+    };
 
-FTKR.FID.Game_Battler_initMembers = Game_Battler.prototype.initMembers;
-Game_Battler.prototype.initMembers = function() {
-    FTKR.FID.Game_Battler_initMembers.call(this);
-    this._faceType = null;
-    this._faceRefresh = false;
-};
+    //=============================================================================
+    // バトラーに顔画像の設定を追加
+    //=============================================================================
 
-FTKR.FID.Game_Battler_requestMotion = Game_Battler.prototype.requestMotion;
-Game_Battler.prototype.requestMotion = function(motionType) {
-    FTKR.FID.Game_Battler_requestMotion.call(this, motionType);
-    this._faceType = this._motionType;
-};
+    var _FID_Game_Battler_initMembers = Game_Battler.prototype.initMembers;
+    Game_Battler.prototype.initMembers = function() {
+        _FID_Game_Battler_initMembers.call(this);
+        this._faceType = null;
+        this._faceRefresh = false;
+    };
 
-Game_Battler.prototype.isFaceRequested = function() {
-    return !!this._faceType;
-};
+    var _FID_Game_Battler_requestMotion = Game_Battler.prototype.requestMotion;
+    Game_Battler.prototype.requestMotion = function(motionType) {
+        _FID_Game_Battler_requestMotion.call(this, motionType);
+        this._faceType = this._motionType;
+    };
 
-Game_Battler.prototype.faceType = function() {
-    return this._faceType;
-};
+    Game_Battler.prototype.isFaceRequested = function() {
+        return !!this._faceType;
+    };
 
-Game_Battler.prototype.clearFace = function() {
-    this._faceType = null;
-    this._faceRefresh = false;
-};
+    Game_Battler.prototype.faceType = function() {
+        return this._faceType;
+    };
 
-Game_Battler.prototype.isFaceRefreshRequested = function() {
-    return this._faceRefresh;
-};
+    Game_Battler.prototype.clearFace = function() {
+        this._faceType = null;
+        this._faceRefresh = false;
+    };
 
-Game_Battler.prototype.requestFaceRefresh = function() {
-    this._faceRefresh = true;
-};
+    Game_Battler.prototype.isFaceRefreshRequested = function() {
+        return this._faceRefresh;
+    };
 
-FTKR.FID.Game_Battler_setActionState = Game_Battler.prototype.setActionState;
-Game_Battler.prototype.setActionState = function(actionState) {
-    FTKR.FID.Game_Battler_setActionState.call(this, actionState);
-    this.requestFaceRefresh();
-};
+    Game_Battler.prototype.requestFaceRefresh = function() {
+        this._faceRefresh = true;
+    };
 
-FTKR.FID.Game_Party_requestMotionRefresh = Game_Party.prototype.requestMotionRefresh;
-Game_Party.prototype.requestMotionRefresh = function() {
-    FTKR.FID.Game_Party_requestMotionRefresh.call(this);
-    this.members().forEach(function(actor) {
-        actor.requestFaceRefresh();
-    });
-};
+    var _FID_Game_Battler_setActionState = Game_Battler.prototype.setActionState;
+    Game_Battler.prototype.setActionState = function(actionState) {
+        _FID_Game_Battler_setActionState.call(this, actionState);
+        this.requestFaceRefresh();
+    };
 
-//=============================================================================
-// アクターの顔画像表示処理を修正
-//=============================================================================
+    var _FID_Game_Party_requestMotionRefresh = Game_Party.prototype.requestMotionRefresh;
+    Game_Party.prototype.requestMotionRefresh = function() {
+        _FID_Game_Party_requestMotionRefresh.call(this);
+        this.members().forEach(function(actor) {
+            actor.requestFaceRefresh();
+        });
+    };
 
-//書き換え
-Window.prototype._createAllParts = function() {
-    this._windowSpriteContainer = new PIXI.Container();
-    this._windowBackSprite = new Sprite();
-    this._windowCursorSprite = new Sprite();
-    this._windowFrameSprite = new Sprite();
-    this._windowCssSprite = new Sprite(); //追加
-    this._windowCssSprite.setFrame(0, 0, Graphics.width, Graphics.height);
-    this._windowContentsSprite = new Sprite();
-    this._downArrowSprite = new Sprite();
-    this._upArrowSprite = new Sprite();
-    this._windowPauseSignSprite = new Sprite();
-    this._windowBackSprite.bitmap = new Bitmap(1, 1);
-    this._windowBackSprite.alpha = 192 / 255;
-    this.addChild(this._windowSpriteContainer);
-    this._windowSpriteContainer.addChild(this._windowBackSprite);
-    this._windowSpriteContainer.addChild(this._windowFrameSprite);
-    this.addChild(this._windowCursorSprite);
-    this.addChild(this._windowCssSprite); //追加
-    this.addChild(this._windowContentsSprite);
-    this.addChild(this._downArrowSprite);
-    this.addChild(this._upArrowSprite);
-    this.addChild(this._windowPauseSignSprite);
-};
+    //=============================================================================
+    // アクターの顔画像表示処理を修正
+    //=============================================================================
 
-FTKR.FID.Window_Base_initialize = Window_Base.prototype.initialize;
-Window_Base.prototype.initialize = function(x, y, width, height) {
-    FTKR.FID.Window_Base_initialize.call(this, x, y, width, height);
-    this._faceSprite = [];
-};
+    //書き換え
+    Window.prototype._createAllParts = function() {
+        this._windowSpriteContainer = new PIXI.Container();
+        this._windowBackSprite = new Sprite();
+        this._windowCursorSprite = new Sprite();
+        this._windowFrameSprite = new Sprite();
+        this._windowCssSprite = new Sprite(); //追加
+        this._windowCssSprite.setFrame(0, 0, Graphics.width, Graphics.height);
+        this._windowContentsSprite = new Sprite();
+        this._downArrowSprite = new Sprite();
+        this._upArrowSprite = new Sprite();
+        this._windowPauseSignSprite = new Sprite();
+        this._windowBackSprite.bitmap = new Bitmap(1, 1);
+        this._windowBackSprite.alpha = 192 / 255;
+        this.addChild(this._windowSpriteContainer);
+        this._windowSpriteContainer.addChild(this._windowBackSprite);
+        this._windowSpriteContainer.addChild(this._windowFrameSprite);
+        this.addChild(this._windowCursorSprite);
+        this.addChild(this._windowCssSprite); //追加
+        this.addChild(this._windowContentsSprite);
+        this.addChild(this._downArrowSprite);
+        this.addChild(this._upArrowSprite);
+        this.addChild(this._windowPauseSignSprite);
+    };
 
-//書き換え
-Window_Base.prototype.drawActorFace = function(actor, x, y, width, height) {
-    width = width || Window_Base._faceWidth;
-    height = height || Window_Base._faceHeight;
-    this.drawCssFace(actor, x, y, width, height);
-};
+    var _FID_Window_Base_initialize = Window_Base.prototype.initialize;
+    Window_Base.prototype.initialize = function(x, y, width, height) {
+        _FID_Window_Base_initialize.call(this, x, y, width, height);
+        this._faceSprite = [];
+    };
 
-Window_Base.prototype.showActorNum = function() {
-    return this.maxPageItems ? this.maxPageItems() : 1;
-};
+    //書き換え
+    Window_Base.prototype.drawActorFace = function(actor, x, y, width, height) {
+        width = width || Window_Base._faceWidth;
+        height = height || Window_Base._faceHeight;
+        this.drawCssFace(actor, x, y, width, height);
+    };
 
-//書き換え
-Window_Base.prototype.drawCssFace = function(actor, dx, dy, width, height) {
-    var index = actor.index() % this.showActorNum();
-    var sprite = this._faceSprite[index];
-    var fh = Window_Base._faceHeight;
-    var scale = Imported.FTKR_CSS ? (Math.min(width, height) || fh) / fh : 1;
-    if (!sprite) {
-        sprite = new Sprite_ActorFace(actor, this);
-        this._windowCssSprite.addChild(sprite);
-        this._faceSprite[index] = sprite;
-    } else if (sprite._actor !== actor){
-        sprite.setBattler(actor);
-    }
-    dx = dx + fh * scale / 2 + this.padding;
-    if (Imported.FTKR_CSS) {
-        var len = Math.min(width, height);
-        var dw = len || Window_Base._faceWidth * scale;
-        dx += FTKR.CSS.cssStatus.face.posiX * (width - dw) / 2;
-    }
-    var sx = Math.floor(dx);
-    var sy = Math.floor(dy + height + this.padding);
-    sprite.setHome(sx, sy);
-    sprite.startEntryMotion();
-    sprite.setScale(scale);
-};
+    Window_Base.prototype.showActorNum = function() {
+        return this.maxPageItems ? this.maxPageItems() : 1;
+    };
 
-FTKR.FID.Window_Base_clearCssSprite = Window_Base.prototype.clearCssSprite;
-Window_Base.prototype.clearCssSprite = function(index) {
-    FTKR.FID.Window_Base_clearCssSprite.call(this, index);
-    if (this._faceSprite[index]) this._faceSprite[index].setBattler();
-};
-
-Window_Base.prototype.clearFaceSprites = function() {
-    this._faceSprite.forEach( function(sprite){
-        sprite.setBattler();
-    });
-};
-
-FTKR.FID.Window_Status_refresh = Window_Status.prototype.refresh;
-Window_Status.prototype.refresh = function() {
-    this.clearFaceSprites();
-    FTKR.FID.Window_Status_refresh.call(this);
-};
-
-//=============================================================================
-// Sprite_ActorFace
-// アクターの顔画像表示スプライト
-//=============================================================================
-
-function Sprite_ActorFace() {
-    this.initialize.apply(this, arguments);
-}
-
-Sprite_ActorFace.prototype = Object.create(Sprite_Actor.prototype);
-Sprite_ActorFace.prototype.constructor = Sprite_ActorFace;
-
-Sprite_ActorFace.prototype.initialize = function(battler, window) {
-    Sprite_Battler.prototype.initialize.call(this, battler);
-    this._spriteWindow = window;
-};
-
-Sprite_ActorFace._imageWidth  = 144;
-Sprite_ActorFace._imageHeight = 144;
-
-Sprite_ActorFace.prototype.initMembers = function() {
-    Sprite_Battler.prototype.initMembers.call(this);
-    this._battlerName = '';
-    this._motion = null;
-    this._motionCount = 0;
-    this._pattern = 0;
-    this._faceType = '';
-    this.createMainSprite();
-};
-
-Sprite_ActorFace.prototype.setBattler = function(battler) {
-    Sprite_Battler.prototype.setBattler.call(this, battler);
-    var changed = (battler !== this._actor);
-    if (changed) {
-        this._actor = battler;
-        this.startEntryMotion();
-    }
-};
-
-Sprite_ActorFace.prototype.startEntryMotion = function() {
-    this.refreshMotion();
-    this.startMove(0, 0, 0);
-};
-
-Sprite_ActorFace.prototype.update = function() {
-    Sprite_Base.prototype.update.call(this);
-    if (this._actor) {
-        this.updateMain();
-        if (FTKR.FID.enableAnimation) {
-            this.updateAnimation();
-            this.updateDamagePopup();
-            this.updateSelectionEffect();
+    //書き換え
+    Window_Base.prototype.drawCssFace = function(actor, dx, dy, width, height) {
+        var index = actor.index() % this.showActorNum();
+        var sprite = this._faceSprite[index];
+        var fh = Window_Base._faceHeight;
+        var scale = Imported.FTKR_CSS ? (Math.min(width, height) || fh) / fh : 1;
+        if (!sprite) {
+            sprite = new Sprite_ActorFace(actor, this);
+            this._windowCssSprite.addChild(sprite);
+            this._faceSprite[index] = sprite;
+        } else if (sprite._actor !== actor){
+            sprite.setBattler(actor);
         }
-    } else {
-        this.bitmap = null;
-    }
-    if (Imported.YEP_BattleEngineCore) {
-        if (!this._postSpriteInitialized) this.postSpriteInitialize();
-    }
-    if (this._actor) {
-        this.updateMotion();
-    }
-};
+        dx = dx + fh * scale / 2 + this.padding;
+        if (Imported.FTKR_CSS) {
+            var len = Math.min(width, height);
+            var dw = len || Window_Base._faceWidth * scale;
+            dx += FTKR.CSS.cssStatus.face.posiX * (width - dw) / 2;
+        }
+        var sx = Math.floor(dx);
+        var sy = Math.floor(dy + height + this.padding);
+        sprite.setHome(sx, sy);
+        sprite.startEntryMotion();
+        sprite.setScale(scale);
+    };
 
-Sprite_ActorFace.prototype.updateMain = function() {
-      this.updateBitmap();
-      this.updateFrame();
-//      this.updateMove();
-//      this.updatePosition();
-};
+    var _FID_Window_Base_clearCssSprite = Window_Base.prototype.clearCssSprite;
+    Window_Base.prototype.clearCssSprite = function(index) {
+        _FID_Window_Base_clearCssSprite.call(this, index);
+        if (this._faceSprite[index]) this._faceSprite[index].setBattler();
+    };
 
-Sprite_ActorFace.prototype.setupMotion = function() {
-    if (this._actor.isFaceRequested()) {
-        this.startMotion(this._actor.faceType());
-        this._actor.clearFace();
+    Window_Base.prototype.clearFaceSprites = function() {
+        this._faceSprite.forEach( function(sprite){
+            sprite.setBattler();
+        });
+    };
+
+    //=============================================================================
+    // Sprite_ActorFace
+    // アクターの顔画像表示スプライト
+    //=============================================================================
+
+    function Sprite_ActorFace() {
+        this.initialize.apply(this, arguments);
     }
-};
 
-Sprite_ActorFace.prototype.updateBitmap = function() {
-    Sprite_Battler.prototype.updateBitmap.call(this);
-    var name = Imported.FTKR_ESM && this.isOtherMotion() ? this.otherBattlerName() : this._actor.faceName();
-    if (this._battlerName !== name) {
-        this._battlerName = name;
-        this._mainSprite.bitmap = ImageManager.loadFace(name);
-    }
-};
+    Sprite_ActorFace.prototype = Object.create(Sprite_Actor.prototype);
+    Sprite_ActorFace.prototype.constructor = Sprite_ActorFace;
 
-Sprite_ActorFace.prototype.otherBattlerName = function() {
-    return readObjectMeta(this._actor.actor(), ['FID_顔画像', 'FID_FACE_IMAGE']);
-};
+    Sprite_ActorFace.prototype.initialize = function(battler, window) {
+        Sprite_Battler.prototype.initialize.call(this, battler);
+        this._spriteWindow = window;
+    };
 
-Sprite_ActorFace.prototype.updateFrame = function() {
-    Sprite_Battler.prototype.updateFrame.call(this);
-    var bitmap = this._mainSprite.bitmap;
-    if (bitmap) {
-        var cw = Sprite_ActorFace._imageWidth;
-        var ch = Sprite_ActorFace._imageHeight;
-        if (FTKR.FID.enableFaceDifference) {
-            var motionIndex = this.faceTypeIndex();
-            var cx = motionIndex % 6;
-            var cy = Math.floor(motionIndex / 6);
+    Sprite_ActorFace._imageWidth  = 144;
+    Sprite_ActorFace._imageHeight = 144;
+
+    Sprite_ActorFace.prototype.initMembers = function() {
+        Sprite_Battler.prototype.initMembers.call(this);
+        this._battlerName = '';
+        this._motion = null;
+        this._motionCount = 0;
+        this._pattern = 0;
+        this._faceType = '';
+        this.createMainSprite();
+    };
+
+    Sprite_ActorFace.prototype.setBattler = function(battler) {
+        Sprite_Battler.prototype.setBattler.call(this, battler);
+        var changed = (battler !== this._actor);
+        if (changed) {
+            this._actor = battler;
+            this.startEntryMotion();
+        }
+    };
+
+    Sprite_ActorFace.prototype.startEntryMotion = function() {
+        this.refreshMotion();
+        this.startMove(0, 0, 0);
+    };
+
+    Sprite_ActorFace.prototype.update = function() {
+        Sprite_Base.prototype.update.call(this);
+        if (this._actor) {
+            this.updateMain();
+            if (FTKR.FID.enableAnimation) {
+                this.updateAnimation();
+                this.updateDamagePopup();
+                this.updateSelectionEffect();
+            }
         } else {
-            var motionIndex = this._actor.faceIndex();
-            var cx = motionIndex % 4;
-            var cy = Math.floor(motionIndex / 4);
+            this.bitmap = null;
         }
-        this._mainSprite.setFrame(cx * cw, cy * ch, cw, ch);
-    }
-};
+        if (Imported.YEP_BattleEngineCore) {
+            if (!this._postSpriteInitialized) this.postSpriteInitialize();
+        }
+        if (this._actor) {
+            this.updateMotion();
+        }
+    };
 
-Sprite_ActorFace.prototype.startMotion = function(motionType) {
-    Sprite_Actor.prototype.startMotion.call(this, motionType);
-    if (this._faceType !== motionType) {
-        this._faceType = motionType;
-        if (Imported.FTKR_ESM) this.setNewMotion(this._actor, motionType);
-    }
-};
+    Sprite_ActorFace.prototype.updateMain = function() {
+          this.updateBitmap();
+          this.updateFrame();
+    //      this.updateMove();
+    //      this.updatePosition();
+    };
 
-Sprite_ActorFace.prototype.faceTypeIndex = function() {
-    if (!this._motion) return 0;
-    var faceType = Imported.FTKR_ESM ? 
-        this.convertOtherMotion(this.motionName()) :
-        this._faceType;
-    return FTKR.FID.faces[faceType];
-};
-
-Sprite_ActorFace.prototype.updateMotion = function() {
-    if (!Imported.YEP_BattleEngineCore) {
-        this.setupMotion();
-        if (this._actor.isFaceRefreshRequested()) {
-            this.refreshMotion();
+    Sprite_ActorFace.prototype.setupMotion = function() {
+        if (this._actor.isFaceRequested()) {
+            this.startMotion(this._actor.faceType());
             this._actor.clearFace();
         }
-    } else {
-        if (this._actor._faceType && this._motionType !== this._actor._faceType) {
-            this.startMotion(this._actor._faceType);
+    };
+
+    Sprite_ActorFace.prototype.updateBitmap = function() {
+        Sprite_Battler.prototype.updateBitmap.call(this);
+        var name = Imported.FTKR_ESM && this.isOtherMotion() ? this.otherBattlerName() : this._actor.faceName();
+        if (this._battlerName !== name) {
+            this._battlerName = name;
+            this._mainSprite.bitmap = ImageManager.loadFace(name);
         }
-    }
-    this.updateMotionCount();
-};
+    };
 
-Sprite_ActorFace.prototype.setScale = function(scale) {
-    this.scale._x = scale;
-    this.scale._y = scale;
-};
+    Sprite_ActorFace.prototype.otherBattlerName = function() {
+        return readObjectMeta(this._actor.actor(), ['FID_顔画像', 'FID_FACE_IMAGE']);
+    };
 
-//------------------------------------------------------------------------
-// フロントビュー戦闘でも顔画像を表示させる
-//------------------------------------------------------------------------
-//書き換え
-Game_Actor.prototype.performDamage = function() {
-    Game_Battler.prototype.performDamage.call(this);
-    this.requestMotion('damage');
-    SoundManager.playActorDamage();
-};
+    Sprite_ActorFace.prototype.updateFrame = function() {
+        Sprite_Battler.prototype.updateFrame.call(this);
+        var bitmap = this._mainSprite.bitmap;
+        if (bitmap) {
+            var cw = Sprite_ActorFace._imageWidth;
+            var ch = Sprite_ActorFace._imageHeight;
+            if (FTKR.FID.enableFaceDifference) {
+                var motionIndex = this.faceTypeIndex();
+                var cx = motionIndex % 6;
+                var cy = Math.floor(motionIndex / 6);
+            } else {
+                var motionIndex = this._actor.faceIndex();
+                var cx = motionIndex % 4;
+                var cy = Math.floor(motionIndex / 4);
+            }
+            this._mainSprite.setFrame(cx * cw, cy * ch, cw, ch);
+        }
+    };
 
-Sprite_ActorFace.prototype.updateVisibility = function() {
-    Sprite_Base.prototype.updateVisibility.call(this);
-    if (!this._actor) {
-        this.visible = false;
-    }
-};
+    Sprite_ActorFace.prototype.startMotion = function(motionType) {
+        Sprite_Actor.prototype.startMotion.call(this, motionType);
+        if (this._faceType !== motionType) {
+            this._faceType = motionType;
+            if (Imported.FTKR_ESM) this.setNewMotion(this._actor, motionType);
+        }
+    };
 
-Sprite_ActorFace.prototype.setupAnimation = function() {
-    while (this._actor.isAnimationRequested()) {
-        var data = this._actor.shiftAnimation();
-        var animation = $dataAnimations[data.animationId];
-        var mirror = data.mirror;
-        var delay = animation.position === 3 ? 0 : data.delay;
-        this.startAnimation(animation, mirror, delay);
-    }
-};
+    Sprite_ActorFace.prototype.faceTypeIndex = function() {
+        if (!this._motion) return 0;
+        var faceType = Imported.FTKR_ESM ? 
+            this.convertOtherMotion(this.motionName()) :
+            this._faceType;
+        return FTKR.FID.faces[faceType];
+    };
 
-Sprite_ActorFace.prototype.startAnimation = function(animation, mirror, delay) {
-    var sprite = new Sprite_FaceAnimation(this._spriteWindow);
-    sprite.setup(this._effectTarget, animation, mirror, delay);
-    if (this.scale._y !== 1) sprite.setHeight(Sprite_ActorFace._imageHeight * this.scale._y);
-    this.parent.addChild(sprite);
-    this._animationSprites.push(sprite);
-};
+    Sprite_ActorFace.prototype.updateMotion = function() {
+        if (!Imported.YEP_BattleEngineCore) {
+            this.setupMotion();
+            if (this._actor.isFaceRefreshRequested()) {
+                this.refreshMotion();
+                this._actor.clearFace();
+            }
+        } else {
+            if (this._actor._faceType && this._motionType !== this._actor._faceType) {
+                this.startMotion(this._actor._faceType);
+            }
+        }
+        this.updateMotionCount();
+    };
 
-Sprite_ActorFace.prototype.setupDamagePopup = function() {
-    if (this._actor.isDamagePopupRequested()) {
-        var sprite = new Sprite_Damage();
-        sprite.x = this.x + this.damageOffsetX();
-        sprite.y = this.y + this.damageOffsetY();
-        sprite.setup(this._actor);
-        this._damages.push(sprite);
+    Sprite_ActorFace.prototype.setScale = function(scale) {
+        this.scale._x = scale;
+        this.scale._y = scale;
+    };
+
+    //------------------------------------------------------------------------
+    // フロントビュー戦闘でも顔画像を表示させる
+    //------------------------------------------------------------------------
+    //書き換え
+    Game_Actor.prototype.performDamage = function() {
+        Game_Battler.prototype.performDamage.call(this);
+        this.requestMotion('damage');
+        SoundManager.playActorDamage();
+    };
+
+    Sprite_ActorFace.prototype.updateVisibility = function() {
+        Sprite_Base.prototype.updateVisibility.call(this);
+        if (!this._actor) {
+            this.visible = false;
+        }
+    };
+
+    Sprite_ActorFace.prototype.setupAnimation = function() {
+        while (this._actor.isAnimationRequested()) {
+            var data = this._actor.shiftAnimation();
+            var animation = $dataAnimations[data.animationId];
+            var mirror = data.mirror;
+            var delay = animation.position === 3 ? 0 : data.delay;
+            this.startAnimation(animation, mirror, delay);
+        }
+    };
+
+    Sprite_ActorFace.prototype.startAnimation = function(animation, mirror, delay) {
+        var sprite = new Sprite_FaceAnimation(this._spriteWindow);
+        sprite.setup(this._effectTarget, animation, mirror, delay);
+        if (this.scale._y !== 1) sprite.setHeight(Sprite_ActorFace._imageHeight * this.scale._y);
         this.parent.addChild(sprite);
-        this._actor.clearDamagePopup();
-        this._actor.clearResult();
-    }
-};
+        this._animationSprites.push(sprite);
+    };
 
-Sprite_ActorFace.prototype.damageOffsetX = function() {
-    return FTKR.FID.damage.offsetX;
-};
-
-Sprite_ActorFace.prototype.damageOffsetY = function() {
-    return FTKR.FID.damage.offsetY;
-};
-
-//=============================================================================
-// Sprite_FaceAnimation
-// アクターの顔画像用アニメーション表示スプライト
-//=============================================================================
-
-function Sprite_FaceAnimation() {
-    this.initialize.apply(this, arguments);
-}
-
-Sprite_FaceAnimation.prototype = Object.create(Sprite_Animation.prototype);
-Sprite_FaceAnimation.prototype.constructor = Sprite_FaceAnimation;
-
-Sprite_FaceAnimation._checker1 = {};
-Sprite_FaceAnimation._checker2 = {};
-
-Sprite_FaceAnimation.prototype.initialize = function(window) {
-    Sprite_Animation.prototype.initialize.call(this);
-    this._spriteWindow = window;
-    this._spriteHeight = 144;
-};
-
-Sprite_FaceAnimation.prototype.setHeight = function(height) {
-    this._spriteHeight = height;
-};
-
-Sprite_FaceAnimation.prototype.updatePosition = function() {
-    if (this._animation.position === 3) {
-        this.x = this.parent.width / 2 - this._spriteWindow.x;
-        this.y = this.parent.height / 2 - this._spriteWindow.y;
-    } else {
-        var parent = this._target.parent;
-        var grandparent = parent ? parent.parent : null;
-        this.x = this._target.x;
-        this.y = this._target.y;
-        if (this.parent === grandparent) {
-            this.x += parent.x;
-            this.y += parent.y;
+    Sprite_ActorFace.prototype.setupDamagePopup = function() {
+        if (this._actor.isDamagePopupRequested()) {
+            var sprite = new Sprite_Damage();
+            sprite.x = this.x + this.damageOffsetX();
+            sprite.y = this.y + this.damageOffsetY();
+            sprite.setup(this._actor);
+            this._damages.push(sprite);
+            this.parent.addChild(sprite);
+            this._actor.clearDamagePopup();
+            this._actor.clearResult();
         }
-        if (this._animation.position === 0) {
-            this.y -= this._spriteHeight;
-        } else if (this._animation.position === 1) {
-            this.y -= this._spriteHeight / 2;
-        }
+    };
+
+    Sprite_ActorFace.prototype.damageOffsetX = function() {
+        return FTKR.FID.damage.offsetX;
+    };
+
+    Sprite_ActorFace.prototype.damageOffsetY = function() {
+        return FTKR.FID.damage.offsetY;
+    };
+
+    //=============================================================================
+    // Sprite_FaceAnimation
+    // アクターの顔画像用アニメーション表示スプライト
+    //=============================================================================
+
+    function Sprite_FaceAnimation() {
+        this.initialize.apply(this, arguments);
     }
-};
 
-//=============================================================================
-// Window_BattleStatus
-// バトル画面のステータス表示用ウィンドウクラス
-//=============================================================================
+    Sprite_FaceAnimation.prototype = Object.create(Sprite_Animation.prototype);
+    Sprite_FaceAnimation.prototype.constructor = Sprite_FaceAnimation;
 
-Window_BattleStatus.prototype.isBusy = function() {
-    return this.isFaceSpriteBusy();
-};
+    Sprite_FaceAnimation._checker1 = {};
+    Sprite_FaceAnimation._checker2 = {};
 
-Window_BattleStatus.prototype.isFaceSpriteBusy = function() {
-    return this._faceSprite.some( function(sprite) {
-        return sprite.isAnimationPlaying();
-    });
-};
+    Sprite_FaceAnimation.prototype.initialize = function(window) {
+        Sprite_Animation.prototype.initialize.call(this);
+        this._spriteWindow = window;
+        this._spriteHeight = 144;
+    };
 
-//=============================================================================
-// BattleManager
-// バトルマネージャー
-//=============================================================================
+    Sprite_FaceAnimation.prototype.setHeight = function(height) {
+        this._spriteHeight = height;
+    };
 
-FTKR.FID.BattleManager_isBusy = BattleManager.isBusy;
-BattleManager.isBusy = function() {
-    return (FTKR.FID.BattleManager_isBusy.call(this) || this._statusWindow.isBusy());
-};
+    Sprite_FaceAnimation.prototype.updatePosition = function() {
+        if (this._animation.position === 3) {
+            this.x = this.parent.width / 2 - this._spriteWindow.x;
+            this.y = this.parent.height / 2 - this._spriteWindow.y;
+        } else {
+            var parent = this._target.parent;
+            var grandparent = parent ? parent.parent : null;
+            this.x = this._target.x;
+            this.y = this._target.y;
+            if (this.parent === grandparent) {
+                this.x += parent.x;
+                this.y += parent.y;
+            }
+            if (this._animation.position === 0) {
+                this.y -= this._spriteHeight;
+            } else if (this._animation.position === 1) {
+                this.y -= this._spriteHeight / 2;
+            }
+        }
+    };
 
-//=============================================================================
-// Scene_Base
-// シーン変更時に顔番号をリセット
-//=============================================================================
+    //=============================================================================
+    // Window_BattleStatus
+    // バトル画面のステータス表示用ウィンドウクラス
+    //=============================================================================
 
-FTKR.FID.Scene_Base_start = Scene_Base.prototype.start;
-Scene_Base.prototype.start = function() {
-    FTKR.FID.Scene_Base_start.call(this);
-    this.resetActorFaceType();
-};
+    Window_BattleStatus.prototype.isBusy = function() {
+        return this.isFaceSpriteBusy();
+    };
 
-Scene_Base.prototype.resetActorFaceType = function() {
-    if (!$gameParty) return;
-    $gameParty.members().forEach( function(member) {
-        member.clearFace();
-    });
-};
+    Window_BattleStatus.prototype.isFaceSpriteBusy = function() {
+        return this._faceSprite.some( function(sprite) {
+            return sprite.isAnimationPlaying();
+        });
+    };
+
+    //=============================================================================
+    // メニュー画面のステータス表示用ウィンドウクラス
+    //=============================================================================
+
+    var _FID_Window_Status_refresh = Window_Status.prototype.refresh;
+    Window_Status.prototype.refresh = function() {
+        this.clearFaceSprites();
+        _FID_Window_Status_refresh.call(this);
+    };
+
+    var _FID_Scene_Menu_onFormationOk = Scene_Menu.prototype.onFormationOk;
+    Scene_Menu.prototype.onFormationOk = function() {
+        _FID_Scene_Menu_onFormationOk.call(this);
+        console.log('refresh ok');
+        this._statusWindow.refresh();
+    };
+
+    //=============================================================================
+    // BattleManager
+    // バトルマネージャー
+    //=============================================================================
+
+    var _FID_BattleManager_isBusy = BattleManager.isBusy;
+    BattleManager.isBusy = function() {
+        return (_FID_BattleManager_isBusy.call(this) || this._statusWindow.isBusy());
+    };
+
+    //=============================================================================
+    // Scene_Base
+    // シーン変更時に顔番号をリセット
+    //=============================================================================
+
+    var _FID_Scene_Base_start = Scene_Base.prototype.start;
+    Scene_Base.prototype.start = function() {
+        _FID_Scene_Base_start.call(this);
+        this.resetActorFaceType();
+    };
+
+    Scene_Base.prototype.resetActorFaceType = function() {
+        if (!$gameParty) return;
+        $gameParty.members().forEach( function(member) {
+            member.clearFace();
+        });
+    };
+
+}());//EOF

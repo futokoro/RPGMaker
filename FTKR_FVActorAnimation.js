@@ -3,8 +3,8 @@
 // FTKR_FVActorAnimation.js
 // 作成者     : フトコロ
 // 作成日     : 2017/11/12
-// 最終更新日 : 2017/11/14
-// バージョン : v1.0.4
+// 最終更新日 : 2017/11/24
+// バージョン : v1.0.5
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.FAA = FTKR.FAA || {};
 
 //=============================================================================
 /*:ja
- * @plugindesc v1.0.4 フロントビューモードでアクター側にアニメーションを表示するプラグイン
+ * @plugindesc v1.0.5 フロントビューモードでアクター側にアニメーションを表示するプラグイン
  * @author フトコロ
  *
  * @param --アニメーション--
@@ -187,6 +187,9 @@ FTKR.FAA = FTKR.FAA || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.5 - 2017/11/24 : 不具合修正
+ *    1. 5人パーティー以上で並べ替えを実施すると、正しく表示できない不具合を修正。
  * 
  * v1.0.4 - 2017/11/14 : 不具合修正
  *    1. 色調設定が正常に読み込まれない不具合を修正。
@@ -441,6 +444,12 @@ function Sprite_FaceAnimation() {
         _FAA_Window_Status_refresh.call(this);
     };
 
+    var _FID_Scene_Menu_onFormationOk = Scene_Menu.prototype.onFormationOk;
+    Scene_Menu.prototype.onFormationOk = function() {
+        _FID_Scene_Menu_onFormationOk.call(this);
+        this._statusWindow.refresh();
+    };
+
     //=============================================================================
     // Sprite_ActorFace
     // アクターの顔画像表示スプライトクラスを定義
@@ -479,7 +488,6 @@ function Sprite_FaceAnimation() {
     Sprite_ActorFace.prototype.setScale = function(scale) {
         this.scale._x = scale;
         this.scale._y = scale;
-        console.log(this._mainSprite);
     };
 
     Sprite_ActorFace.prototype.startToneChange = function() {
