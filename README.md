@@ -154,7 +154,7 @@
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_ExBattleEvent](FTKR_ExBattleEvent.js) | [あり](FTKR_ExBattleEvent.ja.md) | [v1.3.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExBattleEvent.js) | 2017/06/30 | バトルイベントを拡張する |
 | [FTKR_DisplayRegenerateMessage](FTKR_DisplayRegenerateMessage.js) | [あり](FTKR_DisplayRegenerateMessage.ja.md) | [v1.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_DisplayRegenerateMessage.js) | 2017/05/27 | HP再生量をバトルログに表示する |
-| [FTKR_BattleCommandIcon](FTKR_BattleCommandIcon.js) | [あり](FTKR_BattleCommandIcon.ja.md) | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_BattleCommandIcon.js) | 2017/06/24 | バトルコマンドにアイコンを追加する |
+| [FTKR_ExBattleCommand](FTKR_ExBattleCommand.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExBattleCommand.js) | 2017/11/25 | バトルコマンドを変更する |
 | [FTKR_FVActorAnimation](FTKR_FVActorAnimation.js) | なし | [v1.0.5](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_FVActorAnimation.js) | 2017/11/24 | フロントビューモードでアクター画像にアニメーションを表示する<br>別途アクター画像表示用のプラグインが必要 |
 
 [目次に戻る](#目次)
@@ -200,6 +200,7 @@
 * スキル強化プラグインの統合(気が向いたら)
 * スキルツリープラグインのスキルツリー作成がもう少し簡単にできないか検討(気が向いたら)
 * コマンド記憶に対応したアクターコマンド追加プラグインの新規作成
+* FTKR_CSS_CustomizeBattleResultsに、アクターとアイテムを選択できないようにする機能を追加。
 
 # 試作品置き場
 
