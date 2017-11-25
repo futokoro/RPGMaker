@@ -3,8 +3,8 @@
 // FTKR_CSS_CustomizeBattleResults.js
 // 作成者     : フトコロ
 // 作成日     : 2017/06/07
-// 最終更新日 : 2017/11/20
-// バージョン : v1.4.0
+// 最終更新日 : 2017/11/26
+// バージョン : v1.4.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -14,7 +14,7 @@ var FTKR = FTKR || {};
 FTKR.CBR = FTKR.CBR || {};
 
 /*:
- * @plugindesc v1.4.0 カスタム可能な戦闘結果画面を表示する
+ * @plugindesc v1.4.1 カスタム可能な戦闘結果画面を表示する
  * @author フトコロ
  *
  * @param --タイトル設定--
@@ -122,6 +122,13 @@ FTKR.CBR = FTKR.CBR || {};
  * @param --戦績コマンド設定--
  * @default
  *
+ * @param Enable Select Command
+ * @desc 終了コマンド以外を選択できるようにするか設定します。
+ * @type boolean
+ * @on 選択可能
+ * @off 選択不可
+ * @default true
+ * 
  * @param Command Display Status
  * @desc アクターのステータスを表示するコマンド名を設定します。
  * @default ステータス
@@ -339,6 +346,7 @@ FTKR.CBR = FTKR.CBR || {};
  * 3. ゲーム画面でレイアウトを変更する場合は、以下のプラグインが必要です。
  * 
  *    GraphicalDesignMode.js
+ *    FTKR_CSS_GDM.js
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -357,6 +365,9 @@ FTKR.CBR = FTKR.CBR || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.4.1 : 2017/11/26 : 機能追加
+ *    1. アクターコマンドとアイテムコマンドを選択できないようにする機能を追加。
  * 
  * v1.4.0 - 2017/11/20 : 機能追加
  *    1. アイテムを入手しなかった場合に、アイテムコマンドをグレー表示にして
@@ -436,6 +447,7 @@ if (Imported.FTKR_CSS) (function() {
             lineHeight  :Number(parameters['Command Line Height'] || 0),
             opacity     :Number(parameters['Command Opacity'] || 0),
             hideFrame   :Number(parameters['Command Hide Frame'] || 0),
+            enable      :Number(parameters['Enable Select Command'] || true),
         },
         actor:{
             enabled     :true,
@@ -900,9 +912,17 @@ if (Imported.FTKR_CSS) (function() {
     };
 
     Window_BattleResultCommand.prototype.makeCommandList = function() {
-        this.addCommand(FTKR.CBR.command.status, 'status');
-        this.addCommand(FTKR.CBR.command.item,   'item'   ,this.isGotItems());
+        this.addCommand(FTKR.CBR.command.status, 'status', this.canSelectActor());
+        this.addCommand(FTKR.CBR.command.item,   'item'   ,this.canSelectItem());
         this.addCommand(FTKR.CBR.command.finish, 'finish');
+    };
+
+    Window_BattleResultCommand.prototype.canSelectActor = function() {
+        return FTKR.CBR.command.enable;
+    };
+
+    Window_BattleResultCommand.prototype.canSelectItem = function() {
+        return FTKR.CBR.command.enable && this.isGotItems();
     };
 
     Window_BattleResultCommand.prototype.isGotItems = function() {
