@@ -4,7 +4,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2017/06/07
 // 最終更新日 : 2017/11/26
-// バージョン : v1.4.1
+// バージョン : v1.4.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -14,7 +14,7 @@ var FTKR = FTKR || {};
 FTKR.CBR = FTKR.CBR || {};
 
 /*:
- * @plugindesc v1.4.1 カスタム可能な戦闘結果画面を表示する
+ * @plugindesc v1.4.2 カスタム可能な戦闘結果画面を表示する
  * @author フトコロ
  *
  * @param --タイトル設定--
@@ -124,10 +124,14 @@ FTKR.CBR = FTKR.CBR || {};
  *
  * @param Enable Select Command
  * @desc 終了コマンド以外を選択できるようにするか設定します。
- * @type boolean
- * @on 選択可能
- * @off 選択不可
- * @default true
+ * @type select
+ * @option 選択不可(グレー表示)
+ * @value 0
+ * @option 選択不可(白表示)
+ * @value 1
+ * @option 選択可
+ * @value 2
+ * @default 2
  * 
  * @param Command Display Status
  * @desc アクターのステータスを表示するコマンド名を設定します。
@@ -366,6 +370,10 @@ FTKR.CBR = FTKR.CBR || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.4.2 - 2017/11/26 : 機能変更
+ *    1. アクターコマンドとアイテムコマンドを選択できないようにする機能を変更し
+ *       白表示のまま選択できないようにする機能を追加。
+ * 
  * v1.4.1 : 2017/11/26 : 機能追加
  *    1. アクターコマンドとアイテムコマンドを選択できないようにする機能を追加。
  * 
@@ -447,7 +455,7 @@ if (Imported.FTKR_CSS) (function() {
             lineHeight  :Number(parameters['Command Line Height'] || 0),
             opacity     :Number(parameters['Command Opacity'] || 0),
             hideFrame   :Number(parameters['Command Hide Frame'] || 0),
-            enable      :Number(parameters['Enable Select Command'] || true),
+            enable      :Number(parameters['Enable Select Command'] || 2),
         },
         actor:{
             enabled     :true,
@@ -918,16 +926,21 @@ if (Imported.FTKR_CSS) (function() {
     };
 
     Window_BattleResultCommand.prototype.canSelectActor = function() {
-        return FTKR.CBR.command.enable;
+        return FTKR.CBR.command.enable !== 0;
     };
 
     Window_BattleResultCommand.prototype.canSelectItem = function() {
-        return FTKR.CBR.command.enable && this.isGotItems();
+        return FTKR.CBR.command.enable !== 0 && this.isGotItems();
     };
 
     Window_BattleResultCommand.prototype.isGotItems = function() {
         var flag = FTKR.CBR.item.changeOpacity;
         return !flag ? true : this._items && this._items.length > 0;
+    };
+
+    Window_BattleResultCommand.prototype.isCurrentItemEnabled = function() {
+        return (Window_Command.prototype.isCurrentItemEnabled.call(this) &&
+            FTKR.CBR.command.enable === 2) || this.currentSymbol() === 'finish';
     };
 
     Window_BattleResultCommand.prototype.setDropItem = function(items) {
