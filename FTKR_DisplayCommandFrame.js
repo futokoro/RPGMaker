@@ -3,8 +3,8 @@
 // FTKR_DisplayCommandFrame.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/08
-// 最終更新日 : 2017/11/20
-// バージョン : v1.2.0
+// 最終更新日 : 2017/11/26
+// バージョン : v1.2.1
 //=======↑本プラグインを改変した場合でも、この欄は消さないでください↑===============
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.DCF = FTKR.DCF || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.0 コマンドに枠を付けるプラグイン
+ * @plugindesc v1.2.1 コマンドに枠を付けるプラグイン
  * @author フトコロ
  *
  * @param --Basic Setting--
@@ -323,6 +323,12 @@ FTKR.DCF = FTKR.DCF || {};
  * 1.「プラグインマネージャー(プラグイン管理)」に、本プラグインを追加して
  *    ください。
  * 
+ * 2. FTKR_ExBattleCommand.jsと組み合わせる場合は、本プラグインが下になるように
+ *    配置してください。
+ * 
+ *    FTKR_ExBattleCommand.js
+ *    FTKR_DisplayCommandFrame.js
+ * 
  * 
  *-----------------------------------------------------------------------------
  * 基本設定
@@ -460,6 +466,9 @@ FTKR.DCF = FTKR.DCF || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.2.1 - 2017/11/24 : 不具合修正
+ *    1. FTKR_ExBattleCommand.jsとの競合回避。
  * 
  * v1.2.0 - 2017/11/20 : 機能追加
  *    1. スキルリストに枠を表示する機能を追加。
@@ -820,60 +829,65 @@ FTKR.DCF = FTKR.DCF || {};
     // Window_TitleCommand
     //=============================================================================
 
+    var _DCF_Window_TitleCommand_drawItem = Window_TitleCommand.prototype.drawItem;
     Window_TitleCommand.prototype.drawItem = function(index) {
         if (FTKR.DCF.enabled.title) {
             this.changePaintOpacity(this.isCommandEnabled(index));
             this.drawDcfFrame(index);
         }
-        Window_Command.prototype.drawItem.call(this, index);
+        _DCF_Window_TitleCommand_drawItem.call(this, index);
     };
 
     //=============================================================================
     // Window_MenuCommand
     //=============================================================================
 
+    var _DCF_Window_MenuCommand_drawItem = Window_MenuCommand.prototype.drawItem;
     Window_MenuCommand.prototype.drawItem = function(index) {
         if (FTKR.DCF.enabled.menu) {
             this.changePaintOpacity(this.isCommandEnabled(index));
             this.drawDcfFrame(index);
         }
-        Window_Command.prototype.drawItem.call(this, index);
+        _DCF_Window_MenuCommand_drawItem.call(this ,index);
     };
 
     //=============================================================================
     // Window_ItemCategory
     //=============================================================================
 
+    var _DCF_Window_ItemCategory_drawItem = Window_ItemCategory.prototype.drawItem;
     Window_ItemCategory.prototype.drawItem = function(index) {
         if (FTKR.DCF.enabled.item) {
             this.changePaintOpacity(this.isCommandEnabled(index));
             this.drawDcfFrame(index);
         }
-        Window_Command.prototype.drawItem.call(this, index);
+        _DCF_Window_ItemCategory_drawItem.call(this, index);
     };
 
     //=============================================================================
     // Window_SkillType
     //=============================================================================
 
+    var _DCF_Window_SkillType_drawItem = Window_SkillType.prototype.drawItem;
     Window_SkillType.prototype.drawItem = function(index) {
         if (FTKR.DCF.enabled.skill) {
             this.changePaintOpacity(this.isCommandEnabled(index));
             this.drawDcfFrame(index);
         }
-        Window_Command.prototype.drawItem.call(this, index);
+        _DCF_Window_SkillType_drawItem.call(this, index);
     };
 
     //=============================================================================
     // Window_EquipCommand
     //=============================================================================
 
+    var _DCF_Window_EquipCommand_drawItem = Window_EquipCommand.prototype.drawItem;
     Window_EquipCommand.prototype.drawItem = function(index) {
         if (FTKR.DCF.enabled.equip) {
             this.changePaintOpacity(this.isCommandEnabled(index));
             this.drawDcfFrame(index);
         }
-        Window_Command.prototype.drawItem.call(this, index);
+        _DCF_Window_EquipCommand_drawItem.call(this, index);
     };
 
     //=============================================================================
@@ -893,12 +907,13 @@ FTKR.DCF = FTKR.DCF || {};
     // Window_ShopCommand
     //=============================================================================
 
+    var _DCF_Window_ShopCommand_drawItem = Window_ShopCommand.prototype.drawItem;
     Window_ShopCommand.prototype.drawItem = function(index) {
         if (FTKR.DCF.enabled.shop) {
             this.changePaintOpacity(this.isCommandEnabled(index));
             this.drawDcfFrame(index);
         }
-        Window_Command.prototype.drawItem.call(this, index);
+        _DCF_Window_ShopCommand_drawItem.call(this, index);
     };
 
     //=============================================================================
@@ -918,36 +933,39 @@ FTKR.DCF = FTKR.DCF || {};
     // Window_PartyCommand
     //=============================================================================
 
+    var _DCF_Window_PartyCommand_drawItem = Window_PartyCommand.prototype.drawItem;
     Window_PartyCommand.prototype.drawItem = function(index) {
         if (FTKR.DCF.enabled.battle) {
             this.changePaintOpacity(this.isCommandEnabled(index));
             this.drawDcfFrame(index);
         }
-        Window_Command.prototype.drawItem.call(this, index);
+        _DCF_Window_PartyCommand_drawItem.call(this, index);
     };
 
     //=============================================================================
     // Window_ActorCommand
     //=============================================================================
 
+    var _DCF_Window_ActorCommand_drawItem = Window_ActorCommand.prototype.drawItem;
     Window_ActorCommand.prototype.drawItem = function(index) {
         if (FTKR.DCF.enabled.battle) {
             this.changePaintOpacity(this.isCommandEnabled(index));
             this.drawDcfFrame(index);
         }
-        Window_Command.prototype.drawItem.call(this, index);
+        _DCF_Window_ActorCommand_drawItem.call(this, index);
     };
 
     //=============================================================================
     // Window_GameEnd
     //=============================================================================
 
+    var _DCF_Window_GameEnd_drawItem = Window_GameEnd.prototype.drawItem;
     Window_GameEnd.prototype.drawItem = function(index) {
         if (FTKR.DCF.enabled.gameEnd) {
             this.changePaintOpacity(this.isCommandEnabled(index));
             this.drawDcfFrame(index);
         }
-        Window_Command.prototype.drawItem.call(this, index);
+        _DCF_Window_GameEnd_drawItem.call(this, index);
     };
 
     //=============================================================================
