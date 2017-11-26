@@ -41,6 +41,7 @@
 | [FTKR_CSS_EquipStatus](FTKR_CSS_EquipStatus.js) | [仮版](FTKR_CSS_EquipStatus.ja.md) | [v1.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_EquipStatus.js) | 2017/11/18 | 装備画面のステータス表示を変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) |
 | [FTKR_CSS_ShopStatus](FTKR_CSS_ShopStatus.js) | [仮版](FTKR_CSS_ShopStatus.ja.md) | [v1.2.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_ShopStatus.js) | 2017/11/18 | ショップ画面のステータス表示を変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) |
 | [FTKR_CSS_CustomizeBattleResults](FTKR_CSS_CustomizeBattleResults.js) | [仮版](FTKR_CSS_CustomizeBattleResults.ja.md) | [v1.4.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_CustomizeBattleResults.js) | 2017/11/26 | バトル終了時に戦闘結果を表示する <br> ＜以下のプラグインが必要＞ <br> [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) |
+FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 
 [目次に戻る](#目次)
 
@@ -156,6 +157,7 @@
 | [FTKR_DisplayRegenerateMessage](FTKR_DisplayRegenerateMessage.js) | [あり](FTKR_DisplayRegenerateMessage.ja.md) | [v1.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_DisplayRegenerateMessage.js) | 2017/05/27 | HP再生量をバトルログに表示する |
 | [FTKR_ExBattleCommand](FTKR_ExBattleCommand.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExBattleCommand.js) | 2017/11/25 | バトルコマンドを変更する |
 | [FTKR_FVActorAnimation](FTKR_FVActorAnimation.js) | なし | [v1.0.5](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_FVActorAnimation.js) | 2017/11/24 | フロントビューモードでアクター画像にアニメーションを表示する<br>別途アクター画像表示用のプラグインが必要 |
+FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 [目次に戻る](#目次)
 
@@ -199,8 +201,7 @@
 プラグイン対応状況
 * スキル強化プラグインの統合(気が向いたら)
 * スキルツリープラグインのスキルツリー作成がもう少し簡単にできないか検討(気が向いたら)
-* コマンド記憶に対応したアクターコマンド追加プラグインの新規作成
-* FTKR_CSS_CustomizeBattleResultsに、アクターとアイテムを選択できないようにする機能を追加。
+* FTKR_OriginalSceneWindowのGDM対応(気が向いたら)
 
 # 試作品置き場
 
