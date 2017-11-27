@@ -3,8 +3,8 @@
 // FTKR_MenuEvent.js
 // 作成者     : フトコロ
 // 作成日     : 2017/11/27
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2017/11/28
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ME = FTKR.ME || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 メニュー画面上でコモンイベントを実行できるようにする
+ * @plugindesc v1.0.1 メニュー画面上でコモンイベントを実行できるようにする
  * @author フトコロ
  *
  * @param Enable Item Event
@@ -134,7 +134,7 @@ FTKR.ME = FTKR.ME || {};
  * メニュー画面を隠すなどしてください。
  * 
  * 
- * なお、この設定の場合、プラグインパラメータ「Menu Message Window」で
+ * この設定の場合、プラグインパラメータ「Menu Message Window」で
  * 以下のウィンドウの設定を変更できます。
  * ※ウィンドウごとに個別に設定することはできません。
  * 
@@ -144,6 +144,9 @@ FTKR.ME = FTKR.ME || {};
  *      数値入力ウィンドウ
  *      アイテム選択ウィンドウ
  *      スクロールウィンドウ(フォントサイズ、行の高さのみ有効)
+ * 
+ * 他のメッセージ系のプラグインと競合する場合には、「Menu Message Window」の
+ * パラメータの入力を「テキスト」に選択し、空欄にしてください。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -163,6 +166,10 @@ FTKR.ME = FTKR.ME || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.1 - 2017/11/28 : 不具合修正、機能追加。
+ *    1. プラグインコマンドの不具合修正。
+ *    2. Menu Message Windowを空欄にした場合に、機能を無効にするように修正。
  * 
  * v1.0.0 - 2017/11/27 : 初版作成
  * 
@@ -247,7 +254,8 @@ function Game_Menu() {
         priority : JSON.parse(parameters['Display Priority'] || false),
         message  : paramParse(parameters['Menu Message Window']),
     };
-    console.log(FTKR.ME)
+    FTKR.ME.enable = !!FTKR.ME.message;
+
         
     //=============================================================================
     // DataManager
@@ -281,7 +289,7 @@ function Game_Menu() {
                 if (!$gameParty.inBattle() &&
                     SceneManager._scene._itemWindow) SceneManager._scene._itemWindow.activate();
                 break;
-            case 'サブコマンドに戻る':
+            case 'サブコマンド選択に戻る':
             case 'ACTIVATE_SUB_WINDOW':
                 if (!$gameParty.inBattle() && Imported.FTKR_ISC &&
                     SceneManager._scene._subCommandWindow) SceneManager._scene._subCommandWindow.activate();
@@ -431,7 +439,8 @@ function Game_Menu() {
     };
 
     Scene_ItemBase.prototype.createMessageWindow2 = function() {
-        this._messageWindow = new Window_MenuMessage();
+        this._messageWindow = FTKR.ME.enable ?
+            new Window_MenuMessage() : new Window_Message();
         this.addMessage(this._messageWindow);
         this._messageWindow.subWindows().forEach(function(window) {
             this.addMessage(window);
@@ -439,7 +448,8 @@ function Game_Menu() {
     };
 
     Scene_ItemBase.prototype.createScrollTextWindow2 = function() {
-        this._scrollTextWindow = new Window_MenuScrollText();
+        this._scrollTextWindow = FTKR.ME.enable ?
+            new Window_MenuScrollText() : new Window_ScrollText();
         this.addMessage(this._scrollTextWindow);
     };
 
