@@ -3,8 +3,8 @@
 // FTKR_ExTraitSetting.js
 // 作成者     : フトコロ
 // 作成日     : 2017/12/02
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2017/12/03
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ETS = FTKR.ETS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 装備やステート等の特徴を詳細に設定できる
+ * @plugindesc v1.0.1 装備やステート等の特徴を詳細に設定できる
  * @author フトコロ
  *
  * @help 
@@ -100,6 +100,21 @@ FTKR.ETS = FTKR.ETS || {};
  *  s[x]    - スイッチID x の値を参照します。
  * 
  * 
+ * ＜複数の同じ特徴の数値の合計方法について＞
+ * 特徴の合計方法は以下の通りです。
+ * 
+ * (加算と減算の数値の合計)　×　(乗算と除算の数値の合計)
+ * 
+ * 例えば、攻撃力の特徴が以下のように複数あった場合
+ * 　　+10, -5, *1.2, /0.2
+ * 
+ * この合計値は
+ * 　　(+10 -5) × (1.2 - 0.2) = 5
+ * 
+ * 以下の計算ではないことに注意してください。
+ * 　　(+10 -5) × 1.2 / 0.2
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * 本プラグインのライセンスについて(License)
  *-----------------------------------------------------------------------------
@@ -117,6 +132,9 @@ FTKR.ETS = FTKR.ETS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.1 - 2017/12/03 : 不具合修正
+ *    1. 積算除算の計算処理が間違っていた不具合を修正。
  * 
  * v1.0.0 - 2017/12/02 : 初版作成
  * 
@@ -247,7 +265,6 @@ FTKR.ETS = FTKR.ETS || {};
             var obj = group[n];
             var datas = readEntrapmentCodeToTextEx(obj, ['ETS_特徴', 'ETS_TRAITS']);
             this.readTraitMetaData(obj, datas);
-            console.log(obj.name, obj.traits);
         }
     };
 
@@ -317,11 +334,11 @@ FTKR.ETS = FTKR.ETS || {};
             var value = trait.etsValue ? FTKR.evalFormula(trait.etsValue) : trait.value;
             switch(trait.calc) {
             case '/':
-                return r / value;
+                return r - value;
             case '*':
-                return r * value;
+                return r + value;
             default:
-                return init ? r * value : r;
+                return init ? r + value : r;
             }
         }, 1);
     };
@@ -332,11 +349,11 @@ FTKR.ETS = FTKR.ETS || {};
             var value = trait.etsValue ? FTKR.evalFormula(trait.etsValue) : trait.value;
             switch(trait.calc) {
             case '/':
-                return r / value;
+                return r - value;
             case '*':
-                return r * value;
+                return r + value;
             default:
-                return init ? r * value : r;
+                return init ? r + value : r;
             }
         }, 1);
     };
