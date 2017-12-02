@@ -3,8 +3,8 @@
 // FTKR_FVActorAnimation.js
 // 作成者     : フトコロ
 // 作成日     : 2017/11/12
-// 最終更新日 : 2017/11/24
-// バージョン : v1.0.5
+// 最終更新日 : 2017/12/02
+// バージョン : v1.0.6
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.FAA = FTKR.FAA || {};
 
 //=============================================================================
 /*:ja
- * @plugindesc v1.0.5 フロントビューモードでアクター側にアニメーションを表示するプラグイン
+ * @plugindesc v1.0.6 フロントビューモードでアクター側にアニメーションを表示するプラグイン
  * @author フトコロ
  *
  * @param --アニメーション--
@@ -187,6 +187,10 @@ FTKR.FAA = FTKR.FAA || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.6 - 2017/12/02 : 不具合修正
+ *    1. ステータス画面でアクターを変えた場合に、変更前のアクターの画像が残る
+ *       不具合を修正。
  * 
  * v1.0.5 - 2017/11/24 : 不具合修正
  *    1. 5人パーティー以上で並べ替えを実施すると、正しく表示できない不具合を修正。
@@ -444,10 +448,22 @@ function Sprite_FaceAnimation() {
         _FAA_Window_Status_refresh.call(this);
     };
 
-    var _FID_Scene_Menu_onFormationOk = Scene_Menu.prototype.onFormationOk;
+    var _FAA_Scene_Menu_onFormationOk = Scene_Menu.prototype.onFormationOk;
     Scene_Menu.prototype.onFormationOk = function() {
-        _FID_Scene_Menu_onFormationOk.call(this);
+        _FAA_Scene_Menu_onFormationOk.call(this);
         this._statusWindow.refresh();
+    };
+
+    var _FAA_Scene_MenuBase_nextActor = Scene_MenuBase.prototype.nextActor;
+    Scene_MenuBase.prototype.nextActor = function() {
+        if (this._statusWindow) this._statusWindow.clearFaceSprites();
+        _FAA_Scene_MenuBase_nextActor.call(this);
+    };
+
+    var _FAA_Scene_MenuBase_previousActor = Scene_MenuBase.prototype.previousActor;
+    Scene_MenuBase.prototype.previousActor = function() {
+        if (this._statusWindow) this._statusWindow.clearFaceSprites();
+        _FAA_Scene_MenuBase_previousActor.call(this);
     };
 
     //=============================================================================
