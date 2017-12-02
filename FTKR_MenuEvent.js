@@ -3,8 +3,8 @@
 // FTKR_MenuEvent.js
 // 作成者     : フトコロ
 // 作成日     : 2017/11/27
-// 最終更新日 : 2017/11/28
-// バージョン : v1.0.1
+// 最終更新日 : 2017/12/02
+// バージョン : v1.0.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,11 +15,18 @@ FTKR.ME = FTKR.ME || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.1 メニュー画面上でコモンイベントを実行できるようにする
+ * @plugindesc v1.0.2 メニュー画面上でコモンイベントを実行できるようにする
  * @author フトコロ
  *
  * @param Enable Item Event
  * @desc アイテムイベントのメニュー表示中の動作を設定します。
+ * @type boolean
+ * @on メニューで実行
+ * @off マップで実行
+ * @default false
+ *
+ * @param Enable Item SubCom Event
+ * @desc アイテムのサブコマンドで実行するコモンイベントのメニュー表示中の動作を設定します。
  * @type boolean
  * @on メニューで実行
  * @off マップで実行
@@ -37,6 +44,13 @@ FTKR.ME = FTKR.ME || {};
  * @type boolean
  * @on メッセージウィンドウ
  * @off ピクチャ
+ * @default false
+ *
+ * @param Auto Refresh Item Window
+ * @desc コモンイベント実行時にアイテムウィンドウを自動更新するか設定します。
+ * @type boolean
+ * @on 自動更新ON
+ * @off 自動更新OFF
  * @default false
  *
  * @param Menu Message Window
@@ -75,6 +89,9 @@ FTKR.ME = FTKR.ME || {};
  *      ME_アクター選択に戻る
  *      ME_ACTIVATE_ACTOR_WINDOW
  * 
+ *    なお、コモンイベントの中で、選択中のアイテムの所持数が０になった場合は
+ *    アクター選択ではなく、アイテム選択画面に自動的に戻ります。
+ * 
  * 
  * 2. アクターを選択しないアイテム・スキルの場合
  *      ME_アイテム選択に戻る
@@ -86,8 +103,19 @@ FTKR.ME = FTKR.ME || {};
  *      ME_ACTIVATE_SKILL_WINDOW
  * 
  * 
+ * また、コモンイベントの中で、アイテムの所持数を増減させた場合には
+ * アイテムウィンドウの更新が必要です。
+ * 更新しないと画面上の数字に反映されません。
+ * 
+ * プラグインパラメータで一律で自動更新を設定できますが、以下のプラグイン
+ * コマンドでも更新することができます。
+ * 
+ *      ME_アイテムウィンドウを更新する
+ *      ME_REFRESH_ITEM_WINDOW
+ * 
+ * 
  *-----------------------------------------------------------------------------
- * サブコマンドプラグインと併用する場合
+ * サブコマンドプラグイン(FTKR_ItemSubCommand.js)と併用する場合
  *-----------------------------------------------------------------------------
  * サブコマンドプラグインと併用する場合に、サブコマンドで実行するコモンイベントも
  * メニュー画面上で実行可能です。
@@ -97,6 +125,18 @@ FTKR.ME = FTKR.ME || {};
  * 
  *      ME_サブコマンド選択に戻る
  *      ME_ACTIVATE_SUB_WINDOW
+ * 
+ * ただし、サブコマンドイベント実行中に、選択中のアイテムの所持数が０になった場合は
+ * サブコマンド選択画面ではなく、アイテム選択画面に自動的に戻ります。
+ * 
+ * 
+ * 上記プラグインコマンドの変わりに以下の、プラグインコマンドを使うことも
+ * 可能です。
+ * 
+ *      ME_アイテム選択に戻る
+ *      ME_ACTIVATE_ITEM_WINDOW
+ * 
+ * この場合、イベント終了後にサブコマンドを閉じて、アイテム選択に戻ります。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -121,6 +161,14 @@ FTKR.ME = FTKR.ME || {};
  * 
  * プラグインパラメータ「Display priority」で、メッセージウィンドウとピクチャの
  * 表示優先度を変更することができます。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * 参考情報３：実行できないイベントコマンド
+ *-----------------------------------------------------------------------------
+ * ・タイマーの操作
+ * ・アニメーションの表示
+ * ・イベントやプレイヤーを対象とした移動、表示操作
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -166,6 +214,15 @@ FTKR.ME = FTKR.ME || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.2 - 2017/12/02 : 仕様変更, 機能追加
+ *    1. コモンイベント実行時に選択中のアイテムの所持数が０になった場合、
+ *       アイテム選択画面に戻るように修正。
+ *    2. 選択画面に戻るときに、アイテムリスト画面を更新する処理を追加。
+ *    3. メニュー上のイベント実行可否について、アイテム使用時と、サブコマンドの
+ *       カスタムコマンド実行時で、別に設定できるように変更。
+ *    4. アイテムウィンドウの自動更新機能およびプラグインコマンド追加。
+ *    5. メニュー表示中のタイマー機能を削除。
  * 
  * v1.0.1 - 2017/11/28 : 不具合修正、機能追加。
  *    1. プラグインコマンドの不具合修正。
@@ -250,12 +307,13 @@ function Game_Menu() {
 
     FTKR.ME = {
         item     : JSON.parse(parameters['Enable Item Event'] || false),
+        itemSub  : JSON.parse(parameters['Enable Item SubCom Event'] || false),
         skill    : JSON.parse(parameters['Enable Skill Event'] || false),
         priority : JSON.parse(parameters['Display Priority'] || false),
+        refresh  : JSON.parse(parameters['Auto Refresh Item Window'] || false),
         message  : paramParse(parameters['Menu Message Window']),
     };
     FTKR.ME.enable = !!FTKR.ME.message;
-
         
     //=============================================================================
     // DataManager
@@ -280,19 +338,48 @@ function Game_Menu() {
             case 'アクター選択に戻る':
             case 'ACTIVATE_ACTOR_WINDOW':
                 if (!$gameParty.inBattle() &&
-                    SceneManager._scene._actorWindow) SceneManager._scene._actorWindow.activate();
+                    SceneManager._scene._actorWindow) {
+                    if (!$gameParty.hasItem(SceneManager._scene.item())) {
+                        SceneManager._scene._actorWindow.hide();
+                        if (FTKR.ME.refresh) SceneManager._scene._itemWindow.refresh();
+                        SceneManager._scene._itemWindow.activate();
+                    } else {
+                        if (FTKR.ME.refresh) SceneManager._scene._itemWindow.refresh();
+                        SceneManager._scene._actorWindow.activate();
+                    }
+                  }
                 break;
             case 'アイテム選択に戻る':
             case 'ACTIVATE_ITEM_WINDOW':
             case 'スキル選択に戻る':
             case 'ACTIVATE_SKILL_WINDOW':
-                if (!$gameParty.inBattle() &&
-                    SceneManager._scene._itemWindow) SceneManager._scene._itemWindow.activate();
+                if (!$gameParty.inBattle()) {
+                    if (Imported.FTKR_ISC && SceneManager._scene._subCommandWindow) {
+                        SceneManager._scene._subCommandWindow.hide();
+                    }
+                    if (SceneManager._scene._itemWindow) {
+                        if (FTKR.ME.refresh) SceneManager._scene._itemWindow.refresh();
+                        SceneManager._scene._itemWindow.activate();
+                    }
+                }
                 break;
             case 'サブコマンド選択に戻る':
             case 'ACTIVATE_SUB_WINDOW':
                 if (!$gameParty.inBattle() && Imported.FTKR_ISC &&
-                    SceneManager._scene._subCommandWindow) SceneManager._scene._subCommandWindow.activate();
+                    SceneManager._scene._subCommandWindow) {
+                    if (!$gameParty.hasItem(SceneManager._scene._subCommandWindow._item)) {
+                        SceneManager._scene._subCommandWindow.hide();
+                        if (FTKR.ME.refresh) SceneManager._scene._itemWindow.refresh();
+                        SceneManager._scene._itemWindow.activate();
+                    } else {
+                        if (FTKR.ME.refresh) SceneManager._scene._itemWindow.refresh();
+                        SceneManager._scene._subCommandWindow.activate();
+                    }
+                }
+                break;
+            case 'アイテムウィンドウを更新する':
+            case 'REFRESH_ITEM_WINDOW':
+                if (SceneManager._scene._itemWindow) SceneManager._scene._itemWindow.refresh();
                 break;
         }
     };
@@ -356,11 +443,17 @@ function Game_Menu() {
     };
 
     Scene_ItemBase.prototype.isEnabledItemEvent = function() {
-        return !!this._categoryWindow && !!this._itemWindow && FTKR.ME.item;
+        return !!this._categoryWindow && !!this._itemWindow && FTKR.ME.item &&
+            !(this._subCommandWindow && this._subCommandWindow.item() && /custom(\d+)/i.test(this._subCommandWindow.item().symbol));
+    };
+
+    Scene_ItemBase.prototype.isEnabledItemSubComEvent = function() {
+        return !!this._categoryWindow && !!this._itemWindow && FTKR.ME.itemSub &&
+            this._subCommandWindow && this._subCommandWindow.item() && /custom(\d+)/i.test(this._subCommandWindow.item().symbol);
     };
 
     Scene_ItemBase.prototype.isEnabledME = function() {
-        return this.isEnabledItemEvent() || this.isEnabledSkillEvent();
+        return this.isEnabledItemEvent() || this.isEnabledSkillEvent() || this.isEnabledItemSubComEvent();
     };
 
     var _ME_Scene_ItemBase_initialize = Scene_ItemBase.prototype.initialize;
@@ -464,14 +557,14 @@ function Game_Menu() {
     var _ME_Scene_Item_create = Scene_Item.prototype.create;
     Scene_Item.prototype.create = function() {
         _ME_Scene_Item_create.call(this);
-        if (this.isEnabledItemEvent()) {
+        if (FTKR.ME.item || FTKR.ME.itemSub) {
             this.createMenuEventWindow();
         }
     };
 
     Scene_Item.prototype.checkCommonEvent = function() {
         if ($gameTemp.isCommonEventReserved()) {
-            if (this.isEnabledItemEvent()) {
+            if (this.isEnabledItemEvent() || this.isEnabledItemSubComEvent()) {
                 this._actorWindow.deactivate();
             } else {
                 SceneManager.goto(Scene_Map);
@@ -486,7 +579,7 @@ function Game_Menu() {
     var _ME_Scene_Skill_create = Scene_Skill.prototype.create;
     Scene_Skill.prototype.create = function() {
         _ME_Scene_Skill_create.call(this);
-        if (this.isEnabledSkillEvent()) {
+        if (FTKR.ME.skill) {
             this.createMenuEventWindow();
         }
     };
@@ -527,6 +620,11 @@ function Game_Menu() {
         this._baseSprite = new Sprite();
         this._baseSprite.setFrame(0, 0, this.width, this.height);
         this.addChild(this._baseSprite);
+    };
+
+    Spriteset_Menu.prototype.createUpperLayer = function() {
+        this.createPictures();
+        this.createScreenSprites();
     };
 
     //=============================================================================

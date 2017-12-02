@@ -3,12 +3,18 @@
 // FTKR_ItemSubCommand.js
 // 作成者     : フトコロ
 // 作成日     : 2017/06/04
-// 最終更新日 : 2017/09/24
-// バージョン : v1.4.0
+// 最終更新日 : 2017/12/02
+// バージョン : v1.4.1
 //=============================================================================
 
+var Imported = Imported || {};
+Imported.FTKR_ISC = true;
+
+var FTKR = FTKR || {};
+FTKR.ISC = FTKR.ISC || {};
+
 /*:
- * @plugindesc v1.4.0 アイテムボックスにサブコマンドを追加する
+ * @plugindesc v1.4.1 アイテムボックスにサブコマンドを追加する
  * @author フトコロ
  *
  * @param --アイテム情報取得--
@@ -112,7 +118,7 @@
  *
  * @param Disposal SE Name
  * @desc アイテムを捨てる時のSEを設定します。
- * @default Dicision1
+ * @default Decision1
  * @type file
  * @require 1
  * @dir audio/se
@@ -355,9 +361,16 @@
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
+ * プラグイン公開元
+ * https://github.com/futokoro/RPGMaker/blob/master/README.md
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.4.1 - 2017/12/02 : 不具合修正
+ *    1. プラグインパラメータ「Disposal SE Name」の初期値の誤字を修正。
  * 
  * v1.4.0 - 2017/09/24 : 機能追加
  *    1. アイテム別に実行するコモンイベントIDを設定する機能を追加。
@@ -382,12 +395,6 @@
  *-----------------------------------------------------------------------------
 */
 //=============================================================================
-
-var Imported = Imported || {};
-Imported.FTKR_ISC = true;
-
-var FTKR = FTKR || {};
-FTKR.ISC = FTKR.ISC || {};
 
 function Window_ItemSubCommand() {
     this.initialize.apply(this, arguments);

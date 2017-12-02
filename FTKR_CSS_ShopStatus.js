@@ -3,8 +3,8 @@
 // FTKR_CSS_ShopStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/07/23
-// 最終更新日 : 2017/11/18
-// バージョン : v1.2.1
+// 最終更新日 : 2017/12/02
+// バージョン : v1.2.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.CSS = FTKR.CSS || {};
 FTKR.CSS.SpS = FTKR.CSS.SpS || {};
 
 /*:
- * @plugindesc v1.2.1 ショップ画面のステータスレイアウトを変更する
+ * @plugindesc v1.2.2 ショップ画面のステータスレイアウトを変更する
  * @author フトコロ
  *
  * @param --共通レイアウト設定--
@@ -349,6 +349,9 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.2.2 - 2017/12/02 : 不具合修正
+ *    1. GraphicalDesignMode.jsがないとエラーで立ち上がらない不具合を修正。
  * 
  * v1.2.1 - 2017/11/14 : 不具合修正
  *    1. GraphicalDesignMode.jsのレイアウト変更が一部反映されない不具合を修正。
@@ -815,7 +818,7 @@ if (Imported.FTKR_CSS) (function() {
 
     Window_ShopWeaponStatus.prototype.initialize = function(x, y, width, height) {
         Window_ShopItemStatus.prototype.initialize.apply(this, arguments);
-        if ($dataContainerProperties) {
+        if (typeof $dataContainerProperties !== 'undefined') {
             if(this.pageSize) this._customCssMaxCols = this.pageSize();
             if(this.actorRows) this._customCssCursorHeight = this.actorRows();
             if(this.heightSpace) this._customCssHSpace = this.heightSpace();
