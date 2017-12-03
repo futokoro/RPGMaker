@@ -4,7 +4,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2017/12/02
 // 最終更新日 : 2017/12/03
-// バージョン : v1.0.1
+// バージョン : v1.0.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,9 +15,18 @@ FTKR.ETS = FTKR.ETS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.1 装備やステート等の特徴を詳細に設定できる
+ * @plugindesc v1.0.2 装備やステート等の特徴を詳細に設定できる
  * @author フトコロ
  *
+ * @param 計算方法
+ * @desc 特徴の数値で複数の積算値や除算値が有る場合の計算方法
+ * @type select
+ * @option 合計値を積算
+ * @value 0
+ * @option 個別に積算
+ * @value 1
+ * @default 0
+ * 
  * @help 
  *-----------------------------------------------------------------------------
  * 概要
@@ -102,17 +111,27 @@ FTKR.ETS = FTKR.ETS || {};
  * 
  * ＜複数の同じ特徴の数値の合計方法について＞
  * 特徴の合計方法は以下の通りです。
+ * プラグインパラメータで設定できます。
  * 
- * (加算と減算の数値の合計)　×　(乗算と除算の数値の合計)
+ * １．合計値を積算の場合
+ * 
+ * (加算と減算の数値の合計)　×　(1 + 乗算の数値の合計) / (1 + 除算の数値の合計)
  * 
  * 例えば、攻撃力の特徴が以下のように複数あった場合
- * 　　+10, -5, *1.2, /0.2
+ * 　　+10, -4, *1.2, /0.2
  * 
- * この合計値は
- * 　　(+10 -5) × (1.2 - 0.2) = 5
+ * この合計値は以下になります。
+ * 　　(+10 -4) × (1 + 1.2) / (1 + 0.2) = 11
  * 
- * 以下の計算ではないことに注意してください。
- * 　　(+10 -5) × 1.2 / 0.2
+ * ２．個別に積算の場合
+ * 
+ * (加算と減算の数値の合計)　×　(1 * 乗算値1 * 積算値２ * ... / 除算値1 / 除算値2 /...)
+ * 
+ * 例えば、攻撃力の特徴が以下のように複数あった場合
+ * 　　+10, -4, *1.2, /0.2
+ * 
+ * この合計値は以下になります。
+ * 　　(+10 -4) × (1 * 1.2 / 0.2) = 36
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -133,6 +152,9 @@ FTKR.ETS = FTKR.ETS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.2 - 2017/12/03 : 仕様変更
+ *    1. プラグインパラメータ追加して、積算除算の計算処理を見直し。
+ * 
  * v1.0.1 - 2017/12/03 : 不具合修正
  *    1. 積算除算の計算処理が間違っていた不具合を修正。
  * 
@@ -148,6 +170,8 @@ FTKR.ETS = FTKR.ETS || {};
     // プラグイン パラメータ
     //=============================================================================
     var parameters = PluginManager.parameters('FTKR_ExTraitSetting');
+
+    FTKR.ETS.multi = Number(parameters['計算方法'] || 0);
 
     //=============================================================================
     // 自作関数(グローバル)
@@ -329,27 +353,93 @@ FTKR.ETS = FTKR.ETS || {};
     //特徴の積算
     //------------------------------------------------------------------------
     Game_BattlerBase.prototype.traitsEtsPi = function(code, id, init) {
+        var value = FTKR.ETS.multi ? this.traitsEtsMultiDiv(code, id, init) :
+            this.traitsEtsMulti(code, id, init) / this.traitsEtsDiv(code, id, init);
+        return value;
+    }
+
+    Game_BattlerBase.prototype.traitsEtsMultiDiv = function(code, id, init) {
         FTKR.setGameData(this);
         return this.traitsWithIdOperator(code, id, 'pi').reduce(function(r, trait) {
             var value = trait.etsValue ? FTKR.evalFormula(trait.etsValue) : trait.value;
             switch(trait.calc) {
             case '/':
-                return r - value;
+                return r / value;
+            case '*':
+                return r * value;
+            case '+':
+            case '-':
+                return r;
+            default:
+                return init ? r * value : r;
+            }
+        }, 1);
+    };
+
+    Game_BattlerBase.prototype.traitsEtsMulti = function(code, id, init) {
+        FTKR.setGameData(this);
+        return this.traitsWithIdOperator(code, id, 'pi').reduce(function(r, trait) {
+            var value = trait.etsValue ? FTKR.evalFormula(trait.etsValue) : trait.value;
+            switch(trait.calc) {
+            case '+':
+            case '-':
+            case '/':
+                return r;
             case '*':
                 return r + value;
             default:
                 return init ? r + value : r;
+            }
+        }, 1);
+    };
+
+    Game_BattlerBase.prototype.traitsEtsDiv = function(code, id, init) {
+        FTKR.setGameData(this);
+        return this.traitsWithIdOperator(code, id, 'pi').reduce(function(r, trait) {
+            var value = trait.etsValue ? FTKR.evalFormula(trait.etsValue) : trait.value;
+            switch(trait.calc) {
+            case '/':
+                return r + value;
+            case '+':
+            case '-':
+            default:
+                return r;
             }
         }, 1);
     };
 
     Game_BattlerBase.prototype.traitsEtsPiAll = function(code, init) {
+        return FTKR.ETS.multi ? this.traitsEtsMultiDivAll(code, init) :
+            this.traitsEtsMultiAll(code, init) / this.traitsEtsDivAll(code, init);
+    }
+
+    Game_BattlerBase.prototype.traitsEtsMultiDivAll = function(code, init) {
         FTKR.setGameData(this);
         return this.traitsWithOperator(code, 'pi').reduce(function(r, trait) {
             var value = trait.etsValue ? FTKR.evalFormula(trait.etsValue) : trait.value;
             switch(trait.calc) {
             case '/':
-                return r - value;
+                return r / value;
+            case '*':
+                return r * value;
+            case '+':
+            case '-':
+                return r;
+            default:
+                return init ? r * value : r;
+            }
+        }, 1);
+    };
+
+    Game_BattlerBase.prototype.traitsEtsMultiAll = function(code, init) {
+        FTKR.setGameData(this);
+        return this.traitsWithOperator(code, 'pi').reduce(function(r, trait) {
+            var value = trait.etsValue ? FTKR.evalFormula(trait.etsValue) : trait.value;
+            switch(trait.calc) {
+            case '+':
+            case '-':
+            case '/':
+                return r;
             case '*':
                 return r + value;
             default:
@@ -358,6 +448,18 @@ FTKR.ETS = FTKR.ETS || {};
         }, 1);
     };
 
+    Game_BattlerBase.prototype.traitsEtsDivAll = function(code, init) {
+        FTKR.setGameData(this);
+        return this.traitsWithOperator(code, 'pi').reduce(function(r, trait) {
+            var value = trait.etsValue ? FTKR.evalFormula(trait.etsValue) : trait.value;
+            switch(trait.calc) {
+            case '/':
+                return r + value;
+            default:
+                return r;
+            }
+        }, 1);
+    };
     //------------------------------------------------------------------------
     //特徴の加算
     //------------------------------------------------------------------------
@@ -370,6 +472,9 @@ FTKR.ETS = FTKR.ETS || {};
                 return r - value;
             case '+':
                 return r + value;
+            case '*':
+            case '/':
+                return r;
             default:
                 return !init ? r + value : r;
             }
@@ -385,6 +490,9 @@ FTKR.ETS = FTKR.ETS || {};
                 return r - value;
             case '+':
                 return r + value;
+            case '*':
+            case '/':
+                return r;
             default:
                 return !init ? r + value : r;
             }
