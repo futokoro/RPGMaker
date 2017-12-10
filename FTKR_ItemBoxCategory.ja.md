@@ -2,7 +2,7 @@
 
 # [FTKR_ItemBoxCategory](FTKR_ItemBoxCategory.js) プラグイン
 
-アイテムボックスのカテゴリーを追加変更するプラグインプラグインです。
+アイテムボックスのカテゴリーを追加変更するプラグインです。
 
 ダウンロード: [FTKR_ItemBoxCategory.js](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ItemBoxCategory.js)
 
