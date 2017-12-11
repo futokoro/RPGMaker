@@ -3,8 +3,8 @@
 // FTKR_ItemConpositionSystem.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/08
-// 最終更新日 : 2017/11/01
-// バージョン : v1.5.2
+// 最終更新日 : 2017/12/11
+// バージョン : v1.5.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ICS = FTKR.ICS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.5.2 アイテム合成システム
+ * @plugindesc v1.5.3 アイテム合成システム
  * @author フトコロ
  *
  * @param --基本設定--
@@ -123,9 +123,9 @@ FTKR.ICS = FTKR.ICS || {};
  * @default ["レシピから選ぶ"]
  * 
  * @param Slot Cmd Name
- * @desc 「アイテムを戻す」コマンドの表示内容を設定します。
+ * @desc 「合成素材を戻す」コマンドの表示内容を設定します。
  * @type string[]
- * @default ["アイテムを戻す"]
+ * @default ["合成素材を戻す"]
  * 
  * @param Action Cmd Name
  * @desc 「合成を行う」コマンドの表示内容を設定します。
@@ -213,7 +213,7 @@ FTKR.ICS = FTKR.ICS || {};
  * @param Slot Title Format
  * @desc スロットタイトルウィンドウのタイトル表示内容を設定します。
  * @type string[]
- * @default ["\\c[16]合成アイテム"]
+ * @default ["\\c[16]合成素材"]
  * 
  * @param Slot Title Opacity
  * @desc スロットタイトルウィンドウの透明率を指定します。
@@ -240,9 +240,9 @@ FTKR.ICS = FTKR.ICS || {};
  * @default 160
  * 
  * @param Return All Slot
- * @desc アイテムをすべて戻すコマンドの表示名を設定します。
+ * @desc 合成素材をすべて戻すコマンドの表示名を設定します。
  * @type string[]
- * @default ["アイテムをすべて戻す"]
+ * @default ["合成素材をすべて戻す"]
  * 
  * @param Slot Opacity
  * @desc 素材スロットウィンドウの透明率を指定します。
@@ -524,6 +524,10 @@ FTKR.ICS = FTKR.ICS || {};
  * 概要
  *-----------------------------------------------------------------------------
  * 本プラグインは、アイテム合成システムを実装するプラグインです。
+ * 
+ * 
+ * オンラインマニュアル
+ * https://github.com/futokoro/RPGMaker/blob/master/FTKR_ItemCompositionSystem.ja.md
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -930,6 +934,7 @@ FTKR.ICS = FTKR.ICS || {};
  *    :リスト番号を指定すると、合成画面の表示内容をプラグインパラメータで設定した
  *    :リストの番号のものに変更します。
  * 
+ * 
  * 2. レシピを追加
  * ICS_ADD_RECIPE ITEMNAME RecipeId
  * ICS_ADD_RECIPE ITEM ItemId RecipeId 
@@ -968,9 +973,18 @@ FTKR.ICS = FTKR.ICS || {};
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
+ * プラグイン公開元
+ * https://github.com/futokoro/RPGMaker/blob/master/README.md
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.5.3 - 2017/12/11 : 不具合修正、ヘルプ修正、他微修正
+ *    1. レシピを設定したアイテムにカテゴリーを設定しても、特定のカテゴリーの
+ *       アイテムだけ表示する合成コマンドの機能が反映されない不具合を修正。
+ *    2. プラグインパラメータの初期値を見直し。
  * 
  * v1.5.2 - 2017/11/01 : ヘルプ修正
  *    1. レシピの素材にカテゴリーを設定する場合の説明が間違っていたため修正。
@@ -1655,7 +1669,6 @@ function Game_IcsRecipeBook() {
                     if (category) obj.ics.setDataClass(category);
                 }
                 var datas = readEntrapmentCodeToTextEx(obj, ['ICS RECIPES', 'ICS レシピ']);
-                if(datas) console.log(datas);
                 this.setIcsRecipes(obj, datas);
             }
         }
@@ -2413,9 +2426,12 @@ function Game_IcsRecipeBook() {
     Window_IcsItemList.prototype.filterCategory = function() {
         return $gameParty.recipes().filter(function(recipe) {
             if (!recipe) return false;
-            return DataManager.isIcsCategory(recipe.item()) ?
-                this._category === recipe.item().ics.dataClass() :
-                this._category === recipe.dataClass();
+            var item = recipe.item();
+            return DataManager.isIcsCategory(item) ?
+                this._category === item.ics.dataClass() :
+                item.ics.category() ?
+                    this._category === item.ics.category() :
+                    this._category === recipe.dataClass();
         }, this);
     };
 
@@ -3751,22 +3767,18 @@ function Game_IcsRecipeBook() {
         var correct = {};
         switch(judg) {
             case 'success':
-                console.log(sound.success);
                 AudioManager.playStaticSe(sound.success.icsSoundType());
                 break;
             case 'great':
-                console.log(sound.great);
                 AudioManager.playStaticSe(sound.great.icsSoundType());
                 correct = this.successCorrection(recipe.great());
                 break;
             case 'failure':
-                console.log(sound.failure);
                 AudioManager.playStaticSe(sound.failure.icsSoundType());
                 correct = this.successCorrection(recipe.failure());
                 success = false;
                 break;
             default:
-                console.log(sound.lost);
                 AudioManager.playStaticSe(sound.lost.icsSoundType());
                 correct = this.successCorrection('なし');
                 success = false;
@@ -3918,7 +3930,6 @@ function Game_IcsRecipeBook() {
 
     Scene_ICS.prototype.onEndConfOk = function() {
         var cfw = this._stsEndConfWindow;
-        console.log(cfw.item());
         if (cfw.item().dicision) {
             cfw.deselect();
             this.onCompositionEnd();
