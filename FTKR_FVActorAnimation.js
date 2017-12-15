@@ -3,8 +3,8 @@
 // FTKR_FVActorAnimation.js
 // 作成者     : フトコロ
 // 作成日     : 2017/11/12
-// 最終更新日 : 2017/12/02
-// バージョン : v1.0.6
+// 最終更新日 : 2017/12/15
+// バージョン : v1.0.7
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.FAA = FTKR.FAA || {};
 
 //=============================================================================
 /*:ja
- * @plugindesc v1.0.6 フロントビューモードでアクター側にアニメーションを表示するプラグイン
+ * @plugindesc v1.0.7 フロントビューモードでアクター側にアニメーションを表示するプラグイン
  * @author フトコロ
  *
  * @param --アニメーション--
@@ -188,6 +188,9 @@ FTKR.FAA = FTKR.FAA || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.7 - 2017/12/15 : 不具合修正
+ *    1. 戦闘中以外の顔画像に対してもプラグインの影響が出ていた不具合を修正。
+ * 
  * v1.0.6 - 2017/12/02 : 不具合修正
  *    1. ステータス画面でアクターを変えた場合に、変更前のアクターの画像が残る
  *       不具合を修正。
@@ -352,7 +355,7 @@ function Sprite_FaceAnimation() {
     //書き換え
     var _FAA_Window_Base_drawActorFace = Window_Base.prototype.drawActorFace;
     Window_Base.prototype.drawActorFace = function(actor, x, y, width, height) {
-        if (FTKR.FAA.destination !== 1) {
+        if (!$gameParty.inBattle() || FTKR.FAA.destination !== 1) {
             return _FAA_Window_Base_drawActorFace.call(this, actor, x, y, width, height);
         } else {
             width = width || Window_Base._faceWidth;
@@ -368,7 +371,7 @@ function Sprite_FaceAnimation() {
     //書き換え
     var _FAA_Window_Base_drawCssFace = Window_Base.prototype.drawCssFace;
     Window_Base.prototype.drawCssFace = function(actor, dx, dy, width, height) {
-        if (FTKR.FAA.destination !== 1) {
+        if (!$gameParty.inBattle() || FTKR.FAA.destination !== 1) {
             return _FAA_Window_Base_drawCssFace.call(this, actor, dx, dy, width, height);
         } else {
             var index = actor.index() % this.showActorNum();
@@ -398,7 +401,7 @@ function Sprite_FaceAnimation() {
     //書き換え
     var _FAA_Window_Base_drawCssImage = Window_Base.prototype.drawCssImage;
     Window_Base.prototype.drawCssImage = function(actor, dx, dy, width, id) {
-        if (FTKR.FAA.destination !== 2) {
+        if (!$gameParty.inBattle() || FTKR.FAA.destination !== 2) {
             return _FAA_Window_Base_drawCssImage.call(this, actor, dx, dy, width, id);
         } else {
             var bgi = actor.actor().cssbgi[id];
@@ -707,7 +710,7 @@ function Sprite_FaceAnimation() {
     // Window_BattleStatus
     // バトル画面のステータス表示用ウィンドウクラスの修正
     //=============================================================================
-
+    
     Window_BattleStatus.prototype.isBusy = function() {
         return this.isFaceSpriteBusy();
     };
