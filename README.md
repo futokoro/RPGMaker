@@ -159,6 +159,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 | [FTKR_DisplayRegenerateMessage](FTKR_DisplayRegenerateMessage.js) | [あり](FTKR_DisplayRegenerateMessage.ja.md) | [v1.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_DisplayRegenerateMessage.js) | 2017/05/27 | HP再生量をバトルログに表示する |
 | [FTKR_ExBattleCommand](FTKR_ExBattleCommand.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExBattleCommand.js) | 2017/11/25 | バトルコマンドを変更する |
 | [FTKR_FVActorAnimation](FTKR_FVActorAnimation.js) | なし | [v1.0.7](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_FVActorAnimation.js) | 2017/12/15 | フロントビューモードでアクター画像にアニメーションを表示する<br>別途アクター画像表示用のプラグインが必要 |
+
 FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 [目次に戻る](#目次)
