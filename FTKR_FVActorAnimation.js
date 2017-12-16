@@ -3,8 +3,8 @@
 // FTKR_FVActorAnimation.js
 // 作成者     : フトコロ
 // 作成日     : 2017/11/12
-// 最終更新日 : 2017/12/15
-// バージョン : v1.0.7
+// 最終更新日 : 2017/12/16
+// バージョン : v1.0.8
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.FAA = FTKR.FAA || {};
 
 //=============================================================================
 /*:ja
- * @plugindesc v1.0.7 フロントビューモードでアクター側にアニメーションを表示するプラグイン
+ * @plugindesc v1.0.8 フロントビューモードでアクター側にアニメーションを表示するプラグイン
  * @author フトコロ
  *
  * @param --アニメーション--
@@ -108,9 +108,9 @@ FTKR.FAA = FTKR.FAA || {};
  *    別途プラグインを用いて、画像をウィンドウに表示させてください。
  *    ただし、すべてのプラグインで本機能が必ず使用できるわけではありません。
  * 
- *    なお、FTKR_CustomSimpleActorStatus.jsとFTKR_CSS_BattleStatus.js
- *    または FTKR_CSS_GDM.jsを使って、ステータスウィンドウに
- *    顔画像またはカスタム画像を表示させることができます。
+ *    なお、FTKR_CustomSimpleActorStatus.jsとFTKR_CSS_BattleStatus.jsを
+ *    使って、ステータスウィンドウに顔画像またはカスタム画像を表示させることが
+ *    できます。
  * 
  * 
  * 3. FTKR_CustomSimpleActorStatus.jsと組み合わせて使用する場合は
@@ -187,6 +187,9 @@ FTKR.FAA = FTKR.FAA || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.8 - 2017/12/16 : 不具合修正
+ *    1. ステータスウィンドウの開閉と顔画像の表示非表示のタイミングのズレを修正。
  * 
  * v1.0.7 - 2017/12/15 : 不具合修正
  *    1. 戦闘中以外の顔画像に対してもプラグインの影響が出ていた不具合を修正。
@@ -445,28 +448,22 @@ function Sprite_FaceAnimation() {
         });
     };
 
-    var  _FAA_Window_Status_refresh = Window_Status.prototype.refresh;
-    Window_Status.prototype.refresh = function() {
-        this.clearFaceSprites();
-        _FAA_Window_Status_refresh.call(this);
+    Window_Base.prototype.isFaceSpriteBusy = function() {
+        return this._faceSprite.some( function(sprite) {
+            return sprite.isAnimationPlaying();
+        });
     };
 
-    var _FAA_Scene_Menu_onFormationOk = Scene_Menu.prototype.onFormationOk;
-    Scene_Menu.prototype.onFormationOk = function() {
-        _FAA_Scene_Menu_onFormationOk.call(this);
-        this._statusWindow.refresh();
+    Window_Base.prototype.showFaceSprites = function() {
+        this._faceSprite.forEach( function(sprite){
+            sprite.show();
+        });
     };
 
-    var _FAA_Scene_MenuBase_nextActor = Scene_MenuBase.prototype.nextActor;
-    Scene_MenuBase.prototype.nextActor = function() {
-        if (this._statusWindow) this._statusWindow.clearFaceSprites();
-        _FAA_Scene_MenuBase_nextActor.call(this);
-    };
-
-    var _FAA_Scene_MenuBase_previousActor = Scene_MenuBase.prototype.previousActor;
-    Scene_MenuBase.prototype.previousActor = function() {
-        if (this._statusWindow) this._statusWindow.clearFaceSprites();
-        _FAA_Scene_MenuBase_previousActor.call(this);
+    Window_Base.prototype.hideFaceSprites = function() {
+        this._faceSprite.forEach( function(sprite){
+            sprite.hide();
+        });
     };
 
     //=============================================================================
@@ -715,12 +712,6 @@ function Sprite_FaceAnimation() {
         return this.isFaceSpriteBusy();
     };
 
-    Window_BattleStatus.prototype.isFaceSpriteBusy = function() {
-        return this._faceSprite.some( function(sprite) {
-            return sprite.isAnimationPlaying();
-        });
-    };
-
     //アクター選択中のエフェクト表示を追加
     var _FAA_Window_BattleStatus_select = Window_BattleStatus.prototype.select;
     Window_BattleStatus.prototype.select = function(index) {
@@ -737,6 +728,25 @@ function Sprite_FaceAnimation() {
                 i === index ? sprite.startToneChange() : sprite.stopToneChange();
             });
         }
+    };
+
+    //書き換え
+    Window_BattleStatus.prototype.updateOpen = function() {
+        if (this._opening) {
+            this.openness += 32;
+            if (this.isOpen()) {
+                this._opening = false;
+                this.showFaceSprites();
+            }
+        }
+    };
+
+    var _FAA_Window_BattleStatus_updateClose = Window_BattleStatus.prototype.updateClose;
+    Window_BattleStatus.prototype.updateClose = function() {
+        if (this._closing) {
+            this.hideFaceSprites();
+        }
+        _FAA_Window_BattleStatus_updateClose.call(this);
     };
 
     //=============================================================================
