@@ -3,8 +3,8 @@
 // FTKR_FacialImageDifference2.js
 // 作成者     : フトコロ
 // 作成日     : 2017/12/16
-// 最終更新日 : 
-// バージョン : v2.0.0
+// 最終更新日 : 2017/12/16
+// バージョン : v2.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.FID = FTKR.FID || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.0.0 アクターの状態によって顔画像を変えるプラグイン
+ * @plugindesc v2.0.1 アクターの状態によって顔画像を変えるプラグイン
  * @author フトコロ
  *
  * @noteParam FID_画像
@@ -142,8 +142,8 @@ FTKR.FID = FTKR.FID || {};
  *-----------------------------------------------------------------------------
  * 概要
  *-----------------------------------------------------------------------------
- * 本プラグインを実装することで、アクターの顔画像を、アクターのさまざまな状態に
- * おいて表示する顔画像を変更します。
+ * 本プラグインを実装することで、戦闘中のアクターの顔画像を、
+ * アクターのさまざまな状態によって変更します。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -183,11 +183,13 @@ FTKR.FID = FTKR.FID || {};
  * 基本仕様
  *-----------------------------------------------------------------------------
  * 本プラグインを単独で使用する場合、アクターの状態によって
- * メニュー画面や、ステータス画面等で表示する顔画像が変わります。
+ * 戦闘画面で表示する顔画像が変わります。
  * 
- * なお、デフォルトのプラグインの状態では、すべてのアクターの状態に対して 
+ * デフォルトのプラグインの状態では、すべてのアクターの状態に対して 
  * 0番の画像を指定しています。
  * 必要に応じて、プラグインパラメータに値を設定してください。
+ * 
+ * なお、戦闘以外の画面での顔画像は、すべて 0番を使用します。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -247,6 +249,10 @@ FTKR.FID = FTKR.FID || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v2.0.1 - 2017/12/16 : 不具合修正
+ *    1. FTKR_SvMotion.jsと併用できるように見直し。
+ *    2. 戦闘終了後に顔画像がデフォルトに戻らない不具合修正。
  * 
  * v2.0.0 - 2017/12/16 : 初版作成(FTKR_FacialImageDifference v1.1.7から派生)
  *    1. アニメーションおよびダメージポップアップ機能を削除。
@@ -318,6 +324,10 @@ FTKR.FID = FTKR.FID || {};
         this._faceIndex = 0;
     };
 
+    Game_Battler.prototype.clearFace = function() {
+        this._faceIndex = 0;
+    };
+
     var _FID_Game_Battler_requestMotion = Game_Battler.prototype.requestMotion;
     Game_Battler.prototype.requestMotion = function(motionType) {
         _FID_Game_Battler_requestMotion.call(this, motionType);
@@ -345,8 +355,9 @@ FTKR.FID = FTKR.FID || {};
 
     Sprite_Actor.prototype.faceTypeIndex = function(motionType) {
         if (!motionType) return 0;
+        if (Imported.FTKR_ESM && !this._motion) return 0;
         var faceType = Imported.FTKR_ESM ? 
-            this.convertOtherMotion(this._motion) :
+            this.convertOtherMotion(this.motionName()) :
             motionType;
         return FTKR.FID.faces[faceType];
     };
@@ -380,8 +391,7 @@ FTKR.FID = FTKR.FID || {};
     };
 
     //書き換え
-    if (!Imported.FTKR_FAA || Imported.FTKR_FAA && FTKR.FAA.destination !== 1) {
-    Window_BattleStatus.prototype.drawCssFace = function(actor, dx, dy, width, height) {
+    Window_Base.prototype.drawCssFace = function(actor, dx, dy, width, height) {
         var len = Math.min(width, height);
         var dh = len || Window_Base._faceHeight;
         var dw = len || Window_Base._faceWidth;
@@ -394,7 +404,6 @@ FTKR.FID = FTKR.FID || {};
         var sy = Math.floor(actor.faceIndex() / 6) * sh;
         this.contents.blt(bitmap, sx, sy, sw, sh, dx, dy, dw, dh);
     };
-    }
 
     //=============================================================================
     // FTKR_FVActorAnimation.jsの修正
@@ -418,4 +427,22 @@ FTKR.FID = FTKR.FID || {};
     };
 
     }
+    //=============================================================================
+    // Scene_Base
+    // シーン変更時に顔番号をリセット
+    //=============================================================================
+
+    var _FID_Scene_Base_start = Scene_Base.prototype.start;
+    Scene_Base.prototype.start = function() {
+        _FID_Scene_Base_start.call(this);
+        this.resetActorFaceType();
+    };
+
+    Scene_Base.prototype.resetActorFaceType = function() {
+        if (!$gameParty) return;
+        $gameParty.members().forEach( function(member) {
+            member.clearFace();
+        });
+    };
+    
 }());//EOF

@@ -4,7 +4,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2017/11/12
 // 最終更新日 : 2017/12/16
-// バージョン : v1.0.8
+// バージョン : v1.0.9
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.FAA = FTKR.FAA || {};
 
 //=============================================================================
 /*:ja
- * @plugindesc v1.0.8 フロントビューモードでアクター側にアニメーションを表示するプラグイン
+ * @plugindesc v1.0.9 フロントビューモードでアクター側にアニメーションを表示するプラグイン
  * @author フトコロ
  *
  * @param --アニメーション--
@@ -170,6 +170,17 @@ FTKR.FAA = FTKR.FAA || {};
  *    このプラグインは、フロントビューモードでのみ使用してください。
  * 
  * 
+ * 3. 戦闘画面のレイヤー構成の一部変更について
+ *    以下のようにレイヤー構成を変更します。
+ * 
+ *    戦闘画面背景＜敵対象のアニメーション＜ステータスウィンドウ＜
+ *        ＜味方対象のアニメーション＜戦闘ログ＜...
+ * 
+ *    (従来のレイヤー構成)
+ *    戦闘画面背景＜敵対象のアニメーション＜戦闘ログ＜
+ *        ＜ステータスウィンドウ＜味方対象のアニメーション＜...
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * 本プラグインのライセンスについて(License)
  *-----------------------------------------------------------------------------
@@ -187,6 +198,9 @@ FTKR.FAA = FTKR.FAA || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.9 - 2017/12/16 : 不具合修正
+ *    1. FTKR_FacialImageDifference2.jsに対応。
  * 
  * v1.0.8 - 2017/12/16 : 不具合修正
  *    1. ステータスウィンドウの開閉と顔画像の表示非表示のタイミングのズレを修正。
@@ -356,8 +370,8 @@ function Sprite_FaceAnimation() {
     };
 
     //書き換え
-    var _FAA_Window_Base_drawActorFace = Window_Base.prototype.drawActorFace;
-    Window_Base.prototype.drawActorFace = function(actor, x, y, width, height) {
+    var _FAA_Window_Base_drawActorFace = Window_BattleStatus.prototype.drawActorFace;
+    Window_BattleStatus.prototype.drawActorFace = function(actor, x, y, width, height) {
         if (!$gameParty.inBattle() || FTKR.FAA.destination !== 1) {
             return _FAA_Window_Base_drawActorFace.call(this, actor, x, y, width, height);
         } else {
@@ -372,8 +386,8 @@ function Sprite_FaceAnimation() {
     };
 
     //書き換え
-    var _FAA_Window_Base_drawCssFace = Window_Base.prototype.drawCssFace;
-    Window_Base.prototype.drawCssFace = function(actor, dx, dy, width, height) {
+    var _FAA_Window_Base_drawCssFace = Window_BattleStatus.prototype.drawCssFace;
+    Window_BattleStatus.prototype.drawCssFace = function(actor, dx, dy, width, height) {
         if (!$gameParty.inBattle() || FTKR.FAA.destination !== 1) {
             return _FAA_Window_Base_drawCssFace.call(this, actor, dx, dy, width, height);
         } else {
@@ -402,8 +416,8 @@ function Sprite_FaceAnimation() {
     };
 
     //書き換え
-    var _FAA_Window_Base_drawCssImage = Window_Base.prototype.drawCssImage;
-    Window_Base.prototype.drawCssImage = function(actor, dx, dy, width, id) {
+    var _FAA_Window_Base_drawCssImage = Window_BattleStatus.prototype.drawCssImage;
+    Window_BattleStatus.prototype.drawCssImage = function(actor, dx, dy, width, id) {
         if (!$gameParty.inBattle() || FTKR.FAA.destination !== 2) {
             return _FAA_Window_Base_drawCssImage.call(this, actor, dx, dy, width, id);
         } else {
