@@ -28,7 +28,7 @@
 | [FTKR_SearchPartyParam](FTKR_SearchPartyParam.js) | [あり](FTKR_SearchPartyParam.ja.md) | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SearchPartyParam.js) | 2017/04/14 | パーティー内のパラメータに関するスクリプトを実装する |
 | [FTKR_ExSvMotion](FTKR_ExSvMotion.js) | [仮版](FTKR_ExSvMotion.ja.md) | [v1.2.5](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExSvMotion.js) | 2017/08/24 | SVキャラのモーションを拡張する |
 | [FTKR_FacialImageDifference](FTKR_FacialImageDifference.js) | [仮版](FTKR_FacialImageDifference.ja.md) | [v1.1.7](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_FacialImageDifference.js) | 2017/12/02 | アクターの状態によって顔画像を変える<br>顔画像にアニメーションを表示する |
-| [FTKR_FacialImageDifference2](FTKR_FacialImageDifference2.js) | なし | [v2.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_FacialImageDifference2.js) | 2017/12/16 | アクターの状態によって顔画像を変える |
+| [FTKR_FacialImageDifference2](FTKR_FacialImageDifference2.js) | なし | [v2.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_FacialImageDifference2.js) | 2017/12/16 | アクターの状態によって顔画像を変える<br>FTKR_FacialImageDifference.jsと組み合わせて使用できません |
 | [FTKR_ExTraitSetting](FTKR_ExTraitSetting.js) | なし | [v1.0.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExTraitSetting.js) | 2017/12/03 | 装備やステート等の特徴を詳細に設定できる |
 
 ## ステータス表示の変更
