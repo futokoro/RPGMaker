@@ -3,8 +3,8 @@
 // FTKR_SkillTreeSystem.js
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/02/25
-// 最終更新日 : 2017/11/04
-// バージョン : v1.11.4
+// 最終更新日 : 2017/12/20
+// バージョン : v1.12.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.11.4 ツリー型スキル習得システム
+ * @plugindesc v1.12.0 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -1030,6 +1030,15 @@ FTKR.STS = FTKR.STS || {};
  *    :0 - 無効、1 - 有効
  * 
  * 
+ * 以下のタグをスキルのメモ欄に追記することで、スキル使用時の説明文とは
+ * 別の文章を表示させることが出来ます。制御文字が使用できます。
+ * 
+ * <STS DESC>
+ * 文章
+ * 文章
+ * </STS DESC>
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * 習得コストウィンドウの表示設定
  *-----------------------------------------------------------------------------
@@ -1174,6 +1183,7 @@ FTKR.STS = FTKR.STS || {};
  *-----------------------------------------------------------------------------
  * 本プラグインを実装することで、以下の制御文字を追加します。
  * 
+ * １．表示幅の調整
  * \LW[表示幅(,文章,表示位置)]
  * 
  * 表示幅
@@ -1203,6 +1213,23 @@ FTKR.STS = FTKR.STS || {};
  * 主に、本プラグインの制御文字が使用できるプラグインパラメータで、
  * 表示幅を規定したい場合に使用できます。
  *  例) スキル名やコスト名の表示など
+ * 
+ * 
+ * ２．スキルデータの表示
+ * \SDATA[スキルID,パラメータ名]
+ * 
+ * スキルID
+ *    :表示させたいスキルのIDを入力します。
+ * 
+ * パラメータ名
+ *    :表示させたいパラメータに合わせて、以下の文字列を入力します。
+ *    : name    - スキル名を表示
+ *    : mpCost  - 消費MPを表示
+ *    : tpCost  - 消費TPを表示
+ * 
+ * 入力例)
+ * \SDATA[10,mpCost]
+ * ⇒スキルID10の消費MPの値を表示する。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -1330,9 +1357,17 @@ FTKR.STS = FTKR.STS || {};
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
+ * プラグイン公開元
+ * https://github.com/futokoro/RPGMaker/blob/master/README.md
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.12.0 - 2017/12/20 : 機能追加
+ *    1. スキルのデータを表示する制御文字を追加。
+ *    2. スキル習得画面の説明文を、スキル使用時の説明文と変える機能を追加。
  * 
  * v1.11.4 - 2017/11/04 : 不具合修正
  *    1. プラグイン適用前のセーブデータを使用した時に
@@ -1966,6 +2001,8 @@ function Scene_STS() {
     DataManager.stsTreeDataNotetags = function(group) {
         var note1a = /<(?:SET STS DATA)>/i;
         var note1b = /<\/(?:SET STS DATA)>/i;
+        var note2a = /<(?:STS DESC)>/i;
+        var note2b = /<\/(?:STS DESC)>/i;
 
         for (var n = 1; n < group.length; n++) {
             var obj = group[n];
@@ -1985,6 +2022,7 @@ function Scene_STS() {
                 show:'',
                 position:0,
                 diffX:0,
+                desc:'',
             };
             obj.sts.costs.push(this.setCost('sp', 0, FTKR.STS.sp.defaultReq));
 
@@ -1996,8 +2034,16 @@ function Scene_STS() {
                 } else if (note1b.test(line)) {
                     setMode = 'none';
                     obj.sts.data = text;
+                } else if (note2a.test(line)) {
+                    var text = '';
+                    setMode = 'desc';
+                } else if (note2b.test(line)) {
+                    setMode = 'none';
+                    obj.sts.desc = text;
                 } else if (setMode === 'data') {
                     text += line + ';';
+                  } else if (setMode === 'desc') {
+                    text += line + '\n';
                 }
             }
             this.setStsData(obj);
@@ -2771,8 +2817,13 @@ function Scene_STS() {
             var desc = descs.pop();
             return desc ? desc.description : '';
         } else {
-            return skill.description;
+            var desc = this.getStsSubDesc(skill);
+            return desc ? desc : skill.description;
         }
+    };
+
+    Window_Base.prototype.getStsSubDesc = function(skill) {
+        return skill.sts.desc;
     };
 
     /*-------------------------------------------------------------
@@ -2834,6 +2885,15 @@ function Scene_STS() {
     /*-------------------------------------------------------------
       制御文字の表示処理の修正
     -------------------------------------------------------------*/
+    var _STS_Window_Base_convertEscapeCharacters = Window_Base.prototype.convertEscapeCharacters;
+    Window_Base.prototype.convertEscapeCharacters = function(text) {
+        text = _STS_Window_Base_convertEscapeCharacters.call(this, text);
+        text = text.replace(/\x1bSDATA\[(\d+),([^\]]+)\]/gi, function() {
+            return $dataSkills[parseInt(arguments[1])][arguments[2]];
+        }.bind(this));
+        return text;
+    };
+
     var _STS_Window_Base_processEscapeCharacter = Window_Base.prototype.processEscapeCharacter;
     Window_Base.prototype.processEscapeCharacter = function(code, textState) {
         switch (code) {
