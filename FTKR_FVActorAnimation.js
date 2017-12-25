@@ -3,8 +3,8 @@
 // FTKR_FVActorAnimation.js
 // 作成者     : フトコロ
 // 作成日     : 2017/11/12
-// 最終更新日 : 2017/12/16
-// バージョン : v1.0.9
+// 最終更新日 : 2017/12/25
+// バージョン : v1.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.FAA = FTKR.FAA || {};
 
 //=============================================================================
 /*:ja
- * @plugindesc v1.0.9 フロントビューモードでアクター側にアニメーションを表示するプラグイン
+ * @plugindesc v1.1.0 フロントビューモードでアクター側にアニメーションを表示するプラグイン
  * @author フトコロ
  *
  * @param --アニメーション--
@@ -91,6 +91,7 @@ FTKR.FAA = FTKR.FAA || {};
  * 
  * このプラグインは、FTKR_FacialImageDifference.jsと
  * 組み合わせて使用できません。
+ * 
  * 
  *-----------------------------------------------------------------------------
  * 設定方法
@@ -198,6 +199,9 @@ FTKR.FAA = FTKR.FAA || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.1.0 - 2017/12/25 : 仕様変更
+ *    1. バトルシーンのレイヤー構成を変更。
  * 
  * v1.0.9 - 2017/12/16 : 不具合修正
  *    1. FTKR_FacialImageDifference2.jsに対応。
@@ -600,6 +604,9 @@ function Sprite_FaceAnimation() {
         }
     };
 
+    Sprite_Actor.prototype.setupAnimation = function() {
+    };
+
     Sprite_ActorFace.prototype.setupAnimation = function() {
         while (this._actor.isAnimationRequested()) {
             var data = this._actor.shiftAnimation();
@@ -616,6 +623,9 @@ function Sprite_FaceAnimation() {
         if (this.scale._y !== 1) sprite.setHeight(Sprite_ActorFace._imageHeight * this.scale._y);
         this.parent.addChild(sprite);
         this._animationSprites.push(sprite);
+    };
+
+    Sprite_Actor.prototype.setupDamagePopup = function() {
     };
 
     Sprite_ActorFace.prototype.setupDamagePopup = function() {
@@ -782,6 +792,45 @@ function Sprite_FaceAnimation() {
     Scene_Map.prototype.start = function() {
         _FAA_Scene_Map_start.call(this);
         BattleManager._escaped = false;
+    };
+
+    //=============================================================================
+    // バトルシーンのレイヤー構成を変更
+    //=============================================================================
+    //書き換え
+    Scene_Battle.prototype.createAllWindows = function() {
+        this.createLogWindow();
+    //    this.createStatusWindow();
+        this.createPartyCommandWindow();
+        this.createActorCommandWindow();
+        this.createHelpWindow();
+        this.createSkillWindow();
+        this.createItemWindow();
+        this.createActorWindow();
+        this.createEnemyWindow();
+        this.createMessageWindow();
+        this.createScrollTextWindow();
+    };
+
+    Scene_Battle.prototype.createFaaStatusWindow = function() {
+        this._statusWindow = new Window_BattleStatus();
+        this.addChild(this._statusWindow);
+    };
+
+    var _FAA_Scene_Battle_createSpriteset = Scene_Battle.prototype.createSpriteset;
+    Scene_Battle.prototype.createSpriteset = function() {
+        _FAA_Scene_Battle_createSpriteset.call(this);
+        this.createFaaStatusWindow();
+    };
+
+    var _FAA_Scene_Battle_updateWindowPositions = Scene_Battle.prototype.updateWindowPositions;
+    Scene_Battle.prototype.updateWindowPositions = function() {
+        if (this._actorWindow.visible || this._enemyWindow.visible || $gameMessage.isBusy()) {
+            this._statusWindow.hide();
+        } else {
+            this._statusWindow.show();
+        }
+        _FAA_Scene_Battle_updateWindowPositions.call(this);
     };
 
 }());//EOF
