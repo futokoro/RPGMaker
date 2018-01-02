@@ -6,6 +6,9 @@
 
 ダウンロード: [FTKR_ItemCompositionSystem.js](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ItemCompositionSystem.js)
 
+サンプルプロジェクト: [日本語版](sampleProject/ItemCompositionSample.zip)
+※(MVコアスクリプト v1.5.1対応)
+
 # 目次
 
 以下の項目の順でプラグインの使い方を説明します。
