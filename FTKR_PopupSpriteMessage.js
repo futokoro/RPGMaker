@@ -1,0 +1,452 @@
+//=============================================================================
+// 任意のメッセージを画面上にポップアップ表示するプラグイン
+// FTKR_PopupSpriteMessage.js
+// 作成者     : フトコロ
+// 作成日     : 2018/01/05
+// 最終更新日 : 
+// バージョン : v1.0.0
+//=============================================================================
+//=============================================================================
+// BattleEffectPopup.js　//ベースにしたプラグイン
+// ----------------------------------------------------------------------------
+// Copyright (c) 2015 Triacontane
+// This software is released under the MIT License.
+// http://opensource.org/licenses/mit-license.php
+//=============================================================================
+
+var Imported = Imported || {};
+Imported.FTKR_PSM = true;
+
+var FTKR = FTKR || {};
+FTKR.PSM = FTKR.PSM || {};
+
+//=============================================================================
+/*:
+ * @plugindesc v1.0.0 任意のメッセージを画面上にポップアップ表示するプラグイン
+ * @author フトコロ
+ *
+ * @param Max Popup Messages
+ * @desc 画面上に表示可能な文字列の数
+ * @default 10
+ *
+ * @param Popup Message Status
+ * @desc ポップアップ表示する際の設定
+ * 複数のパターンを設定し、プラグインコマンドで呼び出し可能
+ * @type struct<popup>[]
+ * @default ["{\"fontFace\":\"\",\"fontSize\":\"28\",\"color\":\"[\\\"0\\\",\\\"0\\\",\\\"0\\\",\\\"0\\\"]\",\"italic\":\"false\",\"outlineColor\":\"'gray'\",\"popupHeight\":\"40\",\"duration\":\"90\"}"]
+ * 
+ * @help 
+ *-----------------------------------------------------------------------------
+ * 概要
+ *-----------------------------------------------------------------------------
+ * 画面の任意の位置に、任意の文字列をポップアップさせるプラグインです。
+ * マップ画面、バトル画面のどちらでも表示可能です。
+ * 
+ * ポップアップ時に以下のエフェクトをかけることが可能です。
+ *    1. 文字列を１文字ずつ表示
+ * 
+ * 
+ * このプラグインは、トリアコンタンさんのBattleEffectPopup.js(v1.7.1)を
+ * ベースにしています。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * 設定方法
+ *-----------------------------------------------------------------------------
+ * 1.「プラグインマネージャー(プラグイン管理)」に、本プラグインを追加して
+ *    ください。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * 使い方
+ *-----------------------------------------------------------------------------
+ * １．プラグインパラメータPopup Message Statusに、ポップアップさせる時の
+ *     設定を指定してください。
+ * 
+ * ２．以下のプラグインコマンドでポップアップを表示します。
+ * ※[]は実際の入力に使用しません
+ * 
+ * PSM_ポップアップ表示 [ポップアップID] [ポップアップ設定ID] [X座標] [Y座標] [表示時間] [文字列]
+ * PSM_SHOW_POPUP [popupId] [statusId] [x] [y] [duration] [text]
+ * 
+ *    ポップアップID(popupId)
+ *      ：1から、プラグインパラメータMax Popup Messagesで設定した
+ *        値の任意の数字を指定します。
+ *        この値を変えることで、同時に複数の文字列を表示できます。
+ * 
+ *    ポップアップ設定ID(statusId)
+ *      ：プラグインパラメータPopup Message Statusで設定した内容を呼び出します。
+ *        設定時のリスト番号を指定してください。
+ * 
+ *    X座標、Y座標
+ *      ：ポップアップを表示する場合の、画面上の座標を指定します。
+ *    
+ *    表示時間(duration)
+ *      ：ポップアップを表示している時間を指定します。
+ *        ここで指定した時間が経過すると、自動的に表示が消えます。
+ * 
+ *    文字列(text)
+ *      ：ポップアップする内容を指定します。
+ *        半角スペースは使用できません。
+ *        半角スペースを入れたい場合は \_ (アンダーバー)と入力してください。
+ *        また、以下の制御文字が使用可能です。
+ *           \v[n] \N[n] \P[n] \G
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * 本プラグインのライセンスについて(License)
+ *-----------------------------------------------------------------------------
+ * 本プラグインはMITライセンスのもとで公開しています。
+ * This plugin is released under the MIT License.
+ * 
+ * Copyright (c) 2017 Futokoro
+ * http://opensource.org/licenses/mit-license.php
+ * 
+ * 
+ * プラグイン公開元
+ * https://github.com/futokoro/RPGMaker/blob/master/README.md
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * 変更来歴
+ *-----------------------------------------------------------------------------
+ * 
+ * v1.0.0 - 2018/01/05 : 初版作成
+ * 
+ *-----------------------------------------------------------------------------
+*/
+//=============================================================================
+/*~struct~popup:
+ * @param fontFace
+ * @desc 使用するフォントを指定
+ * 空欄の場合はMVデフォルトフォントを使用
+ * @default 
+ *
+ * @param fontSize
+ * @desc フォントサイズ
+ * @type number
+ * @default 28
+ *
+ * @param color
+ * @desc 文字列の色を指定、各リストの意味は以下
+ * 0:赤, 1:緑 ,2:青 ,3:グレー  (0~255の範囲で指定)
+ * @type number[]
+ * @default ["0","0","0","0"]
+ * 
+ * @param italic
+ * @desc イタリック体で表示するか
+ * @type boolean
+ * @on 有効
+ * @off 無効
+ * @default false
+ * 
+ * @param outlineColor
+ * @desc 文字を縁取り表示する場合にカラーを指定
+ * @default 'gray'
+ *
+ * @param popupHeight
+ * @desc ポップアップ時にバウンドさせる高さ
+ * @type number
+ * @min 0
+ * @default 40
+ *
+ * @param offsetWait
+ * @desc 文字を一文字ずつ表示させる場合の時間間隔
+ * 0 の場合は、同時に表示
+ * @type number
+ * @min 0
+ * @default 0
+ *
+*/
+
+(function() {
+
+    var paramParse = function(obj) {
+        return JSON.parse(JSON.stringify(obj, paramReplace));
+    };
+
+    var paramReplace = function(key, value) {
+        try {
+            return JSON.parse(value || null);
+        } catch (e) {
+            return value;
+        }
+    };
+
+    var convertEscapeCharacters = function(text) {
+        if (text == null) text = '';
+        var window = SceneManager._scene._windowLayer.children[0];
+        return window ? window.convertEscapeCharacters(text) : text;
+    };
+
+    //=============================================================================
+    // プラグイン パラメータ
+    //=============================================================================
+    var parameters = PluginManager.parameters('FTKR_PopupSpriteMessage');
+
+    FTKR.PSM = {
+        maxPopupMessages : Number(parameters['Max Popup Messages'] || 0),
+        popupStatus      : paramParse(parameters['Popup Message Status']),
+    };
+
+    //=============================================================================
+    // Game_Interpreter
+    //=============================================================================
+
+    var _PSM_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+    Game_Interpreter.prototype.pluginCommand = function(command, args) {
+        _PSM_Game_Interpreter_pluginCommand.call(this, command, args);
+        if (!command.match(/PSM_(.+)/i)) return;
+        command = (RegExp.$1 + '').toUpperCase();
+        switch (command) {
+            case 'ポップアップ表示':
+            case 'SHOW_POPUP':
+                this.setupPopupMessage(args);
+                break;
+        }
+    };
+
+    Game_Interpreter.prototype.setupPopupMessage = function(args) {
+        var status = FTKR.PSM.popupStatus[Number(args[1])];
+        $gameParty.setPopupMessage(
+          Number(args[0]), Number(args[2]), Number(args[3]), Number(args[4]),
+          status.offsetWait, args[5], status.color, 0, status.italic,
+          status.fontSize, status.outlineColor, status.popupHeight, status.fontFace
+        );
+    };
+
+    //=============================================================================
+    // Game_Party
+    // メッセージスプライトを設定する
+    //=============================================================================
+    
+    var _PSM_Game_Party_initialize = Game_Party.prototype.initialize;
+    Game_Party.prototype.initialize = function() {
+        this._psmMessage = [];
+    };
+
+    Game_Party.prototype.maxPopupMessages = function() {
+        return FTKR.PSM.maxPopupMessages;// 画面に表示可能な文字列の最大数
+    };
+
+    Game_Party.prototype.clearPopupMessage = function(messageId) {
+        this._psmMessage[messageId].popup = false;
+    };
+
+    Game_Party.prototype.isPopupMessage = function(messageId) {
+        return this._psmMessage[messageId] && this._psmMessage[messageId].popup;
+    };
+
+    Game_Party.prototype.setPopupMessage = function(messageId, x1, y1, duration,
+            offsetCount, text, flashColor, flashDuration, italic,
+            fontSize, outlineColor, popupHeight, fontFace) {
+        if (!this._psmMessage) this._psmMessage = [];
+        this._psmMessage[messageId] = {
+            x : x1,
+            y : y1,
+            duration : duration,
+            text : convertEscapeCharacters(text),
+            flashColor : flashColor,
+            flashDuration : flashDuration,
+            popup : true,
+            offsetCount : offsetCount,
+            italic : italic,
+            fontSize : fontSize,
+            outlineColor : outlineColor,
+            popupHeight : popupHeight,
+            fontFace : fontFace,
+        };
+    };
+
+    Game_Party.prototype.psmMessage = function(messageId) {
+        if (!this._psmMessage) this._psmMessage = [];
+        return this._psmMessage[messageId];
+    };
+
+    //=============================================================================
+    // Window_Base
+    //  半角スペース用の制御文字を追加
+    //=============================================================================
+    var _PSM_Window_Base_convertEscapeCharacters = Window_Base.prototype.convertEscapeCharacters;
+    Window_Base.prototype.convertEscapeCharacters = function(text) {
+        text = _PSM_Window_Base_convertEscapeCharacters.call(this, text);
+        text = text.replace(/\x1b_/gi, ' ');
+        return text;
+    };
+
+    //=============================================================================
+    // Spriteset_Base
+    // メッセージスプライトを作成
+    //=============================================================================
+    var _PSM_Spriteset_Base_createUpperLayer = Spriteset_Base.prototype.createUpperLayer;
+    Spriteset_Base.prototype.createUpperLayer = function() {
+        _PSM_Spriteset_Base_createUpperLayer.call(this);
+        this.createPopupMessages();
+    };
+
+    Spriteset_Base.prototype.createPopupMessages = function() {
+        var width = Graphics.boxWidth;
+        var height = Graphics.boxHeight;
+        var x = (Graphics.width - width) / 2;
+        var y = (Graphics.height - height) / 2;
+        this._messageContainer = new Sprite();
+        this._messageContainer.setFrame(x, y, width, height);
+        for (var i = 1; i <= this.maxPopupMessages(); i++) {
+            this._messageContainer.addChild(new Sprite_FtPopupMessage(i));
+        }
+        this.addChild(this._messageContainer);
+    };
+
+    Spriteset_Base.prototype.maxPopupMessages = function() {
+        return $gameParty.maxPopupMessages();
+    };
+
+    //=============================================================================
+    // Sprite_FtPopupMessage
+    // メッセージを表示するスプライト
+    //=============================================================================
+    function Sprite_FtPopupMessage() {
+        this.initialize.apply(this, arguments);
+    }
+
+    Sprite_FtPopupMessage.prototype             = Object.create(Sprite_Damage.prototype);
+    Sprite_FtPopupMessage.prototype.constructor = Sprite_FtPopupMessage;
+
+    Sprite_FtPopupMessage.prototype.initialize = function(messageId) {
+        Sprite_Damage.prototype.initialize.call(this);
+        this._messageId = messageId;
+        this._messageSprites = [];
+        this._index = 0;
+        this._offsetCount = -1;
+    };
+
+    Sprite_FtPopupMessage.prototype.createChildSprite = function() {
+        var sprite = new Sprite();
+        sprite.bitmap = this._damageBitmap;
+        sprite.anchor.x = 0.5;// 原点に対する文字の表示位置
+        sprite.anchor.y = 1;// 原点に対する文字の表示位置
+        sprite.y = -this._popupHeight; // はねる高さ
+        sprite.ry = sprite.y;
+        this.addChild(sprite);
+        return sprite;
+    };
+
+    Sprite_FtPopupMessage.prototype.setup = function(message) {
+        if (this._messageSprites.length) {
+            this._messageSprites.forEach( function(sprite) {
+                this.removeChild(sprite);
+            },this);
+        }
+        this._text = message.text;
+        this._fontSize = message.fontSize;
+        this._fontFace = message.fontFace;
+        this._outlineColor = message.outlineColor;
+        this._italic = message.italic;
+        this._offsetCount = message.offsetCount;
+        this._popupHeight = message.popupHeight || 0;
+        this._index = 0;
+        this._count = 0;
+//        console.log(this._text, this._text.length);//テキストの文字数を獲得
+        this.move(message.x,message.y);// スプライトの原点
+        if (message.flashColor) {
+            this.setupFlashEffect(message.flashColor, message.flashDuration);
+        }
+        this._duration = message.duration;
+        this.opacity = 255;
+    };
+
+    Sprite_FtPopupMessage.prototype.setupSprite = function(text) {
+        var bitmap     = this.setupDynamicText(text);
+        var sprite     = this.createChildSprite();
+        sprite.bitmap  = bitmap;
+        sprite.dy      = 0;
+        sprite.dw      = bitmap.measureTextWidth(text);
+        return sprite;
+    };
+
+    Sprite_FtPopupMessage.prototype.setupDynamicText = function(text) {
+        var size = this._fontSize;
+        var width = (this._italic ? size * 1.5 : size) * text.length;
+        var bitmap = new Bitmap(width, size + 8);// 文字の描画領域サイズ
+        bitmap.fontSize = size;// フォントサイズ
+        if (this._fontFace) {
+            bitmap.fontFace = this._fontFace + ',' + bitmap.fontFace;
+        }
+        if (this._italic) {
+            bitmap.fontItalic = true;// イタリック体で表示
+        }
+        if (this._outlineColor) {
+            bitmap.outlineWidth = Math.floor(bitmap.fontSize / 6);// 文字の縁取り太さ
+            bitmap.outlineColor = this._outlineColor;// 文字の縁取り色
+        }
+        bitmap.drawText(text, 0, 0, bitmap.width, bitmap.height, 'center');
+        return bitmap;
+    };
+
+    Sprite_FtPopupMessage.prototype.setupFlashEffect = function(flashColor, duration) {
+        this._flashColor    = flashColor.clone();
+        this._flashDuration = duration;
+    };
+
+    Sprite_FtPopupMessage.prototype.update = function() {
+        Sprite.prototype.update.call(this);
+        this.updateBitmap();
+        this.updateDuration();
+        this.updateFlash();
+        this.updateOpacity();
+    };
+
+    Sprite_FtPopupMessage.prototype.updateBitmap = function() {
+        if ($gameParty.isPopupMessage(this._messageId)) {
+            var message = this.message();
+            this.setup(message);
+            $gameParty.clearPopupMessage(this._messageId);
+        }
+        if (this._text) {
+            if (this._offsetCount > 0) {
+                if (this._count == 0) {
+                    var i = this._index;
+                    var sprite = this.setupSprite(this._text[i]);
+                    sprite.x = i > 0 ? this._messageSprites[i-1].x + sprite.dw : 0;
+                    this._messageSprites[i] = sprite;
+                    this._count = this.message().offsetCount;
+                    this._index++;
+                } else if (this._count > 0) {
+                    this._count--;
+                }
+                if (this._index >= this._text.length) this._text = '';
+            } else {
+                this._messageSprites[0] = this.setupSprite(this._text);
+                this._text = '';
+            }
+        }
+    };
+
+    Sprite_FtPopupMessage.prototype.message = function() {
+        return $gameParty.psmMessage(this._messageId);
+    };
+
+    Sprite_FtPopupMessage.prototype.updatePosition = function() {
+        var message = this.message();
+        if (message) {
+            this.x = Math.floor(message.x);
+            this.y = Math.floor(message.y);
+        }
+    };
+
+    Sprite_FtPopupMessage.prototype.updateDuration = function() {
+        if (this._duration > 0) {
+            this._duration--;
+            for (var i = 0; i < this.children.length; i++) {
+                this.updateChild(this.children[i]);
+//                console.log('duration', this._duration, 'opacity', this.opacity, 'x', this.x, this.children[i].x, 'y', this.y, this.children[i].y, 'color', this.children[i].getBlendColor(), this._flashDuration);
+            }
+        }
+        if (this._duration == 0 && this._messageSprite) {
+            this.removeChild(this._messageSprite);
+            this._messageSprite = null;
+//            console.log(this);
+        }
+    };
+
+}());//EOF
