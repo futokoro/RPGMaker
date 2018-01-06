@@ -1,5 +1,5 @@
 //=============================================================================
-// 自動戦闘時に使用するスキルの優先度を個別に設定するプラグイン
+// 自動戦闘時に使用するスキルの評価値を個別に設定するプラグイン
 // FTKR_AISkillEvaluate.js
 // 作成者     : フトコロ
 // 作成日     : 2018/01/06
@@ -8,14 +8,14 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.FTKR_BAM = true;
+Imported.FTKR_ASE = true;
 
 var FTKR = FTKR || {};
-FTKR.BAM = FTKR.BAM || {};
+FTKR.ASE = FTKR.ASE || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 自動戦闘時に使用するスキルの優先度を個別に設定するプラグイン
+ * @plugindesc v1.0.0 自動戦闘時に使用するスキルの評価値を個別に設定するプラグイン
  * @author フトコロ
  *
  * @help 
@@ -23,16 +23,16 @@ FTKR.BAM = FTKR.BAM || {};
  * 概要
  *-----------------------------------------------------------------------------
  * スキルのメモ欄に以下のタグを追記すると、自動戦闘時に使用するスキルの
- * 選択する優先度計算を個別に設定することができます。
+ * 選択する評価値計算を個別に設定することができます。
  * 
- * <BAM_優先度式:***>
- * <BAM_EBARUATE:***>
+ * <ASE_評価値式:***>
+ * <ASE_EBARUATE:***>
  *    ***に計算式を入力
  * 
  * 計算式には、ダメージ計算式と同様の記述が可能です。
  * 
  * 
- * 上記の優先度式を設定しない場合は、MVデフォルトの優先度計算式(※)を使用します。
+ * 上記の評価値式を設定しない場合は、MVデフォルトの評価値計算式(※)を使用します。
  * ※後述
  * 
  *-----------------------------------------------------------------------------
@@ -43,18 +43,18 @@ FTKR.BAM = FTKR.BAM || {};
  * 
  * 
  *-----------------------------------------------------------------------------
- * 自動戦闘時の優先度計算式
+ * 自動戦闘時の評価値計算式
  *-----------------------------------------------------------------------------
  * MVのデフォルトでは、自動戦闘時には以下のルールに従い使用可能なスキルを
- * 選択可能な対象ごとに優先度を計算し、その優先度がもっとも高くなる相手に
+ * 選択可能な対象ごとに評価値を計算し、その評価値がもっとも高くなる相手に
  * 対してスキルを使用します。
  * 
- * 1. ダメージタイプが「HPダメージ、HP回復、HP吸収」以外のスキルは優先度0
- * 2. HPダメージの場合は、与えるダメージと相手の残りHPの比が優先度になる
- * 3. HP回復の場合は、回復量と相手の最大HPの比が優先度になる
- * 4. 全体を対象とするスキルは、すべての対象の優先度を合計する
- * 5. 連続回数が設定されている場合は、算出した優先度に回数の数値をかける
- * 6. ルール5までで優先度が 0 でなければ、その値にランダムで 0 ～ 1 を加算する
+ * 1. ダメージタイプが「HPダメージ、HP回復、HP吸収」以外のスキルは評価値0
+ * 2. HPダメージの場合は、与えるダメージと相手の残りHPの比が評価値になる
+ * 3. HP回復の場合は、回復量と相手の最大HPの比が評価値になる
+ * 4. 全体を対象とするスキルは、すべての対象の評価値を合計する
+ * 5. 連続回数が設定されている場合は、算出した評価値に回数の数値をかける
+ * 6. ルール5までで評価値が 0 でなければ、その値にランダムで 0 ～ 1 を加算する
  * 　
  * 
  * 上記ルールを見て分かるとおりに、ダメージタイプがMP系や
@@ -62,7 +62,7 @@ FTKR.BAM = FTKR.BAM || {};
  * MVのデフォルトでは絶対に使用しないことになります。
  * 
  * 
- * 当プラグインを使い、タグで優先度式をそれらのスキルに設定することで
+ * 当プラグインを使い、タグで評価値式をそれらのスキルに設定することで
  * 自動戦闘でも使用する可能性がでるようになります。
  * 
  * 
@@ -148,16 +148,16 @@ FTKR.BAM = FTKR.BAM || {};
     }
     //=============================================================================
     // DataManager
-    // スキルに優先度式を設定する
+    // スキルに評価値式を設定する
     //=============================================================================
 
-    var _BAM_DatabaseLoaded = false;
-    var _BAM_DataManager_isDatabaseLoaded = DataManager.isDatabaseLoaded;
+    var _ASE_DatabaseLoaded = false;
+    var _ASE_DataManager_isDatabaseLoaded = DataManager.isDatabaseLoaded;
     DataManager.isDatabaseLoaded = function() {
-        if (!_BAM_DataManager_isDatabaseLoaded.call(this)) return false;
-        if (!_BAM_DatabaseLoaded) {
+        if (!_ASE_DataManager_isDatabaseLoaded.call(this)) return false;
+        if (!_ASE_DatabaseLoaded) {
             this.itemEvaluateNotetags($dataSkills);
-            _BAM_DatabaseLoaded = true;
+            _ASE_DatabaseLoaded = true;
         }
         return true;
     };
@@ -165,7 +165,7 @@ FTKR.BAM = FTKR.BAM || {};
     DataManager.itemEvaluateNotetags = function(group) {
         for (var n = 1; n < group.length; n++) {
             var obj = group[n];
-            obj.evaluateFormura = readObjectMeta(obj, ['BAM_優先度式', 'BAM_EVALUATE']);
+            obj.evaluateFormura = readObjectMeta(obj, ['ASE_評価値式', 'ASE_EVALUATE']);
         }
     };
    
@@ -184,20 +184,20 @@ FTKR.BAM = FTKR.BAM || {};
         var list = this.makeActionList();//使用可能なスキルを抽出
         var maxValue = Number.MIN_VALUE;
         for (var j = 0; j < list.length; j++) {
-            var value = list[j].evaluate();//スキルごとに優先度を算出
+            var value = list[j].evaluate();//スキルごとに評価値を算出
             if (value > maxValue) {
                 maxValue = value;
-                this.setAction(index, list[j]);//優先度が一番高いスキルをセット
+                this.setAction(index, list[j]);//評価値が一番高いスキルをセット
             }
         }
     };
 
-    var _BAM_Game_Action_evaluateWithTarget = Game_Action.prototype.evaluateWithTarget;
+    var _ASE_Game_Action_evaluateWithTarget = Game_Action.prototype.evaluateWithTarget;
     Game_Action.prototype.evaluateWithTarget = function(target) {
         if (this.item().evaluateFormura) {
             return this.bamEvaluateFormura(target);
         } else {
-            return _BAM_Game_Action_evaluateWithTarget.call(this, target) || 0;
+            return _ASE_Game_Action_evaluateWithTarget.call(this, target) || 0;
         }
     };
 
