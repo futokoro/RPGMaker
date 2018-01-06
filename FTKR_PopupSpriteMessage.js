@@ -63,6 +63,7 @@ FTKR.PSM = FTKR.PSM || {};
  * １．プラグインパラメータPopup Message Statusに、ポップアップさせる時の
  *     設定を指定してください。
  * 
+ * 
  * ２．以下のプラグインコマンドでポップアップを表示します。
  * ※[]は実際の入力に使用しません
  * 
@@ -71,19 +72,23 @@ FTKR.PSM = FTKR.PSM || {};
  * 
  *    ポップアップID(popupId)
  *      ：1から、プラグインパラメータMax Popup Messagesで設定した
- *        値の任意の数字を指定します。
+ *        値の任意の数字を指定します。\v[n]で変数を指定することも可能です。
  *        この値を変えることで、同時に複数の文字列を表示できます。
  * 
  *    ポップアップ設定ID(statusId)
  *      ：プラグインパラメータPopup Message Statusで設定した内容を呼び出します。
- *        設定時のリスト番号を指定してください。
+ *        設定時のリスト番号を指定してください。\v[n]で変数を指定することも可能です。
  * 
  *    X座標、Y座標
  *      ：ポップアップを表示する場合の、画面上の座標を指定します。
+ *      　\v[n]で変数を指定することも可能です。
  *    
  *    表示時間(duration)
  *      ：ポップアップを表示している時間を指定します。
  *        ここで指定した時間が経過すると、自動的に表示が消えます。
+ *        \v[n]で変数を指定することも可能です。
+ *        -1 を指定すると、ポップアップが時間経過で消えません。
+ *        この場合は、別途プラグインコマンドで消去を行ってください。
  * 
  *    文字列(text)
  *      ：ポップアップする内容を指定します。
@@ -91,6 +96,64 @@ FTKR.PSM = FTKR.PSM || {};
  *        半角スペースを入れたい場合は \_ (アンダーバー)と入力してください。
  *        また、以下の制御文字が使用可能です。
  *           \v[n] \N[n] \P[n] \G
+ * 
+ * 
+ * ２．以下のプラグインコマンドでポップアップを移動させます。
+ * ※[]は実際の入力に使用しません
+ * 
+ * PSM_ポップアップ移動 [ポップアップID] [X座標] [Y座標] [移動時間]
+ * PSM_MOVE_POPUP [popupId] [x] [y] [duration]
+ * 
+ *    ポップアップID(popupId)
+ *      ：移動したいポップアップIDを指定します。
+ *      　\v[n]で変数を指定することも可能です。
+ * 
+ *    X座標、Y座標
+ *      ：ポップアップの移動先の、画面上の座標を指定します。
+ *      　\v[n]で変数を指定することも可能です。
+ *    
+ *    表示時間(duration)
+ *      ：ポップアップを移動させる時間を指定します。
+ *        \v[n]で変数を指定することも可能です。
+ *        0 を指定すると即座に移動します。
+ * 
+ * 
+ * ３．以下のプラグインコマンドでポップアップを回転させます。
+ * ※[]は実際の入力に使用しません
+ * 
+ * PSM_ポップアップ回転 [ポップアップID] [角度] [回転]
+ * PSM_ROTATE_POPUP [popupId] [angle] [rotate]
+ * 
+ *    ポップアップID(popupId)
+ *      ：回転したいポップアップIDを指定します。
+ *      　\v[n]で変数を指定することも可能です。
+ * 
+ *    角度(angle)
+ *      ：ポップアップを回転させる角度の増減値を指定します。(0 ～ 359)
+ *        \v[n]で変数を指定することも可能です。
+ *        ポップアップの左上を原点に、正の値で時計周り側に回転します。
+ * 
+ *    回転(rotate)
+ *      ：ポップアップを回転させるかどうかを指定します。
+ *        ture で、指定した角度分回転し続けます。
+ *        false で、指定した角度に変化させます。
+ * 
+ * 
+ * ４．以下のプラグインコマンドでポップアップを消去します。
+ * ※[]は実際の入力に使用しません
+ * 
+ * PSM_ポップアップ消去 [ポップアップID] [消去時間]
+ * PSM_ERASE_POPUP [popupId] [duration]
+ * 
+ *    ポップアップID(popupId)
+ *      ：消去したいポップアップIDを指定します。
+ *        \v[n]で変数を指定することも可能です。
+ * 
+ *    消去時間(duration)
+ *      ：ポップアップを消去する時間を指定します。
+ *        ここで指定した時間が経過すると、自動的に表示が消えます。
+ *        \v[n]で変数を指定することも可能です。
+ *        指定しない場合、または 0 を指定すると即座に消えます。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -110,6 +173,10 @@ FTKR.PSM = FTKR.PSM || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.1.0 - 2018/01/06 : 機能追加
+ *    1. ポップアップを時間経過で消さない機能と、消去するコマンドを追加
+ *    2. ポップアップを移動および回転させるコマンドを追加
  * 
  * v1.0.0 - 2018/01/05 : 初版作成
  * 
@@ -179,6 +246,18 @@ FTKR.PSM = FTKR.PSM || {};
         return window ? window.convertEscapeCharacters(text) : text;
     };
 
+    var setArgStr = function(arg) {
+        return convertEscapeCharacters(arg);
+    };
+
+    var setArgNum = function(arg) {
+        try {
+            return Number(eval(setArgStr(arg)));
+        } catch (e) {
+            return 0;
+        }
+    };
+
     //=============================================================================
     // プラグイン パラメータ
     //=============================================================================
@@ -203,15 +282,39 @@ FTKR.PSM = FTKR.PSM || {};
             case 'SHOW_POPUP':
                 this.setupPopupMessage(args);
                 break;
+            case 'ポップアップ移動':
+            case 'MOVE_POPUP':
+                this.setupMoveMessage(args);
+                break;
+            case 'ポップアップ回転':
+            case 'ROTATE_POPUP':
+                this.setupRotateMessage(args);
+                break;
+            case 'ポップアップ消去':
+            case 'ERASE_POPUP':
+                $gameParty.requestErasePopupMessage(setArgNum(args[0]), setArgNum(args[1]));
+                break;
         }
     };
 
     Game_Interpreter.prototype.setupPopupMessage = function(args) {
         var status = FTKR.PSM.popupStatus[Number(args[1])];
         $gameParty.setPopupMessage(
-          Number(args[0]), Number(args[2]), Number(args[3]), Number(args[4]),
+          setArgNum(args[0]), setArgNum(args[2]), setArgNum(args[3]), setArgNum(args[4]),
           status.offsetWait, args[5], status.color, 0, status.italic,
           status.fontSize, status.outlineColor, status.popupHeight, status.fontFace
+        );
+    };
+
+    Game_Interpreter.prototype.setupMoveMessage = function(args) {
+        $gameParty.movePopupMessage(
+          setArgNum(args[0]), setArgNum(args[1]), setArgNum(args[2]), setArgNum(args[3])
+        );
+    };
+
+    Game_Interpreter.prototype.setupRotateMessage = function(args) {
+        $gameParty.rotatePopupMessage(
+          setArgNum(args[0]), setArgNum(args[1]), Boolean(setArgNum(args[2]))
         );
     };
 
@@ -233,8 +336,58 @@ FTKR.PSM = FTKR.PSM || {};
         this._psmMessage[messageId].popup = false;
     };
 
+    Game_Party.prototype.clearMoveMessage = function(messageId) {
+        this._psmMessage[messageId].move = false;
+    };
+
+    Game_Party.prototype.clearRotateMessage = function(messageId) {
+        this._psmMessage[messageId].rotate = false;
+    }
+    
+    Game_Party.prototype.requestErasePopupMessage = function(messageId, duration) {
+        if (this._psmMessage[messageId]) {
+            this._psmMessage[messageId].erase = true;
+            this._psmMessage[messageId].eraseDuration = duration;
+        }
+    };
+
+    Game_Party.prototype.clearErasePopupMessage = function(messageId) {
+        this._psmMessage[messageId].erase = false;
+        this._psmMessage[messageId].eraseDuration = 0;
+    };
+
     Game_Party.prototype.isPopupMessage = function(messageId) {
         return this._psmMessage[messageId] && this._psmMessage[messageId].popup;
+    };
+
+    Game_Party.prototype.isMoveMessage = function(messageId) {
+        return this._psmMessage[messageId] && this._psmMessage[messageId].move;
+    };
+
+    Game_Party.prototype.isErasePopupMessage = function(messageId) {
+        return this._psmMessage[messageId] && this._psmMessage[messageId].erase;
+    };
+
+    Game_Party.prototype.eraseDuration = function(messageId) {
+        return this._psmMessage[messageId] && this._psmMessage[messageId].eraseDuration || 0
+    };
+
+    Game_Party.prototype.movePopupMessage = function(messageId, x2, y2, duration) {
+        if (this._psmMessage) {
+            var message = this._psmMessage[messageId];
+            message.dx = x2;
+            message.dy = y2;
+            message.moveDuration = duration;
+            message.move = true;
+        }
+    };
+
+    Game_Party.prototype.rotatePopupMessage = function(messageId, speed, rotate) {
+        if (this._psmMessage) {
+            var message = this._psmMessage[messageId];
+            message.rotateSpeed = speed;
+            message.rotate = rotate;
+        }
     };
 
     Game_Party.prototype.setPopupMessage = function(messageId, x1, y1, duration,
@@ -256,6 +409,10 @@ FTKR.PSM = FTKR.PSM || {};
             popupHeight : popupHeight,
             fontFace : fontFace,
         };
+    };
+
+    Game_Party.prototype.clearPsmMessage = function(messageId) {
+        this._psmMessage[messageId] = {};
     };
 
     Game_Party.prototype.psmMessage = function(messageId) {
@@ -318,13 +475,15 @@ FTKR.PSM = FTKR.PSM || {};
         this._messageSprites = [];
         this._index = 0;
         this._offsetCount = -1;
+        this._moveDuration = -1;
+        this._angle = 0;
     };
 
     Sprite_FtPopupMessage.prototype.createChildSprite = function() {
         var sprite = new Sprite();
         sprite.bitmap = this._damageBitmap;
-        sprite.anchor.x = 0.5;// 原点に対する文字の表示位置
-        sprite.anchor.y = 1;// 原点に対する文字の表示位置
+        sprite.anchor.x = 0;// 原点に対する文字の表示位置
+        sprite.anchor.y = 0;// 原点に対する文字の表示位置
         sprite.y = -this._popupHeight; // はねる高さ
         sprite.ry = sprite.y;
         this.addChild(sprite);
@@ -379,6 +538,7 @@ FTKR.PSM = FTKR.PSM || {};
             bitmap.outlineWidth = Math.floor(bitmap.fontSize / 6);// 文字の縁取り太さ
             bitmap.outlineColor = this._outlineColor;// 文字の縁取り色
         }
+//        bitmap.drawText(text, 0, 0, bitmap.width, bitmap.height);
         bitmap.drawText(text, 0, 0, bitmap.width, bitmap.height, 'center');
         return bitmap;
     };
@@ -392,6 +552,7 @@ FTKR.PSM = FTKR.PSM || {};
         Sprite.prototype.update.call(this);
         this.updateBitmap();
         this.updateDuration();
+        this.updatePosition();
         this.updateFlash();
         this.updateOpacity();
     };
@@ -415,6 +576,14 @@ FTKR.PSM = FTKR.PSM || {};
                     this._count--;
                 }
                 if (this._index >= this._text.length) this._text = '';
+            } else if (this._offsetCount == 0) {
+                for (var i = 0; i < this._text.length; i++) {
+                    var sprite = this.setupSprite(this._text[i]);
+                    sprite.x = i > 0 ? this._messageSprites[i-1].x + sprite.dw : 0;
+                    this._messageSprites[i] = sprite;
+                    this._count = this.message().offsetCount;
+                }
+                this._text = '';
             } else {
                 this._messageSprites[0] = this.setupSprite(this._text);
                 this._text = '';
@@ -427,25 +596,63 @@ FTKR.PSM = FTKR.PSM || {};
     };
 
     Sprite_FtPopupMessage.prototype.updatePosition = function() {
-        var message = this.message();
-        if (message) {
-            this.x = Math.floor(message.x);
-            this.y = Math.floor(message.y);
+        if ($gameParty.isMoveMessage(this._messageId)) {
+            var message = this.message();
+            this._moveDuration = message.moveDuration;
+            $gameParty.clearMoveMessage(this._messageId);
         }
+        if (this._moveDuration > 0) {
+            this._moveDuration--;
+            var message = this.message();
+            this.x = Math.floor(message.x + (message.dx - message.x) * (1 - this._moveDuration / message.moveDuration));
+            this.y = Math.floor(message.y + (message.dy - message.y) * (1 - this._moveDuration / message.moveDuration));
+        } else if (this._moveDuration == 0) {
+            this._moveDuration--;
+            var message = this.message();
+            this.x = message.dx;
+            message.x = message.dx;
+            this.y = message.dy;
+            message.y = message.dy;
+        }
+        if (this.message() && this.message().rotate) {
+            this._angle += this.message().rotateSpeed / 2;
+        } else if (this.message() && !this.message().rotate && this.message().rotateSpeed) {
+            this._angle = this.message().rotateSpeed / 2;
+        }
+        this.rotation = this._angle * Math.PI / 180;
     };
 
     Sprite_FtPopupMessage.prototype.updateDuration = function() {
-        if (this._duration > 0) {
+        if (this._duration == -1 && $gameParty.isErasePopupMessage(this._messageId)) {
+            this._duration = $gameParty.eraseDuration(this._messageId);
+            $gameParty.clearErasePopupMessage(this._messageId);
+        }
+        if (this._duration == -1) {
+            for (var i = 0; i < this.children.length; i++) {
+                this.updateChild(this.children[i]);
+            }
+        } else if (this._duration > 0) {
             this._duration--;
             for (var i = 0; i < this.children.length; i++) {
                 this.updateChild(this.children[i]);
 //                console.log('duration', this._duration, 'opacity', this.opacity, 'x', this.x, this.children[i].x, 'y', this.y, this.children[i].y, 'color', this.children[i].getBlendColor(), this._flashDuration);
             }
         }
-        if (this._duration == 0 && this._messageSprite) {
-            this.removeChild(this._messageSprite);
-            this._messageSprite = null;
+        if (this._duration == 0 && this._messageSprites.length) {
+            this._messageSprites.forEach( function(sprite) {
+                this.removeChild(sprite);
+            },this);
+            this._moveDuration = -1;
+            this._angle = 0;
+            $gameParty.clearPsmMessage(this._messageId);
+            this._messageSprites = [];
 //            console.log(this);
+        }
+    };
+
+    Sprite_FtPopupMessage.prototype.updateOpacity = function() {
+        if (this._duration >= 0 && this._duration < 10) {
+            this.opacity = 255 * this._duration / 10;
         }
     };
 

@@ -3,8 +3,8 @@
 // FTKR_MessageWindowLines.js
 // 作成者     : フトコロ
 // 作成日     : 2018/01/05
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2018/01/06
+// バージョン : v1.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.MWL = FTKR.MWL || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 メッセージウィンドウの行数を変更するプラグイン
+ * @plugindesc v1.1.0 メッセージウィンドウの行数を変更するプラグイン
  * @author フトコロ
  *
  * @help 
@@ -35,6 +35,10 @@ FTKR.MWL = FTKR.MWL || {};
  * なお、複数の「文章の表示」コマンドを連結した場合は、
  * ウィンドウの設定(顔画像や表示位置など)は、最初の「文章の表示」コマンドの
  * 内容のみ反映されます。
+ * 
+ * また、「文章のスクロール表示」コマンドとも連結が可能です。
+ * 行数変更中は、「文章のスクロール表示」コマンドを実行すると
+ * メッセージウィンドウに表示するようになります。
  * 
  * 変更した行数は、以下のプラグインコマンドを実行することで、元の行数に戻ります。
  * 
@@ -87,6 +91,10 @@ FTKR.MWL = FTKR.MWL || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.0 - 2018/01/06 : 機能追加
+ *    1. 行数変更時に、「文章のスクロール表示」を実行すると
+ *       メッセージウィンドウに表示するように変更。
+ * 
  * v1.0.0 - 2018/01/05 : 初版作成
  * 
  *-----------------------------------------------------------------------------
@@ -94,13 +102,6 @@ FTKR.MWL = FTKR.MWL || {};
 //=============================================================================
 
 (function() {
-
-    //=============================================================================
-    // プラグイン パラメータ
-    //=============================================================================
-    var parameters = PluginManager.parameters('FTKR_MessageWindowLines');
-
-    FTKR.MWL.param1 = Number(parameters[' '] || 0);
 
     var convertEscapeCharacters = function(text) {
         if (text == null) text = '';
@@ -138,21 +139,25 @@ FTKR.MWL = FTKR.MWL || {};
                 break;
         }
     };
-    
-    // Show Text
+
+    Game_Interpreter.prototype.continueAddMwlMessages = function() {
+        while ([105, 405, 101, 401].contains(this.nextEventCode())) {  // Text data
+            if ([101, 105].contains(this.nextEventCode())) {
+                this._index++;
+                continue;
+            }
+            this._index++;
+            $gameMessage.add(this.currentCommand().parameters[0]);
+        }
+    };
+
+    var _MWL_Game_Interpreter_command101 = Game_Interpreter.prototype.command101;
     Game_Interpreter.prototype.command101 = function() {
-        if (!$gameMessage.isBusy()) {
+        if (!$gameMessage.isBusy() && $gameParty.mwlMessageLines()) {
             $gameMessage.setFaceImage(this._params[0], this._params[1]);
             $gameMessage.setBackground(this._params[2]);
             $gameMessage.setPositionType(this._params[3]);
-            while (this.nextEventCode() === 401 || this.nextEventCode() === 101) {  // Text data
-                if (this.nextEventCode() === 101) {
-                   this._index++;
-                   continue;
-                }
-                this._index++;
-                $gameMessage.add(this.currentCommand().parameters[0]);
-            }
+            this.continueAddMwlMessages();
             switch (this.nextEventCode()) {
             case 102:  // Show Choices
                 this._index++;
@@ -169,8 +174,36 @@ FTKR.MWL = FTKR.MWL || {};
             }
             this._index++;
             this.setWaitMode('message');
+            return false;
+        } else {
+            return _MWL_Game_Interpreter_command101.call(this);
         }
-        return false;
+    };
+
+    var _MWL_Game_Interpreter_command105 = Game_Interpreter.prototype.command105;
+    Game_Interpreter.prototype.command105 = function() {
+        if (!$gameMessage.isBusy() && $gameParty.mwlMessageLines()) {
+            this.continueAddMwlMessages();
+            switch (this.nextEventCode()) {
+            case 102:  // Show Choices
+                this._index++;
+                this.setupChoices(this.currentCommand().parameters);
+                break;
+            case 103:  // Input Number
+                this._index++;
+                this.setupNumInput(this.currentCommand().parameters);
+                break;
+            case 104:  // Select Item
+                this._index++;
+                this.setupItemChoice(this.currentCommand().parameters);
+                break;
+            }
+            this._index++;
+            this.setWaitMode('message');
+            return false;
+        } else {
+            return _MWL_Game_Interpreter_command105.call(this);
+        }
     };
 
     //=============================================================================
@@ -209,15 +242,14 @@ FTKR.MWL = FTKR.MWL || {};
         if ($gameParty.isRequestResetWindowSize()) {
             if ($gameParty.mwlMessageLines()) {
                 this.height = this.fittingHeight($gameParty.mwlMessageLines());
-                this.contents = new Bitmap(this.contentsWidth(), this.contentsHeight());
             } else {
                 this.height = this.windowHeight();
-                this.contents = new Bitmap(this.contentsWidth(), this.contentsHeight());
             }
+            this.move(this.x, this.y, this.width, this.height);
+            this.contents = new Bitmap(this.contentsWidth(), this.contentsHeight());
             $gameParty.clearRequestResetWindowSize();
         }
         _MWL_Window_Message_updatePlacement.call(this);
-        this.move(this.x, this.y, this.width, this.height);
     };
 
 }());//EOF
