@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2017/11/18
-// バージョン : v2.6.0
+// 最終更新日 : 2018/01/07
+// バージョン : v2.6.1
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -21,7 +21,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.6.0 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v2.6.1 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -1321,6 +1321,9 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.6.1 - 2018/01/07 : 処理変更
+ *    1. 顔画像、歩行キャラ、SVキャラのX座標方向の寄せ表示部分を関数として独立。
+ * 
  * v2.6.0 - 2017/11/18 : 機能追加
  *    1. FTKR_CSS_***Status系の拡張プラグインをGraphicalDesignMode.jsに
  *       対応する処理を追加。
@@ -2223,7 +2226,7 @@ FTKR.CSS = FTKR.CSS || {};
         var len = Math.min(width, height);
         var dh = len || Window_Base._faceHeight;
         var dw = len || Window_Base._faceWidth;
-        var offsetX = FTKR.CSS.cssStatus.face.posiX * (width - dw) / 2;
+        var offsetX = this.cssFacePositionX(actor) * (width - dw) / 2;
         dx = Math.floor(dx + offsetX);
         var bitmap = ImageManager.loadFace(actor.faceName());
         var sw = Window_Base._faceWidth;
@@ -2231,6 +2234,10 @@ FTKR.CSS = FTKR.CSS || {};
         var sx = actor.faceIndex() % 4 * sw;
         var sy = Math.floor(actor.faceIndex() / 4) * sh;
         this.contents.blt(bitmap, sx, sy, sw, sh, dx, dy, dw, dh);
+    };
+
+    Window_Base.prototype.cssFacePositionX = function(actor) {
+        return FTKR.CSS.cssStatus.face.posiX;
     };
 
     //------------------------------------------------------------------------
@@ -2250,7 +2257,7 @@ FTKR.CSS = FTKR.CSS || {};
         var index = actor.characterIndex();
         var dh = chara.height;
         var dw = dh || width || chara.width;
-        var offsetX = chara.posiX * (width - dw) / 2;
+        var offsetX = this.cssCharaPositionX(actor, chara) * (width - dw) / 2;
         var offsetY = (height - dh) / 2;
         dx = Math.floor(dx + offsetX);
         dy = Math.floor(dy + offsetY);
@@ -2261,6 +2268,10 @@ FTKR.CSS = FTKR.CSS || {};
         var sx = (index % 4 * 3 + 1) * sw;
         var sy = (Math.floor(index / 4) * 4 + direction) * sh;
         this.contents.blt(bitmap, sx, sy, sw, sh, dx, dy, dw, dh);
+    };
+
+    Window_Base.prototype.cssCharaPositionX = function(actor, chara) {
+        return chara.posiX;
     };
 
     //------------------------------------------------------------------------
@@ -2298,7 +2309,7 @@ FTKR.CSS = FTKR.CSS || {};
         } else {
             sprite.setBattler(actor);
         }
-        var offsetX = svChara.posiX * (width - svChara.width) / 2;
+        var offsetX = this.cssSvPositionX(actor, svChara) * (width - svChara.width) / 2;
         var sx = Math.floor(dx + offsetX + this.padding + svChara.width / 2);
         var sy = Math.floor(dy + height + this.padding);
         sprite.setHome(sx, sy);
@@ -2310,11 +2321,12 @@ FTKR.CSS = FTKR.CSS || {};
             sprite.startMotion(motion);
         }
     };
+    
 
     Window_Base.prototype.drawCssSvImage = function(index, actor, dx, dy, width, height, svChara) {
         var dh = svChara.height;
         var dw = dh || width || svChara.width;
-        var offsetX = svChara.posiX * (width - dw) / 2;
+        var offsetX = this.cssSvPositionX(actor, svChara) * (width - dw) / 2;
         var offsetY = (height - dh) / 2;
         dx = Math.floor(dx + offsetX);
         dy = Math.floor(dy + offsetY);
@@ -2322,6 +2334,10 @@ FTKR.CSS = FTKR.CSS || {};
         var sw = svChara.width;
         var sh = svChara.height;
         this.contents.blt(bitmap, 0, 0, sw, sh, dx, dy, dw, dh);
+    };
+
+    Window_Base.prototype.cssSvPositionX = function(actor, svChara) {
+        return svChara.posiX;
     };
 
     //------------------------------------------------------------------------
