@@ -3,8 +3,8 @@
 // FTKR_AISkillEvaluate.js
 // 作成者     : フトコロ
 // 作成日     : 2018/01/06
-// 最終更新日 : 2018/01/08
-// バージョン : v1.1.0
+// 最終更新日 : 2018/01/11
+// バージョン : v1.2.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ASE = FTKR.ASE || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.0 自動戦闘時に使用するスキルの評価値を変更するプラグイン
+ * @plugindesc v1.2.0 自動戦闘時に使用するスキルの評価値を変更するプラグイン
  * @author フトコロ
  *
  * @param Skill Evaluate Log
@@ -31,9 +31,62 @@ FTKR.ASE = FTKR.ASE || {};
  * @type struct<auto>[]
  * @default 
  * 
+ * @param Manual Mode Name
+ * @desc 自動戦闘を使わない場合の作戦名称を設定します。
+ * @default 手動戦闘
+ * 
+ * @param Default Tactics Name
+ * @desc MVデフォルトの自動戦闘時の作戦名称を設定します。
+ * @default 自動戦闘
+ * 
+ * @param Skip Party Command
+ * @desc パーティーメンバー全員が自動戦闘の場合に、パーティーコマンドをスキップするか
+ * @type select
+ * @option スキップする(MVデフォルト)
+ * @value 0
+ * @option スキップしない
+ * @value 1
+ * @option １ターン目だけスキップしない
+ * @value 2
+ * @default 0
+ * 
+ * @param Menu Command
+ * @desc メニューコマンドに作戦コマンドを追加するか
+ * @type struct<command>
+ * @default 
+ * 
+ * @param Party Command
+ * @desc バトル時のパーティーコマンドに作戦コマンドを追加するか
+ * @type struct<command>
+ * @default 
+ * 
+ * @param Title Texts
+ * @desc 作戦画面のタイトルウィンドウに表示する文字列を設定する
+ * @type struct<title>
+ * @default {"party":"パーティー","tactics":"作戦リスト"}
+ * 
  * @help 
  *-----------------------------------------------------------------------------
  * 概要
+ *-----------------------------------------------------------------------------
+ * 自動戦闘時に使用するスキルを選択するための評価値計算を個別に設定できます。
+ * 
+ * また、行動評価のモデル(簡易的な作戦)を作成することができます。
+ * 
+ * 設定した行動評価モデル(簡易的な作戦)をゲーム内で変更する専用画面の表示コマンドを
+ * メニューコマンドおよびバトルのパーティーコマンドに追加できます。
+ * プラグインパラメータ Menu Command および Party Command で設定してください。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * 設定方法
+ *-----------------------------------------------------------------------------
+ * 1.「プラグインマネージャー(プラグイン管理)」に、本プラグインを追加して
+ *    ください。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * スキルごとの評価値計算式の設定
  *-----------------------------------------------------------------------------
  * スキルのメモ欄に以下のタグを追記すると、自動戦闘時に使用するスキルを
  * 選択する評価値計算を個別に設定することができます。
@@ -48,20 +101,8 @@ FTKR.ASE = FTKR.ASE || {};
  *  item   : 使用するスキル(item.mpCost でスキルの消費MP)
  *  number : スキルで対象者に与える予定のダメージ量
  * 
- * 
  * 上記の評価値式を設定しない場合は、MVデフォルトの評価値計算式(※)を使用します。
  * ※後述
- * 
- * 
- * 
- * また、行動評価のモデル(簡易的な作戦)を設定することができます。
- * 
- * 
- *-----------------------------------------------------------------------------
- * 設定方法
- *-----------------------------------------------------------------------------
- * 1.「プラグインマネージャー(プラグイン管理)」に、本プラグインを追加して
- *    ください。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -189,6 +230,8 @@ FTKR.ASE = FTKR.ASE || {};
  *        ：その行動タイプを選択する頻度を設定します。
  *        ：1～9の値を設定し、この値が評価値に掛けられます。
  * 
+ * 注意）リストには、常に行動可能なスキルを最低１つ設定してください。
+ * 
  * 
  * ３．スキルへの行動タイプの設定
  * スキルのメモ欄に以下のタグを設定することで、行動タイプを設定できます。
@@ -215,6 +258,7 @@ FTKR.ASE = FTKR.ASE || {};
  *   <ASE_評価モデル:n>
  *        n : 評価モデルIDを設定します。
  *            \v[x]でゲーム変数を設定できます。
+ *            なお、 0 でMVデフォルトの自動戦闘、 -1 で手動戦闘になります。
  * 
  * また、以下のスクリプトでアクターID n の評価モデル名を取得できます。
  *    $gameActors.actor(n).evalModelname()
@@ -237,6 +281,12 @@ FTKR.ASE = FTKR.ASE || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.2.0 - 2018/01/11 : 機能追加
+ *    1. ゲーム中にパーティーメンバーの評価モデル(簡易的な作戦)を変更する
+ *       画面を追加。メニューコマンドとバトルのパーティーコマンドに追加可能。
+ *    2. パーティー全員が自動戦闘になっていても、パーティーコマンドを
+ *       スキップしないようにする機能を追加。
  * 
  * v1.1.0 - 2018/01/08 : 機能追加
  *    1. 評価モデル(簡易的な作戦)をアクターに設定する機能を追加。
@@ -297,6 +347,37 @@ FTKR.ASE = FTKR.ASE || {};
  * @max 9
  * @default 5
 */
+/*~struct~command:
+ * @param enable
+ * @desc コマンドを追加するか
+ * @type boolean
+ * @on 追加する
+ * @off 追加しない
+ * @default false
+ *
+ * @param name
+ * @desc コマンドの表示名を設定します
+ * @default 作戦
+ *
+ * @param switchId
+ * @desc 特定のスイッチIDがONの時コマンドを表示させるか
+ * 0 の場合は常に表示
+ * @type number
+ * @min 0
+ * @default 0
+ *
+*/
+/*~struct~title:
+ * @param party
+ * @desc パーティー欄のタイトル文字列
+ * @default パーティー
+ *
+ * @param tactics
+ * @desc 作戦リスト欄のタイトル文字列
+ * @default 作戦リスト
+ *
+*/
+
 (function() {
 
     var paramParse = function(obj) {
@@ -319,10 +400,21 @@ FTKR.ASE = FTKR.ASE || {};
     FTKR.ASE = {
         evalLog : Boolean(parameters['Skill Evaluate Log'] || false),
         models  : paramParse(parameters['Evaluate Models']),
+        skip    : Number(parameters['Skip Party Command'] || 0),
+        command : {
+            menu  : paramParse(parameters['Menu Command']),
+            party : paramParse(parameters['Party Command']),
+        },
+        title   : paramParse(parameters['Title Texts']),
+        manual  : (parameters['Manual Mode Name'] || '手動戦闘'),
     };
-    FTKR.ASE.models.unshift(null);
-    console.log(FTKR.ASE.models);
-    
+    FTKR.ASE.models.unshift({name:(parameters['Default Tactics Name'] || '自動戦闘'),evaluate:[]});
+    FTKR.ASE.models.forEach( function(model, i) {
+        if (model) model.id = i;
+    });
+    console.log(FTKR.ASE);
+
+
     //objのメモ欄から <metacode: x> の値を読み取って返す
     var readObjectMeta = function(obj, metacodes) {
         if (!obj) return false;
@@ -351,6 +443,41 @@ FTKR.ASE = FTKR.ASE || {};
         } catch (e) {
             return 0;
         }
+    };
+
+    var skillActionType = function(skill) {
+        if (skill.id === 1) return 1;
+        if (skill.id === 2) return 2;
+        if (skill.damage) {
+            switch (skill.damage.type) {
+            case 1:
+                return 11;
+            case 2:
+                return 12;
+            case 3:
+                return 13;
+            case 4:
+                return 21;
+            case 5:
+                return 22;
+            case 6:
+                return 22;
+            }
+        }
+        if (skill.effects.length) {
+            var type = 0;
+            skill.effects.some( function(effect){
+                if (effect.code === Game_Action.EFFECT_ADD_BUFF) {
+                    type = 31;return;
+                } else if (effect.code === Game_Action.EFFECT_ADD_DEBUFF) {
+                    type = 41;return;
+                } else if (effect.code === Game_Action.EFFECT_REMOVE_DEBUFF || effect.code === Game_Action.EFFECT_REMOVE_STATE) {
+                    type = 51;return;
+                }
+            });
+            if (type) return type;
+        }
+        return 0;
     };
 
     //=============================================================================
@@ -424,6 +551,33 @@ FTKR.ASE = FTKR.ASE || {};
     };
    
     //=============================================================================
+    // BattleManager
+    //=============================================================================
+
+    //書き換え
+    BattleManager.startInput = function() {
+        this._phase = 'input';
+        $gameParty.makeActions();
+        $gameTroop.makeActions();
+        this.clearActor();
+        if (this.checkCannotInput()) {
+            this.startTurn();
+        }
+    };
+
+    BattleManager.checkCannotInput = function() {
+        return (this._surprise || !$gameParty.canInput()) && !this.checkCannotSkip();
+    };
+
+    BattleManager.checkCannotSkip = function() {
+        return FTKR.ASE.skip === 1 || (FTKR.ASE.skip === 2 && !$gameTroop.turnCount());
+    };
+
+    BattleManager.isTactics = function() {
+        return this._tacticsMode;
+    };
+
+    //=============================================================================
     // Game_BattlerBase
     //=============================================================================
     
@@ -445,6 +599,62 @@ FTKR.ASE = FTKR.ASE || {};
 
     Game_BattlerBase.prototype.aseMaxDebuff = function(paramId) {
         return Number(!this.isMaxDebuffAffected(paramId));
+    };
+
+    var _ASE_Game_BattlerBase_isAutoBattle = Game_BattlerBase.prototype.isAutoBattle;
+    Game_BattlerBase.prototype.isAutoBattle = function() {
+        return this._evalModelId == -1 ? false : _ASE_Game_BattlerBase_isAutoBattle.call(this);
+    };
+
+    //=============================================================================
+    // Game_Action
+    //=============================================================================
+    var _ASE_Game_Action_initialize = Game_Action.prototype.initialize;
+    Game_Action.prototype.initialize = function(subject, forcing) {
+        _ASE_Game_Action_initialize.call(this, subject, forcing);
+        this._rating = 1;
+    };
+
+    var _ASE_Game_Action_evaluate = Game_Action.prototype.evaluate;
+    Game_Action.prototype.evaluate = function(target) {
+        var value = _ASE_Game_Action_evaluate.call(this, target);
+        return value * this._rating;
+    };
+
+    var _ASE_Game_Action_evaluateWithTarget = Game_Action.prototype.evaluateWithTarget;
+    Game_Action.prototype.evaluateWithTarget = function(target) {
+        if (this.item().evaluateFormura) {
+            return this.bamEvaluateFormura(target);
+        } else {
+            return _ASE_Game_Action_evaluateWithTarget.call(this, target) || 0;
+        }
+    };
+
+    Game_Action.prototype.bamEvaluateFormura = function(target) {
+        FTKR.setGameData(this.subject(), target, this.item(), this.makeDamageValue(target, false));
+        return FTKR.evalFormula(this.item().evaluateFormura);
+    };
+
+    Game_Action.prototype.checkAseConditions = function(modelId) {
+        var skill = this.item();
+        var model = FTKR.ASE.models[modelId];
+        if (model && model.evaluate.length > 0) {
+            var atype = Number(readObjectMeta(skill, ['ASE_行動タイプ', 'ASE_ACTION_TYPE']) || 0);
+            if (!atype) atype = skillActionType(skill);
+            var formula = '';
+            var rating = 0;
+            var check = model.evaluate.some( function(eval){
+                formula = eval.conditions;
+                rating = eval.rating;
+                return eval.actionType === atype;
+            });
+            if (check) {
+                this._rating = rating;
+                FTKR.setGameData(this.subject(), null, skill);
+                return formula ? FTKR.evalFormula(formula) : true;
+            }
+        }
+        return false;
     };
 
     //=============================================================================
@@ -481,38 +691,27 @@ FTKR.ASE = FTKR.ASE || {};
         }
     };
 
-    var _ASE_Game_Action_initialize = Game_Action.prototype.initialize;
-    Game_Action.prototype.initialize = function(subject, forcing) {
-        _ASE_Game_Action_initialize.call(this, subject, forcing);
-        this._rating = 1;
-    };
-
-    var _ASE_Game_Action_evaluate = Game_Action.prototype.evaluate;
-    Game_Action.prototype.evaluate = function(target) {
-        var value = _ASE_Game_Action_evaluate.call(this, target);
-        return value * this._rating;
-    };
-
-    var _ASE_Game_Action_evaluateWithTarget = Game_Action.prototype.evaluateWithTarget;
-    Game_Action.prototype.evaluateWithTarget = function(target) {
-        if (this.item().evaluateFormura) {
-            return this.bamEvaluateFormura(target);
-        } else {
-            return _ASE_Game_Action_evaluateWithTarget.call(this, target) || 0;
-        }
-    };
-
-    Game_Action.prototype.bamEvaluateFormura = function(target) {
-        FTKR.setGameData(this.subject(), target, this.item(), this.makeDamageValue(target, false));
-        return FTKR.evalFormula(this.item().evaluateFormura);
-    };
-
     Game_Actor.prototype.evalModelId = function(){
-        return setArgNum(readObjectMeta(this.actor(), ['ASE_評価モデル', 'ASE_EVALUATE_MODEL']));
+        return this._evalModelId || setArgNum(readObjectMeta(this.actor(), ['ASE_評価モデル', 'ASE_EVALUATE_MODEL']));
+    };
+
+    Game_Actor.prototype.setEvalModelId = function(modelId) {
+        this._evalModelId = modelId;
     };
 
     Game_Actor.prototype.evalModelName = function() {
-        return FTKR.isEvalModel(this.evalModelId()) ? FTKR.ASE.models[this.evalModelId()].name : '';
+        return this.isAutoBattle() ? 
+            this.autoBattleModeName() : FTKR.ASE.manual;
+    };
+
+    Game_Actor.prototype.autoBattleModeName = function() {
+        return FTKR.isEvalModel(this.evalModelId()) ?
+            FTKR.ASE.models[this.evalModelId()].name : FTKR.ASE.models[0].name;
+    };
+
+    Game_Actor.prototype.tacticsLists = function() {
+        var list = readObjectMeta(this.actor(), ['ASE_作戦リスト', 'ASE_TACTICS_LIST']);
+        return list ? list.split(',') : '';
     };
 
     var _ASE_Game_Actor_makeActionList = Game_Actor.prototype.makeActionList;
@@ -539,60 +738,394 @@ FTKR.ASE = FTKR.ASE || {};
         }
     };
 
-    Game_Action.prototype.checkAseConditions = function(modelId) {
-        var skill = this.item();
-        var model = FTKR.ASE.models[modelId];
-        if (model && model.evaluate.length > 0) {
-            var atype = Number(readObjectMeta(skill, ['ASE_行動タイプ', 'ASE_ACTION_TYPE']) || 0);
-            if (!atype) atype = skillActionType(skill);
-            var formula = '';
-            var rating = 0;
-            var check = model.evaluate.some( function(eval){
-                formula = eval.conditions;
-                rating = eval.rating;
-                return eval.actionType === atype;
-            });
-            if (check) {
-                this._rating = rating;
-                FTKR.setGameData(this.subject(), null, skill);
-                return formula ? FTKR.evalFormula(formula) : true;
+
+    //=============================================================================
+    // Window_MenuCommand
+    //=============================================================================
+
+    var _ASE_Window_MenuCommand_addOriginalCommands =
+        Window_MenuCommand.prototype.addOriginalCommands;
+    Window_MenuCommand.prototype.addOriginalCommands = function() {
+        _ASE_Window_MenuCommand_addOriginalCommands.call(this);
+        this.addNewCommands(FTKR.ASE.command.menu, 'ase');
+    };
+
+    Window_Command.prototype.addNewCommands = function(cmd, symbol) {
+        if (cmd && cmd.enable) {
+            if (!cmd.switchId) {
+                this.addCommand(cmd.name, symbol, true);
+            } else if (cmd.switchId > 0 &&
+                $gameSwitches.value(cmd.switchId)) {
+                this.addCommand(cmd.name, symbol, true);
             }
+        }
+    };
+
+    //=============================================================================
+    // Scene_Menu
+    //=============================================================================
+
+    var _ASE_Scene_Menu_createCommandWindow =
+        Scene_Menu.prototype.createCommandWindow;
+    Scene_Menu.prototype.createCommandWindow = function() {
+        _ASE_Scene_Menu_createCommandWindow.call(this);
+        if (FTKR.ASE.command.menu && FTKR.ASE.command.menu.enable) {
+            this._commandWindow.setHandler('ase', this.commandAse.bind(this));
+        }
+    };
+
+    Scene_Menu.prototype.commandAse = function() {
+        SceneManager.push(Scene_ASE);
+    };
+
+    //=============================================================================
+    // Scene_Base
+    //=============================================================================
+
+    Scene_Base.prototype.createpartyTitleWindow = function() {
+        this._partyTitleWindow = new Window_PartyTitle(0,0);
+        this.addWindow(this._partyTitleWindow);
+        this._partyTitleWindow.close();
+    };
+
+    Scene_Base.prototype.createPartyWindow = function() {
+        var y = this._partyTitleWindow.y + this._partyTitleWindow.height;
+        var width = this._partyTitleWindow.width;
+        var height = Graphics.boxHeight - y;
+        this._partyTacticsWindow = new Window_PartyTactics(0, y, width, height);
+        this._partyTacticsWindow.setHandler('ok',     this.onPartyTacticsOk.bind(this));
+        this._partyTacticsWindow.setHandler('cancel',    this.onPartyTacticsCancel.bind(this));
+        this.addWindow(this._partyTacticsWindow);
+        this._partyTacticsWindow.close();
+    };
+
+    Scene_Base.prototype.createTacticsTitleWindow = function() {
+        var x = this._partyTacticsWindow.x + this._partyTacticsWindow.width;
+        var width = Graphics.boxWidth - x;
+        this._tacticsTitleWindow = new Window_TacticsTitle(x, 0, width);
+        this.addWindow(this._tacticsTitleWindow);
+        this._tacticsTitleWindow.close();
+    };
+
+    Scene_Base.prototype.createTacticsListWindow = function() {
+        var x = this._partyTacticsWindow.x + this._partyTacticsWindow.width;
+        var y = this._partyTitleWindow.y + this._partyTitleWindow.height;
+        var width = this._tacticsTitleWindow.width;
+        var height = Graphics.boxHeight - y;
+        this._tacticsListWindow = new Window_TacticsList(x, y, width, height);
+        this._tacticsListWindow.setHandler('ok',    this.onTacticsListOk.bind(this));
+        this._tacticsListWindow.setHandler('cancel',    this.onTacticsListCancel.bind(this));
+        this._partyTacticsWindow.setTacticsListWindow(this._tacticsListWindow);
+        this.addWindow(this._tacticsListWindow);
+        this._tacticsListWindow.close();
+    };
+
+    Scene_Base.prototype.setupTacticsWindow = function() {
+        this._partyTitleWindow.open();
+        this._partyTacticsWindow.open();
+        this._partyTacticsWindow.select(0);
+        this._partyTacticsWindow.activate();
+        this._tacticsTitleWindow.open();
+        this._tacticsListWindow.open();
+    };
+
+    Scene_Base.prototype.onPartyTacticsOk = function() {
+        this._tacticsListWindow.select(0);
+        this._tacticsListWindow.activate();
+    };
+
+    Scene_Base.prototype.onPartyTacticsCancel = function() {
+        this.popScene();
+    };
+
+    Scene_Base.prototype.onTacticsListOk = function() {
+        var item = this._tacticsListWindow.item();
+        if (item) this._tacticsListWindow._actor.setEvalModelId(item.id);
+        this._tacticsListWindow.deselect();
+        this._partyTacticsWindow.refresh();
+        this._partyTacticsWindow.activate();
+    };
+
+    Scene_Base.prototype.onTacticsListCancel = function() {
+        this._tacticsListWindow.deselect();
+        this._partyTacticsWindow.activate();
+    };
+
+    //=============================================================================
+    // Scene_ASE
+    //=============================================================================
+
+    function Scene_ASE() {
+        this.initialize.apply(this, arguments);
+    }
+
+    Scene_ASE.prototype = Object.create(Scene_MenuBase.prototype);
+    Scene_ASE.prototype.constructor = Scene_ASE;
+
+    Scene_ASE.prototype.initialize = function() {
+        Scene_MenuBase.prototype.initialize.call(this);
+    };
+
+    Scene_ASE.prototype.create = function() {
+        Scene_MenuBase.prototype.create.call(this);
+        this.createpartyTitleWindow();
+        this.createPartyWindow();
+        this.createTacticsTitleWindow();
+        this.createTacticsListWindow();
+        this.setupTacticsWindow();
+    };
+
+    //=============================================================================
+    // Window_PartyCommand
+    //=============================================================================
+
+    //書き換え
+    Window_PartyCommand.prototype.makeCommandList = function() {
+        this.addCommand(TextManager.fight,  'fight');
+        this.addNewCommands(FTKR.ASE.command.party, 'ase');
+        this.addCommand(TextManager.escape, 'escape', BattleManager.canEscape());
+    };
+
+    //=============================================================================
+    // Scene_Battle
+    //=============================================================================
+
+    var _ASE_Scene_Battle_createAllWindows = Scene_Battle.prototype.createAllWindows;
+    Scene_Battle.prototype.createAllWindows = function() {
+        _ASE_Scene_Battle_createAllWindows.call(this);
+        this.createpartyTitleWindow();
+        this.createPartyWindow();
+        this.createTacticsTitleWindow();
+        this.createTacticsListWindow();
+    };
+
+    //書き換え
+    Scene_Battle.prototype.createPartyCommandWindow = function() {
+        this._partyCommandWindow = new Window_PartyCommand();
+        this._partyCommandWindow.setHandler('fight',  this.commandFight.bind(this));
+        if (FTKR.ASE.command.party && FTKR.ASE.command.party.enable) {
+            this._partyCommandWindow.setHandler('ase',  this.commandAse.bind(this));
+        }
+        this._partyCommandWindow.setHandler('escape', this.commandEscape.bind(this));
+        this._partyCommandWindow.deselect();
+        this.addWindow(this._partyCommandWindow);
+    };
+
+    var _ASE_Scene_Battle_changeInputWindow = Scene_Battle.prototype.changeInputWindow;
+    Scene_Battle.prototype.changeInputWindow = function() {
+        if (!BattleManager.isTactics()) {
+            _ASE_Scene_Battle_changeInputWindow.call(this);
+        }
+    };
+
+    Scene_Battle.prototype.commandAse = function() {
+        BattleManager._tacticsMode = true;
+        this._partyCommandWindow.deselect();
+        this._partyCommandWindow.deactivate();
+        this.setupTacticsWindow();
+    };
+
+    Scene_Battle.prototype.onPartyTacticsCancel = function() {
+        this._partyTitleWindow.close();
+        this._partyTacticsWindow.close();
+        this._tacticsTitleWindow.close();
+        this._tacticsListWindow.close();
+        $gameParty.makeActions();
+        BattleManager._tacticsMode = false;
+    };
+
+    //=============================================================================
+    // Window_PartyTitle
+    //=============================================================================
+
+    function Window_PartyTitle() {
+        this.initialize.apply(this, arguments);
+    }
+
+    Window_PartyTitle.prototype = Object.create(Window_Base.prototype);
+    Window_PartyTitle.prototype.constructor = Window_PartyTitle;
+
+    Window_PartyTitle.prototype.initialize = function(x, y) {
+        var width = this.windowWidth();
+        var height = this.fittingHeight(1);
+        Window_Base.prototype.initialize.call(this, x, y, width, height);
+        this.refresh();
+    };
+
+    Window_PartyTitle.prototype.windowWidth = function() {
+        return Graphics.boxWidth / 2;
+    };
+
+    Window_PartyTitle.prototype.refresh = function() {
+        this.contents.clear();
+        var text = FTKR.ASE.title.party;
+        this.drawTextEx(text, 0, 0);
+    };
+    
+    //=============================================================================
+    // Window_PartyTactics
+    //=============================================================================
+
+    function Window_PartyTactics() {
+        this.initialize.apply(this, arguments);
+    }
+
+    Window_PartyTactics.prototype = Object.create(Window_MenuStatus.prototype);
+    Window_PartyTactics.prototype.constructor = Window_PartyTactics;
+
+    Window_PartyTactics.prototype.initialize = function(x, y, width, height) {
+        Window_Selectable.prototype.initialize.call(this, x, y, width, height);
+        this._pendingIndex = -1;
+        this.refresh();
+    };
+
+    Window_PartyTactics.prototype.setTacticsListWindow = function(window) {
+        this._tacticsListWindow = window;
+    };
+
+    Window_PartyTactics.prototype.maxItems = function() {
+        return $gameParty.size();
+    };
+
+    Window_PartyTactics.prototype.itemHeight = function() {
+        return this.lineHeight();
+    };
+
+    Window_PartyTactics.prototype.drawItem = function(index) {
+        this.drawItemBackground(index);
+        this.drawItemStatus(index);
+    };
+
+    Window_PartyTactics.prototype.drawItemStatus = function(index) {
+        var actor = $gameParty.members()[index];
+        var rect = this.itemRect(index);
+        var width = rect.width - this.textPadding();
+        this.drawText(actor.name(), rect.x, rect.y, width/2);
+        this.drawText(actor.evalModelName(), rect.x + width/2, rect.y, width/2);
+    };
+
+    Window_PartyTactics.prototype.update = function() {
+        Window_Selectable.prototype.update.call(this);
+        if (this._tacticsListWindow) {
+            var actor = $gameParty.members()[this.index()];
+            this._tacticsListWindow.setActor(actor);
+        }
+    };
+
+    Window_PartyTactics.prototype.processOk = function() {
+        Window_Selectable.prototype.processOk.call(this);
+    };
+
+    //=============================================================================
+    // Window_TacticsTitle
+    //=============================================================================
+
+    function Window_TacticsTitle() {
+        this.initialize.apply(this, arguments);
+    }
+
+    Window_TacticsTitle.prototype = Object.create(Window_Base.prototype);
+    Window_TacticsTitle.prototype.constructor = Window_TacticsTitle;
+
+    Window_TacticsTitle.prototype.initialize = function(x, y, width) {
+        var height = this.fittingHeight(1);
+        Window_Base.prototype.initialize.call(this, x, y, width, height);
+        this.refresh();
+    };
+
+    Window_TacticsTitle.prototype.refresh = function() {
+        this.contents.clear();
+        var text = FTKR.ASE.title.tactics;
+        this.drawTextEx(text, 0, 0);
+    };
+    
+    //=============================================================================
+    // Window_TacticsList
+    //=============================================================================
+
+    function Window_TacticsList() {
+        this.initialize.apply(this, arguments);
+    }
+
+    Window_TacticsList.prototype = Object.create(Window_MenuStatus.prototype);
+    Window_TacticsList.prototype.constructor = Window_TacticsList;
+
+    Window_TacticsList.prototype.initialize = function(x, y, width, height) {
+        Window_Selectable.prototype.initialize.call(this, x, y, width, height);
+        this._actor = null;
+        this._data = [];
+        this.refresh();
+    };
+
+    Window_TacticsList.prototype.setActor = function(actor) {
+        if (this._actor !== actor) {
+            this._actor = actor;
+            this.refresh();
+            this.resetScroll();
+        }
+    };
+
+    Window_TacticsList.prototype.maxItems = function() {
+        return this._data ? this._data.length : 1;
+    };
+
+    Window_TacticsList.prototype.item = function() {
+        var index = this.index();
+        return this._data && index >= 0 ? this._data[index] : null;
+    };
+
+    Window_TacticsList.prototype.itemHeight = function() {
+        return this.lineHeight();
+    };
+
+    Window_TacticsList.prototype.drawAllItems = function() {
+        var topIndex = this.topIndex();
+        for (var i = 0; i < this.maxPageItems(); i++) {
+            var index = topIndex + i;
+            if (index < this.maxItems()) {
+                this.drawItem(index);
+            }
+        }
+    };
+
+    Window_TacticsList.prototype.drawItem = function(index) {
+        this.drawItemBackground(index);
+        this.drawItemStatus(index);
+    };
+
+    Window_TacticsList.prototype.drawItemStatus = function(index) {
+        var list = this._data[index];
+        var rect = this.itemRect(index);
+        var width = rect.width - this.textPadding();
+        this.drawText(list.name, rect.x, rect.y, width);
+    };
+
+    Window_TacticsList.prototype.makeItemList = function() {
+        this._data = FTKR.ASE.models.filter(function(model, i) {
+            return this.includes(i);
+        }, this);
+        this._data.push({name:FTKR.ASE.manual, id:-1, evaluate:[]});
+        if (this.includes(null)) {
+            this._data.push(null);
+        }
+    };
+
+    Window_TacticsList.prototype.includes = function(index) {
+        if (this._actor) {
+            var list = this._actor.tacticsLists();
+            return list.length ? list.contains(index+'') : index > 0;
         }
         return false;
     };
 
-    var skillActionType = function(skill) {
-        if (skill.id === 1) return 1;
-        if (skill.id === 2) return 2;
-        if (skill.damage) {
-            switch (skill.damage.type) {
-            case 1:
-                return 11;
-            case 2:
-                return 12;
-            case 3:
-                return 13;
-            case 4:
-                return 21;
-            case 5:
-                return 22;
-            case 6:
-                return 22;
-            }
-        }
-        if (skill.effects.length) {
-            var type = 0;
-            skill.effects.some( function(effect){
-                if (effect.code === Game_Action.EFFECT_ADD_BUFF) {
-                    type = 31;return;
-                } else if (effect.code === Game_Action.EFFECT_ADD_DEBUFF) {
-                    type = 41;return;
-                } else if (effect.code === Game_Action.EFFECT_REMOVE_DEBUFF || effect.code === Game_Action.EFFECT_REMOVE_STATE) {
-                    type = 51;return;
-                }
-            });
-            if (type) return type;
-        }
-        return 0;
+    Window_TacticsList.prototype.refresh = function() {
+        this.makeItemList();
+        this.createContents();
+        this.drawAllItems();
     };
+
+    Window_TacticsList.prototype.processOk = function() {
+        Window_Selectable.prototype.processOk.call(this);
+    };
+
 }());//EOF

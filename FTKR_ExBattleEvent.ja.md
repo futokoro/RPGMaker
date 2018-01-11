@@ -38,12 +38,13 @@
 
 # プラグインの登録
 
-[FTKR_ExVariablesChange](FTKR_ExVariablesChange.ja.md)プラグインと組み合わせて使用する場合は、当プラグインを上にしてください。
+[FTKR_ExVariablesChange](FTKR_ExVariablesChange.ja.md)プラグインまたは[FTKR_CSS_CustomizeBattleResults](FTKR_CSS_CustomizeBattleResults.ja.md)と組み合わせて使用する場合は、当プラグインを上にしてください。
 ```
 FTKR_ExBattleEvent.js
 FTKR_ExVariablesChange.js
+FTKR_CSS_CustomizeBattleResults.js
 ```
-順番が逆(当プラグインが下)の場合、FTKR_ExVariablesChangeの戦闘勝利時および戦闘敗北時の変数操作が実行できません。
+順番が逆(当プラグインが下)の場合、正常に動作しません。
 また、戦闘終了時の処理は、戦闘勝利イベントや敗北イベントの後に実行します。
 
 [目次に戻る](#目次)
@@ -140,6 +141,12 @@ EBE_DISPLAY_VICTORY_MESSAGE
 ```
 EBE_戦闘報酬表示
 EBE_DISPLAY_REWARDS
+```
+
+なお、FTKR_CSS_CustomizeBattleResultsプラグインがあると、以下のプラグインコマンドで専用の戦闘結果画面を表示させることができます。
+```
+CBR_戦績画面表示
+CBR_SHOW_BATTLE_RESULT
 ```
 
 ### ８．戦闘報酬の入手
