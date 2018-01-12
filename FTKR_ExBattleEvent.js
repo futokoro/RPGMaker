@@ -3,8 +3,8 @@
 // FTKR_ExBattleEvent.js
 // 作成者     : フトコロ
 // 作成日     : 2017/05/25
-// 最終更新日 : 2018/01/12
-// バージョン : v1.3.1
+// 最終更新日 : 2018/01/13
+// バージョン : v1.3.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -14,7 +14,7 @@ var FTKR = FTKR || {};
 FTKR.EBE = FTKR.EBE || {};
 
 /*:
- * @plugindesc v1.3.1 バトルイベントを拡張するプラグイン
+ * @plugindesc v1.3.2 バトルイベントを拡張するプラグイン
  * @author フトコロ
  * 
  * @param Battle Event
@@ -143,19 +143,23 @@ FTKR.EBE = FTKR.EBE || {};
  * 
  * ６．勝利メッセージの表示
  * データベースの[用語]-[メッセージ]で設定した勝利メッセージを表示します。
+ * 半角スペースを空けて"-s"を付けると、メッセージを閉じるまでイベント処理を
+ * 止めます。
  * 
  * プラグインコマンド
- * 　EBE_勝利メッセージ表示
- * 　EBE_DISPLAY_VICTORY_MESSAGE
+ * 　EBE_勝利メッセージ表示 (-s)
+ * 　EBE_DISPLAY_VICTORY_MESSAGE (-s)
  * 
  * 
  * ７．戦闘報酬の表示
  * 戦闘報酬の計算結果に合わせて、データベースの[用語]-[メッセージ]で設定した
  * メッセージを表示します。
+ * 半角スペースを空けて"-s"を付けると、メッセージを閉じるまでイベント処理を
+ * 止めます。
  * 
  * プラグインコマンド
- * 　EBE_戦闘報酬表示
- * 　EBE_DISPLAY_REWARDS
+ * 　EBE_戦闘報酬表示 (-s)
+ * 　EBE_DISPLAY_REWARDS (-s)
  * 
  * 　
  * ８．戦闘報酬の入手
@@ -193,10 +197,12 @@ FTKR.EBE = FTKR.EBE || {};
  * 
  * １．敗北メッセージの表示
  * データベースの[用語]-[メッセージ]で設定した敗北メッセージを表示します。
+ * 半角スペースを空けて"-s"を付けると、メッセージを閉じるまでイベント処理を
+ * 止めます。
  * 
  * プラグインコマンド
- * 　EBE_敗北メッセージ表示
- * 　EBE_DISPLAY_DEFEAT_MESSAGE
+ * 　EBE_敗北メッセージ表示 (-s)
+ * 　EBE_DISPLAY_DEFEAT_MESSAGE (-s)
  * 
  * 
  * ２．敗北MEの演奏
@@ -439,6 +445,9 @@ FTKR.EBE = FTKR.EBE || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.3.2 - 2018/01/13 : 機能追加
+ *    1. メッセージ表示関係のプラグインコマンドに、イベント処理を止める機能を追加。
+ * 
  * v1.3.1 - 2018/01/12 : 不具合修正
  *    1. 戦闘終了時イベント中にウェイトコマンドを実行すると、アクターの
  *       モーションが正常に再生されない不具合を修正。
@@ -626,14 +635,17 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
         case '勝利メッセージ表示':
         case 'DISPLAY_VICTORY_MESSAGE':
             BattleManager.displayVictoryMessage();
+            if (args[0] === '-s')this.setWaitMode('message');
             break;
         case '敗北メッセージ表示':
         case 'DISPLAY_DEFEAT_MESSAGE':
             BattleManager.displayDefeatMessage();
+            if (args[0] === '-s')this.setWaitMode('message');
             break;
         case '戦闘報酬表示':
         case 'DISPLAY_REWARDS':
             BattleManager.displayRewards();
+            if (args[0] === '-s')this.setWaitMode('message');
             break;
         case '戦闘報酬入手':
         case 'GAIN_REWARDS':
