@@ -38,11 +38,14 @@
 
 # プラグインの登録
 
-[FTKR_ExVariablesChange](FTKR_ExVariablesChange.ja.md)プラグインまたは[FTKR_CSS_CustomizeBattleResults](FTKR_CSS_CustomizeBattleResults.ja.md)と組み合わせて使用する場合は、当プラグインを上にしてください。
+[FTKR_ExVariablesChange](FTKR_ExVariablesChange.ja.md)プラグインと組み合わせて使用する場合は、当プラグインを上にしてください。
+
+[FTKR_CSS_CustomizeBattleResults](FTKR_CSS_CustomizeBattleResults.ja.md)と組み合わせて使用する場合は、当プラグインを下にしてください。
+
 ```
+FTKR_CSS_CustomizeBattleResults.js
 FTKR_ExBattleEvent.js
 FTKR_ExVariablesChange.js
-FTKR_CSS_CustomizeBattleResults.js
 ```
 順番が逆(当プラグインが下)の場合、正常に動作しません。
 また、戦闘終了時の処理は、戦闘勝利イベントや敗北イベントの後に実行します。
@@ -484,7 +487,8 @@ BattleManager.isActedEnemy(メンバーID)
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.3.0](FTKR_ExBattleEvent.js) | 2017/06/30 | 戦闘終了時のイベントの後に、MVデフォルトの戦闘終了処理を実行する機能を追加 |
+| [ver1.3.1](FTKR_ExBattleEvent.js) | 2018/01/12 | 戦闘終了時イベント中にウェイトコマンドを実行すると、アクターのモーションが正常に再生されない不具合を修正 |
+| ver1.3.0 | 2017/06/30 | 戦闘終了時のイベントの後に、MVデフォルトの戦闘終了処理を実行する機能を追加 |
 | ver1.2.0 | 2017/06/01 | 敵キャラの戦闘行動を再設定するプラグインコマンドを追加 |
 | ver1.1.0 | 2017/05/26 | バトル中にコモンイベントを実行できる機能を追加<br>モーション実行コマンドにアクターを対象にできる機能を追加<br>画面に数字をポップアップさせるプラグインコマンドを追加 |
 | ver1.0.0 | 2017/05/25 | 初版公開 |

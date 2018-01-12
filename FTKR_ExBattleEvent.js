@@ -3,8 +3,8 @@
 // FTKR_ExBattleEvent.js
 // 作成者     : フトコロ
 // 作成日     : 2017/05/25
-// 最終更新日 : 2017/06/30
-// バージョン : v1.3.0
+// 最終更新日 : 2018/01/12
+// バージョン : v1.3.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -14,7 +14,7 @@ var FTKR = FTKR || {};
 FTKR.EBE = FTKR.EBE || {};
 
 /*:
- * @plugindesc v1.3.0 バトルイベントを拡張するプラグイン
+ * @plugindesc v1.3.1 バトルイベントを拡張するプラグイン
  * @author フトコロ
  * 
  * @param Battle Event
@@ -439,6 +439,10 @@ FTKR.EBE = FTKR.EBE || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.3.1 - 2018/01/12 : 不具合修正
+ *    1. 戦闘終了時イベント中にウェイトコマンドを実行すると、アクターの
+ *       モーションが正常に再生されない不具合を修正。
+ * 
  * v1.3.0 - 2017/06/30 : 機能追加
  *    1. 戦闘終了時のイベントの後に、MVデフォルトの戦闘終了処理を実行する
  *       機能を追加。
@@ -637,6 +641,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
             break;
         case '戦闘再開':
         case 'RESTART_BATTLE':
+            BattleManager._isBattleEndEvent = false;
             BattleManager._checkEbeBattleEvent = false;
             break;
         case '数字ポップアップ':
@@ -722,6 +727,18 @@ BattleManager.initMembers = function() {
     this._checkEbeBattleEvent = false;
     this._battleEndPattern = 0;
     this._numberSprite = [];
+    this._isBattleEndEvent = false;
+};
+
+var _EBE_Game_Party_requestMotionRefresh = Game_Party.prototype.requestMotionRefresh;
+Game_Party.prototype.requestMotionRefresh = function() {
+    if (!BattleManager.isBattleEndEvent()) {
+        _EBE_Game_Party_requestMotionRefresh.call(this);
+    }
+};
+
+BattleManager.isBattleEndEvent = function() {
+    return $gameParty.inBattle() && this._isBattleEndEvent;
 };
 
 FTKR.EBE.BattleManager_checkBattleEnd = BattleManager.checkBattleEnd;
@@ -764,7 +781,7 @@ BattleManager.processDefeat = function() {
             this._checkEbeBattleEvent = true;
             this._battleEndPattern = 2;
         }
-       return true;
+        return true;
     }
     FTKR.EBE.BattleManager_processDefeat.call(this);
 };
@@ -867,6 +884,7 @@ Game_Troop.prototype.setupEbeBattleEvent = function(condition, metacodes) {
             }
         }
         var event = $dataCommonEvents[FTKR.EBE.battleEnd[condition]];
+        BattleManager._isBattleEndEvent = true;
         this._interpreter.setup(event.list, this.troop().id);
         return true;
     }

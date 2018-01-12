@@ -3,8 +3,8 @@
 // FTKR_CSS_CustomizeBattleResults.js
 // 作成者     : フトコロ
 // 作成日     : 2017/06/07
-// 最終更新日 : 2017/11/26
-// バージョン : v1.4.2
+// 最終更新日 : 2018/01/12
+// バージョン : v1.4.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -14,7 +14,7 @@ var FTKR = FTKR || {};
 FTKR.CBR = FTKR.CBR || {};
 
 /*:
- * @plugindesc v1.4.2 カスタム可能な戦闘結果画面を表示する
+ * @plugindesc v1.4.3 カスタム可能な戦闘結果画面を表示する
  * @author フトコロ
  *
  * @param --タイトル設定--
@@ -352,6 +352,10 @@ FTKR.CBR = FTKR.CBR || {};
  *    GraphicalDesignMode.js
  *    FTKR_CSS_GDM.js
  * 
+ * 4. FTKR_ExBattleEvent.js と組み合わせると、戦闘終了時イベントのなかで
+ *    プラグインコマンドで戦績画面を表示できます。
+ *    この場合は、当プラグインをFTKR_ExBattleEvent.jsよりも上にしてください。
+ * 
  * 
  *-----------------------------------------------------------------------------
  * 本プラグインのライセンスについて(License)
@@ -369,6 +373,14 @@ FTKR.CBR = FTKR.CBR || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.4.3 - 2018/01/12 : 不具合修正、機能追加
+ *    1. FTKR_ExBattleEventと組み合わせたときに、戦闘終了時イベント中に
+ *       正しく戦績画面の処理が実行できない不具合を修正。
+ *    2. 経験値のゲージが上昇している間に戦績画面を閉じると、ゲージが止まった
+ *       時点までの経験値しか入手していなかった不具合を修正。
+ *    3. 戦績画面で終了コマンドを実行するまで、戦闘終了時イベントの処理を
+ *       止めるプラグインコマンドを追加。
  * 
  * v1.4.2 - 2017/11/26 : 機能変更
  *    1. アクターコマンドとアイテムコマンドを選択できないようにする機能を変更し
@@ -559,9 +571,26 @@ if (Imported.FTKR_CSS) (function() {
             case 'SHOW_BATTLE_RESULT':
                 BattleManager.showCBR();
                 break;
+            case '戦績画面終了待ち':
+            case 'WAIT_BATTLE_RESULT_END':
+                this.setWaitMode('battleResult');
+                break;
         }
     };
 
+    var _CBR_Game_Interpreter_updateWaitMode = Game_Interpreter.prototype.updateWaitMode;
+    Game_Interpreter.prototype.updateWaitMode = function() {
+        var waiting = false;
+        if (this._waitMode === 'battleResult' ) {
+            waiting =  BattleManager.isCbrBattleResult();
+            if (!waiting) {
+                this._waitMode = '';
+            }
+            return waiting;
+        }
+        return _CBR_Game_Interpreter_updateWaitMode.call(this);
+    };
+  
     //=============================================================================
     // FTKR_CustomSimpleActorStatus.jsの修正
     //=============================================================================
@@ -645,7 +674,7 @@ if (Imported.FTKR_CSS) (function() {
 
     var _CBR_BattleManager_updateEvent = BattleManager.updateEvent;
     BattleManager.updateEvent = function() {
-        if (this._phase === 'battleEnd' && this._showBattleResultOk) {
+        if (BattleManager.isCbrBattleResult()) {
             SceneManager._scene.updateExp(this._cbrGainExp);
             return true;
         }
@@ -655,6 +684,23 @@ if (Imported.FTKR_CSS) (function() {
     BattleManager.showCBR = function() {
         this._showBattleResultOk = true;
         SceneManager._scene.showBattleResult(this._rewards);
+    };
+
+    BattleManager.isCbrBattleResult = function() {
+        return this._showBattleResultOk;
+    };
+
+    //書き換え
+    Scene_Battle.prototype.updateBattleProcess = function() {
+        if (this.checkBattleProcessBusy()) {
+            BattleManager.update();
+            this.changeInputWindow();
+        }
+    };
+
+    Scene_Battle.prototype.checkBattleProcessBusy = function() {
+        return !this.isAnyInputWindowActive() || BattleManager.isAborting() ||
+            BattleManager.isBattleEnd() || BattleManager.isCbrBattleResult();
     };
 
     //=============================================================================
@@ -756,6 +802,7 @@ if (Imported.FTKR_CSS) (function() {
 
     Scene_Battle.prototype.setGainExp = function(gainExp) {
         this._cbrExp = 0;
+        this._cbrGainExp = gainExp;
         var splitNum = Scene_Battle.CBR_SPLIT_NUMBER;
         this._cbrSplitExp = Math.floor(gainExp / splitNum);
         this._cbrModExp = gainExp % splitNum;
@@ -814,6 +861,12 @@ if (Imported.FTKR_CSS) (function() {
     Scene_Battle.prototype.cbrFinish = function() {
         this.hideBattleResult();
         BattleManager._showBattleResultOk = false;
+        var difExp = this._cbrGainExp - this._cbrExp;
+        if (difExp) {
+            $gameParty.allMembers().forEach(function(actor) {
+                actor.gainExp(difExp);
+            },this);
+        }
     };
 
     Scene_Battle.prototype.onCBRActorCancel = function() {
