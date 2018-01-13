@@ -274,6 +274,7 @@ CBR_戦績画面終了待ち
 CBR_SHOW_BATTLE_RESULT
 ```
 戦績画面が終了するまでイベントの処理を止めます。
+[FTKR_ExBattleEvent](FTKR_ExBattleEvent.ja.md)を使って戦闘終了時のイベントで実行する場合は、「戦闘報酬の入手コマンド」の後で実行してください。
 
 
 [目次に戻る](#目次)
