@@ -222,7 +222,7 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 # 更新情報
 
-2018/01
+2018/01の更新情報
 
 ### 2018/01/13 
 * [FTKR_ExBattleEvent](FTKR_ExBattleEvent.ja.md) v1.3.2
