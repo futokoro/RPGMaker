@@ -231,7 +231,7 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 * [FTKR_CSS_CustomizeBattleResults](FTKR_CSS_CustomizeBattleResults.ja.md) v1.4.3
 
 ### 2018/01/11
-* [FTKR_AISkillEvaluate](FTKR_AISkillEvaluate.ja.md) v1.2.0
+* [FTKR_AISkillEvaluate](FTKR_AISkillEvaluate.js) v1.2.0
 
 ### 2018/01/08
 * [FTKR_ItemSelfVariables](FTKR_ItemSelfVariables.ja.md) v1.2.2
@@ -240,8 +240,8 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 * [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md) v2.6.1
 
 ### 2018/01/06
-* [FTKR_MessageWindowLines](FTKR_MessageWindowLines.ja.md) v1.1.0
-* [FTKR_PopupSpriteMessage](FTKR_PopupSpriteMessage.ja.md) v1.1.0
+* [FTKR_MessageWindowLines](FTKR_MessageWindowLines.js) v1.1.0
+* [FTKR_PopupSpriteMessage](FTKR_PopupSpriteMessage.js) v1.1.0
 
 #
 [目次に戻る](#目次)
