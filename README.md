@@ -1,5 +1,7 @@
 # RPGツクールMV プラグイン
 
+プラグインは逐次追加更新を行っています。最新情報は、[更新情報](#更新情報)を確認してください。
+
 # 目次
 
 1. [ステータス](#ステータス)
@@ -18,6 +20,7 @@
 1. [デバッグ](#デバッグ)
 1. [その他備忘録](#その他備忘録)
 1. [試作品置き場](#試作品置き場)
+1. [更新情報](#更新情報)
 
 
 # ステータス
@@ -216,6 +219,29 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_ActionGauge](FTKR_ActionGauge.js) | なし | [v0.7.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ActionGauge.js) | 2017/04/21 | アクションゲージ |
-#
 
+# 更新情報
+
+2018/01
+
+### 2018/01/13 
+* [FTKR_ExBattleEvent](FTKR_ExBattleEvent.ja.md) v1.3.2
+
+### 2018/01/12 
+* [FTKR_CSS_CustomizeBattleResults](FTKR_CSS_CustomizeBattleResults.ja.md) v1.4.3
+
+### 2018/01/11
+* [FTKR_AISkillEvaluate](FTKR_AISkillEvaluate.js) v1.2.0
+
+### 2018/01/08
+* [FTKR_ItemSelfVariables](FTKR_ItemSelfVariables.js) v1.2.2
+
+### 2018/01/07 
+* [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) v2.6.1
+
+### 2018/01/06
+* [FTKR_MessageWindowLines](FTKR_MessageWindowLines.js) v1.1.0
+* [FTKR_PopupSpriteMessage](FTKR_PopupSpriteMessage.js) v1.1.0
+
+#
 [目次に戻る](#目次)
