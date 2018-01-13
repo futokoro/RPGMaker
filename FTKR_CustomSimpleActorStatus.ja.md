@@ -717,7 +717,8 @@ a.hit.parcent()
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver2.6.0](FTKR_CustomSimpleActorStatus.js) | 2017/11/18| FTKR_CSS_***Status系の拡張プラグインをGraphicalDesignMode.jsに対応する処理を追加 |
+| [ver2.6.1](FTKR_CustomSimpleActorStatus.js) | 2018/01/07| 顔画像、歩行キャラ、SVキャラのX座標方向の寄せ表示部分を関数として独立 |
+| ver2.6.0 | 2017/11/18| FTKR_CSS_***Status系の拡張プラグインをGraphicalDesignMode.jsに対応する処理を追加 |
 | ver2.5.1 | 2017/11/08| FTKR_OriginalSceneWindow.jsで生成したウィンドウが有る場合にシーン開始時にエラーになる不具合を修正 |
 | ver2.5.0 | 2017/11/08| 横線を表示するコードを追加<br>GraphicalDesignMode.jsとFTKR_CSS_GDM.jsにより、デザインモード中にゲーム内でレイアウトを変更する機能を追加 |
 | ver2.4.3 | 2017/11/02| 装備画面でフリーズする不具合を修正 |
