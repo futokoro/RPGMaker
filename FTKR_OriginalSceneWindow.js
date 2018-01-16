@@ -3,8 +3,8 @@
 // FTKR_OriginalSceneWindow.js
 // 作成者     : フトコロ
 // 作成日     : 2017/06/17
-// 最終更新日 : 2017/07/09
-// バージョン : v1.3.0
+// 最終更新日 : 2018/01/16
+// バージョン : v1.4.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.OSW = FTKR.OSW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.3.0 オリジナルのシーンやウィンドウを作成する
+ * @plugindesc v1.4.0 オリジナルのシーンやウィンドウを作成する
  * @author フトコロ
  *
  * @param --ウィンドウの共通設定--
@@ -250,12 +250,12 @@ FTKR.OSW = FTKR.OSW || {};
  * 
  * 
  *-----------------------------------------------------------------------------
- * オリジナルシーンの表示
+ * オリジナルシーンの表示と終了
  *-----------------------------------------------------------------------------
  * 以下のプラグインコマンドを実行すると、オリジナルシーンを表示します。
  * 
  * OSW_オリジナルシーン表示
- * OSW_OPEN_SCENE
+ * OSW_OPEN_ORIGINAL_SCENE
  * 
  * オリジナルシーンは、デフォルトでは何も表示しません。
  * 
@@ -266,6 +266,16 @@ FTKR.OSW = FTKR.OSW || {};
  * ただし、文章を表示するタイプのイベントコマンドや、
  * アニメーション、ピクチャ表示のイベントコマンドなど
  * 使用できないイベントコマンドがあります。
+ * 
+ * 
+ * また、以下のプラグインコマンドを実行すると、オリジナルシーンを終了します。
+ * 
+ * OSW_オリジナルシーン終了
+ * OSW_CLOSE_ORIGINAL_SCENE
+ * 
+ * オリジナルシーンを終了すると、元のシーン(*1)に戻ります。
+ * 
+ * (*1)オリジナルシーンを表示する前のシーン
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -399,6 +409,12 @@ FTKR.OSW = FTKR.OSW || {};
  *        :記録した番号は、以下のスクリプトで取得できます。
  *        :   オリジナルシーンの場合 - $gameOswData._oswIndex
  *        :   マップシーンの場合　　 - $gameMap._oswIndex
+ * 
+ *    キャンセル実行設定 [メソッド]
+ *    ADD_CANCEL_ACTION [method]
+ *        :コマンドウィンドウ上でのキャンセル操作の結果を設定します。
+ *        :
+ *        :[メソッド]は、コマンドウィンドウのメソッドと仕様は同じです。
  * 
  *    カーソル残す [ON or OFF]
  *    LEAVE_CURSOR
@@ -755,9 +771,21 @@ FTKR.OSW = FTKR.OSW || {};
  * This plugin is released under the MIT License.
  * 
  * 
+ * Copyright (c) 2017 Futokoro
+ * http://opensource.org/licenses/mit-license.php
+ * 
+ * 
+ * プラグイン公開元
+ * https://github.com/futokoro/RPGMaker/blob/master/README.md
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.4.0 - 2018/01/16 : 機能追加
+ *    1. コマンドウィンドウのキャンセル時の動作を設定するコマンドを追加。
+ *    2. オリジナルシーンを終了するプラグインコマンドを追加。
  * 
  * v1.3.0 - 2017/07/09 : 機能追加
  * 
@@ -967,6 +995,10 @@ function Game_OswScene() {
             case 'OPEN_ORIGINAL_SCENE':
                 SceneManager.push(Scene_OSW);
                 break;
+            case 'オリジナルシーン終了':
+            case 'CLOSE_ORIGINAL_SCENE':
+                if (SceneManager._scene.isOSWScene()) SceneManager._scene.popScene();
+                break;
             case 'コモン設定':
             case 'SET_COMMON':
                 this.setOswWindowParam(args, Game_OswBase.WINDOW_COMMON);
@@ -1101,6 +1133,11 @@ function Game_OswScene() {
                 case 'ADD_COMMAND':
                     i += this.setOswCommandArgs(window, i + 1, args);
                     break;
+                case 'キャンセル実行設定':
+                case 'ADD_CANCEL_ACTION':
+                    this.setOswCommandCancel(window, args[i+1]);
+                    i += 1;
+                    break;
                 case 'コマンド初期化':
                 case 'CLEAR_COMMAND':
                     window.clearList();
@@ -1205,6 +1242,10 @@ function Game_OswScene() {
         var method = this.setOswMethod(args[i+3]);
         window.addCommand(name, symbol, enabled, null, method);
         return 4;
+    };
+
+    Game_Interpreter.prototype.setOswCommandCancel = function(window, method) {
+        window.setCancelAction(this.setOswMethod(method));
     };
 
     Game_Interpreter.prototype.setOswMethod = function(text) {
@@ -1580,7 +1621,7 @@ function Game_OswScene() {
         this._drawType = 0;
         this.clearList();
         this.setOkAction(false, false, null, null, null);
-        this.setCancelAction(false, false, null, null);
+        this.setCancelAction(null, null);
         this.setMaxCols(select.maxCols);
         this.setCursorHeight(select.cursorHeight);
         this.setPosition(select.x, select.y);
@@ -1638,6 +1679,7 @@ function Game_OswScene() {
         this.setTextAlign(cmd.align);
         this.setMaxCols(cmd.maxCols);
         this.setPosition(cmd.x, cmd.y);
+        this.setCancelAction(false, false, null, null);
         this.setSize(cmd.width);
     };
 
@@ -1675,6 +1717,13 @@ function Game_OswScene() {
             ext     :ext,
             method  :method,
         });
+    };
+
+    Game_OswCommand.prototype.setCancelAction = function(method, varId) {
+        this._cancel = {
+            method :method,
+            varId  :varId,
+        }
     };
 
     //=============================================================================
@@ -1955,6 +2004,10 @@ function Game_OswScene() {
         this._oswWindowLayer.addChild(window);
     };
 
+    Scene_Base.prototype.isOSWScene = function() {
+        return false;
+    };
+
     //------------------------------------------------------------------------
     // 全ウィンドウの作成
     //------------------------------------------------------------------------
@@ -2005,6 +2058,7 @@ function Game_OswScene() {
             var method = eval(cmd.method);
             window.setHandler(cmd.symbol, method);
         },this);
+        if (gameWindow._cancel.method) window.setHandler('cancel', eval(gameWindow._cancel.method));
         this.addOswWindow(window);
     };
 
@@ -2124,6 +2178,10 @@ function Game_OswScene() {
         var active = this.isActive();
         $gameOswData.update(active);
         this.updateCreateOswWindows($gameOswData);
+    };
+
+    Scene_OSW.prototype.isOSWScene = function() {
+        return true;
     };
 
     //=============================================================================
