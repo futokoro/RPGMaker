@@ -224,6 +224,9 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 2018/01の更新情報
 
+### 2018/01/16
+* [FTKR_OriginalSceneWindow](FTKR_OriginalSceneWindow.ja.md) v1.4.0
+
 ### 2018/01/13 
 * [FTKR_ExBattleEvent](FTKR_ExBattleEvent.ja.md) v1.3.2
 
