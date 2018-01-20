@@ -3,8 +3,8 @@
 // FTKR_ExTraitSetting.js
 // 作成者     : フトコロ
 // 作成日     : 2017/12/02
-// 最終更新日 : 2017/12/03
-// バージョン : v1.0.2
+// 最終更新日 : 2018/01/20
+// バージョン : v1.0.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ETS = FTKR.ETS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.2 装備やステート等の特徴を詳細に設定できる
+ * @plugindesc v1.0.3 装備やステート等の特徴を詳細に設定できる
  * @author フトコロ
  *
  * @param 計算方法
@@ -140,7 +140,7 @@ FTKR.ETS = FTKR.ETS || {};
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
- * Copyright (c) 2017 Futokoro
+ * Copyright (c) 2017,2018 Futokoro
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
@@ -151,6 +151,9 @@ FTKR.ETS = FTKR.ETS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.3 - 2018/01/20 : 不具合修正
+ *    1. スクリプト入力時に三項演算子を使うと反映されない不具合を修正。
  * 
  * v1.0.2 - 2017/12/03 : 仕様変更
  *    1. プラグインパラメータ追加して、積算除算の計算処理を見直し。
@@ -299,8 +302,9 @@ FTKR.ETS = FTKR.ETS || {};
             if (!datas || !obj.traits[dataId]) continue;
             for (var i = 0; i < datas.length; i++) {
                 var data = datas[i];
-                var match = /(.+)[ ]*:[ ]*(.+)/.exec(data);
+                var match = /([^:\s]+)[ ]*:[ ]*(.+)/.exec(data);
                 if (!match) continue;
+                console.log(match);
                 switch(match[1].toUpperCase()) {
                 case '内容':
                 case 'CONTENTS':
@@ -340,13 +344,14 @@ FTKR.ETS = FTKR.ETS || {};
         return this.allTraits().filter(function(trait) {
             return trait.code === code && matchTraitDataId(trait, id) &&
                 matchTraitOperator(trait, ope);
-        });
+        },this);
     };
 
     Game_BattlerBase.prototype.traitsWithOperator = function(code, ope) {
+        FTKR.setGameData(this);
         return this.traits(code).filter(function(trait) {
             return matchTraitOperator(trait, ope);
-        });
+        },this);
     };
 
     //------------------------------------------------------------------------
