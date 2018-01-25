@@ -178,6 +178,7 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 | [FTKR_EventSmoothStart](FTKR_EventSmoothStart.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_EventSmoothStart.js) | 2017/06/25 | イベント起動時のプレイヤーの移動停止を無視する |
 | [FTKR_EventReSpawnEx](FTKR_EventReSpawnEx.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_EventReSpawnEx.js) | 2017/11/14 | EventReSpawn.jsとTemplateEvent.jsで生成した一時イベントの座標とセルフスイッチを記録する<br> ＜以下のプラグインが必要＞ <br> [EventReSpawn.js(トリアコンタンさんのHPリンク)](https://triacontane.blogspot.jp/2016/08/blog-post.html)  <br>[TemplateEvent.js(トリアコンタンさんのHPリンク)](https://triacontane.blogspot.jp/2016/06/blog-post_25.html) |
 | [FTKR_MenuEvent](FTKR_MenuEvent.js) | なし | [v1.0.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_MenuEvent.js) | 2017/12/02 | メニュー画面上でコモンイベントを実行する |
+| [FTKR_EventMoveByInput](FTKR_EventMoveByInput.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_EventMoveByInput.js) | 2018/01/25 | 指定したイベントを画面の中心にしてキー操作で移動させる |
 
 [目次に戻る](#目次)
 
@@ -223,6 +224,9 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 # 更新情報
 
 2018/01の更新情報
+
+### 2018/01/25
+* [FTKR_EventMoveByInput](FTKR_EventMoveByInput.js) v1.0.0 (新規)
 
 ### 2018/01/20
 * [FTKR_ExTraitSetting](FTKR_ExTraitSetting.js) v1.0.3
