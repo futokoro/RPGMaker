@@ -3,8 +3,8 @@
 // FTKR_ExItemConfig_Required.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/14
-// 最終更新日 : 2017/04/29
-// バージョン : v1.0.1
+// 最終更新日 : 2018/01/31
+// バージョン : v1.0.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EIR = FTKR.EIR || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.1 アイテムとスキルの使用条件を拡張するプラグイン
+ * @plugindesc v1.0.2 アイテムとスキルの使用条件を拡張するプラグイン
  * @author フトコロ
  *
  * @help
@@ -105,13 +105,20 @@ FTKR.EIR = FTKR.EIR || {};
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
- * Copyright (c) 2017 Futokoro
+ * Copyright (c) 2017,2018 Futokoro
  * http://opensource.org/licenses/mit-license.php
+ * 
+ * 
+ * プラグイン公開元
+ * https://github.com/futokoro/RPGMaker/blob/master/README.md
  * 
  * 
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.2 - 2018/01/31 : 不具合修正
+ *    1. 装備タイプを指定しても正しく動作しない不具合を修正。
  * 
  * v1.0.1 - 2017/04/29 : FTKR_ItemSelfVariables の v1.1.0以降に対応
  * 
@@ -277,7 +284,7 @@ Game_Actor.prototype.isSkillEtypeOk = function(skill) {
     var sreq = skill.required;
     if (!sreq.etypeIds.length) return true;
     var logicOks = sreq.etypeIds.filter( function(item) {
-        return item || item > 0 && this.isEtypeEquipped(item);
+        return item && item > 0 && this.isEtypeEquipped(item);
     },this);
     return this.isLogicOk(sreq.etypeIds, logicOks, sreq.logic);
 };

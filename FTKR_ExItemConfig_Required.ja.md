@@ -93,7 +93,9 @@ Condition: eval
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.0.0](FTKR_ExItemConfig_Required.js) | 2017/04/14 | 初版公開 |
+| [ver1.0.2](FTKR_ExItemConfig_Required.js) | 2018/01/31 | 装備タイプを指定しても正しく動作しない不具合を修正 |
+| ver1.0.1 | 2017/04/29 | FTKR_ItemSelfVariables の v1.1.0以降に対応 |
+| ver1.0.0 | 2017/04/14 | 初版公開 |
 
 ## ライセンス
 
