@@ -3,8 +3,8 @@
 // FTKR_ExItemConfig_Required.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/14
-// 最終更新日 : 2018/01/31
-// バージョン : v1.0.2
+// 最終更新日 : 2018/02/01
+// バージョン : v1.0.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EIR = FTKR.EIR || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.2 アイテムとスキルの使用条件を拡張するプラグイン
+ * @plugindesc v1.0.3 アイテムとスキルの使用条件を拡張するプラグイン
  * @author フトコロ
  *
  * @help
@@ -61,6 +61,11 @@ FTKR.EIR = FTKR.EIR || {};
  * 装備タイプID: y1,y2,...
  *    :スキルを使用するために、特定の装備タイプが必要になります。
  *    :必要装備タイプID y1,y2,... を追加します。
+ * 
+ * AtypeId: y1,y2,...
+ * 防具タイプID: y1,y2,...
+ *    :スキルを使用するために、特定の防具タイプが必要になります。
+ *    :必要防具タイプID y1,y2,... を追加します。
  * 
  * Logic: type
  * 論理計算: type
@@ -116,6 +121,9 @@ FTKR.EIR = FTKR.EIR || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.3 - 2018/02/01 : 機能追加
+ *    1. 防具タイプIDを条件に指定する機能を追加。
  * 
  * v1.0.2 - 2018/01/31 : 不具合修正
  *    1. 装備タイプを指定しても正しく動作しない不具合を修正。
@@ -228,6 +236,7 @@ DataManager.makeEirData = function(skill) {
         wtypeIds:[],
         logic:'or',
         etypeIds:[],
+        atypeIds:[],
         condition:'',
     };
     if (skill.requiredWtypeId1) skill.required.wtypeIds.push(skill.requiredWtypeId1);
@@ -246,6 +255,8 @@ DataManager.setSepRequired = function(skill) {
         var case3j = /(?:装備タイプID):[ ]*(\d+(?:\s*,\s*\d+)*)/i;
         var case4 = /(?:CONDITION):[ ]*(.+)/i;
         var case4j = /(?:追加条件):[ ]*(.+)/i;
+        var case5 = /(?:ATYPEID):[ ]*(\d+(?:\s*,\s*\d+)*)/i;
+        var case5j = /(?:防具タイプID):[ ]*(\d+(?:\s*,\s*\d+)*)/i;
 
         var datas = sepdata.split(';');
         for (var i = 0; i < datas.length; i++) {
@@ -262,6 +273,11 @@ DataManager.setSepRequired = function(skill) {
                 });
             } else if(data.match(case4) || data.match(case4j)) {
                 skill.required.condition = String(RegExp.$1);
+            } else if (data.match(case5) || data.match(case5j)) {
+                var atypeIds = JSON.parse('[' + RegExp.$1.match(/\d+/g) + ']');
+                atypeIds.forEach( function(atypeId) {
+                    skill.required.atypeIds.push(atypeId);
+                });
             }
         }
     }
@@ -289,6 +305,15 @@ Game_Actor.prototype.isSkillEtypeOk = function(skill) {
     return this.isLogicOk(sreq.etypeIds, logicOks, sreq.logic);
 };
 
+Game_Actor.prototype.isSkillAtypeOk = function(skill) {
+    var sreq = skill.required;
+    if (!sreq.atypeIds.length) return true;
+    var logicOks = sreq.atypeIds.filter( function(item) {
+        return item && item > 0 && this.isAtypeEquipped(item);
+    },this);
+    return this.isLogicOk(sreq.atypeIds, logicOks, sreq.logic);
+};
+
 Game_Actor.prototype.isLogicOk = function(items, logicOks, logic) {
     switch (true) {
         case (/(?:nor)/i).test(logic):
@@ -312,6 +337,14 @@ Game_Actor.prototype.isEtypeEquipped = function(etypeId) {
     return false;
 };
 
+Game_Actor.prototype.isAtypeEquipped = function(atypeId) {
+    var items = this.armors();
+    for (var i = 0; i < items.length ; i++) {
+        if (items[i].atypeId === atypeId ) return true;
+    }
+    return false;
+};
+
 Game_Actor.prototype.isSkillRequiredParamOk = function(skill) {
     return this.evalEirFormula(skill.required.condition, skill);
 };
@@ -329,7 +362,7 @@ FTKR.EIR.Game_BattlerBase_meetsSkillConditions =
     Game_BattlerBase.prototype.meetsSkillConditions;
 Game_BattlerBase.prototype.meetsSkillConditions = function(skill) {
     return FTKR.EIR.Game_BattlerBase_meetsSkillConditions.call(this, skill) &&
-        this.isSkillRequiredParamOk(skill) && this.isSkillEtypeOk(skill);
+        this.isSkillRequiredParamOk(skill) && this.isSkillEtypeOk(skill) && this.isSkillAtypeOk(skill);
 };
 
 Game_BattlerBase.prototype.isSkillRequiredParamOk = function(skill) {
@@ -340,11 +373,15 @@ Game_BattlerBase.prototype.isSkillEtypeOk = function(skill) {
     return true;
 };
 
+Game_BattlerBase.prototype.isSkillAtypeOk = function(skill) {
+    return true;
+};
+
 FTKR.EIR.Game_BattlerBase_meetsItemConditions =
     Game_BattlerBase.prototype.meetsItemConditions;
 Game_BattlerBase.prototype.meetsItemConditions = function(item) {
     return FTKR.EIR.Game_BattlerBase_meetsItemConditions.call(this, item) &&
         this.isSkillWtypeOk(item) && 
         this.isSkillRequiredParamOk(item) && 
-        this.isSkillEtypeOk(item);
+        this.isSkillEtypeOk(item) && this.isSkillAtypeOk(item);
 };

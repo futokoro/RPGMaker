@@ -91,7 +91,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 | [FTKR_ExItemConfig_Damage](FTKR_ExItemConfig_Damage.js) | [仮版](FTKR_ExItemConfig_Damage.ja.md) | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExItemConfig_Damage.js) | 2017/04/29 | アイテムとスキルのダメージ処理を拡張する |
 | [FTKR_ExItemConfig_Effect](FTKR_ExItemConfig_Effect.js) | [仮版](FTKR_ExItemConfig_Effect.ja.md) | [v1.2.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExItemConfig_Effect.js) | 2017/08/27 | アイテムとスキルの使用効果を拡張する |
 | [FTKR_ExItemConfig_Activate](FTKR_ExItemConfig_Activate.js) | [仮版](FTKR_ExItemConfig_Activate.ja.md) | [v1.0.3](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExItemConfig_Activate.js) | 2017/06/23 | アイテムとスキルの発動設定を拡張する |
-| [FTKR_ExItemConfig_Required](FTKR_ExItemConfig_Required.js) | [仮版](FTKR_ExItemConfig_Required.ja.md) | [v1.0.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExItemConfig_Required.js) | 2018/01/31 | アイテムとスキルの使用条件を拡張する |
+| [FTKR_ExItemConfig_Required](FTKR_ExItemConfig_Required.js) | [仮版](FTKR_ExItemConfig_Required.ja.md) | [v1.0.3](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExItemConfig_Required.js) | 2018/02/01 | アイテムとスキルの使用条件を拡張する |
 
 注意）FTKR_ExItemConfig_* と FTKR_SkillExpansion は組み合わせて使用できません。
 
@@ -223,38 +223,12 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 # 更新情報
 
-2018/01の更新情報
+2018/02の更新情報
 
-### 2018/01/31
-* [FTKR_ItemConfig_Required](FTKR_ExItemConfig_Required.ja.md) v1.0.2
+### 2018/02/01
+* [FTKR_ItemConfig_Required](FTKR_ExItemConfig_Required.ja.md) v1.0.3
 
-### 2018/01/25
-* [FTKR_EventMoveByInput](FTKR_EventMoveByInput.js) v1.0.0 (新規)
-
-### 2018/01/20
-* [FTKR_ExTraitSetting](FTKR_ExTraitSetting.js) v1.0.3
-
-### 2018/01/16
-* [FTKR_OriginalSceneWindow](FTKR_OriginalSceneWindow.ja.md) v1.4.0
-
-### 2018/01/13 
-* [FTKR_ExBattleEvent](FTKR_ExBattleEvent.ja.md) v1.3.2
-
-### 2018/01/12 
-* [FTKR_CSS_CustomizeBattleResults](FTKR_CSS_CustomizeBattleResults.ja.md) v1.4.3
-
-### 2018/01/11
-* [FTKR_AISkillEvaluate](FTKR_AISkillEvaluate.js) v1.2.0
-
-### 2018/01/08
-* [FTKR_ItemSelfVariables](FTKR_ItemSelfVariables.ja.md) v1.2.2
-
-### 2018/01/07 
-* [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md) v2.6.1
-
-### 2018/01/06
-* [FTKR_MessageWindowLines](FTKR_MessageWindowLines.js) v1.1.0
-* [FTKR_PopupSpriteMessage](FTKR_PopupSpriteMessage.js) v1.1.0
+[過去の更新情報](note.md)
 
 #
 [目次に戻る](#目次)
