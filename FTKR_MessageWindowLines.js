@@ -3,8 +3,8 @@
 // FTKR_MessageWindowLines.js
 // 作成者     : フトコロ
 // 作成日     : 2018/01/05
-// 最終更新日 : 2018/01/06
-// バージョン : v1.1.0
+// 最終更新日 : 2018/02/03
+// バージョン : v1.1.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.MWL = FTKR.MWL || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.0 メッセージウィンドウの行数を変更するプラグイン
+ * @plugindesc v1.1.1 メッセージウィンドウの行数を変更するプラグイン
  * @author フトコロ
  *
  * @help 
@@ -55,10 +55,10 @@ FTKR.MWL = FTKR.MWL || {};
  * ：　　：３行目
  * ：　　：４行目
  * ◆文章：なし, ウィンドウ, 下
- * ：　　：１行目
- * ：　　：２行目
- * ：　　：３行目
- * ：　　：４行目
+ * ：　　：５行目
+ * ：　　：６行目
+ * ：　　：７行目
+ * ：　　：次ページの１行目
  * ◆プラグインコマンド：MWL_行数リセット
  * 
  * このイベントを実行した場合、７行サイズのメッセージウィンドウに
@@ -72,6 +72,52 @@ FTKR.MWL = FTKR.MWL || {};
  * 1.「プラグインマネージャー(プラグイン管理)」に、本プラグインを追加して
  *    ください。
  * 
+ * 
+ *-----------------------------------------------------------------------------
+ * 競合対策
+ *-----------------------------------------------------------------------------
+ * 1. MessageWindowPopup.jsと組み合わせる場合は、以下の通りに使用してください。
+ * 
+ *    1. プラグインマネージャー(プラグイン管理)では、本プラグインを
+ *       下にしてください。
+ * 
+ *    2. 表示行数を変更する場合は、かならず文章の表示コマンドの連結部と
+ *       表示行数を合わせてください。
+ * 
+ *       例) 表示行数を 6 行に変更する場合は、以下の様にイベントを組みます。
+ *        ◆プラグインコマンド：MWL_行数変更 6
+ *        ◆文章：なし, ウィンドウ, 下
+ *        ：　　：１行目
+ *        ：　　：２行目
+ *        ：　　：３行目
+ *        ◆文章：なし, ウィンドウ, 下
+ *        ：　　：４行目
+ *        ：　　：５行目
+ *        ：　　：６行目
+ *        ◆文章：なし, ウィンドウ, 下
+ *        ：　　：２ページ目の１行目
+ *        ：　　：２行目
+ *        ：　　：３行目
+ *        ◆プラグインコマンド：MWL_行数リセット 
+ *        上のように新しいページの１行目は、かならず文章の表示コマンドの
+ *        最初にします。
+ * 
+ * 
+ *       間違った例）下の場合は、２ページ目を表示できません。
+ *        ◆プラグインコマンド：MWL_行数変更 6
+ *        ◆文章：なし, ウィンドウ, 下
+ *        ：　　：１行目
+ *        ：　　：２行目
+ *        ：　　：３行目
+ *        ：　　：４行目
+ *        ◆文章：なし, ウィンドウ, 下
+ *        ：　　：５行目
+ *        ：　　：６行目
+ *        ：　　：２ページ目の１行目
+ *        ：　　：２行目
+ *        ◆文章：なし, ウィンドウ, 下
+ *        ：　　：３行目
+ *        ◆プラグインコマンド：MWL_行数リセット 
  * 
  *-----------------------------------------------------------------------------
  * 本プラグインのライセンスについて(License)
@@ -90,6 +136,10 @@ FTKR.MWL = FTKR.MWL || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.1.1 - 2018/02/03 : 処理見直し
+ *    1. 競合対策として、ウィンドウサイズを変更する処理と、連結した
+ *       文章の表示イベントの処理を見直し。
  * 
  * v1.1.0 - 2018/01/06 : 機能追加
  *    1. 行数変更時に、「文章のスクロール表示」を実行すると
@@ -119,6 +169,12 @@ FTKR.MWL = FTKR.MWL || {};
         }
     };
     
+    var isExistPlugin = function(pluginName) {
+        return Object.keys(PluginManager.parameters(pluginName)).length > 0;
+    };
+
+    var MessageWindowPopup = isExistPlugin('MessageWindowPopup');
+
     //=============================================================================
     // Game_Interpreter
     //=============================================================================
@@ -141,12 +197,17 @@ FTKR.MWL = FTKR.MWL || {};
     };
 
     Game_Interpreter.prototype.continueAddMwlMessages = function() {
+        var count = 0;
         while ([105, 405, 101, 401].contains(this.nextEventCode())) {  // Text data
+            if (MessageWindowPopup && count >= $gameParty.mwlMessageLines()) {
+                break;
+            }
             if ([101, 105].contains(this.nextEventCode())) {
                 this._index++;
                 continue;
             }
             this._index++;
+            count++;
             $gameMessage.add(this.currentCommand().parameters[0]);
         }
     };
@@ -237,19 +298,24 @@ FTKR.MWL = FTKR.MWL || {};
     // Window_Message
     //=============================================================================
 
-    var _MWL_Window_Message_updatePlacement = Window_Message.prototype.updatePlacement;
-    Window_Message.prototype.updatePlacement = function() {
+    Window_Message.prototype.setMWLWindowSize = function() {
         if ($gameParty.isRequestResetWindowSize()) {
             if ($gameParty.mwlMessageLines()) {
-                this.height = this.fittingHeight($gameParty.mwlMessageLines());
+                height = this.fittingHeight($gameParty.mwlMessageLines());
             } else {
-                this.height = this.windowHeight();
+                height = this.windowHeight();
             }
-            this.move(this.x, this.y, this.width, this.height);
+            var y = this._positionType * (Graphics.boxHeight - height) / 2;
+            this.move(this.x, y, this.windowWidth(), height);
             this.contents = new Bitmap(this.contentsWidth(), this.contentsHeight());
             $gameParty.clearRequestResetWindowSize();
         }
+    };
+    
+    var _MWL_Window_Message_updatePlacement = Window_Message.prototype.updatePlacement;
+    Window_Message.prototype.updatePlacement = function() {
         _MWL_Window_Message_updatePlacement.call(this);
+        this.setMWLWindowSize();
     };
 
 }());//EOF
