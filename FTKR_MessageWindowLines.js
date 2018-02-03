@@ -298,15 +298,14 @@ FTKR.MWL = FTKR.MWL || {};
     // Window_Message
     //=============================================================================
 
+    var _MWL_Window_Message_numVisibleRows = Window_Message.prototype.numVisibleRows;
+    Window_Message.prototype.numVisibleRows = function() {
+        return $gameParty.mwlMessageLines() || _MWL_Window_Message_numVisibleRows.call(this);
+    };
+
     Window_Message.prototype.setMWLWindowSize = function() {
         if ($gameParty.isRequestResetWindowSize()) {
-            if ($gameParty.mwlMessageLines()) {
-                height = this.fittingHeight($gameParty.mwlMessageLines());
-            } else {
-                height = this.windowHeight();
-            }
-            var y = this._positionType * (Graphics.boxHeight - height) / 2;
-            this.move(this.x, y, this.windowWidth(), height);
+            this.move(this.x, this.y, this.windowWidth(), this.windowHeight());
             this.contents = new Bitmap(this.contentsWidth(), this.contentsHeight());
             $gameParty.clearRequestResetWindowSize();
         }
