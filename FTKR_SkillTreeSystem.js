@@ -3,8 +3,8 @@
 // FTKR_SkillTreeSystem.js
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/02/25
-// 最終更新日 : 2017/12/20
-// バージョン : v1.12.0
+// 最終更新日 : 2018/02/13
+// バージョン : v1.13.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.12.0 ツリー型スキル習得システム
+ * @plugindesc v1.13.0 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -627,6 +627,12 @@ FTKR.STS = FTKR.STS || {};
  * 2.スキルBの派生スキルにスキルCを登録
  * ⇒この場合、スキルCを習得するために、スキルAとスキルBをどちらも
  *   習得しなければいけない
+ * 
+ * forget_skills: y1,y2,...
+ * 削除スキル: y1,y2,...
+ *    :このスキルを習得した時に、習得済みのスキルID y1,y2,...を削除します。
+ *    :なお、この設定で削除されたスキルは、スキルツリー上では
+ *    :習得済みのままです。
  * 
  * position: y(, z)
  * 表示位置: y(, z)
@@ -1353,7 +1359,7 @@ FTKR.STS = FTKR.STS || {};
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
- * Copyright (c) 2017 Futokoro
+ * Copyright (c) 2017,2018 Futokoro
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
@@ -1364,6 +1370,9 @@ FTKR.STS = FTKR.STS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.13.0 - 2018/02/13 : 機能追加
+ *    1. スキルを習得した時に、他のスキルを忘れさせる機能を追加。
  * 
  * v1.12.0 - 2017/12/20 : 機能追加
  *    1. スキルのデータを表示する制御文字を追加。
@@ -2023,6 +2032,7 @@ function Scene_STS() {
                 position:0,
                 diffX:0,
                 desc:'',
+                forgetSkillIds:[],
             };
             obj.sts.costs.push(this.setCost('sp', 0, FTKR.STS.sp.defaultReq));
 
@@ -2061,6 +2071,8 @@ function Scene_STS() {
             var case1j = /習得条件:[ ]*(.+)/i;
             var case2 = /(?:COST SP):[ ]*(.+)/i;
             var case2j = /コスト SP:[ ]*(.+)/i;
+            var case2a = /(?:FORGET_SKILLS):[ ]*(\d+(?:\s*,\s*\d+)*)/i;
+            var case2aj = /削除スキル:[ ]*(\d+(?:\s*,\s*\d+)*)/i;
             var case3a = /(?:TREE)[ ](\d+)[ ](?:SKILL):[ ]*(\d+(?:\s*,\s*\d+)*)/i;
             var case3aj = /ツリータイプ (\d+) スキル:[ ]*(\d+(?:\s*,\s*\d+)*)/i;
             var case3b = /(?:SKILL):[ ]*(\d+(?:\s*,\s*\d+)*)/i;
@@ -2095,6 +2107,8 @@ function Scene_STS() {
                     obj.sts.required = String(RegExp.$1);
                 } else if(data.match(case2) || data.match(case2j)) {
                     obj.sts.costs[0].value = String(RegExp.$1);
+                } else if (data.match(case2a) || data.match(case2aj)) {
+                    obj.sts.forgetSkillIds = JSON.parse('[' + RegExp.$1.match(/\d+/g) + ']');
                 } else if(data.match(case3a) || data.match(case3aj)) {
                     var treeId = RegExp.$1;
                     var tree = this.readTree(obj, RegExp.$1, RegExp.$2);
@@ -2216,10 +2230,25 @@ function Scene_STS() {
             if (FTKR.STS.learnedSkillVarID) $gameVariables.setValue(FTKR.STS.learnedSkillVarID, skillId);
             this.stsCountUp(skillId);
             this._stsLearnSkills[skillId] = true;
+            this.checkStsForgetSkills(skillId);
         }
         if (this._initStsFlag) {
             this.stsUsedCost(skillId);
         }
+    };
+
+    Game_Actor.prototype.checkStsForgetSkills = function(skillId) {
+        var skillIds = this.stsSkill(skillId).sts.forgetSkillIds;
+        if (!skillIds || !skillIds.length) return;
+        skillIds.forEach( function(id){
+            if (!id) return;
+            var sid = Number(id);
+            if (FTKR.STS.enableSkillCount) {
+                var skill = this.stsSkill(sid);
+                this.setStsSkillCount(sid, skill.sts.maxCount);
+            }
+            _STS_Game_Actor_forgetSkill.call(this, sid);
+        },this);
     };
 
     var _STS_Game_Actor_forgetSkill = Game_Actor.prototype.forgetSkill;
@@ -3758,7 +3787,7 @@ function Scene_STS() {
 
     Scene_STS.prototype.create = function() {
       Scene_ItemBase.prototype.create.call(this);
-      this.createHelpWindow();
+//      this.createHelpWindow();
       this.createStsActorStatusWindow();
       this.createTreeTypeWindow();
       this.createSkillTreeWindow();
@@ -3780,7 +3809,7 @@ function Scene_STS() {
     Scene_STS.prototype.createTreeTypeWindow = function() {
       this._stsTreeTypeWindow = new Window_TreeType(0, 144, 240, 288);
       var window = this._stsTreeTypeWindow;
-      window.setHelpWindow(this._helpWindow);
+//      window.setHelpWindow(this._helpWindow);
       window.setHandler('ok',       this.onTreeTypeOk.bind(this));
       window.setHandler('cancel',   this.popScene.bind(this));
       window.setHandler('pagedown', this.nextActor.bind(this));
@@ -3796,7 +3825,7 @@ function Scene_STS() {
       var wh = Graphics.boxHeight - wy;
       this._stsSkillTreeWindow = new Window_SkillTree(wx, wy, ww, wh);
       var window = this._stsSkillTreeWindow;
-      window.setHelpWindow(this._helpWindow);
+//      window.setHelpWindow(this._helpWindow);
       window.setHandler('ok',     this.onSkillTreeOk.bind(this));
       window.setHandler('cancel', this.onSkillTreeCancel.bind(this));
       this._stsTreeTypeWindow.setSkillTreeWindow(window);
@@ -3813,7 +3842,8 @@ function Scene_STS() {
     };
 
     Scene_STS.prototype.createStsConfTitleWindow = function() {
-      var wh = this._helpWindow.lineHeight() + this._helpWindow.standardPadding() * 2;
+      var wh = this._stsActorStatusWindow.fittingHeight(1);
+//      var wh = this._helpWindow.lineHeight() + this._helpWindow.standardPadding() * 2;
       this._stsConfTitleWindow = new Window_StsConfTitle(204, 120, 408, wh);
       this.addWindow(this._stsConfTitleWindow);
     };
@@ -3823,7 +3853,8 @@ function Scene_STS() {
       var wx = ctw.x;
       var wy = ctw.y + ctw.height;
       var ww = ctw.width;
-      var wh = this._helpWindow.lineHeight() * 1 + this._helpWindow.standardPadding() * 2;
+      var wh = this._stsActorStatusWindow.fittingHeight(1);
+//      var wh = this._helpWindow.lineHeight() * 1 + this._helpWindow.standardPadding() * 2;
       this._stsConfWindow = new Window_StsConf(wx, wy, ww, wh);
       var window = this._stsConfWindow;
       window.setHandler('ok', this.onConfirmationOk.bind(this));
