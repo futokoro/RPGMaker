@@ -3,8 +3,8 @@
 // FTKR_OriginalSceneWindow.js
 // 作成者     : フトコロ
 // 作成日     : 2017/06/17
-// 最終更新日 : 2018/01/16
-// バージョン : v1.4.0
+// 最終更新日 : 2018/02/14
+// バージョン : v1.5.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.OSW = FTKR.OSW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.4.0 オリジナルのシーンやウィンドウを作成する
+ * @plugindesc v1.5.0 オリジナルのシーンやウィンドウを作成する
  * @author フトコロ
  *
  * @param --ウィンドウの共通設定--
@@ -90,16 +90,6 @@ FTKR.OSW = FTKR.OSW || {};
  * left / center / right
  * @default left
  * 
- * @param Command Number In Original
- * @desc オリジナルシーンのコマンドウィンドウ生成数を設定します。
- * @type number
- * @default 
- * 
- * @param Command Number In Map
- * @desc マップシーンのコマンドウィンドウ生成数を設定します。
- * @type number
- * @default 
- * 
  * @param --コモンウィンドウの設定--
  * @desc 
  * 
@@ -110,21 +100,6 @@ FTKR.OSW = FTKR.OSW || {};
  * @param Common Height
  * @desc コモンウィンドウの高さを設定します。
  * @default 240
- * 
- * @param Common Number In Original
- * @desc オリジナルシーンのコモンウィンドウ生成数を設定します。
- * @type number
- * @default 
- * 
- * @param Common Number In Map
- * @desc マップシーンのコモンウィンドウ生成数を設定します。
- * @type number
- * @default 
- * 
- * @param Common Number In Battle
- * @desc バトルシーンのコモンウィンドウ生成数を設定します。
- * @type number
- * @default 
  * 
  * @param --コモンウィンドウの表示内容設定--
  * @desc 
@@ -165,16 +140,6 @@ FTKR.OSW = FTKR.OSW || {};
  * @desc セレクトウィンドウの最大列数を設定します。
  * @type number
  * @default 2
- * 
- * @param Select Number In Original
- * @desc オリジナルシーンのセレクトウィンドウ生成数を設定します。
- * @type number
- * @default 
- * 
- * @param Select Number In Map
- * @desc マップシーンのセレクトウィンドウ生成数を設定します。
- * @type number
- * @default 
  * 
  * @param --セレクトウィンドウの表示内容設定--
  * @desc 
@@ -279,38 +244,52 @@ FTKR.OSW = FTKR.OSW || {};
  * 
  * 
  *-----------------------------------------------------------------------------
- * コマンドウィンドウの設定
+ * ウィンドウの設定方法
  *-----------------------------------------------------------------------------
- * コマンドウィンドウの生成数はプラグインパラメータで設定します。
+ * ウィンドウの設定は、ウィンドウの種類ごとに異なるプラグインコマンドで行います。
  * 
- * Command Number In Original
- *    :オリジナルシーンでの生成数
+ * １．コモンウィンドウの場合
  * 
- * Command Number In Map
- *    :マップシーンでの生成数
+ * 　OSW_コモンウィンドウ設定 [シーン名] [ウィンドウID] [設定内容]
+ * 　OSW_SET_COMMON_WINDOW [scene] [windowId] [setting]
+ * 
+ * ２．コマンドウィンドウの場合
+ * 
+ * 　OSW_コマンドウィンドウ設定 [シーン名] [ウィンドウID] [設定内容]
+ * 　OSW_SET_COMMAND_WINDOW [scene] [windowId] [setting]
+ * 
+ * ３．セレクトウィンドウの場合
+ * 
+ * 　OSW_セレクトウィンドウ設定 [シーン名] [ウィンドウID] [設定内容]
+ * 　OSW_SET_SELECT_WINDOW [scene] [windowId] [setting]
  * 
  * 
- * コマンドウィンドウの設定は、以下のプラグインコマンドで行います。
+ * プラグインコマンドの各パラメータの意味は以下の通りです。
  * 
- * OSW_コマンドウィンドウ設定 [シーン名] [ウィンドウID] [設定内容]
- * OSW_SET_COMMAND_WINDOW [scene] [windowId] [setting]
+ * [シーン名]
+ *    どのシーンのウィンドウを設定するか指定します。
+ *    以下の文字で指定します。
+ *        オリジナル or ORIGINAL
+ *            :オリジナルシーンを設定する
+ *        マップ or MAP
+ *            :マップシーンを設定する
+ *        バトル or BATTLE
+ *            :バトルシーンを設定する
  * 
- * [シーン名]に、以下を設定してください。
- *    オリジナル or ORIGINAL
- *        :オリジナルシーンを設定する
- *    マップ or MAP
- *        :マップシーンを設定する
+ * [ウィンドウID]
+ *    設定するウィンドウのIDを指定します。
  * 
- * [ウィンドウID]で、設定するウィンドウのIDを指定します。
+ * [設定内容]
+ *    ウィンドウのレイアウトや表示内容を設定します。
+ *    設定内容には、どのウィンドウでも設定可能な共通なものと
+ *    コモンウィンドウだけ、コマンドウィンドウだけなど、固有の設定があります。
  * 
- * [設定内容]には、以下があります。
- * この設定は、プラグインパラメータの設定よりも優先します。
+ * 以下に、共通で使える設定内容を示します。
  * 
  *    生成
  *    CREATE
  *        :ウィンドウを生成します。
- *        :オリジナルシーンおよびマップシーンでのみ使用できます。
- *        :このパラメータは単独で使用してください。
+ *        :このパラメータは単独でかならず最初に実行してください。
  * 
  *    位置 [x] [y]
  *    POSITION [x] [y]
@@ -318,26 +297,12 @@ FTKR.OSW = FTKR.OSW || {};
  *        :x に -1 を入力すると、ウィンドウサイズに合わせて画面右寄せします。
  *        :y に -1 を入力すると、ウィンドウサイズに合わせて画面下寄せします。
  * 
- *    サイズ [width]
- *    SIZE [width]
+ *    サイズ [width] [height]
+ *    SIZE [width] [height]
  *        :ウィンドウのサイズを pixel単位 で指定します。
- *        :ウィンドウの高さは、設定したコマンドの数と最大列数により決まります。
  *        :width に -1 を入力すると、画面の幅に合わせます。
- *        :width に 0 を入力すると、幅は変えずに高さだけ設定します。
- *        :コマンドを追加した場合は、サイズの再設定を行ってください。
- * 
- *    最大列数 [value]
- *    MAX_COLS [value]
- *        :コマンドを横に並べる数を設定します。
- *        :デフォルトは１です。
- * 
- *    コマンド位置 [align]
- *    COMMAND_ALIGN [align]
- *        :ウィンドウ枠内で、コマンド名を表示する位置を設定します。
- *        : left   - 左寄せ
- *        : center - 中央
- *        : right  - 右寄せ
- *        :デフォルトは左寄せです。
+ *        :height に -1 を入力すると、画面の高さに合わせます。
+ *        :コマンドウィンドウの場合は、height は入力できません。
  * 
  *    フォントサイズ [value]
  *    FONTSIZE [value]
@@ -355,10 +320,45 @@ FTKR.OSW = FTKR.OSW || {};
  *    OPACITY [value]
  *        :ウィンドウの透明度を pixel単位 で指定します。
  * 
- *    フレーム [ON or OFF]
- *    FRAME [ON or OFF]
+ *    フレーム [表示 or 非表示]
+ *    FRAME [SHOW or HIDE]
  *        :ウィンドウのフレームを表示するかどうか設定します。
- *        :デフォルトでは表示(ON)します。
+ *        :(デフォルトでは表示)
+ * 
+ *    更新
+ *    REFRESH
+ *        :設定内容をウィンドウに反映させます。
+ *        :位置やサイズなど、設定した後には更新が必要です。
+ * 
+ *    表示 [ON or OFF]
+ *    SHOW [ON or OFF]
+ *        :ウィンドウの表示のON/OFFを切り替えます。
+ *        :表示をONに切り替える時に、更新を行います。
+ *        :基本的に最後に設定してください。
+ * 
+ *    表示スイッチ [スイッチID]
+ *    SHOW_SWITCH [switchId]
+ *        :ウィンドウの表示のON/OFFを指定したスイッチIDで切り替えます。
+ *        :表示をOFFにすると、自動的にアクティブもOFFになります。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * コマンドウィンドウの個別設定内容
+ *-----------------------------------------------------------------------------
+ * コマンドウィンドウの個別設定内容は、以下があります。
+ * 
+ *    最大列数 [value]
+ *    MAX_COLS [value]
+ *        :コマンドを横に並べる数を設定します。
+ *        :デフォルトは１です。
+ * 
+ *    コマンド位置 [align]
+ *    COMMAND_ALIGN [align]
+ *        :ウィンドウ枠内で、コマンド名を表示する位置を設定します。
+ *        : left   - 左寄せ
+ *        : center - 中央
+ *        : right  - 右寄せ
+ *        :デフォルトは左寄せです。
  * 
  *    コマンド初期化
  *    CLEAR_COMMAND
@@ -427,85 +427,11 @@ FTKR.OSW = FTKR.OSW || {};
  *        :複数のコマンドウィンドウを表示させる場合には、
  *        :アクティブをONにするウィンドウは一つだけにしてください。
  * 
- *    表示 [ON or OFF]
- *    SHOW [ON or OFF]
- *        :ウィンドウの表示のON/OFFを切り替えます。
- *        :表示をONに切り替える時に、更新を行います。
- *        :基本的に最後に設定してください。
  * 
  *-----------------------------------------------------------------------------
- * コモンウィンドウの表示
+ * コモンウィンドウの個別設定内容
  *-----------------------------------------------------------------------------
- * コモンウィンドウの生成数はプラグインパラメータで設定します。
- * 
- * Common Number In Original
- *    :オリジナルシーンでの生成数
- * 
- * Common Number In Map
- *    :マップシーンでの生成数
- * 
- * Common Number In Battle
- *    :バトルシーンでの生成数
- *    :バトルシーンでは、ログウィンドウよりも手前に表示します。
- * 
- * 
- * コモンウィンドウの設定は以下のプラグインコマンドで行います。
- * 
- * OSW_コモンウィンドウ設定 [シーン名] [ウィンドウID] [設定内容]
- * OSW_SET_COMMON_WINDOW [scene] [windowId] [setting]
- * 
- * [シーン名]に、以下を設定してください。
- *    オリジナル or ORIGINAL
- *        :オリジナルシーンを設定する
- *    マップ or MAP
- *        :マップシーンを設定する
- *    バトル or BATTLE
- *        :バトルシーンを設定する
- * 
- * 
- * [ウィンドウID]で、設定するウィンドウのIDを指定します。
- * 
  * [設定内容]には、以下があります。
- * この設定は、プラグインパラメータの設定よりも優先します。
- * 
- *    生成
- *    CREATE
- *        :ウィンドウを生成します。
- *        :オリジナルシーンおよびマップシーンでのみ使用できます。
- *        :このパラメータは単独で使用してください。
- * 
- *    位置 [x] [y]
- *    POSITION [x] [y]
- *        :ウィンドウの表示位置を pixel単位 で指定します。
- *        :x に -1 を入力すると、ウィンドウサイズに合わせて画面右寄せします。
- *        :y に -1 を入力すると、ウィンドウサイズに合わせて画面下寄せします。
- * 
- *    サイズ [width] [height]
- *    SIZE [width] [height]
- *        :ウィンドウのサイズを pixel単位 で指定します。
- *        :width に -1 を入力すると、画面の幅に合わせます。
- *        :height に -1 を入力すると、画面の高さに合わせます。
- * 
- *    フォントサイズ [value]
- *    FONTSIZE [value]
- *        :ウィンドウのフォントサイズを pixel単位 で指定します。
- * 
- *    行の高さ [value]
- *    LINEHEIGHT [value]
- *        :ウィンドウの１行の高さを pixel単位 で指定します。
- * 
- *    余白 [value]
- *    PADDING [value]
- *        :ウィンドウの周囲の余白を pixel単位 で指定します。
- * 
- *    透明度 [value]
- *    OPACITY [value]
- *        :ウィンドウの透明度を pixel単位 で指定します。
- * 
- *    フレーム [表示 or 非表示]
- *    FRAME [SHOW or HIDE]
- *        :ウィンドウのフレームを表示するかどうか設定します。
- *        :(デフォルトでは表示)
  * 
  *    アクター [アクターID]
  *    ACTOR [actorId]
@@ -563,62 +489,11 @@ FTKR.OSW = FTKR.OSW || {};
  *        :       :Actor Status Width Rate に相当する設定です。
  *        :       :カンマ(,)で区切って、入力してください。
  * 
- *    更新
- *    REFRESH
- *        :設定内容をウィンドウに反映させます。
- *        :位置やサイズなど、設定した後には更新が必要です。
- * 
- *    表示 [ON or OFF]
- *    SHOW [ON or OFF]
- *        :ウィンドウの表示のON/OFFを切り替えます。
- *        :基本的に最後に設定してください。
- * 
  * 
  *-----------------------------------------------------------------------------
- * セレクトウィンドウの設定
+ * セレクトウィンドウの個別設定内容
  *-----------------------------------------------------------------------------
- * セレクトウィンドウの生成数はプラグインパラメータで設定します。
- * 
- * Select Number In Original
- *    :オリジナルシーンでの生成数
- * 
- * Select Number In Map
- *    :マップシーンでの生成数
- * 
- * 
- * セレクトウィンドウの設定は、以下のプラグインセレクトで行います。
- * 
- * OSW_セレクトウィンドウ設定 [シーン名] [ウィンドウID] [設定内容]
- * OSW_SET_SELECT_WINDOW [scene] [windowId] [setting]
- * 
- * [シーン名]に、以下を設定してください。
- *    オリジナル or ORIGINAL
- *        :オリジナルシーンを設定する
- *    マップ or MAP
- *        :マップシーンを設定する
- * 
- * [ウィンドウID]で、設定するウィンドウのIDを指定します。
- * 
- * [設定内容]には、以下があります。
- * この設定は、プラグインパラメータの設定よりも優先します。
- * 
- *    生成
- *    CREATE
- *        :ウィンドウを生成します。
- *        :オリジナルシーンおよびマップシーンでのみ使用できます。
- *        :このパラメータは単独で使用してください。
- * 
- *    位置 [x] [y]
- *    POSITION [x] [y]
- *        :ウィンドウの表示位置を pixel単位 で指定します。
- *        :x に -1 を入力すると、ウィンドウサイズに合わせて画面右寄せします。
- *        :y に -1 を入力すると、ウィンドウサイズに合わせて画面下寄せします。
- * 
- *    サイズ [width] [height]
- *    SIZE [width] [height]
- *        :ウィンドウのサイズを pixel単位 で指定します。
- *        :width に -1 を入力すると、画面の幅に合わせます。
- *        :height に -1 を入力すると、画面の高さに合わせます。
+ * セレクトウィンドウの[設定内容]には、以下があります。
  * 
  *    最大列数 [value]
  *    MAX_COLS [value]
@@ -629,27 +504,6 @@ FTKR.OSW = FTKR.OSW || {};
  *    CURSOR_HEIGHT [value]
  *        :カーソルの高さ(行数)を設定します。
  *        :デフォルトは１です。
- * 
- *    フォントサイズ [value]
- *    FONTSIZE [value]
- *        :ウィンドウのフォントサイズを pixel単位 で指定します。
- * 
- *    行の高さ [value]
- *    LINEHEIGHT [value]
- *        :ウィンドウの１行の高さを pixel単位 で指定します。
- * 
- *    余白 [value]
- *    PADDING [value]
- *        :ウィンドウの周囲の余白を pixel単位 で指定します。
- * 
- *    透明度 [value]
- *    OPACITY [value]
- *        :ウィンドウの透明度を pixel単位 で指定します。
- * 
- *    フレーム [ON or OFF]
- *    FRAME [ON or OFF]
- *        :ウィンドウのフレームを表示するかどうか設定します。
- *        :デフォルトでは表示(ON)します。
  * 
  *    アクター [アクターID]
  *    ACTOR [actorId]
@@ -758,11 +612,6 @@ FTKR.OSW = FTKR.OSW || {};
  *        :複数のセレクトウィンドウを表示させる場合には、
  *        :アクティブをONにするウィンドウは一つだけにしてください。
  * 
- *    表示 [ON or OFF]
- *    SHOW [ON or OFF]
- *        :ウィンドウの表示のON/OFFを切り替えます。
- *        :表示をONに切り替える時に、更新を行います。
- *        :基本的に最後に設定してください。
  * 
  *-----------------------------------------------------------------------------
  * 本プラグインのライセンスについて(License)
@@ -782,6 +631,12 @@ FTKR.OSW = FTKR.OSW || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.5.0 - 2018/02/14 : 機能追加、仕様変更、ヘルプ修正
+ *    1. ゲーム内スイッチで、ウィンドウの表示のON/OFFを切り替える機能を追加。
+ *    2. プラグインパラメータで、ウィンドウの生成数を設定する機能を削除。
+ *    3. バトルシーンでも、ウィンドウを作成するために生成コマンドの実行が
+ *       必要なように変更。
  * 
  * v1.4.0 - 2018/01/16 : 機能追加
  *    1. コマンドウィンドウのキャンセル時の動作を設定するコマンドを追加。
@@ -860,10 +715,6 @@ function Game_OswScene() {
             width         :Number(parameters['Command Width'] || 240),
             maxCols       :Number(parameters['Command Max Cols'] || 1),
             align         :String(parameters['Command Align'] || 'left'),
-            number:{
-                original  :Number(parameters['Command Number In Original'] || 0),
-                map       :Number(parameters['Command Number In Map'] || 0),
-            },
         },
         common:{
             width         :Number(parameters['Common Width'] || 240),
@@ -873,21 +724,12 @@ function Game_OswScene() {
                 spaceIn   :Number(parameters['Actor Status Space In Text'] || 0),
                 widthRate :String(parameters['Actor Status Width Rate'] || '1,0,0'),
             },
-            number:{
-                original  :Number(parameters['Common Number In Original'] || 0),
-                map       :Number(parameters['Common Number In Map'] || 0),
-                battle    :Number(parameters['Common Number In Battle'] || 0),
-            },
         },
         select:{
             width         :Number(parameters['Select Width'] || -1),
             height        :Number(parameters['Select Height'] || 240),
             maxCols       :Number(parameters['Select Max Cols'] || 1),
             cursorHeight  :Number(parameters['Select Cursor Height'] || 1),
-            number:{
-                original  :Number(parameters['Select Number In Original'] || 0),
-                map       :Number(parameters['Select Number In Map'] || 0),
-            },
             content:{
                 space     :String(parameters['Select Status Space'] || '0,0,0,0'),
                 spaceIn   :Number(parameters['Select Status Space In Text'] || 0),
@@ -1020,10 +862,10 @@ function Game_OswScene() {
                 return $gameOswData;
             case 'マップ':
             case 'MAP':
-                return  $gameMap;
+                return $gameMap;
             case 'バトル':
             case 'BATTLE':
-                return  $gameParty;
+                return $gameParty;
             default:
                 return {};
         }
@@ -1048,18 +890,33 @@ function Game_OswScene() {
         this.setOswWindowArgs(window, 2, args, type);
     };
 
+    Game_Interpreter.prototype.createOswList = function(args, type) {
+        var windowId = setArgNum(args[1]);
+        switch (setArgStr(args[0]).toUpperCase()) {
+            case 'オリジナル':
+            case 'ORIGINAL':
+                $gameOswData.addOswList(type, windowId);
+                break;
+            case 'マップ':
+            case 'MAP':
+                $gameMap.addOswList(type, windowId);
+                break;
+            case 'バトル':
+            case 'BATTLE':
+                $gameParty.addOswList(type, windowId);
+                break;
+            default:
+                return {};
+        }
+    };
+
     Game_Interpreter.prototype.setOswWindowArgs = function(window, index, args, type) {
         for (var i = index; i < args.length; i++) {
             var arg = (args[i] + '').toUpperCase();
             switch (arg) {
                 case '生成':
                 case 'CREATE':
-                    var windowId = setArgNum(args[1]);
-                    if (window.isOriginal()) {
-                        $gameOswData.addOswList(type, windowId);
-                    } else if (window.isMap()) {
-                        $gameMap.addOswList(type, windowId);
-                    }
+                    this.createOswList(args, type);
                     return;
                 case '位置':
                 case 'POSITION':
@@ -1098,6 +955,12 @@ function Game_OswScene() {
                             window.hide();
                             break;
                     }
+                    i += 1;
+                    break;
+                case '表示スイッチ':
+                case 'SHOW_SWITCH':
+                    var switchId = setArgNum(args[i+1]);
+                    window.setShowSwitch(switchId);
                     i += 1;
                     break;
                 case 'アクティブ':
@@ -1442,9 +1305,10 @@ function Game_OswScene() {
     // ウィンドウ設定用ベースデータクラス
     //=============================================================================
 
-    Game_OswBase.prototype.initialize = function(scene) {
+    Game_OswBase.prototype.initialize = function(scene, windowId) {
         var basic = FTKR.OSW.basic;
         this._scene = scene;
+        this._windowId = windowId;
         this._x = 0;
         this._y = 0;
         this._width = 0;
@@ -1606,6 +1470,10 @@ function Game_OswScene() {
         this._content.widthRate = widthRate;
     };
 
+    Game_OswBase.prototype.setShowSwitch = function(switchId) {
+        this._showSwitchId = switchId;
+    };
+
     //=============================================================================
     // Game_OswSelectable
     // セレクトウィンドウ設定用データクラス
@@ -1614,8 +1482,8 @@ function Game_OswScene() {
     Game_OswSelectable.prototype = Object.create(Game_OswBase.prototype);
     Game_OswSelectable.prototype.constructor = Game_OswSelectable;
 
-    Game_OswSelectable.prototype.initialize = function(scene) {
-        Game_OswBase.prototype.initialize.call(this, scene);
+    Game_OswSelectable.prototype.initialize = function(scene, windowId) {
+        Game_OswBase.prototype.initialize.call(this, scene, windowId);
         var select = FTKR.OSW.select;
         var content = select.content;
         this._drawType = 0;
@@ -1672,8 +1540,8 @@ function Game_OswScene() {
     Game_OswCommand.prototype = Object.create(Game_OswBase.prototype);
     Game_OswCommand.prototype.constructor = Game_OswCommand;
 
-    Game_OswCommand.prototype.initialize = function(scene) {
-        Game_OswBase.prototype.initialize.call(this, scene);
+    Game_OswCommand.prototype.initialize = function(scene, windowId) {
+        Game_OswBase.prototype.initialize.call(this, scene, windowId);
         var cmd = FTKR.OSW.command;
         this.clearList();
         this.setTextAlign(cmd.align);
@@ -1734,8 +1602,8 @@ function Game_OswScene() {
     Game_OswCommon.prototype = Object.create(Game_OswBase.prototype);
     Game_OswCommon.prototype.constructor = Game_OswCommon;
 
-    Game_OswCommon.prototype.initialize = function(scene) {
-        Game_OswBase.prototype.initialize.call(this, scene);
+    Game_OswCommon.prototype.initialize = function(scene, windowId) {
+        Game_OswBase.prototype.initialize.call(this, scene, windowId);
         var common = FTKR.OSW.common;
         var content = common.content;
         this._referenceId = -1;
@@ -1778,37 +1646,24 @@ function Game_OswScene() {
         _OSW_Game_Map_initialize.call(this);
         this._oswIndex = -1;
         this._oswList = [];
-        this.initCommandWindows();
-        this.initCommonWindows();
-        this.initSelectWindows();
+        this._oswCommandWindows = [];
+        this._oswCommonWindows = [];
+        this._oswSelectWindows = [];
     };
 
     Game_Map.prototype.addOswList = function(type, id) {
         if (!this._oswList) this._oswList = [];
-        if (type === Game_OswBase.WINDOW_COMMAND && id >= this.commandWindowNumber()) return;
-        if (type === Game_OswBase.WINDOW_COMMON && id >= this.commonWindowNumber()) return;
-        if (type === Game_OswBase.WINDOW_SELECTABLE && id >= this.selectWindowNumber()) return;
-        this._oswList.push({type:type, id:id, creative:false});
-    };
-
-    Game_Map.prototype.initCommandWindows = function() {
-        this._oswCommandWindows = [];
-        for (var i = 0; i < this.commandWindowNumber(); i++) {
-            this._oswCommandWindows[i] = new Game_OswCommand(Game_OswBase.SCENE_MAP);
+        if (!this._oswList.some(function(list){
+            return list.type === type && list.id === id;
+        })) this._oswList.push({type:type, id:id, creative:false});
+        if (type === Game_OswBase.WINDOW_COMMON && !this._oswCommonWindows[id]) {
+            this._oswCommonWindows[id] = new Game_OswCommon(Game_OswBase.SCENE_MAP, id);
         }
-    };
-
-    Game_Map.prototype.initCommonWindows = function() {
-        this._oswCommonWindows = [];
-        for (var i = 0; i < this.commonWindowNumber(); i++) {
-            this._oswCommonWindows[i] = new Game_OswCommon(Game_OswBase.SCENE_MAP);
+        if (type === Game_OswBase.WINDOW_COMMAND && !this._oswCommandWindows[id]) {
+            this._oswCommandWindows[id] = new Game_OswCommand(Game_OswBase.SCENE_MAP, id);
         }
-    };
-
-    Game_Map.prototype.initSelectWindows = function() {
-        this._oswSelectWindows = [];
-        for (var i = 0; i < this.selectWindowNumber(); i++) {
-            this._oswSelectWindows[i] = new Game_OswSelectable(Game_OswBase.SCENE_MAP);
+        if (type === Game_OswBase.WINDOW_SELECTABLE && !this._oswSelectWindows[id]) {
+            this._oswSelectWindows[id] = new Game_OswSelectable(Game_OswBase.SCENE_MAP, id);
         }
     };
 
@@ -1828,18 +1683,6 @@ function Game_OswScene() {
         return this._oswSelectWindows[windowId];
     };
 
-    Game_Map.prototype.commandWindowNumber = function() {
-        return FTKR.OSW.command.number.map;
-    };
-
-    Game_Map.prototype.selectWindowNumber = function() {
-        return FTKR.OSW.select.number.map;
-    };
-
-    Game_Map.prototype.commonWindowNumber = function() {
-        return FTKR.OSW.common.number.map;
-    };
-
     //=============================================================================
     // Game_Party
     // パーティーデータクラスに、バトルシーン用のウィンドウ設定を追加
@@ -1853,29 +1696,22 @@ function Game_OswScene() {
     Game_Party.prototype.initialize = function() {
         _OSW_Game_Party_initialize.call(this);
         this._oswList = [];
-        this.initCommonWindows();
-    };
-
-    Game_Party.prototype.addOswList = function(id) {
-        if (!this._oswList) this._oswList = [];
-        this._oswList.push({type:Game_OswBase.WINDOW_COMMON, id:id, creative:false});
-    };
-
-    Game_Party.prototype.initCommonWindows = function() {
         this._oswCommonWindows = [];
-        for (var i = 0; i < this.commonWindowNumber(); i++) {
-            this._oswCommonWindows[i] = new Game_OswCommon(Game_OswBase.SCENE_BATTLE);
-            this._oswCommonWindows[i].createWindow();
-            this.addOswList(i);
+    };
+
+    Game_Party.prototype.addOswList = function(type, id) {
+        if (!this._oswList) this._oswList = [];
+        if (!this._oswList.some(function(list){
+            return list.type === type && list.id === id;
+        })) this._oswList.push({type:type, id:id, creative:false});
+        if (type === Game_OswBase.WINDOW_COMMON && !this._oswCommonWindows[id]) {
+            this._oswCommonWindows[id] = new Game_OswCommon(Game_OswBase.SCENE_BATTLE, id);
+            this._oswCommonWindows[id].createWindow();
         }
     };
 
     Game_Party.prototype.commonWindow = function(windowId) {
         return this._oswCommonWindows[windowId];
-    };
-
-    Game_Party.prototype.commonWindowNumber = function() {
-        return FTKR.OSW.common.number.battle;
     };
 
     //=============================================================================
@@ -1888,37 +1724,24 @@ function Game_OswScene() {
         this._oswIndex = -1;
         this._active = false;
         this._oswList = [];
-        this.initCommandWindows();
-        this.initCommonWindows();
-        this.initSelectWindows();
+        this._oswCommandWindows = [];
+        this._oswCommonWindows = [];
+        this._oswSelectWindows = [];
     };
 
     Game_OswScene.prototype.addOswList = function(type, id) {
         if (!this._oswList) this._oswList = [];
-        if (type === Game_OswBase.WINDOW_COMMAND && id >= this.commandWindowNumber()) return;
-        if (type === Game_OswBase.WINDOW_COMMON && id >= this.commonWindowNumber()) return;
-        if (type === Game_OswBase.WINDOW_SELECTABLE && id >= this.selectWindowNumber()) return;
-        this._oswList.push({type:type, id:id, creative:false});
-    };
-
-    Game_OswScene.prototype.initCommandWindows = function() {
-        this._oswCommandWindows = [];
-        for (var i = 0; i < this.commandWindowNumber(); i++) {
-            this._oswCommandWindows[i] = new Game_OswCommand(Game_OswBase.SCENE_ORIGINAL);
+        if (!this._oswList.some(function(list){
+            return list.type === type && list.id === id;
+        })) this._oswList.push({type:type, id:id, creative:false});
+        if (type === Game_OswBase.WINDOW_COMMON && !this._oswCommonWindows[id]) {
+            this._oswCommonWindows[id] = new Game_OswCommon(Game_OswBase.SCENE_ORIGINAL, id);
         }
-    };
-
-    Game_OswScene.prototype.initCommonWindows = function() {
-        this._oswCommonWindows = [];
-        for (var i = 0; i < this.commonWindowNumber(); i++) {
-            this._oswCommonWindows[i] = new Game_OswCommon(Game_OswBase.SCENE_ORIGINAL);
+        if (type === Game_OswBase.WINDOW_COMMAND && !this._oswCommandWindows[id]) {
+            this._oswCommandWindows[id] = new Game_OswCommand(Game_OswBase.SCENE_ORIGINAL, id);
         }
-    };
-
-    Game_OswScene.prototype.initSelectWindows = function() {
-        this._oswSelectWindows = [];
-        for (var i = 0; i < this.selectWindowNumber(); i++) {
-            this._oswSelectWindows[i] = new Game_OswSelectable(Game_OswBase.SCENE_ORIGINAL);
+        if (type === Game_OswBase.WINDOW_SELECTABLE && !this._oswSelectWindows[id]) {
+            this._oswSelectWindows[id] = new Game_OswSelectable(Game_OswBase.SCENE_ORIGINAL, id);
         }
     };
 
@@ -1932,18 +1755,6 @@ function Game_OswScene() {
 
     Game_OswScene.prototype.selectWindow = function(windowId) {
         return this._oswSelectWindows[windowId];
-    };
-
-    Game_OswScene.prototype.commandWindowNumber = function() {
-        return FTKR.OSW.command.number.original;
-    };
-
-    Game_OswScene.prototype.commonWindowNumber = function() {
-        return FTKR.OSW.common.number.original;
-    };
-
-    Game_OswScene.prototype.selectWindowNumber = function() {
-        return FTKR.OSW.select.number.original;
     };
 
     Game_OswScene.prototype.update = function(sceneActive) {
@@ -2190,6 +2001,14 @@ function Game_OswScene() {
     //=============================================================================
 
     Window_Base.prototype.updateOswShow = function() {
+        if (this._window._showSwitchId > 0) {
+            if ($gameSwitches.value(this._window._showSwitchId)) {
+                this._window._show = true;
+            } else {
+                this._window._show = false;
+                this.deactivate();
+            }
+        }
         if (this._show !== this._window._show) {
             this._show = this._window._show;
             if (this._show) {
