@@ -3,8 +3,8 @@
 // FTKR_OriginalSceneWindow.js
 // 作成者     : フトコロ
 // 作成日     : 2017/06/17
-// 最終更新日 : 2018/02/14
-// バージョン : v1.5.0
+// 最終更新日 : 2018/02/15
+// バージョン : v1.5.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.OSW = FTKR.OSW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.5.0 オリジナルのシーンやウィンドウを作成する
+ * @plugindesc v1.5.1 オリジナルのシーンやウィンドウを作成する
  * @author フトコロ
  *
  * @param --ウィンドウの共通設定--
@@ -421,6 +421,10 @@ FTKR.OSW = FTKR.OSW || {};
  *        :アクティブOFFにした時に、カーソルを残すかどうか設定します。
  *        :アクティブ設定よりも前に設定してください。
  * 
+ *    カーソル位置初期化
+ *    CLEAR_CURSOR
+ *        :カーソルの位置を初期位置（ウィンドウ左上）に移動させます。
+ * 
  *    アクティブ [ON or OFF]
  *    ACTIVE [ON or OFF
  *        :コマンドウィンドウを選択可能な状態にするかどうか設定します。
@@ -606,6 +610,10 @@ FTKR.OSW = FTKR.OSW || {};
  *        :アクティブOFFにした時に、カーソルを残すかどうか設定します。
  *        :アクティブ設定よりも前に設定してください。
  * 
+ *    カーソル位置初期化
+ *    CLEAR_CURSOR
+ *        :カーソルの位置を初期位置（ウィンドウ左上）に移動させます。
+ * 
  *    アクティブ [ON or OFF]
  *    ACTIVE [ON or OFF
  *        :セレクトウィンドウを選択可能な状態にするかどうか設定します。
@@ -631,6 +639,10 @@ FTKR.OSW = FTKR.OSW || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.5.1 - 2018/02/15 : 機能追加
+ *    1. コマンドウィンドウとセレクトウィンドウで、カーソル位置を初期位置に戻す
+ *       コマンドを追加。
  * 
  * v1.5.0 - 2018/02/14 : 機能追加、仕様変更、ヘルプ修正
  *    1. ゲーム内スイッチで、ウィンドウの表示のON/OFFを切り替える機能を追加。
@@ -1054,6 +1066,10 @@ function Game_OswScene() {
                 case 'REFRESH':
                     window.setRequestRefresh();
                     break;
+                case 'カーソル位置初期化':
+                case 'CLEAR_CURSOR':
+                    window.clearSelectIndex();
+                    break;
                 case 'フォントサイズ':
                 case 'FONT_SIZE':
                     var value = setArgNum(args[i+1]);
@@ -1410,6 +1426,10 @@ function Game_OswScene() {
 
     Game_OswBase.prototype.clearRequestRefresh = function() {
         this._requestRefresh = false;
+    };
+
+    Game_OswBase.prototype.clearSelectIndex = function() {
+        this._clearSelectIndex = true;
     };
 
     Game_OswBase.prototype.showFrame = function() {
@@ -2064,6 +2084,10 @@ function Game_OswScene() {
         } else if (!$gameOswData._active && $gameMap._oswIndex !== this.index()) {
             $gameMap._oswIndex = this.index();
             $gameMap._oswItem = this.item(this.index());
+        }
+        if (this._window._clearSelectIndex) {
+            this.select(0);
+            this._window._clearSelectIndex = false;
         }
     };
 
