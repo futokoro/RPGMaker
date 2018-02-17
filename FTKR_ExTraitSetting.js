@@ -3,8 +3,8 @@
 // FTKR_ExTraitSetting.js
 // 作成者     : フトコロ
 // 作成日     : 2017/12/02
-// 最終更新日 : 2018/01/20
-// バージョン : v1.0.3
+// 最終更新日 : 2018/02/17
+// バージョン : v1.0.4
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ETS = FTKR.ETS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.3 装備やステート等の特徴を詳細に設定できる
+ * @plugindesc v1.0.4 装備やステート等の特徴を詳細に設定できる
  * @author フトコロ
  *
  * @param 計算方法
@@ -25,7 +25,7 @@ FTKR.ETS = FTKR.ETS || {};
  * @value 0
  * @option 個別に積算
  * @value 1
- * @default 0
+ * @default 1
  * 
  * @help 
  *-----------------------------------------------------------------------------
@@ -115,23 +115,24 @@ FTKR.ETS = FTKR.ETS || {};
  * 
  * １．合計値を積算の場合
  * 
- * (加算と減算の数値の合計)　×　(1 + 乗算の数値の合計) / (1 + 除算の数値の合計)
+ * (加算と減算の数値の合計)　×　(1 or 乗算の数値の合計) / (1 or 除算の数値の合計)
  * 
  * 例えば、攻撃力の特徴が以下のように複数あった場合
- * 　　+10, -4, *1.2, /0.2
+ * 　　+10, -4, *1.2, *0.5, /0.2, /1.4
  * 
  * この合計値は以下になります。
- * 　　(+10 -4) × (1 + 1.2) / (1 + 0.2) = 11
+ * 　　(+10 -4) × (1.2 + 0.5) / (0.2 + 1.4) = 6
  * 
- * ２．個別に積算の場合
+ * 
+ * ２．個別に積算の場合(MVデフォルトの計算方法)
  * 
  * (加算と減算の数値の合計)　×　(1 * 乗算値1 * 積算値２ * ... / 除算値1 / 除算値2 /...)
  * 
  * 例えば、攻撃力の特徴が以下のように複数あった場合
- * 　　+10, -4, *1.2, /0.2
+ * 　　+10, -4, *1.2, *0.5, /0.2, /1.4
  * 
  * この合計値は以下になります。
- * 　　(+10 -4) × (1 * 1.2 / 0.2) = 36
+ * 　　(+10 -4) × (1 * 1.2 * 0.5 / 0.2 / 1.4) = 13
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -151,6 +152,10 @@ FTKR.ETS = FTKR.ETS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.4 - 2018/02/17 : 不具合修正、仕様変更
+ *    1. 計算(calc)コードを設定しない場合に正しく計算できていない不具合を修正。
+ *    2. プラグインパラメータ<計算方法>の初期値を変更。
  * 
  * v1.0.3 - 2018/01/20 : 不具合修正
  *    1. スクリプト入力時に三項演算子を使うと反映されない不具合を修正。
@@ -267,6 +272,22 @@ FTKR.ETS = FTKR.ETS || {};
         });
     };
 
+    var typeCalc = function(code) {
+        switch (code) {
+            case Game_BattlerBase.TRAIT_XPARAM:
+            case Game_BattlerBase.TRAIT_ATTACK_STATE:
+            case Game_BattlerBase.TRAIT_ATTACK_SPEED:
+            case Game_BattlerBase.TRAIT_ATTACK_TIMES:
+                return '+';
+            case Game_BattlerBase.TRAIT_PARAM:
+            case Game_BattlerBase.TRAIT_SPARAM:
+            case Game_BattlerBase.TRAIT_ELEMENT_RATE:
+            case Game_BattlerBase.TRAIT_DEBUFF_RATE:
+            case Game_BattlerBase.TRAIT_STATE_RATE:
+                return '*';
+        }
+    };
+
     //=============================================================================
     // DataManager
     //=============================================================================
@@ -304,7 +325,6 @@ FTKR.ETS = FTKR.ETS || {};
                 var data = datas[i];
                 var match = /([^:\s]+)[ ]*:[ ]*(.+)/.exec(data);
                 if (!match) continue;
-                console.log(match);
                 switch(match[1].toUpperCase()) {
                 case '内容':
                 case 'CONTENTS':
@@ -367,7 +387,8 @@ FTKR.ETS = FTKR.ETS || {};
         FTKR.setGameData(this);
         return this.traitsWithIdOperator(code, id, 'pi').reduce(function(r, trait) {
             var value = trait.etsValue ? FTKR.evalFormula(trait.etsValue) : trait.value;
-            switch(trait.calc) {
+            var calc = trait.calc || typeCalc(code);
+            switch(calc) {
             case '/':
                 return r / value;
             case '*':
@@ -385,7 +406,8 @@ FTKR.ETS = FTKR.ETS || {};
         FTKR.setGameData(this);
         return this.traitsWithIdOperator(code, id, 'pi').reduce(function(r, trait) {
             var value = trait.etsValue ? FTKR.evalFormula(trait.etsValue) : trait.value;
-            switch(trait.calc) {
+            var calc = trait.calc || typeCalc(code);
+            switch(calc) {
             case '+':
             case '-':
             case '/':
@@ -402,7 +424,8 @@ FTKR.ETS = FTKR.ETS || {};
         FTKR.setGameData(this);
         return this.traitsWithIdOperator(code, id, 'pi').reduce(function(r, trait) {
             var value = trait.etsValue ? FTKR.evalFormula(trait.etsValue) : trait.value;
-            switch(trait.calc) {
+            var calc = trait.calc || typeCalc(code);
+            switch(calc) {
             case '/':
                 return r + value;
             case '+':
@@ -422,7 +445,8 @@ FTKR.ETS = FTKR.ETS || {};
         FTKR.setGameData(this);
         return this.traitsWithOperator(code, 'pi').reduce(function(r, trait) {
             var value = trait.etsValue ? FTKR.evalFormula(trait.etsValue) : trait.value;
-            switch(trait.calc) {
+            var calc = trait.calc || typeCalc(code);
+            switch(calc) {
             case '/':
                 return r / value;
             case '*':
@@ -440,7 +464,8 @@ FTKR.ETS = FTKR.ETS || {};
         FTKR.setGameData(this);
         return this.traitsWithOperator(code, 'pi').reduce(function(r, trait) {
             var value = trait.etsValue ? FTKR.evalFormula(trait.etsValue) : trait.value;
-            switch(trait.calc) {
+            var calc = trait.calc || typeCalc(code);
+            switch(calc) {
             case '+':
             case '-':
             case '/':
@@ -457,7 +482,8 @@ FTKR.ETS = FTKR.ETS || {};
         FTKR.setGameData(this);
         return this.traitsWithOperator(code, 'pi').reduce(function(r, trait) {
             var value = trait.etsValue ? FTKR.evalFormula(trait.etsValue) : trait.value;
-            switch(trait.calc) {
+            var calc = trait.calc || typeCalc(code);
+            switch(calc) {
             case '/':
                 return r + value;
             default:
@@ -472,7 +498,8 @@ FTKR.ETS = FTKR.ETS || {};
         FTKR.setGameData(this);
         return this.traitsWithIdOperator(code, id, 'sum').reduce(function(r, trait) {
             var value = trait.etsValue ? FTKR.evalFormula(trait.etsValue) : trait.value;
-            switch(trait.calc) {
+            var calc = trait.calc || typeCalc(code);
+            switch(calc) {
             case '-':
                 return r - value;
             case '+':
@@ -490,7 +517,8 @@ FTKR.ETS = FTKR.ETS || {};
         FTKR.setGameData(this);
         return this.traitsWithOperator(code, 'sum').reduce(function(r, trait) {
             var value = trait.etsValue ? FTKR.evalFormula(trait.etsValue) : trait.value;
-            switch(trait.calc) {
+            var calc = trait.calc || typeCalc(code);
+            switch(calc) {
             case '-':
                 return r - value;
             case '+':

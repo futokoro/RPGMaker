@@ -32,7 +32,7 @@
 | [FTKR_ExSvMotion](FTKR_ExSvMotion.js) | [仮版](FTKR_ExSvMotion.ja.md) | [v1.2.5](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExSvMotion.js) | 2017/08/24 | SVキャラのモーションを拡張する |
 | [FTKR_FacialImageDifference](FTKR_FacialImageDifference.js) | [仮版](FTKR_FacialImageDifference.ja.md) | [v1.1.7](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_FacialImageDifference.js) | 2017/12/02 | アクターの状態によって顔画像を変える<br>顔画像にアニメーションを表示する |
 | [FTKR_FacialImageDifference2](FTKR_FacialImageDifference2.js) | なし | [v2.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_FacialImageDifference2.js) | 2017/12/16 | アクターの状態によって顔画像を変える<br>FTKR_FacialImageDifference.jsと組み合わせて使用できません |
-| [FTKR_ExTraitSetting](FTKR_ExTraitSetting.js) | なし | [v1.0.3](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExTraitSetting.js) | 2018/01/20 | 装備やステート等の特徴を詳細に設定できる |
+| [FTKR_ExTraitSetting](FTKR_ExTraitSetting.js) | なし | [v1.0.4](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExTraitSetting.js) | 2018/02/17 | 装備やステート等の特徴を詳細に設定できる |
 
 ## ステータス表示の変更
 
@@ -225,6 +225,9 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 # 更新情報
 
 2018/02の更新情報
+
+### 2018/02/17
+* [FTKR_ExTraitSetting](FTKR_ExTraitSetting.js) v1.0.4
 
 ### 2018/02/15
 * [FTKR_OriginalSceneWindow](FTKR_OriginalSceneWindow.ja.md) v1.5.1
