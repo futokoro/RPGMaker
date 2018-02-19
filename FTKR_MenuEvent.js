@@ -3,8 +3,8 @@
 // FTKR_MenuEvent.js
 // 作成者     : フトコロ
 // 作成日     : 2017/11/27
-// 最終更新日 : 2017/12/02
-// バージョン : v1.0.2
+// 最終更新日 : 2018/02/20
+// バージョン : v1.0.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ME = FTKR.ME || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.2 メニュー画面上でコモンイベントを実行できるようにする
+ * @plugindesc v1.0.3 メニュー画面上でコモンイベントを実行できるようにする
  * @author フトコロ
  *
  * @param Enable Item Event
@@ -203,7 +203,7 @@ FTKR.ME = FTKR.ME || {};
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
- * Copyright (c) 2017 Futokoro
+ * Copyright (c) 2017,2018 Futokoro
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
@@ -214,6 +214,10 @@ FTKR.ME = FTKR.ME || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.3 - 2018/02/20 : 不具合修正
+ *    1. 範囲が「なし」のアイテムのコモンイベントで、メッセージウィンドウを
+ *       表示させたときに、イベントを正しく実行できない不具合を修正。
  * 
  * v1.0.2 - 2017/12/02 : 仕様変更, 機能追加
  *    1. コモンイベント実行時に選択中のアイテムの所持数が０になった場合、
@@ -550,6 +554,14 @@ function Game_Menu() {
         this._messageLayer.addChild(window);
     };
 
+    var _ME_Scene_ItemBase_activateItemWindow = Scene_ItemBase.prototype.activateItemWindow;
+    Scene_ItemBase.prototype.activateItemWindow = function() {
+        this._itemWindow.refresh();
+        if (!$gameTemp.isCommonEventReserved()) {
+            _ME_Scene_ItemBase_activateItemWindow.call(this);
+        }
+    };
+
     //=============================================================================
     // Scene_Item
     //=============================================================================
@@ -565,6 +577,7 @@ function Game_Menu() {
     Scene_Item.prototype.checkCommonEvent = function() {
         if ($gameTemp.isCommonEventReserved()) {
             if (this.isEnabledItemEvent() || this.isEnabledItemSubComEvent()) {
+                this._itemWindow.deactivate();
                 this._actorWindow.deactivate();
             } else {
                 SceneManager.goto(Scene_Map);
@@ -587,6 +600,7 @@ function Game_Menu() {
     Scene_Skill.prototype.checkCommonEvent = function() {
         if ($gameTemp.isCommonEventReserved()) {
             if (this.isEnabledSkillEvent()) {
+                this._itemWindow.deactivate();
                 this._actorWindow.deactivate();
             } else {
                 SceneManager.goto(Scene_Map);
