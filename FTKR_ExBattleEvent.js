@@ -773,7 +773,6 @@ BattleManager.checkBattleEnd = function() {
                     FTKR.EBE.BattleManager_processDefeat.call(this);
                     return true;
             }
-            console.log('call endBattle()');
             this.endBattle(this._battleEndPattern);
             return true;
         }
