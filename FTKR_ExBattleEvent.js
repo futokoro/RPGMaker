@@ -3,8 +3,8 @@
 // FTKR_ExBattleEvent.js
 // 作成者     : フトコロ
 // 作成日     : 2017/05/25
-// 最終更新日 : 2018/01/13
-// バージョン : v1.3.2
+// 最終更新日 : 2018/02/19
+// バージョン : v1.3.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -14,7 +14,7 @@ var FTKR = FTKR || {};
 FTKR.EBE = FTKR.EBE || {};
 
 /*:
- * @plugindesc v1.3.2 バトルイベントを拡張するプラグイン
+ * @plugindesc v1.3.3 バトルイベントを拡張するプラグイン
  * @author フトコロ
  * 
  * @param Battle Event
@@ -429,21 +429,27 @@ FTKR.EBE = FTKR.EBE || {};
  * 　BattleManager.isActedEnemy(メンバーID)
  * 
  * 
- * 
- * 
  *-----------------------------------------------------------------------------
  * 本プラグインのライセンスについて(License)
  *-----------------------------------------------------------------------------
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
- * Copyright (c) 2017 Futokoro
+ * Copyright (c) 2017,2018 Futokoro
  * http://opensource.org/licenses/mit-license.php
+ * 
+ * 
+ * プラグイン公開元
+ * https://github.com/futokoro/RPGMaker/blob/master/README.md
  * 
  * 
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.3.3 - 2018/02/19 : 不具合修正
+ *    1. Custom Victory Eventが0の時に、戦闘勝利イベントを実行すると
+ *       戦闘勝利回数が2回増加してしまう不具合を修正。
  * 
  * v1.3.2 - 2018/01/13 : 機能追加
  *    1. メッセージ表示関係のプラグインコマンドに、イベント処理を止める機能を追加。
@@ -565,14 +571,14 @@ FTKR.evalFormula = function(formula) {
 //=============================================================================
 // プラグイン パラメータ
 //=============================================================================
-FTKR.EBE.parameters = PluginManager.parameters('FTKR_ExBattleEvent');
+var parameters = PluginManager.parameters('FTKR_ExBattleEvent');
 
-FTKR.EBE.battleEvents = splitConvertNumber(FTKR.EBE.parameters['Battle Event']);
+FTKR.EBE.battleEvents = splitConvertNumber(parameters['Battle Event']);
 FTKR.EBE.battleEnd = {
-    customV : Number(FTKR.EBE.parameters['Custom Victory Event'] || 0),
-    customD : Number(FTKR.EBE.parameters['Custom Defeat Event'] || 0),
-    victory : Number(FTKR.EBE.parameters['Victory Event'] || 0),
-    defeat : Number(FTKR.EBE.parameters['Defeat Event'] || 0),
+    customV : Number(parameters['Custom Victory Event'] || 0),
+    customD : Number(parameters['Custom Defeat Event'] || 0),
+    victory : Number(parameters['Victory Event'] || 0),
+    defeat  : Number(parameters['Defeat Event'] || 0),
 };
 
 //=============================================================================
@@ -761,12 +767,13 @@ BattleManager.checkBattleEnd = function() {
                 case 0:
                     if (FTKR.EBE.battleEnd.customV) break;
                     FTKR.EBE.BattleManager_processVictory.call(this);
-                    break;
+                    return true;
                 case 2:
                     if (FTKR.EBE.battleEnd.customD) break;
                     FTKR.EBE.BattleManager_processDefeat.call(this);
-                    break;
+                    return true;
             }
+            console.log('call endBattle()');
             this.endBattle(this._battleEndPattern);
             return true;
         }
