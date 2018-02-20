@@ -3,8 +3,8 @@
 // FTKR_SkillTreeSystem.js
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/02/25
-// 最終更新日 : 2018/02/13
-// バージョン : v1.13.0
+// 最終更新日 : 2018/02/22
+// バージョン : v1.14.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.13.0 ツリー型スキル習得システム
+ * @plugindesc v1.14.0 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -114,6 +114,13 @@ FTKR.STS = FTKR.STS || {};
  * @desc 戦闘終了時のSP入手メッセージ
  * %1 - 獲得SP量, %2 - スキルポイント名
  * @default %1 の%2を獲得！
+ * 
+ * @param Enable Class Sp
+ * @desc アクター１人に対して職業毎に個別のSPを持たせるか
+ * @type Boolean
+ * @on 有効
+ * @off 無効
+ * @default false
  * 
  * @param --スキル枠の設定(Skill Frame)--
  * 
@@ -722,7 +729,8 @@ FTKR.STS = FTKR.STS || {};
  * Init Sp: x
  * 初期 SP: x
  *    :アクターの初期SPを x に設定します。
- * 
+ *    :<Enable Class Sp>が有効の場合は、クラスのメモ欄に設定した初期値が
+ *    :その職業の初期SPになります。
  * 
  * 以下のプラグインコマンドで、スキルツリーの追加・削除ができます。
  * 
@@ -742,6 +750,14 @@ FTKR.STS = FTKR.STS || {};
  * スキルを習得するためのコストとして、本プラグイン専用に、スキルポイント
  * というパラメータを用意しています。
  * 
+ * スキルポイントは、アクター毎に個別に持つパラメータですが
+ * 以下のプラグインパラメータの設定により、職業毎にも個別に持たせることができます。
+ * 
+ * <Enable Class Sp>
+ *    :有効にすると、職業毎にSPの増減計算を行います。
+ *    :無効の場合は、すべての職業で共通のSPを使用します。
+ * 
+ * 
  * スキルポイントは、レベルアップ時に入手できます。
  * 以下のプラグインパラメータで入手量を設定できます。
  * 
@@ -760,6 +776,7 @@ FTKR.STS = FTKR.STS || {};
  * スキルポイントの取得
  *-----------------------------------------------------------------------------
  * 以下のプラグインコマンド(Plugin Command)で、SPを取得できます。
+ * なお、<Enable Class Sp>が有効の場合は、現在職業のSPのみ増加します。
  * 
  * <STS Add Sp(x) Actor(y)>
  * <STS 加算 Sp(x) アクター(y)>
@@ -1371,6 +1388,11 @@ FTKR.STS = FTKR.STS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.14.0 - 2018/02/22 : 機能追加、不具合修正
+ *    1. 職業毎に個別のSPをもてる機能を追加。
+ *    2. スキル習得時に他のスキルを忘れさせた場合、ツリーをリセットしても
+ *       使用したコストが戻らない不具合を修正。
+ * 
  * v1.13.0 - 2018/02/13 : 機能追加
  *    1. スキルを習得した時に、他のスキルを忘れさせる機能を追加。
  * 
@@ -1630,6 +1652,7 @@ function Scene_STS() {
         icon:Number(parameters['Cost Sp Icon'] || 0),
         hideCost0:Number(parameters['Hide Sp Cost 0'] || 0),
         format:String(parameters['Display Get Sp'] || ''),
+        enableClassSp:(JSON.parse(parameters['Enable Class Sp']) || false),
     };
 
     //スキル枠
@@ -2174,10 +2197,12 @@ function Scene_STS() {
     Game_Actor.prototype.initMembers = function() {
         _STS_Game_Actor_initMembers.call(this);
         this._stsSp = 0;
+        this._stsCsp = [];
         this._stsLearnSkills = [];
         this._stsTrees = [];
         this._stsCount = [];
         this._stsUsedSp = [];
+        this._stsUsedCsp = [];
         this._stsUsedItem = [];
         this._stsUsedWeapon = [];
         this._stsUsedArmor = [];
@@ -2186,10 +2211,12 @@ function Scene_STS() {
     };
 
     Game_Actor.prototype.checkInitSts = function() {
+        if (!this._stsCsp) this._stsCsp = [];
         if (!this._stsCount) this._stsCount = [];
         if (!this._stsLearnSkills) this._stsLearnSkills = [];
         if (!this._stsTrees) this._stsTrees = [];
         if (!this._stsUsedSp) this._stsUsedSp = [];
+        if (!this._stsUsedCsp) this._stsUsedCsp = [];
         if (!this._stsUsedItem) this._stsUsedItem = [];
         if (!this._stsUsedWeapon) this._stsUsedWeapon = [];
         if (!this._stsUsedArmor) this._stsUsedArmor = [];
@@ -2201,7 +2228,14 @@ function Scene_STS() {
     Game_Actor.prototype.setup = function(actorId) {
         _STS_Game_Actor_setup.call(this, actorId);
         if (isMVver_1_4()) ImageManager.loadFace(this.faceName());
-        this.getSp(this.actor().sts.initsp);
+        if (FTKR.STS.sp.enableClassSp) {
+            this._stsCsp = [];
+            $dataClasses.forEach( function(dataClass){
+                if (dataClass) this._stsCsp[dataClass.id] = dataClass.sts.initsp;
+            },this);
+        } else {
+            this.getSp(this.actor().sts.initsp);
+        }
     };
 
     var _STS_Game_Actor_initSkills = Game_Actor.prototype.initSkills;
@@ -2309,15 +2343,40 @@ function Scene_STS() {
         },this);
     };
     
+    Game_Actor.prototype.setStsUsedCsp = function(classId, skillId, value) {
+        if (!this._stsUsedCsp) this._stsUsedCsp = [];
+        if (!this._stsUsedCsp[classId]) this._stsUsedCsp[classId] = [];
+        this._stsUsedCsp[classId][skillId] = value;
+    };
+
     Game_Actor.prototype.setStsUsedSp = function(skillId, value) {
-        if (!this._stsUsedSp) this._stsUsedSp = [];
-        this._stsUsedSp[skillId] = value;
+        if (FTKR.STS.sp.enableClassSp) {
+            this.setStsUsedCsp(this._classId, skillId, value);
+        } else {
+            if (!this._stsUsedSp) this._stsUsedSp = [];
+            this._stsUsedSp[skillId] = value;
+        }
+    };
+
+    Game_Actor.prototype.stsUsedCsp = function(classId, skillId) {
+        if (!this.isStsLearnedSkill(skillId)) return 0;
+        if (!this._stsUsedCsp) this._stsUsedCsp = [];
+        if (!this._stsUsedCsp[classId]) this._stsUsedCsp[classId] = [];
+        return this._stsUsedCsp[classId][skillId] || 0;
     };
 
     Game_Actor.prototype.stsUsedSp = function(skillId) {
-        if (!this.isLearnedSkill(skillId)) return 0;
-        if (!this._stsUsedSp) this._stsUsedSp = [];
-        return this._stsUsedSp[skillId] || 0;
+        if (!this.isStsLearnedSkill(skillId)) return 0;
+        if (FTKR.STS.sp.enableClassSp) {
+            return this.stsUsedCsp(this._classId, skillId);
+        } else {
+            if (!this._stsUsedSp) this._stsUsedSp = [];
+            return this._stsUsedSp[skillId] || 0;
+        }
+    };
+
+    Game_Actor.prototype.addStsUsedCsp = function(classId, skillId, value) {
+        this.setStsUsedCsp(classId, skillId, this.stsUsedCsp(classId, skillId) + value);
     };
 
     Game_Actor.prototype.addStsUsedSp = function(skillId, value) {
@@ -2330,7 +2389,7 @@ function Scene_STS() {
     };
 
     Game_Actor.prototype.stsUsedGold = function(skillId) {
-        if (!this.isLearnedSkill(skillId)) return 0;
+        if (!this.isStsLearnedSkill(skillId)) return 0;
         if (!this._stsUsedGold) this._stsUsedGold = [];
         return this._stsUsedGold[skillId] || 0;
     };
@@ -2351,7 +2410,7 @@ function Scene_STS() {
     };
 
     Game_Actor.prototype.stsUsedItems = function(skillId) {
-        if (!this.isLearnedSkill(skillId)) return [];
+        if (!this.isStsLearnedSkill(skillId)) return [];
         this.initStsUsedItem(skillId);
         return this._stsUsedItem[skillId];
     };
@@ -2373,7 +2432,7 @@ function Scene_STS() {
     };
 
     Game_Actor.prototype.stsUsedWeapons = function(skillId) {
-        if (!this.isLearnedSkill(skillId)) return [];
+        if (!this.isStsLearnedSkill(skillId)) return [];
         this.initStsUsedWeapon(skillId);
         return this._stsUsedWeapon[skillId];
     };
@@ -2395,7 +2454,7 @@ function Scene_STS() {
     };
 
     Game_Actor.prototype.stsUsedArmors = function(skillId) {
-        if (!this.isLearnedSkill(skillId)) return [];
+        if (!this.isStsLearnedSkill(skillId)) return [];
         this.initStsUsedArmor(skillId);
         return this._stsUsedArmor[skillId];
     };
@@ -2417,7 +2476,7 @@ function Scene_STS() {
     };
 
     Game_Actor.prototype.stsUsedVars = function(skillId) {
-        if (!this.isLearnedSkill(skillId)) return [];
+        if (!this.isStsLearnedSkill(skillId)) return [];
         this.initStsUsedVar(skillId);
         return this._stsUsedVar[skillId];
     };
@@ -2486,16 +2545,33 @@ function Scene_STS() {
         }
     };
 
+    Game_Actor.prototype.getCsp = function(classId, value) {
+        this._stsCsp[classId] += value;
+    };
+
     Game_Actor.prototype.getSp = function(value) {
-      this._stsSp += value;
+        if (FTKR.STS.sp.enableClassSp) {
+            this.getCsp(this._classId, value);
+        } else {
+            this._stsSp += value;
+        }
+    };
+
+    Game_Actor.prototype.loseCsp = function(classId, value) {
+        this.getCsp(classId, -value);
     };
 
     Game_Actor.prototype.loseSp = function(value) {
-      this._stsSp -= value;
+        this.getSp(-value);
+//        this._stsSp -= value;
+    };
+
+    Game_Actor.prototype.stsCsp = function(classId) {
+        return this._stsCsp[classId];
     };
 
     Game_Actor.prototype.stsSp = function() {
-      return this._stsSp;
+        return FTKR.STS.sp.enableClassSp ? this.stsCsp(this._classId) : this._stsSp;
     };
 
     Game_Actor.prototype.isStsLearnedSkill = function(skillId) {
@@ -2579,13 +2655,19 @@ function Scene_STS() {
         if (!skillTree.length) return 0;
         skillTree.forEach( function(skill) {
             if (!skill) return;
-            if (flag) {
-                this.getSp(this.stsUsedSp(skill.id));
-                $gameParty.gainGold(this.stsUsedGold(skill.id));
+            if (FTKR.STS.sp.enableClassSp) {
+                $dataClasses.forEach( function(dataClass, i){
+                    if (!dataClass) return;
+                    console.log(skill.id, i, this.stsUsedCsp(i, skill.id));
+                    if (flag) this.getCsp(i, this.stsUsedCsp(i, skill.id));
+                    this.setStsUsedCsp(i, skill.id, 0);
+                },this);
+            } else {
+                if (flag) this.getSp(this.stsUsedSp(skill.id));
+                this.setStsUsedSp(skill.id, 0);
             }
-            this.setStsUsedSp(skill.id, 0);
+            if (flag) $gameParty.gainGold(this.stsUsedGold(skill.id));
             this.setStsUsedGold(skill.id, 0);
-
             this.stsUsedItems(skill.id).forEach( function(itemNum, i){
                 if (!itemNum) return;
                 if (flag)$gameParty.gainItem($dataItems[i], itemNum);
