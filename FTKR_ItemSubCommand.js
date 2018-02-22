@@ -3,8 +3,8 @@
 // FTKR_ItemSubCommand.js
 // 作成者     : フトコロ
 // 作成日     : 2017/06/04
-// 最終更新日 : 2017/12/02
-// バージョン : v1.4.1
+// 最終更新日 : 2018/02/22
+// バージョン : v1.5.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -14,7 +14,7 @@ var FTKR = FTKR || {};
 FTKR.ISC = FTKR.ISC || {};
 
 /*:
- * @plugindesc v1.4.1 アイテムボックスにサブコマンドを追加する
+ * @plugindesc v1.5.0 アイテムボックスにサブコマンドを追加する
  * @author フトコロ
  *
  * @param --アイテム情報取得--
@@ -35,6 +35,10 @@ FTKR.ISC = FTKR.ISC || {};
  * @param Command Use Format
  * @desc 実行コマンドの「使う」のコマンド名を設定します。
  * @default 使う
+ *
+ * @param Command Equip Format
+ * @desc 実行コマンドの「装備する」のコマンド名を設定します。
+ * @default 装備する
  *
  * @param Command Discard Format
  * @desc 実行コマンドの「捨てる」のコマンド名を設定します。
@@ -247,8 +251,10 @@ FTKR.ISC = FTKR.ISC || {};
  * サブコマンドには以下のコマンドがあります。
  * 1. 使う　　 - アイテムを使用します。使用できない場合はグレー表示になります。
  * 2. 捨てる　 - アイテムを捨てます。「大事なもの」は捨てることが出来ません。
- * 3. やめる　 - サブコマンドを閉じます。
- * 4. カスタム - プラグインパラメータで設定したコモンイベントを実行します。
+ * 3. 装備する - そのアイテムが、武器や防具ならアクターに装備させます。
+ *    　　　　   アクター選択画面を表示して装備させる対象を選びます。
+ * 4. やめる　 - サブコマンドを閉じます。
+ * 5. カスタム - プラグインパラメータで設定したコモンイベントを実行します。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -268,6 +274,7 @@ FTKR.ISC = FTKR.ISC || {};
  * <コマンド>　<コード>
  * 使う　　　　use
  * 捨てる　　　discard
+ * 装備する　　equip
  * やめる　　　cancel
  * カスタム　　custom*　　(*は各カスタムコマンド番号)
  * 
@@ -298,6 +305,21 @@ FTKR.ISC = FTKR.ISC || {};
  * <捨てられない: x>
  * <NOT_DISCARDABLE: x>
  *    x : スイッチＩＤ
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * アイテムを装備する
+ *-----------------------------------------------------------------------------
+ * サブコマンドの「装備する」を実行すると、選択したアイテムが武器や防具なら
+ * アクターを選択して装備を変更することができます。
+ * 
+ * このサブコマンドは、武器、防具以外のアイテムのを選択した場合は
+ * サブコマンドウィンドウ上に表示しません。
+ * 
+ * ！注意！
+ * 装備先のスロットは、そのアイテムの装備タイプによって自動的に設定されます。
+ * 他のプラグインにより、同じ装備タイプを複数装備できるようにしていた場合に
+ * 正しく動作しない可能性があります。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -357,7 +379,7 @@ FTKR.ISC = FTKR.ISC || {};
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
- * Copyright (c) 2017 Futokoro
+ * Copyright (c) 2017,2018 Futokoro
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
@@ -368,6 +390,9 @@ FTKR.ISC = FTKR.ISC || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.5.0 - 2018/02/22 : 機能追加
+ *    1. アイテム画面から装備する機能を追加。
  * 
  * v1.4.1 - 2017/12/02 : 不具合修正
  *    1. プラグインパラメータ「Disposal SE Name」の初期値の誤字を修正。
@@ -417,6 +442,7 @@ function Window_ItemSubCommand() {
                 list    :(parameters['Command List'] || 'use,cancel').split(','),
                 use     :String(parameters['Command Use Format'] || ''),
                 discard :String(parameters['Command Discard Format'] || ''),
+                equip   :String(parameters['Command Equip Format'] || ''),
                 cancel  :String(parameters['Command Cancel Format'] || ''),
                 posiX   :Number(parameters['Command Position X'] || 0),
                 posiY   :Number(parameters['Command Position Y'] || 0),
@@ -723,6 +749,13 @@ function Window_ItemSubCommand() {
                 this._numberWindow.show();
                 this._numberWindow.activate();
                 break;
+            case 'equip':
+                this._isSubComEquip = true;
+                this._actorWindow.x = Graphics.boxWidth - this._actorWindow.width;
+                this._actorWindow.show();
+                this._actorWindow.activate();
+                this._actorWindow.select(0);
+                break;
             default:
                 var match = /custom(\d+)/i.exec(symbol);
                 if (match) {
@@ -737,6 +770,43 @@ function Window_ItemSubCommand() {
                     this.onSubComCancel();
                 }
                 break;
+        }
+    };
+
+    var _ISC_Scene_Item_onActorOk = Scene_Item.prototype.onActorOk;
+    Scene_Item.prototype.onActorOk = function() {
+        if (this._isSubComEquip) {
+            this._isSubComEquip = false;
+            var item = this._subCommandWindow._item;
+            var actor = $gameParty.targetActor();
+            if (actor && actor.canEquip(item)) {
+                SoundManager.playEquip();
+                actor.changeEquip(item.etypeId - 1, item);
+                this._actorWindow.refresh();
+                this._subCommandWindow.hide();
+                this._itemWindow.refresh();
+                this._itemWindow.select(0);
+                this._itemWindow.activate();
+            } else {
+                SoundManager.playBuzzer();
+                this._subCommandWindow.activate();
+            }
+            this._actorWindow.deactivate();
+            this._actorWindow.hide();
+        } else {
+            _ISC_Scene_Item_onActorOk.call(this);
+        }
+    };
+
+    var _ISC_Scene_Item_onActorCancel = Scene_Item.prototype.onActorCancel;
+    Scene_Item.prototype.onActorCancel = function() {
+        if (this._isSubComEquip) {
+            this._isSubComEquip = false;
+            this._actorWindow.hide();
+            this._actorWindow.deactivate();
+            this._subCommandWindow.activate();
+        } else {
+            _ISC_Scene_Item_onActorCancel.call(this);
         }
     };
 
@@ -1033,6 +1103,10 @@ function Window_ItemSubCommand() {
                 case 'cancel':
                     this._data.push({symbol:'cancel',  enabled:true, disp:sep.cancel});
                     break;
+                case 'equip':
+                    if (!this.isEquipItem(this._item)) break;
+                    this._data.push({symbol:'equip',  enabled:true, disp:sep.equip});
+                    break;
                 default:
                     var match = /custom(\d+)/i.exec(list);
                     if (match) {
@@ -1049,6 +1123,10 @@ function Window_ItemSubCommand() {
                     break;
             }
         },this);
+    };
+
+    Window_ItemSubCommand.prototype.isEquipItem = function(item) {
+        return DataManager.isWeapon(item) || DataManager.isArmor(item);
     };
 
     Window_ItemSubCommand.prototype.isUsable = function(item) {
