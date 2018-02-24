@@ -3,8 +3,8 @@
 // FTKR_ItemSubCommand.js
 // 作成者     : フトコロ
 // 作成日     : 2017/06/04
-// 最終更新日 : 2018/02/22
-// バージョン : v1.5.0
+// 最終更新日 : 2018/02/24
+// バージョン : v1.5.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -14,7 +14,7 @@ var FTKR = FTKR || {};
 FTKR.ISC = FTKR.ISC || {};
 
 /*:
- * @plugindesc v1.5.0 アイテムボックスにサブコマンドを追加する
+ * @plugindesc v1.5.1 アイテムボックスにサブコマンドを追加する
  * @author フトコロ
  *
  * @param --アイテム情報取得--
@@ -391,6 +391,9 @@ FTKR.ISC = FTKR.ISC || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.5.1 - 2018/02/24 : 不具合修正
+ *    1. スクリプト入力時に三項演算子を使うと反映されない不具合を修正。
+ * 
  * v1.5.0 - 2018/02/22 : 機能追加
  *    1. アイテム画面から装備する機能を追加。
  * 
@@ -646,7 +649,7 @@ function Window_ItemSubCommand() {
             var datas = metaDatas[t].text.split(';');
             for (var i = 0; i < datas.length; i++) {
                 var data = datas[i];
-                var match = /(.+):[ ]*(.+)/.exec(data);
+                var match = /([^:\s]+)[ ]*:[ ]*(.+)/.exec(data);
                 if (!match) continue;
                 switch (match[1].toUpperCase()) {
                     case '表示条件':
@@ -731,7 +734,7 @@ function Window_ItemSubCommand() {
         if (!FTKR.ISC.subcom.command.height) this._subCommandWindow.refreshHeight();
         this._subCommandWindow.show();
         this._subCommandWindow.actSelect(0);
-      };
+    };
 
     Scene_Item.prototype.onSubComOk = function() {
         var symbol = this._subCommandWindow.item().symbol;
@@ -1087,6 +1090,10 @@ function Window_ItemSubCommand() {
         this.move(this.x, this.y, this.width, height);
     };
 
+    Window_ItemSubCommand.prototype.addSubCommand = function(symbol, enabled, disp) {
+        this._data.push({symbol:symbol, enabled:enabled, disp:disp});
+    };
+
     Window_ItemSubCommand.prototype.makeItemList = function() {
         this._data = [];
         if (!this._item) return;
@@ -1095,29 +1102,35 @@ function Window_ItemSubCommand() {
         sep.list.forEach( function(list){
             switch (list) {
                 case 'use':
-                    this._data.push({symbol:'use', enabled:this.isUsable(this._item), disp:sep.use});
+                    this.addSubCommand(list, this.isUsable(this._item), sep.use);
+//                    this._data.push({symbol:'use', enabled:this.isUsable(this._item), disp:sep.use});
                     break;
                 case 'discard':
-                    this._data.push({symbol:'discard', enabled:this.isDiscardable(), disp:sep.discard});
+                    this.addSubCommand(list, this.isDiscardable(), sep.discard);
+//                    this._data.push({symbol:'discard', enabled:this.isDiscardable(), disp:sep.discard});
                     break;
                 case 'cancel':
-                    this._data.push({symbol:'cancel',  enabled:true, disp:sep.cancel});
+                    this.addSubCommand(list, true, sep.cancel);
+//                    this._data.push({symbol:'cancel',  enabled:true, disp:sep.cancel});
                     break;
                 case 'equip':
                     if (!this.isEquipItem(this._item)) break;
-                    this._data.push({symbol:'equip',  enabled:true, disp:sep.equip});
+                    this.addSubCommand(list, true, sep.equip);
+//                    this._data.push({symbol:'equip',  enabled:true, disp:sep.equip});
                     break;
                 default:
                     var match = /custom(\d+)/i.exec(list);
                     if (match) {
                         var cmdId = Number(match[1]);
                         var cmd = ctm[cmdId];
-                        if (cmd && this.isCustomShow(this._item,cmdId,cmd)) {
+                        if (cmd && this.isCustomShow(this._item, cmdId, cmd)) {
+                            this.addSubCommand(list, this.isCustomEnabled(this._item,cmdId,cmd), sep.format);
+                            /*
                             this._data.push({
                                 symbol:list,
                                 enabled:this.isCustomEnabled(this._item,cmdId,cmd),
                                 disp:cmd.format,
-                            });
+                            });*/
                         }
                     }
                     break;
