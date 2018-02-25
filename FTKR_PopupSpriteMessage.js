@@ -3,8 +3,8 @@
 // FTKR_PopupSpriteMessage.js
 // 作成者     : フトコロ
 // 作成日     : 2018/01/05
-// 最終更新日 : 2018/02/24
-// バージョン : v1.1.1
+// 最終更新日 : 2018/02/25
+// バージョン : v1.2.0
 //=============================================================================
 //=============================================================================
 // BattleEffectPopup.js　//ベースにしたプラグイン
@@ -22,7 +22,7 @@ FTKR.PSM = FTKR.PSM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.1 任意のメッセージを画面上にポップアップ表示するプラグイン
+ * @plugindesc v1.2.0 任意のメッセージを画面上にポップアップ表示するプラグイン
  * @author フトコロ
  *
  * @param Max Popup Messages
@@ -34,6 +34,13 @@ FTKR.PSM = FTKR.PSM || {};
  * 複数のパターンを設定し、プラグインコマンドで呼び出し可能
  * @type struct<popup>[]
  * @default ["{\"fontFace\":\"\",\"fontSize\":\"28\",\"color\":\"[\\\"0\\\",\\\"0\\\",\\\"0\\\",\\\"0\\\"]\",\"italic\":\"false\",\"outlineColor\":\"'gray'\",\"popupHeight\":\"40\",\"duration\":\"90\"}"]
+ * 
+ * @param Repop Message After Menu
+ * @desc メニュー開閉後にポップアップを再度表示させるか
+ * @type boolean
+ * @on 表示させる
+ * @off 表示させない
+ * @default false
  * 
  * @help 
  *-----------------------------------------------------------------------------
@@ -157,12 +164,30 @@ FTKR.PSM = FTKR.PSM || {};
  * 
  * 
  *-----------------------------------------------------------------------------
+ * メニュー開閉とポップアップ表示について
+ *-----------------------------------------------------------------------------
+ * ポップアップ表示中にメニューを開閉すると、ポップアップ表示は消去されます。
+ * 
+ * プラグインパラメータ<Repop Message After Menu>を「表示する」に
+ * 設定することで、メニュー開閉後に再表示させることができます。
+ * 
+ * 
+ * なお、メニュー開閉後の再表示の仕様は以下の通りです。
+ * 
+ * １．ポップアップのバウンドと、１文字ずつ表示する機能は無効。(即座に表示)
+ * ２．ポップアップの移動中にメニューを開閉すると、移動動作をキャンセルし
+ * 　　移動後の場所に再表示します。
+ * ３．ポップアップの回転中にメニューを開閉すると、初期状態から再回転します。
+ * 　　角度を変えた場合は、その角度を維持します。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
  * 本プラグインのライセンスについて(License)
  *-----------------------------------------------------------------------------
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
- * Copyright (c) 2017 Futokoro
+ * Copyright (c) 2018 Futokoro
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
@@ -173,6 +198,9 @@ FTKR.PSM = FTKR.PSM || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.2.0 - 2018/02/25 : 機能追加
+ *    1. メニュー開閉後にポップアップを再表示させる機能を追加。
  * 
  * v1.1.1 - 2018/02/24 : 不具合修正
  *    1. $gamePartyの初期化処理が間違っていた不具合を修正。
@@ -269,6 +297,7 @@ FTKR.PSM = FTKR.PSM || {};
     FTKR.PSM = {
         maxPopupMessages : Number(parameters['Max Popup Messages'] || 0),
         popupStatus      : paramParse(parameters['Popup Message Status']),
+        repop            : paramParse(parameters['Repop Message After Menu']),
     };
 
     //=============================================================================
@@ -435,6 +464,27 @@ FTKR.PSM = FTKR.PSM || {};
         return text;
     };
 
+    var _PSM_Scene_Map_start = Scene_Map.prototype.start;
+    Scene_Map.prototype.start = function() {
+        _PSM_Scene_Map_start.call(this);
+        this.repopPsmMessages();
+    };
+
+    Scene_Map.prototype.repopPsmMessages = function() {
+        if (FTKR.PSM.repop) {
+            $gameParty._psmMessage.forEach(function(message, i){
+                if (message && message.duration) {
+                    message.offsetCount = 0;
+                    if (message.dx) message.x = message.dx;
+                    if (message.dy) message.y = message.dy;
+                    var sprite = this._spriteset._ftPopupMessages[i];
+                    sprite.setup(message);
+                    sprite.setupSprite(sprite._text);
+                }
+            },this);
+        }
+    };
+
     //=============================================================================
     // Spriteset_Base
     // メッセージスプライトを作成
@@ -452,8 +502,10 @@ FTKR.PSM = FTKR.PSM || {};
         var y = (Graphics.height - height) / 2;
         this._messageContainer = new Sprite();
         this._messageContainer.setFrame(x, y, width, height);
+        this._ftPopupMessages = [];
         for (var i = 1; i <= this.maxPopupMessages(); i++) {
-            this._messageContainer.addChild(new Sprite_FtPopupMessage(i));
+            this._ftPopupMessages[i] = new Sprite_FtPopupMessage(i);
+            this._messageContainer.addChild(this._ftPopupMessages[i]);
         }
         this.addChild(this._messageContainer);
     };
@@ -481,17 +533,8 @@ FTKR.PSM = FTKR.PSM || {};
         this._offsetCount = -1;
         this._moveDuration = -1;
         this._angle = 0;
-    };
-
-    Sprite_FtPopupMessage.prototype.createChildSprite = function() {
-        var sprite = new Sprite();
-        sprite.bitmap = this._damageBitmap;
-        sprite.anchor.x = 0;// 原点に対する文字の表示位置
-        sprite.anchor.y = 0;// 原点に対する文字の表示位置
-        sprite.y = -this._popupHeight; // はねる高さ
-        sprite.ry = sprite.y;
-        this.addChild(sprite);
-        return sprite;
+        this._duration = 0;
+        this._isKeepPopup = false;
     };
 
     Sprite_FtPopupMessage.prototype.setup = function(message) {
@@ -507,9 +550,9 @@ FTKR.PSM = FTKR.PSM || {};
         this._italic = message.italic;
         this._offsetCount = message.offsetCount;
         this._popupHeight = message.popupHeight || 0;
+        message.popupHeight = 0;
         this._index = 0;
         this._count = 0;
-//        console.log(this._text, this._text.length);//テキストの文字数を獲得
         this.move(message.x,message.y);// スプライトの原点
         if (message.flashColor) {
             this.setupFlashEffect(message.flashColor, message.flashDuration);
@@ -542,9 +585,18 @@ FTKR.PSM = FTKR.PSM || {};
             bitmap.outlineWidth = Math.floor(bitmap.fontSize / 6);// 文字の縁取り太さ
             bitmap.outlineColor = this._outlineColor;// 文字の縁取り色
         }
-//        bitmap.drawText(text, 0, 0, bitmap.width, bitmap.height);
         bitmap.drawText(text, 0, 0, bitmap.width, bitmap.height, 'center');
         return bitmap;
+    };
+
+    Sprite_FtPopupMessage.prototype.createChildSprite = function() {
+        var sprite = new Sprite();
+        sprite.bitmap = this._damageBitmap;
+        sprite.anchor.x = 0;// 原点に対する文字の表示位置
+        sprite.anchor.y = 0;// 原点に対する文字の表示位置
+        sprite.y = -this._popupHeight; // はねる高さ
+        sprite.ry = sprite.y;
+        return sprite;
     };
 
     Sprite_FtPopupMessage.prototype.setupFlashEffect = function(flashColor, duration) {
@@ -574,6 +626,7 @@ FTKR.PSM = FTKR.PSM || {};
                     var sprite = this.setupSprite(this._text[i]);
                     sprite.x = i > 0 ? this._messageSprites[i-1].x + sprite.dw : 0;
                     this._messageSprites[i] = sprite;
+                    this.addChild(this._messageSprites[i]);
                     this._count = this.message().offsetCount;
                     this._index++;
                 } else if (this._count > 0) {
@@ -585,11 +638,13 @@ FTKR.PSM = FTKR.PSM || {};
                     var sprite = this.setupSprite(this._text[i]);
                     sprite.x = i > 0 ? this._messageSprites[i-1].x + sprite.dw : 0;
                     this._messageSprites[i] = sprite;
+                    this.addChild(this._messageSprites[i]);
                     this._count = this.message().offsetCount;
                 }
                 this._text = '';
             } else {
                 this._messageSprites[0] = this.setupSprite(this._text);
+                this.addChild(this._messageSprites[0]);
                 this._text = '';
             }
         }
@@ -637,9 +692,9 @@ FTKR.PSM = FTKR.PSM || {};
             }
         } else if (this._duration > 0) {
             this._duration--;
+            if (this.message()) this.message().duration = this._duration;
             for (var i = 0; i < this.children.length; i++) {
                 this.updateChild(this.children[i]);
-//                console.log('duration', this._duration, 'opacity', this.opacity, 'x', this.x, this.children[i].x, 'y', this.y, this.children[i].y, 'color', this.children[i].getBlendColor(), this._flashDuration);
             }
         }
         if (this._duration == 0 && this._messageSprites.length) {
@@ -650,7 +705,6 @@ FTKR.PSM = FTKR.PSM || {};
             this._angle = 0;
             $gameParty.clearPsmMessage(this._messageId);
             this._messageSprites = [];
-//            console.log(this);
         }
     };
 
