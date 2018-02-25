@@ -69,6 +69,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 | [FTKR_DisplayCommandFrame](FTKR_DisplayCommandFrame.js) | [仮版](FTKR_DisplayCommandFrame.ja.md) | [v1.2.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_DisplayCommandFrame.js) | 2017/11/26 | コマンドに枠を付ける |
 | [FTKR_OriginalSceneWindow](FTKR_OriginalSceneWindow.js) | [仮版](FTKR_OriginalSceneWindow.ja.md) | [v1.5.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_OriginalSceneWindow.js) | 2018/02/15 | オリジナルのシーンおよびウィンドウを作成する |
 | [FTKR_SceneBackImages](FTKR_SceneBackImages.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SceneBackImages.js) | 2018/02/24 | メニュー画面やショップ画面などに変数で切替可能な背景画像を設定する |
+| [FTKR_InterlockMoueAndWindow](FTKR_InterlockMoueAndWindow.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_InterlockMoueAndWindow.js) | 2018/02/25 | マウスポインタとウィンドウのカーソルを連動させる |
 
 [目次に戻る](#目次)
 
@@ -239,8 +240,8 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 ### 2018/02/25
 * [FTKR_MaxBattleMembers](FTKR_MaxBattleMembers.js) v1.0.0(新規)
-* [FTKR_DeleteSavefile](FTKR_DeleteSavefile.js) v1.0.0(新規)
-
+* [FTKR_DeleteSavefile](FTKR_DeleteSavefile.ja.md) v1.0.0(新規)
+* [FTKR_InterlockMoueAndWindow](FTKR_InterlockMoueAndWindow.js) v1.0.0(新規)
 
 ### 2018/02/24
 * [FTKR_PopupSpriteMessage](FTKR_PopupSpriteMessage.js) v1.1.1
