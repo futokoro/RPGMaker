@@ -19,7 +19,7 @@
 
 削除時に確認画面を表示させることもできます。
 
-![画像](image/FTKR_DeleteSavefile/n01_001.png)
+![画像](image/FTKR_DSF/n01_001.png)
 
 [目次に戻る](#目次)
 
