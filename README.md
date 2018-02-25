@@ -16,6 +16,7 @@
 1. [バトル](#バトル)
 1. [イベント](#イベント)
 1. [マップ](#マップ)
+1. [セーブ](#セーブ)
 1. [ミニゲーム](#ミニゲーム)
 1. [デバッグ](#デバッグ)
 1. [その他備忘録](#その他備忘録)
@@ -168,6 +169,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 | [FTKR_ExBattleCommand](FTKR_ExBattleCommand.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExBattleCommand.js) | 2017/11/25 | バトルコマンドを変更する |
 | [FTKR_FVActorAnimation](FTKR_FVActorAnimation.js) | なし | [v1.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_FVActorAnimation.js) | 2017/12/25 | フロントビューモードでアクター画像にアニメーションを表示する<br>別途アクター画像表示用のプラグインが必要 |
 | [FTKR_BattleAbortConditions](FTKR_BattleAbortConditions.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_BattleAbortConditions.js) | 2018/02/12 | 設定した条件を満たすと、バトルを中断して勝利または敗北する |
+| [FTKR_MaxBattleMembers](FTKR_MaxBattleMembers.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_MaxBattleMembers.js) | 2018/02/25 | バトルメンバーの最大人数を変数で管理する |
 
 FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
@@ -189,6 +191,14 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_ExTileSettingForRegion](FTKR_ExTileSettingForRegion.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExTileSettingForRegion.js) | 2017/08/27 | 指定したリージョンの通行設定を一時的に変更する |
+
+[目次に戻る](#目次)
+
+# セーブ
+
+| プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
+|:-----------|:-----------:|:-------------|:-------------|:-------------|
+| [FTKR_FTKR_DeleteSavefile](FTKR_FTKR_DeleteSavefile.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_FTKR_DeleteSavefile.js) | 2018/02/25 | セーブファイルを削除するコマンドを追加する |
 
 [目次に戻る](#目次)
 
@@ -226,6 +236,11 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 # 更新情報
 
 2018/02の更新情報
+
+### 2018/02/25
+* [FTKR_MaxBattleMembers](FTKR_MaxBattleMembers.js) v1.0.0(新規)
+* [FTKR_DeleteSavefile](FTKR_DeleteSavefile.js) v1.0.0(新規)
+
 
 ### 2018/02/24
 * [FTKR_PopupSpriteMessage](FTKR_PopupSpriteMessage.js) v1.1.1
