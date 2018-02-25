@@ -253,8 +253,6 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 ### 2018/02/20
 * [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.ja.md) v1.14.0
-
-### 2018/02/19
 * [FTKR_MenuEvent](FTKR_MenuEvent.js) v1.0.3
 
 ### 2018/02/19
