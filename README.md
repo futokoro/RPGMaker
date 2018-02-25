@@ -198,7 +198,7 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
-| [FTKR_FTKR_DeleteSavefile](FTKR_FTKR_DeleteSavefile.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_FTKR_DeleteSavefile.js) | 2018/02/25 | セーブファイルを削除するコマンドを追加する |
+| [FTKR_DeleteSavefile](FTKR_DeleteSavefile.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_DeleteSavefile.js) | 2018/02/25 | セーブファイルを削除するコマンドを追加する |
 
 [目次に戻る](#目次)
 
