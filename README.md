@@ -171,7 +171,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 | [FTKR_FVActorAnimation](FTKR_FVActorAnimation.js) | なし | [v1.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_FVActorAnimation.js) | 2017/12/25 | フロントビューモードでアクター画像にアニメーションを表示する<br>別途アクター画像表示用のプラグインが必要 |
 | [FTKR_BattleAbortConditions](FTKR_BattleAbortConditions.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_BattleAbortConditions.js) | 2018/02/12 | 設定した条件を満たすと、バトルを中断して勝利または敗北する |
 | [FTKR_MaxBattleMembers](FTKR_MaxBattleMembers.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_MaxBattleMembers.js) | 2018/02/25 | バトルメンバーの最大人数を変数で管理する |
-| [FTKR_ChangeBattleSpeed](FTKR_ChangeBattleSpeed.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ChangeBattleSpeed.js) | 2018/02/26 | バトル中の各種速度を変数で管理する |
+| [FTKR_ChangeBattleSpeed](FTKR_ChangeBattleSpeed.js) | なし | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ChangeBattleSpeed.js) | 2018/02/27 | バトル中の各種速度を変数で管理する |
 
 FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
@@ -238,6 +238,9 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 # 更新情報
 
 2018/02の更新情報
+
+### 2018/02/27
+* [FTKR_ChangeBattleSpeed](FTKR_ChangeBattleSpeed.js) v1.0.1
 
 ### 2018/02/26
 * [FTKR_ChangeBattleSpeed](FTKR_ChangeBattleSpeed.js) v1.0.0(新規)

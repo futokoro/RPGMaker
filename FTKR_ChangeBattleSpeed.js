@@ -1,9 +1,9 @@
 //=============================================================================
-// バトル中の各種速度を変数で管理するプラグイン
+// バトル中の各種速度を変更するプラグイン
 // FTKR_ChangeBattleSpeed.js
 // 作成者     : フトコロ
 // 作成日     : 2018/02/26
-// 最終更新日 : 
+// 最終更新日 : 2018/02/27
 // バージョン : v1.0.0
 //=============================================================================
 
@@ -15,7 +15,7 @@ FTKR.CBS = FTKR.CBS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 バトル中の各種速度を変数で管理するプラグイン
+ * @plugindesc v1.0.1 バトル中の各種速度を変更するプラグイン
  * @author フトコロ
  *
  * @param Message Speed
@@ -32,6 +32,11 @@ FTKR.CBS = FTKR.CBS || {};
  * @desc 複数の対象に別々にアニメーションを表示する場合の２キャラ目以降の再生ウェイト時間を設定します。
  * @type struct<variable>
  * @default {"variableId":"0","initValue":"12"}
+ *
+ * @param Aniamtion Enemy Delay
+ * @desc 敵がアニメーションを再生するまでのウェイト時間を設定します。Base Delayと別に処理されます。
+ * @type struct<variable>
+ * @default {"variableId":"0","initValue":"0"}
  *
  * @param Animation Rate
  * @desc アニメーションの１フレームごとの表示時間を設定します。
@@ -58,11 +63,22 @@ FTKR.CBS = FTKR.CBS || {};
  * ・バトルログの表示時間　　　　　　　　　　　（MVデフォルト：16）
  * ・アニメーションを開始するまでのディレイ時間（MVデフォルト：8）
  * ・アニメーションのフレームごとの表示時間　　（MVデフォルト：4）
+ * ・敵のアニメーション開始前のディレイ時間　　（MVデフォルトにはありません）　　　　　
  * ・ダメージポップアップの時間　　　　　　　　（MVデフォルト：90）
  * ・敵通常キャラの消滅時間　　　　　　　　　　（MVデフォルト：32）
  * 
  * プラグインパラメータで、変数IDを指定しない場合は
  * MVデフォルトの時間を使用します。
+ * 
+ * 
+ * なお、敵のアニメーションを開始する前のディレイ時間は
+ * 「アニメーションを開始するまでのディレイ時間」+
+ * 　　　　　　　「敵のアニメーション開始前のディレイ時間」
+ * という結果になります。
+ * 
+ * 「アニメーションを開始するまでのディレイ時間」はアクターも使用するため
+ * 敵の行動だけ遅くしたい場合は、「敵のアニメーション開始前のディレイ時間」で
+ * 調整してください。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -89,6 +105,9 @@ FTKR.CBS = FTKR.CBS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.1 - 2018/02/27 : 機能追加
+ *    1. 敵だけアニメーション開始前のディレイ時間を変更する機能を追加。
  * 
  * v1.0.0 - 2018/02/26 : 初版作成
  * 
@@ -140,6 +159,7 @@ FTKR.CBS = FTKR.CBS || {};
         animationRate      : setPluginStructVariable('Animation Rate'),
         damageDuration     : setPluginStructVariable('Damage Popup Duration'),
         collapseDuration   : setPluginStructVariable('Enemy Collapse Duration'),
+        animationEnemyDelay: setPluginStructVariable('Aniamtion Enemy Delay'),
     };
 
     var getParamVariableValue = function(param, base){
@@ -163,19 +183,33 @@ FTKR.CBS = FTKR.CBS || {};
         return getParamVariableValue(FTKR.CBS.messageSpeed, _CBS_Window_BattleLog_messageSpeed.call(this));
     };
 
-    Window_BattleLog.prototype.isBusy = function() {
-        return this._waitCount > 0 || this._waitMode || this._methods.length > 0;
+    var _CBS_Window_BattleLog_showAnimation = Window_BattleLog.prototype.showAnimation;
+    Window_BattleLog.prototype.showAnimation = function(subject, targets, animationId) {
+        this._subject = subject;
+        _CBS_Window_BattleLog_showAnimation.call(this, subject, targets, animationId);
+    };
+
+    Window_BattleLog.prototype.animationEnemyDelay = function() {
+        return getParamVariableValue(FTKR.CBS.animationEnemyDelay, 0);
+    };
+
+    var _CBS_Window_BattleLog_showEnemyAttackAnimation = Window_BattleLog.prototype.showEnemyAttackAnimation;
+    Window_BattleLog.prototype.showEnemyAttackAnimation = function(subject, targets) {
+        _CBS_Window_BattleLog_showEnemyAttackAnimation.call(this, subject, targets);
+        this._waitCount = this.animationEnemyDelay();
     };
 
     var _CBS_Window_BattleLog_animationBaseDelay = Window_BattleLog.prototype.animationBaseDelay;
     Window_BattleLog.prototype.animationBaseDelay = function() {
-        return getParamVariableValue(FTKR.CBS.animationBaseDelay, _CBS_Window_BattleLog_animationBaseDelay.call(this));
+        var delay = this._subject && !this._subject.isActor() ? this.animationEnemyDelay() : 0;
+        return delay + getParamVariableValue(FTKR.CBS.animationBaseDelay, _CBS_Window_BattleLog_animationBaseDelay.call(this));
     };
 
     var _CBS_Window_BattleLog_animationNextDelay = Window_BattleLog.prototype.animationNextDelay;
     Window_BattleLog.prototype.animationNextDelay = function() {
         return getParamVariableValue(FTKR.CBS.animationNextDelay, _CBS_Window_BattleLog_animationNextDelay.call(this));
     };
+
 
     var _CBS_Sprite_Enemy_startCollapse = Sprite_Enemy.prototype.startCollapse;
     Sprite_Enemy.prototype.startCollapse = function() {
