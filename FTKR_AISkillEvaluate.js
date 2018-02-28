@@ -4,7 +4,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2018/01/06
 // 最終更新日 : 2018/02/28
-// バージョン : v1.2.1
+// バージョン : v1.2.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ASE = FTKR.ASE || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.1 自動戦闘時に使用するスキルの評価値を変更するプラグイン
+ * @plugindesc v1.2.2 自動戦闘時に使用するスキルの評価値を変更するプラグイン
  * @author フトコロ
  *
  * @param Skill Evaluate Log
@@ -29,7 +29,7 @@ FTKR.ASE = FTKR.ASE || {};
  * @desc 行動評価のモデル(簡易的な作戦)を作成します
  * ここで設定した評価モデルをアクターに反映できます
  * @type struct<auto>[]
- * @default 
+ * @default []
  * 
  * @param Manual Mode Name
  * @desc 自動戦闘を使わない場合の作戦名称を設定します。
@@ -240,11 +240,14 @@ FTKR.ASE = FTKR.ASE || {};
  *        ：その行動タイプを選択する頻度を設定します。
  *        ：1～9の値を設定し、この値が評価値に掛けられます。
  * 
- * 注意）
- * リストには、常に行動可能なスキルを最低１つ設定してください。
+ * ！！注意！！********************************************
+ * リストには、常に行動可能なスキルがある行動タイプを最低１つ
+ * 設定してください。
  * ここでの常に行動可能なスキルとは、評価値が 0 にならず
  * コストを消費せずに使用可能なスキルのことです。
+ * 　例）行動タイプ：通常攻撃
  * 
+ * *******************************************************
  * 
  * ３．スキルへの行動タイプの設定
  * スキルのメモ欄に以下のタグを設定することで、行動タイプを設定できます。
@@ -294,6 +297,10 @@ FTKR.ASE = FTKR.ASE || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.2.2 - 2018/02/28 : 不具合修正
+ *    1. プラグインパラメータEvaluate Modelsの初期値が空欄の場合に
+ *       エラーになる不具合を修正。
  * 
  * v1.2.1 - 2018/02/28 : ヘルプ修正、機能追加
  *    1. ヘルプ内の誤字を修正。
@@ -398,6 +405,8 @@ FTKR.ASE = FTKR.ASE || {};
 
 (function() {
 
+    var parameters = PluginManager.parameters('FTKR_AISkillEvaluate');
+
     var paramParse = function(obj) {
         return JSON.parse(JSON.stringify(obj, paramReplace));
     };
@@ -410,14 +419,18 @@ FTKR.ASE = FTKR.ASE || {};
         }
     };
 
+    var setArrayParamParse = function(param) {
+        param = paramParse(parameters[param]);
+        return Array.isArray(param) ? param : [];
+    };
+
     //=============================================================================
     // プラグイン パラメータ
     //=============================================================================
-    var parameters = PluginManager.parameters('FTKR_AISkillEvaluate');
 
     FTKR.ASE = {
         evalLog : Boolean(parameters['Skill Evaluate Log'] || false),
-        models  : paramParse(parameters['Evaluate Models']),
+        models  : setArrayParamParse('Evaluate Models'),
         skip    : Number(parameters['Skip Party Command'] || 0),
         command : {
             menu  : paramParse(parameters['Menu Command']),
@@ -426,11 +439,11 @@ FTKR.ASE = FTKR.ASE || {};
         title   : paramParse(parameters['Title Texts']),
         manual  : (parameters['Manual Mode Name'] || '手動戦闘'),
     };
+
     FTKR.ASE.models.unshift({name:(parameters['Default Tactics Name'] || '自動戦闘'),evaluate:[]});
     FTKR.ASE.models.forEach( function(model, i) {
         if (model) model.id = i;
     });
-    console.log(FTKR.ASE);
 
 
     //objのメモ欄から <metacode: x> の値を読み取って返す
