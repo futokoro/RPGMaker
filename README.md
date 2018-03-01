@@ -200,7 +200,7 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
-| [FTKR_DeleteSavefile](FTKR_DeleteSavefile.js) | [仮版](FTKR_DeleteSavefile.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_DeleteSavefile.js) | 2018/02/25 | セーブファイルを削除するコマンドを追加する |
+| [FTKR_DeleteSavefile](FTKR_DeleteSavefile.js) | [仮版](FTKR_DeleteSavefile.ja.md) | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_DeleteSavefile.js) | 2018/03/01 | セーブファイルを削除するコマンドを追加する |
 
 [目次に戻る](#目次)
 
@@ -237,60 +237,10 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 # 更新情報
 
-2018/02の更新情報
+2018/03の更新情報
 
-### 2018/02/28
-* [FTKR_PopupSpriteMessage](FTKR_PopupSpriteMessage.js) v1.2.1
-* [FTKR_AISkillEvaluate](FTKR_AISkillEvaluate.js) v1.2.3
-
-### 2018/02/27
-* [FTKR_ChangeBattleSpeed](FTKR_ChangeBattleSpeed.js) v1.0.2
-
-### 2018/02/26
-* [FTKR_ChangeBattleSpeed](FTKR_ChangeBattleSpeed.js) v1.0.0(新規)
-
-### 2018/02/25
-* [FTKR_MaxBattleMembers](FTKR_MaxBattleMembers.js) v1.0.0(新規)
-* [FTKR_DeleteSavefile](FTKR_DeleteSavefile.ja.md) v1.0.0(新規)
-* [FTKR_InterlockMouseAndWindow](FTKR_InterlockMouseAndWindow.js) v1.0.0(新規)
-* [FTKR_PopupSpriteMessage](FTKR_PopupSpriteMessage.js) v1.2.0
-
-### 2018/02/24
-* [FTKR_PopupSpriteMessage](FTKR_PopupSpriteMessage.js) v1.1.1
-* [FTKR_ItemSubCommand](FTKR_ItemSubCommand.ja.md) v1.5.1
-* [FTKR_SceneBackImages](FTKR_SceneBackImages.js) v1.0.0(新規)
-
-### 2018/02/22
-* [FTKR_ItemSubCommand](FTKR_ItemSubCommand.ja.md) v1.5.0
-
-### 2018/02/20
-* [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.ja.md) v1.14.0
-* [FTKR_MenuEvent](FTKR_MenuEvent.js) v1.0.3
-
-### 2018/02/19
-* [FTKR_ExMetaData](FTKR_ExMetaData.ja.md) v1.0.1
-* [FTKR_ExBattleEvent](FTKR_ExBattleEvent.ja.md) v1.3.3
-
-### 2018/02/17
-* [FTKR_ExTraitSetting](FTKR_ExTraitSetting.js) v1.0.4
-
-### 2018/02/15
-* [FTKR_OriginalSceneWindow](FTKR_OriginalSceneWindow.ja.md) v1.5.1
-
-### 2018/02/14
-* [FTKR_OriginalSceneWindow](FTKR_OriginalSceneWindow.ja.md) v1.5.0
-
-### 2018/02/13
-* [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.ja.md) v1.13.0
-
-### 2018/02/12
-* [FTKR_BattleAbortConditions](FTKR_BattleAbortConditions.js) v1.0.0(新規)
-
-### 2018/02/03
-* [FTKR_MessageWindowLines](FTKR_MessageWindowLines.js) v1.1.1
-
-### 2018/02/01
-* [FTKR_ItemConfig_Required](FTKR_ExItemConfig_Required.ja.md) v1.0.3
+### 2018/03/01
+* [FTKR_DeleteSavefile](FTKR_DeleteSavefile.ja.md) v1.0.1
 
 [過去の更新情報](note.md)
 

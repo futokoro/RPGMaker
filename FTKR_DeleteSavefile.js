@@ -3,8 +3,8 @@
 // FTKR_DeleteSavefile.js
 // 作成者     : フトコロ
 // 作成日     : 2018/02/25
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2018/03/01
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.DSF = FTKR.DSF || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 セーブファイルを削除するコマンドを追加するプラグイン
+ * @plugindesc v1.0.1 セーブファイルを削除するコマンドを追加するプラグイン
  * @author フトコロ
  *
  * @param --コマンド名--
@@ -97,6 +97,9 @@ FTKR.DSF = FTKR.DSF || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.1 - 2018/03/01 : 仕様変更
+ *    1. 確認画面でカーソルの初期位置を「実行しない」に変更。
  * 
  * v1.0.0 - 2018/02/25 : 初版作成
  * 
@@ -268,7 +271,7 @@ FTKR.DSF = FTKR.DSF || {};
             this._confTitleWindow.show();
             this._confCommandWindow.show();
             this._confCommandWindow.activate();
-            this._confCommandWindow.select(0);
+            this._confCommandWindow.select(1);
         } else {
             SoundManager.playDeleteSavefile();
             StorageManager.remove(this.savefileId());
