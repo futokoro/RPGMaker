@@ -4,7 +4,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2018/01/05
 // 最終更新日 : 2018/03/03
-// バージョン : v1.2.2
+// バージョン : v1.2.3
 //=============================================================================
 //=============================================================================
 // BattleEffectPopup.js　//ベースにしたプラグイン
@@ -22,7 +22,7 @@ FTKR.PSM = FTKR.PSM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.2 任意のメッセージを画面上にポップアップ表示するプラグイン
+ * @plugindesc v1.2.3 任意のメッセージを画面上にポップアップ表示するプラグイン
  * @author フトコロ
  *
  * @param Max Popup Messages
@@ -257,6 +257,9 @@ FTKR.PSM = FTKR.PSM || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.2.3 - 2018/03/03 : 不具合修正
+ *    1. メニュー開閉時に色調と透明度が元に戻ってしまう不具合を修正。
+ * 
  * v1.2.2 - 2018/03/03 : 不具合修正、機能追加
  *    1. 文字の縁取りの色指定方法が間違っていたため修正。プラグインパラメータの
  *       初期値変更。
@@ -440,8 +443,8 @@ FTKR.PSM = FTKR.PSM || {};
         $gameParty.setPopupMessage(
           setArgNum(args[0]), setArgNum(args[1]), setArgNum(args[2]), setArgNum(args[3]),
           setArgNum(args[11]), args[4], color, 0, Boolean(args[8]),
-          setArgNum(args[6]), args[9], setArgNum(args[10]), args[5],
-          setArgNum(args[11])
+          setArgNum(args[6]), args[9], setArgNum(args[10]), font,
+          setArgNum(args[12])
         );
     };
 
@@ -608,6 +611,10 @@ FTKR.PSM = FTKR.PSM || {};
                     message.offsetCount = 0;
                     if (message.dx) message.x = message.dx;
                     if (message.dy) message.y = message.dy;
+                    if (message.dopacity>=0) {
+                        message.opacity = message.dopacity;
+                    }
+                    if (message.dcolor instanceof Array) message.flashColor = message.dcolor.clone();
                     var sprite = this._spriteset._ftPopupMessages[i];
                     sprite.setup(message);
                     sprite.setupSprite(sprite._text);
@@ -689,8 +696,7 @@ FTKR.PSM = FTKR.PSM || {};
             this.setupFlashEffect(message.flashColor, message.flashDuration);
         }
         this._duration = message.duration;
-        console.log(this._flashColor, this._outlineColor);
-        this.opacity = message.opacity ? Number(message.opacity) : 255;
+        this.opacity = !isNaN(message.opacity)  ? Number(message.opacity) : 255;
     };
 
     Sprite_FtPopupMessage.prototype.setupSprite = function(text) {
@@ -848,6 +854,7 @@ FTKR.PSM = FTKR.PSM || {};
             this.setNextColor(2, message),
             this.setNextColor(3, message),
         ];
+        message.flashColor = this._flashColor.clone();
     };
 
     Sprite_FtPopupMessage.prototype.setNextColor = function(index, message) {
@@ -873,7 +880,10 @@ FTKR.PSM = FTKR.PSM || {};
                 this.opacity = message.dopacity;
                 message.opacity = message.dopacity;
             }
-            if (message.dcolor instanceof Array) this._flashColor = message.dcolor.clone();
+            if (message.dcolor instanceof Array) {
+                this._flashColor = message.dcolor.clone();
+                message.flashColor = message.dcolor.clone();
+            }
         }
         if (this._duration >= 0 && this._duration < 10) {
             this.opacity = 255 * this._duration / 10;
