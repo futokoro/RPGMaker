@@ -3,8 +3,8 @@
 // FTKR_AISkillEvaluate.js
 // 作成者     : フトコロ
 // 作成日     : 2018/01/06
-// 最終更新日 : 2018/02/28
-// バージョン : v1.2.3
+// 最終更新日 : 2018/03/10
+// バージョン : v1.2.4
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ASE = FTKR.ASE || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.3 自動戦闘時に使用するスキルの評価値を変更するプラグイン
+ * @plugindesc v1.2.4 自動戦闘時に使用するスキルの評価値を変更するプラグイン
  * @author フトコロ
  *
  * @param Skill Evaluate Log
@@ -319,6 +319,11 @@ FTKR.ASE = FTKR.ASE || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.2.4 - 2018/03/10 : 不具合修正
+ *    1. アクターの特徴で自動戦闘を追加していないと、作戦画面で作戦を変更しても
+ *       正しく更新されない不具合を修正。
+ *    2. バトル中に使用可能なスキルが何もない場合にエラーになる不具合を修正。
  * 
  * v1.2.3 - 2018/02/28 : ヘルプ追記
  *    1. 作戦の設定方法をヘルプに追記。
@@ -659,7 +664,7 @@ FTKR.ASE = FTKR.ASE || {};
 
     var _ASE_Game_BattlerBase_isAutoBattle = Game_BattlerBase.prototype.isAutoBattle;
     Game_BattlerBase.prototype.isAutoBattle = function() {
-        return this._evalModelId == -1 ? false : _ASE_Game_BattlerBase_isAutoBattle.call(this);
+        return this._evalModelId ? this._evalModelId >= 0 : _ASE_Game_BattlerBase_isAutoBattle.call(this);
     };
 
     //=============================================================================
@@ -745,7 +750,9 @@ FTKR.ASE = FTKR.ASE || {};
         for (var i = 0; i < this.numActions(); i++) {
             if (FTKR.ASE.evalLog && this.numActions() > 1) console.log('行動', i+1);
             this.makeAutoBattleAction(i);
-            if (FTKR.ASE.evalLog) console.log('決定＞＞', this.action(i).item().name);
+            if (FTKR.ASE.evalLog && this.action(i) && this.action(i).item()) {
+                console.log('決定＞＞', this.action(i).item().name);
+            }
         }
         if (FTKR.ASE.evalLog) {
             console.log('評価値計算終了');

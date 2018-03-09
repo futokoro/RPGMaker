@@ -3,8 +3,8 @@
 // FTKR_PopupSpriteMessage.js
 // 作成者     : フトコロ
 // 作成日     : 2018/01/05
-// 最終更新日 : 2018/03/03
-// バージョン : v1.2.3
+// 最終更新日 : 2018/03/10
+// バージョン : v1.2.4
 //=============================================================================
 //=============================================================================
 // BattleEffectPopup.js　//ベースにしたプラグイン
@@ -22,7 +22,7 @@ FTKR.PSM = FTKR.PSM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.3 任意のメッセージを画面上にポップアップ表示するプラグイン
+ * @plugindesc v1.2.4 任意のメッセージを画面上にポップアップ表示するプラグイン
  * @author フトコロ
  *
  * @param Max Popup Messages
@@ -80,8 +80,8 @@ FTKR.PSM = FTKR.PSM || {};
  * ２．以下のプラグインコマンドでポップアップを表示します。
  * ※[]は実際の入力に使用しません
  * 
- * PSM_ポップアップ表示 [ポップアップID] [ポップアップ設定ID] [X座標] [Y座標] [表示時間] [文字列]
- * PSM_SHOW_POPUP [popupId] [statusId] [x] [y] [duration] [text]
+ * PSM_ポップアップ表示 [ポップアップID] [ポップアップ設定ID] [X座標] [Y座標] [表示時間] [文字列] [オプション]
+ * PSM_SHOW_POPUP [popupId] [statusId] [x] [y] [duration] [text] [options]
  * 
  *    ポップアップID(popupId)
  *      ：1から、プラグインパラメータMax Popup Messagesで設定した
@@ -96,6 +96,8 @@ FTKR.PSM = FTKR.PSM || {};
  *    X座標、Y座標
  *      ：ポップアップを表示する場合の、画面上の座標を指定します。
  *      　\v[n]で変数を指定することも可能です。
+ *      　デフォルトでは文字列の左上が原点ですが、オプション(options)部に
+ *      　-c と記載することで文字列の中心を原点にできます。
  *    
  *    表示時間(duration)
  *      ：ポップアップを表示している時間を指定します。
@@ -111,10 +113,21 @@ FTKR.PSM = FTKR.PSM || {};
  *        また、以下の制御文字が使用可能です。
  *           \v[n] \N[n] \P[n] \G
  * 
+ *    オプション(options)
+ *      ：末尾に以下の文字列を入力することもできます。(順不同)
+ *      　オプションの文字列同士は半角スペースを空けてください。
+ * 
+ *        -c : 指定する座標が文字列の中心になります。
+ *             入力しない場合は、文字列左上座標になります。
+ * 
+ *        -s : 表示が完了するまでウェイトが掛かります。
+ *             表示時間を-1に設定した場合は無効です。 
+ * 
+ * 
  * なお、以下のコマンドでポップアップ設定IDを使用せずに、直接パラメータを指定できます。
  * 
- * PSM_ポップアップ表示B [ポップアップID] [X座標] [Y座標] [表示時間] [文字列] [フォント] [フォントサイズ] [文字色] [イタリック] [縁色] [バウンド高さ] [時間間隔] [透明度]
- * PSM_SHOW_POPUP_B [popupId] [x] [y] [duration] [text] [fontFace] [fontSize] [color] [italic] [outlineColor] [popupHeight] [offsetWait] [opacity]
+ * PSM_ポップアップ表示B [ポップアップID] [X座標] [Y座標] [表示時間] [文字列] [フォント] [フォントサイズ] [文字色] [イタリック] [縁色] [バウンド高さ] [時間間隔] [透明度] [オプション]
+ * PSM_SHOW_POPUP_B [popupId] [x] [y] [duration] [text] [fontFace] [fontSize] [color] [italic] [outlineColor] [popupHeight] [offsetWait] [opacity] [options]
  * 
  *    フォント(fontFace)以降のパラメータの意味は、プラグインパラメータと同じです。
  *    以下のパラメータの入力方式に気をつけてください。
@@ -138,8 +151,8 @@ FTKR.PSM = FTKR.PSM || {};
  * ２．以下のプラグインコマンドでポップアップを移動させます。
  * ※[]は実際の入力に使用しません
  * 
- * PSM_ポップアップ移動 [ポップアップID] [X座標] [Y座標] [移動時間]
- * PSM_MOVE_POPUP [popupId] [x] [y] [duration]
+ * PSM_ポップアップ移動 [ポップアップID] [X座標] [Y座標] [移動時間] [オプション]
+ * PSM_MOVE_POPUP [popupId] [x] [y] [duration] [options]
  * 
  *    ポップアップID(popupId)
  *      ：移動したいポップアップIDを指定します。
@@ -153,6 +166,11 @@ FTKR.PSM = FTKR.PSM || {};
  *      ：ポップアップを移動させる時間を指定します。
  *        \v[n]で変数を指定することも可能です。
  *        0 を指定すると即座に移動します。
+ * 
+ *    オプション(options)
+ *      ：末尾に以下の文字列を入力することもできます。
+ * 
+ *        -s : 移動が完了するまでウェイトが掛かります。
  * 
  * 
  * ３．以下のプラグインコマンドでポップアップを回転させます。
@@ -179,8 +197,8 @@ FTKR.PSM = FTKR.PSM || {};
  * ４．以下のプラグインコマンドでポップアップの色調と透明度を変化させます。
  * ※[]は実際の入力に使用しません
  * 
- * PSM_ポップアップ色調変更 [ポップアップID] [色調] [透明度] [変化時間]
- * PSM_CHANGECOLOR_POPUP [popupId] [tone] [opacity] [duration]
+ * PSM_ポップアップ色調変更 [ポップアップID] [色調] [透明度] [変化時間] [オプション]
+ * PSM_CHANGECOLOR_POPUP [popupId] [tone] [opacity] [duration] [options]
  * 
  *    ポップアップID(popupId)
  *      ：移動したいポップアップIDを指定します。
@@ -203,12 +221,17 @@ FTKR.PSM = FTKR.PSM || {};
  *        \v[n]で変数を指定することも可能です。
  *        0 を指定すると即座に変化します。
  * 
+ *    オプション(options)
+ *      ：末尾に以下の文字列を入力することもできます。
+ * 
+ *        -s : 変化が完了するまでウェイトが掛かります。
+ * 
  * 
  * ４．以下のプラグインコマンドでポップアップを消去します。
  * ※[]は実際の入力に使用しません
  * 
- * PSM_ポップアップ消去 [ポップアップID] [消去時間]
- * PSM_ERASE_POPUP [popupId] [duration]
+ * PSM_ポップアップ消去 [ポップアップID] [消去時間] [オプション]
+ * PSM_ERASE_POPUP [popupId] [duration] [options]
  * 
  *    ポップアップID(popupId)
  *      ：消去したいポップアップIDを指定します。
@@ -219,6 +242,11 @@ FTKR.PSM = FTKR.PSM || {};
  *        ここで指定した時間が経過すると、自動的に表示が消えます。
  *        \v[n]で変数を指定することも可能です。
  *        指定しない場合、または 0 を指定すると即座に消えます。
+ * 
+ *    オプション(options)
+ *      ：末尾に以下の文字列を入力することもできます。
+ * 
+ *        -s : 消去が完了するまでウェイトが掛かります。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -240,6 +268,25 @@ FTKR.PSM = FTKR.PSM || {};
  * 
  * 
  *-----------------------------------------------------------------------------
+ * ウェイトコマンドの設定時間とポップアップ操作コマンドの実行時間について
+ *-----------------------------------------------------------------------------
+ * ポップアップ操作(移動、回転、色調変更）では、各操作の実行時間(duration)を
+ * 0 に設定した場合でも極短時間(1ウェイト分)ですが処理が行われます。
+ * 
+ * そのため、操作コマンドの後にウェイトコマンドを入れる場合は
+ * 最低でも、実行時間＋1 のウェイトに設定してください。
+ * 
+ * 
+ * なお、各操作の実行処理が完了する前に、次の操作を実行した場合は
+ * 前の処理を即座に終了させた上で、次の操作を実行します。
+ * 
+ * 例)
+ * A地点に表示したポップアップ文字列を、B地点に移動させるコマンドを実行中に
+ * (AとB地点の途中で)、C地点に移動させるコマンドを実行した場合は、
+ * 即座にBに移動させた上で、BからC地点に移動させます。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
  * 本プラグインのライセンスについて(License)
  *-----------------------------------------------------------------------------
  * 本プラグインはMITライセンスのもとで公開しています。
@@ -256,6 +303,13 @@ FTKR.PSM = FTKR.PSM || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.2.4 - 2018/03/10 : 不具合修正、機能追加
+ *    1. ポップアップの移動実行中に、別地点への移動コマンドを実行すると
+ *       前の移動がキャンセルされて初期位置から移動してしまう不具合を修正。
+ *    2. ポップアップの操作実行時間とウェイト時間に関する注意をヘルプに追加。
+ *    3. ポップアップ表示コマンドに、文字列の中心座標を設定できる機能を追加。
+ *    4. ポップアップ動作が完了するまで、イベント処理にウェイトを掛ける機能を追加。
  * 
  * v1.2.3 - 2018/03/03 : 不具合修正
  *    1. メニュー開閉時に色調と透明度が元に戻ってしまう不具合を修正。
@@ -360,6 +414,27 @@ FTKR.PSM = FTKR.PSM || {};
         return window && Number(colorId)>=0 ? window.textColor(colorId) : '';
     };
 
+    var convertTextWidth = function(text) {
+        var tw = 0;
+        var window = SceneManager._scene._windowLayer.children[0];
+        if (!window) return tw;
+        var conv = window.convertEscapeCharacters(text);
+        var reg = /i\[(\d+)\]/i
+        while (reg.test(conv)) {
+            conv = (conv.toUpperCase()).replace(reg, '');
+            tw += Window_Base._iconWidth + 4;
+        }
+        if (/c\[(\d+)\]/i.test(conv)) {
+            conv = (conv.toUpperCase()).replace(/c\[(\d+)\]/ig, '');
+        }
+        if (conv.match(/lw\[(\d+),?([^\]]+)\]/i)) {
+            tw += RegExp.$1;
+            conv = (conv.toUpperCase()).replace(/lw\[(\d+),?([^\]]+)\]/ig, '');
+        }
+        tw += window.textWidth(conv);
+        return tw;
+    };
+
     var setArgStr = function(arg) {
         return convertEscapeCharacters(arg);
     };
@@ -419,6 +494,7 @@ FTKR.PSM = FTKR.PSM || {};
             case 'ポップアップ消去':
             case 'ERASE_POPUP':
                 $gameParty.requestErasePopupMessage(setArgNum(args[0]), setArgNum(args[1]));
+                var option = this.setupPopupMessageOptions(args, 2);
                 break;
             case 'ポップアップ色調変更':
             case 'CHANGECOLOR_POPUP':
@@ -427,28 +503,46 @@ FTKR.PSM = FTKR.PSM || {};
         }
     };
 
+    Game_Interpreter.prototype.setupPopupMessageOptions = function(args, i) {
+        var option = {};
+        for (var m = i; m < args.length; m++) {
+            switch(args[m]) {
+                case '-c':
+                    option.align = true;
+                    break;
+                case '-s':
+                    this.setPSMWaitMode();
+                    break;
+            }
+        }
+        return option;
+    };
+
     Game_Interpreter.prototype.setupPopupMessage = function(args) {
         var status = FTKR.PSM.popupStatus[Number(args[1])];
+        var option = this.setupPopupMessageOptions(args, 6);
         $gameParty.setPopupMessage(
           setArgNum(args[0]), setArgNum(args[2]), setArgNum(args[3]), setArgNum(args[4]),
           status.offsetWait, args[5], status.color, 0, status.italic,
           status.fontSize, status.outlineColor, status.popupHeight, status.fontFace,
-          status.opacity
+          status.opacity, !!option.align
         );
     };
 
     Game_Interpreter.prototype.setupPopupMessage_B = function(args) {
         var font = args[5] == -1 ? '' : args[5];
+        var option = this.setupPopupMessageOptions(args, 13);
         var color = /,/g.test(args[7]) ? args[7].split(',').num() : [0,0,0,0];
         $gameParty.setPopupMessage(
           setArgNum(args[0]), setArgNum(args[1]), setArgNum(args[2]), setArgNum(args[3]),
           setArgNum(args[11]), args[4], color, 0, Boolean(args[8]),
           setArgNum(args[6]), args[9], setArgNum(args[10]), font,
-          setArgNum(args[12])
+          setArgNum(args[12]), !!option.align
         );
     };
 
     Game_Interpreter.prototype.setupMoveMessage = function(args) {
+        var option = this.setupPopupMessageOptions(args, 4);
         $gameParty.movePopupMessage(
           setArgNum(args[0]), setArgNum(args[1]), setArgNum(args[2]), setArgNum(args[3])
         );
@@ -459,10 +553,28 @@ FTKR.PSM = FTKR.PSM || {};
           setArgNum(args[0]), setArgNum(args[1]), Boolean(setArgNum(args[2]))
         );
     };
+
     Game_Interpreter.prototype.setupChangeColorMessage = function(args) {
+        var option = this.setupPopupMessageOptions(args, 4);
         $gameParty.changeColorMessage(
           setArgNum(args[0]), args[1], setArgNum(args[2]), setArgNum(args[3])
         );
+    };
+
+    Game_Interpreter.prototype.setPSMWaitMode = function() {
+        this._waitMode = 'popupSpriteText';
+    };
+
+    var _PSM_Game_Interpreter_updateWaitMode = Game_Interpreter.prototype.updateWaitMode;
+    Game_Interpreter.prototype.updateWaitMode = function() {
+        var waiting = false;
+        switch (this._waitMode) {
+            case 'popupSpriteText':
+                waiting = $gameParty.isPsmBusy();
+                break;
+        }
+        if (waiting) return waiting;
+        return _PSM_Game_Interpreter_updateWaitMode.call(this);
     };
 
     //=============================================================================
@@ -528,9 +640,20 @@ FTKR.PSM = FTKR.PSM || {};
         return this._psmMessage[messageId] && this._psmMessage[messageId].eraseDuration || 0
     };
 
+    Game_Party.prototype.isPsmBusy = function() {
+        return this._psmMessage.some(function(message) {
+            return message.duration > 0 ||
+              message.moveDuration >= 0 || 
+              message.colorDuration >= 0;
+        });
+    };
+
     Game_Party.prototype.movePopupMessage = function(messageId, x2, y2, duration) {
         if (this._psmMessage) {
             var message = this._psmMessage[messageId];
+            if (message && message.duration) {
+                this.stopUpdateMessage(messageId);
+            }
             message.dx = x2;
             message.dy = y2;
             message.moveDuration = duration;
@@ -541,6 +664,9 @@ FTKR.PSM = FTKR.PSM || {};
     Game_Party.prototype.rotatePopupMessage = function(messageId, speed, rotate) {
         if (this._psmMessage) {
             var message = this._psmMessage[messageId];
+            if (message && message.duration) {
+                this.stopUpdateMessage(messageId);
+            }
             message.rotateSpeed = speed;
             message.rotate = rotate;
         }
@@ -549,6 +675,9 @@ FTKR.PSM = FTKR.PSM || {};
     Game_Party.prototype.changeColorMessage = function(messageId, color, opacity, duration){
         if (this._psmMessage) {
             var message = this._psmMessage[messageId];
+            if (message && message.duration) {
+                this.stopUpdateMessage(messageId);
+            }
             message.dopacity = opacity;
             message.dcolor = /,/g.test(color) ? color.split(',').num() : '';
             message.colorDuration = duration;
@@ -558,7 +687,7 @@ FTKR.PSM = FTKR.PSM || {};
 
     Game_Party.prototype.setPopupMessage = function(messageId, x1, y1, duration,
             offsetCount, text, flashColor, flashDuration, italic,
-            fontSize, outlineColor, popupHeight, fontFace, opacity) {
+            fontSize, outlineColor, popupHeight, fontFace, opacity, align) {
         if (!this._psmMessage) this._psmMessage = [];
         this._psmMessage[messageId] = {
             x : x1,
@@ -574,7 +703,8 @@ FTKR.PSM = FTKR.PSM || {};
             outlineColor : outlineColor,
             popupHeight : popupHeight,
             fontFace : fontFace,
-            opacity : opacity
+            opacity : opacity,
+            align : align,
         };
     };
 
@@ -585,6 +715,19 @@ FTKR.PSM = FTKR.PSM || {};
     Game_Party.prototype.psmMessage = function(messageId) {
         if (!this._psmMessage) this._psmMessage = [];
         return this._psmMessage[messageId];
+    };
+
+    Game_Party.prototype.stopUpdateMessage = function(messageId) {
+        var message = this.psmMessage(messageId);
+        if (message) {
+            message.offsetCount = 0;
+            if (message.dx) message.x = message.dx;
+            if (message.dy) message.y = message.dy;
+            if (message.dopacity>=0) {
+                message.opacity = message.dopacity;
+            }
+            if (message.dcolor instanceof Array) message.flashColor = message.dcolor.clone();
+        }
     };
 
     //=============================================================================
@@ -608,13 +751,7 @@ FTKR.PSM = FTKR.PSM || {};
         if (FTKR.PSM.repop) {
             $gameParty._psmMessage.forEach(function(message, i){
                 if (message && message.duration) {
-                    message.offsetCount = 0;
-                    if (message.dx) message.x = message.dx;
-                    if (message.dy) message.y = message.dy;
-                    if (message.dopacity>=0) {
-                        message.opacity = message.dopacity;
-                    }
-                    if (message.dcolor instanceof Array) message.flashColor = message.dcolor.clone();
+                    $gameParty.stopUpdateMessage(i);
                     var sprite = this._spriteset._ftPopupMessages[i];
                     sprite.setup(message);
                     sprite.setupSprite(sprite._text);
@@ -670,6 +807,7 @@ FTKR.PSM = FTKR.PSM || {};
         this._index = 0;
         this._offsetCount = -1;
         this._moveDuration = -1;
+        this._colorDuration = -1;
         this._angle = 0;
         this._duration = 0;
         this._isKeepPopup = false;
@@ -691,12 +829,29 @@ FTKR.PSM = FTKR.PSM || {};
         message.popupHeight = 0;
         this._index = 0;
         this._count = 0;
-        this.move(message.x,message.y);// スプライトの原点
+        this._align = message.align;
+        this._textWidth = this.getTextWidth();
+        this._textHeight = this.setupDynamicText().height;
+        var x = message.x;
+        var y = message.y;
+        this.move(this.textX(message.x), this.textY(message.y));// スプライトの原点
         if (message.flashColor) {
             this.setupFlashEffect(message.flashColor, message.flashDuration);
         }
         this._duration = message.duration;
         this.opacity = !isNaN(message.opacity)  ? Number(message.opacity) : 255;
+    };
+
+    Sprite_FtPopupMessage.prototype.getTextWidth = function() {
+        return this.setupDynamicText().measureTextWidth(this._text);
+    };
+
+    Sprite_FtPopupMessage.prototype.textX = function(x) {
+        return this._align ? x - this._textWidth / 2 : x;
+    };
+
+    Sprite_FtPopupMessage.prototype.textY = function(y) {
+        return this._align ? y - this._textHeight / 2 : y;
     };
 
     Sprite_FtPopupMessage.prototype.setupSprite = function(text) {
@@ -709,7 +864,7 @@ FTKR.PSM = FTKR.PSM || {};
 
     Sprite_FtPopupMessage.prototype.setupDynamicText = function(text) {
         var size = this._fontSize;
-        var width = (this._italic ? size * 1.5 : size) * text.length;
+        var width = text ? (this._italic ? size * 1.5 : size) * text.length : size + 8;
         var bitmap = new Bitmap(width, size + 8);// 文字の描画領域サイズ
         bitmap.fontSize = size;// フォントサイズ
         if (this._fontFace) {
@@ -722,7 +877,7 @@ FTKR.PSM = FTKR.PSM || {};
             bitmap.outlineWidth = Math.floor(bitmap.fontSize / 6);// 文字の縁取り太さ
             bitmap.outlineColor = this._outlineColor;// 文字の縁取り色
         }
-        bitmap.drawText(text, 0, 0, bitmap.width, bitmap.height, 'center');
+        if (text) bitmap.drawText(text, 0, 0, bitmap.width, bitmap.height, 'center');
         return bitmap;
     };
 
@@ -800,14 +955,16 @@ FTKR.PSM = FTKR.PSM || {};
         if (this._moveDuration > 0) {
             this._moveDuration--;
             var message = this.message();
-            this.x = Math.floor(message.x + (message.dx - message.x) * (1 - this._moveDuration / message.moveDuration));
-            this.y = Math.floor(message.y + (message.dy - message.y) * (1 - this._moveDuration / message.moveDuration));
+            if (this.message()) this.message().moveDuration = this._moveDuration;
+            this.x = this.textX(Math.floor(message.x + (message.dx - message.x) * (1 - this._moveDuration / message.moveDuration)));
+            this.y = this.textY(Math.floor(message.y + (message.dy - message.y) * (1 - this._moveDuration / message.moveDuration)));
         } else if (this._moveDuration == 0) {
             this._moveDuration--;
             var message = this.message();
-            this.x = message.dx;
+            if (this.message()) this.message().moveDuration = this._moveDuration;
+            this.x = this.textX(message.dx);
             message.x = message.dx;
-            this.y = message.dy;
+            this.y = this.textY(message.dy);
             message.y = message.dy;
         }
         if (this.message() && this.message().rotate) {
@@ -871,11 +1028,13 @@ FTKR.PSM = FTKR.PSM || {};
         if (this._colorDuration > 0) {
             this._colorDuration--;
             var message = this.message();
+            if (this.message()) this.message().colorDuration = this._colorDuration;
             this.updateColor();
             if (message.dopacity>=0) this.opacity = Math.floor(message.opacity + (message.dopacity - message.opacity) * (1 - this._colorDuration / message.colorDuration));
         } else if (this._colorDuration == 0) {
             this._colorDuration--;
             var message = this.message();
+            if (this.message()) this.message().colorDuration = this._colorDuration;
             if (message.dopacity>=0) {
                 this.opacity = message.dopacity;
                 message.opacity = message.dopacity;

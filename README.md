@@ -81,7 +81,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 | [FTKR_ExMessageWindow](FTKR_ExMessageWindow.js) | [仮版](FTKR_ExMessageWindow.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExMessageWindow.js) | 2017/03/28 | 制御文字を使って、一度に複数のメッセージウィンドウを表示する |
 | [FTKR_ExMessageWindow2](FTKR_ExMessageWindow2.js) | [仮版](FTKR_ExMessageWindow2.ja.md) | [v2.4.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExMessageWindow2.js) | 2017/08/21 | 文章の表示コマンドを使って、一度に複数のメッセージウィンドウを表示する <br> FTKR_ExMessageWindowと組み合わせて使用できません |
 | [FTKR_MessageWindowLines](FTKR_MessageWindowLines.js) | なし | [v1.1.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_MessageWindowLines.js) | 2018/02/03 | メッセージウィンドウの行数を変更する<br>文章の表示コマンドを複数組み合わせて４行以上入力可能 |
-| [FTKR_PopupSpriteMessage](FTKR_PopupSpriteMessage.js) | なし | [v1.2.3](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_PopupSpriteMessage.js) | 2018/03/03 | 任意のメッセージを画面上にポップアップ表示する |
+| [FTKR_PopupSpriteMessage](FTKR_PopupSpriteMessage.js) | なし | [v1.2.4](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_PopupSpriteMessage.js) | 2018/03/10 | 任意のメッセージを画面上にポップアップ表示する |
 
 [目次に戻る](#目次)
 
@@ -107,7 +107,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 | [FTKR_SkillCounter](FTKR_SkillCounter.js) | [あり](FTKR_SkillCounter.ja.md) | [v1.0.5](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillCounter.js) | 2017/04/29 | 相手のスキルに対抗して効果を変える |
 | [FTKR_SkillSubCommand](FTKR_SkillSubCommand.js) | [仮版](FTKR_SkillSubCommand.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillSubCommand.js) | 2017/04/15 | スキル画面にサブコマンドを追加する <br> FTKR_SEP_ShowSkillStatusと組み合わせて使用できません |
 | [FTKR_AutoInvokeSkill](FTKR_AutoInvokeSkill.js) | なし | [v1.3.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AutoInvokeSkill.js) | 2017/11/04 | 特定条件で自動でスキルを発動させる |
-| [FTKR_AISkillEvaluate](FTKR_AISkillEvaluate.js) | なし | [v1.2.3](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AISkillEvaluate.js) | 2018/02/28 | 自動戦闘時に使用するスキルの評価値を個別に設定する |
+| [FTKR_AISkillEvaluate](FTKR_AISkillEvaluate.js) | なし | [v1.2.4](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AISkillEvaluate.js) | 2018/03/10 | 自動戦闘時に使用するスキルの評価値を個別に設定する |
 
 ## スキル強化システム
 
@@ -238,6 +238,10 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 # 更新情報
 
 2018/03の更新情報
+
+### 2018/03/10
+* [FTKR_PopupSpriteMessage](FTKR_PopupSpriteMessage.js) v1.2.4
+* [FTKR_AISkillEvaluate](FTKR_AISkillEvaluate.js) v1.2.4
 
 ### 2018/03/09
 * [FTKR_FTKR_SkillTreeSystem](FTKR_FTKR_SkillTreeSystem.ja.md) v1.15.0
