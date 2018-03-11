@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2018/03/11
-// バージョン : v2.6.2
+// 最終更新日 : 2018/03/12
+// バージョン : v2.6.3
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -21,7 +21,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.6.2 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v2.6.3 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -1321,6 +1321,10 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.6.3 - 2018/03/12 : 処理変更
+ *    1. 顔画像やカスタム画像の表示透過度の判定部を関数として独立。
+ *    2. コード処理部にアクターが設定されていない場合の例外処理を追加。
+ * 
  * v2.6.2 - 2018/03/11 : 不具合修正
  *    1. 角括弧で設定したコードが正しく表示されない不具合を修正。
  *    2. デザインモード中にstateコードを変更した際に、ステートアイコンの表示が
@@ -2047,6 +2051,10 @@ FTKR.CSS = FTKR.CSS || {};
         return FTKR.evalStrFormula(formula);
     };
 
+    Window_Base.prototype.isEnabledChangePaintOpacity = function(actor) {
+        return actor && actor.isBattleMember();
+    };
+
     /*-------------------------------------------------------------
     アクターの簡易ステータスを表示する関数
     drawCssActorStatus(index, actor, x, y, width, height, lss)
@@ -2129,6 +2137,7 @@ FTKR.CSS = FTKR.CSS || {};
         if (match) {
             return this.drawCssActorStatusBase_A(index, actor, x, y, width, match, lss, css);
         } else {
+            if (!actor) return 1;
             return this.drawCssActorStatusBase_B(index, actor, x, y, width, status, lss, css);
         }
     };
@@ -2143,6 +2152,7 @@ FTKR.CSS = FTKR.CSS || {};
             case 'TEXT':
                 return this.drawCssText(actor, x, y, width, match[2]);
             default:
+                if (!actor) return 1;
                 match[2] = this.evalCssCustomFormula(actor, match[2]);
                 return this.drawCssActorStatusBase_A1(index, actor, x, y, width, match, lss, css);
         }
@@ -2222,7 +2232,7 @@ FTKR.CSS = FTKR.CSS || {};
     Window_Base.prototype.drawCssActorFace = function(actor, x, y, width, lss, scale) {
         var dy = this.lineHeight();
         scale = scale || Math.ceil(Window_Base._faceHeight / dy);
-        this.changePaintOpacity(actor.isBattleMember());
+        this.changePaintOpacity(this.isEnabledChangePaintOpacity(actor));
         this.drawCssFace(actor, x, y, width, dy * scale);
         this.changePaintOpacity(true);
         return scale;
@@ -2252,7 +2262,7 @@ FTKR.CSS = FTKR.CSS || {};
     Window_Base.prototype.drawCssActorChara = function(actor, x, y, width, chara) {
         var dy = this.lineHeight();
         var line = Math.ceil(chara.height / dy);
-        this.changePaintOpacity(actor.isBattleMember());
+        this.changePaintOpacity(this.isEnabledChangePaintOpacity(actor));
         this.drawCssChara(actor, x, y, width, dy * line, chara);
         this.changePaintOpacity(true);
         return line;
@@ -2286,7 +2296,7 @@ FTKR.CSS = FTKR.CSS || {};
     Window_Base.prototype.drawCssActorSvChara = function(index, actor, x, y, width, svChara) {
         var dy = this.lineHeight();
         var line = Math.ceil(svChara.height / dy);
-        this.changePaintOpacity(actor.isBattleMember());
+        this.changePaintOpacity(this.isEnabledChangePaintOpacity(actor));
         this.drawCssSvChara(index, actor, x, y, width, dy * line, svChara);
         this.changePaintOpacity(true);
         return line;
@@ -2629,7 +2639,8 @@ FTKR.CSS = FTKR.CSS || {};
     //指定画像の表示関数
     //------------------------------------------------------------------------
     Window_Base.prototype.drawCssActorImage = function(actor, x, y, width, id) {
-        this.changePaintOpacity(actor.isBattleMember());
+        if (!actor) return 1;
+        this.changePaintOpacity(this.isEnabledChangePaintOpacity(actor));
         var line = this.drawCssImage(actor, x, y, width, id);
         this.changePaintOpacity(true);
         return line;

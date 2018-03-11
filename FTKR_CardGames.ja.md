@@ -6,6 +6,9 @@
 
 ダウンロード: [FTKR_CardGames.js](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CardGames.js)
 
+サンプルプロジェクト: [アツマール公開版](sampleProject/CardGameSample.zip)
+※(MVコアスクリプト v1.5.2対応)
+
 ## 目次
 
 以下の項目の順でプラグインの使い方を説明します。

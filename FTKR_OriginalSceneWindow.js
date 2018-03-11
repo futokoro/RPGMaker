@@ -3,8 +3,8 @@
 // FTKR_OriginalSceneWindow.js
 // 作成者     : フトコロ
 // 作成日     : 2017/06/17
-// 最終更新日 : 2018/02/15
-// バージョン : v1.5.1
+// 最終更新日 : 2018/03/12
+// バージョン : v1.5.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.OSW = FTKR.OSW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.5.1 オリジナルのシーンやウィンドウを作成する
+ * @plugindesc v1.5.2 オリジナルのシーンやウィンドウを作成する
  * @author フトコロ
  *
  * @param --ウィンドウの共通設定--
@@ -639,6 +639,9 @@ FTKR.OSW = FTKR.OSW || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.5.2 - 2018/03/12 : 不具合修正
+ *    1. アクター画像関係の表示透過度が変わってしまう不具合を修正。
  * 
  * v1.5.1 - 2018/02/15 : 機能追加
  *    1. コマンドウィンドウとセレクトウィンドウで、カーソル位置を初期位置に戻す
@@ -2274,6 +2277,10 @@ function Game_OswScene() {
         }
     };
 
+    Window_OswCommon.prototype.isEnabledChangePaintOpacity = function(actor) {
+        return true;
+    };
+
     Window_OswCommon.prototype.drawContent = function(x, y, width, height) {
         if (Imported.FTKR_CSS) {
             this._window.content().item = this._item;
@@ -2403,6 +2410,10 @@ function Game_OswScene() {
         this.makeItemList();
         this.createContents();
         this.drawAllItems();
+    };
+
+    Window_OswSelect.prototype.isEnabledChangePaintOpacity = function(actor) {
+        return true;
     };
 
     Window_OswSelect.prototype.item = function(index) {
