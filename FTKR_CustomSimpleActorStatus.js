@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2018/01/07
-// バージョン : v2.6.1
+// 最終更新日 : 2018/03/11
+// バージョン : v2.6.2
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -21,7 +21,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.6.1 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v2.6.2 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -1309,7 +1309,7 @@ FTKR.CSS = FTKR.CSS || {};
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
- * Copyright (c) 2017 Futokoro
+ * Copyright (c) 2017,2018 Futokoro
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
@@ -1320,6 +1320,11 @@ FTKR.CSS = FTKR.CSS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v2.6.2 - 2018/03/11 : 不具合修正
+ *    1. 角括弧で設定したコードが正しく表示されない不具合を修正。
+ *    2. デザインモード中にstateコードを変更した際に、ステートアイコンの表示が
+ *       一部更新されない不具合を修正。
  * 
  * v2.6.1 - 2018/01/07 : 処理変更
  *    1. 顔画像、歩行キャラ、SVキャラのX座標方向の寄せ表示部分を関数として独立。
@@ -2098,9 +2103,10 @@ FTKR.CSS = FTKR.CSS || {};
         var statuses = status.match(/^\[(.+)\]$/i) ? RegExp.$1.split('/') : [status];
         var line = 0;
         var len = statuses.length;
-        if (len > 1) width = (width - lss.spaceIn * (len - 1))/ len;
+        var sIn = Number(lss.spaceIn);
+        if (len > 1) width = (width - sIn * (len - 1))/ len;
         statuses.forEach( function(element, i) {
-            var dx = (width + lss.spaceIn) * i;
+            var dx = (width + sIn) * i;
             line = Math.max(this.drawCssActorStatusBase(index, actor, x + dx, y, width, element, lss), line);
         },this);
         return line;
@@ -2396,8 +2402,9 @@ FTKR.CSS = FTKR.CSS || {};
         var css = FTKR.CSS.cssStatus.state;
         var iw = Window_Base._iconWidth;
         index = index % this.showActorNum();
-        if (!this._stateIconSprite[index]) {
-            this._stateIconSprite[index] = [];
+        var iconSprites = this._stateIconSprite[index];
+        if (!iconSprites) {
+            iconSprites = [];
         }
         if(css.autoScale) {
             var scale = this.iconScale();
@@ -2406,12 +2413,20 @@ FTKR.CSS = FTKR.CSS || {};
         var maxlen = line ? this.lineHeight() * line : width;
         var offset = css.overlap ? this.getOverlapValue(actor, iw, maxlen, css) : iw;
         var showNum = Math.min(Math.floor((maxlen - 4) / offset));
+        if (showNum < iconSprites.length) {
+            iconSprites.forEach(function(sprite,i){
+                if (i < showNum) return;
+                this.removeChild(sprite);
+            },this);
+            iconSprites = iconSprites.slice(0, showNum);
+        }
         for (var i = 0; i < showNum; i++) {
-            var sprite = this._stateIconSprite[index][i];
+            var sprite = iconSprites[i];
             if (!sprite) {
                 sprite = new Sprite_CssStateIcon(i, showNum);
                 this.addChild(sprite);
-                this._stateIconSprite[index][i] = sprite;
+                sprite.setup(actor, showNum);
+                iconSprites[i] = sprite;
             } else {
                 sprite.setup(actor, showNum);
             }
@@ -2419,6 +2434,7 @@ FTKR.CSS = FTKR.CSS || {};
             sprite.offsetMove(offset * i, line);
             if(css.autoScale) sprite.setScale(scale);
         }
+        this._stateIconSprite[index] = iconSprites;
         return line ? line : 1;
     };
 
