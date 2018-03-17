@@ -239,6 +239,9 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 2018/03の更新情報
 
+### 2018/03/17
+* [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md) v2.7.0
+
 ### 2018/03/15
 * [FTKR_ItemSubCommand](FTKR_ItemSubCommand.ja.md) v1.5.2
 

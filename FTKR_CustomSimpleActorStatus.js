@@ -3,8 +3,8 @@
 // FTKR_CustomSimpleActorStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2018/03/12
-// バージョン : v2.6.3
+// 最終更新日 : 2018/03/17
+// バージョン : v2.7.0
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -21,7 +21,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.6.3 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v2.7.0 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -1133,6 +1133,7 @@ FTKR.CSS = FTKR.CSS || {};
  * 
  *    image    - 最初に登録した画像を表示します。
  *    image(x) - 画像を登録した順番に x = 0,1,2,... と指定します。
+ *               この番号をカスタム画像IDと呼びます。
  * 
  * <CSS_画像:ImageName>
  * code
@@ -1144,7 +1145,7 @@ FTKR.CSS = FTKR.CSS || {};
  * code
  * </CSS_IMAGE>
  * 
- * (*1)画像は、プロジェクトフォルダ内の/img/picture/に保存してください。
+ * (*1)画像は、プロジェクトフォルダ内の/img/pictures/に保存してください。
  * 
  * [code に使用できる項目]
  * 以下のタグで、画像を四角に切り取って表示(トリミング)することができます。
@@ -1177,6 +1178,49 @@ FTKR.CSS = FTKR.CSS || {};
  *    :0 - 左寄せ, 1 - 中央(デフォルト), 2 - 右寄せ
  *    :描画エリアの幅が、顔画像の表示幅よりも大きい場合に機能します。
  *    :また、波括弧を使って描画エリアを拡張した場合にも有効です。
+ * 
+ * 
+ * なお、設定したカスタム画像は、以下のプラグインコマンドを実行することで
+ * ゲーム中に変更できます。
+ * ※[]は実際の入力に使用しません
+ * 
+ * CSS_カスタム画像変更 [アクター または パーティー] [アクターID または パーティー順番] [カスタム画像ID] [画像名] [X座標] [Y座標] [幅] [高さ] [拡大率]
+ * CSS_CHANGE_CUSTOM_IMAGE [ACTOR or PARTY] [actorID or partyNumber] [customImageID] [imageName] [offsetX] [offsetY] [width] [height] [scale]
+ * 
+ *    アクター または パーティー(ACTOR or PARTY)
+ *      ：変更したい対象アクターの指定方法を選択します。
+ *        いずれかの文字列を記載してください。
+ * 
+ *    アクターID または パーティー順番(actorID or partyNumber)
+ *      ：上記で設定した指定方法に合わせて
+ *        アクターIDかパーティー順番の番号を入力します。
+ *        なお、パーティー順番は、先頭キャラを 0番と数えます。
+ *        \v[n]で変数を指定することも可能です。
+ * 
+ *    カスタム画像ID(customImageID)
+ *      ：変更したいカスタム画像IDを設定します。
+ *        \v[n]で変数を指定することも可能です。
+ * 
+ *    画像名(imageName)
+ *      ：変更する画像ファイル名を文字列で設定します。
+ *        画像は、プロジェクトフォルダ内の/img/pictures/に保存してください。
+ * 
+ *    X座標(offsetX)
+ *    Y座標(offsetY)
+ *    幅(width)
+ *    高さ(height)
+ *    拡大率(scale)
+ *      ：画像ファイルの表示設定を変更します。
+ *        アクターのメモ欄の設定方法と同じです。
+ *        変更しない場合は、-1 と入力します。
+ *        \v[n]で変数を指定することも可能です。
+ * 
+ * 入力例）
+ * ◆プラグインコマンド：CSS_カスタム画像変更 アクター 1 0 Package1_2 -1 -1 -1 -1 50
+ * 
+ * このコマンドで、アクターID 1 のカスタム画像ID 0 の画像を
+ * /img/pictures/Package1_2.png に変更した上で
+ * トリミングサイズは変更せず、拡大率を 50% に設定します。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -1259,7 +1303,7 @@ FTKR.CSS = FTKR.CSS || {};
  * 
  * 
  *-----------------------------------------------------------------------------
- * 概要
+ * GraphicalDesignMode.jsと連動したGUIベース画面設定
  *-----------------------------------------------------------------------------
  * トリアコンタンさん製作のGraphicalDesignMode.jsを使って
  * FTKR_CSSプラグインのステータス表示のレイアウトをゲーム画面上で変更できます。
@@ -1320,6 +1364,9 @@ FTKR.CSS = FTKR.CSS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v2.7.0 - 2018/03/17 : 機能追加
+ *    1. カスタム画像をゲーム中に変更するプラグインコマンドを追加。
  * 
  * v2.6.3 - 2018/03/12 : 処理変更
  *    1. 顔画像やカスタム画像の表示透過度の判定部を関数として独立。
@@ -1815,6 +1862,24 @@ FTKR.CSS = FTKR.CSS || {};
         return tw;
     };
 
+    var convertEscapeCharacters = function(text) {
+        if (text == null) text = '';
+        var window = SceneManager._scene._windowLayer.children[0];
+        return window ? window.convertEscapeCharacters(text) : text;
+    };
+
+    var setArgStr = function(arg) {
+        return convertEscapeCharacters(arg);
+    };
+
+    var setArgNum = function(arg) {
+        try {
+            return Number(eval(setArgStr(arg)));
+        } catch (e) {
+            return 0;
+        }
+    };
+
     // 配列の要素の合計
     Math.sam = function(arr) {
         return arr.reduce( function(prev, current, i, arr) {
@@ -1980,6 +2045,44 @@ FTKR.CSS = FTKR.CSS || {};
     };
 
     //=============================================================================
+    // プラグインコマンド
+    //=============================================================================
+
+    var _CSS_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+    Game_Interpreter.prototype.pluginCommand = function(command, args) {
+        _CSS_Game_Interpreter_pluginCommand.call(this, command, args);
+        if (!command.match(/CSS_(.+)/i)) return;
+        command = (RegExp.$1 + '').toUpperCase();
+        switch (command) {
+            case 'カスタム画像変更':
+            case 'CHANGE_CUSTOM_IMAGE':
+                switch (setArgStr(args[0]).toUpperCase()) {
+                    case 'アクター':
+                    case 'ACTOR':
+                        var actor = $gameActors.actor(setArgNum(args[1]));
+                        break;
+                    case 'パーティー':
+                    case 'PARTY':
+                        var actor = $gameParty.members()[setArgNum(args[1])];
+                        break;
+                    default : 
+                        return;
+                }
+                if (!actor) break;
+                actor.setupCssbgi(
+                    setArgNum(args[2]),
+                    setArgStr(args[3]),
+                    setArgNum(args[4]),
+                    setArgNum(args[5]),
+                    setArgNum(args[6]),
+                    setArgNum(args[7]),
+                    setArgNum(args[8])
+                );
+                break;
+        }
+    };
+
+    //=============================================================================
     // Game_Actor
     //=============================================================================
 
@@ -1997,7 +2100,27 @@ FTKR.CSS = FTKR.CSS || {};
         this.actor().cssbgi.forEach( function(bgi){
             if (bgi) ImageManager.loadPicture(bgi.name);
         });
+        this._cssbgi = this.actor().cssbgi.filter(function(bgi){
+            return bgi && bgi.name;
+        });
         ImageManager.loadSvActor(this.battlerName());
+    };
+
+    Game_Actor.prototype.cssbgi = function(imageId) {
+        return this._cssbgi[imageId];
+    };
+
+    Game_Actor.prototype.setupCssbgi = function(imageId, name, x, y, width, height, scale) {
+        var bgi = this._cssbgi[imageId];
+        bgi = {
+            name    : name || bgi.name,
+            offsetX : x >= 0 ? x : bgi.offsetX,
+            offsetY : y >= 0 ? y : bgi.offsetY,
+            width   : width >= 0 ? width : bgi.width,
+            height  : height >= 0 ? height : bgi.height,
+            scale   : scale >= 0 ? scale : bgi.scale,
+        };
+        this._cssbgi[imageId] = bgi;
     };
 
     //ステートモーションを取得する
@@ -2636,7 +2759,7 @@ FTKR.CSS = FTKR.CSS || {};
     };
 
     //------------------------------------------------------------------------
-    //指定画像の表示関数
+    //カスタム画像の表示関数
     //------------------------------------------------------------------------
     Window_Base.prototype.drawCssActorImage = function(actor, x, y, width, id) {
         if (!actor) return 1;
@@ -2647,14 +2770,14 @@ FTKR.CSS = FTKR.CSS || {};
     };
 
     Window_Base.prototype.drawCssImage = function(actor, dx, dy, width, id) {
-        var bgi = actor.actor().cssbgi[id];
+        var bgi = actor.cssbgi(id) ? actor.cssbgi(id) : actor.actor().cssbgi[id];
         var bitmap = ImageManager.loadPicture(bgi.name);
         if (!bitmap) return 1;
         var sw = bgi.width || bitmap.width;
         var sh = bgi.height || bitmap.height;
         var sx = bgi.offsetX || 0;
         var sy = bgi.offsetY || 0;
-
+        console.log(bgi);
         var dh = sh * bgi.scale / 100;
         var dw = sw * bgi.scale / 100;
         var offsetX = FTKR.CSS.cssStatus.image.posiX * (width - dw) / 2;
