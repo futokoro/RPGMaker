@@ -249,7 +249,7 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 2018/03の更新情報
 
 ### 2018/03/25
-* [FTKR_ShowPictureBalloon.js](#FTKR_ShowPictureBalloon.js) v1.0.0(新規)
+* [FTKR_ShowPictureBalloon](#FTKR_ShowPictureBalloon.js) v1.0.0(新規)
 
 ### 2018/03/24
 * [FTKR_InterlockMouseAndWindow](FTKR_InterlockMouseAndWindow.js) v1.0.1
