@@ -16,6 +16,7 @@
 1. [バトル](#バトル)
 1. [イベント](#イベント)
 1. [マップ](#マップ)
+1. [ピクチャ](#ピクチャ)
 1. [セーブ](#セーブ)
 1. [ミニゲーム](#ミニゲーム)
 1. [デバッグ](#デバッグ)
@@ -196,6 +197,14 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 [目次に戻る](#目次)
 
+# ピクチャ
+
+| プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
+|:-----------|:-----------:|:-------------|:-------------|:-------------|
+| [FTKR_ShowPictureBalloon](FTKR_ShowPictureBalloon.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ShowPictureBalloon.js) | 2018/03/25 | ピクチャにフキダシアイコンを表示させる |
+
+[目次に戻る](#目次)
+
 # セーブ
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
@@ -238,6 +247,9 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 # 更新情報
 
 2018/03の更新情報
+
+### 2018/03/25
+* [FTKR_ShowPictureBalloon.js](#FTKR_ShowPictureBalloon.js) v1.0.0(新規)
 
 ### 2018/03/24
 * [FTKR_InterlockMouseAndWindow](FTKR_InterlockMouseAndWindow.js) v1.0.1
