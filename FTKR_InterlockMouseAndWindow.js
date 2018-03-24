@@ -3,8 +3,8 @@
 // FTKR_InterlockMouseAndWindow.js
 // 作成者     : フトコロ
 // 作成日     : 2018/02/25
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2018/03/24
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.IMW = FTKR.IMW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 マウスポインタとウィンドウのカーソルを連動させるプラグイン
+ * @plugindesc v1.0.1 マウスポインタとウィンドウのカーソルを連動させるプラグイン
  * @author フトコロ
  *
  * @param カーソル音を鳴らす
@@ -61,6 +61,8 @@ FTKR.IMW = FTKR.IMW || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.1 - 2018/03/24 : 不具合修正
  * 
  * v1.0.0 - 2018/02/25 : 初版作成
  * 
@@ -133,7 +135,7 @@ FTKR.IMW = FTKR.IMW || {};
                     }
                 },this);
                 //一番手前のウィンドウのカーソル位置を更新
-                if (!!pointWindow && index >= 0 && pointWindow._index !== index) {
+                if (this.isRefreshWindowCursor(pointWindow, index)) {
                     this.refreshWindowCursor(pointWindow, index);
                 }
             }
@@ -144,7 +146,12 @@ FTKR.IMW = FTKR.IMW || {};
         return !TouchInput.isTriggered() && !TouchInput.isCancelled() && TouchInput.isMoved();
     };
 
-    Scene_Base.prototype.refreshWindowCursor = function(pointWndow, index) {
+    Scene_Base.prototype.isRefreshWindowCursor = function(pointWindow, index) {
+        return !!pointWindow && index >= 0 && pointWindow._index !== index
+    };
+
+    Scene_Base.prototype.refreshWindowCursor = function(pointWindow, index) {
+        //カーソル移動に合わせて、SEを鳴らす
         if (FTKR.IMW.enable) SoundManager.playCursor();
         pointWindow.select(index);
     };

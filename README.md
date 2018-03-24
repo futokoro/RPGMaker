@@ -39,7 +39,7 @@
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
-| [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) | [あり](FTKR_CustomSimpleActorStatus.ja.md) | [v2.6.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CustomSimpleActorStatus.js) | 2018/03/11 | ステータス表示を変更する 本体プラグイン |
+| [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) | [あり](FTKR_CustomSimpleActorStatus.ja.md) | [v2.7.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CustomSimpleActorStatus.js) | 2018/03/17 | ステータス表示を変更する 本体プラグイン |
 | [FTKR_CSS_MenuStatus](FTKR_CSS_MenuStatus.js) | [あり](FTKR_CSS_MenuStatus.ja.md) | [v1.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_MenuStatus.js) | 2017/11/18 | メニュー画面のステータス表示を変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) |
 | [FTKR_CSS_BattleStatus](FTKR_CSS_BattleStatus.js) | [あり](FTKR_CSS_BattleStatus.ja.md) | [v1.3.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_BattleStatus.js) | 2017/11/18 | バトル画面のステータス表示を変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) |
 | [FTKR_CSS_DetailedStatus](FTKR_CSS_DetailedStatus.js) | [あり](FTKR_CSS_DetailedStatus.ja.md) | [v1.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_DetailedStatus.js) | 2017/11/18 | ステータス画面のステータス表示を変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) |
@@ -69,7 +69,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 | [FTKR_DisplayCommandFrame](FTKR_DisplayCommandFrame.js) | [仮版](FTKR_DisplayCommandFrame.ja.md) | [v1.2.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_DisplayCommandFrame.js) | 2017/11/26 | コマンドに枠を付ける |
 | [FTKR_OriginalSceneWindow](FTKR_OriginalSceneWindow.js) | [仮版](FTKR_OriginalSceneWindow.ja.md) | [v1.5.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_OriginalSceneWindow.js) | 2018/02/15 | オリジナルのシーンおよびウィンドウを作成する |
 | [FTKR_SceneBackImages](FTKR_SceneBackImages.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SceneBackImages.js) | 2018/02/24 | メニュー画面やショップ画面などに変数で切替可能な背景画像を設定する |
-| [FTKR_InterlockMouseAndWindow](FTKR_InterlockMouseAndWindow.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_InterlockMouseAndWindow.js) | 2018/02/25 | マウスポインタとウィンドウのカーソルを連動させる |
+| [FTKR_InterlockMouseAndWindow](FTKR_InterlockMouseAndWindow.js) | なし | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_InterlockMouseAndWindow.js) | 2018/03/24 | マウスポインタとウィンドウのカーソルを連動させる |
 
 [目次に戻る](#目次)
 
@@ -238,6 +238,9 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 # 更新情報
 
 2018/03の更新情報
+
+### 2018/03/24
+* [FTKR_InterlockMouseAndWindow](FTKR_InterlockMouseAndWindow.js) v1.0.1
 
 ### 2018/03/17
 * [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md) v2.7.0
