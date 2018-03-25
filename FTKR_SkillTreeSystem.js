@@ -3,8 +3,8 @@
 // FTKR_SkillTreeSystem.js
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/02/25
-// 最終更新日 : 2018/03/09
-// バージョン : v1.15.0
+// 最終更新日 : 2018/03/25
+// バージョン : v1.15.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.15.0 ツリー型スキル習得システム
+ * @plugindesc v1.15.1 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -1387,6 +1387,9 @@ FTKR.STS = FTKR.STS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.15.1 - 2018/03/25 : 不具合修正
+ *    1. FTKR_ExItemConfig_ItemBasic.js未適用時にエラーになる不具合を修正。
  * 
  * v1.15.0 - 2018/03/09 : 機能追加
  *    1. FTKR_ExItemConfig_ItemBasic.jsに対応。
@@ -3044,13 +3047,13 @@ function Scene_STS() {
         };
     }
     
-    if (!Window_Base.prototype.itemName) {
+    if (!Window_Base.prototype.itemIcon) {
         Window_Base.prototype.itemIcon = function(item) {
             return !!item ? item.iconIndex : 0;
         };
     }
     
-    if (!Window_Base.prototype.itemName) {
+    if (!Window_Base.prototype.itemDesc) {
         Window_Base.prototype.itemDesc = function(item) {
             return !!item ? item.description : '';
         };
