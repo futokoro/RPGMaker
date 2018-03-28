@@ -3,8 +3,8 @@
 // FTKR_SEP_ShowSkillStatus.js
 // 作成者     : フトコロ
 // 作成日     : 2017/02/24
-// 最終更新日 : 2017/10/19
-// バージョン : v1.4.5
+// 最終更新日 : 2018/03/27
+// バージョン : v1.4.6
 //=======↑本プラグインを改変した場合でも、この欄は消さないでください↑===============
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.SSS = FTKR.SSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.4.5 スキルのステータスを表示するプラグイン
+ * @plugindesc v1.4.6 スキルのステータスを表示するプラグイン
  * @author フトコロ
  *
  * @param ---Layout---
@@ -919,7 +919,7 @@ FTKR.SSS = FTKR.SSS || {};
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
- * Copyright (c) 2017 Futokoro
+ * Copyright (c) 2017,2018 Futokoro
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
@@ -927,6 +927,10 @@ FTKR.SSS = FTKR.SSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  *
+ * v1.4.6 - 2018/03/27 : 不具合修正
+ *    1. FTKR_SkillUpgradeSystemとYEP_JobPoints.jsと組み合わせた時に
+ *       JPをコストに設定しても、現在JPが表示されない不具合修正。
+ * 
  * v1.4.5 - 2017/10/19 : 不具合修正
  *    1. スキルステータスウィンドウを非表示設定にしていても、内部で
  *       描画処理されていた不具合を修正
@@ -1499,6 +1503,8 @@ Window_Base.prototype.setSepCost = function(cost) {
     case 'armor':
       var item = $dataArmors[cost.id];
       return this.setCost(item.iconIndex, item.name, $gameParty.numItems(item));
+    case 'jp':
+      return this.setCost(Yanfly.Icon.Jp, Yanfly.Param.Jp, this._actor.jp(this._actor._classId));
     default:
       return this.setCost(0, '', 0);
   }
