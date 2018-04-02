@@ -226,7 +226,7 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_IgnoreScriptError](FTKR_IgnoreScriptError.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_IgnoreScriptError.js) | 2017/05/03 | イベントで実行するスクリプトのエラーを無視する |
-| [FTKR_OriginalDebugMode](FTKR_OriginalDebugMode.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_OriginalDebugMode.js) | 2018/04/02 | オリジナルのデバッグモードを追加する |
+| [FTKR_OriginalDebugMode](FTKR_OriginalDebugMode.js) | [あり](FTKR_OriginalDebugMode.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_OriginalDebugMode.js) | 2018/04/02 | オリジナルのデバッグモードを追加する |
 
 [目次に戻る](#目次)
 
