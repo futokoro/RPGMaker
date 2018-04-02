@@ -226,6 +226,7 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_IgnoreScriptError](FTKR_IgnoreScriptError.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_IgnoreScriptError.js) | 2017/05/03 | イベントで実行するスクリプトのエラーを無視する |
+| [FTKR_OriginalDebugMode](FTKR_OriginalDebugMode.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_OriginalDebugMode.js) | 2018/04/02 | オリジナルのデバッグモードを追加する |
 
 [目次に戻る](#目次)
 
@@ -246,41 +247,10 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 # 更新情報
 
-2018/03の更新情報
+2018/04の更新情報
 
-### 2018/03/27
-* [FTKR_ExBattleCommand](FTKR_ExBattleCommand.js) v1.0.1
-* [FTKR_SEP_ShowSkillStatus](FTKR_SEP_ShowSkillStatus.js) 1.4.6
-
-### 2018/03/25
-* [FTKR_ShowPictureBalloon](FTKR_ShowPictureBalloon.ja.md) v1.0.0(新規)
-* [FTKR_FTKR_SkillTreeSystem](FTKR_FTKR_SkillTreeSystem.ja.md) v1.15.1
-
-### 2018/03/24
-* [FTKR_InterlockMouseAndWindow](FTKR_InterlockMouseAndWindow.js) v1.0.1
-
-### 2018/03/17
-* [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md) v2.7.0
-
-### 2018/03/15
-* [FTKR_ItemSubCommand](FTKR_ItemSubCommand.ja.md) v1.5.2
-
-### 2018/03/11 
-* [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md) v2.6.2
-
-### 2018/03/10
-* [FTKR_PopupSpriteMessage](FTKR_PopupSpriteMessage.js) v1.2.4
-* [FTKR_AISkillEvaluate](FTKR_AISkillEvaluate.js) v1.2.4
-
-### 2018/03/09
-* [FTKR_FTKR_SkillTreeSystem](FTKR_FTKR_SkillTreeSystem.ja.md) v1.15.0
-* [FTKR_FTKR_ExItemConfig_ItemBasic](FTKR_FTKR_ExItemConfig_ItemBasic.ja.md) v1.1.1
-
-### 2018/03/03
-* [FTKR_PopupSpriteMessage](FTKR_PopupSpriteMessage.js) v1.2.3
-
-### 2018/03/01
-* [FTKR_DeleteSavefile](FTKR_DeleteSavefile.ja.md) v1.0.1
+### 2018/04/02
+* [FTKR_OriginalDebugMode](FTKR_OriginalDebugMode.js) v1.0.0(新規)
 
 [過去の更新情報](note.md)
 
