@@ -150,6 +150,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 | [FTKR_AutoStateConditions](FTKR_AutoStateConditions.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AutoStateConditions.js) | 2017/05/02 | ステートに自動付与条件および自動解除条件を設定する |
 | [FTKR_ExStateEffects](FTKR_ExStateEffects.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExStateEffects.js) | 2017/08/04 | ステートが掛かっている間に使用したスキルに別のスキルの特徴を追加する |
 | [FTKR_ChangeRepeatsState](FTKR_ChangeRepeatsState.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ChangeRepeatsState.js) | 2017/08/23 | ステートが掛かっている間に使用したスキルの連続回数を倍加する |
+| [FTKR_DamageFixedStates](FTKR_DamageFixedStates.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_DamageFixedStates.js) | 2018/04/03 | ステートが掛かっている間に受けるダメージを固定値にする |
 
 [目次に戻る](#目次)
 
@@ -250,6 +251,7 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 2018/04の更新情報
 
 ### 2018/04/03
+* [FTKR_DamageFixedStates](FTKR_DamageFixedStates.js) v1.0.0(新規)
 * [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.ja.md) v1.15.2
 * [FTKR_DeleteSavefile](FTKR_DeleteSavefile.ja.md) v1.0.2
 
