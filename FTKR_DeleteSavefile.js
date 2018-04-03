@@ -3,8 +3,8 @@
 // FTKR_DeleteSavefile.js
 // 作成者     : フトコロ
 // 作成日     : 2018/02/25
-// 最終更新日 : 2018/03/01
-// バージョン : v1.0.1
+// 最終更新日 : 2018/04/03
+// バージョン : v1.0.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.DSF = FTKR.DSF || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.1 セーブファイルを削除するコマンドを追加するプラグイン
+ * @plugindesc v1.0.2 セーブファイルを削除するコマンドを追加するプラグイン
  * @author フトコロ
  *
  * @param --コマンド名--
@@ -53,7 +53,7 @@ FTKR.DSF = FTKR.DSF || {};
  *
  * @param Conf Title Format
  * @desc セーブファイルを削除する時の確認内容を記述します。
- *  %1 - ファイル, %2 - ファイルID
+ *  %1 - ファイル, %2 - ファイルID    (制御文字を使用できます)
  * @default %1%2 を削除しますか？
  * 
  * @param Confirmation Ok Format
@@ -64,6 +64,18 @@ FTKR.DSF = FTKR.DSF || {};
  * @desc 確認コマンドの「実行しない」の表示内容を記述します。
  * @default 実行しない
  *
+ * @param Enable Conf Window Setting
+ * @desc 確認用ウィンドウ設定を、セーブ画面ウィンドウと別に設定する機能を有効にします。
+ * @type boolean
+ * @on 有効
+ * @off 無効
+ * @default false
+ *
+ * @param Conf Window Setting
+ * @desc 確認用ウィンドウを設定します。
+ * @default 
+ * @type struct<window>
+ * 
  * @help 
  *-----------------------------------------------------------------------------
  * 概要
@@ -71,6 +83,12 @@ FTKR.DSF = FTKR.DSF || {};
  * セーブ画面やコンティニュー画面から、セーブファイルを削除できます。
  * 
  * 削除時に確認画面を表示させることもできます。
+ * 
+ * 
+ * プラグインパラメータで、以下を設定できます。
+ * 1. 表示するコマンドの名前
+ * 2. 削除時のSE
+ * 3. 削除時に表示する文章と、そのウィンドウ設定
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -97,6 +115,10 @@ FTKR.DSF = FTKR.DSF || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.2 - 2018/04/03 : 機能追加
+ *    1. 削除でファイルを選択した時に決定SEを鳴らすように変更。
+ *    2. 確認画面のウィンドウを個別に設定する機能を追加。
  * 
  * v1.0.1 - 2018/03/01 : 仕様変更
  *    1. 確認画面でカーソルの初期位置を「実行しない」に変更。
@@ -135,6 +157,35 @@ FTKR.DSF = FTKR.DSF || {};
  * @min -100
  *
 */
+/*~struct~window:
+ * @param windowskin
+ * @desc ウィンドウスキンを指定します。
+ * @default Window
+ * @require 1
+ * @dir img/system/
+ * @type file
+ *
+ * @param width
+ * @desc ウィンドウの幅を設定します。
+ * @default 544
+ * @type number
+ * @min 1
+ *
+ * @param opacity
+ * @desc ウィンドウ内の背景の透明率を指定します。0 で透明です。
+ * @default 192
+ * @type number
+ * @min 0
+ * @max 255
+ *
+ * @param frame
+ * @desc ウィンドウ枠を表示するか指定します。
+ * @type boolean
+ * @on 表示する
+ * @off 表示しない
+ * @default true
+ *
+*/
 
 (function() {
 
@@ -165,6 +216,8 @@ FTKR.DSF = FTKR.DSF || {};
             title : String(parameters['Conf Title Format'] || ''),
             ok    : String(parameters['Confirmation Ok Format'] || ''),
             cancel: String(parameters['Confirmation Cancel Format'] || ''),
+            enabledSetting : paramParse(parameters['Enable Conf Window Setting']) || false,
+            setting : paramParse(parameters['Conf Window Setting']) || false,
         }
     };
 
@@ -228,7 +281,7 @@ FTKR.DSF = FTKR.DSF || {};
     }
 
     Scene_File.prototype.createDsdConfTitle = function() {
-        var wx = Graphics.boxWidth / 6;
+        var wx = FTKR.DSF.conf.enabledSetting ? (Graphics.boxWidth - FTKR.DSF.conf.setting.width) / 2 : Graphics.boxWidth / 6;
         var wy = Graphics.boxHeight / 2 - this._helpWindow.fittingHeight(1);
         this._confTitleWindow = new Window_DsdConfTitle(wx, wy);
         this.addWindow(this._confTitleWindow);
@@ -304,6 +357,7 @@ FTKR.DSF = FTKR.DSF || {};
     Scene_Save.prototype.onSavefileOk = function() {
         if (this._delete) {
             if (DataManager.isThisGameFile(this.savefileId())) {
+                SoundManager.playOk();
                 this.deleteSavefile();
             } else {
                 this.onSaveFailure();
@@ -320,6 +374,7 @@ FTKR.DSF = FTKR.DSF || {};
     Scene_Load.prototype.onSavefileOk = function() {
         if (this._delete) {
             if (DataManager.isThisGameFile(this.savefileId())) {
+                SoundManager.playOk();
                 this.deleteSavefile();
             } else {
                 this.onLoadFailure();
@@ -374,9 +429,10 @@ FTKR.DSF = FTKR.DSF || {};
     Window_DsdConfTitle.prototype.constructor = Window_DsdConfTitle;
 
     Window_DsdConfTitle.prototype.initialize = function(x, y) {
-        var width = Graphics.boxWidth * 2 / 3;
+        var width = FTKR.DSF.conf.enabledSetting ? FTKR.DSF.conf.setting.width : Graphics.boxWidth * 2 / 3;
         var height = this.fittingHeight(1);
         Window_Base.prototype.initialize.call(this, x, y, width, height);
+        if (FTKR.DSF.conf.enabledSetting && !FTKR.DSF.conf.setting.frame) this.margin = 0;
         this._savefileId = 0;
         this.refresh();
     };
@@ -392,6 +448,26 @@ FTKR.DSF = FTKR.DSF || {};
         this.drawTextEx(text, 0, 0);
     };
 
+    Window_DsdConfTitle.prototype.loadWindowskin = function() {
+        if (FTKR.DSF.conf.enabledSetting) {
+            this.windowskin = ImageManager.loadSystem(FTKR.DSF.conf.setting.windowskin);
+        } else {
+            Window_Base.prototype.loadWindowskin.call(this);
+        }
+    };
+
+    Window_DsdConfTitle.prototype.standardBackOpacity = function() {
+        if (FTKR.DSF.conf.enabledSetting) {
+            return Number(FTKR.DSF.conf.setting.opacity);
+        } else {
+            return Window_Base.prototype.standardBackOpacity.call(this);
+        }
+    };
+
+    Window_DsdConfTitle.prototype._refreshFrame = function() {
+        if (FTKR.DSF.conf.enabledSetting && FTKR.DSF.conf.setting.frame) Window.prototype._refreshFrame.call(this);
+    };
+
     //=============================================================================
     // Window_DsdConf
     //=============================================================================
@@ -405,10 +481,11 @@ FTKR.DSF = FTKR.DSF || {};
 
     Window_DsdConf.prototype.initialize = function(x, y) {
         Window_HorzCommand.prototype.initialize.call(this, x, y);
+        if (FTKR.DSF.conf.enabledSetting && !FTKR.DSF.conf.setting.frame) this.margin = 0;
     };
 
     Window_DsdConf.prototype.windowWidth = function() {
-        return Graphics.boxWidth * 2 / 3;
+        return FTKR.DSF.conf.enabledSetting ? FTKR.DSF.conf.setting.width : Graphics.boxWidth * 2 / 3;
     };
 
     Window_DsdConf.prototype.maxCols = function() {
@@ -418,6 +495,26 @@ FTKR.DSF = FTKR.DSF || {};
     Window_DsdConf.prototype.makeCommandList = function() {
         this.addCommand(FTKR.DSF.conf.ok, 'delete');
         this.addCommand(FTKR.DSF.conf.cancel, 'cancel');
+    };
+
+    Window_DsdConf.prototype.loadWindowskin = function() {
+        if (FTKR.DSF.conf.enabledSetting) {
+            this.windowskin = ImageManager.loadSystem(FTKR.DSF.conf.setting.windowskin);
+        } else {
+            Window_Base.prototype.loadWindowskin.call(this);
+        }
+    };
+
+    Window_DsdConf.prototype.standardBackOpacity = function() {
+        if (FTKR.DSF.conf.enabledSetting) {
+            return Number(FTKR.DSF.conf.setting.opacity);
+        } else {
+            return Window_Base.prototype.standardBackOpacity.call(this);
+        }
+    };
+
+    Window_DsdConf.prototype._refreshFrame = function() {
+        if (FTKR.DSF.conf.enabledSetting && FTKR.DSF.conf.setting.frame) Window.prototype._refreshFrame.call(this);
     };
 
 }());//EOF

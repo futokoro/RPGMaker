@@ -3,8 +3,8 @@
 // FTKR_SkillTreeSystem.js
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/02/25
-// 最終更新日 : 2018/03/25
-// バージョン : v1.15.1
+// 最終更新日 : 2018/04/03
+// バージョン : v1.15.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.15.1 ツリー型スキル習得システム
+ * @plugindesc v1.15.2 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -479,6 +479,9 @@ FTKR.STS = FTKR.STS || {};
  * 
  * プラグインの使い方は、以下のHPを参照してください。
  * https://github.com/futokoro/RPGMaker/blob/master/FTKR_SkillTreeSystem.ja.md
+ * 
+ * 
+ * このプラグインは、コアスクリプトv1.5.0以降専用です。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -1388,6 +1391,8 @@ FTKR.STS = FTKR.STS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.15.2 - 2018/04/03 : エラー判定処理追加、ヘルプに注釈追加
+ * 
  * v1.15.1 - 2018/03/25 : 不具合修正
  *    1. FTKR_ExItemConfig_ItemBasic.js未適用時にエラーになる不具合を修正。
  * 
@@ -1428,7 +1433,7 @@ FTKR.STS = FTKR.STS || {};
  *    1. スキルツリーの起点スキルに対して行を指定して登録する機能を追加。
  * 
  * v1.9.0 - 2017/07/25 : 機能追加
- *    1. コアスクリプトv1.5.0以前にも仮対応。
+ *    1. コアスクリプトv1.5.0以前にも仮対応。⇒v1.15.2で削除
  *    2. プラグインパラメータに@type適用
  *    3. 一部記述見直し
  * 
@@ -1770,10 +1775,34 @@ function Scene_STS() {
     Game_Action.EFFECT_RESET_TREE = 998;
     Game_Action.EFFECT_CLEAR_TREE = 997;
 
-    var isMVver_1_4 = function() {
-        return !Window_Base.prototype.reserveFaceImages;
-    };
 
+    if (!Window_Base.prototype.reserveFaceImages) {
+        console.error('プロジェクトのコアスクリプトを最新版(v1.5.0以降)にアップデートしてください。');
+        console.error('Update core scripts of your project to the latest version (v1.5.0 or later).');
+    }
+
+    var current = (function() {
+        if (document.currentScript) {
+            return document.currentScript.src;
+        } else {
+            var scripts = document.getElementsByTagName('script'),
+            script = scripts[scripts.length-1];
+            if (script.src) {
+                return script.src;
+            }
+        }
+    })();
+    var filename = current ? current.substring(current.lastIndexOf('/')+1, current.length) : '';
+    if (filename !== 'FTKR_SkillTreeSystem.js') {
+        console.error('スキルツリープラグインのファイル名が間違っています。「FTKR_SkillTreeSystem.js」に直してください。');
+        console.error('The file name of SkillTree-plugin is incorrect. Change to "FTKR_SkillTreeSystem.js".');
+    }
+
+    if (!FTKR.STS.skillTreeId) {
+        console.error('プラグインパラメータ<Skill Tree Id>を設定してください。');
+        console.error('Set the plugin parameter <Skill Tree Id>.');
+    }
+    
     //objのメモ欄から <metacode: x> の値を読み取って返す
     var readObjectMeta = function(obj, metacodes) {
         if (!obj) return false;
@@ -2233,7 +2262,6 @@ function Scene_STS() {
     var _STS_Game_Actor_setup = Game_Actor.prototype.setup;
     Game_Actor.prototype.setup = function(actorId) {
         _STS_Game_Actor_setup.call(this, actorId);
-        if (isMVver_1_4()) ImageManager.loadFace(this.faceName());
         if (FTKR.STS.sp.enableClassSp) {
             this._stsCsp = [];
             $dataClasses.forEach( function(dataClass){
@@ -2569,7 +2597,6 @@ function Scene_STS() {
 
     Game_Actor.prototype.loseSp = function(value) {
         this.getSp(-value);
-//        this._stsSp -= value;
     };
 
     Game_Actor.prototype.stsCsp = function(classId) {
@@ -2664,7 +2691,6 @@ function Scene_STS() {
             if (FTKR.STS.sp.enableClassSp) {
                 $dataClasses.forEach( function(dataClass, i){
                     if (!dataClass) return;
-//                    console.log(skill.id, i, this.stsUsedCsp(i, skill.id));
                     if (flag) this.getCsp(i, this.stsUsedCsp(i, skill.id));
                     this.setStsUsedCsp(i, skill.id, 0);
                 },this);
@@ -3893,7 +3919,6 @@ function Scene_STS() {
 
     Scene_STS.prototype.create = function() {
       Scene_ItemBase.prototype.create.call(this);
-//      this.createHelpWindow();
       this.createStsActorStatusWindow();
       this.createTreeTypeWindow();
       this.createSkillTreeWindow();
@@ -3908,14 +3933,13 @@ function Scene_STS() {
 
     Scene_STS.prototype.createStsActorStatusWindow = function() {
       this._stsActorStatusWindow = new Window_StsActorStatus(0, 0, 240, 144);
-      if(!isMVver_1_4()) this._stsActorStatusWindow.reserveFaceImages();
+      this._stsActorStatusWindow.reserveFaceImages();
       this.addWindow(this._stsActorStatusWindow);
     };
 
     Scene_STS.prototype.createTreeTypeWindow = function() {
       this._stsTreeTypeWindow = new Window_TreeType(0, 144, 240, 288);
       var window = this._stsTreeTypeWindow;
-//      window.setHelpWindow(this._helpWindow);
       window.setHandler('ok',       this.onTreeTypeOk.bind(this));
       window.setHandler('cancel',   this.popScene.bind(this));
       window.setHandler('pagedown', this.nextActor.bind(this));
@@ -3931,7 +3955,6 @@ function Scene_STS() {
       var wh = Graphics.boxHeight - wy;
       this._stsSkillTreeWindow = new Window_SkillTree(wx, wy, ww, wh);
       var window = this._stsSkillTreeWindow;
-//      window.setHelpWindow(this._helpWindow);
       window.setHandler('ok',     this.onSkillTreeOk.bind(this));
       window.setHandler('cancel', this.onSkillTreeCancel.bind(this));
       this._stsTreeTypeWindow.setSkillTreeWindow(window);
@@ -3949,7 +3972,6 @@ function Scene_STS() {
 
     Scene_STS.prototype.createStsConfTitleWindow = function() {
       var wh = this._stsActorStatusWindow.fittingHeight(1);
-//      var wh = this._helpWindow.lineHeight() + this._helpWindow.standardPadding() * 2;
       this._stsConfTitleWindow = new Window_StsConfTitle(204, 120, 408, wh);
       this.addWindow(this._stsConfTitleWindow);
     };
@@ -3960,7 +3982,6 @@ function Scene_STS() {
       var wy = ctw.y + ctw.height;
       var ww = ctw.width;
       var wh = this._stsActorStatusWindow.fittingHeight(1);
-//      var wh = this._helpWindow.lineHeight() * 1 + this._helpWindow.standardPadding() * 2;
       this._stsConfWindow = new Window_StsConf(wx, wy, ww, wh);
       var window = this._stsConfWindow;
       window.setHandler('ok', this.onConfirmationOk.bind(this));
