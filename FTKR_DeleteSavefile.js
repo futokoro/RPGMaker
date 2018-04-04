@@ -3,8 +3,8 @@
 // FTKR_DeleteSavefile.js
 // 作成者     : フトコロ
 // 作成日     : 2018/02/25
-// 最終更新日 : 2018/04/03
-// バージョン : v1.0.2
+// 最終更新日 : 2018/04/04
+// バージョン : v1.0.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.DSF = FTKR.DSF || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.2 セーブファイルを削除するコマンドを追加するプラグイン
+ * @plugindesc v1.0.3 セーブファイルを削除するコマンドを追加するプラグイン
  * @author フトコロ
  *
  * @param --コマンド名--
@@ -115,6 +115,9 @@ FTKR.DSF = FTKR.DSF || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.3 - 2018/04/04 : 不具合修正
+ *    1. windowskinを変更した場合に、初回表示時に反映されない不具合を修正。
  * 
  * v1.0.2 - 2018/04/03 : 機能追加
  *    1. 削除でファイルを選択した時に決定SEを鳴らすように変更。
@@ -221,14 +224,24 @@ FTKR.DSF = FTKR.DSF || {};
         }
     };
 
-    console.log(FTKR.DSF);
-
     SoundManager.playDeleteSavefile = function() {
         var sound = FTKR.DSF.deleteSe;
         if (sound && sound.name) {
             AudioManager.playStaticSe(sound);
         } else {
             this.playSystemSound(1);
+        }
+    };
+
+    //=============================================================================
+    // Scene_Boot
+    //=============================================================================
+
+    var _DSF_Scene_Boot_loadSystemWindowImage = Scene_Boot.prototype.loadSystemWindowImage;
+    Scene_Boot.prototype.loadSystemWindowImage = function() {
+        _DSF_Scene_Boot_loadSystemWindowImage.call(this);
+        if (FTKR.DSF.conf.enabledSetting) {
+            ImageManager.reserveSystem(FTKR.DSF.conf.setting.windowskin);
         }
     };
 
