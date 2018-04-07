@@ -2,7 +2,7 @@
 // 敵味方交互にターンが進むターン制戦闘システムのプラグイン
 // FTKR_AlternatingTurnBattle.js
 // 作成者     : フトコロ
-// 作成日     : 2018/04/08
+// 作成日     : 2018/04/07
 // 最終更新日 : 
 // バージョン : v1.0.0
 //=============================================================================
@@ -384,7 +384,7 @@ FTKR.AltTB = FTKR.AltTB || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
- * v1.0.0 - 2018/04/08 : 初版作成
+ * v1.0.0 - 2018/04/07 : 初版作成
  * 
  *-----------------------------------------------------------------------------
 */
@@ -923,7 +923,7 @@ FTKR.AltTB = FTKR.AltTB || {};
     var _AltTB_Game_Actor_canUse = Game_Actor.prototype.canUse;
     Game_Actor.prototype.canUse = function(item) {
         var result = _AltTB_Game_Actor_canUse.call(this, item);
-        if (FTKR.AltTB.enableAP && (DataManager.isSkill(item) || DataManager.isItem(item)) ) {
+        if ($gameParty.inBattle() && FTKR.AltTB.enableAP && (DataManager.isSkill(item) || DataManager.isItem(item)) ) {
             return result && this.canPayActionPoint(item);
         } else {
             return result;
@@ -1132,6 +1132,39 @@ FTKR.AltTB = FTKR.AltTB || {};
         this.setup(BattleManager.actor());
     };
 
+    Window_ActorCommand.prototype.drawItem = function(index) {
+        if (FTKR.AltTB.enableAP) {
+            var rect = this.itemRectForText(index);
+            var align = this.itemTextAlign();
+            this.resetTextColor();
+            this.changePaintOpacity(this.isCommandEnabled(index));
+            if (this.isCommandSkill(index)) {
+                var tw = this.textWidth('0000');
+                var nw = FTKR.AltTB.enableAP ? rect.width - tw : rect.width;
+                this.drawText(this.commandName(index), rect.x, rect.y, nw, align);
+                if (FTKR.AltTB.enableAP) {
+                    this.drawText(FTKR.AltTB.dispAP + this.commandAP(index), rect.x + nw, rect.y, tw, 'right');
+                }
+            } else {
+                this.drawText(this.commandName(index), rect.x, rect.y, rect.width, align);
+            }
+        } else {
+            Window_Command.prototype.drawItem.call(this, index);
+        }
+    };
+
+    Window_ActorCommand.prototype.isCommandSkill = function(index) {
+        return this.commandSymbol(index) === 'attack' || this.commandSymbol(index) === 'guard';
+    }
+
+    Window_ActorCommand.prototype.commandAP = function(index) {
+        if (this.commandSymbol(index) === 'attack') {
+            return $dataSkills[this._actor.attackSkillId()].actionPoint;
+        } else if (this.commandSymbol(index) === 'guard') {
+            return $dataSkills[this._actor.guardSkillId()].actionPoint;
+        }
+    };
+
     Window_ActorCommand.prototype.cursorRight = function(wrap) {
         if (FTKR.AltTB.changePlayer === 1) {
             BattleManager.selectNextCommand();
@@ -1186,6 +1219,25 @@ FTKR.AltTB = FTKR.AltTB || {};
         return line;
     };
 
+    Window_BattleItem.prototype.drawItemNumber = function(item, x, y, width) {
+        var tw = this.textWidth('0000');
+        var nw = FTKR.AltTB.enableAP ? width - tw : width;
+        Window_ItemList.prototype.drawItemNumber.call(this, item, x, y, nw);
+        if (FTKR.AltTB.enableAP) {
+            this.drawText(FTKR.AltTB.dispAP + item.actionPoint, x + nw, y, tw, 'right');
+        }
+    };
+
+    Window_BattleSkill.prototype.drawSkillCost = function(skill, x, y, width) {
+        var tw = this.textWidth('0000');
+        var nw = FTKR.AltTB.enableAP ? width - tw : width;
+        Window_SkillList.prototype.drawSkillCost.call(this, skill, x, y, nw);
+        if (FTKR.AltTB.enableAP) {
+            this.drawText(FTKR.AltTB.dispAP + skill.actionPoint, x + nw, y, tw, 'right');
+        }
+    };
+
+    
     //=============================================================================
     // Window_BattleActionPoint
     //=============================================================================
