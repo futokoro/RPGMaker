@@ -43,7 +43,8 @@ FTKR_AlternatingTurnBattle.jsと組み合わせる場合は、このプラグイ
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.0.0](FTKR_BattleWindowLayout.js)| 2018/04/08 | 初版作成 |
+| [ver1.1.0](FTKR_BattleWindowLayout.js)| 2018/04/09 | ステータスウィンドウでアクター同士の表示が重なる場合がある不具合を修正<br>アクターコマンドウィンドウの表示位置を変更する機能を追加<br>FTKR_AlternatingTurnBattle.jsの v1.1.0 に対応 |
+| ver1.0.0 | 2018/04/08 | 初版作成 |
 
 
 ## ライセンス

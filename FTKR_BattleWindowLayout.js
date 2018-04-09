@@ -3,8 +3,8 @@
 // FTKR_BattleWindowLayout.js
 // 作成者     : フトコロ
 // 作成日     : 2018/04/08
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2018/04/09
+// バージョン : v1.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.BWL = FTKR.BWL || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 戦闘時のウィンドウ配置を変更する
+ * @plugindesc v1.1.0 戦闘時のウィンドウ配置を変更する
  * @author フトコロ
  *
  * @param Show Actor Face
@@ -25,6 +25,15 @@ FTKR.BWL = FTKR.BWL || {};
  * @off 無効
  * @default true
  * 
+ * @param Actor Command Position
+ * @desc アクターコマンドウィンドウを表示する場所を指定します。
+ * @type select
+ * @option ステータスウィンドウに重ねる
+ * @value 0
+ * @option ステータスウィンドウの上に表示
+ * @value 1
+ * @default 0
+ *
  * @help 
  *-----------------------------------------------------------------------------
  * 概要
@@ -34,7 +43,7 @@ FTKR.BWL = FTKR.BWL || {};
  * １．ステータスウィンドウの幅を画面サイズと同じにします。
  * ２．ステータスウィンドウのアクターを横並びに変更します。(*1)
  * ３．アクターコマンドウィンドウの表示位置を、ステータスウィンドウの
- * 　　選択中のアクターに重ねます。
+ * 　　選択中のアクターに重ねます。(*2)
  * ４．パーティーコマンドウィンドウをステータスウィンドウの上に表示し
  * 　　コマンドを横並びにします。
  * 
@@ -42,6 +51,9 @@ FTKR.BWL = FTKR.BWL || {};
  * (*1) ステータスウィンドウの表示内容は、顔画像、名前、ステート、HP、MP、TPです。
  *      顔画像は、プラグインパラメータで表示のON/OFFを変えられます。
  *      TPは、「バトル画面でTPを表示」にチェックが入っている場合に表示します。
+ * 
+ * (*2) プラグインパラメータで、パーティーコマンドウィンドウと同じ表示位置に
+ *      変更できます。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -72,6 +84,11 @@ FTKR.BWL = FTKR.BWL || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.0 - 2018/04/09 : 機能追加、不具合修正
+ *    1. ステータスウィンドウでアクター同士の表示が重なる場合がある不具合を修正。
+ *    2. アクターコマンドウィンドウの表示位置を変更する機能を追加。
+ *    3. FTKR_AlternatingTurnBattle.jsの v1.1.0 に対応。
+ * 
  * v1.0.0 - 2018/04/08 : 初版作成
  * 
  *-----------------------------------------------------------------------------
@@ -97,7 +114,10 @@ FTKR.BWL = FTKR.BWL || {};
     //=============================================================================
     var parameters = PluginManager.parameters('FTKR_BattleWindowLayout');
 
-    FTKR.BWL.showFace = (paramParse(parameters['Show Actor Face']) || false);
+    FTKR.BWL = {
+        showFace    : (paramParse(parameters['Show Actor Face']) || false),
+        actorCmdPos : (paramParse(parameters['Actor Command Position']) || 0),
+    };
 
     //=============================================================================
     // Scene_Battle
@@ -120,10 +140,11 @@ FTKR.BWL = FTKR.BWL || {};
         this.createFaaStatusWindow();
     };
 
-    var _BWL_Scene_Battle_startActorCommandSelection = Scene_Battle.prototype.startActorCommandSelection;
+    var _BWL_Scene_Battle_startActorCommandSelection =
+         Scene_Battle.prototype.startActorCommandSelection;
     Scene_Battle.prototype.startActorCommandSelection = function() {
         _BWL_Scene_Battle_startActorCommandSelection.call(this);
-        this._actorCommandWindow.x = this._actorCommandWindow.width * BattleManager.actor().index();
+        this._actorCommandWindow.refreshPosition();
     };
 
     var _BWL_Scene_Battle_selectActorSelection = Scene_Battle.prototype.selectActorSelection;
@@ -166,6 +187,13 @@ FTKR.BWL = FTKR.BWL || {};
     // Window_BattleStatus
     //=============================================================================
 
+    var _BWL_Window_BattleStatus_changeActorOnMouse =
+        Window_BattleStatus.prototype.changeActorOnMouse;
+    Window_BattleStatus.prototype.changeActorOnMouse = function(index) {
+        _BWL_Window_BattleStatus_changeActorOnMouse.call(this, index);
+        BattleManager._actorCommandWindow.refreshPosition();
+    };
+
     Window_BattleStatus.prototype.maxCols = function() {
         return $gameParty.battleMembers().length;
     };
@@ -195,10 +223,10 @@ FTKR.BWL = FTKR.BWL || {};
         var width = rect.width;
         if (FTKR.BWL.showFace) {
             var x2 = x + Math.max((width - 144)/2, 0);
-            this.drawActorFace(actor, x2, y);
+            this.drawActorFace(actor, x2, y, width);
         }
-        this.drawActorName(actor, x, y);
-        this.drawActorIcons(actor, x, y + lineHeight * 1);
+        this.drawActorName(actor, x, y, width);
+        this.drawActorIcons(actor, x, y + lineHeight * 1, width);
         this.drawActorHp(actor, x, y + lineHeight * 2, width);
         if ($dataSystem.optDisplayTp) {
             var width2 = (width - 4) / 2;
@@ -223,18 +251,18 @@ FTKR.BWL = FTKR.BWL || {};
     
     Window_PartyCommand.prototype.initialize = function() {
         var y = Graphics.boxHeight - this.fittingHeight(6);
-        var x = this.apWidth();
+        var x = this.apWindowWidth();
         Window_Command.prototype.initialize.call(this, x, y);
         this.openness = 0;
         this.deactivate();
     };
 
-    Window_PartyCommand.prototype.apWidth = function() {
+    Window_Command.prototype.apWindowWidth = function() {
         return Imported.FTKR_AltTB && FTKR.AltTB.enableAP && FTKR.AltTB.showApWindow ? 120 : 0;
     };
 
     Window_PartyCommand.prototype.windowWidth = function() {
-        return Graphics.boxWidth - this.apWidth();
+        return Graphics.boxWidth - this.apWindowWidth();
     };
 
     Window_PartyCommand.prototype.numVisibleRows = function() {
@@ -254,25 +282,43 @@ FTKR.BWL = FTKR.BWL || {};
     //=============================================================================
     
     Window_ActorCommand.prototype.initialize = function() {
-        var y = Graphics.boxHeight - this.windowHeight();
-        Window_Command.prototype.initialize.call(this, 0, y);
+        var y = FTKR.BWL.actorCmdPos ? 
+            Graphics.boxHeight - this.fittingHeight(6) :
+            Graphics.boxHeight - this.windowHeight();
+        var x = FTKR.BWL.actorCmdPos ? this.apWindowWidth() : 0;
+        Window_Command.prototype.initialize.call(this, x, y);
         this.openness = 0;
         this.deactivate();
         this._actor = null;
     };
 
     Window_ActorCommand.prototype.windowWidth = function() {
-        return Graphics.boxWidth / $gameParty.battleMembers().length;
+        return FTKR.BWL.actorCmdPos ? 
+          Graphics.boxWidth - this.apWindowWidth() : 
+          Graphics.boxWidth / $gameParty.battleMembers().length;
+    };
+
+    Window_ActorCommand.prototype.refreshPosition = function() {
+        if (!FTKR.BWL.actorCmdPos) this.x = this.width * BattleManager.actor().index();
     };
 
     Window_ActorCommand.prototype.numVisibleRows = function() {
-        return 4;
+        return FTKR.BWL.actorCmdPos ? 1 : 4;
     };
 
-    var _BWL_Window_ActorCommand_changeInputWindow = Window_ActorCommand.prototype.changeInputWindow;
+    Window_ActorCommand.prototype.maxCols = function() {
+        return FTKR.BWL.actorCmdPos ? 4 : 1;
+    };
+
+    Window_ActorCommand.prototype.itemTextAlign = function() {
+        return FTKR.BWL.actorCmdPos ? 'center' : 'left';
+    };
+
+    var _BWL_Window_ActorCommand_changeInputWindow =
+        Window_ActorCommand.prototype.changeInputWindow;
     Window_ActorCommand.prototype.changeInputWindow = function() {
         _BWL_Window_ActorCommand_changeInputWindow.call(this);
-        this.x = this.width * BattleManager.actor().index();
+        this.refreshPosition();
     };
 
 }());//EOF

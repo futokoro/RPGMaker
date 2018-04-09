@@ -1,10 +1,10 @@
 //=============================================================================
-// アクターのバトルコマンドを変更するプラグイン
+// アクターのバトルコマンドの表示を変更するプラグイン
 // FTKR_ExBattleCommand.js
 // 作成者     : フトコロ
 // 作成日     : 2017/11/25
-// 最終更新日 : 2018/03/27
-// バージョン : v1.0.1
+// 最終更新日 : 2018/04/09
+// バージョン : v1.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,11 +15,16 @@ FTKR.EBC = FTKR.EBC || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.1 アクターのバトルコマンドを変更する
+ * @plugindesc v1.1.0 アクターのバトルコマンドの表示を変更する
  * @author フトコロ
  *
  * @param --パーティーコマンド--
  * @default
+ * 
+ * @param Party Command List
+ * @desc パーティーコマンドの表示内容と順番を設定します。
+ * コマンドの間は、カンマ(,)で区切ってください。
+ * @default fight,escape
  * 
  * @param Party Command Icons
  * @desc パーティーコマンドのアイコンを設定します。
@@ -34,6 +39,13 @@ FTKR.EBC = FTKR.EBC || {};
  * @type struct<actor>
  * @default {"attack":"0","skills":"","guard":"0","item":"0","custom":"false"}
  *
+ * @param Show Custom Cmd Cost
+ * @desc カスタムコマンドのコストを表示するか指定します。
+ * @type boolean
+ * @on 有効
+ * @off 無効
+ * @default false
+ * 
  * @help 
  *-----------------------------------------------------------------------------
  * 概要
@@ -41,8 +53,9 @@ FTKR.EBC = FTKR.EBC || {};
  * アクターのバトルコマンドを変更します。
  * 変更可能な項目は以下の通りです。
  * 
- * １．アクターコマンドの表示内容をアクター毎に設定できます。
- * ２．コマンドにアイコンを表示できます。
+ * １．コマンドにアイコンを表示できます。
+ * ２．パーティーコマンドの表示内容や順番を設定できます。
+ * ３．アクターコマンドの表示内容をアクター毎に設定できます。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -53,9 +66,53 @@ FTKR.EBC = FTKR.EBC || {};
  * 
  * 2. 本プラグインは、FTKR_BattleCommandIcon.jsと組み合わせて使用できません。
  * 
+ * 3. FTKR_AlternatingTurnBattle.jsと組み合わせる場合は、このプラグインが
+ *    下になるように配置してください。
+ * 
  * 
  *-----------------------------------------------------------------------------
- * コマンドの設定方法
+ * パーティーコマンドの設定方法
+ *-----------------------------------------------------------------------------
+ * プラグインパラメータ Party Command List で、パーティーコマンドの
+ * 表示内容と順番を設定できます。
+ * 
+ * リストに設定できる内容は以下の通りです。
+ * 
+ * ・基本のコマンドの場合
+ *    fight   - 「戦う」コマンド
+ *    escape  - 「逃げる」コマンド
+ *    custom* - プラグインパラメータ Party Command Icons の
+ *              custom に追加したコマンド
+ *              custom* の * 部には、リストの番号を記載します。
+ * 
+ * 例)※半角スペースは入れない
+ *    fight,escap,custom1
+ * 
+ * 
+ * ＜プラグインパラメータ Party Command Icons の custom の設定＞
+ * このパラメータでは、他のプラグインで追加したパーティーコマンドを定義し、
+ * そのコマンドアイコンを設定します。
+ * 
+ * 設定時には、以下のパラメータの内容に気をつけてください。
+ * これらは、他のプラグイン内のコマンド定義と同じにする必要があります。
+ * 
+ *    symbol
+ *    ext
+ *    enabled(コマンド実行条件)
+ * 
+ * 具体的に何を設定するかは、他のプラグインによります。
+ * 
+ * 例)
+ * FTKR_AlternatingTurnBattle.jsの「ターン終了」コマンドの場合は
+ * 以下の通りです。名前は自由に設定できます。
+ * 
+ *    symbol    ：trunEnd
+ *    ext       ：空欄
+ *    enabled   ：空欄
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * アクターコマンドの設定方法
  *-----------------------------------------------------------------------------
  * アクターのメモ欄に以下のタグを設定することで
  * リストで設定した順番にアクターコマンドを表示します。
@@ -158,6 +215,11 @@ FTKR.EBC = FTKR.EBC || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.0 - 2018/04/09 : 機能追加
+ *    1. FTKR_AlternatingTurnBattle.jsの v1.1.0 に対応。
+ *    2. パーティーコマンドの表示順番を設定する機能を追加。
+ *    3. カスタムコマンドのコストを表示する機能を追加。
+ * 
  * v1.0.1 - 2018/03/27 : 不具合修正、ヘルプ修正
  *    1.複数の特徴欄で同じスキルタイプを追加したときに、コマンドが重複して
  *      表示してしまう不具合を修正。
@@ -180,6 +242,37 @@ FTKR.EBC = FTKR.EBC || {};
  * @type number
  * @default 
  *
+ * @param custom
+ * @desc 他のプラグインで追加したパーティーコマンドのアイコンを設定します。
+ * @type struct<custom>[]
+ * @default 
+ *
+*/
+/*~struct~custom:
+ * @param name
+ * @desc コマンドの表示名
+ * @default 
+ * 
+ * @param symbol
+ * @desc コマンドのシンボル
+ * 追加するパーティーコマンドの仕様に合わせてください。
+ * @default 
+ * 
+ * @param enabled
+ * @desc コマンドの表示条件
+ * 追加するパーティーコマンドの仕様に合わせてください。
+ * @default 
+ * 
+ * @param ext
+ * @desc コマンドの拡張パラメータ
+ * 追加するパーティーコマンドの仕様に合わせてください。
+ * @default 
+ * 
+ * @param iconId
+ * @desc コマンドのアイコン
+ * 0 は アイコン表示なし
+ * @type number
+ * @default 
 */
 /*~struct~actor:
 * @param attack
@@ -249,10 +342,14 @@ FTKR.EBC = FTKR.EBC || {};
     var parameters = PluginManager.parameters('FTKR_ExBattleCommand');
 
     FTKR.EBC = {
+        list : {
+            party : paramParse(parameters['Party Command List'], '').split(','),
+        },
         icons : {
             party : paramParse(parameters['Party Command Icons']),
             actor : paramParse(parameters['Actor Command Icons']),
         },
+        showCustomCost : paramParse(parameters['Show Custom Cmd Cost']) || false,
     };
     FTKR.EBC.icons.actor.skill = (',' + FTKR.EBC.icons.actor.skills).split(',').num();
 
@@ -414,47 +511,183 @@ FTKR.EBC = FTKR.EBC || {};
     Window_Command.prototype.commandExt = function(index) {
         return this._list[index].ext;
     };
+    Window_Command.prototype.commandIconId = function(index) {
+        return this._list[index].iconId;
+    };
 
-    Window_Command.prototype.drawItemIcon = function(index, type) {
-        var rect = this.itemRectForText(index);
-        var align = this.itemTextAlign();
-        this.resetTextColor();
-        this.changePaintOpacity(this.isCommandEnabled(index));
-        var commandType = FTKR.EBC.icons[type]
+    Window_Command.prototype.cmdIconId = function(index) {
+        var commandType = FTKR.EBC.icons[this._windowType]
+        if (!commandType) return 0;
         var ext = this.commandExt(index);
         var symbol = this.commandSymbol(index);
+        var pCmdId = this.commandIconId(index);
         if (symbol === 'custom') {
             var id = Number(convertEscapeCharacters(ext+''));
             var icon = commandType[symbol] ? $dataSkills[id].iconIndex : 0;
+        } else if (pCmdId) {
+            var icon = pCmdId;
         } else {
             var icon = ext ?
                 commandType[this.commandSymbol(index)][ext]:
                 commandType[this.commandSymbol(index)];
         }
-        var offset = 0;
+        return icon
+    };
+
+    Window_Command.prototype.iconWidth = function(index) {
+        return this.cmdIconId(index) ? Window_Base._iconWidth + 4 : 0;
+    };
+
+    Window_Command.prototype.costWidth = function(index) {
+        return this.cmdSkillId(index) ? this.textWidth('000') : 0;
+    };
+
+    Window_Command.prototype.nameWidth = function(index, width) {
+        width = width || this.contentsWidth();
+        return Math.max(width - this.iconWidth(index) - this.costWidth(index), 0);
+    };
+
+    Window_Command.prototype.drawCmdIcon = function(index, x, y) {
+        var icon = this.cmdIconId(index);
         if (icon) {
-            this.drawIcon(icon, rect.x + 2, rect.y + 2);
-            offset = Window_Base._iconWidth + 4;
+            this.drawIcon(icon, x + 2, y + 2);
         }
-        this.drawText(this.commandName(index), rect.x + offset, rect.y, rect.width - offset, align);
+        return x + this.iconWidth(index);
+    };
+
+    Window_Command.prototype.drawCmdName = function(index, x, y, width) {
+        var nw = this.nameWidth(index, width);
+        var align = !this.costWidth(index) && !this.iconWidth(index) ? this.itemTextAlign() : 'left';
+        this.drawText(this.commandName(index), x, y, nw, align);
+        return x + nw;
+    };
+
+    Window_Command.prototype.drawCmdCost = function(index, x, y) {
+        var skill = $dataSkills[this.cmdSkillId(index)];
+        var width = this.costWidth(index);
+        if (this._actor.skillTpCost(skill) > 0) {
+            this.changeTextColor(this.tpCostColor());
+            this.drawText(this._actor.skillTpCost(skill), x, y, width, 'right');
+        } else if (this._actor.skillMpCost(skill) > 0) {
+            this.changeTextColor(this.mpCostColor());
+            this.drawText(this._actor.skillMpCost(skill), x, y, width, 'right');
+        }
+    };
+
+    Window_Command.prototype.cmdSkillId = function(index) {
+        if (this.commandSymbol(index) === 'custom') {
+            var ext = this.commandExt(index);
+            return Number(convertEscapeCharacters(ext+''));
+        }
+        return 0;
+    };
+
+    Window_Command.prototype.hasCost = function(index) {
+        return FTKR.EBC.showCustomCost ? this.cmdSkillId(index) : false;
+    };
+
+    Window_Command.prototype.drawBattleItem = function(index) {
+        var rect = this.itemRectForText(index);
+        this.resetTextColor();
+        this.changePaintOpacity(this.isCommandEnabled(index));
+        var x1 = this.drawCmdIcon(index, rect.x, rect.y);
+        var x2 = this.drawCmdName(index, x1, rect.y, rect.width);
+        if (this.hasCost(index)) {
+            this.drawCmdCost(index, x2, rect.y);
+        }
     };
 
     //=============================================================================
     // Window_PartyCommand
     //=============================================================================
 
+    var _EBC_Window_PartyCommand_initalize = Window_PartyCommand.prototype.initialize;
+    Window_PartyCommand.prototype.initialize = function() {
+        _EBC_Window_PartyCommand_initalize.call(this);
+        this._windowType = 'party';
+    };
+
+    //書き換え
+    Window_PartyCommand.prototype.addCommand = function(name, symbol, enabled, ext, iconId) {
+        if (enabled === undefined) {
+            enabled = true;
+        }
+        if (ext === undefined) {
+            ext = null;
+        }
+        if (iconId === undefined) {
+            iconId = 0;
+        }
+        this._list.push({ name: name, symbol: symbol, enabled: enabled, ext: ext, iconId:iconId});
+    };
+
+    Window_PartyCommand.prototype.isEscapeEnabled = function() {
+        return Imported.FTKR_AltTB ? !BattleManager.inputCount() && BattleManager.canEscape() :
+            BattleManager.canEscape();
+    };
+
+    //書き換え
+    Window_PartyCommand.prototype.makeCommandList = function() {
+        FTKR.EBC.list.party.forEach(function(list){
+            switch(list.toUpperCase()) {
+              case 'FIGHT':
+                  this.addCommand(TextManager.fight,  'fight');
+                  break;
+              case 'ESCAPE':
+                  this.addCommand(TextManager.escape, 'escape', this.isEscapeEnabled());
+                  break;
+              default:
+                  var match = /custom(\d+)/i.exec(list);
+                  if (!match) break;
+                  var cmd = FTKR.EBC.icons.party.custom[Number(match[1])-1];
+                  var enabled = !cmd.enabled ? true : eval(cmd.enabled);
+                  this.addCommand(cmd.name, cmd.symbol, enabled, cmd.ext, cmd.iconId);
+                  break;
+              }
+        },this);
+    };
+
     //書き換え
     Window_PartyCommand.prototype.drawItem = function(index) {
-        this.drawItemIcon(index, 'party');
+        this.drawBattleItem(index);
     };
 
     //=============================================================================
     // Window_ActorCommand
     //=============================================================================
 
+    var _EBC_Window_ActorCommand_initalize = Window_ActorCommand.prototype.initialize;
+    Window_ActorCommand.prototype.initialize = function() {
+        _EBC_Window_ActorCommand_initalize.call(this);
+        this._windowType = 'actor';
+    };
+
+    Window_ActorCommand.prototype.iconWidth = function(index) {
+        return this.cmdIconId(index) ? Window_Base._iconWidth + 4 : 0;
+    };
+
+    Window_ActorCommand.prototype.drawCmdIcon = function(index, x, y) {
+        var icon = this.cmdIconId(index);
+        if (icon) {
+            this.drawIcon(icon, x + 2, y + 2);
+        }
+        return x + this.iconWidth(index);
+    };
+
+    var _EBC_Window_ActorCommand_commandAP = Window_ActorCommand.prototype.commandAP;
+    Window_ActorCommand.prototype.commandAP = function(index) {
+        if (this.commandSymbol(index) === 'custom') {
+            var ext = this.commandExt(index);
+            var id = Number(convertEscapeCharacters(ext+''));
+            return $dataSkills[id].actionPoint;
+        } else {
+            return _EBC_Window_ActorCommand_commandAP.call(this, index);
+        }
+    };
+
     //書き換え
     Window_ActorCommand.prototype.drawItem = function(index) {
-        this.drawItemIcon(index, 'actor');
+        this.drawBattleItem(index);
     };
 
     var _EBC_Window_ActorCommand_makeCommandList = Window_ActorCommand.prototype.makeCommandList;
