@@ -3,8 +3,8 @@
 // FTKR_ExSvMotion.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/19
-// 最終更新日 : 2017/08/24
-// バージョン : v1.2.5
+// 最終更新日 : 2018/04/10
+// バージョン : v1.2.6
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ESM = FTKR.ESM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.5 SVキャラのモーションを拡張するプラグイン
+ * @plugindesc v1.2.6 SVキャラのモーションを拡張するプラグイン
  * @author フトコロ
  *
  * @noteParam ESM_画像
@@ -443,7 +443,7 @@ FTKR.ESM = FTKR.ESM || {};
  *-----------------------------------------------------------------------------
  * スキル・アイテムに個別でモーションを設定
  *-----------------------------------------------------------------------------
- * スキル、アイテムのメモ欄に以下のタグを設定すると、使用時のモーションを
+ * スキル、アイテムのメモ欄に以下のタグを設定すると、待機時、使用時のモーションを
  * 変更することができます。
  * 
  * <ESM モーション: name>
@@ -455,6 +455,11 @@ FTKR.ESM = FTKR.ESM || {};
  * <ESM 武器モーション>
  * <ESM WEAPON_MOTION>
  * このタグがあると、手持ちの武器付きのモーションになります。
+ * 
+ * 
+ * <ESM 詠唱ON>
+ * <ESM CHANT_ON>
+ * このタグがあると、スキル実行待機中のモーションを詠唱モーションに設定できます。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -576,13 +581,22 @@ FTKR.ESM = FTKR.ESM || {};
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
- * Copyright (c) 2017 Futokoro
+ * Copyright (c) 2017,2018 Futokoro
  * http://opensource.org/licenses/mit-license.php
+ * 
+ * 
+ * プラグイン公開元
+ * https://github.com/futokoro/RPGMaker/blob/master/README.md
  * 
  * 
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.2.6 - 2018/04/10 : 不具合修正、機能追加
+ *    1. YED_SideviewBattlerと組み合わせた場合に、3フレーム以外のモーションを
+ *       表示できない不具合を修正。
+ *    2. スキルに詠唱モーションを実行させるタグ付け機能を追加。
  * 
  * v1.2.5 - 2017/08/24 : 不具合修正
  *    1. メモ欄の読み取り処理を見直し。
@@ -638,637 +652,651 @@ FTKR.ESM = FTKR.ESM || {};
  */
 //=============================================================================
 
-//=============================================================================
-// プラグイン パラメータ
-//=============================================================================
-FTKR.ESM.parameters = PluginManager.parameters('FTKR_ExSvMotion');
+(function() {
 
-FTKR.ESM.motion = {
-    debug:{
-        enable:Number(FTKR.ESM.parameters['Output Motion Log'] || 0),
-        pattern:Number(FTKR.ESM.parameters['Output Motion Pattern Log'] || 0),
-    },
-    basic:{
-        damage:String(FTKR.ESM.parameters['Damage Motion'] || ''),
-        evade:String(FTKR.ESM.parameters['Evade Motion'] || ''),
-        thrust:String(FTKR.ESM.parameters['Thrust Motion'] || ''),
-        swing:String(FTKR.ESM.parameters['Swing Motion'] || ''),
-        missile:String(FTKR.ESM.parameters['Missile Motion'] || ''),
-        skill:String(FTKR.ESM.parameters['Skill Motion'] || ''),
-        speed:String(FTKR.ESM.parameters['Spell Motion'] || ''),
-        item:String(FTKR.ESM.parameters['Item Motion'] || ''),
-        undecided:String(FTKR.ESM.parameters['Undecided Motion'] || ''),
-        wait:String(FTKR.ESM.parameters['Wait Motion'] || ''),
-        recovery:String(FTKR.ESM.parameters['Recovery Motion'] || ''),
-    },
-    state:[
-        {name:'', condition:'',},
-        {name:String(FTKR.ESM.parameters['Motion 1 name'] || ''),
-          condition:String(FTKR.ESM.parameters['Motion 1 Condition'] || ''),},
-        {name:String(FTKR.ESM.parameters['Motion 2 name'] || ''),
-          condition:String(FTKR.ESM.parameters['Motion 2 Condition'] || ''),},
-        {name:String(FTKR.ESM.parameters['Motion 3 name'] || ''),
-          condition:String(FTKR.ESM.parameters['Motion 3 Condition'] || ''),},
-        {name:String(FTKR.ESM.parameters['Motion 4 name'] || ''),
-          condition:String(FTKR.ESM.parameters['Motion 4 Condition'] || ''),},
-        {name:String(FTKR.ESM.parameters['Motion 5 name'] || ''),
-          condition:String(FTKR.ESM.parameters['Motion 5 Condition'] || ''),},
-        {name:String(FTKR.ESM.parameters['Motion 6 name'] || ''),
-          condition:String(FTKR.ESM.parameters['Motion 6 Condition'] || ''),},
-        {name:String(FTKR.ESM.parameters['Motion 7 name'] || ''),
-          condition:String(FTKR.ESM.parameters['Motion 7 Condition'] || ''),},
-        {name:String(FTKR.ESM.parameters['Motion 8 name'] || ''),
-          condition:String(FTKR.ESM.parameters['Motion 8 Condition'] || ''),},
-        {name:String(FTKR.ESM.parameters['Motion 9 name'] || ''),
-          condition:String(FTKR.ESM.parameters['Motion 9 Condition'] || ''),},
-        {name:String(FTKR.ESM.parameters['Motion 10 name'] || ''),
-          condition:String(FTKR.ESM.parameters['Motion 10 Condition'] || ''),},
-        {name:String(FTKR.ESM.parameters['Motion 11 name'] || ''),
-          condition:String(FTKR.ESM.parameters['Motion 11 Condition'] || ''),},
-        {name:String(FTKR.ESM.parameters['Motion 12 name'] || ''),
-          condition:String(FTKR.ESM.parameters['Motion 12 Condition'] || ''),},
-        {name:String(FTKR.ESM.parameters['Motion 13 name'] || ''),
-          condition:String(FTKR.ESM.parameters['Motion 13 Condition'] || ''),},
-        {name:String(FTKR.ESM.parameters['Motion 14 name'] || ''),
-          condition:String(FTKR.ESM.parameters['Motion 14 Condition'] || ''),},
-        {name:String(FTKR.ESM.parameters['Motion 15 name'] || ''),
-          condition:String(FTKR.ESM.parameters['Motion 15 Condition'] || ''),},
-        {name:String(FTKR.ESM.parameters['Motion 16 name'] || ''),
-          condition:String(FTKR.ESM.parameters['Motion 16 Condition'] || ''),},
-    ],
-    custom:[
-        ['', ''],
-        [String(FTKR.ESM.parameters['Custom 1 Non Loop'] || ''),
-          String(FTKR.ESM.parameters['Custom 1 Loop'] || '')],
-        [String(FTKR.ESM.parameters['Custom 2 Non Loop'] || ''),
-          String(FTKR.ESM.parameters['Custom 2 Loop'] || '')],
-        [String(FTKR.ESM.parameters['Custom 3 Non Loop'] || ''),
-          String(FTKR.ESM.parameters['Custom 3 Loop'] || '')],
-        [String(FTKR.ESM.parameters['Custom 4 Non Loop'] || ''),
-          String(FTKR.ESM.parameters['Custom 4 Loop'] || '')],
-        [String(FTKR.ESM.parameters['Custom 5 Non Loop'] || ''),
-          String(FTKR.ESM.parameters['Custom 5 Loop'] || '')],
-        [String(FTKR.ESM.parameters['Custom 6 Non Loop'] || ''),
-          String(FTKR.ESM.parameters['Custom 6 Loop'] || '')],
-        [String(FTKR.ESM.parameters['Custom 7 Non Loop'] || ''),
-          String(FTKR.ESM.parameters['Custom 7 Loop'] || '')],
-        [String(FTKR.ESM.parameters['Custom 8 Non Loop'] || ''),
-          String(FTKR.ESM.parameters['Custom 8 Loop'] || '')],
-    ],
-    condition:[
-        '',
-        String(FTKR.ESM.parameters['Custom Condition 1'] || ''),
-        String(FTKR.ESM.parameters['Custom Condition 2'] || ''),
-        String(FTKR.ESM.parameters['Custom Condition 3'] || ''),
-        String(FTKR.ESM.parameters['Custom Condition 4'] || ''),
-        String(FTKR.ESM.parameters['Custom Condition 5'] || ''),
-    ],
-};
+    //=============================================================================
+    // プラグイン パラメータ
+    //=============================================================================
+    var parameters = PluginManager.parameters('FTKR_ExSvMotion');
 
-Game_BattlerBase.ESM_MOTION_NUMBER = 16;
-
-//objのメモ欄から <metacode: x> の値を読み取って配列で返す
-var readObjectMeta = function(obj, metacodes) {
-    if (!obj) return false;
-    var match = {};
-    metacodes.some(function(metacode){
-        var metaReg = new RegExp('<' + metacode + ':[ ]*(.+)>', 'i');
-        match = metaReg.exec(obj.note);
-        return match;
-    }); 
-    return match ? match[1] : '';
-};
-
-//objのメモ欄から <metacode> があるか真偽を返す
-var testObjectMeta = function(obj, metacodes) {
-    if (!obj) return false;
-    return metacodes.some(function(metacode){
-        var metaReg = new RegExp('<' + metacode + '>', 'i');
-        return metaReg.test(obj.note);
-    }); 
-};
-
-//=============================================================================
-// 自作関数(グローバル)
-//=============================================================================
-
-FTKR.gameData = FTKR.gameData || {
-    user   :null,
-    target :null,
-    item   :null,
-    number :0,
-};
-
-if (!FTKR.setGameData) {
-FTKR.setGameData = function(user, target, item, number) {
-    FTKR.gameData = {
-        user   :user || null,
-        target :target || null,
-        item   :item || null,
-        number :number || 0
+    FTKR.ESM.motion = {
+        debug:{
+            enable:Number(parameters['Output Motion Log'] || 0),
+            pattern:Number(parameters['Output Motion Pattern Log'] || 0),
+        },
+        basic:{
+            damage:String(parameters['Damage Motion'] || ''),
+            evade:String(parameters['Evade Motion'] || ''),
+            thrust:String(parameters['Thrust Motion'] || ''),
+            swing:String(parameters['Swing Motion'] || ''),
+            missile:String(parameters['Missile Motion'] || ''),
+            skill:String(parameters['Skill Motion'] || ''),
+            speed:String(parameters['Spell Motion'] || ''),
+            item:String(parameters['Item Motion'] || ''),
+            undecided:String(parameters['Undecided Motion'] || ''),
+            wait:String(parameters['Wait Motion'] || ''),
+            recovery:String(parameters['Recovery Motion'] || ''),
+        },
+        state:[
+            {name:'', condition:'',},
+            {name:String(parameters['Motion 1 name'] || ''),
+              condition:String(parameters['Motion 1 Condition'] || ''),},
+            {name:String(parameters['Motion 2 name'] || ''),
+              condition:String(parameters['Motion 2 Condition'] || ''),},
+            {name:String(parameters['Motion 3 name'] || ''),
+              condition:String(parameters['Motion 3 Condition'] || ''),},
+            {name:String(parameters['Motion 4 name'] || ''),
+              condition:String(parameters['Motion 4 Condition'] || ''),},
+            {name:String(parameters['Motion 5 name'] || ''),
+              condition:String(parameters['Motion 5 Condition'] || ''),},
+            {name:String(parameters['Motion 6 name'] || ''),
+              condition:String(parameters['Motion 6 Condition'] || ''),},
+            {name:String(parameters['Motion 7 name'] || ''),
+              condition:String(parameters['Motion 7 Condition'] || ''),},
+            {name:String(parameters['Motion 8 name'] || ''),
+              condition:String(parameters['Motion 8 Condition'] || ''),},
+            {name:String(parameters['Motion 9 name'] || ''),
+              condition:String(parameters['Motion 9 Condition'] || ''),},
+            {name:String(parameters['Motion 10 name'] || ''),
+              condition:String(parameters['Motion 10 Condition'] || ''),},
+            {name:String(parameters['Motion 11 name'] || ''),
+              condition:String(parameters['Motion 11 Condition'] || ''),},
+            {name:String(parameters['Motion 12 name'] || ''),
+              condition:String(parameters['Motion 12 Condition'] || ''),},
+            {name:String(parameters['Motion 13 name'] || ''),
+              condition:String(parameters['Motion 13 Condition'] || ''),},
+            {name:String(parameters['Motion 14 name'] || ''),
+              condition:String(parameters['Motion 14 Condition'] || ''),},
+            {name:String(parameters['Motion 15 name'] || ''),
+              condition:String(parameters['Motion 15 Condition'] || ''),},
+            {name:String(parameters['Motion 16 name'] || ''),
+              condition:String(parameters['Motion 16 Condition'] || ''),},
+        ],
+        custom:[
+            ['', ''],
+            [String(parameters['Custom 1 Non Loop'] || ''),
+              String(parameters['Custom 1 Loop'] || '')],
+            [String(parameters['Custom 2 Non Loop'] || ''),
+              String(parameters['Custom 2 Loop'] || '')],
+            [String(parameters['Custom 3 Non Loop'] || ''),
+              String(parameters['Custom 3 Loop'] || '')],
+            [String(parameters['Custom 4 Non Loop'] || ''),
+              String(parameters['Custom 4 Loop'] || '')],
+            [String(parameters['Custom 5 Non Loop'] || ''),
+              String(parameters['Custom 5 Loop'] || '')],
+            [String(parameters['Custom 6 Non Loop'] || ''),
+              String(parameters['Custom 6 Loop'] || '')],
+            [String(parameters['Custom 7 Non Loop'] || ''),
+              String(parameters['Custom 7 Loop'] || '')],
+            [String(parameters['Custom 8 Non Loop'] || ''),
+              String(parameters['Custom 8 Loop'] || '')],
+        ],
+        condition:[
+            '',
+            String(parameters['Custom Condition 1'] || ''),
+            String(parameters['Custom Condition 2'] || ''),
+            String(parameters['Custom Condition 3'] || ''),
+            String(parameters['Custom Condition 4'] || ''),
+            String(parameters['Custom Condition 5'] || ''),
+        ],
     };
-};
-}
 
-if (!FTKR.evalFormula) {
-FTKR.evalFormula = function(formula) {
-    var datas = FTKR.gameData;
-    try {
-        var s = $gameSwitches._data;
-        var v = $gameVariables._data;
-        var a = datas.user;
-        var b = datas.target;
-        var item   = datas.item;
-        var number = datas.number;
-        if (b) var result = b.result();
-        var value = eval(formula);
-        if (isNaN(value)) value = 0;
-        return value;
-    } catch (e) {
-        console.error(e);
-        return 0;
-    }
-};
-}
+    Game_BattlerBase.ESM_MOTION_NUMBER = 16;
 
-//=============================================================================
-// 基本モーションの設定を変更
-//=============================================================================
-
-FTKR.ESM.Game_Battler_onBattleStart = Game_Battler.prototype.onBattleStart;
-Game_Battler.prototype.onBattleStart = function() {
-    FTKR.ESM.Game_Battler_onBattleStart.call(this);
-    this._requestVictory = false;
-    this._requestEscape = false;
-};
-
-//書き換え
-if (!Imported.YEP_BattleEngineCore) {
-    Game_Battler.prototype.requestMotion = function(motionType) {
-        var motion = FTKR.ESM.motion.basic[motionType];
-        this._motionType = motion ? motion : motionType;
+    //objのメモ欄から <metacode: x> の値を読み取って配列で返す
+    var readObjectMeta = function(obj, metacodes) {
+        if (!obj) return false;
+        var match = {};
+        metacodes.some(function(metacode){
+            var metaReg = new RegExp('<' + metacode + ':[ ]*(.+)>', 'i');
+            match = metaReg.exec(obj.note);
+            return match;
+        }); 
+        return match ? match[1] : '';
     };
-}
 
-Game_Actor.prototype.performRecovery = function() {
-    Game_Battler.prototype.performRecovery.call(this);
-    this.requestMotion(FTKR.ESM.motion.basic.recovery);
-};
+    //objのメモ欄から <metacode> があるか真偽を返す
+    var testObjectMeta = function(obj, metacodes) {
+        if (!obj) return false;
+        return metacodes.some(function(metacode){
+            var metaReg = new RegExp('<' + metacode + '>', 'i');
+            return metaReg.test(obj.note);
+        }); 
+    };
 
-//書き換え
-Game_Actor.prototype.performVictory = function() {
-    if (this.canMove()) {
-        this._requestVictory = true;
-        this.requestMotion('refresh');
+    //=============================================================================
+    // 自作関数(グローバル)
+    //=============================================================================
+
+    FTKR.gameData = FTKR.gameData || {
+        user   :null,
+        target :null,
+        item   :null,
+        number :0,
+    };
+
+    if (!FTKR.setGameData) {
+    FTKR.setGameData = function(user, target, item, number) {
+        FTKR.gameData = {
+            user   :user || null,
+            target :target || null,
+            item   :item || null,
+            number :number || 0
+        };
+    };
     }
-};
 
-//書き換え
-Game_Actor.prototype.performEscape = function() {
-    if (this.canMove()) {
-        this._requestEscape = true;
-        this.requestMotion('refresh');
-    }
-};
-
-//書き換え
-Game_Actor.prototype.performAction = function(action) {
-    Game_Battler.prototype.performAction.call(this, action);
-    if (action.isAttack()) {
-        this.performAttack();
-    } else if (action.isGuard()) {
-        this.requestMotion('refresh');
-//        this.requestMotion('guard');
-    } else if (action.isMagicSkill()) {
-        var motion = this.esmMotion(action.item(), 'spell');
-        this.requestMotion(motion);
-    } else if (action.isSkill()) {
-        var motion = this.esmMotion(action.item(), 'skill');
-        this.requestMotion(motion);
-    } else if (action.isItem()) {
-        var motion = this.esmMotion(action.item(), 'item');
-        this.requestMotion(motion);
-    }
-    if (motion && testObjectMeta(action.item(), ['ESM 武器モーション', 'ESM WEAPON_MOTION'])) {
-        var weapons = this.weapons();
-        var wtypeId = weapons[0] ? weapons[0].wtypeId : 0;
-        var attackMotion = $dataSystem.attackMotions[wtypeId];
-        if (attackMotion) {
-            this.startWeaponAnimation(attackMotion.weaponImageId);
+    if (!FTKR.evalFormula) {
+    FTKR.evalFormula = function(formula) {
+        var datas = FTKR.gameData;
+        try {
+            var s = $gameSwitches._data;
+            var v = $gameVariables._data;
+            var a = datas.user;
+            var b = datas.target;
+            var item   = datas.item;
+            var number = datas.number;
+            if (b) var result = b.result();
+            var value = eval(formula);
+            if (isNaN(value)) value = 0;
+            return value;
+        } catch (e) {
+            console.error(e);
+            return 0;
         }
+    };
     }
-};
 
-Game_Actor.prototype.esmMotion = function(item, motion) {
-    return readObjectMeta(item, ['ESM モーション', 'ESM MOTION']) || motion;
-}
+    //=============================================================================
+    // 基本モーションの設定を変更
+    //=============================================================================
 
-//=============================================================================
-// バトラーの状態からモーション名を取得する
-// Game_BattlerBase
-//=============================================================================
+    var _ESM_Game_Battler_onBattleStart = Game_Battler.prototype.onBattleStart;
+    Game_Battler.prototype.onBattleStart = function() {
+        _ESM_Game_Battler_onBattleStart.call(this);
+        this._requestVictory = false;
+        this._requestEscape = false;
+    };
 
-Game_BattlerBase.prototype.getEsmMotion = function() {
-    var index = this.checkConditionAll();
-    if (index) {
-        return FTKR.ESM.motion.state[index].name;
-    } else if (this.isUndecided()) {
-        return FTKR.ESM.motion.basic.undecided;
-    } else {
-        return FTKR.ESM.motion.basic.wait;
+    //書き換え
+    if (!Imported.YEP_BattleEngineCore) {
+        Game_Battler.prototype.requestMotion = function(motionType) {
+            var motion = FTKR.ESM.motion.basic[motionType];
+            this._motionType = motion ? motion : motionType;
+        };
     }
-};
 
-Game_BattlerBase.prototype.checkConditionAll = function() {
-    for(var i = Game_BattlerBase.ESM_MOTION_NUMBER; i > 0; i--) {
-        if (this.checkCondition(FTKR.ESM.motion.state[i].condition)) {
-            return i;
+    Game_Actor.prototype.performRecovery = function() {
+        Game_Battler.prototype.performRecovery.call(this);
+        this.requestMotion(FTKR.ESM.motion.basic.recovery);
+    };
+
+    //書き換え
+    Game_Actor.prototype.performVictory = function() {
+        if (this.canMove()) {
+            this._requestVictory = true;
+            this.requestMotion('refresh');
         }
-    }
-    return 0;
-};
-
-Game_BattlerBase.prototype.checkCondition = function(condition) {
-    var stateMotion = this.stateMotionIndex();
-    if (condition.match(/state(\d+)/i)) {
-        return stateMotion === Number(RegExp.$1);
-    } else if (condition.match(/custom(\d+)/i)) {
-        return this.evalEsmCondition(Number(RegExp.$1));
-    }
-    switch(true) {
-        case /input/i.test(condition):
-            return this.isInputting() || this.isActing();
-        case /guard/i.test(condition):
-            return this.isGuardMotion();
-        case /chant/i.test(condition):
-            return this.isChanting();
-        case /victory/i.test(condition):
-            return $gameParty.inBattle() && $gameTroop.isAllDead() && this._requestVictory;
-        case /escape/i.test(condition):
-            return $gameParty.inBattle() && BattleManager.isEscaped() && this._requestEscape;
-        case /dying/i.test(condition):
-            return this.isDying();
-        default:
-            return false;
     };
-};
 
-Game_BattlerBase.prototype.isGuardMotion = function() {
-    return this.isGuard() || this.isGuardWaiting() ||
-        (BattleManager._action && BattleManager._action.isGuard());
-};
-
-Game_BattlerBase.prototype.evalEsmCondition = function(number) {
-    FTKR.setGameData(this, null, null);
-    return FTKR.evalFormula(FTKR.ESM.motion.condition[number]);
-};
-
-//書き換え
-FTKR.ESM.Game_BattlerBase_stateMotionIndex = Game_BattlerBase.prototype.stateMotionIndex;
-Game_BattlerBase.prototype.stateMotionIndex = function() {
-    if (this.isEnemy() && !FTKR.ESM.enableEnemyMotion) {
-        return FTKR.ESM.Game_BattlerBase_stateMotionIndex.call(this);
-    }
-    var states = this.states();
-    if (states.length > 0) {
-        var motion = readObjectMeta(states[0], ['ESM モーション', 'ESM MOTION']);
-        return motion ? Number(motion) : states[0].motion;
-    } else {
-        return 0;
-    }
-};
-
-//=============================================================================
-// Sprite_Weapon
-// 武器のSVスプライトを修正
-//=============================================================================
-
-FTKR.ESM.Sprite_Weapon_setup = Sprite_Weapon.prototype.setup;
-Sprite_Weapon.prototype.setup = function(weaponImageId) {
-    FTKR.ESM.Sprite_Weapon_setup.call(this, weaponImageId);
-    this.consoleLog_weaponMotion('setup');
-};
-
-Sprite_Weapon.prototype.consoleLog_weaponMotion = function(text) {
-    if (FTKR.ESM.motion.debug.enable && this._weaponImageId) {
-    console.log('********************************************');
-    console.log('Weapon Motion <', text, '>');
-    console.log('---------------------------');
-    console.log('ImageID :', this._weaponImageId);
-    console.log('pattern :', this._pattern);
-    console.log('********************************************');
-    }
-};
-
-//=============================================================================
-// バトラーの拡張モーション機能を追加
-// Sprite_Battler
-//=============================================================================
-
-FTKR.ESM.Sprite_Battler_initMembers = Sprite_Battler.prototype.initMembers;
-Sprite_Battler.prototype.initMembers = function() {
-    FTKR.ESM.Sprite_Battler_initMembers.call(this);
-    this._motionIndex = 0;
-    this._motionTypes = [[],[]];
-    this._motionType = '';
-    this._index = 0;
-    this._otherFile = false;
-};
-
-Sprite_Battler.ESM_MOTIONS = {
-    walk:     ['', 'walk'    ],
-    wait:     ['', 'wait'    ],
-    chant:    ['', 'chant'   ],
-    guard:    ['', 'guard'   ],
-    damage:   ['damage', ''  ],
-    evade:    ['evade', ''   ],
-    thrust:   ['thrust', ''  ],
-    swing:    ['swing', ''   ],
-    missile:  ['missile', '' ],
-    skill:    ['skill', ''   ],
-    spell:    ['spell', ''   ],
-    item:     ['item', ''    ],
-    escape:   ['', 'escape'  ],
-    victory:  ['', 'victory' ],
-    dying:    ['', 'dying'   ],
-    abnormal: ['', 'abnormal'],
-    sleep:    ['', 'sleep'   ],
-    dead:     ['', 'dead'    ],
-};
-
-Sprite_Battler.ESM_MOTION_NAME = [
-    'walk',
-    'wait',
-    'chant',
-    'guard',
-    'damage',
-    'evade',
-    'thrust',
-    'swing',
-    'missile',
-    'skill',
-    'spell',
-    'item',
-    'escape',
-    'victory',
-    'dying',
-    'abnormal',
-    'sleep',
-    'dead'
-];
-
-Sprite_Battler.prototype.motion = function() {
-    return Sprite_Actor.MOTIONS[this.convertOtherMotion(this.motionName())];
-};
-
-Sprite_Battler.prototype.convertOtherMotion = function(other) {
-    return other && other.match(/other(\d+)/) ? Sprite_Battler.ESM_MOTION_NAME[Number(RegExp.$1)] : other;
-};
-
-Sprite_Battler.prototype.isOtherMotion = function() {
-    return /other/i.test(this.motionName());
-};
-
-Sprite_Battler.prototype.motionTypes = function() {
-    return this._motionTypes;
-};
-
-Sprite_Battler.prototype.motions = function() {
-    return this._motionTypes[this._motionIndex];
-};
-
-Sprite_Battler.prototype.motionName = function() {
-    return this._motionTypes[this._motionIndex][this._index];
-};
-
-Sprite_Battler.prototype.lastMotionType = function() {
-    return this.motions().length === 1 || this.motions().length <= this._index + 1;
-};
-
-if (!Imported.YED_SideviewBattler) {
-    Sprite_Battler.prototype.motionFrames = function() {
-        return 3;
+    //書き換え
+    Game_Actor.prototype.performEscape = function() {
+        if (this.canMove()) {
+            this._requestEscape = true;
+            this.requestMotion('refresh');
+        }
     };
-}
 
-Sprite_Battler.prototype.setNewMotion = function(battler, motionType) {
-    if (!motionType || motionType === 'refresh') {
-        motionType = battler.getEsmMotion();
-    }
-    this._motionType = motionType;
-    battler._faceType = motionType;
-    this._otherFile = false;
-    if (motionType.match(/custom(\d+)/)) {
-        var newMotions = FTKR.ESM.motion.custom[Number(RegExp.$1)];
-    } else if (motionType.match(/other(\d+)/)) {
-        var newMotions =[motionType, ''];
-    } else {
-        var newMotions = Sprite_Battler.ESM_MOTIONS[motionType];
-    }
-    this._motionTypes = newMotions.map(function(motions) {
-        return motions.split(',');
-    });
-    this._motionIndex = this.motionTypes()[0][0] ? 0 : 1;
-    this._motionCount = 0;
-    this._pattern = 0;
-    this._index = 0;
-    this._motion = this.motion();
-    this.consoleLog_BattlerMotion('start')
-    this.consoleLog_BattlerMotion('data')
-};
+    //書き換え
+    Game_Actor.prototype.performAction = function(action) {
+        Game_Battler.prototype.performAction.call(this, action);
+        if (action.isAttack()) {
+            this.performAttack();
+        } else if (action.isGuard()) {
+            this.requestMotion('refresh');
+    //        this.requestMotion('guard');
+        } else if (action.isMagicSkill()) {
+            var motion = this.esmMotion(action.item(), 'spell');
+            this.requestMotion(motion);
+        } else if (action.isSkill()) {
+            var motion = this.esmMotion(action.item(), 'skill');
+            this.requestMotion(motion);
+        } else if (action.isItem()) {
+            var motion = this.esmMotion(action.item(), 'item');
+            this.requestMotion(motion);
+        }
+        if (motion && testObjectMeta(action.item(), ['ESM 武器モーション', 'ESM WEAPON_MOTION'])) {
+            var weapons = this.weapons();
+            var wtypeId = weapons[0] ? weapons[0].wtypeId : 0;
+            var attackMotion = $dataSystem.attackMotions[wtypeId];
+            if (attackMotion) {
+                this.startWeaponAnimation(attackMotion.weaponImageId);
+            }
+        }
+    };
 
-Sprite_Battler.prototype.esmUpdateMotionCount = function(battler) {
-    if (this.motion() && ++this._motionCount >= this.motionSpeed()) {
-        var frames = this.motionFrames();
-        var loopFrames = Imported.YED_SideviewBattler && battler.isSideviewBattler() ? frames : frames + 1;
-        // ループする場合
-        if (this._motionIndex && this.motions().length <= 1) {
-            this._pattern = (this._pattern + 1) % loopFrames;
-            this.consoleLog_BattlerMotion('pattern')
-        // ループしない場合 パターンを増やす
-        } else if (this._pattern < frames - 1) {
-            this._pattern++;
-            this.consoleLog_BattlerMotion('pattern')
-        // ループしない場合 パターンをリセット
+    Game_Actor.prototype.esmMotion = function(item, motion) {
+        return readObjectMeta(item, ['ESM モーション', 'ESM MOTION']) || motion;
+    }
+
+    var _ESM_Game_Action_isMagicSkill = Game_Action.prototype.isMagicSkill;
+    Game_Action.prototype.isMagicSkill = function() {
+        if (testObjectMeta(this.item(), ['ESM 詠唱ON', 'ESM CHANT_ON'])) {
+            return true;
         } else {
-            this.refreshMotion();
+            return _ESM_Game_Action_isMagicSkill.call(this);
         }
-        this._motionCount = 0;
-    }
-};
+    };
 
-Sprite_Battler.prototype.esmRefreshMotion = function(battler) {
-    var condition = battler.getEsmMotion();
-    this.consoleLog_BattlerMotion('refresh', [condition])
-    if (this._motionType === condition) {
-        if (!this._index && !this._pattern) {
-        //index の更新
-        } else if (!this.lastMotionType()) {
-            this._pattern = 0;
-            this._index++;
-        //motionIndex の更新、index のリセット
+    //=============================================================================
+    // バトラーの状態からモーション名を取得する
+    // Game_BattlerBase
+    //=============================================================================
+
+    Game_BattlerBase.prototype.getEsmMotion = function() {
+        var index = this.checkConditionAll();
+        if (index) {
+            return FTKR.ESM.motion.state[index].name;
+        } else if (this.isUndecided()) {
+            return FTKR.ESM.motion.basic.undecided;
         } else {
-            if (!this._motionIndex) this._motionIndex = 1;
-            this._index = 0;
-            this._pattern = 0;
+            return FTKR.ESM.motion.basic.wait;
         }
-        this._motion = this.motion();
-        this.consoleLog_BattlerMotion('data')
-    //condition の更新
-    } else {
-        this._motionIndex = 0;
-        this._index = 0;
-        this.startMotion(condition);
-    }
-};
+    };
 
-Sprite_Battler.prototype.consoleLog_BattlerMotion = function(type, datas) {
-    if (FTKR.ESM.motion.debug.enable) {
-        if (!FTKR.ESM.motion.debug.pattern && type === 'pattern') return;
+    Game_BattlerBase.prototype.checkConditionAll = function() {
+        for(var i = Game_BattlerBase.ESM_MOTION_NUMBER; i > 0; i--) {
+            if (this.checkCondition(FTKR.ESM.motion.state[i].condition)) {
+                return i;
+            }
+        }
+        return 0;
+    };
+
+    Game_BattlerBase.prototype.checkCondition = function(condition) {
+        var stateMotion = this.stateMotionIndex();
+        if (condition.match(/state(\d+)/i)) {
+            return stateMotion === Number(RegExp.$1);
+        } else if (condition.match(/custom(\d+)/i)) {
+            return this.evalEsmCondition(Number(RegExp.$1));
+        }
+        switch(true) {
+            case /input/i.test(condition):
+                return this.isInputting() || this.isActing();
+            case /guard/i.test(condition):
+                return this.isGuardMotion();
+            case /chant/i.test(condition):
+                return this.isChanting();
+            case /victory/i.test(condition):
+                return $gameParty.inBattle() && $gameTroop.isAllDead() && this._requestVictory;
+            case /escape/i.test(condition):
+                return $gameParty.inBattle() && BattleManager.isEscaped() && this._requestEscape;
+            case /dying/i.test(condition):
+                return this.isDying();
+            default:
+                return false;
+        };
+    };
+
+    Game_BattlerBase.prototype.isGuardMotion = function() {
+        return this.isGuard() || this.isGuardWaiting() ||
+            (BattleManager._action && BattleManager._action.isGuard());
+    };
+
+    Game_BattlerBase.prototype.evalEsmCondition = function(number) {
+        FTKR.setGameData(this, null, null);
+        return FTKR.evalFormula(FTKR.ESM.motion.condition[number]);
+    };
+
+    //書き換え
+    var _ESM_Game_BattlerBase_stateMotionIndex = Game_BattlerBase.prototype.stateMotionIndex;
+    Game_BattlerBase.prototype.stateMotionIndex = function() {
+        if (this.isEnemy() && !FTKR.ESM.enableEnemyMotion) {
+            return _ESM_Game_BattlerBase_stateMotionIndex.call(this);
+        }
+        var states = this.states();
+        if (states.length > 0) {
+            var motion = readObjectMeta(states[0], ['ESM モーション', 'ESM MOTION']);
+            return motion ? Number(motion) : states[0].motion;
+        } else {
+            return 0;
+        }
+    };
+
+    //=============================================================================
+    // Sprite_Weapon
+    // 武器のSVスプライトを修正
+    //=============================================================================
+
+    var _ESM_Sprite_Weapon_setup = Sprite_Weapon.prototype.setup;
+    Sprite_Weapon.prototype.setup = function(weaponImageId) {
+        _ESM_Sprite_Weapon_setup.call(this, weaponImageId);
+        this.consoleLog_weaponMotion('setup');
+    };
+
+    Sprite_Weapon.prototype.consoleLog_weaponMotion = function(text) {
+        if (FTKR.ESM.motion.debug.enable && this._weaponImageId) {
         console.log('********************************************');
-        console.log('Actor motion <', type, '>');
+        console.log('Weapon Motion <', text, '>');
         console.log('---------------------------');
-        switch (type) {
-        case 'start':
-        console.log('Input Motion   :', this._motionType);
-        console.log('motionTypes[0] : ' + this.motionTypes()[0]);
-        console.log('motionTypes[1] : ' + this.motionTypes()[1]);
-        break;
-        case 'refresh':
-        console.log('motionType :', this._motionType);
-        console.log('condition  :', datas[0]);
-        console.log('motion num :', this.motions().length)
-        if (this._motionType !== datas[0]) {
-        console.log('⇒ Start Motion');
-        }
-        break;
-        case 'data':
-        console.log('Motion Name  :', this.motionName());
-        console.log('Motion Index :', this.motion().index);
-        console.log('Type Index   :', this._motionIndex);
-        console.log('index        :', this._index);
-        break;
-        case 'pattern':
-        console.log('Motion Name :', this.motionName());
-        console.log('Type Index  :', this._motionIndex);
-        console.log('index       :', this._index);
-        console.log('pattern     :', this._pattern);
-        break;
-        }
+        console.log('ImageID :', this._weaponImageId);
+        console.log('pattern :', this._pattern);
         console.log('********************************************');
-    }
-};
-
-//=============================================================================
-// Sprite_Actor
-// アクターのSVスプライトを修正
-//=============================================================================
-
-FTKR.ESM.Sprite_Actor_updateBitmap = Sprite_Actor.prototype.updateBitmap;
-Sprite_Actor.prototype.updateBitmap = function() {
-    if (this.isOtherMotion()) {
-        Sprite_Battler.prototype.updateBitmap.call(this);
-        var name = this.otherBattlerName();
-        if (this._battlerName !== name) {
-            this._battlerName = name;
-            this._mainSprite.bitmap = ImageManager.loadSvActor(name);
         }
-    } else {
-        FTKR.ESM.Sprite_Actor_updateBitmap.call(this);
+    };
+
+    //=============================================================================
+    // バトラーの拡張モーション機能を追加
+    // Sprite_Battler
+    //=============================================================================
+
+    var _ESM_Sprite_Battler_initMembers = Sprite_Battler.prototype.initMembers;
+    Sprite_Battler.prototype.initMembers = function() {
+        _ESM_Sprite_Battler_initMembers.call(this);
+        this._motionIndex = 0;
+        this._motionTypes = [[],[]];
+        this._motionType = '';
+        this._index = 0;
+        this._otherFile = false;
+    };
+
+    Sprite_Battler.ESM_MOTIONS = {
+        walk:     ['', 'walk'    ],
+        wait:     ['', 'wait'    ],
+        chant:    ['', 'chant'   ],
+        guard:    ['', 'guard'   ],
+        damage:   ['damage', ''  ],
+        evade:    ['evade', ''   ],
+        thrust:   ['thrust', ''  ],
+        swing:    ['swing', ''   ],
+        missile:  ['missile', '' ],
+        skill:    ['skill', ''   ],
+        spell:    ['spell', ''   ],
+        item:     ['item', ''    ],
+        escape:   ['', 'escape'  ],
+        victory:  ['', 'victory' ],
+        dying:    ['', 'dying'   ],
+        abnormal: ['', 'abnormal'],
+        sleep:    ['', 'sleep'   ],
+        dead:     ['', 'dead'    ],
+    };
+
+    Sprite_Battler.ESM_MOTION_NAME = [
+        'walk',
+        'wait',
+        'chant',
+        'guard',
+        'damage',
+        'evade',
+        'thrust',
+        'swing',
+        'missile',
+        'skill',
+        'spell',
+        'item',
+        'escape',
+        'victory',
+        'dying',
+        'abnormal',
+        'sleep',
+        'dead'
+    ];
+
+    Sprite_Battler.prototype.motion = function() {
+        return Sprite_Actor.MOTIONS[this.convertOtherMotion(this.motionName())];
+    };
+
+    Sprite_Battler.prototype.convertOtherMotion = function(other) {
+        return other && other.match(/other(\d+)/) ? Sprite_Battler.ESM_MOTION_NAME[Number(RegExp.$1)] : other;
+    };
+
+    Sprite_Battler.prototype.isOtherMotion = function() {
+        return /other/i.test(this.motionName());
+    };
+
+    Sprite_Battler.prototype.motionTypes = function() {
+        return this._motionTypes;
+    };
+
+    Sprite_Battler.prototype.motions = function() {
+        return this._motionTypes[this._motionIndex];
+    };
+
+    Sprite_Battler.prototype.motionName = function() {
+        return this._motionTypes[this._motionIndex][this._index];
+    };
+
+    Sprite_Battler.prototype.lastMotionType = function() {
+        return this.motions().length === 1 || this.motions().length <= this._index + 1;
+    };
+
+    if (!Imported.YED_SideviewBattler) {
+        Sprite_Battler.prototype.motionFrames = function() {
+            return 3;
+        };
     }
-};
 
-Sprite_Actor.prototype.otherBattlerName = function() {
-    return readObjectMeta(this._actor.actor(), ['ESM_画像', 'ESM_IMAGE']);
-};
+    Sprite_Battler.prototype.setNewMotion = function(battler, motionType) {
+        if (!motionType || motionType === 'refresh') {
+            motionType = battler.getEsmMotion();
+        }
+        this._motionType = motionType;
+        battler._faceType = motionType;
+        this._otherFile = false;
+        if (motionType.match(/custom(\d+)/)) {
+            var newMotions = FTKR.ESM.motion.custom[Number(RegExp.$1)];
+        } else if (motionType.match(/other(\d+)/)) {
+            var newMotions =[motionType, ''];
+        } else {
+            var newMotions = Sprite_Battler.ESM_MOTIONS[motionType];
+        }
+        this._motionTypes = newMotions.map(function(motions) {
+            return motions.split(',');
+        });
+        this._motionIndex = this.motionTypes()[0][0] ? 0 : 1;
+        this._motionCount = 0;
+        this._pattern = 0;
+        this._index = 0;
+        this._motion = this.motion();
+        this.consoleLog_BattlerMotion('start')
+        this.consoleLog_BattlerMotion('data')
+    };
 
-//書き換え
-Sprite_Actor.prototype.updateMotionCount = function() {
-    this.esmUpdateMotionCount(this._actor);
-};
+    Sprite_Battler.prototype.esmUpdateMotionCount = function(battler) {
+        if (this.motion() && ++this._motionCount >= this.motionSpeed()) {
+            if (Imported.YED_SideviewBattler) this._motionName = this.motionName();
+            var frames = this.motionFrames();
+            var loopFrames = Imported.YED_SideviewBattler && battler.isSideviewBattler() ? frames : frames + 1;
+            // ループする場合
+            if (this._motionIndex && this.motions().length <= 1) {
+                this._pattern = (this._pattern + 1) % loopFrames;
+                this.consoleLog_BattlerMotion('pattern')
+            // ループしない場合 パターンを増やす
+            } else if (this._pattern < frames - 1) {
+                this._pattern++;
+                this.consoleLog_BattlerMotion('pattern')
+            // ループしない場合 パターンをリセット
+            } else {
+                this.refreshMotion();
+            }
+            this._motionCount = 0;
+        }
+    };
 
-//書き換え
-Sprite_Actor.prototype.refreshMotion = function() {
-    var actor = this._actor;
-    if (actor) {
-        this.esmRefreshMotion(actor);
-    }
-};
+    Sprite_Battler.prototype.esmRefreshMotion = function(battler) {
+        var condition = battler.getEsmMotion();
+        this.consoleLog_BattlerMotion('refresh', [condition])
+        if (this._motionType === condition) {
+            if (!this._index && !this._pattern) {
+            //index の更新
+            } else if (!this.lastMotionType()) {
+                this._pattern = 0;
+                this._index++;
+            //motionIndex の更新、index のリセット
+            } else {
+                if (!this._motionIndex) this._motionIndex = 1;
+                this._index = 0;
+                this._pattern = 0;
+            }
+            this._motion = this.motion();
+            this.consoleLog_BattlerMotion('data')
+        //condition の更新
+        } else {
+            this._motionIndex = 0;
+            this._index = 0;
+            this.startMotion(condition);
+        }
+    };
 
-//書き換え
-Sprite_Actor.prototype.startMotion = function(motionType) {
-    if (this._motionType !== motionType) {
+    Sprite_Battler.prototype.consoleLog_BattlerMotion = function(type, datas) {
+        if (FTKR.ESM.motion.debug.enable) {
+            if (!FTKR.ESM.motion.debug.pattern && type === 'pattern') return;
+            console.log('********************************************');
+            console.log('Actor motion <', type, '>');
+            console.log('---------------------------');
+            switch (type) {
+            case 'start':
+            console.log('Input Motion   :', this._motionType);
+            console.log('motionTypes[0] : ' + this.motionTypes()[0]);
+            console.log('motionTypes[1] : ' + this.motionTypes()[1]);
+            break;
+            case 'refresh':
+            console.log('motionType :', this._motionType);
+            console.log('condition  :', datas[0]);
+            console.log('motion num :', this.motions().length)
+            if (this._motionType !== datas[0]) {
+            console.log('⇒ Start Motion');
+            }
+            break;
+            case 'data':
+            console.log('Motion Name  :', this.motionName());
+            console.log('Motion Index :', this.motion().index);
+            console.log('Type Index   :', this._motionIndex);
+            console.log('index        :', this._index);
+            break;
+            case 'pattern':
+            console.log('Motion Name :', this.motionName());
+            console.log('Type Index  :', this._motionIndex);
+            console.log('index       :', this._index);
+            console.log('pattern     :', this._pattern);
+            break;
+            }
+            console.log('********************************************');
+        }
+    };
+
+    //=============================================================================
+    // Sprite_Actor
+    // アクターのSVスプライトを修正
+    //=============================================================================
+
+    var _ESM_Sprite_Actor_updateBitmap = Sprite_Actor.prototype.updateBitmap;
+    Sprite_Actor.prototype.updateBitmap = function() {
+        if (this.isOtherMotion()) {
+            Sprite_Battler.prototype.updateBitmap.call(this);
+            var name = this.otherBattlerName();
+            if (this._battlerName !== name) {
+                this._battlerName = name;
+                this._mainSprite.bitmap = ImageManager.loadSvActor(name);
+            }
+        } else {
+            _ESM_Sprite_Actor_updateBitmap.call(this);
+        }
+    };
+
+    Sprite_Actor.prototype.otherBattlerName = function() {
+        return readObjectMeta(this._actor.actor(), ['ESM_画像', 'ESM_IMAGE']);
+    };
+
+    //書き換え
+    Sprite_Actor.prototype.updateMotionCount = function() {
+        this.esmUpdateMotionCount(this._actor);
+    };
+
+    //書き換え
+    Sprite_Actor.prototype.refreshMotion = function() {
+        var actor = this._actor;
+        if (actor) {
+            this.esmRefreshMotion(actor);
+        }
+    };
+
+    //書き換え
+    Sprite_Actor.prototype.startMotion = function(motionType) {
+        if (this._motionType !== motionType) {
+            this.setNewMotion(this._actor, motionType);
+        }
+    };
+
+    //=============================================================================
+    // 他プラグインの修正
+    //=============================================================================
+    //-----------------------------------------------------------------
+    // YEP_BattleEngineCoreの修正
+    //-----------------------------------------------------------------
+    if (Imported.YEP_BattleEngineCore) {
+
+    var _ESM_Game_Battler_requestMotionRefresh = Game_Battler.prototype.requestMotionRefresh;
+    Game_Battler.prototype.requestMotionRefresh = function() {
+        if (this._motionType) {
+            this.requestMotion(this._motionType);
+            this.clearMotion();
+            return;
+        }
+        _ESM_Game_Battler_requestMotionRefresh.call(this);
+    };
+
+    //書き換え
+    Sprite_Actor.prototype.forceMotion = function(motionType) {
         this.setNewMotion(this._actor, motionType);
-    }
-};
+    };
 
-//=============================================================================
-// 他プラグインの修正
-//=============================================================================
-//-----------------------------------------------------------------
-// YEP_BattleEngineCoreの修正
-//-----------------------------------------------------------------
-if (Imported.YEP_BattleEngineCore) {
+    }//Imported.YEP_BattleEngineCore
 
-FTKR.ESM.Game_Battler_requestMotionRefresh = Game_Battler.prototype.requestMotionRefresh;
-Game_Battler.prototype.requestMotionRefresh = function() {
-    if (this._motionType) {
-        this.requestMotion(this._motionType);
-        this.clearMotion();
-        return;
-    }
-    FTKR.ESM.Game_Battler_requestMotionRefresh.call(this);
-};
+    //-----------------------------------------------------------------
+    // (YEP_X_AnimatedSVEnemiesの修正)
+    //-----------------------------------------------------------------
+    if (Imported.YEP_X_AnimatedSVEnemies) {
 
-//書き換え
-Sprite_Actor.prototype.forceMotion = function(motionType) {
-    this.setNewMotion(this._actor, motionType);
-};
+    //書き換え
+    Sprite_Enemy.prototype.updateMotionCount = function() {
+        if (!this._svBattlerEnabled) return;
+        this.esmUpdateMotionCount(this._enemy);
+    };
 
-}//Imported.YEP_BattleEngineCore
+    //書き換え
+    Sprite_Enemy.prototype.refreshMotion = function() {
+        if (!this._svBattlerEnabled) return;
+        var enemy = this._enemy;
+        if (!enemy) return;
+        this.esmRefreshMotion(enemy);
+    };
 
-//-----------------------------------------------------------------
-// (YEP_X_AnimatedSVEnemiesの修正)
-//-----------------------------------------------------------------
-if (Imported.YEP_X_AnimatedSVEnemies) {
+    //書き換え
+    Sprite_Enemy.prototype.startMotion = function(motionType) {
+        if (!this._svBattlerEnabled) return;
+        if (this._motionType !== motionType) {
+            this.setNewMotion(this._enemy, motionType);
+        }
+    };
 
-//書き換え
-Sprite_Enemy.prototype.updateMotionCount = function() {
-    if (!this._svBattlerEnabled) return;
-    this.esmUpdateMotionCount(this._enemy);
-};
+    }//Imported.YEP_X_AnimatedSVEnemies
 
-//書き換え
-Sprite_Enemy.prototype.refreshMotion = function() {
-    if (!this._svBattlerEnabled) return;
-    var enemy = this._enemy;
-    if (!enemy) return;
-    this.esmRefreshMotion(enemy);
-};
+    //-----------------------------------------------------------------
+    // YED_SideviewBattlerの修正
+    //-----------------------------------------------------------------
+    if (Imported.YED_SideviewBattler) {
 
-//書き換え
-Sprite_Enemy.prototype.startMotion = function(motionType) {
-    if (!this._svBattlerEnabled) return;
-    if (this._motionType !== motionType) {
-        this.setNewMotion(this._enemy, motionType);
-    }
-};
+    //書き換え
+    Sprite_Actor.prototype.getCurrentMotion = function() {
+        return this._actor.getSideviewMotion(this.motionName());
+    };
 
-}//Imported.YEP_X_AnimatedSVEnemies
+    //書き換え
+    Sprite_Enemy.prototype.getCurrentMotion = function() {
+        return this._enemy.getSideviewMotion(this.motionName());
+    };
 
-//-----------------------------------------------------------------
-// YED_SideviewBattlerの修正
-//-----------------------------------------------------------------
-if (Imported.YED_SideviewBattler) {
+    }//Imported.ED_SideviewBattler
 
-//書き換え
-Sprite_Actor.prototype.getCurrentMotion = function() {
-    return this._actor.getSideviewMotion(this.motionName());
-};
-
-//書き換え
-Sprite_Enemy.prototype.getCurrentMotion = function() {
-    return this._enemy.getSideviewMotion(this.motionName());
-};
-
-}//Imported.ED_SideviewBattler
+}());//EOF
