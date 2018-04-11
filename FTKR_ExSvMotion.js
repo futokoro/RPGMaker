@@ -3,8 +3,8 @@
 // FTKR_ExSvMotion.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/19
-// 最終更新日 : 2018/04/10
-// バージョン : v1.2.6
+// 最終更新日 : 2018/04/12
+// バージョン : v1.2.7
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.ESM = FTKR.ESM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.6 SVキャラのモーションを拡張するプラグイン
+ * @plugindesc v1.2.7 SVキャラのモーションを拡張するプラグイン
  * @author フトコロ
  *
  * @noteParam ESM_画像
@@ -462,6 +462,12 @@ FTKR.ESM = FTKR.ESM || {};
  * このタグがあると、スキル実行待機中のモーションを詠唱モーションに設定できます。
  * 
  * 
+ * <ESM 詠唱OFF>
+ * <ESM CHANT_OFF>
+ * このタグがあると、詠唱モーションをOFFに設定できます。
+ * SV魔法スキルに設定したスキルであっても、詠唱モーションを実行しません。
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * カスタムモーションについて
  *-----------------------------------------------------------------------------
@@ -592,6 +598,10 @@ FTKR.ESM = FTKR.ESM || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.2.7 - 2018/04/12 : 不具合修正
+ *    1. YEP_VictoryAftermath.jsと組み合わせた場合に、勝利モーションを実行しない
+ *       不具合を修正。
  * 
  * v1.2.6 - 2018/04/10 : 不具合修正、機能追加
  *    1. YED_SideviewBattlerと組み合わせた場合に、3フレーム以外のモーションを
@@ -883,6 +893,8 @@ FTKR.ESM = FTKR.ESM || {};
     Game_Action.prototype.isMagicSkill = function() {
         if (testObjectMeta(this.item(), ['ESM 詠唱ON', 'ESM CHANT_ON'])) {
             return true;
+        } else if (testObjectMeta(this.item(), ['ESM 詠唱OFF', 'ESM CHANT_OFF'])){
+            return false;
         } else {
             return _ESM_Game_Action_isMagicSkill.call(this);
         }
@@ -1080,6 +1092,7 @@ FTKR.ESM = FTKR.ESM || {};
         if (!motionType || motionType === 'refresh') {
             motionType = battler.getEsmMotion();
         }
+        if (this._motionType === motionType) return;
         this._motionType = motionType;
         battler._faceType = motionType;
         this._otherFile = false;
@@ -1227,6 +1240,7 @@ FTKR.ESM = FTKR.ESM || {};
             this.setNewMotion(this._actor, motionType);
         }
     };
+
 
     //=============================================================================
     // 他プラグインの修正
