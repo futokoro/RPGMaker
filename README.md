@@ -255,7 +255,7 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 2018/04の更新情報
 
 ### 2018/04/14
-* [FTKR_ExForceAction](FTKR_ExForceAction.js) v1.0.0(新規)
+* [FTKR_ExForceAction](FTKR_ExForceAction.ja.md) v1.0.0(新規)
 
 ### 2018/04/12
 * [FTKR_ExSvMotion](FTKR_ExSvMotion.ja.md) v1.2.7
