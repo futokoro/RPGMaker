@@ -83,6 +83,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 | [FTKR_ExMessageWindow2](FTKR_ExMessageWindow2.js) | [仮版](FTKR_ExMessageWindow2.ja.md) | [v2.4.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExMessageWindow2.js) | 2017/08/21 | 文章の表示コマンドを使って、一度に複数のメッセージウィンドウを表示する <br> FTKR_ExMessageWindowと組み合わせて使用できません |
 | [FTKR_MessageWindowLines](FTKR_MessageWindowLines.js) | なし | [v1.1.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_MessageWindowLines.js) | 2018/02/03 | メッセージウィンドウの行数を変更する<br>文章の表示コマンドを複数組み合わせて４行以上入力可能 |
 | [FTKR_PopupSpriteMessage](FTKR_PopupSpriteMessage.js) | なし | [v1.2.4](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_PopupSpriteMessage.js) | 2018/03/10 | 任意のメッセージを画面上にポップアップ表示する |
+| [FTKR_PauseSignPosition](FTKR_PauseSignPosition.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_PauseSignPosition.js) | 2018/04/15 | ポーズサインの表示位置を変更する |
 
 [目次に戻る](#目次)
 
@@ -257,6 +258,7 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 ### 2018/04/15
 * [FTKR_ExGuardEffect](FTKR_ExGuardEffect.ja.md) v1.0.0(新規)
+* [FTKR_PauseSignPosition](FTKR_PauseSignPosition.js) v1.0.0(新規)
 
 ### 2018/04/14
 * [FTKR_ExForceAction](FTKR_ExForceAction.ja.md) v1.0.0(新規)
