@@ -3,8 +3,8 @@
 // FTKR_SkillTreeSystem.js
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/02/25
-// 最終更新日 : 2018/04/03
-// バージョン : v1.15.2
+// 最終更新日 : 2018/04/16
+// バージョン : v1.15.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.15.2 ツリー型スキル習得システム
+ * @plugindesc v1.15.3 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -1390,6 +1390,9 @@ FTKR.STS = FTKR.STS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.15.3 - 2018/04/16 : 仕様変更
+ *    1. 他プラグインとの競合回避のため、関数名を変更。
  * 
  * v1.15.2 - 2018/04/03 : エラー判定処理追加、ヘルプに注釈追加
  * 
@@ -2953,7 +2956,7 @@ function Scene_STS() {
     Window_Base.prototype.getStsDesc = function(skill) {
         if (Imported.FTKR_SEP) {
             var actor = $gameActors.actor(skill.actorId);
-            if (!actor) return this.itemDesc(skill);
+            if (!actor) return this.ftItemDesc(skill);
             var descs = skill.descs.filter( function(desc) {
                 return actor.evalEnabledFormula(desc.enabled, skill);
             });
@@ -2961,7 +2964,7 @@ function Scene_STS() {
             return desc ? desc.description : '';
         } else {
             var desc = this.getStsSubDesc(skill);
-            return desc ? desc : this.itemDesc(skill);
+            return desc ? desc : this.ftItemDesc(skill);
         }
     };
 
@@ -3028,6 +3031,7 @@ function Scene_STS() {
     /*-------------------------------------------------------------
       制御文字の表示処理の修正
     -------------------------------------------------------------*/
+    
     var _STS_Window_Base_convertEscapeCharacters = Window_Base.prototype.convertEscapeCharacters;
     Window_Base.prototype.convertEscapeCharacters = function(text) {
         text = _STS_Window_Base_convertEscapeCharacters.call(this, text);
@@ -3067,20 +3071,20 @@ function Scene_STS() {
         textState.x += args[0];
     };
 
-    if (!Window_Base.prototype.itemName) {
-        Window_Base.prototype.itemName = function(item) {
+    if (!Window_Base.prototype.ftItemName) {
+        Window_Base.prototype.ftItemName = function(item) {
             return !!item ? item.name : '';
         };
     }
     
-    if (!Window_Base.prototype.itemIcon) {
-        Window_Base.prototype.itemIcon = function(item) {
+    if (!Window_Base.prototype.ftItemIcon) {
+        Window_Base.prototype.ftItemIcon = function(item) {
             return !!item ? item.iconIndex : 0;
         };
     }
     
-    if (!Window_Base.prototype.itemDesc) {
-        Window_Base.prototype.itemDesc = function(item) {
+    if (!Window_Base.prototype.ftItemDesc) {
+        Window_Base.prototype.ftItemDesc = function(item) {
             return !!item ? item.description : '';
         };
     }
@@ -3355,7 +3359,7 @@ function Scene_STS() {
 
     Window_SkillTree.prototype.drawTreeIcon = function(skill, rect) {
         var ssi = FTKR.STS.sFrame.icon;
-        this.drawIcon(this.itemIcon(skill), rect.x + ssi.offsetX, rect.y + ssi.offsetY);
+        this.drawIcon(this.ftItemIcon(skill), rect.x + ssi.offsetX, rect.y + ssi.offsetY);
     };
 
     Window_SkillTree.prototype.drawFrame = function(index, skill, data) {
@@ -3395,7 +3399,7 @@ function Scene_STS() {
     Window_SkillTree.prototype.drawSkillText = function(skill, x, y, width, color, sts) {
         var stx = sts.offsetX;
         this.changeTextColor(this.textColor(color));
-        this.drawFormatTextEx(sts.format, x + stx, y + sts.offsetY, [this.itemName(skill)]);
+        this.drawFormatTextEx(sts.format, x + stx, y + sts.offsetY, [this.ftItemName(skill)]);
     };
 
     //スキルの習得回数を表示

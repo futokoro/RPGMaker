@@ -3,8 +3,8 @@
 // FTKR_ExItemConfig_ItemBasic.js
 // 作成者     : フトコロ
 // 作成日     : 2017/04/14
-// 最終更新日 : 2018/03/09
-// バージョン : v1.1.1
+// 最終更新日 : 2018/04/16
+// バージョン : v1.1.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.IEP = FTKR.IEP || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.1 アイテムやスキルの基本設定を拡張するプラグイン
+ * @plugindesc v1.1.2 アイテムやスキルの基本設定を拡張するプラグイン
  * @author フトコロ
  *
  * @help 
@@ -143,6 +143,9 @@ FTKR.IEP = FTKR.IEP || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.1.2 - 2018/04/16 : 仕様変更
+ *    1. 他プラグインとの競合回避のため、関数名を変更。
  * 
  * v1.1.1 - 2018/03/09 : 不具合修正
  *    1. ヘルプの計算式の説明で、アクターのパラメータ参照方法の記述を修正。
@@ -392,15 +395,15 @@ FTKR.IEP = FTKR.IEP || {};
         return DataManager.itemIepData(item, actor);
     };
 
-    Window_Base.prototype.itemName = function(item) {
+    Window_Base.prototype.ftItemName = function(item) {
         return !!item ? this.itemIepData(item).name : '';
     };
 
-    Window_Base.prototype.itemIcon = function(item) {
+    Window_Base.prototype.ftItemIcon = function(item) {
         return !!item ? this.itemIepData(item).iconIndex : 0;
     };
 
-    Window_Base.prototype.itemDesc = function(item) {
+    Window_Base.prototype.ftItemDesc = function(item) {
         return !!item ? this.itemIepData(item).description : '';
     };
 
@@ -432,8 +435,8 @@ FTKR.IEP = FTKR.IEP || {};
         if (item && item.iepDatas) {
             var iw = Window_Base._iconWidth + 4;
             this.resetTextColor();
-            this.drawIcon(this.itemIcon(item), x + 2, y + 2);
-            this.drawText(this.itemName(item), x + iw, y, width - iw);
+            this.drawIcon(this.ftItemIcon(item), x + 2, y + 2);
+            this.drawText(this.ftItemName(item), x + iw, y, width - iw);
         } else {
             _IEP_Window_Base_drawItemName.call(this, item, x, y, width);
         }
@@ -491,7 +494,7 @@ FTKR.IEP = FTKR.IEP || {};
     var _IEP_Window_Help_setItem = Window_Help.prototype.setItem;
     Window_Help.prototype.setItem = function(item) {
         if (item && item.iepDatas) {
-            this.setText(this.itemDesc(item));
+            this.setText(this.ftItemDesc(item));
         } else {
             _IEP_Window_Help_setItem.call(this, item);
         }
