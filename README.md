@@ -1,7 +1,7 @@
 # RPGツクールMV プラグイン
 
 プラグインは逐次追加更新を行っています。最新情報は、[更新情報](#更新情報)を確認してください。<br>
-公開中のプラグインの数：81 (19年度中に 100 にしたいなぁ)
+公開中のプラグインの数：82 (19年度中に 100 にしたいなぁ)
 
 # 目次
 
@@ -258,6 +258,9 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 # 更新情報
 
 2018/04の更新情報
+
+### 2018/04/17
+* [FTKR_DisplayEnemyParameters](FTKR_DisplayEnemyParameters.js) v1.0.0(新規)
 
 ### 2018/04/16
 * [FTKR_ExItemConfig_ItemBasic](FTKR_ExItemConfig_ItemBasic.js) v1.1.2
