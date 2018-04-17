@@ -260,10 +260,10 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 2018/04の更新情報
 
 ### 2018/04/17
-* [FTKR_DisplayEnemyParameters](FTKR_DisplayEnemyParameters.js) v1.0.0(新規)
+* [FTKR_DisplayEnemyParameters](FTKR_DisplayEnemyParameters.ja.md) v1.0.0(新規)
 
 ### 2018/04/16
-* [FTKR_ExItemConfig_ItemBasic](FTKR_ExItemConfig_ItemBasic.js) v1.1.2
+* [FTKR_ExItemConfig_ItemBasic](FTKR_ExItemConfig_ItemBasic.ja.md) v1.1.2
 * [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.ja.md) v1.15.3
 
 ### 2018/04/15
