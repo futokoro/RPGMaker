@@ -3,8 +3,8 @@
 // FTKR_SkillTreeSystem.js
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/02/25
-// 最終更新日 : 2018/04/16
-// バージョン : v1.15.3
+// 最終更新日 : 2018/04/18
+// バージョン : v1.15.4
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.15.3 ツリー型スキル習得システム
+ * @plugindesc v1.15.4 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -1391,6 +1391,9 @@ FTKR.STS = FTKR.STS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.15.3 - 2018/04/18 : 不具合修正
+ *    1. スキルの表示条件が反映されない不具合を修正。
+ * 
  * v1.15.3 - 2018/04/16 : 仕様変更
  *    1. 他プラグインとの競合回避のため、関数名を変更。
  * 
@@ -2525,7 +2528,8 @@ function Scene_STS() {
 
     Game_Actor.prototype.evalStsFormula = function(formula, result1, result2) {
         if (!formula) return result1;
-        return Math.max(Math.floor(FTKR.evalFormula(formula)), result2);
+        var result = FTKR.evalFormula(formula);
+        return Math.max(Math.floor(result), result2);
     };
 
     Game_Actor.prototype.payLearnedCost = function(skillId) {
@@ -2780,7 +2784,7 @@ function Scene_STS() {
                           }
                         }
                         FTKR.setGameData(this, null, item);
-                        if (this.evalStsFormula(item.sts.show, true)) {
+                        if (this.evalStsFormula(item.sts.show, true, false)) {
                             var skillIds = this.getDevSkillId(item, tree);
                             var data = { id:id, next:skillIds, x:i + dupCount, y:count };
                             results.forEach( function(result, t){

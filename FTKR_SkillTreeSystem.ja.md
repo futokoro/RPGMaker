@@ -7,7 +7,8 @@
 ダウンロード: [FTKR_SkillTreeSystem.js](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillTreeSystem.js)
 
 サンプルプロジェクト: [英語版(English)](sampleProject/SkillTreeSample.zip)
-※(MVコアスクリプト v1.5.1対応)
+※(MVコアスクリプト v1.5.2対応)<br>
+※サンプルプロジェクト内のプラグインはバージョンが古い場合がありますので、ご利用の際には、最新のものか一度確認してください。
 
 # 目次
 
@@ -1646,7 +1647,8 @@ STS 削除 ツリータイプ(x) アクター(x)
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.15.3](FTKR_SkillTreeSystem.js) | 2018/04/16 | 他プラグインとの競合回避のため、関数名を変更 |
+| [ver1.15.4](FTKR_SkillTreeSystem.js) | 2018/04/18 | スキルの表示条件が反映されない不具合を修正 |
+| ver1.15.3 | 2018/04/16 | 他プラグインとの競合回避のため、関数名を変更 |
 | ver1.15.2 | 2018/04/03 | エラー判定処理追加、ヘルプに注釈追加 |
 | ver1.15.1 | 2018/03/25 | FTKR_ExItemConfig_ItemBasic.js未適用時にエラーになる不具合を修正 |
 | ver1.15.0 | 2018/03/09 | FTKR_ExItemConfig_ItemBasic.jsに対応 |
