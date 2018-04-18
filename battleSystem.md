@@ -7,6 +7,7 @@
 大きな流れは以下の通り。
 
 1. [戦闘シーンの呼び出し](#戦闘シーンの呼び出し)
+1. [マップシーンと戦闘シーンの切替](#マップシーンと戦闘シーンの切替)
 1. [戦闘シーンの初期化](#戦闘シーンの初期化)
 1. [戦闘の開始](#戦闘の開始)
 1. [コマンド選択](#コマンド選択)
@@ -25,7 +26,8 @@
 * イベントで「戦闘の処理」実行
 
 ### マップ上でエンカウント
-`Scene_Map.prototype.updateScene()`内で<br>
+
+`Scene_Map.prototype.update()`内の`Scene_Map.prototype.updateScene()`で<br>
 `Scene_Map.prototype.updateEncounter()`を実行
 ```
 Scene_Map.prototype.updateEncounter = function() {
@@ -53,8 +55,10 @@ Game_Player.prototype.executeEncounter = function() {
 };
 ```
 #### 内部の処理
-`Game_Player._encounterCount`はプレイヤーがマップ上で移動すると減っていく値。
-この値が０以下なら、以下を実行。
+`Game_Player._encounterCount`はプレイヤーがマップ上で移動すると減っていく値。カウント(敵出現歩数)。この値が０以下なら、以下を実行。
+
+`$gamePlayer.makeEncounterCount()`<br>
+エンカウント戦闘をするためのカウント(敵出現歩数)をリセット。
 
 `BattleManager.setup(troopId, true, false)`<br>
 戦闘の初期化処理。内部では以下を実行。
@@ -74,7 +78,27 @@ BattleManager.setup = function(troopId, canEscape, canLose) {
 
 を実行した後に
 
-`SceneManager.push(Scene_Battle)`を実行、戦闘シーンを呼び出す。
+`SceneManager.push(Scene_Battle)`を実行、戦闘シーンを予約する。
+```
+SceneManager.push = function(sceneClass) {
+    this._stack.push(this._scene.constructor);//今のシーンを保存
+    this.goto(sceneClass);//次のシーンに移る
+};
+```
+
+`SceneManager.goto()`内で以下の処理を実行。
+
+```
+SceneManager.goto = function(sceneClass) {
+    if (sceneClass) {
+        this._nextScene = new sceneClass();//入力されたシーンを次のシーンに予約
+    }
+    if (this._scene) {
+        this._scene.stop();//今のシーンの終了処理を実行
+    }
+};
+```
+これにより、マップシーンを終了して、戦闘シーンに切り替える処理が動作する。
 
 ### イベントで「戦闘の処理」実行
 `Game_Interpreter.prototype.command301()`を実行
@@ -113,18 +137,83 @@ Game_Interpreter.prototype.command301 = function() {
 `$gamePlayer.makeEncounterCount()`<br>
 エンカウント戦闘をするためのカウント(敵出現歩数)をリセット。
 
-`SceneManager.push(Scene_Battle)`を実行、戦闘シーンを呼び出す。
+`SceneManager.push(Scene_Battle)`を実行、戦闘シーンを予約する。
+
+[上に戻る](#RPGツクールMVの戦闘システムの解析)
+
+## マップシーンと戦闘シーンの切替
+
+`Scene_Map.prototype.stop()`内で`Scene_Map.prototype.launchBattle`を実行。
+
+```
+Scene_Map.prototype.launchBattle = function() {
+    BattleManager.saveBgmAndBgs();  //現在のBGMとBGSを保存
+    this.stopAudioOnBattleStart();  //オーディオの再生を停止
+    SoundManager.playBattleStart(); //戦闘開始時のSEを鳴らす
+    this.startEncounterEffect();    //戦闘シーンへの切替エフェクトを実行
+    this._mapNameWindow.hide();
+};
+```
+
+戦闘シーンへの切替エフェクトを実行処理
+```
+Scene_Map.prototype.startEncounterEffect = function() {
+    this._spriteset.hideCharacters();
+    this._encounterEffectDuration = this.encounterEffectSpeed();
+};
+```
+
+その後、`Scene_Map.prototype.update()`内で以下を実行するようになる<br>
+`Scene_Map.prototype.updateEncounterEffect()`
+
+```
+Scene_Map.prototype.updateEncounterEffect = function() {
+    if (this._encounterEffectDuration > 0) {
+        this._encounterEffectDuration--;
+        var speed = this.encounterEffectSpeed();
+        var n = speed - this._encounterEffectDuration;
+        var p = n / speed;
+        var q = ((p - 1) * 20 * p + 5) * p + 1;
+        var zoomX = $gamePlayer.screenX();
+        var zoomY = $gamePlayer.screenY() - 24;
+        if (n === 2) {
+            $gameScreen.setZoom(zoomX, zoomY, 1);
+            this.snapForBattleBackground();       //現在の画面をスナップショットとして保存
+            this.startFlashForEncounter(speed / 2);
+        }
+        $gameScreen.setZoom(zoomX, zoomY, q);
+        if (n === Math.floor(speed / 6)) {
+            this.startFlashForEncounter(speed / 2);
+        }
+        if (n === Math.floor(speed / 2)) {
+            BattleManager.playBattleBgm();        //戦闘BGMを再生
+            this.startFadeOut(this.fadeSpeed());  //フェードアウト開始
+        }
+    }
+};
+```
+
+処理が完了するとマップシーンを完全に終了し、戦闘シーンに切り替わる。
 
 [上に戻る](#RPGツクールMVの戦闘システムの解析)
 
 ## 戦闘シーンの初期化
-戦闘シーンを呼び出すと以下の順で、シーンの初期化を行う。
+戦闘シーンに切り替わると以下の順で、シーンの初期化を行う。
 
 `Scene_Battle.prototype.create()`<br>
 戦闘背景や、各種ウィンドウ、アクターやエネミー等のキャラクターを生成する。
 
-`Scene_Battle.prototype.start()`<br>
-フェードイン処理、マップBGMの保存と戦闘BGMの読込、`BattleManager.startBattle()`の実行。
+`Scene_Battle.prototype.start()`
+```
+Scene_Battle.prototype.start = function() {
+    Scene_Base.prototype.start.call(this);
+    this.startFadeIn(this.fadeSpeed(), false);  //フェードイン実行
+    BattleManager.playBattleBgm();              //戦闘BGMの再生
+    BattleManager.startBattle();
+};
+```
+
+`BattleManager.startBattle()`を実行する。
 ```
 BattleManager.startBattle = function() {
     this._phase = 'start';        //戦闘フェーズをstartにセット
