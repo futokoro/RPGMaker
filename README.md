@@ -243,6 +243,7 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 # その他備忘録
 
 * [コードリスト](Code_List.ja.md)
+* [RPGツクールMVの戦闘システムの解析](battleSystem.md)
 
 プラグイン対応状況
 * スキル強化プラグインの統合(気が向いたら)
