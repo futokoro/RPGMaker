@@ -85,7 +85,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 | [FTKR_MessageWindowLines](FTKR_MessageWindowLines.js) | なし | [v1.1.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_MessageWindowLines.js) | 2018/02/03 | メッセージウィンドウの行数を変更する<br>文章の表示コマンドを複数組み合わせて４行以上入力可能 |
 | [FTKR_PopupSpriteMessage](FTKR_PopupSpriteMessage.js) | なし | [v1.2.4](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_PopupSpriteMessage.js) | 2018/03/10 | 任意のメッセージを画面上にポップアップ表示する |
 | [FTKR_PauseSignPosition](FTKR_PauseSignPosition.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_PauseSignPosition.js) | 2018/04/15 | ポーズサインの表示位置を変更する |
-| [FTKR_SelectHelpWindow](FTKR_SelectHelpWindow.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SelectHelpWindow.js) | 2018/04/15 | 選択肢ウィンドウを表示中に選択肢の説明ウィンドウを表示する |
+| [FTKR_SelectHelpWindow](FTKR_SelectHelpWindow.js) | [あり](FTKR_SelectHelpWindow.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SelectHelpWindow.js) | 2018/04/15 | 選択肢ウィンドウを表示中に選択肢の説明ウィンドウを表示する |
 
 [目次に戻る](#目次)
 
