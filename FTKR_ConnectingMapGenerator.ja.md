@@ -169,14 +169,14 @@ CMG_マップ連結 2 3 4 5
 連結後のマップのイベントIDは、以下のスクリプトで取得できます。
 
 ```
-this.cmgEventId(mapId, eventId)
+$gameMap.cmgEventId(mapId, eventId)
 ```
 * mapId: そのイベントを作成したマップのID(データベース上のマップです)
 * eventIdそのイベントを作成したマップ上のイベントID
 
 入力例)
 ```
-this.cmgEventId(2, 3)
+$gameMap.cmgEventId(2, 3)
 ```
 
 ただし、そのイベント内であれば、this._eventId で自分のIDを取得できます。

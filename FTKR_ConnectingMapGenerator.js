@@ -153,12 +153,12 @@ FTKR.CMG = FTKR.CMG || {};
  *-----------------------------------------------------------------------------
  * 連結後のマップのイベントIDは、以下のスクリプトで取得できます。
  * 
- * this.cmgEventId(mapId, eventId)
+ * $gameMap.cmgEventId(mapId, eventId)
  *    mapId   : そのイベントを作成したマップのID(データベース上のマップです)
  *    eventId : そのイベントを作成したマップ上のイベントID
  * 
  * 入力例)
- *    this.cmgEventId(2, 3)
+ *    $gameMap.cmgEventId(2, 3)
  * 
  * 
  * ただし、そのイベント内であれば、this._eventId で自分のIDを取得できます。
@@ -366,21 +366,6 @@ function Game_CmgEvent() {
         }
     };
 
-    Game_Interpreter.prototype.cmgEventId = function(mapId, eventId) {
-        var cmgMapId = 0;
-        var num = 0;
-        $gamePlayer._connectingMaps.some( function(cmapId, i){
-            if (cmapId === mapId) {
-                cmgMapId = i;
-                return true;
-            }
-        });
-        if (cmgMapId > 0) num += $dataMap0.events.length;
-        if (cmgMapId > 1) num += $dataMap1.events.length;
-        if (cmgMapId > 2) num += $dataMap2.events.length;
-        return num + eventId;
-    };
-
     //=============================================================================
     // Game_Player
     //=============================================================================
@@ -454,6 +439,21 @@ function Game_CmgEvent() {
             if (len > index) return 3;
         }
         return -1;
+    };
+
+    Game_Map.prototype.cmgEventId = function(mapId, eventId) {
+        var cmgMapId = 0;
+        var num = 0;
+        $gamePlayer._connectingMaps.some( function(cmapId, i){
+            if (cmapId === mapId) {
+                cmgMapId = i;
+                return true;
+            }
+        });
+        if (cmgMapId > 0) num += $dataMap0.events.length;
+        if (cmgMapId > 1) num += $dataMap1.events.length;
+        if (cmgMapId > 2) num += $dataMap2.events.length;
+        return num + eventId;
     };
 
     //=============================================================================
