@@ -1,7 +1,7 @@
 # RPGツクールMV プラグイン
 
 プラグインは逐次追加更新を行っています。最新情報は、[更新情報](#更新情報)を確認してください。<br>
-公開中のプラグインの数：82 (19年度中に 100 にしたいなぁ)
+公開中のプラグインの数：83 (19年度中に 100 にしたいなぁ)
 
 # 目次
 
@@ -28,6 +28,8 @@
 
 # ステータス
 
+プラグイン数:6
+
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_AddOriginalParameters](FTKR_AddOriginalParameters.js) | [あり](FTKR_AddOriginalParameters.ja.md) | [v1.1.6](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AddOriginalParameters.js) | 2017/11/05 |オリジナルパラメータを追加する |
@@ -38,6 +40,8 @@
 | [FTKR_ExTraitSetting](FTKR_ExTraitSetting.js) | なし | [v1.0.4](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExTraitSetting.js) | 2018/02/17 | 装備やステート等の特徴を詳細に設定できる |
 
 ## ステータス表示の変更
+
+プラグイン数:8
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
@@ -56,6 +60,8 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 
 # 変数_スイッチ
 
+プラグイン数:3
+
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_ItemSelfVariables](FTKR_ItemSelfVariables.js) | [あり](FTKR_ItemSelfVariables.ja.md) | [v1.2.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ItemSelfVariables.js) | 2018/01/08 | アイテム、スキル、アクター、エネミーにセルフ変数を追加する |
@@ -65,6 +71,8 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 [目次に戻る](#目次)
 
 # ウィンドウ
+
+プラグイン数:4
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
@@ -76,6 +84,8 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 [目次に戻る](#目次)
 
 # メッセージ
+
+プラグイン数:7
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
@@ -90,6 +100,8 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 [目次に戻る](#目次)
 
 # アイテム_スキル仕様拡張
+
+プラグイン数:6
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
@@ -106,6 +118,8 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 
 # スキル
 
+プラグイン数:5
+
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_SkillCounter](FTKR_SkillCounter.js) | [あり](FTKR_SkillCounter.ja.md) | [v1.0.5](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillCounter.js) | 2017/04/29 | 相手のスキルに対抗して効果を変える |
@@ -116,6 +130,8 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 
 ## スキル強化システム
 
+プラグイン数:4
+
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_SkillExpansion](FTKR_SkillExpansion.js) | [仮版](FTKR_SkillExpansion.ja.md) | [v1.3.4](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillExpansion.js) | 2017/10/16 | スキルの仕様を拡張する |
@@ -125,6 +141,8 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 
 ## スキルツリーシステム
 
+プラグイン数:2
+
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js) | [あり](FTKR_SkillTreeSystem.ja.md) | [v1.15.4](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillTreeSystem.js) | 2018/04/18 | ツリー型のスキル習得システム |
@@ -133,6 +151,8 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 [目次に戻る](#目次)
 
 # アイテム
+
+プラグイン数:7
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
@@ -148,6 +168,8 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 
 # ステート
 
+プラグイン数:5
+
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_TransformationState](FTKR_TransformationState.js) | なし | [v1.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_TransformationState.js) | 2017/10/08 | ステートが掛かっている間SV画像を変更する |
@@ -160,6 +182,8 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 
 # 敵グループ
 
+プラグイン数:2
+
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_ExMetaData](FTKR_ExMetaData.js) | [あり](FTKR_ExMetaData.ja.md) | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExMetaData.js) | 2018/02/19 | 敵グループとイベントのメタデータを拡張する |
@@ -168,6 +192,8 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 [目次に戻る](#目次)
 
 # バトル
+
+プラグイン数:12
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
@@ -190,6 +216,8 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 # イベント
 
+プラグイン数:4
+
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_EventSmoothStart](FTKR_EventSmoothStart.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_EventSmoothStart.js) | 2017/06/25 | イベント起動時のプレイヤーの移動停止を無視する |
@@ -201,13 +229,18 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 # マップ
 
+プラグイン数:2
+
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_ExTileSettingForRegion](FTKR_ExTileSettingForRegion.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExTileSettingForRegion.js) | 2017/08/27 | 指定したリージョンの通行設定を一時的に変更する |
+| [FTKR_ConnectingMapGenerator](FTKR_ConnectingMapGenerator.js) | [あり](FTKR_ConnectingMapGenerator.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ConnectingMapGenerator.js) | 2018/04/22 | 複数のマップを繋げて１つの大きなマップにする |
 
 [目次に戻る](#目次)
 
 # ピクチャ
+
+プラグイン数:1
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
@@ -217,6 +250,8 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 # セーブ
 
+プラグイン数:1
+
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_DeleteSavefile](FTKR_DeleteSavefile.js) | [仮版](FTKR_DeleteSavefile.ja.md) | [v1.0.4](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_DeleteSavefile.js) | 2018/04/06 | セーブファイルを削除するコマンドを追加する |
@@ -225,6 +260,8 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 # ミニゲーム
 
+プラグイン数:1
+
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_CardGames](FTKR_CardGames.js) | [仮版](FTKR_CardGames.ja.md) | [v1.2.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CardGames.js) | 2017/10/02 | カードゲーム |
@@ -232,6 +269,8 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 [目次に戻る](#目次)
 
 # デバッグ
+
+プラグイン数:2
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
@@ -252,6 +291,8 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 # 試作品置き場
 
+プラグイン数:1
+
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_ActionGauge](FTKR_ActionGauge.js) | なし | [v0.7.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ActionGauge.js) | 2017/04/21 | アクションゲージ |
@@ -259,6 +300,9 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 # 更新情報
 
 2018/04の更新情報
+
+### 2018/04/22
+* [FTKR_ConnectingMapGenerator](FTKR_ConnectingMapGenerator.ja.md) v1.0.0(新規)
 
 ### 2018/04/18
 * [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.ja.md) v1.15.4
