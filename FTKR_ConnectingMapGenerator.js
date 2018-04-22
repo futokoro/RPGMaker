@@ -5,7 +5,7 @@
 // 作成者　　   : フトコロ
 // 作成日　　   : 2018/04/22
 // 最終更新日   : 2018/04/22
-// バージョン   : v1.0.1
+// バージョン   : v1.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,14 +16,26 @@ FTKR.CMG = FTKR.CMG || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.1 複数のマップを繋げて１つの大きなマップにするプラグイン
+ * @plugindesc v1.1.0 複数のマップを繋げて１つの大きなマップにするプラグイン
  * @author フトコロ
  *
+ * @param 連結マップの横サイズ
+ * @desc 横に連結させるマップの数。ゲーム中で変更可能です。
+ * @default 2
+ * @type number
+ * @min 0
+ *
+ * @param 連結マップの縦サイズ
+ * @desc 縦に連結させるマップの数。ゲーム中で変更可能です。
+ * @default 2
+ * @type number
+ * @min 0
+ * 
  * @help 
  *-----------------------------------------------------------------------------
  * 概要
  *-----------------------------------------------------------------------------
- * 最大４つのマップを繋げて１つの大きなマップとして表示することができます。
+ * 複数のマップを繋げて１つの大きなマップとして表示することができます。
  * 
  * 連結後のマップでは、各マップに設定したイベントも個々に実行することができます。
  * ただし、イベントのIDは、連結後のマップでは変わるため注意が必要です。
@@ -39,47 +51,75 @@ FTKR.CMG = FTKR.CMG || {};
  *-----------------------------------------------------------------------------
  * マップを連結する方法
  *-----------------------------------------------------------------------------
- * 場所移動コマンド実行前に、以下のプラグインコマンドを実行します。
+ * まず、縦横に何枚のマップを連結させてマップを生成するか設定します。
+ * 
+ * 設定方法は以下の２通りです。
+ * ・プラグインパラメータで縦横の枚数の初期値を設定。
+ * ・以下のプラグインコマンドを実施し、場所移動ごとに設定。
+ * 
+ * プラグインコマンド
+ * ※[]は実際の入力に使用しません
+ * 
+ * CMG_連結マップサイズ [横のマップ数] [縦のマップ数]
+ * CMG_CONNECTING_MAP_SIZE [cols] [lines]
+ * 
+ *    横のマップ数(cols)
+ *        : 横に連結させるマップの数を変更します。
+ * 
+ *    縦のマップ数(lines)
+ *        : 縦に連結させるマップの数を変更します。
+ * 
+ * 
+ * 
+ * 次に、以下のプラグインコマンドを実行し、連結させるマップIDを指定します。
+ * なお、この時に、同じマップIDを複数回入力することが可能です。
  * ※[]は実際の入力に使用しません
  * 
  * 
- * CMG_マップ連結 [マップ1] [マップ2] [マップ3] [マップ4]
- * CMG_CONNECTING_MAP [map1] [map2] [map3] [map4]
+ * CMG_マップ連結 [マップ1] [マップ2] [マップ3] [マップ4] ...
+ * CMG_CONNECTING_MAP [map1] [map2] [map3] [map4] ...
  * 
  *    マップ1(map1)
  *        : 連結後にマップの左上に配置されるマップのIDを指定します。
  *          連結後のマップ設定は、マップ1の設定を引き継ぎます。
  * 
- *    マップ2(map2)
- *        : 連結後にマップの右上に配置されるマップのIDを指定します。
+ *    マップ*(map*)
+ *        : 連結させるマップの数だけ、マップIDを指定します。
+ *        : 縦横2*2の場合は マップ4 まで、縦横3*3の場合は マップ9 まで入力します。
  * 
- *    マップ3(map3)
- *        : 連結後にマップの左下に配置されるマップのIDを指定します。
- * 
- *    マップ4(map4)
- *        : 連結後にマップの右下に配置されるマップのIDを指定します。
- * 
- * ┌--ーーー--┬--ーーー--┐
- * │  マップ1 │ マップ2  │
- * ├--ーーー--┼--ーーー--┤
- * │  マップ3 │ マップ4  │
- * └--ーーー--┴--ーーー--┘
- * 
- * 
- * 入力例)
+  * 入力例) 2*2のマップを連結させる場合の入力
  * 　CMG_マップ連結 2 3 4 5
  * 　CMG_CONNECTING_MAP 2 3 4 5
  * 
  * 
- * マップを２つだけ連結させることも可能です。
+ * 連結した時のマップの配置は、
+ * マップ1を左上に、そこから右にマップ2、マップ3、...と配置します。
+ * 横のマップ数上限に達した場合、１段下に下がり、マップを連結し
+ * 画面右下が一番最後のマップになります。
  * 
- * 横に連結させる場合は、マップ3とマップ4に 0 を入力します。
- * 入力例)
- * 　CMG_マップ連結 2 3 0 0
+ * 簡単なマップ配置イメージ
  * 
- * 縦に連結させる場合は、マップ2とマップ4に 0 を入力します。
- * 入力例)
- * 　CMG_マップ連結 2 0 4 0
+ * ・1*2の場合
+ *    1 2 
+ * 
+ * ・2*2の場合　　　・3*2の場合
+ *    1 2 　　　　　  1 2 3
+ *    3 4 　　　　　  4 5 6
+ * 
+ * ・3*3の場合
+ *    1 2 3
+ *    4 5 6
+ *    7 8 9
+ * 
+ * 
+ * 連結マップのサイズと、連結させるマップIDを設定したら
+ * 場所移動イベントを実行してください。
+ * 
+ * 場所移動時のマップIDと座標の設定は、連結させるマップのいずれかを選べば
+ * 連結後のその位置に移動します。
+ * 
+ * なお、同じマップIDを複数回連結させている場合は、一番最初に配置した場所の
+ * マップ上に移動します。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -94,7 +134,9 @@ FTKR.CMG = FTKR.CMG || {};
  *-----------------------------------------------------------------------------
  * マップを連結させるための条件
  *-----------------------------------------------------------------------------
- * 連結させるマップ同士は幅や高さを合わせる必要があります。
+ * 連結させるマップ同士の幅や高さを合わせる必要があります。
+ * 
+ * 例えば、2*2のマップを連結させる場合、
  * 
  * 1. マップ1 と マップ2 の 高さ は同じにしてください。
  * 2. マップ1 と マップ3 の 幅 は同じにしてください。
@@ -194,6 +236,11 @@ FTKR.CMG = FTKR.CMG || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.0 - 2018/04/22 : 仕様変更
+ *    1. 連結する縦横のマップの数を設定する機能を追加。4つ以上のマップを連結可能。
+ *    2. マップ数の設定機能に合わせて、連結するマップIDを設定する
+ *       プラグインコマンドの仕様を変更。
+ * 
  * v1.0.1 - 2018/04/22 : ヘルプの誤記修正
  * 
  * v1.0.0 - 2018/04/22 : 初版作成
@@ -201,10 +248,7 @@ FTKR.CMG = FTKR.CMG || {};
  *-----------------------------------------------------------------------------
 */
 //=============================================================================
-var $dataMap0         = null;
-var $dataMap1         = null;
-var $dataMap2         = null;
-var $dataMap3         = null;
+var $dataCmgMaps = [];
 
 function Game_CmgEvent() {
     this.initialize.apply(this, arguments);
@@ -259,6 +303,11 @@ function Game_CmgEvent() {
     //=============================================================================
     var parameters = PluginManager.parameters('FTKR_ConnectingMapGenerator');
 
+    FTKR.CMG = {
+        mapW : paramParse(parameters['連結マップの横サイズ']),
+        mapH : paramParse(parameters['連結マップの縦サイズ']),
+    };
+
     //=============================================================================
     // DataManager
     //=============================================================================
@@ -268,8 +317,8 @@ function Game_CmgEvent() {
     DataManager.loadConnectingMapData = function(mapId, index) {
         if (mapId > 0) {
             var filename = 'Map%1.json'.format(mapId.padZero(3));
-            this._mapLoaders[index] = ResourceHandler.createLoader('data/' + filename, this.loadConnectingDataFile.bind(this, '$dataMap' + index, filename, index));
-            this.loadConnectingDataFile('$dataMap' + index, filename, index);
+            this._mapLoaders[index] = ResourceHandler.createLoader('data/' + filename, this.loadConnectingDataFile.bind(this, '$dataCmgMaps', filename, index));
+            this.loadConnectingDataFile('$dataCmgMaps', filename, index);
         } else {
             this.makeEmptyMap();
         }
@@ -282,23 +331,22 @@ function Game_CmgEvent() {
         xhr.overrideMimeType('application/json');
         xhr.onload = function() {
             if (xhr.status < 400) {
-                window[name] = JSON.parse(xhr.responseText);
-                DataManager.onConnectingLoad(window[name]);
+                if (!window[name]) window[name] = [];
+                window[name][index] = JSON.parse(xhr.responseText);
+                DataManager.onConnectingLoad(window[name][index]);
             }
         };
         xhr.onerror = this._mapLoaders[index] || function() {
             DataManager._errorUrls[index] = DataManager._errorUrl || url;
         };
-        window[name] = null;
+        window[name][index] = null;
         xhr.send();
     };
 
     DataManager.onConnectingLoad = function(object) {
         var array;
-        if (object === $dataMap) {
-            this.extractMetadata(object);
-            array = object.events;
-        }
+        this.extractMetadata(object);
+        array = object.events;
         if (Array.isArray(array)) {
             for (var i = 0; i < array.length; i++) {
                 var data = array[i];
@@ -332,17 +380,7 @@ function Game_CmgEvent() {
     };
 
     DataManager.dataMap = function(cmgMapId) {
-        switch(cmgMapId) {
-            case 0:
-                return $dataMap0;
-            case 1:
-                return $dataMap1;
-            case 2:
-                return $dataMap2;
-            case 3:
-                return $dataMap3;
-        }
-        return $dataMap;
+        return $dataCmgMaps[cmgMapId] || $dataMap;
     };
 
     DataManager.pushMapData = function(data, mapId, index) {
@@ -352,6 +390,26 @@ function Game_CmgEvent() {
             var newdata = dataMap.data.slice(index * len, (index + 1) * len);
             Array.prototype.push.apply(data, newdata);
         }
+    };
+
+    DataManager.cmgMapId = function(mapId) {
+        if (!$gamePlayer._connectingMaps) return -1;
+        var cmgMapId = -1;
+        $gamePlayer._connectingMaps.some(function(cMap, i){
+            if (cMap && cMap === mapId) {
+                cmgMapId = i;
+                return true;
+            }
+        });
+        return cmgMapId;
+    };
+
+    DataManager.cmgMapW = function() {
+        return this._cmgMapW || 0;
+    };
+
+    DataManager.cmgMapH = function() {
+        return this._cmgMapH || 0;
     };
 
     //=============================================================================
@@ -364,17 +422,21 @@ function Game_CmgEvent() {
         if (!command.match(/CMG_(.+)/i)) return;
         command = (RegExp.$1 + '').toUpperCase();
         switch (command) {
+            case '連結マップサイズ':
+            case 'CONNECTING_MAP_SIZE':
+                DataManager._cmgMapW = setArgNum(args[0]);
+                DataManager._cmgMapH = setArgNum(args[1]);
+                break;
             case 'マップ連結':
             case 'CONNECTING_MAP':
-                $gamePlayer._connectingMaps = [setArgNum(args[0]),setArgNum(args[1]),setArgNum(args[2]),setArgNum(args[3])];
+                $gamePlayer._connectingMaps = args.map(function(arg){
+                    return setArgNum(arg);
+                });
                 break;
             case 'マップ連結解除':
             case 'CLEAR_CONNECTING_MAP':
                 $gamePlayer._connectingMaps = null;
-                $dataMap0 = null;
-                $dataMap1 = null;
-                $dataMap2 = null;
-                $dataMap3 = null;
+                $dataCmgMaps = [];
                 break;
         }
     };
@@ -383,14 +445,45 @@ function Game_CmgEvent() {
     // Game_Player
     //=============================================================================
 
+    Game_Character.prototype.getCmgMapX = function(cmgMapId, mapX) {
+        for (var i = 0; i < cmgMapId % DataManager.cmgMapW(); i++) {
+            mapX += DataManager.dataMap(i).width;
+        }
+        return mapX;
+    };
+
+    Game_Character.prototype.getCmgMapY = function(cmgMapId, mapY) {
+        var m = 0;
+        if (cmgMapId >= DataManager.cmgMapW()){
+            for (var i = 0; i < Math.ceil(cmgMapId / DataManager.cmgMapH()); i++) {
+                mapY += DataManager.dataMap(m).height;
+                m += DataManager.cmgMapW();
+            }
+        }
+        return mapY;
+    };
+
+    //=============================================================================
+    // Game_Player
+    //=============================================================================
+
+    var _CMG_Game_Player_initMembers = Game_Player.prototype.initMembers;
+    Game_Player.prototype.initMembers = function() {
+        _CMG_Game_Player_initMembers.call(this);
+        DataManager._cmgMapW = FTKR.CMG.mapW;
+        DataManager._cmgMapH = FTKR.CMG.mapH;
+    };
+
     var _CMG_Game_Player_performTransfer = Game_Player.prototype.performTransfer;
     Game_Player.prototype.performTransfer = function() {
         if (this.isTransferring()) {
             var maps = this._connectingMaps;
             if (maps) {
-                if ([maps[1],maps[3]].contains(this._newMapId)) this._newX += $dataMap0.width;
-                if ([maps[2],maps[3]].contains(this._newMapId)) this._newY += $dataMap0.height;
+                var cmgMapId = DataManager.cmgMapId(this._newMapId);
+                this._newX = this.getCmgMapX(cmgMapId, this._newX);
+                this._newY = this.getCmgMapY(cmgMapId, this._newY);
                 this._newMapId = this._connectingMaps[0];
+                console.log(this._newX, this._newY);
             }
         }
         _CMG_Game_Player_performTransfer.call(this);
@@ -406,10 +499,8 @@ function Game_CmgEvent() {
     Game_CmgEvent.prototype.initialize = function(mapId, eventId, cmgMapId) {
         this._cmgMapId = cmgMapId;
         Game_Event.prototype.initialize.call(this, mapId, eventId);
-        var x = this.event().x;
-        if ([1,3].contains(cmgMapId)) x += $dataMap0.width;
-        var y = this.event().y;
-        if ([2,3].contains(cmgMapId)) y += $dataMap0.height;
+        var x = this.getCmgMapX(this._cmgMapId, this.event().x);
+        var y = this.getCmgMapY(this._cmgMapId, this.event().y);
         this.locate(x, y);
         this.refresh();
     };
@@ -418,7 +509,6 @@ function Game_CmgEvent() {
     // Game_Map
     //=============================================================================
 
-    //書き換え
     var _CMG_Game_Map_setupEvents = Game_Map.prototype.setupEvents;
     Game_Map.prototype.setupEvents = function() {
         _CMG_Game_Map_setupEvents.call(this);
@@ -435,23 +525,18 @@ function Game_CmgEvent() {
 
     Game_Map.prototype.cmgMapId = function(index) {
         if (!$gamePlayer._connectingMaps) return -1;
-        if ($dataMap0) {
-            var len = $dataMap0.events.length;
-            if (len > index) return 0;
-        }
-        if ($dataMap1) {
-            len += $dataMap1.events.length;
-            if (len > index) return 1;
-        }
-        if ($dataMap2) {
-            len += $dataMap2.events.length;
-            if (len > index) return 2;
-        }
-        if ($dataMap3) {
-            len += $dataMap3.events.length;
-            if (len > index) return 3;
-        }
-        return -1;
+        var cmgMapId = -1;
+        var len = 0;
+        $dataCmgMaps.some(function(dataMap, i){
+            if (dataMap) {
+                len += dataMap.events.length;
+                if (len > index) {
+                    cmgMapId = i;
+                    return true;
+                }
+            }
+        });
+        return cmgMapId;
     };
 
     Game_Map.prototype.cmgEventId = function(mapId, eventId) {
@@ -463,9 +548,11 @@ function Game_CmgEvent() {
                 return true;
             }
         });
-        if (cmgMapId > 0) num += $dataMap0.events.length;
-        if (cmgMapId > 1) num += $dataMap1.events.length;
-        if (cmgMapId > 2) num += $dataMap2.events.length;
+        $dataCmgMaps.forEach( function(dataMap, i){
+            if (i < $dataCmgMaps.length - 1) {
+                if (cmgMapId > i) num += dataMap.events.length;
+            }
+        });
         return num + eventId;
     };
 
@@ -512,34 +599,54 @@ function Game_CmgEvent() {
 
     Scene_Map.prototype.createConnectingMap = function() {
         this.setupConnectingMapData();
+        this.setupConnectingMapWidth();
+        this.setupConnectingMapHeight();
         this.setupConnectingMapEvents();
         this.setupConnectingMapEncounterList();
     };
 
     Scene_Map.prototype.setupConnectingMapData = function() {
         var data = [];
-        var newdata = [];
-        var len0 = $dataMap0 ? $dataMap0.width : 0;
-        var len1 = $dataMap1 ? $dataMap1.width : 0;
-        var num0 = $dataMap0 ? $dataMap0.height : 0;
+        var mapH = DataManager.cmgMapH();
+        var mapW = DataManager.cmgMapW();
+        var dataMap = null;
         for (var i = 0; i < 6; i++) {
-            if (!!$dataMap0) {
-                for (var h = num0 * i; h < num0 * (i + 1); h++) {
-                    DataManager.pushMapData(data, 0, h);
-                    DataManager.pushMapData(data, 1, h);
+            for (var m = 0; m < mapH; m++) {
+                dataMap = DataManager.dataMap(mapW * m);
+                if (!!dataMap) {
+                    var num = dataMap.height;
+                    for (var h = num * i; h < num * (i + 1); h++) {
+                        for (var v = mapW * m; v < mapW * (m + 1); v++) {
+                            DataManager.pushMapData(data, v, h);
+                        }
+                    }
                 }
-                $dataMap.width = len0 + len1;
-            }
-            if (!!$dataMap2) {
-                var num1 = $dataMap2.height;
-                for (var h = num1 * i; h < num1 * (i + 1); h++) {
-                    DataManager.pushMapData(data, 2, h);
-                    DataManager.pushMapData(data, 3, h);
-                }
-                $dataMap.height = num0 + num1;
             }
         }
         $dataMap.data = data;
+    };
+
+    Scene_Map.prototype.setupConnectingMapWidth = function() {
+        var width = 0;
+        $dataCmgMaps.some( function(dataMap, i){
+            if (i >= DataManager.cmgMapW()) return true;
+            if (dataMap) {
+                width += dataMap.width;
+            }
+        });
+        $dataMap.width = width;
+    };
+
+    Scene_Map.prototype.setupConnectingMapHeight = function() {
+        var height = 0;
+        $dataCmgMaps.forEach( function(dataMap, i){
+            if (!(i % DataManager.cmgMapW())) {
+                if (dataMap) {
+                    height += dataMap.height;
+                }
+            }
+        });
+        $dataMap.height = height;
     };
 
     Scene_Map.prototype.setupConnectingMapEvents = function() {
