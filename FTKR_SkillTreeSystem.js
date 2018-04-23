@@ -2,10 +2,10 @@
 // ツリー型スキル習得システム(Tree-type Skill Learning System)
 // FTKR_SkillTreeSystem.js
 // プラグインNo : 7
-// 作成者     : フトコロ(futokoro)
-// 作成日     : 2017/02/25
-// 最終更新日 : 2018/04/18
-// バージョン : v1.15.4
+// 作成者　　   : フトコロ(futokoro)
+// 作成日　　   : 2017/02/25
+// 最終更新日   : 2018/04/23
+// バージョン   : v1.15.5
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.15.4 ツリー型スキル習得システム
+ * @plugindesc v1.15.5 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -1392,6 +1392,10 @@ FTKR.STS = FTKR.STS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.15.4 - 2018/04/23 : 仕様変更
+ *    1. 他プラグインとの競合回避のため、Scene_STSクラスの継承元を
+ *       Scene_MenuBaseに変更
+ * 
  * v1.15.3 - 2018/04/18 : 不具合修正
  *    1. スキルの表示条件が反映されない不具合を修正。
  * 
@@ -2239,24 +2243,14 @@ function Scene_STS() {
     Game_Actor.prototype.initMembers = function() {
         _STS_Game_Actor_initMembers.call(this);
         this._stsSp = 0;
-        this._stsCsp = [];
-        this._stsLearnSkills = [];
-        this._stsTrees = [];
-        this._stsCount = [];
-        this._stsUsedSp = [];
-        this._stsUsedCsp = [];
-        this._stsUsedItem = [];
-        this._stsUsedWeapon = [];
-        this._stsUsedArmor = [];
-        this._stsUsedVar = [];
-        this._stsUsedGold = [];
+        this.checkInitSts();
     };
 
     Game_Actor.prototype.checkInitSts = function() {
         if (!this._stsCsp) this._stsCsp = [];
-        if (!this._stsCount) this._stsCount = [];
         if (!this._stsLearnSkills) this._stsLearnSkills = [];
         if (!this._stsTrees) this._stsTrees = [];
+        if (!this._stsCount) this._stsCount = [];
         if (!this._stsUsedSp) this._stsUsedSp = [];
         if (!this._stsUsedCsp) this._stsUsedCsp = [];
         if (!this._stsUsedItem) this._stsUsedItem = [];
@@ -3919,15 +3913,20 @@ function Scene_STS() {
     // Scene_STS
     //=============================================================================
 
-    Scene_STS.prototype = Object.create(Scene_Skill.prototype);
+    Scene_STS.prototype = Object.create(Scene_MenuBase.prototype);
     Scene_STS.prototype.constructor = Scene_STS;
 
     Scene_STS.prototype.initialize = function() {
-      Scene_Skill.prototype.initialize.call(this);
+      Scene_MenuBase.prototype.initialize.call(this);
+    };
+    
+    Scene_STS.prototype.start = function() {
+      Scene_MenuBase.prototype.start.call(this);
+      this.refreshActor();
     };
 
     Scene_STS.prototype.create = function() {
-      Scene_ItemBase.prototype.create.call(this);
+      Scene_MenuBase.prototype.create.call(this);
       this.createStsActorStatusWindow();
       this.createTreeTypeWindow();
       this.createSkillTreeWindow();
