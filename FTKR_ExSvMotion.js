@@ -4,8 +4,8 @@
 // プラグインNo : 24
 // 作成者     : フトコロ
 // 作成日     : 2017/04/19
-// 最終更新日 : 2018/04/12
-// バージョン : v1.2.7
+// 最終更新日 : 2018/04/28
+// バージョン : v1.2.8
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.ESM = FTKR.ESM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.7 SVキャラのモーションを拡張するプラグイン
+ * @plugindesc v1.2.8 SVキャラのモーションを拡張するプラグイン
  * @author フトコロ
  *
  * @noteParam ESM_画像
@@ -600,6 +600,10 @@ FTKR.ESM = FTKR.ESM || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.2.8 - 2018/04/28 : 不具合修正
+ *    1. YEP_BattleEngineCore.jsと組み合わせている場合に、戦闘不能時の
+ *       状態モーションの設定が反映されない不具合を修正。
+ * 
  * v1.2.7 - 2018/04/12 : 不具合修正
  *    1. YEP_VictoryAftermath.jsと組み合わせた場合に、勝利モーションを実行しない
  *       不具合を修正。
@@ -1165,8 +1169,9 @@ FTKR.ESM = FTKR.ESM || {};
     Sprite_Battler.prototype.consoleLog_BattlerMotion = function(type, datas) {
         if (FTKR.ESM.motion.debug.enable) {
             if (!FTKR.ESM.motion.debug.pattern && type === 'pattern') return;
+            var name = !!this._battler ? this._battler.name() : '';
             console.log('********************************************');
-            console.log('Actor motion <', type, '>');
+            console.log('Actor motion <', type, '>', name);
             console.log('---------------------------');
             switch (type) {
             case 'start':
@@ -1250,6 +1255,38 @@ FTKR.ESM = FTKR.ESM || {};
     // YEP_BattleEngineCoreの修正
     //-----------------------------------------------------------------
     if (Imported.YEP_BattleEngineCore) {
+
+    Game_Battler.prototype.idleMotion = function() {
+        return '';
+    };
+
+    Game_Battler.prototype.deadMotion = function() {
+        return '';
+    };
+
+    Game_Battler.prototype.sleepMotion = function() {
+        return '';
+    };
+
+    Game_Battler.prototype.chantMotion = function() {
+        return '';
+    };
+
+    Game_Battler.prototype.guardMotion = function() {
+        return '';
+    };
+
+    Game_Battler.prototype.abnormalMotion = function() {
+        return '';
+    };
+
+    Game_Battler.prototype.dyingMotion = function() {
+        return '';
+    };
+
+    Game_Battler.prototype.waitMotion = function() {
+        return '';
+    };
 
     var _ESM_Game_Battler_requestMotionRefresh = Game_Battler.prototype.requestMotionRefresh;
     Game_Battler.prototype.requestMotionRefresh = function() {
