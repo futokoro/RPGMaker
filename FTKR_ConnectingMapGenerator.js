@@ -313,8 +313,9 @@ FTKR.CMG = FTKR.CMG || {};
  * 
  * v1.2.0 - 2018/04/28 : 不具合修正、機能追加
  *    1. 場所移動先によって、アクターが表示されずゲームが動かなくなる不具合を修正。
- *    2. 連結マップの行ごとに分割して設定する機能を追加
- *    3. ランダムに複数のマップIDから一つを設定する機能を追加。
+ *    2. 連結マップが正しく生成できない場合がある不具合を修正。
+ *    3. 連結マップの行ごとに分割して設定する機能を追加
+ *    4. ランダムに複数のマップIDから一つを設定する機能を追加。
  * 
  * v1.1.1 - 2018/04/27 : ヘルプ修正
  *    1. ヘルプの誤記修正
@@ -483,7 +484,7 @@ function Game_CmgEvent() {
     };
 
     DataManager.dataMap = function(cmgMapId) {
-        return $dataCmgMaps[cmgMapId] || $dataMap;
+        return $dataCmgMaps[cmgMapId];
     };
 
     DataManager.pushMapData = function(data, mapId, index) {
@@ -804,6 +805,7 @@ function Game_CmgEvent() {
         });
         $dataMap.events = events;
     };
+
     Scene_Map.prototype.setupConnectingMapEncounterList = function() {
         var encounterList = [];
         $gamePlayer._connectingMaps.forEach(function(map, i){
