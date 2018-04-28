@@ -4,8 +4,8 @@
 // プラグインNo : 83
 // 作成者　　   : フトコロ
 // 作成日　　   : 2018/04/22
-// 最終更新日   : 2018/04/27
-// バージョン   : v1.1.1
+// 最終更新日   : 2018/04/28
+// バージョン   : v1.2.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.CMG = FTKR.CMG || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.1 複数のマップを繋げて１つの大きなマップにするプラグイン
+ * @plugindesc v1.2.0 複数のマップを繋げて１つの大きなマップにするプラグイン
  * @author フトコロ
  *
  * @param 連結マップの横サイズ
@@ -84,11 +84,18 @@ FTKR.CMG = FTKR.CMG || {};
  *        : 連結後にマップの左上に配置されるマップのIDを指定します。
  *          連結後のマップ設定は、マップ1の設定を引き継ぎます。
  *        　\v[n] と指定することで変数 n の値を参照できます。
+ *        　\R[n] と指定することで、ランダムパーツID n に設定した複数のマップIDから
+ *        　一つランダムで選ばれその値を設定します。
  * 
  *    マップ*(map*)
  *        : 連結させるマップの数だけ、マップIDを指定します。
  *        : 縦横2*2の場合は マップ4 まで、縦横3*3の場合は マップ9 まで入力します。
  *        　\v[n] と指定することで変数 n の値を参照できます。
+ *        　\R[n] と指定することで、ランダムパーツID n に設定した複数のマップIDから
+ *        　一つランダムで選ばれその値を設定します。
+ * 
+ * ※ランダムパーツIDについては後述
+ * 
  * 
  * 入力例) 2*2のマップを連結させる場合の入力
  * 　CMG_マップ連結 2 3 4 5
@@ -121,6 +128,41 @@ FTKR.CMG = FTKR.CMG || {};
  *    1 2 3
  *    4 5 6
  *    7 8 9
+ * 
+ * 
+ * また、行ごとに分割して設定することもできます。
+ * 4*4などのサイズ数が大きくなると、データベース上で見づらくなるため
+ * こちらを利用すると良いです。
+ * 
+ * CMG_マップ連結 分割 [分割ID] マップ [マップ1] [マップ2] [マップ3] [マップ4] ...
+ * CMG_CONNECTING_MAP SPLIT [splitId] MAP [map1] [map2] [map3] [map4] ...
+ * 
+ *    分割ID(splitId)
+ *        : 0 から、連結させるマップの行数 - 1 までの値を指定します。
+ *        : すべての行で設定が必要です。
+ * 
+ *    マップ*(map*)
+ *        : 連結させるマップの列数だけ、マップIDを指定します。
+ *        : 縦横2*2の場合は マップ2 まで、縦横3*3の場合は マップ3 まで入力します。
+ *        　\v[n] と指定することで変数 n の値を参照できます。
+ *        　\R[n] と指定することで、ランダムパーツID n に設定した複数のマップIDから
+ *        　一つランダムで選ばれその値を設定します。
+ * 
+ * 
+ * 分割データを設定した後に、生成を行います。
+ * 
+ * CMG_マップ連結 生成
+ * CMG_CONNECTING_MAP MAKE
+ * 
+ * 
+ * 入力例) 2*2のマップを連結させる場合の入力
+ * 　CMG_マップ連結 分割 0 マップ 2 3
+ * 　CMG_マップ連結 分割 1 マップ 4 5
+ * 　CMG_マップ連結 生成
+ * 
+ * 　CMG_CONNECTING_MAP SPLIT 0 MAP 2 3
+ * 　CMG_CONNECTING_MAP SPLIT 1 MAP 4 5
+ * 　CMG_CONNECTING_MAP MAKE
  * 
  * 
  * 連結マップのサイズと、連結させるマップIDを設定したら
@@ -230,6 +272,28 @@ FTKR.CMG = FTKR.CMG || {};
  * 
  * 
  *-----------------------------------------------------------------------------
+ * ランダムパーツIDについて
+ *-----------------------------------------------------------------------------
+ * 連結マップの設定時に\R[n]と指定することで、ランダムパーツID n に設定した
+ * 複数のマップIDから一つランダムで選ばれその値を設定します。
+ * 
+ * ランダムパーツIDの設定方法は、以下のプラグインコマンドを実行することで
+ * 設定できます。
+ * 
+ * CMG_ランダムパーツセット [パーツID] マップ [マップID] [マップID] [マップID] ...
+ * CMG_SET_RANDOM_PARTS [partsId] MAP [mapId] [mapId] [mapId] ...
+ * 
+ *    パーツID(partsId)
+ *        : 0 以上の任意の値を指定します。
+ *        : 連結マップのマップIDを設定するときに\R[n]で指定する番号に相当します。
+ * 
+ *    マップID(mapId)
+ *        : このセットで選ばれるマップのIDを設定します。
+ *        : 設定可能な数に制限はありません。
+ *        　\v[n] と指定することで変数 n の値を参照できます。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
  * 本プラグインのライセンスについて(License)
  *-----------------------------------------------------------------------------
  * 本プラグインはMITライセンスのもとで公開しています。
@@ -246,6 +310,11 @@ FTKR.CMG = FTKR.CMG || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.2.0 - 2018/04/28 : 不具合修正、機能追加
+ *    1. 場所移動先によって、アクターが表示されずゲームが動かなくなる不具合を修正。
+ *    2. 連結マップの行ごとに分割して設定する機能を追加
+ *    3. ランダムに複数のマップIDから一つを設定する機能を追加。
  * 
  * v1.1.1 - 2018/04/27 : ヘルプ修正
  *    1. ヘルプの誤記修正
@@ -283,12 +352,6 @@ function Game_CmgEvent() {
         }
     };
 
-    var convertEscapeCharacters = function(text) {
-        if (text == null) text = '';
-        var window = SceneManager._scene._windowLayer.children[0];
-        return window ? window.convertEscapeCharacters(text) : text;
-    };
-
     var setArgStr = function(arg) {
         return convertEscapeCharacters(arg);
     };
@@ -299,6 +362,21 @@ function Game_CmgEvent() {
         } catch (e) {
             return 0;
         }
+    };
+
+    var convertEscapeCharacters = function(text) {
+        text = text.replace(/\\/g, '\x1b');
+        text = text.replace(/\x1b\x1b/g, '\\');
+        text = text.replace(/\x1bV\[(\d+)\]/gi, function() {
+            return $gameVariables.value(parseInt(arguments[1]));
+        }.bind(this));
+        text = text.replace(/\x1bV\[(\d+)\]/gi, function() {
+            return $gameVariables.value(parseInt(arguments[1]));
+        }.bind(this));
+        text = text.replace(/\x1bR\[(\d+)\]/gi, function() {
+            return parseInt(randomGetArray(FTKR.CMG.rand[parseInt(arguments[1])]));
+        }.bind(this));
+        return text;
     };
 
     //objのメモ欄から <metacode: x> の値を読み取って返す
@@ -313,6 +391,15 @@ function Game_CmgEvent() {
         return match ? match[1] : '';
     };
     
+    var randomGetArray = function(args) {
+        if (Array.isArray(args)) {
+            var arg = args[Math.randomInt(args.length)];
+        } else {
+            var arg = args;
+        }
+        return arg
+    };
+
     //=============================================================================
     // プラグイン パラメータ
     //=============================================================================
@@ -321,6 +408,7 @@ function Game_CmgEvent() {
     FTKR.CMG = {
         mapW : paramParse(parameters['連結マップの横サイズ']),
         mapH : paramParse(parameters['連結マップの縦サイズ']),
+        rand : [],
     };
 
     //=============================================================================
@@ -444,13 +532,56 @@ function Game_CmgEvent() {
                 break;
             case 'マップ連結':
             case 'CONNECTING_MAP':
-                $gamePlayer._connectingMaps = args.map(function(arg){
-                    return setArgNum(arg);
-                });
+                switch(args[0].toUpperCase()) {
+                    case '分割':
+                    case 'SPLIT':
+                        if (!$gamePlayer._splitMaps) $gamePlayer._splitMaps = [];
+                        var splitId = setArgNum(args[1]);
+                        switch(args[2].toUpperCase()) {
+                            case 'マップ':
+                            case 'MAP':
+                                args = args.slice(3);
+                                $gamePlayer._splitMaps[splitId] = args.map(function(arg){
+                                    return setArgNum(arg);
+                                });
+                                break;
+                        }
+                        break;
+                    case '生成':
+                    case 'MAKE':
+                        $gamePlayer._connectingMaps = [];
+                        $gamePlayer._splitMaps.forEach( function(splitMap){
+                            Array.prototype.push.apply($gamePlayer._connectingMaps, splitMap);
+                        });
+                        break;
+                        break;
+                    default:
+                        $gamePlayer._connectingMaps = args.map(function(arg){
+                            return setArgNum(arg);
+                        });
+                        break;
+                }
+                break;
+            case 'ランダムパーツセット':
+            case 'SET_RANDOM_PARTS':
+                var partsId = setArgNum(args[0]);
+                switch(args[1].toUpperCase()) {
+                    case 'マップ':
+                    case 'MAP':
+                        args = args.slice(2);
+                        FTKR.CMG.rand[partsId] = args.map(function(arg){
+                            return setArgNum(arg);
+                        });
+                        break;
+                    default:
+                        FTKR.CMG.rand[partsId] = [];
+                        break;
+                }
                 break;
             case 'マップ連結解除':
             case 'CLEAR_CONNECTING_MAP':
                 $gamePlayer._connectingMaps = null;
+                $gamePlayer._splitMaps = [];
                 $dataCmgMaps = [];
                 break;
         }
@@ -470,7 +601,7 @@ function Game_CmgEvent() {
     Game_Character.prototype.getCmgMapY = function(cmgMapId, mapY) {
         var m = 0;
         if (cmgMapId >= DataManager.cmgMapW()){
-            for (var i = 0; i < Math.ceil(cmgMapId / DataManager.cmgMapH()); i++) {
+            for (var i = 0; i < Math.floor(cmgMapId / DataManager.cmgMapH()); i++) {
                 mapY += DataManager.dataMap(m).height;
                 m += DataManager.cmgMapW();
             }
@@ -498,7 +629,6 @@ function Game_CmgEvent() {
                 this._newX = this.getCmgMapX(cmgMapId, this._newX);
                 this._newY = this.getCmgMapY(cmgMapId, this._newY);
                 this._newMapId = this._connectingMaps[0];
-                console.log(this._newX, this._newY);
             }
         }
         _CMG_Game_Player_performTransfer.call(this);

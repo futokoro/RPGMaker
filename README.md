@@ -92,7 +92,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 | [FTKR_ExEscapeCharacters](FTKR_ExEscapeCharacters.js) | [仮版](FTKR_ExEscapeCharacters.ja.md) | [v1.0.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExEscapeCharacters.js) | 2017/03/28 | 制御文字を追加する |
 | [FTKR_ExMessageWindow](FTKR_ExMessageWindow.js) | [仮版](FTKR_ExMessageWindow.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExMessageWindow.js) | 2017/03/28 | 制御文字を使って、一度に複数のメッセージウィンドウを表示する |
 | [FTKR_ExMessageWindow2](FTKR_ExMessageWindow2.js) | [仮版](FTKR_ExMessageWindow2.ja.md) | [v2.4.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExMessageWindow2.js) | 2017/08/21 | 文章の表示コマンドを使って、一度に複数のメッセージウィンドウを表示する <br> FTKR_ExMessageWindowと組み合わせて使用できません |
-| [FTKR_MessageWindowLines](FTKR_MessageWindowLines.js) | なし | [v1.1.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_MessageWindowLines.js) | 2018/02/03 | メッセージウィンドウの行数を変更する<br>文章の表示コマンドを複数組み合わせて４行以上入力可能 |
+| [FTKR_MessageWindowLines](FTKR_MessageWindowLines.js) | なし | [v1.1.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_MessageWindowLines.js) | 2018/04/28 | メッセージウィンドウの行数を変更する<br>文章の表示コマンドを複数組み合わせて４行以上入力可能 |
 | [FTKR_PopupSpriteMessage](FTKR_PopupSpriteMessage.js) | なし | [v1.2.4](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_PopupSpriteMessage.js) | 2018/03/10 | 任意のメッセージを画面上にポップアップ表示する |
 | [FTKR_PauseSignPosition](FTKR_PauseSignPosition.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_PauseSignPosition.js) | 2018/04/15 | ポーズサインの表示位置を変更する |
 | [FTKR_SelectHelpWindow](FTKR_SelectHelpWindow.js) | [あり](FTKR_SelectHelpWindow.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SelectHelpWindow.js) | 2018/04/15 | 選択肢ウィンドウを表示中に選択肢の説明ウィンドウを表示する |
@@ -234,7 +234,7 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_ExTileSettingForRegion](FTKR_ExTileSettingForRegion.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExTileSettingForRegion.js) | 2017/08/27 | 指定したリージョンの通行設定を一時的に変更する |
-| [FTKR_ConnectingMapGenerator](FTKR_ConnectingMapGenerator.js) | [あり](FTKR_ConnectingMapGenerator.ja.md) | [v1.1.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ConnectingMapGenerator.js) | 2018/04/27 | 複数のマップを繋げて１つの大きなマップにする |
+| [FTKR_ConnectingMapGenerator](FTKR_ConnectingMapGenerator.js) | [あり](FTKR_ConnectingMapGenerator.ja.md) | [v1.2.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ConnectingMapGenerator.js) | 2018/04/28 | 複数のマップを繋げて１つの大きなマップにする |
 
 [目次に戻る](#目次)
 
@@ -303,6 +303,8 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 ### 2018/04/28
 * [FTKR_ExSvMotion](FTKR_ExSvMotion.ja.md) v1.2.8
+* [FTKR_ConnectingMapGenerator](FTKR_ConnectingMapGenerator.ja.md) v1.2.0
+* [FTKR_MessageWindowLines](FTKR_MessageWindowLines.js) v1.1.2
 
 ### 2018/04/27
 * [FTKR_ConnectingMapGenerator](FTKR_ConnectingMapGenerator.ja.md) v1.1.1

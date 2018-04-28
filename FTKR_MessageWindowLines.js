@@ -4,8 +4,8 @@
 // プラグインNo : 62
 // 作成者     : フトコロ
 // 作成日     : 2018/01/05
-// 最終更新日 : 2018/02/03
-// バージョン : v1.1.1
+// 最終更新日 : 2018/04/28
+// バージョン : v1.1.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.MWL = FTKR.MWL || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.1 メッセージウィンドウの行数を変更するプラグイン
+ * @plugindesc v1.1.2 メッセージウィンドウの行数を変更するプラグイン
  * @author フトコロ
  *
  * @help 
@@ -137,6 +137,10 @@ FTKR.MWL = FTKR.MWL || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.1.2 - 2018/04/28 : 不具合修正
+ *    1. 行数変更後のメッセージウィンドウ表示位置が、ウィンドウサイズに合わせて
+ *       調整されない不具合を修正。
  * 
  * v1.1.1 - 2018/02/03 : 処理見直し
  *    1. 競合対策として、ウィンドウサイズを変更する処理と、連結した
@@ -306,6 +310,7 @@ FTKR.MWL = FTKR.MWL || {};
 
     Window_Message.prototype.setMWLWindowSize = function() {
         if ($gameParty.isRequestResetWindowSize()) {
+            this.y = this._positionType * (Graphics.boxHeight - this.windowHeight()) / 2;
             this.move(this.x, this.y, this.windowWidth(), this.windowHeight());
             this.contents = new Bitmap(this.contentsWidth(), this.contentsHeight());
             $gameParty.clearRequestResetWindowSize();
