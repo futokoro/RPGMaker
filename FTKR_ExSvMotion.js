@@ -5,7 +5,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2017/04/19
 // 最終更新日 : 2018/04/28
-// バージョン : v1.2.8
+// バージョン : v1.2.9
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.ESM = FTKR.ESM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.8 SVキャラのモーションを拡張するプラグイン
+ * @plugindesc v1.2.9 SVキャラのモーションを拡張するプラグイン
  * @author フトコロ
  *
  * @noteParam ESM_画像
@@ -600,6 +600,10 @@ FTKR.ESM = FTKR.ESM || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.2.9 - 2018/04/28 : 不具合修正
+ *    1. デバッグ設定のログ表示を有効にすると、特定のモーション時にエラーになる
+ *       不具合を修正。
+ * 
  * v1.2.8 - 2018/04/28 : 不具合修正
  *    1. YEP_BattleEngineCore.jsと組み合わせている場合に、戦闘不能時の
  *       状態モーションの設定が反映されない不具合を修正。
@@ -1182,14 +1186,16 @@ FTKR.ESM = FTKR.ESM || {};
             case 'refresh':
             console.log('motionType :', this._motionType);
             console.log('condition  :', datas[0]);
-            console.log('motion num :', this.motions().length)
+            var num = !!this.motions() ? this.motions().length : 0;
+            console.log('motion num :', num)
             if (this._motionType !== datas[0]) {
             console.log('⇒ Start Motion');
             }
             break;
             case 'data':
             console.log('Motion Name  :', this.motionName());
-            console.log('Motion Index :', this.motion().index);
+            var index = !!this.motion() ? this.motion().index : 0;
+            console.log('Motion Index :', index);
             console.log('Type Index   :', this._motionIndex);
             console.log('index        :', this._index);
             break;
