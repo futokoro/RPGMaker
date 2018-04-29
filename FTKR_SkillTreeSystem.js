@@ -4,8 +4,8 @@
 // プラグインNo : 7
 // 作成者　　   : フトコロ(futokoro)
 // 作成日　　   : 2017/02/25
-// 最終更新日   : 2018/04/23
-// バージョン   : v1.15.5
+// 最終更新日   : 2018/04/29
+// バージョン   : v1.15.6 
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.15.5 ツリー型スキル習得システム
+ * @plugindesc v1.15.6 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -1392,11 +1392,14 @@ FTKR.STS = FTKR.STS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
- * v1.15.4 - 2018/04/23 : 仕様変更
+ * v1.15.6 - 2018/04/29 : 不具合修正
+ *    1. メニュー画面に戻る時に、まれに画面がフリーズする不具合の暫定対処を追加。
+ * 
+ * v1.15.5 - 2018/04/23 : 仕様変更
  *    1. 他プラグインとの競合回避のため、Scene_STSクラスの継承元を
  *       Scene_MenuBaseに変更
  * 
- * v1.15.3 - 2018/04/18 : 不具合修正
+ * v1.15.4 - 2018/04/18 : 不具合修正
  *    1. スキルの表示条件が反映されない不具合を修正。
  * 
  * v1.15.3 - 2018/04/16 : 仕様変更
@@ -1975,17 +1978,17 @@ function Scene_STS() {
     // DataManager
     //=============================================================================
 
-    FTKR.STS.DatabaseLoaded = false;
+    var _STS_DatabaseLoaded = false;
     var _STS_DataManager_isDatabaseLoaded = DataManager.isDatabaseLoaded;
     DataManager.isDatabaseLoaded = function() {
         if (!_STS_DataManager_isDatabaseLoaded.call(this)) return false;
-        if (!FTKR.STS.DatabaseLoaded) {
+        if (!_STS_DatabaseLoaded) {
             this.stsTreeListNotetags($dataActors);
             this.stsTreeListNotetags($dataClasses);
             this.stsItemGetSpNotetags($dataItems);
             this.stsTreeDataNotetags($dataWeapons);
             this.stsTreeDataNotetags($dataSkills);
-            FTKR.STS.DatabaseLoaded = true;
+            _STS_DatabaseLoaded = true;
         }
         return true;
     };
@@ -3488,16 +3491,16 @@ function Scene_STS() {
     };
 
     Window_SkillTree.prototype.setFrameColor = function(data) {
-      var sts = FTKR.STS.sFrame.color;
-      if (this._actor.isStsLearnedSkill(data.id)) {
-        return sts.isLearned;
-      } else if (this.isLearnOk(data)) {
-        return sts.isLearnOk;
-      } else if (!this.isReqSkillOk(data)) {
-        return sts.isReqSkillNg;
-      } else {
-        return sts.isReqNg;
-      }
+        var sts = FTKR.STS.sFrame.color;
+        if (this._actor.isStsLearnedSkill(data.id)) {
+          return sts.isLearned;
+        } else if (this.isLearnOk(data)) {
+          return sts.isLearnOk;
+        } else if (!this.isReqSkillOk(data)) {
+          return sts.isReqSkillNg;
+        } else {
+          return sts.isReqNg;
+        }
     };
 
     Window_SkillTree.prototype.refresh = function() {
@@ -3507,42 +3510,42 @@ function Scene_STS() {
     };
 
     Window_SkillTree.prototype.setTtypeId = function(tTypeId) {
-      if (this._tTypeId === tTypeId) return;
-      this._tTypeId = tTypeId;
-      this.refresh();
+        if (this._tTypeId === tTypeId) return;
+        this._tTypeId = tTypeId;
+        this.refresh();
     };
 
     Window_SkillTree.prototype.defineLearnSound = function() {
-      this.setLearnSound();
+        this.setLearnSound();
     };
 
     Window_SkillTree.prototype.setStatusTitleWindow = function(window) {
-      this._stsStatusTitleWindow = window;
-      this.update();
+        this._stsStatusTitleWindow = window;
+        this.update();
     };
 
     Window_SkillTree.prototype.setConfWindow = function(window) {
-      this._confWindow = window;
-      this.update();
+        this._confWindow = window;
+        this.update();
     };
 
     Window_SkillTree.prototype.setCostWindow = function(window) {
-      this._costWindow = window;
-      this.update();
+        this._costWindow = window;
+        this.update();
     };
 
     Window_SkillTree.prototype.setPreskillWindow = function(window) {
-      this._preskillWindow = window;
-      this.update();
+        this._preskillWindow = window;
+        this.update();
     };
 
     Window_SkillTree.prototype.update = function() {
-      Window_Selectable.prototype.update.call(this);
-      this._skillId = this.item() ? this.item().id : null;
-      if (this._stsStatusTitleWindow) this._stsStatusTitleWindow.setSkillId(this._skillId);
-      if (this._confWindow) this._confWindow.setEnabled(this.isLearnOk(this.item()));
-      if (this._costWindow) this._costWindow.setSkillId(this._skillId);
-      if (this._preskillWindow) this._preskillWindow.setSkillId(this._skillId);
+        Window_Selectable.prototype.update.call(this);
+        this._skillId = this.item() ? this.item().id : null;
+        if (this._stsStatusTitleWindow) this._stsStatusTitleWindow.setSkillId(this._skillId);
+        if (this._confWindow) this._confWindow.setEnabled(this.isLearnOk(this.item()));
+        if (this._costWindow) this._costWindow.setSkillId(this._skillId);
+        if (this._preskillWindow) this._preskillWindow.setSkillId(this._skillId);
     };
 
     Window_SkillTree.prototype.select = function(index) {
@@ -3578,6 +3581,12 @@ function Scene_STS() {
         return rect;
     };
 
+    //メニュー画面に戻る時のフリーズバグの暫定対処
+    Window_SkillTree.prototype.processCancel = function() {
+        Window_Selectable.prototype.processCancel.call(this);
+        this.activate();
+    };
+    
     //=============================================================================
     // Window_StsSkillStatus
     //=============================================================================
@@ -3655,19 +3664,19 @@ function Scene_STS() {
     Window_StsConf.prototype.constructor = Window_StsConf;
 
     Window_StsConf.prototype.initialize = function(x, y, width, height) {
-      Window_Selectable.prototype.initialize.call(this, x, y, width, height);
-      this.setLearnSound();
-      this._actor = null;
-      this._data = [];
-      this._enabled = false;
-      this._dicision = false;
+        Window_Selectable.prototype.initialize.call(this, x, y, width, height);
+        this.setLearnSound();
+        this._actor = null;
+        this._data = [];
+        this._enabled = false;
+        this._dicision = false;
     };
 
     Window_StsConf.prototype.setActor = function(actor) {
-      if (this._actor !== actor) {
-        this._actor = actor;
-        this.refresh();
-      }
+        if (this._actor !== actor) {
+            this._actor = actor;
+            this.refresh();
+        }
     };
 
     Window_StsConf.prototype.maxCols = function() {
