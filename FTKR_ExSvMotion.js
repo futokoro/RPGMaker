@@ -4,8 +4,8 @@
 // プラグインNo : 24
 // 作成者     : フトコロ
 // 作成日     : 2017/04/19
-// 最終更新日 : 2018/04/28
-// バージョン : v1.2.9
+// 最終更新日 : 2018/04/29
+// バージョン : v1.2.10
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.ESM = FTKR.ESM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.9 SVキャラのモーションを拡張するプラグイン
+ * @plugindesc v1.2.10 SVキャラのモーションを拡張するプラグイン
  * @author フトコロ
  *
  * @noteParam ESM_画像
@@ -551,7 +551,7 @@ FTKR.ESM = FTKR.ESM || {};
  * 
  * <Motion * Condition>
  *    :モーションの状態。上記の8種類から設定してください。
- *    :ステートモーションに設定したモーションは、ループします。
+ *    :状態モーションに設定したモーションは、ループします。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -599,6 +599,9 @@ FTKR.ESM = FTKR.ESM || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.2.10 - 2018/04/29 : 不具合修正
+ *    1. 状態モーションにループしないモーションを設定すると、エラーになる不具合を修正。
  * 
  * v1.2.9 - 2018/04/28 : 不具合修正
  *    1. デバッグ設定のログ表示を有効にすると、特定のモーション時にエラーになる
@@ -1083,6 +1086,10 @@ FTKR.ESM = FTKR.ESM || {};
         return this._motionTypes[this._motionIndex];
     };
 
+    Sprite_Battler.prototype.hasLoopMotions = function() {
+        return !!this.motionTypes() && !!this.motionTypes()[1] && !!this.motionTypes()[1][0];
+    };
+
     Sprite_Battler.prototype.motionName = function() {
         return this._motionTypes[this._motionIndex][this._index];
     };
@@ -1156,7 +1163,7 @@ FTKR.ESM = FTKR.ESM || {};
                 this._index++;
             //motionIndex の更新、index のリセット
             } else {
-                if (!this._motionIndex) this._motionIndex = 1;
+                if (!this._motionIndex && this.hasLoopMotions()) this._motionIndex = 1;
                 this._index = 0;
                 this._pattern = 0;
             }
@@ -1347,6 +1354,7 @@ FTKR.ESM = FTKR.ESM || {};
 
     //書き換え
     Sprite_Actor.prototype.getCurrentMotion = function() {
+//        console.log(this.motionTypes(), this.motions(), this._motionIndex, this._index, this.motionName());
         return this._actor.getSideviewMotion(this.motionName());
     };
 
