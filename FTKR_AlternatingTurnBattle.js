@@ -4,7 +4,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2018/04/08
 // 最終更新日 : 2018/04/29
-// バージョン : v1.2.0
+// バージョン : v1.2.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.AltTB = FTKR.AltTB || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.0 敵味方交互にターンが進むターン制戦闘システム
+ * @plugindesc v1.2.1 敵味方交互にターンが進むターン制戦闘システム
  * @author フトコロ
  *
  * @param TurnEnd Command
@@ -38,6 +38,13 @@ FTKR.AltTB = FTKR.AltTB || {};
  * @off 無効
  * @default false
  * 
+ * @param Enable Auto Player Turn End
+ * @desc パーティーが行動できなくなった時に、自動でターン終了する。
+ * @type boolean
+ * @on 有効
+ * @off 無効
+ * @default false
+ *
  * @param --- 行動回数 ---
  * 
  * @param Disable AC
@@ -117,11 +124,13 @@ FTKR.AltTB = FTKR.AltTB || {};
  * @desc パーティーのアクションポイントの初期値を設定します。
  * @default 4
  * @type number
+ * @min 0
  *
  * @param Item AP
  * @desc スキルやアイテムのアクションポイントを設定します。メモ欄で設定しない場合は、この値になります。
  * @default 1
  * @type number
+ * @min 0
  *
  * @param Turn Refresh AP
  * @desc ターンごとに回復するアクションポイントをスクリプトで設定します。-1 にすると全回復します。
@@ -465,6 +474,18 @@ FTKR.AltTB = FTKR.AltTB || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.2.1 - 2018/04/29 : 不具合修正、機能追加
+ *    1. AP0になった時に、ゲームがフリーズする不具合を修正。
+ *    2. 戦闘行動の強制で消費APを無効にしても、AP0になった際に戦闘行動の強制を
+ *       実行できない不具合を修正。
+ *    3. アクターの行動回数を無効にした時に、同じアクターを２回以上行動させると
+ *       エラーになる不具合を修正。
+ *    4. アクターの行動回数を無効にした時に、エネミーターンが終わらない不具合を修正。
+ *    5. プレイヤーが全員行動できなくなった時に、自動でプレイヤーターンを
+ *       飛ばすかどうか設定する機能を追加。
+ *    6. パーティーの初期APとスキル・アイテムの消費APのデフォルト値を、どちらも 0 に
+ *       設定できるように変更。
+ * 
  * v1.2.0 - 2018/04/29 : 機能追加
  *    1. アクションポイントウィンドウのレイアウト設定機能を追加。
  *    2. スキル使用後にAPを一定値自動取得可能な機能を追加。
@@ -553,6 +574,7 @@ FTKR.AltTB = FTKR.AltTB || {};
         textTurnEnd     : (parameters['TurnEnd Command'] || 'ターン終了'),
         changePlayer    : (paramParse(parameters['Change Player']) || 0),
         startActorCmd   : (paramParse(parameters['Start Actor Command']) || false),
+        enableAutoTurnEnd : (paramParse(parameters['Enable Auto Player Turn End']) || false),
         disableAC       : (paramParse(parameters['Disable AC']) || false),
         showAC          : (paramParse(parameters['Show Action Count']) || false),
         dispACFormat    : (paramParse(parameters['Display AC Format']) || '[%1]'),
@@ -562,8 +584,8 @@ FTKR.AltTB = FTKR.AltTB || {};
         activatedSv     : (paramParse(parameters['Activated Sv Actor Sign']) || 0),
         enableAP        : (paramParse(parameters['Enable AP']) || false),
         dispAP          : (paramParse(parameters['Display AP']) || 'AP'),
-        partyAp         : (paramParse(parameters['Party AP']) || 1),
-        itemAp          : (paramParse(parameters['Item AP']) || 1),
+        partyAp         : (paramParse(parameters['Party AP']) || 0),
+        itemAp          : (paramParse(parameters['Item AP']) || 0),
         apCostPos       : (paramParse(parameters['AP Cost Position']) || 0),
         apCostColor     : (paramParse(parameters['AP Cost Color']) || 0),
         dispApWidthCmd  : (paramParse(parameters['Display AP Width Cmd']) || 3),
@@ -755,6 +777,10 @@ FTKR.AltTB = FTKR.AltTB || {};
     var _AltTB_BattleManager_startBattle = BattleManager.startBattle;
     BattleManager.startBattle = function() {
         _AltTB_BattleManager_startBattle.call(this);
+        this.resetAPWindow();
+    };
+
+    BattleManager.resetAPWindow = function() {
         if (FTKR.AltTB.enableAP) {
             if (FTKR.AltTB.enableResetAP) $gameParty.resetActionPoint();
             if (FTKR.AltTB.showApWindow) this._partyApWindow.open();
@@ -824,11 +850,18 @@ FTKR.AltTB = FTKR.AltTB || {};
     };
 
     BattleManager.updatePlayerTurn = function() {
-        if ($gameParty.canInputAction() && (!FTKR.AltTB.enableAP || FTKR.AltTB.enableAP && $gameParty.actionPoint() > 0)) {
+        if ($gameParty.canInputPlayerAction()) {
             this._phase = 'input';
-            if (FTKR.AltTB.notSelectActivatedActor && this.actor() && !this.actor().canSelectInput()) this.selectNextCommand();
+            this.autoSelectNextActor();
         } else {
             this.changeTrunSide();
+        }
+    };
+
+    BattleManager.autoSelectNextActor = function() {
+        if (!FTKR.AltTB.notSelectActivatedActor) return;
+        if (this.actor() && !this.actor().canSelectInput()){
+            this.selectNextCommand();
         }
     };
 
@@ -836,6 +869,7 @@ FTKR.AltTB = FTKR.AltTB || {};
         if (!this._subject) {
             this._subject = this.getNextSubject();
         }
+        console.log(this._subject);
         if (this._subject) {
             this.processTurn();
         } else {
@@ -847,6 +881,7 @@ FTKR.AltTB = FTKR.AltTB || {};
     BattleManager.processTurn = function() {
         var subject = this._subject;
         var action = subject.currentAction();
+        console.log(action);
         if (action) {
             this.processBeforeAction(subject, action);
         } else {
@@ -861,7 +896,8 @@ FTKR.AltTB = FTKR.AltTB || {};
             if (FTKR.AltTB.enableAP) this.payActionPoint(subject);
             this.startAction();
         }
-        if (!FTKR.AltTB.disableAC) subject.removeCurrentAction();
+        subject.removeCurrentAction();
+//        if (!subject.isActor() || !FTKR.AltTB.disableAC) subject.removeCurrentAction();
     };
 
     //書き換え
@@ -916,11 +952,11 @@ FTKR.AltTB = FTKR.AltTB || {};
             if (!this.actor() || !this.actor().selectNextCommand()) {
                 if (this._actorIndex + 1 >= $gameParty.size()) {
                     this.changeActorAltTB(0);
-//                    return;
                 } else {
                     this.changeActorAltTB(this._actorIndex + 1);
                 }
             }
+            if (!$gameParty.canInputAction()) return;
         } while (!this.actor().canSelectInput());
     };
 
@@ -930,11 +966,11 @@ FTKR.AltTB = FTKR.AltTB || {};
             if (!this.actor() || !this.actor().selectPreviousCommand()) {
                 if (this._actorIndex - 1 < 0) {
                     this.changeActorAltTB($gameParty.size() - 1);
-//                    return;
                 } else {
                     this.changeActorAltTB(this._actorIndex - 1);
                 }
             }
+            if (!$gameParty.canInputAction()) return;
         } while (!this.actor().canSelectInput());
     };
     
@@ -961,6 +997,10 @@ FTKR.AltTB = FTKR.AltTB || {};
             obj.actionPoint = Number(readObjectMeta(obj, ['AltTB_AP']) || FTKR.AltTB.itemAp);
             obj.gainAp = Number(readObjectMeta(obj, ['AltTB_GAINAP']) || 0);
         }
+    };
+
+    DataManager.isHaveAp = function(item) {
+        return FTKR.AltTB.enableAP && (this.isSkill(item) || this.isItem(item));
     };
 
     //=============================================================================
@@ -1054,6 +1094,10 @@ FTKR.AltTB = FTKR.AltTB || {};
         return this.hasActionCount() && this.isAlive();
     };
 
+    Game_Battler.prototype.canPayActionPoint = function(item) {
+        return true;
+    };
+
     //=============================================================================
     // Game_Actor
     //=============================================================================
@@ -1061,15 +1105,22 @@ FTKR.AltTB = FTKR.AltTB || {};
     var _AltTB_Game_Actor_canUse = Game_Actor.prototype.canUse;
     Game_Actor.prototype.canUse = function(item) {
         var result = _AltTB_Game_Actor_canUse.call(this, item);
-        if ($gameParty.inBattle() && FTKR.AltTB.enableAP && (DataManager.isSkill(item) || DataManager.isItem(item)) ) {
-            return result && this.canPayActionPoint(item);
-        } else {
-            return result;
-        }
+        return result && this.canPayActionPoint(item);
     };
 
-    Game_Actor.prototype.canPayActionPoint = function(skill) {
-        return skill && skill.actionPoint <= $gameParty.actionPoint();
+    Game_Actor.prototype.checkUsedAP = function(item) {
+        return $gameParty.inBattle() && 
+        (!BattleManager.isForcedTurn() || BattleManager.isForcedTurn() && FTKR.AltTB.enableFAAP) &&
+        DataManager.isHaveAp(item);
+    };
+
+    Game_Actor.prototype.canPayActionPoint = function(item) {
+        return this.checkUsedAP(item) ? 
+          item && item.actionPoint <= $gameParty.actionPoint() : true;
+    };
+
+    Game_Actor.prototype.removeCurrentAction = function() {
+        if (!FTKR.AltTB.disableAC) Game_Battler.prototype.removeCurrentAction.call(this);
     };
 
     //=============================================================================
@@ -1118,10 +1169,20 @@ FTKR.AltTB = FTKR.AltTB || {};
         this._actionPoint = this.maxActionPoint();
     };
 
+    Game_Party.prototype.canInputPlayerAction = function() {
+        return !FTKR.AltTB.enableAutoTurnEnd || 
+          FTKR.AltTB.enableAutoTurnEnd && this.canInputAction();
+    };
+
+    Game_Party.prototype.hasActionPoint = function() {
+        return !FTKR.AltTB.enableAP || FTKR.AltTB.enableAP && this.actionPoint() > 0;
+    };
+
     Game_Party.prototype.canInputAction = function() {
-        return this.battleMembers().some( function(battler){
-            return battler.canInputAction();
-        });
+        return this.hasActionPoint() && 
+            this.battleMembers().some( function(battler){
+                return battler.canInputAction();
+            });
     };
 
     Game_Party.prototype.resetActionCount = function() {
@@ -1136,11 +1197,20 @@ FTKR.AltTB = FTKR.AltTB || {};
     var _AltTB_Game_Action_applyItemUserEffect = Game_Action.prototype.applyItemUserEffect;
     Game_Action.prototype.applyItemUserEffect = function(target) {
         _AltTB_Game_Action_applyItemUserEffect.call(this, target);
+        this.applyItemPartyGainAp(target);
+    };
+
+    Game_Action.prototype.applyItemPartyGainAp = function(target) {
         if (this.subject().isActor() && this.item().gainAp) {
-            console.log(this.item().gainAp);
             $gameParty.getActionPoint(this.item().gainAp);
             BattleManager._partyApWindow.refresh();
         }
+    };
+
+    //書き換え
+    Game_Action.prototype.isValid = function() {
+        return (this._forcing && this.item() && this.subject().canPayActionPoint(this.item())) ||
+            this.subject().canUse(this.item());
     };
 
     //=============================================================================
@@ -1616,7 +1686,8 @@ FTKR.AltTB = FTKR.AltTB || {};
           this._subject.onAllActionsEnd();
         }
         if (this._processingForcedAction) {
-          if (!FTKR.AltTB.disableAC) this._subject.removeCurrentAction();
+        this._subject.removeCurrentAction();
+//        if (!this._subject.isActor() || !FTKR.AltTB.disableAC) this._subject.removeCurrentAction();
           this._phase = this._preForcePhase;
         }
         this._processingForcedAction = false;
