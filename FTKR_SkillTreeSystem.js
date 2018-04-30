@@ -4,8 +4,8 @@
 // プラグインNo : 7
 // 作成者　　   : フトコロ(futokoro)
 // 作成日　　   : 2017/02/25
-// 最終更新日   : 2018/04/29
-// バージョン   : v1.15.6 
+// 最終更新日   : 2018/04/30
+// バージョン   : v1.15.7
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.15.6 ツリー型スキル習得システム
+ * @plugindesc v1.15.7 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -1392,8 +1392,11 @@ FTKR.STS = FTKR.STS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.15.7 - 2018/04/30 : 不具合修正
+ *    1. メニュー画面に戻る時のフリーズバグの暫定対処見直し。
+ * 
  * v1.15.6 - 2018/04/29 : 不具合修正
- *    1. メニュー画面に戻る時に、まれに画面がフリーズする不具合の暫定対処を追加。
+ *    1. メニュー画面に戻る時のフリーズバグの暫定対処を追加。
  * 
  * v1.15.5 - 2018/04/23 : 仕様変更
  *    1. 他プラグインとの競合回避のため、Scene_STSクラスの継承元を
@@ -3581,12 +3584,6 @@ function Scene_STS() {
         return rect;
     };
 
-    //メニュー画面に戻る時のフリーズバグの暫定対処
-    Window_SkillTree.prototype.processCancel = function() {
-        Window_Selectable.prototype.processCancel.call(this);
-        this.activate();
-    };
-    
     //=============================================================================
     // Window_StsSkillStatus
     //=============================================================================
@@ -4121,6 +4118,20 @@ function Scene_STS() {
       this._stsPreskillWindow.show();
     };
 
+    Scene_STS.prototype.update = function() {
+        Scene_MenuBase.prototype.update.call(this);
+        if (this.isAllWindowDeactive()) this._stsTreeTypeWindow.activate();
+    };
+
+    Scene_STS.prototype.isAllWindowDeactive = function() {
+        return this._stsConfWindow ? 
+            (this._stsConfWindow.active !== true && 
+            this._stsSkillTreeWindow.active !== true &&
+            this._stsTreeTypeWindow.active !== true) :
+            (this._stsTreeTypeWindow.active !== true && 
+            this._stsSkillTreeWindow.active !== true);
+    };
+s
     //=============================================================================
     // Game_Interpreter
     //=============================================================================
