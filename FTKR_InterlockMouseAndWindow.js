@@ -4,8 +4,8 @@
 // プラグインNo : 69
 // 作成者     : フトコロ
 // 作成日     : 2018/02/25
-// 最終更新日 : 2018/03/24
-// バージョン : v1.0.1
+// 最終更新日 : 2018/04/30
+// バージョン : v1.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.IMW = FTKR.IMW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.1 マウスポインタとウィンドウのカーソルを連動させるプラグイン
+ * @plugindesc v1.1.0 マウスポインタとウィンドウのカーソルを連動させるプラグイン
  * @author フトコロ
  *
  * @param カーソル音を鳴らす
@@ -25,6 +25,13 @@ FTKR.IMW = FTKR.IMW || {};
  * @on 有効
  * @off 無効
  * @default true
+ * 
+ * @param 対象拡張フラグ
+ * @desc ウィンドウにマウスポインタを乗せても動かないときに有効にしてください。
+ * @type boolean
+ * @on 有効
+ * @off 無効
+ * @default false
  * 
  * @help 
  *-----------------------------------------------------------------------------
@@ -63,6 +70,10 @@ FTKR.IMW = FTKR.IMW || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.0 - 2018/04/30 : 機能追加
+ *    1. 名前入力ウィンドウに対応。
+ *    2. Scene_Base直下のchildrenに格納されたウィンドウも対象に出来る機能を追加。
+ * 
  * v1.0.1 - 2018/03/24 : 不具合修正
  * 
  * v1.0.0 - 2018/02/25 : 初版作成
@@ -72,8 +83,23 @@ FTKR.IMW = FTKR.IMW || {};
 //=============================================================================
 
 (function() {
-    var parameters = PluginManager.parameters('FTKR_OriginalSceneWindow');
-    FTKR.IMW.enable = JSON.parse(parameters['カーソル音鳴らす'] || true),
+    var paramParse = function(obj) {
+        return JSON.parse(JSON.stringify(obj, paramReplace));
+    };
+
+    var paramReplace = function(key, value) {
+        try {
+            return JSON.parse(value || null);
+        } catch (e) {
+            return value;
+        }
+    };
+
+    var parameters = PluginManager.parameters('FTKR_InterlockMouseAndWindow');
+    FTKR.IMW = {
+        enable : paramParse(parameters['カーソル音鳴らす']) || false,
+        flag   : paramParse(parameters['対象拡張フラグ']) || false,
+    };
 
     //----------------------------------------------------------------------
     // TouchInput
@@ -93,18 +119,34 @@ FTKR.IMW = FTKR.IMW || {};
     };
 
     Window_Selectable.prototype.isCursorIndexOnMouse = function() {
-        if (!this.onMouseInFrame()) return -1;
+        if (!this.isTouchedInsideFrame()) return -1;
         var ih = this.itemHeight() || 36;
         var iw = this.itemWidth() || this.width;
         var index = Math.floor((TouchInput.y - this.y - this.padding) / ih) + this.topRow();
-        var col = Math.floor((TouchInput.x - this.x - this.padding) / iw);
+        var x = this.x;
+        for(var i = 0; i < this.maxCols(); i++) {
+            if (TouchInput.x >= x && TouchInput.x < x + iw + this.spacing()) {
+                var col = i;
+                break;
+            }
+            x += iw + this.spacing() + this.imawOffset(i);
+        }
         return Math.min(index * this.maxCols() + col, this.maxItems() - 1);
+    };
+
+    Window_Selectable.prototype.imawOffset = function(index) {
+        return 0;
     };
 
     //ウィンドウフレーム内にマウスポインタがあるか判定
     Window_Base.prototype.onMouseInFrame = function() {
         return this.x <= TouchInput.x && this.x + this.width >= TouchInput.x &&
                 this.y <= TouchInput.y && this.y + this.height >= TouchInput.y;
+    };
+
+    //名前入力欄用の補正
+    Window_Selectable.prototype.imawOffset = function(index) {
+        return ([4,5].contains(index)) ? 12 : 0;
     };
 
     //----------------------------------------------------------------------
@@ -117,9 +159,15 @@ FTKR.IMW = FTKR.IMW || {};
     };
 
     Scene_Base.prototype.activeSelectWindows = function() {
-        return this._windowLayer.children.filter( function(window){
+        return this.allWindowChildren().filter( function(window){
             return !!window && !!window.select && window.active;
         });
+    };
+
+    Scene_Base.prototype.allWindowChildren = function() {
+        return FTKR.IMW.flag ?
+            Array.prototype.concat.call(this._windowLayer.children, this.children) :
+            this._windowLayer.children;
     };
 
     Scene_Base.prototype.updateSmcMousePosition = function() {
