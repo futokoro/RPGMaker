@@ -3,8 +3,8 @@
 // FTKR_AlternatingTurnBattle.js
 // 作成者     : フトコロ
 // 作成日     : 2018/04/08
-// 最終更新日 : 2018/04/29
-// バージョン : v1.2.1
+// 最終更新日 : 2018/04/30
+// バージョン : v1.2.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.AltTB = FTKR.AltTB || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.1 敵味方交互にターンが進むターン制戦闘システム
+ * @plugindesc v1.2.2 敵味方交互にターンが進むターン制戦闘システム
  * @author フトコロ
  *
  * @param TurnEnd Command
@@ -312,6 +312,10 @@ FTKR.AltTB = FTKR.AltTB || {};
  * 行動することが可能です。
  * 
  * 
+ * スキルやアイテムのメモ欄に、<AltTB_noAC>と記入すると
+ * そのスキルやアイテムを使用しても行動回数を消費ません。
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * アクションポイント
  *-----------------------------------------------------------------------------
@@ -474,6 +478,11 @@ FTKR.AltTB = FTKR.AltTB || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.2.2 - 2018/04/30 : 不具合修正、機能追加
+ *    1. 自動でプレイヤーターンを飛ばす処理が正常に動作しない不具合を修正。
+ *    2. エネミーターンに移行した直後にゲームが止まる不具合を修正。
+ *    3. 特定のスキル・アイテムの行動回数の消費を無効にする機能を追加。
+ * 
  * v1.2.1 - 2018/04/29 : 不具合修正、機能追加
  *    1. AP0になった時に、ゲームがフリーズする不具合を修正。
  *    2. 戦闘行動の強制で消費APを無効にしても、AP0になった際に戦闘行動の強制を
@@ -535,6 +544,15 @@ FTKR.AltTB = FTKR.AltTB || {};
         }
     };
 
+    //objのメモ欄から <metacode> があるか真偽を返す
+    var testObjectMeta = function(obj, metacodes) {
+        if (!obj) return false;
+        return metacodes.some(function(metacode){
+            var metaReg = new RegExp('<' + metacode + '>', 'i');
+            return metaReg.test(obj.note);
+        }); 
+    };
+
     //objのメモ欄から <metacode: x> の値を読み取って返す
     var readObjectMeta = function(obj, metacodes) {
         if (!obj) return false;
@@ -563,6 +581,18 @@ FTKR.AltTB = FTKR.AltTB || {};
         } catch (e) {
             return 0;
         }
+    };
+
+    Array.prototype.everyOk = function (){
+        return this.every( function(arr){
+            return !!arr;
+        });
+    };
+
+    Array.prototype.someOk = function (){
+        return this.some( function(arr){
+            return !!arr;
+        });
     };
 
     //=============================================================================
@@ -755,13 +785,15 @@ FTKR.AltTB = FTKR.AltTB || {};
     };
 
     BattleManager.forcePartyAction = function(battler){
-        if (FTKR.AltTB.enableFAAC && !FTKR.AltTB.disableAC) battler.payActionCount();
-        if (FTKR.AltTB.enableFAAP && FTKR.AltTB.enableAP) this.payActionPoint(battler.currentAction());
+        battler.payActionCount();
+        this.payActionPoint(battler);
     };
 
     BattleManager.payActionPoint = function(battler) {
-        if (battler.isActor()) {
-            var usedAp = battler.currentAction().item().actionPoint;
+        if (FTKR.AltTB.enableAP && battler.isActor()) {
+            var action = battler.currentAction();
+            if (action._forcing && !FTKR.AltTB.enableFAAP) return;
+            var usedAp = action.item().actionPoint;
             $gameParty.getActionPoint(-usedAp);
             this._partyApWindow.refresh();
         }
@@ -843,14 +875,23 @@ FTKR.AltTB = FTKR.AltTB || {};
     BattleManager.updateTurn = function() {
         $gameParty.requestMotionRefresh();
         if (this.isPlayerTurn()) {
+            this.resetPlayerActions();
             this.updatePlayerTurn();
         } else {
             this.updateEnemyTurn();
         }
     };
 
+    BattleManager.resetPlayerActions = function() {
+        if (FTKR.AltTB.disableAC) $gameParty.makeActions();
+    };
+
+    BattleManager.checkAutoTurnChange = function() {
+        return FTKR.AltTB.enableAutoTurnEnd && $gameParty.cannotInputPlayerAction();
+    };
+
     BattleManager.updatePlayerTurn = function() {
-        if ($gameParty.canInputPlayerAction()) {
+        if (!this.checkAutoTurnChange()) {
             this._phase = 'input';
             this.autoSelectNextActor();
         } else {
@@ -866,10 +907,10 @@ FTKR.AltTB = FTKR.AltTB || {};
     };
 
     BattleManager.updateEnemyTurn = function() {
+        if (this._subject && this._subject.isActor()) this._subject = null;
         if (!this._subject) {
             this._subject = this.getNextSubject();
         }
-        console.log(this._subject);
         if (this._subject) {
             this.processTurn();
         } else {
@@ -881,7 +922,6 @@ FTKR.AltTB = FTKR.AltTB || {};
     BattleManager.processTurn = function() {
         var subject = this._subject;
         var action = subject.currentAction();
-        console.log(action);
         if (action) {
             this.processBeforeAction(subject, action);
         } else {
@@ -892,12 +932,11 @@ FTKR.AltTB = FTKR.AltTB || {};
     BattleManager.processBeforeAction = function(subject, action) {
         action.prepare();
         if (action.isValid()) {
-            if (!FTKR.AltTB.disableAC) subject.payActionCount();
-            if (FTKR.AltTB.enableAP) this.payActionPoint(subject);
+            subject.payActionCount();
+            this.payActionPoint(subject);
             this.startAction();
         }
         subject.removeCurrentAction();
-//        if (!subject.isActor() || !FTKR.AltTB.disableAC) subject.removeCurrentAction();
     };
 
     //書き換え
@@ -996,6 +1035,7 @@ FTKR.AltTB = FTKR.AltTB || {};
             var obj = group[n];
             obj.actionPoint = Number(readObjectMeta(obj, ['AltTB_AP']) || FTKR.AltTB.itemAp);
             obj.gainAp = Number(readObjectMeta(obj, ['AltTB_GAINAP']) || 0);
+            obj.noAC = Boolean(testObjectMeta(obj, ['AltTB_NOAC']) || false);
         }
     };
 
@@ -1081,20 +1121,32 @@ FTKR.AltTB = FTKR.AltTB || {};
         return this.actionCount() > 0 || FTKR.AltTB.disableAC;
     };
 
+    Game_Battler.prototype.canPayAC = function(item) {
+        return item.noAC || this.hasActionCount();
+    };
+
     Game_Battler.prototype.getActionCount = function(value) {
         this._actionCount += value;
         if (this._actionCount < 0) this._actionCount = 0;
     };
 
     Game_Battler.prototype.payActionCount = function() {
-        this.getActionCount(-1);
+        if (!FTKR.AltTB.disableAC) {
+            var action = this.currentAction();
+            if (action.item().noAC || action._forcing && !FTKR.AltTB.enableFAAC) return;
+            this.getActionCount(-1);
+        }
     };
 
     Game_Battler.prototype.canAction = function() {
         return this.hasActionCount() && this.isAlive();
     };
 
-    Game_Battler.prototype.canPayActionPoint = function(item) {
+    Game_Battler.prototype.canPayAP = function(item) {
+        return true;
+    };
+
+    Game_Battler.prototype.canPayFAAP = function(item) {
         return true;
     };
 
@@ -1105,22 +1157,22 @@ FTKR.AltTB = FTKR.AltTB || {};
     var _AltTB_Game_Actor_canUse = Game_Actor.prototype.canUse;
     Game_Actor.prototype.canUse = function(item) {
         var result = _AltTB_Game_Actor_canUse.call(this, item);
-        return result && this.canPayActionPoint(item);
+        if ($gameParty.inBattle()) {
+            return result && this.canPayAP(item) && this.canPayAC(item);
+        } else {
+            return result;
+        }
     };
 
-    Game_Actor.prototype.checkUsedAP = function(item) {
-        return $gameParty.inBattle() && 
-        (!BattleManager.isForcedTurn() || BattleManager.isForcedTurn() && FTKR.AltTB.enableFAAP) &&
-        DataManager.isHaveAp(item);
-    };
-
-    Game_Actor.prototype.canPayActionPoint = function(item) {
-        return this.checkUsedAP(item) ? 
-          item && item.actionPoint <= $gameParty.actionPoint() : true;
+    Game_Actor.prototype.canPayAP = function(item) {
+        //AP無効 または APが0 または 消費APが現在AP以下 または 戦闘行動の強制で消費無効
+        return !FTKR.AltTB.enableAP || !item.actionPoint ||
+            item.actionPoint <= $gameParty.actionPoint() ||
+            this.currentAction() && this.currentAction()._forcing && !FTKR.AltTB.enableFAAP;
     };
 
     Game_Actor.prototype.removeCurrentAction = function() {
-        if (!FTKR.AltTB.disableAC) Game_Battler.prototype.removeCurrentAction.call(this);
+        Game_Battler.prototype.removeCurrentAction.call(this);
     };
 
     //=============================================================================
@@ -1169,9 +1221,14 @@ FTKR.AltTB = FTKR.AltTB || {};
         this._actionPoint = this.maxActionPoint();
     };
 
-    Game_Party.prototype.canInputPlayerAction = function() {
-        return !FTKR.AltTB.enableAutoTurnEnd || 
-          FTKR.AltTB.enableAutoTurnEnd && this.canInputAction();
+    Game_Party.prototype.cannotInputPlayerAction = function() {
+        var results = [
+            FTKR.AltTB.enableAP && !this.actionPoint(),
+            !this.battleMembers().some( function(battler){
+                return battler.canInputAction();
+            })
+        ];
+        return results[0] || results[1];
     };
 
     Game_Party.prototype.hasActionPoint = function() {
@@ -1190,6 +1247,13 @@ FTKR.AltTB = FTKR.AltTB || {};
             member.resetActionCount();
         });
     };
+
+    Game_Party.prototype.canUseAltTBnoForcing = function(item) {
+        return this.members().some(function(actor) {
+            return actor.canUseAltTBnoForcing(item);
+        });
+    };
+
     //=============================================================================
     // Game_Action
     //=============================================================================
@@ -1205,12 +1269,6 @@ FTKR.AltTB = FTKR.AltTB || {};
             $gameParty.getActionPoint(this.item().gainAp);
             BattleManager._partyApWindow.refresh();
         }
-    };
-
-    //書き換え
-    Game_Action.prototype.isValid = function() {
-        return (this._forcing && this.item() && this.subject().canPayActionPoint(this.item())) ||
-            this.subject().canUse(this.item());
     };
 
     //=============================================================================
@@ -1358,14 +1416,16 @@ FTKR.AltTB = FTKR.AltTB || {};
         this._statusWindow = statusWindow;
     };
 
+    var _AltTB_Window_ActorCommand_isCurrentItemEnabled = 
+        Window_ActorCommand.prototype.isCurrentItemEnabled;
     Window_ActorCommand.prototype.isCurrentItemEnabled = function() {
-        return BattleManager.actor() && BattleManager.actor().canAction();
+        return _AltTB_Window_ActorCommand_isCurrentItemEnabled.call(this) && BattleManager.actor() && BattleManager.actor().canAction();
     };
 
     var _AltTB_Window_ActorCommand_isCommandEnabled =
          Window_ActorCommand.prototype.isCommandEnabled;
     Window_ActorCommand.prototype.isCommandEnabled = function(index) {
-        return this.isCurrentItemEnabled() && _AltTB_Window_ActorCommand_isCommandEnabled.call(this, index);
+        return BattleManager.actor() && BattleManager.actor().canAction() && _AltTB_Window_ActorCommand_isCommandEnabled.call(this, index);
     };
 
     Window_ActorCommand.prototype.changeInputWindow = function() {
@@ -1561,7 +1621,6 @@ FTKR.AltTB = FTKR.AltTB || {};
         }
     };
 
-    
     //=============================================================================
     // Window_BattleActionPoint
     //=============================================================================
@@ -1687,7 +1746,6 @@ FTKR.AltTB = FTKR.AltTB || {};
         }
         if (this._processingForcedAction) {
         this._subject.removeCurrentAction();
-//        if (!this._subject.isActor() || !FTKR.AltTB.disableAC) this._subject.removeCurrentAction();
           this._phase = this._preForcePhase;
         }
         this._processingForcedAction = false;
