@@ -4,8 +4,8 @@
 // プラグインNo : 7
 // 作成者　　   : フトコロ(futokoro)
 // 作成日　　   : 2017/02/25
-// 最終更新日   : 2018/05/03
-// バージョン   : v1.15.8
+// 最終更新日   : 2018/05/04
+// バージョン   : v1.15.9
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.15.8 ツリー型スキル習得システム
+ * @plugindesc v1.15.9 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -948,10 +948,15 @@ FTKR.STS = FTKR.STS || {};
  * スキルの取得回数は、各ステータスのeval式に使用できます。
  * 
  * eval式に対して、以下のコードを使用できます。
- *  a.stsCount(x) - スキルID x の習得回数を参照します。
+ *  a.stsCount(x)   - スキルID x の習得回数を参照します。
+ *  this.stsCount() - そのスキルの習得回数を参照します。(ダメージ計算式のみ)(*1)
+ * 
  * 
  * この機能により、習得回数によってダメージIDや使用効果を有効にすることや、
  * ステータスの値自体を変える、といった使い方ができます。
+ * 
+ * (*1)このコードは、FTKR_ExItemConfig_Damage.jsを組み合わせている場合は
+ * 使用できません。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -1391,6 +1396,9 @@ FTKR.STS = FTKR.STS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.15.9 - 2018/05/04 : 機能追加
+ *    1. 習得回数を取得するスクリプトを追加。(しぐれんさん案)
  * 
  * v1.15.8 - 2018/05/03 : 不具合修正
  *    1. プラグインコマンドが認識しない不具合を修正。
@@ -1858,7 +1866,7 @@ function Scene_STS() {
     }
 
     if (!FTKR.evalFormula) {
-    FTKR.evalFormula = function(formula) {
+    FTKR.evalFormula = function(formula, classObj) {
         var datas = FTKR.gameData;
         try {
             var s = $gameSwitches._data;
@@ -2882,6 +2890,14 @@ function Scene_STS() {
     Game_Action.prototype.itemEffectClearTree = function(target, effect) {
         target.resetAllTree(0);
         this.makeSuccess(target);
+    };
+
+    Game_Action.prototype.stsCount = function() {
+        if (this.isSkill()) {
+            var id= this._item.itemId();
+            return this.subject().stsCount(id);
+        }
+        return 0;
     };
 
     //=============================================================================
