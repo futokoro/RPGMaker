@@ -3,8 +3,8 @@
 // FTKR_AlternatingTurnBattle.js
 // 作成者     : フトコロ
 // 作成日     : 2018/04/08
-// 最終更新日 : 2018/04/30
-// バージョン : v1.2.2
+// 最終更新日 : 2018/05/04
+// バージョン : v1.3.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.AltTB = FTKR.AltTB || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.2 敵味方交互にターンが進むターン制戦闘システム
+ * @plugindesc v1.3.0 敵味方交互にターンが進むターン制戦闘システム
  * @author フトコロ
  *
  * @param TurnEnd Command
@@ -345,6 +345,16 @@ FTKR.AltTB = FTKR.AltTB || {};
  * 
  * また、スキルのメモ欄に<AltTB_GainAP: n>と設定すると、
  * そのスキルを使用した時に、命中時に n ポイントAPを取得できます。
+ * さらに、以下のタグを追加すると、そのAP取得に条件を設定できます。
+ * 
+ * <AltTB_GainAP_Conditions>
+ * condition1
+ * condition2
+ * ...
+ * </AltTB_GainAP_Conditions>
+ * 
+ * 入力例は後述。
+ * 
  * 
  * 
  * ＜ターン毎のアクションポイント回復量＞
@@ -359,6 +369,61 @@ FTKR.AltTB = FTKR.AltTB || {};
  * アクションポイントは戦闘毎にリセットされ、0 から開始します。
  * ただし、プラグインパラメータ Enable Reset AP Every Battle を無効にすることで
  * 残ったアクションポイントを次の戦闘に持ち越すことができます。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
+ * <AltTB_GainAP_Conditions>条件式タグの設定方法
+ *-----------------------------------------------------------------------------
+ * 以下のノートタグをスキルやアイテム追記することで、<AltTB_GainAP: n>で設定した
+ * AP取得に条件を設定することができます。
+ * 
+ * <AltTB_GainAP_Conditions>
+ * condition1
+ * condition2
+ * ...
+ * </AltTB_GainAP_Conditions>
+ * 
+ * 
+ * [条件式(condition) の値について]
+ * 条件式(condition)は、ダメージ計算式のように、計算式を入力することで、
+ * 固定値以外の値を使用することができます。以下のコードを使用できます。
+ *  a.param - 攻撃側のパラメータを参照します。(a.atk で攻撃側の攻撃力)
+ *  b.param - 防御側のパラメータを参照します。(b.atk で防御側の攻撃力)
+ *  s[x]    - スイッチID x の状態を参照します。
+ *  v[x]    - 変数ID x の値を参照します。
+ * 
+ * 
+ * 入力例）
+ * スイッチID1 が ON の時かつ使用者がアクターID1の場合にAP取得。
+ * <AltTB_GainAP: 1>
+ * <AltTB_GainAP_Conditions>
+ * !!s[1]
+ * a.actorId() === 1
+ * </AltTB_GainAP_Conditions>
+ * 
+ * 
+ * [複数の条件を設定する場合]
+ * 以下の2種類の入力例は同じ意味で、condition1とcondition2を両方満たした時に
+ * APを取得できます。
+ * 
+ * 1. 縦に複数の条件式を並べる
+ * <AltTB_GainAP_Conditions>
+ * condition1
+ * condition2
+ * </AltTB_GainAP_Conditions>
+ * 
+ * 2. '&&'を使用して横に複数の条件式を並べる
+ * <AltTB_GainAP_Conditions>
+ * condition1 && condition2
+ * </AltTB_GainAP_Conditions>
+ * 
+ * 
+ * 複数の条件の中から、いずれか一つを満たした場合の条件を設定する場合は
+ * 以下の様に'||'を使用して記述します。
+ * 
+ * <AltTB_GainAP_Conditions>
+ * condition1 || condition2
+ * </AltTB_GainAP_Conditions>
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -478,6 +543,10 @@ FTKR.AltTB = FTKR.AltTB || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.3.0 - 2018/05/04 : 機能追加
+ *    1. 使用したスキル命中時に、<AltTB_GainAP:n>で設定したAP取得の条件を
+ *       設定できる機能を追加。
+ * 
  * v1.2.2 - 2018/04/30 : 不具合修正、機能追加
  *    1. 自動でプレイヤーターンを飛ばす処理が正常に動作しない不具合を修正。
  *    2. エネミーターンに移行した直後にゲームが止まる不具合を修正。
@@ -565,6 +634,56 @@ FTKR.AltTB = FTKR.AltTB || {};
         return match ? match[1] : '';
     };
     
+    // <codeTitle>text</codeTitle>の形式のメタデータを読み取ってtextを返す
+    var readEntrapmentCodeToText = function(obj, codeTitles) {
+        notes = convertEntrapmentRegArray(codeTitles);
+        var notedata = obj.note.split(/[\r\n]+/);
+        var setMode = 'none';
+
+        for (var i = 0; i < notedata.length; i++) {
+            var line = notedata[i];
+            if (testRegs(line, notes, 'a')) {
+                var text = '';
+                setMode = 'read';
+            } else if (testRegs(line, notes, 'b')) {
+                setMode = 'none';
+            } else if (setMode === 'read') {
+                text += line + ';';
+            }
+        }
+        return text;
+    };
+
+    var convertEntrapmentRegArray = function(codeTitles) {
+        return codeTitles.map(function(codeTitle) {
+            return {
+                a:new RegExp('<' + codeTitle + '>', 'i'),
+                b:new RegExp('<\/' + codeTitle + '>', 'i')
+            };
+        });
+    };
+
+    //正規表現オブジェクトの配列とdataをテストする
+    var testRegs = function(data, regs, prop) {
+        return regs.some(function(reg) {
+            return prop ? reg[prop].test(data) : reg.test(data);
+        });
+    };
+
+    // textを条件式に使える状態に変換する
+    var convertTextToConditions = function(text) {
+        var result = '';
+        if (text) {
+            var datas = text.split(';');
+            datas.forEach(function(data, i) {
+                result += data;
+                if (datas[i+1]) result += ')&&(';
+            });
+            result = '(' + result + ')';
+        }
+        return result;
+    };
+
     var convertEscapeCharacters = function(text) {
         if (text == null) text = '';
         var window = SceneManager._scene._windowLayer.children[0];
@@ -595,6 +714,48 @@ FTKR.AltTB = FTKR.AltTB || {};
         });
     };
 
+    //=============================================================================
+    // 自作関数(グローバル)
+    //=============================================================================
+
+    FTKR.gameData = FTKR.gameData || {
+        user   :null,
+        target :null,
+        item   :null,
+        number :0,
+    };
+
+    if (!FTKR.setGameData) {
+    FTKR.setGameData = function(user, target, item, number) {
+        FTKR.gameData = {
+            user   :user || null,
+            target :target || null,
+            item   :item || null,
+            number :number || 0
+        };
+    };
+    }
+
+    if (!FTKR.evalFormula) {
+    FTKR.evalFormula = function(formula) {
+        var datas = FTKR.gameData;
+        try {
+            var s = $gameSwitches._data;
+            var v = $gameVariables._data;
+            var a = datas.user;
+            var b = datas.target;
+            var item   = datas.item;
+            var number = datas.number;
+            if (b) var result = b.result();
+            var value = eval(formula);
+            if (isNaN(value)) value = 0;
+            return value;
+        } catch (e) {
+            console.error(e);
+            return 0;
+        }
+    };
+    }
     //=============================================================================
     // プラグイン パラメータ
     //=============================================================================
@@ -1036,6 +1197,8 @@ FTKR.AltTB = FTKR.AltTB || {};
             obj.actionPoint = Number(readObjectMeta(obj, ['AltTB_AP']) || FTKR.AltTB.itemAp);
             obj.gainAp = Number(readObjectMeta(obj, ['AltTB_GAINAP']) || 0);
             obj.noAC = Boolean(testObjectMeta(obj, ['AltTB_NOAC']) || false);
+            var datas = readEntrapmentCodeToText(obj, ['AltTB_GAINAP_CONDITIONS']) || '';
+            obj.gainApConditions = convertTextToConditions(datas);
         }
     };
 
@@ -1266,8 +1429,11 @@ FTKR.AltTB = FTKR.AltTB || {};
 
     Game_Action.prototype.applyItemPartyGainAp = function(target) {
         if (this.subject().isActor() && this.item().gainAp) {
-            $gameParty.getActionPoint(this.item().gainAp);
-            BattleManager._partyApWindow.refresh();
+            FTKR.setGameData(this.subject(), target, this.item());
+            if (!this.item().gainApConditions || FTKR.evalFormula(this.item().gainApConditions)) {
+                $gameParty.getActionPoint(this.item().gainAp);
+                BattleManager._partyApWindow.refresh();
+            }
         }
     };
 
