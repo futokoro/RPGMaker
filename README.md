@@ -1,7 +1,7 @@
 # RPGツクールMV プラグイン
 
 プラグインは逐次追加更新を行っています。最新情報は、[更新情報](#更新情報)を確認してください。<br>
-公開中のプラグインの数：83 (19年度中に 100 にしたいなぁ)
+公開中のプラグインの数：85 (19年度中に 100 にしたいなぁ)
 
 # 目次
 
@@ -72,7 +72,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 
 # ウィンドウ
 
-プラグイン数:4
+プラグイン数:5
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
@@ -80,6 +80,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 | [FTKR_OriginalSceneWindow](FTKR_OriginalSceneWindow.js) | [仮版](FTKR_OriginalSceneWindow.ja.md) | [v1.5.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_OriginalSceneWindow.js) | 2018/02/15 | オリジナルのシーンおよびウィンドウを作成する |
 | [FTKR_SceneBackImages](FTKR_SceneBackImages.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SceneBackImages.js) | 2018/02/24 | メニュー画面やショップ画面などに変数で切替可能な背景画像を設定する |
 | [FTKR_InterlockMouseAndWindow](FTKR_InterlockMouseAndWindow.js) | なし | [v1.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_InterlockMouseAndWindow.js) | 2018/04/30 | マウスポインタとウィンドウのカーソルを連動させる |
+| [FTKR_TitleScene](FTKR_TitleScene.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_TitleScene.js) | 2018/05/06 | タイトル画面のコマンドの表示変更や、クレジット画面を追加する。 |
 
 [目次に戻る](#目次)
 
@@ -291,15 +292,20 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 # 試作品置き場
 
-プラグイン数:1
+プラグイン数:2
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_ActionGauge](FTKR_ActionGauge.js) | なし | [v0.7.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ActionGauge.js) | 2017/04/21 | アクションゲージ |
+| [FTKR_addon_TMShooting](FTKR_addon_TMShooting) | なし | [v0.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_addon_TMShooting) | 2018/05/06 | tomoakyさんのシューティングプラグインの機能拡張 |
 
 # 更新情報
 
 2018/05の更新情報
+
+### 218/05/06
+* [FTKR_addon_TMShooting](FTKR_addon_TMShooting) v0.1.0(新規)
+* [FTKR_TitleScene](FTKR_TitleScene.js) v1.0.0(新規)
 
 ### 2018/05/04
 * [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v1.3.0
