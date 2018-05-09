@@ -4,8 +4,8 @@
 // プラグインNo : 84
 // 作成者　　   : フトコロ
 // 作成日　　   : 2018/05/06
-// 最終更新日   : 
-// バージョン   : v0.1.0
+// 最終更新日   : 2018/05/09
+// バージョン   : v0.2.0
 //=============================================================================
 //=============================================================================
 // TMPlugin - シューティング(TMShooting.js)
@@ -26,7 +26,7 @@ FTKR.TMS = FTKR.TMS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 tomoakyさんのシューティングプラグインの機能拡張プラグイン(試作版)
+ * @plugindesc v0.2.0 tomoakyさんのシューティングプラグインの機能拡張プラグイン(試作版)
  * @author フトコロ
  *
  * @param Default Break Animation
@@ -76,8 +76,21 @@ FTKR.TMS = FTKR.TMS || {};
  *    ＜変更時のアニメーションの設定方法＞
  *    設定方法は、以下があります。
  *      1. プラグインパラメータで共通設定
+ *      2. タイルイベントのメモ欄に<changeAnimeId:n>と入力。n がアニメーションID。
  * 
+ *    両方で設定している場合は、２のタイルイベント側の設定を使用します。
  *    設定しない場合は、アニメーションは表示しません。
+ * 
+ * 
+ * 
+ * 2. プレイヤーの弾が通行不可タイルやイベントに接触し、タイルの変更やイベントの
+ *    撃破がない場合に、アクターや装備、ステートで指定したアニメーションを表示する。
+ * 
+ *    以下のタグをメモ欄に設定すると、そのアニメーションを接触時に表示します。
+ *    <collideAnimeId:n>
+ *        n : アニメーションID
+ * 
+ *    対象：アクター、装備、ステート
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -108,6 +121,11 @@ FTKR.TMS = FTKR.TMS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v0.2.0 - 2018/05/09 : 機能追加
+ *    1. プレイヤーの弾が通行不可タイルやイベントに接触し、タイルの変更やイベントの
+ *       撃破がない場合に、アクターやスキル、武器で指定したアニメーションを表示する
+ *       機能を追加。
+ *    2. タイルごとに変更時のアニメーションを設定する機能を追加。
  * v0.1.0 - 2018/05/06 : 初版作成
  * 
  *-----------------------------------------------------------------------------
@@ -307,6 +325,53 @@ $tileSettingDatas = [];
     };
 
     /*-------------------------------------------------------------------------/
+    // Game_Character
+    /-------------------------------------------------------------------------*/
+    // プレイヤー（フォロワー）のショット処理
+    var _TMS_Game_Character_executeShot = Game_Character.prototype.executeShot;
+    Game_Character.prototype.executeShot = function() {
+        var result = _TMS_Game_Character_executeShot.call(this);
+        if (result) {
+            var battler = this.battler();
+            var shotParams = battler.shotParams();
+            $gameMap.setShotCollideAnimeId(shotParams.collideAnimeId);
+            return true;
+        }
+        return false;
+    };
+
+    /*-------------------------------------------------------------------------/
+    // Game_Actor
+    /-------------------------------------------------------------------------*/
+    var _TMS_Game_Actor_refreshShotParam = Game_Actor.prototype.refreshShotParam;
+    Game_Actor.prototype.refreshShotParam = function() {
+        _TMS_Game_Actor_refreshShotParam.call(this);
+        if (!!this._shotParams) {
+            this._shotParams.collideAnimeId = 0;
+            var data = this.actor();
+            this._shotParams.collideAnimeId = +(data.meta.shotCollideAnimeId || 0);
+            var items = this.equips().concat(this.states());
+            for (var i = 0; i < items.length; i++) {
+              var item = items[i];
+              if (item) {
+                this._shotParams.collideAnimeId = +(item.meta.shotCollideAnimeId || 0);
+              }
+            }
+            var weapon = this.weapons()[0];
+            if (weapon) {
+              this._shotParams.collideAnimeId = +(weapon.meta.shotCollideAnimeId || 0);
+            }
+            var items = this.states();
+            for (var i = 0; i < items.length; i++) {
+              var item = items[i];
+              if (item) {
+                if (item.meta.shotCollideAnimeId) this._shotParams.collideAnimeId = +item.meta.shotCollideAnimeId;
+              }
+            }
+        }
+    };
+
+    /*-------------------------------------------------------------------------/
     // Game_Player
     /-------------------------------------------------------------------------*/
 
@@ -372,16 +437,46 @@ $tileSettingDatas = [];
       if (result) {
           var x = Math.floor(this._x);
           var y = Math.floor(this._y);
+          //var x = Math.round(this._x);
+          //var y = Math.round(this._y);
           if (!this._isBreaking && $gameMap.changeMapTilesByBullet(x, y)) {
               this._isBreaking = true;
-              if (FTKR.TMS.defaultAnime) {
-                  this._breakAnimationId = FTKR.TMS.defaultAnime;
+              var animeId = $gameMap.changeAnimeId() || FTKR.TMS.defaultAnime;
+              if (animeId) {
+                  this._breakAnimationId = animeId;
                   this._requestBreakAnimation = true;
               }
+          } else if (!this._isBreaking && $gameMap.isValid(x, y) && this.collideAnimeId()) {
+              this._isBreaking = true;
+              this._breakAnimationId = this.collideAnimeId();
+              this._requestBreakAnimation = true;
           }
       }
       return result;
     }
+
+    // イベントキャラクターと接触しているかどうかを返す
+    Game_PlayerBullet.prototype.isCollidedWithEvents = function() {
+        var result = Game_Bullet.prototype.isCollidedWithEvents.call(this);
+        if (result) {
+            var x = Math.floor(this._x);
+            var y = Math.floor(this._y);
+            if (!this._isBreaking && this.collideAnimeId()) {
+                this._isBreaking = true;
+                this._breakAnimationId = this.collideAnimeId();
+                this._requestBreakAnimation = true;
+            }
+        }
+        return result;
+    };
+
+    Game_PlayerBullet.prototype.collideAnimeId = function() {
+        return this._collideAnimeId;
+    };
+
+    Game_PlayerBullet.prototype.setShotCollideAnimeId = function(animeId) {
+        this._collideAnimeId = animeId;
+    };
 
     /*-------------------------------------------------------------------------/
     // Game_Map
@@ -519,8 +614,11 @@ $tileSettingDatas = [];
             this._mapTileParamTable[x][y] = {};
         } else if (this._1PartList.some(function(list){
             if (list.tile2Id == tile2Id && list.tile3Id == tile3Id) {
-                if (list.meta && list.meta.tileHp) {
-                    this._mapTileParamTable[x][y] = {hp:list.meta.tileHp};
+                if (list.meta) {
+                    this._mapTileParamTable[x][y] = {
+                        hp            : list.meta.tileHp || 0,
+                        changeAnimeId : +list.meta.changeAnimeId || 0
+                    };
                     return true;
                 }
             }
@@ -529,8 +627,11 @@ $tileSettingDatas = [];
         } else if (this._2VPartsList.some(function(list){
             var data = list.bottom;
             if (data.tile2Id == tile2Id && data.tile3Id == tile3Id) {
-                if (list.top.meta && list.top.meta.tileHp) {
-                    this._mapTileParamTable[x][y] = {hp:list.top.meta.tileHp};
+                if (list.top.meta) {
+                    this._mapTileParamTable[x][y] = {
+                        hp            : list.top.meta.tileHp || 0,
+                        changeAnimeId : list.top.meta.changeAnimeId || 0
+                    };
                     return true;
                 }
             }
@@ -539,6 +640,10 @@ $tileSettingDatas = [];
         } else {
             this._mapTileParamTable[x][y] = {};
         }
+    };
+
+    Game_Map.prototype.getMapTileChangeAnimeId = function(x, y) {
+        return this._mapTileParamTable[x][y].changeAnimeId || 0;
     };
 
     //座標(X,Y)のマスの弾の通行を再チェック
@@ -572,6 +677,7 @@ $tileSettingDatas = [];
             if (this.check1PartTiles(x, y) || this.check2VPartsTiles(x, y)) {
                 //タイルを変更したら、弾の通過再チェックと画面の更新を行う
                 if (this._changeMapTile) {
+                    this._changeAnimeId = this.getMapTileChangeAnimeId(x, y);
                     this.refreshMapTileParamTable(x, y);
                     this.refreshBulletPassageTableXy(x, y);
                     SceneManager._spriteset._tilemap._requestRefreshTile = true;
@@ -581,6 +687,10 @@ $tileSettingDatas = [];
             }
         }
         return false;
+    };
+
+    Game_Map.prototype.changeAnimeId = function() {
+        return this._changeAnimeId || 0;
     };
 
     Game_Map.prototype.checkUpperLayerTileId = function(x, y, data) {
@@ -692,6 +802,13 @@ $tileSettingDatas = [];
         var height = $dataMap.height;
         $dataMap.data[(z * height + y) * width + x] = changeId;
     };
+
+    Game_Map.prototype.setShotCollideAnimeId = function(animeId) {
+        var lastAlivePlayerBurretIndex = this._alivePlayerBullets.length - 1;
+        var bulletIndex = this._alivePlayerBullets[lastAlivePlayerBurretIndex];
+        this._playerBullets[bulletIndex].setShotCollideAnimeId(animeId);
+    };
+
 
     /*-------------------------------------------------------------------------/
     // Spriteset_Map
