@@ -297,14 +297,14 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_ActionGauge](FTKR_ActionGauge.js) | なし | [v0.7.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ActionGauge.js) | 2017/04/21 | アクションゲージ |
-| [FTKR_addon_TMShooting](FTKR_addon_TMShooting.js) | なし | [v0.2.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_addon_TMShooting.js) | 2018/05/09 | tomoakyさんのシューティングプラグインの機能拡張 |
+| [FTKR_addon_TMShooting](FTKR_addon_TMShooting.js) | なし | [v0.2.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_addon_TMShooting.js) | 2018/05/09 | tomoakyさんのシューティングプラグインの機能拡張 |
 
 # 更新情報
 
 2018/05の更新情報
 
 ### 218/05/09
-* [FTKR_addon_TMShooting](FTKR_addon_TMShooting.js) v0.2.0
+* [FTKR_addon_TMShooting](FTKR_addon_TMShooting.js) v0.2.0 v0.2.1
 
 ### 218/05/06
 * [FTKR_addon_TMShooting](FTKR_addon_TMShooting.js) v0.1.0(新規)

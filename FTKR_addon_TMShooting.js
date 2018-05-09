@@ -5,7 +5,7 @@
 // 作成者　　   : フトコロ
 // 作成日　　   : 2018/05/06
 // 最終更新日   : 2018/05/09
-// バージョン   : v0.2.0
+// バージョン   : v0.2.1
 //=============================================================================
 //=============================================================================
 // TMPlugin - シューティング(TMShooting.js)
@@ -26,7 +26,7 @@ FTKR.TMS = FTKR.TMS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v0.2.0 tomoakyさんのシューティングプラグインの機能拡張プラグイン(試作版)
+ * @plugindesc v0.2.1 tomoakyさんのシューティングプラグインの機能拡張プラグイン(試作版)
  * @author フトコロ
  *
  * @param Default Break Animation
@@ -41,6 +41,26 @@ FTKR.TMS = FTKR.TMS || {};
  * @default
  * @type struct<tileset>[]
  *
+ * @noteParam shotCollideActor
+ * @noteRequire 1
+ * @noteType animation
+ * @noteData actors
+ * 
+ * @noteParam shotCollideWeapon
+ * @noteRequire 1
+ * @noteType animation
+ * @noteData weapons
+ * 
+ * @noteParam shotCollideState
+ * @noteRequire 1
+ * @noteType animation
+ * @noteData states
+ * 
+ * @noteParam changeAnimeId
+ * @noteRequire 1
+ * @noteType animation
+ * @noteData events
+ * 
  * @help 
  *-----------------------------------------------------------------------------
  * 概要
@@ -87,10 +107,19 @@ FTKR.TMS = FTKR.TMS || {};
  *    撃破がない場合に、アクターや装備、ステートで指定したアニメーションを表示する。
  * 
  *    以下のタグをメモ欄に設定すると、そのアニメーションを接触時に表示します。
- *    <collideAnimeId:n>
+ *    設定の優先度は、ステート＞武器＞アクターです。
+ * 
+ *    アクター
+ *    <shotCollideActor:n>
  *        n : アニメーションID
  * 
- *    対象：アクター、装備、ステート
+ *    武器
+ *    <shotCollideWeapon:n>
+ *        n : アニメーションID
+ *    
+ *    ステート
+ *    <shotCollideState:n>
+ *        n : アニメーションID
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -121,11 +150,16 @@ FTKR.TMS = FTKR.TMS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v0.2.1 - 2018/05/09 : 不具合修正
+ *    1. ディプロイメント時にタイル接触アニメーションが残るように修正。
+ *    2. タイル接触アニメーション設定用のタグを変更。
+ * 
  * v0.2.0 - 2018/05/09 : 機能追加
  *    1. プレイヤーの弾が通行不可タイルやイベントに接触し、タイルの変更やイベントの
  *       撃破がない場合に、アクターやスキル、武器で指定したアニメーションを表示する
  *       機能を追加。
  *    2. タイルごとに変更時のアニメーションを設定する機能を追加。
+ * 
  * v0.1.0 - 2018/05/06 : 初版作成
  * 
  *-----------------------------------------------------------------------------
@@ -349,23 +383,16 @@ $tileSettingDatas = [];
         if (!!this._shotParams) {
             this._shotParams.collideAnimeId = 0;
             var data = this.actor();
-            this._shotParams.collideAnimeId = +(data.meta.shotCollideAnimeId || 0);
-            var items = this.equips().concat(this.states());
-            for (var i = 0; i < items.length; i++) {
-              var item = items[i];
-              if (item) {
-                this._shotParams.collideAnimeId = +(item.meta.shotCollideAnimeId || 0);
-              }
-            }
+            this._shotParams.collideAnimeId = +(data.meta.shotCollideActor || 0);
             var weapon = this.weapons()[0];
             if (weapon) {
-              this._shotParams.collideAnimeId = +(weapon.meta.shotCollideAnimeId || 0);
+              this._shotParams.collideAnimeId = +(weapon.meta.shotCollideWeapon || 0);
             }
             var items = this.states();
             for (var i = 0; i < items.length; i++) {
               var item = items[i];
               if (item) {
-                if (item.meta.shotCollideAnimeId) this._shotParams.collideAnimeId = +item.meta.shotCollideAnimeId;
+                if (item.meta.shotCollideState) this._shotParams.collideAnimeId = +item.meta.shotCollideState;
               }
             }
         }
