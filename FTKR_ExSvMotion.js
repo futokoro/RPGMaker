@@ -4,8 +4,8 @@
 // プラグインNo : 24
 // 作成者     : フトコロ
 // 作成日     : 2017/04/19
-// 最終更新日 : 2018/04/29
-// バージョン : v1.2.10
+// 最終更新日 : 2018/05/22
+// バージョン : v1.3.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.ESM = FTKR.ESM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.10 SVキャラのモーションを拡張するプラグイン
+ * @plugindesc v1.3.0 SVキャラのモーションを拡張するプラグイン
  * @author フトコロ
  *
  * @noteParam ESM_画像
@@ -469,6 +469,7 @@ FTKR.ESM = FTKR.ESM || {};
  * SV魔法スキルに設定したスキルであっても、詠唱モーションを実行しません。
  * 
  * 
+ * 
  *-----------------------------------------------------------------------------
  * カスタムモーションについて
  *-----------------------------------------------------------------------------
@@ -566,6 +567,14 @@ FTKR.ESM = FTKR.ESM || {};
  *    :タグで設定しない場合は、基本設定の[SV]モーションの設定に従います。
  * 
  * 
+ * <ESM モーション固定>
+ * <ESM FIXED_MOTION>
+ *    :ステート付与中のモーションの更新を無効にします。
+ *    :例えば、防御モーション中にこのステートが付与されると、防御モーションで
+ *    :固定され、以降このステートが解除されるまで何があっても防御モーションを
+ *    :とり続けます。
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * カスタムコンディションの設定
  *-----------------------------------------------------------------------------
@@ -599,6 +608,9 @@ FTKR.ESM = FTKR.ESM || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.3.0 - 2018/05/22 : 機能追加
+ *    1. 特定のステート付与中のモーションの更新を無効にする機能を追加。
  * 
  * v1.2.10 - 2018/04/29 : 不具合修正
  *    1. 状態モーションにループしないモーションを設定すると、エラーになる不具合を修正。
@@ -987,6 +999,17 @@ FTKR.ESM = FTKR.ESM || {};
         }
     };
 
+    Game_Battler.prototype.isFixedMotion = function() {
+        var states = this.states();
+        if (states.length > 0) {
+            return states.some( function(state){
+                return testObjectMeta(state, ['ESM モーション固定', 'ESM FIXED_MOTION']);
+            });
+        } else {
+            return false;
+        }
+    };
+
     //=============================================================================
     // Sprite_Weapon
     // 武器のSVスプライトを修正
@@ -1105,6 +1128,7 @@ FTKR.ESM = FTKR.ESM || {};
     }
 
     Sprite_Battler.prototype.setNewMotion = function(battler, motionType) {
+        if (battler.isFixedMotion()) return;
         if (!motionType || motionType === 'refresh') {
             motionType = battler.getEsmMotion();
         }
@@ -1132,6 +1156,7 @@ FTKR.ESM = FTKR.ESM || {};
     };
 
     Sprite_Battler.prototype.esmUpdateMotionCount = function(battler) {
+        if (battler.isFixedMotion()) return;
         if (this.motion() && ++this._motionCount >= this.motionSpeed()) {
             if (Imported.YED_SideviewBattler) this._motionName = this.motionName();
             var frames = this.motionFrames();
@@ -1153,6 +1178,7 @@ FTKR.ESM = FTKR.ESM || {};
     };
 
     Sprite_Battler.prototype.esmRefreshMotion = function(battler) {
+        if (battler.isFixedMotion()) return;
         var condition = battler.getEsmMotion();
         this.consoleLog_BattlerMotion('refresh', [condition])
         if (this._motionType === condition) {

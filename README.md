@@ -34,7 +34,7 @@
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_AddOriginalParameters](FTKR_AddOriginalParameters.js) | [あり](FTKR_AddOriginalParameters.ja.md) | [v1.1.6](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AddOriginalParameters.js) | 2017/11/05 |オリジナルパラメータを追加する |
 | [FTKR_SearchPartyParam](FTKR_SearchPartyParam.js) | [あり](FTKR_SearchPartyParam.ja.md) | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SearchPartyParam.js) | 2017/04/14 | パーティー内のパラメータに関するスクリプトを実装する |
-| [FTKR_ExSvMotion](FTKR_ExSvMotion.js) | [仮版](FTKR_ExSvMotion.ja.md) | [v1.2.10](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExSvMotion.js) | 2018/04/29 | SVキャラのモーションを拡張する |
+| [FTKR_ExSvMotion](FTKR_ExSvMotion.js) | [仮版](FTKR_ExSvMotion.ja.md) | [v1.3.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExSvMotion.js) | 2018/05/22 | SVキャラのモーションを拡張する |
 | [FTKR_FacialImageDifference](FTKR_FacialImageDifference.js) | [仮版](FTKR_FacialImageDifference.ja.md) | [v1.1.7](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_FacialImageDifference.js) | 2017/12/02 | アクターの状態によって顔画像を変える<br>顔画像にアニメーションを表示する |
 | [FTKR_FacialImageDifference2](FTKR_FacialImageDifference2.js) | なし | [v2.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_FacialImageDifference2.js) | 2017/12/16 | アクターの状態によって顔画像を変える<br>FTKR_FacialImageDifference.jsと組み合わせて使用できません |
 | [FTKR_ExTraitSetting](FTKR_ExTraitSetting.js) | なし | [v1.0.4](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExTraitSetting.js) | 2018/02/17 | 装備やステート等の特徴を詳細に設定できる |
@@ -303,13 +303,16 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 2018/05の更新情報
 
-### 218/05/20
+### 2018/05/22
+* [FTKR_ExSvMotion](FTKR_ExSvMotion.ja.md) v1.3.0
+
+### 2018/05/20
 * [FTKR_OriginalSceneWindow](FTKR_OriginalSceneWindow.ja.md) v1.5.3
 
-### 218/05/09
+### 2018/05/09
 * [FTKR_addon_TMShooting](FTKR_addon_TMShooting.js) v0.2.0 v0.2.1
 
-### 218/05/06
+### 2018/05/06
 * [FTKR_addon_TMShooting](FTKR_addon_TMShooting.js) v0.1.0(新規)
 * [FTKR_TitleScene](FTKR_TitleScene.js) v1.0.0(新規)
 
