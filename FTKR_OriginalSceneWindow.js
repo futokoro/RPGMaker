@@ -4,8 +4,8 @@
 // プラグインNo : 46
 // 作成者     : フトコロ
 // 作成日     : 2017/06/17
-// 最終更新日 : 2018/05/20
-// バージョン : v1.5.3
+// 最終更新日 : 2018/05/24
+// バージョン : v1.5.4
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.OSW = FTKR.OSW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.5.3 オリジナルのシーンやウィンドウを作成する
+ * @plugindesc v1.5.4 オリジナルのシーンやウィンドウを作成する
  * @author フトコロ
  *
  * @param --ウィンドウの共通設定--
@@ -465,8 +465,7 @@ FTKR.OSW = FTKR.OSW || {};
  *        :ウィンドウに表示する文字列を設定します。
  *        :行数で、文字列を何行目(最上段を0とする)に表示するか指定します。
  *        :制御文字を使用できます。
- *        :FTKR_CustomSimpleActorStatus.js と組み合わせている場合には
- *        :この記述は使用できません。
+ *        :一つのウィンドウで内容コマンドと同時に使用することはできません。
  *    
  *    内容 [表示内容]
  *    CONTENT [contentSetting]
@@ -647,6 +646,10 @@ FTKR.OSW = FTKR.OSW || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.5.4 - 2018/05/24 : 機能修正
+ *    1. FTKR_CustomSimpleActorStatus.jsと組み合わせた時でも、
+ *       テキスト表示コマンドが使えるように修正。
  * 
  * v1.5.3 - 2018/05/20 : ヘルプ修正
  *    1. セレクトウィンドウのリストで、選択した対象のデータを取得する
@@ -1049,6 +1052,7 @@ function Game_OswScene() {
                     var line = setArgNum(args[i+1]);
                     var text = setArgStr(args[i+2]);
                     window.setText(line, text);
+                    window._cssContent = false;
                     i += 2;
                     break;
                 case 'テキスト初期化':
@@ -1058,6 +1062,7 @@ function Game_OswScene() {
                 case '内容':
                 case 'CONTENT':
                     i += this.setOswContentArgs(window, i + 1, args);
+                    window._cssContent = true;
                     break;
                 case 'アクター':
                 case 'ACTOR':
@@ -2294,7 +2299,7 @@ function Game_OswScene() {
     };
 
     Window_OswCommon.prototype.drawContent = function(x, y, width, height) {
-        if (Imported.FTKR_CSS) {
+        if (Imported.FTKR_CSS && this._window._cssContent) {
             this._window.content().item = this._item;
             this.drawCssActorStatus(0, this._actor, x, y, width, height,
                                     this._window.content());

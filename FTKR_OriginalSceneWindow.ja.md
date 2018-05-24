@@ -341,7 +341,7 @@ PARTY [memberId]
 
 ### 表示内容の設定
 
-#### FTKR_CustomSimpleActorStatusなし
+#### テキスト文の直接入力
 ```
 テキスト [行数] [表示する文字列]
 TEXT [line] [displayText]
@@ -350,15 +350,14 @@ TEXT [line] [displayText]
 行数で、文字列を何行目(最上段を0とする)に表示するか指定します。
 制御文字を使用できます。
 
-FTKR_CustomSimpleActorStatus.js と組み合わせている場合には、この記述は使用できません。
-
+一つのウィンドウでFTKR_CustomSimpleActorStatusによる表示設定と同時に使用することはできません。
 ```
 テキスト初期化
 CLEAR_TEXT
 ```
 設定したテキストをすべて初期化します。
 
-#### FTKR_CustomSimpleActorStatusあり
+#### FTKR_CustomSimpleActorStatusによる表示設定
 ```
 内容 [表示内容]
 CONTENT [contentSetting]
@@ -883,7 +882,8 @@ ACTIVE [ON or OFF
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.5.3](FTKR_OriginalSceneWindow.js) | 2018/05/20 | セレクトウィンドウのリストで、選択した対象のデータを取得するスクリプトを追記 |
+| [ver1.5.4](FTKR_OriginalSceneWindow.js) | 2018/05/24 | FTKR_CustomSimpleActorStatus.jsと組み合わせた時でも、テキスト表示コマンドが使えるように修正s |
+| ver1.5.3 | 2018/05/20 | セレクトウィンドウのリストで、選択した対象のデータを取得するスクリプトをヘルプに追記 |
 | ver1.5.2 | 2018/03/12 | アクター画像関係の表示透過度が変わってしまう不具合を修正 |
 | ver1.5.1 | 2018/02/15 | コマンドウィンドウとセレクトウィンドウで、カーソル位置を初期位置に戻すコマンドを追加 |
 | ver1.5.0 | 2018/02/14 | ゲーム内スイッチで、ウィンドウの表示のON/OFFを切り替える機能を追加s<br>プラグインパラメータで、ウィンドウの生成数を設定する機能を削除<br>バトルシーンでも、ウィンドウを作成するために生成コマンドの実行が必要なように変更 |
