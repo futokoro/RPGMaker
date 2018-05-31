@@ -4,8 +4,8 @@
 // プラグインNo : 24
 // 作成者     : フトコロ
 // 作成日     : 2017/04/19
-// 最終更新日 : 2018/05/22
-// バージョン : v1.3.0
+// 最終更新日 : 2018/05/31
+// バージョン : v1.3.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.ESM = FTKR.ESM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.3.0 SVキャラのモーションを拡張するプラグイン
+ * @plugindesc v1.3.1 SVキャラのモーションを拡張するプラグイン
  * @author フトコロ
  *
  * @noteParam ESM_画像
@@ -609,6 +609,10 @@ FTKR.ESM = FTKR.ESM || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.3.1 - 2018/05/31 : 不具合修正
+ *    1. パーティーの誰かが防御を使用すると、パーティーメンバー全員が防御モーションを
+ *       一瞬実行する不具合を修正。
+ * 
  * v1.3.0 - 2018/05/22 : 機能追加
  *    1. 特定のステート付与中のモーションの更新を無効にする機能を追加。
  * 
@@ -960,6 +964,7 @@ FTKR.ESM = FTKR.ESM || {};
             case /input/i.test(condition):
                 return this.isInputting() || this.isActing();
             case /guard/i.test(condition):
+                console.log('ok');
                 return this.isGuardMotion();
             case /chant/i.test(condition):
                 return this.isChanting();
@@ -976,7 +981,8 @@ FTKR.ESM = FTKR.ESM || {};
 
     Game_BattlerBase.prototype.isGuardMotion = function() {
         return this.isGuard() || this.isGuardWaiting() ||
-            (BattleManager._action && BattleManager._action.isGuard());
+            (!!BattleManager._subject && BattleManager._subject === this && 
+              !!BattleManager._action && BattleManager._action.isGuard());
     };
 
     Game_BattlerBase.prototype.evalEsmCondition = function(number) {
