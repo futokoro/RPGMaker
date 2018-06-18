@@ -77,7 +77,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_DisplayCommandFrame](FTKR_DisplayCommandFrame.js) | [仮版](FTKR_DisplayCommandFrame.ja.md) | [v1.2.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_DisplayCommandFrame.js) | 2017/11/26 | コマンドに枠を付ける |
-| [FTKR_OriginalSceneWindow](FTKR_OriginalSceneWindow.js) | [仮版](FTKR_OriginalSceneWindow.ja.md) | [v1.5.4](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_OriginalSceneWindow.js) | 2018/05/24 | オリジナルのシーンおよびウィンドウを作成する |
+| [FTKR_OriginalSceneWindow](FTKR_OriginalSceneWindow.js) | [仮版](FTKR_OriginalSceneWindow.ja.md) | [v1.5.5](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_OriginalSceneWindow.js) | 2018/06/18 | オリジナルのシーンおよびウィンドウを作成する |
 | [FTKR_SceneBackImages](FTKR_SceneBackImages.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SceneBackImages.js) | 2018/02/24 | メニュー画面やショップ画面などに変数で切替可能な背景画像を設定する |
 | [FTKR_InterlockMouseAndWindow](FTKR_InterlockMouseAndWindow.js) | なし | [v1.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_InterlockMouseAndWindow.js) | 2018/04/30 | マウスポインタとウィンドウのカーソルを連動させる |
 | [FTKR_TitleScene](FTKR_TitleScene.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_TitleScene.js) | 2018/05/06 | タイトル画面のコマンドの表示変更や、クレジット画面を追加する。 |
@@ -301,33 +301,10 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 # 更新情報
 
-2018/05の更新情報
+2018/06の更新情報
 
-### 2018/05/31
-* [FTKR_ExSvMotion](FTKR_ExSvMotion.ja.md) v1.3.1
-
-### 2018/05/24
-* [FTKR_OriginalSceneWindow](FTKR_OriginalSceneWindow.ja.md) v1.5.4
-
-### 2018/05/22
-* [FTKR_ExSvMotion](FTKR_ExSvMotion.ja.md) v1.3.0
-
-### 2018/05/20
-* [FTKR_OriginalSceneWindow](FTKR_OriginalSceneWindow.ja.md) v1.5.3
-
-### 2018/05/09
-* [FTKR_addon_TMShooting](FTKR_addon_TMShooting.js) v0.2.0 v0.2.1
-
-### 2018/05/06
-* [FTKR_addon_TMShooting](FTKR_addon_TMShooting.js) v0.1.0(新規)
-* [FTKR_TitleScene](FTKR_TitleScene.js) v1.0.0(新規)
-
-### 2018/05/04
-* [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v1.3.0
-* [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.ja.md) v1.15.9
-
-### 2018/05/03
-* [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.ja.md) v1.15.8
+### 2018/06/18
+* [FTKR_OriginalSceneWindow](FTKR_OriginalSceneWindow.ja.md) v1.5.5
 
 [過去の更新情報](note.md)
 

@@ -2,6 +2,34 @@
 
 # 過去の更新情報
 
+## 2018/05の更新情報
+
+### 2018/05/31
+* [FTKR_ExSvMotion](FTKR_ExSvMotion.ja.md) v1.3.1
+
+### 2018/05/24
+* [FTKR_OriginalSceneWindow](FTKR_OriginalSceneWindow.ja.md) v1.5.4
+
+### 2018/05/22
+* [FTKR_ExSvMotion](FTKR_ExSvMotion.ja.md) v1.3.0
+
+### 2018/05/20
+* [FTKR_OriginalSceneWindow](FTKR_OriginalSceneWindow.ja.md) v1.5.3
+
+### 2018/05/09
+* [FTKR_addon_TMShooting](FTKR_addon_TMShooting.js) v0.2.0 v0.2.1
+
+### 2018/05/06
+* [FTKR_addon_TMShooting](FTKR_addon_TMShooting.js) v0.1.0(新規)
+* [FTKR_TitleScene](FTKR_TitleScene.js) v1.0.0(新規)
+
+### 2018/05/04
+* [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v1.3.0
+* [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.ja.md) v1.15.9
+
+### 2018/05/03
+* [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.ja.md) v1.15.8
+
 ## 2018/04の更新情報
 
 ### 2018/04/30

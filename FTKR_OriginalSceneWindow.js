@@ -4,8 +4,8 @@
 // プラグインNo : 46
 // 作成者     : フトコロ
 // 作成日     : 2017/06/17
-// 最終更新日 : 2018/05/24
-// バージョン : v1.5.4
+// 最終更新日 : 2018/06/18
+// バージョン : v1.5.5
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.OSW = FTKR.OSW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.5.4 オリジナルのシーンやウィンドウを作成する
+ * @plugindesc v1.5.5 オリジナルのシーンやウィンドウを作成する
  * @author フトコロ
  *
  * @param --ウィンドウの共通設定--
@@ -45,7 +45,11 @@ FTKR.OSW = FTKR.OSW || {};
  * @param Window Frame
  * @desc ウィンドウ枠を表示にするか
  * 1 - 表示する, 0 - 表示しない
- * @type number
+ * @type select
+ * @option 表示する
+ * @value 1
+ * @option 表示しない
+ * @value 0
  * @default 1
  * 
  * @param --オリジナルシーンの設定--
@@ -65,7 +69,11 @@ FTKR.OSW = FTKR.OSW || {};
  * @param Enable Escape Code
  * @desc コマンドに制御文字を使えるようにします。
  * 1 - 有効, 0 - 無効
- * @type number
+ * @type select
+ * @option 有効
+ * @value 1
+ * @option 無効
+ * @value 0
  * @default 0
  * 
  * @param Command Position X
@@ -90,6 +98,13 @@ FTKR.OSW = FTKR.OSW || {};
  * @desc コマンドウィンドウのコマンド表示位置を設定します。
  * left / center / right
  * @default left
+ * @type select
+ * @option 左寄せ
+ * @value left
+ * @option 中央
+ * @value center
+ * @option 右寄せ
+ * @value right
  * 
  * @param --コモンウィンドウの設定--
  * @desc 
@@ -647,6 +662,9 @@ FTKR.OSW = FTKR.OSW || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.5.5 - 2018/06/18 : 不具合修正
+ *    1．プラグインパラメータEnable Escape Codeの設定が反映されない不具合を修正
+ * 
  * v1.5.4 - 2018/05/24 : 機能修正
  *    1. FTKR_CustomSimpleActorStatus.jsと組み合わせた時でも、
  *       テキスト表示コマンドが使えるように修正。
@@ -745,6 +763,7 @@ function Game_OswScene() {
             width         :Number(parameters['Command Width'] || 240),
             maxCols       :Number(parameters['Command Max Cols'] || 1),
             align         :String(parameters['Command Align'] || 'left'),
+            escape        :Number(parameters['Enable Escape Code'] || 0),
         },
         common:{
             width         :Number(parameters['Common Width'] || 240),
@@ -2212,7 +2231,7 @@ function Game_OswScene() {
         var align = this.itemTextAlign();
         this.resetTextColor();
         this.changePaintOpacity(this.isCommandEnabled(index));
-        if (FTKR.OSW.command.excape) {
+        if (FTKR.OSW.command.escape) {
             var tw = this.convertTextWidth(this.commandName(index));
             var offset = this.convertAlign(align) * (rect.width - tw) / 2;
             this.drawTextEx(this.commandName(index), rect.x + offset, rect.y);
