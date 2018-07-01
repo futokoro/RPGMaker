@@ -2,6 +2,11 @@
 
 # 過去の更新情報
 
+## 2018/06の更新情報
+
+### 2018/06/18
+* [FTKR_OriginalSceneWindow](FTKR_OriginalSceneWindow.ja.md) v1.5.5
+
 ## 2018/05の更新情報
 
 ### 2018/05/31

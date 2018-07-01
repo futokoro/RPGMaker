@@ -4,8 +4,8 @@
 // プラグインNo : 23
 // 作成者     : フトコロ
 // 作成日     : 2017/04/18
-// 最終更新日 : 2017/08/24
-// バージョン : v1.2.3
+// 最終更新日 : 2018/07/01
+// バージョン : v1.2.4
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.EVC = FTKR.EVC || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.3 変数の操作を拡張するプラグイン
+ * @plugindesc v1.2.4 変数の操作を拡張するプラグイン
  * @author フトコロ
  *
  * @param --アイテム増減時--
@@ -336,6 +336,9 @@ FTKR.EVC = FTKR.EVC || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.2.4 - 2018/07/01 : 仕様変更
+ *    1. 他プラグインとの競合回避のためダメージ時のデータ取得タイミングを変更。
+ * 
  * v1.2.3 - 2017/08/24 : 不具合修正
  *    1. アクターの職業IDを正しく取得できていない不具合を修正。
  * 
@@ -601,23 +604,14 @@ FTKR.EVC = FTKR.EVC || {};
 
     var _EVC_Game_Action_executeDamage = Game_Action.prototype.executeDamage;
     Game_Action.prototype.executeDamage = function(target, value) {
-        FTKR.setGameData(this.subject(), target, this.item());
         _EVC_Game_Action_executeDamage.call(this, target, value);
         if (this.isHpEffect() || this.isMpEffect()) {
+            FTKR.setGameData(this.subject(), target, this.item());
             this.variablesChangeItemNoteTags(['与ダメージ時', 'DAMAGE'], this.subject());
             defaultVariablesChange('damage');
-            if (this.isMpEffect()) {
-                variablesChangeUnitNoteTags(['被ダメージ時', 'RECEIVE_DAM'], target);
-                defaultVariablesChange('receive');
-            }
+            variablesChangeUnitNoteTags(['被ダメージ時', 'RECEIVE_DAM'], target);
+            defaultVariablesChange('receive');
         }
-    };
-
-    var _EVC_Game_Battler_onDamage = Game_Battler.prototype.onDamage;
-    Game_Battler.prototype.onDamage = function(value) {
-        variablesChangeUnitNoteTags(['被ダメージ時', 'RECEIVE_DAM'], this);
-        defaultVariablesChange('receive');
-        _EVC_Game_Battler_onDamage.call(this, value);
     };
 
     //=============================================================================
