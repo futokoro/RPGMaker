@@ -1,7 +1,7 @@
 # RPGツクールMV プラグイン
 
 プラグインは逐次追加更新を行っています。最新情報は、[更新情報](#更新情報)を確認してください。<br>
-公開中のプラグインの数：85 (19年度中に 100 にしたいなぁ)
+公開中のプラグインの数：86 (19年度中に 100 にしたいなぁ)
 
 # 目次
 
@@ -288,20 +288,23 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 プラグイン対応状況
 * スキル強化プラグインの統合(気が向いたら)
 * スキルツリープラグインのスキルツリー作成がもう少し簡単にできないか検討(気が向いたら)
-* FTKR_OriginalSceneWindowのGDM対応(気が向いたら)
 
 # 試作品置き場
 
-プラグイン数:2
+プラグイン数:3
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_ActionGauge](FTKR_ActionGauge.js) | なし | [v0.7.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ActionGauge.js) | 2017/04/21 | アクションゲージ |
 | [FTKR_addon_TMShooting](FTKR_addon_TMShooting.js) | なし | [v0.2.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_addon_TMShooting.js) | 2018/05/09 | tomoakyさんのシューティングプラグインの機能拡張 |
+| [FTKR_GDM_WindowEditor](FTKR_GDM_WindowEditor.js) | [仮版](FTKR_GDM_WindowEditor.ja.md) | [v0.9.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_addon_TMShooting.js) | 2018/07/15 | トリアコンタンさんのGUI画面デザインプラグイン(GraphicalDesignMode.js)の機能拡張 |
 
 # 更新情報
 
 2018/07の更新情報
+
+### 2018/07/15
+* [FTKR_GDM_WindowEditor](FTKR_GDM_WindowEditor.js) v0.9.0(新規)
 
 ### 2018/07/12
 * [FTKR_ItemCompositionSystem](FTKR_ItemCompositionSystem.ja.md) v1.5.4
