@@ -40,7 +40,7 @@ GraphicalDesignMode.js
 FTKR_GDM_WindowEditor.js
 ```
 
-また、[FTKR_CustomSimpleActorStatus_3](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CustomSimpleActorStatus_3)プラグインと組み合わせることで、ウィンドウにアクター画像やパラメータなどの詳細な表示設定が可能です。<br>
+また、[FTKR_CustomSimpleActorStatus_3](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CustomSimpleActorStatus_3.js)プラグインと組み合わせることで、ウィンドウにアクター画像やパラメータなどの詳細な表示設定が可能です。<br>
 プラグイン管理画面で、以下の順の配置になるように登録してください。
 ```
 GraphicalDesignMode.js
