@@ -3,9 +3,9 @@
 // FTKR_GDM_WindowEditor.js
 // プラグインNo : 86
 // 作成者     : フトコロ
-// 作成日     : 2018/07/14
-// 最終更新日 : 
-// バージョン : v0.9.0
+// 作成日     : 2018/07/15
+// 最終更新日 : 2018/07/15
+// バージョン : v0.9.1
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -23,7 +23,7 @@ FTKR.GDM = FTKR.GDM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v0.9.0 トリアコンタンさんのGUI画面デザインプラグインの機能追加
+ * @plugindesc v0.9.1 トリアコンタンさんのGUI画面デザインプラグインの機能追加
  * @author フトコロ
  *
  * @param autoCreate
@@ -252,7 +252,7 @@ FTKR.GDM = FTKR.GDM || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
- * v0.9.0 - 2018/07/14 : 試作版作成
+ * v0.9.0 - 2018/07/15 : 試作版作成
  * 
 */
 //=============================================================================
@@ -696,7 +696,7 @@ function Scene_OSW() {
             case Game_OswData.WINDOW_SELECTABLE://2
                 return 'Window_OswSelect';
         }
-        return '';
+        return windowType;
     };
 
     //=============================================================================
@@ -2049,7 +2049,7 @@ function Scene_OSW() {
               default:
                   return;
           }
-          this.removeOswWindow(type, windowId);
+          this.removeOswWindow(convertWindowName(type), windowId);
       };
 
       Scene_Base.prototype.removeOswWindow = function(windowType, windowId) {
@@ -2059,10 +2059,7 @@ function Scene_OSW() {
                   return true;
               }
           },this);
-          var sceneName  = SceneManager.getSceneName();
-          if (!$dataContainerProperties[sceneName]) $dataContainerProperties[sceneName] = {};
-          var sceneInfo = $dataContainerProperties[sceneName];
-          sceneInfo._oswWindowList = this._oswWindowList.clone();
+          this.saveOswWindowList();
       };
 
       Scene_Base.prototype.onConfirmationCancel = function() {
@@ -2140,6 +2137,8 @@ function Scene_OSW() {
                   break;
           }
           SoundManager.playMagicEvasion();
+          this.addOswWindow(convertWindowName(windowType), windowId);
+          this.saveOswWindowList();
           createWindow.priority = this._windowLayer.children.length - 1;
           createWindow.name = windowId + '_' + getClassName(createWindow);
           createWindow.saveContainerInfo();
@@ -3020,6 +3019,13 @@ function Scene_OSW() {
         containerInfo._customCancelMethodDetail = this._customCancelMethodDetail;
     };
 
+    Scene_Base.prototype.saveOswWindowList = function() {
+        var sceneName  = SceneManager.getSceneName();
+        if (!$dataContainerProperties[sceneName]) $dataContainerProperties[sceneName] = {};
+        var sceneInfo = $dataContainerProperties[sceneName];
+        sceneInfo._oswWindowList = this._oswWindowList.clone();
+    };
+
     //変更したJSONデータ構造で読込
     PIXI.Container.prototype.loadContainerInfo = function() {
         var sceneName  = SceneManager.getSceneName();
@@ -3109,7 +3115,7 @@ function Scene_OSW() {
         this._customHideFrame = false;
         this._customShow = false;
         this._customActivate = false;
-        if (!this._ftkrEditor) {
+        if (!this._ftkrEditor && this._windowId == undefined) {
             var windowType = getClassName(this);
             this._windowId = SceneManager.getWindowTypeNumber(windowType);
             SceneManager._scene.addOswWindow(windowType, this._windowId, true);
@@ -3195,7 +3201,10 @@ function Scene_OSW() {
         Window.prototype._refreshFrame.call(this);
         if (this._customHideFrame) {
             this._windowFrameSprite.alpha = 0;//フレームだけ消す
+        } else {
+            this._windowFrameSprite.alpha = 1;
         }
+        console.log('refresh frame', this._windowFrameSprite.alpha, this);
     };
 
     var _SA_Window_Base_update = Window_Base.prototype.update;
@@ -3543,10 +3552,6 @@ function Scene_OSW() {
     Scene_Base.prototype.addOswWindow = function(windowType, windowId, creative) {
         if (!this.checkOswWindow(windowType, windowId)) {
             this._oswWindowList.push({type:windowType, id:windowId, creative:creative});
-            var sceneName  = SceneManager.getSceneName();
-            if (!$dataContainerProperties[sceneName]) $dataContainerProperties[sceneName] = {};
-            var sceneInfo = $dataContainerProperties[sceneName];
-            sceneInfo._oswWindowList = this._oswWindowList.clone();
         }
     };
 
@@ -3569,7 +3574,6 @@ function Scene_OSW() {
         this._oswCommandWindows = [];
         this._oswCommonWindows = [];
         this._oswSelectWindows = [];
-        this._oswWindowList = [];
         var sceneName  = SceneManager.getSceneName();
         var sceneInfo  = $dataContainerProperties[sceneName];
         if (sceneInfo && sceneInfo._oswWindowList) {
@@ -3584,31 +3588,19 @@ function Scene_OSW() {
     Scene_Base.prototype.createOswWindow = function(data) {
         switch (data.type) {
             case Game_OswData.WINDOW_COMMON:
+            case 'Window_OswCommon':
                 this.createOswCommonWindow(data.id);
                 break;
             case Game_OswData.WINDOW_COMMAND:
+            case 'Window_OswCommand':
                 this.createOswCommandWindow(data.id);
                 break;
             case Game_OswData.WINDOW_SELECTABLE:
+            case 'Window_OswSelect':
                 this.createOswSelectWindow(data.id);
                 break;
         }
         return;
-    };
-
-    var _OSW_Scene_Base_update = Scene_Base.prototype.update;
-    Scene_Base.prototype.update = function() {
-        this.updateCreateOswWindows();
-        _OSW_Scene_Base_update.call(this);
-    };
-
-    Scene_Base.prototype.updateCreateOswWindows = function() {
-        if (!this._windowLayer) return;
-        this.oswWindowList().forEach( function(data) {
-            if (data.creative) return;
-            this.createOswWindow(data);
-            data.creative = true;
-        },this);
     };
 
     //------------------------------------------------------------------------
@@ -4358,6 +4350,7 @@ function Scene_OSW() {
         this._windowType = Game_OswData.WINDOW_COMMAND;
         this._width = FTKR.GDM.command.width;
         Window_Command.prototype.initialize.call(this, 0, 0);
+        this.show();
         this.deactivate();
         this.select(0);
         this.refresh();
@@ -4432,6 +4425,7 @@ function Scene_OSW() {
         var common = FTKR.GDM.common;
         Window_Base.prototype.initialize.call(this, 
             0, 0, common.width, common.height);
+        this.show();
         this._show = false;
         this._referenceIndex = -1;
         this.refresh();
@@ -4533,6 +4527,7 @@ function Scene_OSW() {
         this._data = [];
         this._show = false;
         this._reference = [];
+        this.show();
         this.deactivate();
         this.refresh();
     };
