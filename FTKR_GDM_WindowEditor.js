@@ -5,7 +5,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2018/07/15
 // 最終更新日 : 2018/07/15
-// バージョン : v0.9.1
+// バージョン : v0.9.2
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -23,7 +23,7 @@ FTKR.GDM = FTKR.GDM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v0.9.1 トリアコンタンさんのGUI画面デザインプラグインの機能追加
+ * @plugindesc v0.9.2 トリアコンタンさんのGUI画面デザインプラグインの機能追加
  * @author フトコロ
  *
  * @param autoCreate
@@ -252,6 +252,9 @@ FTKR.GDM = FTKR.GDM || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v0.9.2 - 編集メニューの文字サイズや表示位置を調整
+ *          表示列間隔と表示幅間隔が正しく反映されない不具合を修正
+ * v0.9.1 - シーン切替時に作成したウィンドウが再表示されない不具合修正
  * v0.9.0 - 2018/07/15 : 試作版作成
  * 
 */
@@ -282,6 +285,9 @@ function Scene_OSW() {
         return;
     }
 
+    //=============================================================================
+    //プラグインパラメータを取得
+    //=============================================================================
     var parameters = PluginManager.parameters('FTKR_GDM_WindowEditor');
     var autoCreate = JSON.parse(parameters['autoCreate'] || false);
     FTKR.GDM = {
@@ -366,16 +372,22 @@ function Scene_OSW() {
     // 自作定数
     //=============================================================================
 
+    var optionFontSize   = 21;
+    var optionLineHeight = 28;
+
     var $configSelectLists = {};
 
     var SCENE_LISTS = [
         'Scene_Item',
         'Scene_Skill',
+        'Scene_Equip',
+        'Scene_Status',
         'Scene_Save',
         'Scene_Load',
         'Scene_Options',
         'Scene_OSW',
     ];
+
     var COMMAND_METHOD = [
         'なし',
         'シーン終了',
@@ -801,6 +813,10 @@ function Scene_OSW() {
       //ウィンドウのタイプ判別処理を追加
       //=============================================================================
 
+      Window_Base.prototype.isOswOption = function() {
+          return false;
+      };
+
       Window_Base.prototype.isCssContentsWindow = function() {
           return Imported.FTKR_CSS && !!this._lssStatus &&
             (!isNaN(this._lssStatus.widthRate) || this._customDrawType);
@@ -1176,6 +1192,7 @@ function Scene_OSW() {
       
       //コモンウィンドウのテキストモードなら行ごとに変更
       Window_Base.prototype.updateOswContentAreaColor = function() {
+          if (this.isOswOption()) return;
           var index = this.isCursorIndexOnMouse();
           if (index >= 0) {
               var rect = this.itemRect(index);
@@ -1240,7 +1257,7 @@ function Scene_OSW() {
       //=============================================================================
 
       Window_Base.prototype.updateScaleArrows = function() {
-          if (this.isTouchedFrame()) {
+          if (this.isTouchedFrame() && !this.isOswOption()) {
               this.oswUpDownArrowVisible = this.isTouchedFrameTop() || this.isTouchedFrameBottom();
               this.oswLeftRightArrowVisible = this.isTouchedFrameLeft() || this.isTouchedFrameRight();
           } else {
@@ -1508,6 +1525,17 @@ function Scene_OSW() {
           this.show();
       };
 
+      Window_Base.prototype.setPosition = function(x, y) {
+          this.x = x;
+          this.y = y;
+      };
+
+      Window_Base.prototype.setPositionReferWindowIndex = function(window) {
+          var x = window.x + 100;
+          var y = window.y + window.index() * window.lineHeight();
+          this.setPosition(x, y);
+      };
+
       //------------------------------------------------------------------------
       //メインコマンドウィンドウの設定
       //------------------------------------------------------------------------
@@ -1523,30 +1551,29 @@ function Scene_OSW() {
 
       //ウィンドウ作成コマンド
       Scene_Base.prototype.cwCreateCmd = function() {
-          this._cwCreateNewW.show();
-          this._cwCreateNewW.select(0);
-          this._cwCreateNewW.activate();
+          this._cwCreateNewW.setPositionReferWindowIndex(this._mainConfigWindow);
+          this._cwCreateNewW.activateWindow();
       };
 
       //ウィンドウ編集コマンド
       Scene_Base.prototype.cwEditCmd = function() {
           this._touchWindow.readCssStatus();
           this.setConfigContents_edit(this._touchWindow);
+          this._editConfigWindow.setPositionReferWindowIndex(this._mainConfigWindow);
           this._editConfigWindow.activateWindow();
       };
 
       //ウィンドウ表示コマンド
       Scene_Base.prototype.cwDisplayCmd = function() {
           this.setConfigContents_Display(this._touchWindow);
+          this._dispConfigWindow.setPositionReferWindowIndex(this._mainConfigWindow);
           this._dispConfigWindow.activateWindow();
       };
 
       //ウィンドウ削除コマンド
       Scene_Base.prototype.cwDeleteCmd = function() {
           this._stsConfTitleWindow.setConf(this._touchWindow.name);
-          this._stsConfWindow.show();
-          this._stsConfWindow.select(1);
-          this._stsConfWindow.activate();
+          this._stsConfWindow.activateWindow();
       };
 
       //コンフィグウィンドウの終了
@@ -1576,7 +1603,7 @@ function Scene_OSW() {
                   /*
                   this._touchWindow.setMaxCols();
                   this._touchWindow.setCursorHeight();
-                  this._touchWindow.setHSpace();
+                  this._touchWindow.setHorSpacing();
                   */
               }
               this._touchWindow._refreshAllParts();
@@ -1626,20 +1653,23 @@ function Scene_OSW() {
               {type: 'subConfig', name: '行列設定', symbol: 'lineEdit', enabled: true, options: {subConfigs: [
                   {type: 'number', name: '行高さ　　　', symbol: '_customLineHeight',      enabled: true, options: {min:1, max: graphicsMinSize(), offset: 1}},
                   {type: 'number', name: '表示行数　　', symbol: '_customLineNumber',      enabled: configValues.isList(), options: {min:1, max: 99, offset: 1}},
-                  {type: 'number', name: '表示列数　　', symbol: '_customCssMaxCols',      enabled: configValues.isList(), options: {min:1, max: 99, offset: 1}},
-                  {type: 'number', name: '表示列間隔　', symbol: '_customCssHSpace',       enabled: configValues.isList(), options: {min:0, max: graphicsMinSize(), offset: 1}},
-                  {type: 'number', name: 'カーソル行数', symbol: '_customCssCursorHeight', enabled: configValues.isList(), options: {min:1, max: 99, offset: 1}},
+                  {type: 'number', name: '表示行間隔　', symbol: '_customHorSpacing',       enabled: configValues.isList(), options: {min:0, max: graphicsMinSize(), offset: 1}},
+                  {type: 'number', name: '表示列数　　', symbol: '_customMaxCols',      enabled: configValues.isList(), options: {min:1, max: 99, offset: 1}},
+                  {type: 'number', name: '表示列間隔　', symbol: '_customSpacing',         enabled: configValues.isList(), options: {min:0, max: graphicsMinSize(), offset: 1}},
+                  {type: 'number', name: 'カーソル行数', symbol: '_customCursorHeight', enabled: configValues.isList(), options: {min:1, max: 99, offset: 1}},
                   {type: 'line'},
                   {type: 'save',   name: '決定'},
               ], width: 400, textWidth: 220, statusWidth: 120}},
               {type: 'subConfig',  name: '処理設定', symbol: 'methodEdit', enabled: configValues.isList(), options: {subConfigs: [
-                  {type: 'select', name: '実行設定　　　', symbol: '_customOkMethodType',       enabled: configValues.isSelect(), options: {select:COMMAND_METHOD}},
-                  {type: 'refer',  name: '実行詳細　　　', symbol: '_customOkMethodDetail',     enabled: configValues.isSelect(), options: {refSymbol:'_customOkMethodType', refData:FTKR_METHOD_DATALIST(this)}},
-                  {type: 'select', name: 'キャンセル設定', symbol: '_customCancelMethodType',   enabled: true, options: {select:COMMAND_METHOD}},
-                  {type: 'refer',  name: 'キャンセル詳細', symbol: '_customCancelMethodDetail', enabled: true, options: {refSymbol:'_customCancelMethodType', refData:FTKR_METHOD_DATALIST(this)}},
+                  {type: 'select', name: '実行設定　　　　', symbol: '_customOkMethodType',       enabled: configValues.isSelect(), options: {select:COMMAND_METHOD}},
+                  {type: 'refer',  name: '実行詳細　　　　', symbol: '_customOkMethodDetail',     enabled: configValues.isSelect(), options: {refSymbol:'_customOkMethodType', refData:FTKR_METHOD_DATALIST(this)}},
+                  {type: 'refer',  name: '実行詳細２　　　', symbol: '_customOkMethodDetail2',    enabled: configValues.isSelect(), options: {refSymbol:'_customOkMethodType', refData:FTKR_METHOD_DATALIST2}},
+                  {type: 'select', name: 'キャンセル設定　', symbol: '_customCancelMethodType',   enabled: true, options: {select:COMMAND_METHOD}},
+                  {type: 'refer',  name: 'キャンセル詳細　', symbol: '_customCancelMethodDetail', enabled: true, options: {refSymbol:'_customCancelMethodType', refData:FTKR_METHOD_DATALIST(this)}},
+                  {type: 'refer',  name: 'キャンセル詳細２', symbol: '_customCancelMethodDetail2',enabled: true, options: {refSymbol:'_customCancelMethodType', refData:FTKR_METHOD_DATALIST2}},
                   {type: 'line'},
                   {type: 'save',   name: '決定'},
-              ], width: 500, textWidth: 220, statusWidth: 240}},
+              ], width: 500, textWidth: 220, statusWidth: 220}},
           ];
           //設定したコンテンツデータをオプションウィンドウに反映
           this._editConfigWindow.setConfigContents(configContents, configValues);
@@ -1715,7 +1745,7 @@ function Scene_OSW() {
                   {type: 'number', name: '描画エリア３比率', symbol: '_customCssWidthRate3', enabled: true, options: {min:0, max: 100, offset: 1}},
                   {type: 'line'},
                   {type: 'save',   name: '決定'},
-              ], width: 500, textWidth: 220, statusWidth: 240}},
+              ], width: 500, textWidth: 220, statusWidth: 220}},
               {type: 'line'},
               {type: 'subConfig', name: '配置', symbol: 'priority', enabled: true, options: {subConfigs: [
                   {type: 'command', name: '前面に配置　', symbol: 'toFront',    enabled: true, options: {method:this.cwToFront.bind(this)}},
@@ -1820,7 +1850,7 @@ function Scene_OSW() {
                   {type: 'refer',  name: '実行詳細2', symbol: 'methodDetail2', enabled: true, options:  {refSymbol:'methodType', refData:FTKR_METHOD_DATALIST2}},
                   {type: 'line'},
                   {type: 'save',   name: '決定'},
-              ], width: 500, textWidth: 220, statusWidth: 240}},
+              ], width: 500, textWidth: 220, statusWidth: 220}},
               {type: 'line'},
               {type: 'subConfig', name: '表示順番', symbol: 'order', enabled: true, options: {subConfigs: [
                   {type: 'command', name: '上部に移動　', symbol: 'toTop',       enabled: true, options: {method:this.cwToTop.bind(this)}},
@@ -1955,7 +1985,7 @@ function Scene_OSW() {
       //コモンウィンドウのテキスト編集用ウィンドウを設定
       //------------------------------------------------------------------------
       Scene_Base.prototype.createFtkrCommonOptions = function() {
-          var width = 400, textWidth = 220, statusWidth = 120;
+          var width = 240, textWidth = 220, statusWidth = 0;
           var layer = this.configLayer();
           this._commonConfigWindow = new Window_FtkrOptions(layer, width, textWidth, statusWidth);
           this._commonConfigWindow.setHandler('cancel', this.cwCloseConfig.bind(this));
@@ -2172,8 +2202,20 @@ function Scene_OSW() {
           this.hide();
       };
 
+      Window_CreateNewWindowCommand.prototype.isOswOption = function() {
+          return true;
+      };
+
       Window_CreateNewWindowCommand.prototype.windowWidth = function() {
           return 240;
+      };
+
+      Window_CreateNewWindowCommand.prototype.standardFontSize = function() {
+          return optionFontSize;
+      };
+
+      Window_CreateNewWindowCommand.prototype.lineHeight = function() {
+          return optionLineHeight;
       };
 
       Window_CreateNewWindowCommand.prototype.makeCommandList = function() {
@@ -2205,9 +2247,13 @@ function Scene_OSW() {
           this._oldConfigValues = {};
           this.setWindowLayer(layer);
           Window_Command.prototype.initialize.call(this, 0, 0);
-          this.updatePlacement();
+//          this.updatePlacement();
           this.deactivate();
           this.hide();
+      };
+
+      Window_FtkrOptionsBase.prototype.isOswOption = function() {
+          return true;
       };
 
       //親ウィンドウかどうかの判定
@@ -2225,6 +2271,14 @@ function Scene_OSW() {
 
       Window_FtkrOptionsBase.prototype.setWindowLayer = function(layer) {
           this._windowLayer = layer;
+      };
+
+      Window_FtkrOptionsBase.prototype.standardFontSize = function() {
+          return optionFontSize;
+      };
+
+      Window_FtkrOptionsBase.prototype.lineHeight = function() {
+          return optionLineHeight;
       };
 
       //再描画処理
@@ -2315,8 +2369,8 @@ function Scene_OSW() {
       Window_FtkrOptionsBase.prototype.updatePlacement = function() {
           this.width  = this.windowWidth();
           this.height = this.windowHeight();
-          this.x = (Graphics.boxWidth - this.width) / 2;
-          this.y = (Graphics.boxHeight - this.height) / 2;
+//          this.x = (Graphics.boxWidth - this.width) / 2;
+//          this.y = (Graphics.boxHeight - this.height) / 2;
       };
       
       //------------------------------------------------------------------------
@@ -2385,7 +2439,7 @@ function Scene_OSW() {
               this.drawHorzLine(rect.y);
           } else {
               this.drawText(this.commandName(index), rect.x, rect.y, titleWidth, 'left');
-              this.drawText(this.statusText(index), titleWidth, rect.y, statusWidth, 'right');
+              this.drawText(this.statusText(index), rect.width - statusWidth, rect.y, statusWidth, 'right');
           }
       };
       
@@ -2607,9 +2661,8 @@ function Scene_OSW() {
       Window_FtkrOptionsBase.prototype.showSubConfigs = function(symbol) {
           if(this.childWindows().some(function(window){
               if (window._windowSymbol === symbol) {
-                  window.select(0);
-                  window.activate();
-                  window.show();
+                  window.setPositionReferWindowIndex(this);
+                  window.activateWindow();
                   return true;
               }
           },this)) {
@@ -2837,8 +2890,20 @@ function Scene_OSW() {
           this.hide();
       };
 
+      Window_MainConfigCommand.prototype.isOswOption = function() {
+          return true;
+      };
+
       Window_MainConfigCommand.prototype.windowWidth = function() {
           return 240;
+      };
+
+      Window_MainConfigCommand.prototype.standardFontSize = function() {
+          return optionFontSize;
+      };
+
+      Window_MainConfigCommand.prototype.lineHeight = function() {
+          return optionLineHeight;
       };
 
       Window_MainConfigCommand.prototype.setWindow = function(window) {
@@ -2884,6 +2949,18 @@ function Scene_OSW() {
           this.refresh();
       };
 
+      Window_OSWConfTitle.prototype.isOswOption = function() {
+          return true;
+      };
+
+      Window_OSWConfTitle.prototype.standardFontSize = function() {
+          return optionFontSize;
+      };
+
+      Window_OSWConfTitle.prototype.lineHeight = function() {
+          return optionLineHeight;
+      };
+
       Window_OSWConfTitle.prototype.updatePlacement = function() {
           this.x = (Graphics.boxWidth - this.width) / 2;
           this.y = (Graphics.boxHeight - this.height) / 2 - this.lineHeight();
@@ -2917,6 +2994,18 @@ function Scene_OSW() {
           this.updatePlacement();
           this.deactivate();
           this.hide();
+      };
+
+      Window_OSWConf.prototype.isOswOption = function() {
+          return true;
+      };
+
+      Window_OSWConf.prototype.standardFontSize = function() {
+          return optionFontSize;
+      };
+
+      Window_OSWConf.prototype.lineHeight = function() {
+          return optionLineHeight;
       };
 
       Window_OSWConf.prototype.maxCols = function() {
@@ -3005,6 +3094,10 @@ function Scene_OSW() {
         containerInfo._customShowSwId  = this._customShowSwId;
         containerInfo._customShow      = this._customShow;
         containerInfo._customActivate  = this._customActivate;
+        containerInfo._customSpacing      = this._customSpacing;
+        containerInfo._customMaxCols      = this._customMaxCols;
+        containerInfo._customCursorHeight = this._customCursorHeight;
+        containerInfo._customHorSpacing   = this._customHorSpacing;
     };
 
     Window_Selectable.prototype.saveProperty = function(containerInfo) {
@@ -3075,6 +3168,10 @@ function Scene_OSW() {
         if(containerInfo.name) this.name = containerInfo.name;
         if(containerInfo._customShow)      this._customShow = containerInfo._customShow;
         if(containerInfo._customActivate)  this._customActivate = containerInfo._customActivate;
+        if(containerInfo._customSpacing) this._customSpacing   = containerInfo._customSpacing;
+        if(containerInfo._customMaxCols) this._customMaxCols = containerInfo._customMaxCols;
+        if(containerInfo._customCursorHeight) this._customCursorHeight = containerInfo._customCursorHeight;
+        if(containerInfo._customHorSpacing) this._customHorSpacing = containerInfo._customHorSpacing;
         _Window_Base_loadProperty.apply(this, arguments);
         this._firstUpdated = false;
     };
@@ -3113,13 +3210,18 @@ function Scene_OSW() {
         this._customList      = [];
         this._customShowSwId  = 0;
         this._customHideFrame = false;
-        this._customShow = false;
-        this._customActivate = false;
+        this._customShow      = false;
+        this._customActivate  = false;
+        this._customSpacing   = this.spacing();
+        if(this.maxCols) this._customMaxCols = this.maxCols();
+        if(this.cursorHeight) this._customCursorHeight = this.cursorHeight();
+        if(this.itemHeightSpace) this._customHorSpacing = this.itemHeightSpace();
         if (!this._ftkrEditor && this._windowId == undefined) {
             var windowType = getClassName(this);
             this._windowId = SceneManager.getWindowTypeNumber(windowType);
             SceneManager._scene.addOswWindow(windowType, this._windowId, true);
         }
+        this.name = this._windowId + ',' + getClassName(this);
         _Window_Base_initialize.apply(this, arguments);
     };
 
@@ -3151,18 +3253,6 @@ function Scene_OSW() {
     // customデータの参照
     //=============================================================================
 
-    Window_Base.prototype.setMaxCols = function(value) {
-        this._customCssMaxCols = value;
-    };
-
-    Window_Base.prototype.setCursorHeight = function(value) {
-        this._customCssCursorHeight = value;
-    };
-
-    Window_Base.prototype.setHSpace = function(value){
-        this._customCssHSpace = value;
-    };
-
     Window_Base.prototype.setCustomActorId = function(actorId) {
         this._customActorId = actorId;
     }
@@ -3187,6 +3277,108 @@ function Scene_OSW() {
         this._customBackOpacity = value;
     };
 
+    //------------------------------------------------------------------------
+    // _customSpacing
+    //------------------------------------------------------------------------
+    Window_Base.prototype.spacing = function() {
+        return 0;
+    };
+
+    var _CSS_Window_Selectable_spacing = Window_Selectable.prototype.spacing;
+    Window_Selectable.prototype.spacing = function() {
+        return this._customSpacing >= 0 ? this._customSpacing : _CSS_Window_Selectable_spacing.call(this);
+    };
+
+    //------------------------------------------------------------------------
+    // _customMaxCols
+    //------------------------------------------------------------------------
+    var _CSS_Window_Selectable_maxCols = Window_Selectable.prototype.maxCols;
+    Window_Selectable.prototype.maxCols = function() {
+        return this._customMaxCols ? this._customMaxCols : _CSS_Window_Selectable_maxCols.call(this);
+    };
+
+    Window_Base.prototype.setMaxCols = function(value) {
+        this._customMaxCols = value;
+    };
+
+    //------------------------------------------------------------------------
+    // _customCursorHeight
+    //------------------------------------------------------------------------
+    Window_Selectable.prototype.cursorHeight = function() {
+        return this._customCursorHeight;
+    };
+
+    Window_Base.prototype.setCursorHeight = function(value) {
+        this._customCursorHeight = value;
+    };
+
+    //------------------------------------------------------------------------
+    // _customHorSpacing
+    //------------------------------------------------------------------------
+    Window_Base.prototype.setHorSpacing = function(value){
+        this._customHorSpacing = value;
+    };
+
+    Window_Selectable.prototype.itemHeightSpace = function() {
+        return this._customHorSpacing;
+    };
+
+    Window_Selectable.prototype.unitHeight = function() {
+        return this.itemHeight() + this.itemHeightSpace();
+    };
+
+    Window_Selectable.prototype.unitWidth = function() {
+        return this.itemWidth() + this.spacing();
+    };
+
+    var _CSS_Window_Selectable_maxPageRows = Window_Selectable.prototype.maxPageRows;
+    Window_Selectable.prototype.maxPageRows = function() {
+        if (this.itemHeightSpace()) {
+            var pageHeight = this.height - this.padding * 2;
+            return Math.floor(pageHeight / this.unitHeight());
+        } else {
+            return _CSS_Window_Selectable_maxPageRows.call(this);
+        }
+    };
+
+    var _CSS_Window_Selectable_topRow = Window_Selectable.prototype.topRow;
+    Window_Selectable.prototype.topRow = function() {
+        return this.itemHeightSpace() ? Math.floor(this._scrollY / this.unitHeight()) :
+            _CSS_Window_Selectable_topRow.call(this);
+    };
+
+    var _CSS_Window_Selectable_setTopRow = Window_Selectable.prototype.setTopRow;
+    Window_Selectable.prototype.setTopRow = function(row) {
+        if (this.itemHeightSpace()) {
+            var scrollY = row.clamp(0, this.maxTopRow()) * this.unitHeight();
+            if (this._scrollY !== scrollY) {
+                this._scrollY = scrollY;
+                this.refresh();
+                this.updateCursor();
+            }
+        } else {
+            return _CSS_Window_Selectable_setTopRow.call(this, row);
+        }
+    };
+
+    var _CSS_Window_Selectable_itemRect = Window_Selectable.prototype.itemRect;
+    Window_Selectable.prototype.itemRect = function(index) {
+        if (this.itemHeightSpace()) {
+            var rect = new Rectangle();
+            var maxCols = this.maxCols();
+            rect.width = this.itemWidth();
+            rect.height = this.itemHeight();
+            rect.x = index % maxCols * this.unitWidth() - this._scrollX;
+            rect.y = Math.floor(index / maxCols) * this.unitHeight() - this._scrollY;
+            return rect;
+        } else {
+            return _CSS_Window_Selectable_itemRect.call(this, index);
+        }
+    };
+
+    //------------------------------------------------------------------------
+    // _reserveCursor
+    //------------------------------------------------------------------------
     Window_Base.prototype.showFrame = function() {
         this._customHideFrame = false;
         this._refreshFrame();
@@ -3204,9 +3396,11 @@ function Scene_OSW() {
         } else {
             this._windowFrameSprite.alpha = 1;
         }
-        console.log('refresh frame', this._windowFrameSprite.alpha, this);
     };
 
+    //------------------------------------------------------------------------
+    // _reserveCursor
+    //------------------------------------------------------------------------
     var _SA_Window_Base_update = Window_Base.prototype.update;
     Window_Base.prototype.update = function() {
         if (!this._firstUpdated) {
@@ -3423,7 +3617,6 @@ function Scene_OSW() {
             this._windowLayer.children.forEach( function(child, i){
                 if (child.priority === undefined) {
                     child.priority = i;
-                    child.name = i + '_' + getClassName(child);
                 }
             },this);
         }
@@ -3742,14 +3935,14 @@ function Scene_OSW() {
                 break;
             case Game_OswData.WINDOW_COMMAND:
                 container.width = command.width;
-                container._customCssMaxCols = command.maxCols;
+                container._customMaxCols = command.maxCols;
                 container._customTextAlign = command.align;
                 break;
             case Game_OswData.WINDOW_SELECTABLE:
                 container.width = select.width;
                 container.height = select.height;
-                container._customCssMaxCols = select.maxCols;
-                container._customCssCursorHeight = select.cursorHeight;
+                container._customMaxCols = select.maxCols;
+                container._customCursorHeight = select.cursorHeight;
                 break;
         }
     };
@@ -3855,13 +4048,13 @@ function Scene_OSW() {
                 case '最大列数':
                 case 'MAX_COLS':
                     var value = setArgNum(args[i+1]);
-                    container._customCssMaxCols = value;
+                    container._customMaxCols = value;
                     i += 1;
                     break;
                 case 'カーソル高さ':
                 case 'CURSOR_HEIGHT':
                     var value = setArgNum(args[i+1]);
-                    container._customCssCursorHeight = value;
+                    container._customCursorHeight = value;
                     i += 1;
                     break;
                 case 'コマンド位置':

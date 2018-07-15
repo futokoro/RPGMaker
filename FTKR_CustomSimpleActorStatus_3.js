@@ -5,7 +5,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
 // 最終更新日 : 2018/07/15
-// バージョン : v3.0.0
+// バージョン : v3.0.1
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v3.0.0 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v3.0.1 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -786,8 +786,7 @@ FTKR.CSS = FTKR.CSS || {};
  * なります。
  * 
  * 
- * また、トリアコンタンさん製作のGraphicalDesignMode.jsを使って
- * 拡張プラグインのステータス表示のレイアウトをゲーム画面上で変更できます。
+ * このプラグインは、FTKR_GDM_WindowEditor.js用です。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -2896,7 +2895,6 @@ FTKR.CSS = FTKR.CSS || {};
     Window_Base.prototype.initCssLayout = function() {
         var lss = this.standardCssLayout();
         if (lss && lss.enabled) {
-            this._customCssSpacing  = 0;
             this._customFontSize    = lss.fontSize;
             this._customPadding     = lss.padding;
             this._customLineHeight  = lss.lineHeight;
@@ -2922,28 +2920,32 @@ FTKR.CSS = FTKR.CSS || {};
         Window_Base.prototype.initCssLayout.call(this);
         var lss = this.standardCssLayout();
         if (lss && lss.enabled) {
-            this._customCssMaxCols = lss.maxCols;
-            this._customCssCursorHeight = lss.cursorHeight;
-            this._customCssHSpace = lss.hspace;
+            this._customMaxCols = lss.maxCols;
+            this._customCursorHeight = lss.cursorHeight;
+            this._customHorSpacing = lss.hspace;
         }
+    };
+/*
+    Window_Base.prototype.spacing = function() {
+        return 0;
     };
 
     var _CSS_Window_Selectable_spacing = Window_Selectable.prototype.spacing;
     Window_Selectable.prototype.spacing = function() {
-        return this._customCssSpacing >= 0 ? this._customCssSpacing : _CSS_Window_Selectable_spacing.call(this);
+        return this._customSpacing >= 0 ? this._customSpacing : _CSS_Window_Selectable_spacing.call(this);
     };
 
     var _CSS_Window_Selectable_maxCols = Window_Selectable.prototype.maxCols;
     Window_Selectable.prototype.maxCols = function() {
-        return this._customCssMaxCols ? this._customCssMaxCols : _CSS_Window_Selectable_maxCols.call(this);
+        return this._customMaxCols ? this._customMaxCols : _CSS_Window_Selectable_maxCols.call(this);
     };
 
     Window_Selectable.prototype.cursorHeight = function() {
-        return this._customCssCursorHeight;
+        return this._customCursorHeight;
     };
 
     Window_Selectable.prototype.itemHeightSpace = function() {
-        return this._customCssHSpace;
+        return this._customHorSpacing;
     };
 
     Window_Selectable.prototype.unitHeight = function() {
@@ -2998,7 +3000,7 @@ FTKR.CSS = FTKR.CSS || {};
             return _CSS_Window_Selectable_itemRect.call(this, index);
         }
     };
-
+*/
     //=============================================================================
     // Sprite_Battlerの修正
     // Sprite_Actorの修正
@@ -3041,9 +3043,6 @@ FTKR.CSS = FTKR.CSS || {};
         if (containerInfo._customCssSpace) this._customCssSpace    = containerInfo._customCssSpace;
         if (containerInfo._customCssSpaceIn) this._customCssSpaceIn   = containerInfo._customCssSpaceIn;
         if (containerInfo._customCssWidthRate) this._customCssWidthRate = containerInfo._customCssWidthRate;
-        if (containerInfo._customCssMaxCols) this._customCssMaxCols = containerInfo._customCssMaxCols;
-        if (containerInfo._customCssCursorHeight) this._customCssCursorHeight = containerInfo._customCssCursorHeight;
-        if (containerInfo._customCssHSpace) this._customCssHSpace = containerInfo._customCssHSpace;
         this.setCssStatus();
 //        this.setMaxCols();
 //        this.setCursorHeight();
@@ -3060,9 +3059,6 @@ FTKR.CSS = FTKR.CSS || {};
         containerInfo._customCssSpace       = this._customCssSpace;
         containerInfo._customCssSpaceIn     = this._customCssSpaceIn;
         containerInfo._customCssWidthRate   = this._customCssWidthRate;
-        containerInfo._customCssMaxCols     = this._customCssMaxCols;
-        containerInfo._customCssCursorHeight = this._customCssCursorHeight;
-        containerInfo._customCssHSpace      = this._customCssHSpace;
     };
       
     var _Window_Base_initialize      = Window_Base.prototype.initialize;
@@ -3077,9 +3073,11 @@ FTKR.CSS = FTKR.CSS || {};
             this._customCssSpaceIn   = lss.spaceIn;
             this._customCssWidthRate = lss.widthRate;
         }
-        if(this.maxCols) this._customCssMaxCols = this.maxCols();
-        if(this.cursorHeight) this._customCssCursorHeight = this.cursorHeight();
-        if(this.itemHeightSpace) this._customCssHSpace = this.itemHeightSpace();
+        /*
+        if(this.maxCols) this._customMaxCols = this.maxCols();
+        if(this.cursorHeight) this._customCursorHeight = this.cursorHeight();
+        if(this.itemHeightSpace) this._customHorSpacing = this.itemHeightSpace();
+        */
     };
 
     Window_Base.prototype.clearCssSpriteAll = function() {
@@ -3102,17 +3100,17 @@ FTKR.CSS = FTKR.CSS || {};
 /*
     Window_Base.prototype.setMaxCols = function() {
         this.clearCssSpriteAll();
-        if (this._customCssMaxCols) this._customCssMaxCols = Number(this._customCssMaxCols);
+        if (this._customMaxCols) this._customMaxCols = Number(this._customMaxCols);
     };
 
     Window_Base.prototype.setCursorHeight = function() {
         this.clearCssSpriteAll();
-        if (this._customCssCursorHeight) this._customCssCursorHeight = Number(this._customCssCursorHeight);
+        if (this._customCursorHeight) this._customCursorHeight = Number(this._customCursorHeight);
     };
 
     Window_Base.prototype.setHSpace = function(){
         this.clearCssSpriteAll();
-        if (this._customCssHSpace) this._customCssHSpace = Number(this._customCssHSpace);
+        if (this._customHorSpacing) this._customHorSpacing = Number(this._customHorSpacing);
     };
 */
     }//GraphicalDesignMode.js
