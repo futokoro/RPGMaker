@@ -4,8 +4,8 @@
 // プラグインNo : 7
 // 作成者　　   : フトコロ(futokoro)
 // 作成日　　   : 2017/02/25
-// 最終更新日   : 2018/05/04
-// バージョン   : v1.15.9
+// 最終更新日   : 2018/07/16
+// バージョン   : v1.15.10
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.15.9 ツリー型スキル習得システム
+ * @plugindesc v1.15.10 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -509,6 +509,13 @@ FTKR.STS = FTKR.STS || {};
  *    FTKR_DisplayCommandFrame.js is required.
  * 
  * 
+ * 4. 以下のプラグインと組み合わせて使用する場合には、
+ *    プラグイン管理画面上の順番を守ってください。
+ * 
+ *    FTKR_SkillExpansion.js
+ *    FTKR_SkillTreeSystem.js(このプラグイン/This)
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * スキル習得画面の設定
  *-----------------------------------------------------------------------------
@@ -955,7 +962,7 @@ FTKR.STS = FTKR.STS || {};
  * この機能により、習得回数によってダメージIDや使用効果を有効にすることや、
  * ステータスの値自体を変える、といった使い方ができます。
  * 
- * (*1)このコードは、FTKR_ExItemConfig_Damage.jsを組み合わせている場合は
+ * (*1)このコードは、FTKR_ItemBasic_Damage.jsを組み合わせている場合は
  * 使用できません。
  * 
  * 
@@ -1397,6 +1404,10 @@ FTKR.STS = FTKR.STS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.15.10 - 2018/07/16 : 処理見直し
+ *    1. SPの計算処理を見直し。
+ *    2. ヘルプの設定方法にFTKR_SkillExpansion.jsを追加。
+ * 
  * v1.15.9 - 2018/05/04 : 機能追加
  *    1. 習得回数を取得するスクリプトを追加。(しぐれんさん案)
  * 
@@ -1666,22 +1677,24 @@ function Scene_STS() {
     //=============================================================================
     var parameters = PluginManager.parameters('FTKR_SkillTreeSystem');
 
-    //必須設定
-    FTKR.STS.skillTreeId = Number(parameters['Skill Tree Id'] || 0);
+    FTKR.STS = {
+        //必須設定
+        skillTreeId       : Number(parameters['Skill Tree Id'] || 0),
 
-    //基本設定
-    FTKR.STS.showCommand = Number(parameters['Show Skill Command'] || 0);
-    FTKR.STS.commandName = String(parameters['Command Name'] || 'スキル習得');
-    FTKR.STS.menuSwitchId = Number(parameters['Skill Menu Switch ID'] || 0);
-    FTKR.STS.enableConf = Number(parameters['Enable Confirmation'] || 0);
-    FTKR.STS.learnedActorVarID = Number(parameters['Learned Actor Var ID'] || 0);
-    FTKR.STS.learnedSkillVarID = Number(parameters['Learned Skill Var ID'] || 0);
-    FTKR.STS.resetWhenForgottenSkill = Number(parameters['Reset When Forgotten Skill'] || 0);
+        //基本設定
+        showCommand       : Number(parameters['Show Skill Command'] || 0),
+        commandName       : String(parameters['Command Name'] || 'スキル習得'),
+        menuSwitchId      : Number(parameters['Skill Menu Switch ID'] || 0),
+        enableConf        : Number(parameters['Enable Confirmation'] || 0),
+        learnedActorVarID : Number(parameters['Learned Actor Var ID'] || 0),
+        learnedSkillVarID : Number(parameters['Learned Skill Var ID'] || 0),
+        resetWhenForgottenSkill : Number(parameters['Reset When Forgotten Skill'] || 0),
 
-    //習得回数の設定
-    FTKR.STS.enableSkillCount = Number(parameters['Enabled Skill Count'] || 0);
-    FTKR.STS.defaultMaxCount = Number(parameters['Default Max Count'] || 0);
-    FTKR.STS.skillLearnedIcon = Number(parameters['Skill Learned Icon'] || 0);
+        //習得回数の設定
+        enableSkillCount  : Number(parameters['Enabled Skill Count'] || 0),
+        defaultMaxCount   : Number(parameters['Default Max Count'] || 0),
+        skillLearnedIcon  : Number(parameters['Skill Learned Icon'] || 0)
+    };
 
     //スキルポイント関係
     FTKR.STS.sp = {
@@ -1807,6 +1820,7 @@ function Scene_STS() {
     if (!Window_Base.prototype.reserveFaceImages) {
         console.error('プロジェクトのコアスクリプトを最新版(v1.5.0以降)にアップデートしてください。');
         console.error('Update core scripts of your project to the latest version (v1.5.0 or later).');
+        return;
     }
 
     var current = (function() {
@@ -1824,11 +1838,13 @@ function Scene_STS() {
     if (filename !== 'FTKR_SkillTreeSystem.js') {
         console.error('スキルツリープラグインのファイル名が間違っています。「FTKR_SkillTreeSystem.js」に直してください。');
         console.error('The file name of SkillTree-plugin is incorrect. Change to "FTKR_SkillTreeSystem.js".');
+        return;
     }
 
     if (!FTKR.STS.skillTreeId) {
         console.error('プラグインパラメータ<Skill Tree Id>を設定してください。');
         console.error('Set the plugin parameter <Skill Tree Id>.');
+        return;
     }
     
     //objのメモ欄から <metacode: x> の値を読み取って返す
@@ -1841,6 +1857,14 @@ function Scene_STS() {
             return match;
         }); 
         return match ? match[1] : '';
+    };
+
+    //引数の要素の中の重複部分を削除する。
+    var duplicateDelete = function(list) {
+        var newlist = list.filter( function(x, i, self) {
+            return self.indexOf(x) === i;
+        });
+        return newlist;
     };
 
     //=============================================================================
@@ -1885,14 +1909,6 @@ function Scene_STS() {
         }
     };
     }
-
-    //引数の要素の中の重複部分を削除する。
-    FTKR.duplicateDelete = function(list) {
-        var newlist = list.filter( function(x, i, self) {
-            return self.indexOf(x) === i;
-        });
-        return newlist;
-    };
 
     //=============================================================================
     // Bitmap
@@ -2281,12 +2297,11 @@ function Scene_STS() {
     Game_Actor.prototype.setup = function(actorId) {
         _STS_Game_Actor_setup.call(this, actorId);
         if (FTKR.STS.sp.enableClassSp) {
-            this._stsCsp = [];
             $dataClasses.forEach( function(dataClass){
-                if (dataClass) this._stsCsp[dataClass.id] = dataClass.sts.initsp;
+                if (dataClass) this.setCsp(dataClass.id, dataClass.sts.initsp);
             },this);
         } else {
-            this.getSp(this.actor().sts.initsp);
+            this.setAsp(this.actor().sts.initsp);
         }
     };
 
@@ -2581,7 +2596,7 @@ function Scene_STS() {
     };
 
     Game_Actor.prototype.isPayCostNg = function(cost) {
-        var value = this.evalStsFormula(cost.value,0,0);
+        var value = this.evalStsFormula(cost.value, 0, 0);
         switch (cost.type) {
           case 'item':
             return $gameParty.numItems($dataItems[cost.id]) < value;
@@ -2599,14 +2614,22 @@ function Scene_STS() {
     };
 
     Game_Actor.prototype.getCsp = function(classId, value) {
-        this._stsCsp[classId] += value;
+        if(isNaN(value)) value = 0;
+        if(isNaN(this._stsCsp[classId])) this._stsCsp[classId] = 0;
+        this._stsCsp[classId] = Math.max(this._stsCsp[classId] + Number(value), 0);
+    };
+
+    Game_Actor.prototype.getAsp = function(value) {
+        if(isNaN(value)) value = 0;
+        if(isNaN(this._stsSp)) this._stsSp = 0;
+        this._stsSp = Math.max(this._stsSp + Number(value), 0);
     };
 
     Game_Actor.prototype.getSp = function(value) {
         if (FTKR.STS.sp.enableClassSp) {
             this.getCsp(this._classId, value);
         } else {
-            this._stsSp += value;
+            this.getAsp(value);
         }
     };
 
@@ -2618,12 +2641,26 @@ function Scene_STS() {
         this.getSp(-value);
     };
 
+    Game_Actor.prototype.setCsp = function(classId, value) {
+        if(isNaN(value)) value = 0;
+        this._stsCsp[classId] = Math.max(Number(value), 0);
+    };
+
+    Game_Actor.prototype.setAsp = function(value) {
+        if(isNaN(value)) value = 0;
+        this._stsSp = Math.max(Number(value), 0);
+    };
+
     Game_Actor.prototype.stsCsp = function(classId) {
-        return this._stsCsp[classId];
+        return this._stsCsp[classId] || 0;
+    };
+
+    Game_Actor.prototype.stsAsp = function() {
+        return this._stsSp || 0;
     };
 
     Game_Actor.prototype.stsSp = function() {
-        return FTKR.STS.sp.enableClassSp ? this.stsCsp(this._classId) : this._stsSp;
+        return FTKR.STS.sp.enableClassSp ? this.stsCsp(this._classId) : this.stsAsp();
     };
 
     Game_Actor.prototype.isStsLearnedSkill = function(skillId) {
@@ -2679,7 +2716,7 @@ function Scene_STS() {
 
     Game_Actor.prototype.getTreeTypes = function() {
       var tTypes = this.actor().sts.treeTypes.concat(this.currentClass().sts.treeTypes, this._stsTrees);
-      return !tTypes.length ? [] : FTKR.duplicateDelete(tTypes);
+      return !tTypes.length ? [] : duplicateDelete(tTypes);
     };
 
     Game_Actor.prototype.addTreetype = function(treeTypeId) {
