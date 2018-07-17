@@ -4,8 +4,8 @@
 // プラグインNo : 86
 // 作成者     : フトコロ
 // 作成日     : 2018/07/15
-// 最終更新日 : 2018/07/15
-// バージョン : v0.9.3
+// 最終更新日 : 2018/07/18
+// バージョン : v0.9.4
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -23,7 +23,7 @@ FTKR.GDM = FTKR.GDM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v0.9.3 トリアコンタンさんのGUI画面デザインプラグインの機能追加
+ * @plugindesc v0.9.4 トリアコンタンさんのGUI画面デザインプラグインの機能追加
  * @author フトコロ
  *
  * @param autoCreate
@@ -62,7 +62,7 @@ FTKR.GDM = FTKR.GDM || {};
  * @type boolean
  * @on 表示する
  * @off 表示しない
- * @default true
+ * @default false
  * 
  * @param --オリジナルシーンの設定--
  * @desc 
@@ -187,8 +187,15 @@ FTKR.GDM = FTKR.GDM || {};
  * (*1)削除可能なウィンドウは、このプラグインで作成したウィンドウのみです。
  * 
  * 
- * 試作版です。
- * 不具合と思われる現象が発生したらご連絡ください。
+ * このプラグインは、試作版です。
+ * 
+ * 動作がまだ十分に安定していないため、使用にはご注意ください。
+ * また、正式版になるまでに仕様が変わり、従来のセーブデータと
+ * 互換性がなくなる可能性があります。
+ * 
+ * 不具合と思われる現象が発生したら、↓ までご連絡ください。
+ * [ツクマテさん] https://tm.lucky-duet.com/viewtopic.php?f=68&t=6309
+ * [Twitter    ] https://twitter.com/futokoro_mv
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -251,10 +258,9 @@ FTKR.GDM = FTKR.GDM || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
- *          (未)フォントの設定
- *          (未)ウィンドウの背景画像の設定(ウィンドウスキン)
- *          (未)表示行数の設定
- * 
+ * v0.9.4 - 表示スイッチを無効にできない不具合を修正
+ *          プラグインパラメータの初期値見直し
+ *          マウスポインタで選択したウィンドウの行の個別編集処理を見直し
  * v0.9.3 - マップ上のキャラのマウス操作を無効化
  *          コマンドの実行処理を見直し
  *          コモンウィンドウで初期のテキストが表示されない不具合を修正
@@ -300,11 +306,11 @@ function Scene_OSW() {
     var autoCreate = JSON.parse(parameters['autoCreate'] || false);
     FTKR.GDM = {
         basic:{
-            fontSize  :Number(parameters['Font Size'] || 28),
-            padding   :Number(parameters['Window Padding'] || 0),
-            lineHeight:Number(parameters['Window Line Height'] || 36),
-            opacity   :Number(parameters['Window Opacity'] || 0),
-            frame     :Number(parameters['Window Frame'] || 0),
+            fontSize   :Number(parameters['Font Size'] || 28),
+            padding    :Number(parameters['Window Padding'] || 0),
+            lineHeight :Number(parameters['Window Line Height'] || 36),
+            opacity    :Number(parameters['Window Opacity'] || 0),
+            hideFrame  :Number(parameters['Window Frame'] || 0),
         },
         original:{
             bgimage   :String(parameters['Background Image Name'] || ''),
@@ -946,6 +952,12 @@ function Scene_OSW() {
           this._holdH = 0;
       };
 
+      Scene_Base.prototype.releaceTouchWindow = function() {
+          this._touchWindow = null;
+          this._touchWindowIndex = -2;
+          this.clearTouchedParam();
+      }
+
       Window_Base.prototype.releaseByCmdSet = function() {
           this._holding = false;
           this._windowBackSprite.setBlendColor([0, 0, 0, 0]);
@@ -1022,67 +1034,61 @@ function Scene_OSW() {
 
       //マウスの左ボタンを離したときの処理
       Scene_Base.prototype.actionMouseLeftRelease = function() {
-          //短時間クリックで、クリックした行を編集するウィンドウを表示
+          //短時間クリックで、クリックした行を個別編集するウィンドウを表示
           if (this._touchHolding && !this._touchedFrame && this._touchWindow && this._touchWindow.visible) {
               if (this._touchWindow.isCommand()) {
-                  //コマンドウィンドウの場合
-                  var touchIndex = -1;
-                  this._touchWindow._customList.some(function(cmd, i){
-                      var list = this._touchWindow._list[this._touchWindowIndex];
-                      if(list && list.symbol === cmd.symbol) {
-                          touchIndex = i;
-                          return true;
-                      }
-                  },this);
-                  if (touchIndex < 0) {
-                      this._touchWindow = null;
-                      this._touchWindowIndex = -2;
-                      return;
-                  }
-                  this._touchWindowIndex = touchIndex;
-                  this._touchWindow.releaseByCmdSet();
-                  this.reserveActiveWindow();
-                  this.setConfigContents_command(this._touchWindow._customList[this._touchWindowIndex]);
-                  this._cmdConfigWindow.activateWindow();
-              } else if (this._touchWindow.isSelect() && !this._touchWindow._customDrawType) {
-                  //セレクトウィンドウで、テキストモードの場合
-                  if (this._touchWindowIndex < 0) {
-                      this._touchWindow = null;
-                      this._touchWindowIndex = -2;
-                      return;
-                  }
-                  this._touchWindow.releaseByCmdSet();
-                  this.reserveActiveWindow();
-                  if (this._touchWindowIndex > this._touchWindow._customList.length - 1) {
-                      this._touchWindowIndex = this._touchWindow._customList.length - 1;
-                  }
-                  this.setConfigContents_select(this._touchWindow);
-                  this._selectConfigWindow.activateWindow();
-              } else if (this._touchWindow.isCommon() && !this._touchWindow._customDrawType) {
-                  //コモンウィンドウで、テキストモードの場合
-                  if (this._touchWindowIndex < 0) {
-                      this._touchWindow = null;
-                      this._touchWindowIndex = -2;
-                      return;
-                  }
-                  this._touchWindow.releaseByCmdSet();
-                  this.reserveActiveWindow();
-                  if (this._touchWindowIndex > this._touchWindow._customList.length - 1) {
-                      this._touchWindowIndex = this._touchWindow._customList.length - 1;
-                  }
-                  this.setConfigContents_common(this._touchWindow);
-                  this._commonConfigWindow.activateWindow();
-              } else {
-                  this._touchWindow = null;
-                  this._touchWindowIndex = -2;
+                  if(this.setupCommandConfigWindow()) return true;
+              } else if (this._touchWindow.isSelect()) {
+                  if(this.setupSelectConfigWindow()) return true;
+              } else if (this._touchWindow.isCommon()) {
+                  if(this.setupCommonConfigWindow()) return true;
               }
-          } else {
-              this._touchWindow = null;
-              this._touchWindowIndex = -2;
           }
+          this.releaceTouchWindow();
+          return false;
+      }
+
+      //コマンドウィンドウの個別編集メニューを表示
+      Scene_Base.prototype.setupCommandConfigWindow = function() {
+          var command = this.currentListCommand()
+          if (this._touchWindowIndex < 0 || !command) {
+              return false;
+          }
+          this._touchWindow.releaseByCmdSet();
+          this.reserveActiveWindow();
+          this.setConfigContents_command(command);
+          this._cmdConfigWindow.activateWindow();
           this.clearTouchedParam();
           return true;
-      }
+      };
+
+      //セレクトウィンドウの個別編集メニューを表示
+      Scene_Base.prototype.setupSelectConfigWindow = function() {
+          var command = this.currentListCommand()
+          if (this._touchWindowIndex < 0 || !command || this._touchWindow._customDrawType) {
+              return false;
+          }
+          this._touchWindow.releaseByCmdSet();
+          this.reserveActiveWindow();
+          this.setConfigContents_select(this._touchWindow);
+          this._selectConfigWindow.activateWindow();
+          this.clearTouchedParam();
+          return true;
+      };
+
+      //コモンウィンドウの個別編集メニューを表示
+      Scene_Base.prototype.setupCommonConfigWindow = function() {
+          var command = this.currentListCommand()
+          if (this._touchWindowIndex < 0 || !command || this._touchWindow._customDrawType) {
+              return false;
+          }
+          this._touchWindow.releaseByCmdSet();
+          this.reserveActiveWindow();
+          this.setConfigContents_common(this._touchWindow);
+          this._commonConfigWindow.activateWindow();
+          this.clearTouchedParam();
+          return true;
+      };
 
       //マウスの右ボタンを押したときの処理
       Scene_Base.prototype.actionMouseRightPush = function() {
@@ -1217,7 +1223,29 @@ function Scene_OSW() {
               }
               x += iw + this.spacing();
           }
-          return Math.min(index * this.maxCols() + col, this.maxItems() - 1);
+          return index * this.maxCols() + col;
+//          return Math.min(index * this.maxCols() + col, this.maxItems() - 1);
+      };
+
+      //マウスポインタが指している行のリスト番号を取得
+      Scene_Base.prototype.currentListIndex = function() {
+          var touchIndex = -1;
+          if (!!this._touchWindow && this._touchWindowIndex >= 0) {
+              if (!this._touchWindow.isCommand()) return this._touchWindowIndex;
+              var list = this._touchWindow._list[this._touchWindowIndex];
+              this._touchWindow._customList.some(function(cmd, i){
+                  if(list && list.symbol === cmd.symbol) {
+                      touchIndex = i;
+                      return true;
+                  }
+              },this);
+          }
+          return touchIndex;
+      };
+
+      //マウスポインタが指している行のリストデータを取得
+      Scene_Base.prototype.currentListCommand = function() {
+          return this._touchWindow ? this._touchWindow._customList[this.currentListIndex()] : null;
       };
 
       //=============================================================================
@@ -1910,117 +1938,131 @@ function Scene_OSW() {
           this._cmdConfigWindow.setConfigContents(configContents, configValues);
       };
 
-      Scene_Base.prototype.currentListIndex = function() {
-          var index = -1;
-          this._touchWindow._customList.some(function(list, i){
-              if (list.index === this._touchWindowIndex) {
-                  index = i;
-                  return true;
-              }
-          },this);
-          return index;
-      };
-
       Scene_Base.prototype.cwSetCmdListOrder = function() {
           SoundManager.playMagicEvasion();
           this._touchWindow.saveContainerInfo();
           this._touchWindow.createContents();
           this._touchWindow.refresh();
-          this._touchWindow = null;
-          this._touchWindowIndex = -2;
           if (this._cmdConfigWindow.visible) {
-              this._cmdConfigWindow.hideChildWindows();
-              this._cmdConfigWindow.deactivate();
-              this._cmdConfigWindow.hide();
+              this._cmdConfigWindow.hideAll();
           } else if (this._selectConfigWindow.visible) {
-              this._selectConfigWindow.hideChildWindows();
-              this._selectConfigWindow.deactivate();
-              this._selectConfigWindow.hide();
+              this._selectConfigWindow.hideAll();
           } else if (this._commonConfigWindow.visible) {
-              this._commonConfigWindow.hideChildWindows();
-              this._commonConfigWindow.deactivate();
-              this._commonConfigWindow.hide();
+              this._commonConfigWindow.hideAll();
           }
+          this.releaceTouchWindow();
           this.releaseActiveWindow();
       };
       
       Scene_Base.prototype.cwToTop = function() {
-          var index = this.currentListIndex();
+          var currentCmd = this.currentListCommand();
+          consoleLogWIndex('コマンド順番変更', this.currentListIndex(), currentCmd);
           this._touchWindow._customList.some(function(child){
-              if (child.index === this._touchWindow._customList[index].index - 1) {
+              if (child.index === currentCmd.index - 1) {
                   child.index++;
-                  this._touchWindow._customList[index].index--;
+                  currentCmd.index--;
                   return true;
               }
           },this);
+          this._touchWindow.sortCustomList();
+          consoleLogWCommand();
           this.cwSetCmdListOrder();
       };
 
       Scene_Base.prototype.cwToTheTop = function() {
-          var index = this.currentListIndex();
+          var currentCmd = this.currentListCommand();
+          consoleLogWIndex('コマンド順番変更', this.currentListIndex(), currentCmd);
           this._touchWindow._customList.forEach(function(child){
-              if (child.index < this._touchWindow._customList[index].index) {
+              if (child.index < currentCmd.index) {
                   child.index++;
                   return true;
               }
           },this);
-          this._touchWindow._customList[index].index = 0;
+          currentCmd.index = 0;
+          this._touchWindow.sortCustomList();
+          consoleLogWCommand();
           this.cwSetCmdListOrder();
       };
 
       Scene_Base.prototype.cwToBottom = function() {
-          var index = this.currentListIndex();
+          var currentCmd = this.currentListCommand();
+          consoleLogWIndex('コマンド順番変更', this.currentListIndex(), currentCmd);
           this._touchWindow._customList.some(function(child){
-              if (child.index === this._touchWindow._customList[index].index + 1) {
+              if (child.index === currentCmd.index + 1) {
                   child.index--;
-                  this._touchWindow._customList[index].index++;
+                  currentCmd.index++;
                   return true;
               }
           },this);
+          this._touchWindow.sortCustomList();
+          consoleLogWCommand();
           this.cwSetCmdListOrder();
       };
 
       Scene_Base.prototype.cwToTheBottom = function() {
-          var index = this.currentListIndex();
+          var currentCmd = this.currentListCommand();
+          consoleLogWIndex('コマンド順番変更', this.currentListIndex(), currentCmd);
           this._touchWindow._customList.forEach(function(child){
-              if (child.index > this._touchWindow._customList[index].index) {
+              if (child.index > currentCmd.index) {
                   child.index--;
                   return true;
               }
           },this);
-          this._touchWindow._customList[index].index = this._touchWindow._customList.length - 1;
+          currentCmd.index = this._touchWindow._customList.length - 1;
+          this._touchWindow.sortCustomList();
+          consoleLogWCommand();
+          this.cwSetCmdListOrder();
+      };
+
+      Scene_Base.prototype.addCustomCommandAt = function(index) {
+          var i = this._touchWindow._customList.length;
+          this._touchWindow.addCustomCommandAt(index, 'コマンド' + i, 'cmd' + i, 'true');
+          consoleLogWIndex('コマンド追加', index, this._touchWindow._customList);
+          consoleLogWCommand();
           this.cwSetCmdListOrder();
       };
 
       Scene_Base.prototype.cwAddTop = function() {
           var index = this.currentListIndex();
-          var i = this._touchWindow._customList.length;
-          this._touchWindow.addCustomCommandAt(index, 'コマンド' + i, 'cmd' + i, 'true');
-          this.cwSetCmdListOrder();
+          this.addCustomCommandAt(index);
       };
     
       Scene_Base.prototype.cwAddBottom = function() {
           var index = this.currentListIndex() + 1;
-          var i = this._touchWindow._customList.length;
-          this._touchWindow.addCustomCommandAt(index, 'コマンド' + i, 'cmd' + i, 'true');
-          this.cwSetCmdListOrder();
+          this.addCustomCommandAt(index);
       };
 
       Scene_Base.prototype.cwHideCommand = function() {
           var index = this.currentListIndex();
           this._touchWindow._customList[index].visible = false;
+          consoleLogWIndex('コマンド非表示', index, this._touchWindow._customList[index]);
           this.cwSetCmdListOrder();
       };
     
       Scene_Base.prototype.cwDeleteCommand = function() {
           var index = this.currentListIndex();
-          this._touchWindow._customList.splice(index, 1);
+          var data = this._touchWindow._customList.splice(index, 1);
           this._touchWindow._customList.forEach(function(cmd, i){
               if (i >= index) {
                   cmd.index--;
               }
           });
+          consoleLogWIndex('コマンド削除', null, data);
           this.cwSetCmdListOrder();
+      };
+
+      var consoleLogWIndex = function(text, index, result) {
+          var scene = SceneManager._scene;
+          text = text + '：';
+          if(index == null) index = this._touchWindowIndex;
+          var name = !!scene._touchWindow ? scene._touchWindow.name : undefined;
+          console.log(text, name, '行数', index, '内容', result);
+      };
+
+      var consoleLogWCommand = function() {
+          SceneManager._scene._touchWindow._customList.forEach(function(cmd){
+              console.log('行番', cmd.index, 'コマンド名', cmd.name, '表示', cmd.visible);
+          });
       };
 
       //------------------------------------------------------------------------
@@ -2083,22 +2125,44 @@ function Scene_OSW() {
       Scene_Base.prototype.cwSetText = function() {
           var list = this._touchWindow._customList[this._touchWindowIndex];
           if (!(list instanceof Object)) list = {name:'', index:this._touchWindowIndex, visible:true};
+          var oldStr = list.name;
           list.name = getPromptResult(list.name);
+          if (oldStr !== list.name) {
+              consoleLogWIndex('テキスト編集', null, list.name);
+          }
+          this.cwSetCmdListOrder();
+      };
+
+      Scene_Base.prototype.addCustomTextAt = function(index) {
+          var i = this._touchWindow._customList.length;
+          this._touchWindow.addCustomCommandAt(index, 'テキスト' + i);
+          consoleLogWIndex('テキスト追加', index, this._touchWindow._customList);
+          consoleLogWCommand();
           this.cwSetCmdListOrder();
       };
 
       Scene_Base.prototype.cwAddTopText = function() {
-          var index = this.currentListIndex();
+          var index = this._touchWindowIndex;
+          this.addCustomTextAt(index);
+          /*
           var i = this._touchWindow._customList.length;
           this._touchWindow.addCustomCommandAt(index, 'テキスト' + i);
+          consoleLogWIndex('テキスト追加', index, this._touchWindow._customList);
+          consoleLogWCommand();
           this.cwSetCmdListOrder();
+          */
       };
     
       Scene_Base.prototype.cwAddBottomText = function() {
-          var index = this.currentListIndex() + 1;
+          var index = this._touchWindowIndex + 1;
+          this.addCustomTextAt(index);
+          /*
           var i = this._touchWindow._customList.length;
           this._touchWindow.addCustomCommandAt(index, 'テキスト' + i);
+          consoleLogWIndex('テキスト追加', index, this._touchWindow._customList);
+          consoleLogWCommand();
           this.cwSetCmdListOrder();
+          */
       };
 
       //------------------------------------------------------------------------
@@ -2130,6 +2194,7 @@ function Scene_OSW() {
       };
 
       Scene_Base.prototype.deleteTouchWindow = function() {
+          console.log('ウィンドウ削除：', this._touchWindow.name);
           this._windowLayer.removeChild(this._touchWindow);
           var type = this._touchWindow._windowType;
           var windowId = this._touchWindow._windowId;
@@ -2240,6 +2305,7 @@ function Scene_OSW() {
           createWindow.name = windowId + '_' + getClassName(createWindow);
           createWindow.saveContainerInfo();
           this._cwCreateNewW.hide();
+          console.log('ウィンドウ作成：', createWindow.name);
           this.cwCloseConfig();
           return createWindow;
       };
@@ -2664,7 +2730,7 @@ function Scene_OSW() {
       //データリスト DATA
       //------------------------------------------------------------------------
       Window_FtkrOptionsBase.prototype.adjustDataStatus = function(options, value) {
-          var min = options.data[0] ? 0 : 1;
+          var min = 0;
           var max = options.data.length - 1;
           value = (value === undefined || isNaN(value)) ? min : Number(value);
           if (value < min) value = max;
@@ -2676,6 +2742,7 @@ function Scene_OSW() {
           var data = options.data;
           var prop = options.property;
           value = this.adjustDataStatus(options, value);
+          if (!value && !data[0]) return 'なし';
           return prop ? data[value][prop] : data[value];
       };
 
@@ -2754,6 +2821,7 @@ function Scene_OSW() {
           var options = config.options;
           if (!symbol) return;
           var value = this.getConfigValue(symbol);
+          var oldValue = this.oldConfigValues()[symbol];
           if (type.toUpperCase() == 'REFER') {
               var referConfig = this.getReferenceConfig(options);
               value = this.convertConfigValue(referConfig, value);
@@ -2761,7 +2829,10 @@ function Scene_OSW() {
               value = this.convertConfigValue(config, value);
               if(value === undefined) return;
           }
-          this.oldConfigValues()[symbol] = value;
+          if (this.oldConfigValues()[symbol] !== value) {
+              this.oldConfigValues()[symbol] = value;
+              console.log('データ更新：', symbol, value, '←', oldValue);
+          }
       };
 
       Window_FtkrOptionsBase.prototype.convertConfigValue = function(config, value) {
@@ -3064,16 +3135,16 @@ function Scene_OSW() {
 
       Window_OSWConfTitle.prototype.updatePlacement = function() {
           this.x = (Graphics.boxWidth - this.width) / 2;
-          this.y = (Graphics.boxHeight - this.height) / 2 - this.lineHeight();
+          this.y = Graphics.boxHeight / 2 - this.height;
       };
 
       Window_OSWConfTitle.prototype.refresh = function () {
           this.contents.clear();
-          this.drawText(this._text, 0, 0, this.contentsWidth(),'center');
+          this.drawText(this._text, 0, 0, this.contentsWidth(), 'center');
       };
 
       Window_OSWConfTitle.prototype.setConf = function(text) {
-          this._text = text + 'を削除しますか？';
+          this._text = text + ' を削除しますか？';
           this.refresh();
           this.show();
       };
@@ -3086,12 +3157,12 @@ function Scene_OSW() {
           this.initialize.apply(this, arguments);
       }
 
-      Window_OSWConf.prototype = Object.create(Window_Command.prototype);
+      Window_OSWConf.prototype = Object.create(Window_HorzCommand.prototype);
       Window_OSWConf.prototype.constructor = Window_OSWConf;
 
       Window_OSWConf.prototype.initialize = function() {
           this._ftkrEditor = true;
-          Window_Command.prototype.initialize.call(this, 0, 0);
+          Window_HorzCommand.prototype.initialize.call(this, 0, 0);
           this.updatePlacement();
           this.deactivate();
           this.hide();
@@ -3119,7 +3190,7 @@ function Scene_OSW() {
 
       Window_OSWConf.prototype.updatePlacement = function() {
           this.x = (Graphics.boxWidth - this.width) / 2;
-          this.y = (Graphics.boxHeight - this.height) / 2 + this.lineHeight();
+          this.y = Graphics.boxHeight / 2;
       };
 
       Window_OSWConf.prototype.refresh = function() {
@@ -3130,8 +3201,8 @@ function Scene_OSW() {
       };
 
       Window_OSWConf.prototype.makeCommandList = function() {
-          this.addCommand('削除する', 'delete', 'center');
-          this.addCommand('削除しない', 'cancel', 'center');
+          this.addCommand('削除する', 'delete');
+          this.addCommand('削除しない', 'cancel');
       };
 
     };//デザインモード
@@ -3194,6 +3265,7 @@ function Scene_OSW() {
         containerInfo._customList      = copyArray(this._customList);
         containerInfo._customShowSwId  = this._customShowSwId;
         containerInfo._customShow      = this._customShow;
+        containerInfo._customHideFrame = this._customHideFrame;
         containerInfo._customActivate  = this._customActivate;
         containerInfo._customSpacing      = this._customSpacing;
         containerInfo._customMaxCols      = this._customMaxCols;
@@ -3262,17 +3334,18 @@ function Scene_OSW() {
 
     var _Window_Base_loadProperty = Window_Base.prototype.loadProperty;
     Window_Base.prototype.loadProperty = function(containerInfo) {
+        if(containerInfo.name) this.name = containerInfo.name;
         if(containerInfo._customActorId)   this._customActorId = containerInfo._customActorId;
         if(containerInfo._customReference) this._customReference = containerInfo._customReference;
-        if(containerInfo._customList)      this._customList = copyArray(containerInfo._customList);
         if(containerInfo._customShowSwId)  this._customShowSwId = containerInfo._customShowSwId;
-        if(containerInfo.name) this.name = containerInfo.name;
         if(containerInfo._customShow)      this._customShow = containerInfo._customShow;
+        if(containerInfo._customHideFrame) this._customHideFrame = containerInfo._customHideFrame;
         if(containerInfo._customActivate)  this._customActivate = containerInfo._customActivate;
-        if(containerInfo._customSpacing) this._customSpacing   = containerInfo._customSpacing;
-        if(containerInfo._customMaxCols) this._customMaxCols = containerInfo._customMaxCols;
+        if(containerInfo._customSpacing)   this._customSpacing   = containerInfo._customSpacing;
+        if(containerInfo._customMaxCols)   this._customMaxCols = containerInfo._customMaxCols;
         if(containerInfo._customCursorHeight) this._customCursorHeight = containerInfo._customCursorHeight;
         if(containerInfo._customHorSpacing) this._customHorSpacing = containerInfo._customHorSpacing;
+        if(containerInfo._customList)      this._customList = copyArray(containerInfo._customList);
         _Window_Base_loadProperty.apply(this, arguments);
         this._firstUpdated = false;
     };
@@ -3672,6 +3745,13 @@ function Scene_OSW() {
         });
     };
 
+    Window_Base.prototype.sortCustomList = function() {
+        if(!this._customList) return;
+        this._customList.sort(function(a, b){
+            return a.index - b.index;
+        });
+    };
+
     Window_Command.prototype.makeCustomCommandList = function() {
         if (this._customList) {
             this._list.forEach(function(mlist){
@@ -4033,11 +4113,11 @@ function Scene_OSW() {
         var common  = FTKR.GDM.common;
         var command = FTKR.GDM.command;
         var select  = FTKR.GDM.select;
-        container._customFontSize   = basic.fontSize;
-        container._customPadding    = basic.padding;
-        container._customLineHeight = basic.lineHeight;
+        container._customFontSize    = basic.fontSize;
+        container._customPadding     = basic.padding;
+        container._customLineHeight  = basic.lineHeight;
         container._customBackOpacity = basic.opacity;
-        container._customHideFrame  = basic.frame;
+        container._customHideFrame   = basic.frame;
         container.opacity = 255;
         container.visible = true;
         switch(type) {
@@ -4668,7 +4748,6 @@ function Scene_OSW() {
     Window_OswCommand.prototype.standardCssLayout = function() {
         var layout = copyObject(FTKR.GDM.basic);
         layout.enabled = true;
-        layout.hideFrame = !layout.frame;
         layout.maxCols = FTKR.GDM.command.maxCols;
         return layout;
     };
@@ -4860,7 +4939,6 @@ function Scene_OSW() {
     Window_OswSelect.prototype.standardCssLayout = function() {
         var layout = copyObject(FTKR.GDM.basic);
         layout.enabled = true;
-        layout.hideFrame = !layout.frame;
         layout.maxCols = FTKR.GDM.select.maxCols;
         layout.cursorHeight = FTKR.GDM.select.cursorHeight;
         return layout;
