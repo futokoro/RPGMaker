@@ -5,7 +5,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2018/07/15
 // 最終更新日 : 2018/07/18
-// バージョン : v0.9.4
+// バージョン : v0.9.5
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -23,7 +23,7 @@ FTKR.GDM = FTKR.GDM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v0.9.4 トリアコンタンさんのGUI画面デザインプラグインの機能追加
+ * @plugindesc v0.9.5 トリアコンタンさんのGUI画面デザインプラグインの機能追加
  * @author フトコロ
  *
  * @param autoCreate
@@ -258,6 +258,7 @@ FTKR.GDM = FTKR.GDM || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * v0.9.5 - コモンウィンドウのセレクト参照機能を実装
  * v0.9.4 - 表示スイッチを無効にできない不具合を修正
  *          プラグインパラメータの初期値見直し
  *          マウスポインタで選択したウィンドウの行の個別編集処理を見直し
@@ -780,9 +781,9 @@ function Scene_OSW() {
           return [
               {type:'none'},
               {type:'none'},
-              {type:'select', options:{select:SCENE_LISTS, value:SCENE_LISTS}},
+              {type:'select', options:{select:SCENE_LISTS}},
               {type:'data',   options:{data:$dataCommonEvents, property:'name'}},
-              {type:'data',   options:{data:list, property:'name', string:true}}
+              {type:'data',   options:{data:list, property:'name', enabled:'data.isList()', string:true}}
           ];
       };
 
@@ -1728,11 +1729,11 @@ function Scene_OSW() {
               ], width: 400, textWidth: 220, statusWidth: 120}},
               {type: 'subConfig',  name: '処理設定', symbol: 'methodEdit', enabled: configValues.isList(), options: {subConfigs: [
                   {type: 'select', name: '実行設定　　　　', symbol: '_customOkMethodType',       enabled: configValues.isSelect(), options: {select:COMMAND_METHOD}},
-                  {type: 'refer',  name: '実行詳細　　　　', symbol: '_customOkMethodDetail',     enabled: configValues.isSelect(), options: {refSymbol:'_customOkMethodType', refData:FTKR_METHOD_DATALIST(this)}},
-                  {type: 'refer',  name: '実行詳細２　　　', symbol: '_customOkMethodDetail2',    enabled: configValues.isSelect(), options: {refSymbol:'_customOkMethodType', refData:FTKR_METHOD_DATALIST2}},
+                  {type: 'refer',  name: '実行詳細　　　　', symbol: '_customOkMethodDetail',     enabled: configValues.isSelect(), options: {refSymbol:['_customOkMethodType'], refData:FTKR_METHOD_DATALIST(this)}},
+                  {type: 'refer',  name: '実行詳細２　　　', symbol: '_customOkMethodDetail2',    enabled: configValues.isSelect(), options: {refSymbol:['_customOkMethodType'], refData:FTKR_METHOD_DATALIST2}},
                   {type: 'select', name: 'キャンセル設定　', symbol: '_customCancelMethodType',   enabled: true, options: {select:COMMAND_METHOD}},
-                  {type: 'refer',  name: 'キャンセル詳細　', symbol: '_customCancelMethodDetail', enabled: true, options: {refSymbol:'_customCancelMethodType', refData:FTKR_METHOD_DATALIST(this)}},
-                  {type: 'refer',  name: 'キャンセル詳細２', symbol: '_customCancelMethodDetail2',enabled: true, options: {refSymbol:'_customCancelMethodType', refData:FTKR_METHOD_DATALIST2}},
+                  {type: 'refer',  name: 'キャンセル詳細　', symbol: '_customCancelMethodDetail', enabled: true, options: {refSymbol:['_customCancelMethodType'], refData:FTKR_METHOD_DATALIST(this)}},
+                  {type: 'refer',  name: 'キャンセル詳細２', symbol: '_customCancelMethodDetail2',enabled: true, options: {refSymbol:['_customCancelMethodType'], refData:FTKR_METHOD_DATALIST2}},
                   {type: 'line'},
                   {type: 'save',   name: '決定'},
               ], width: 500, textWidth: 220, statusWidth: 220}},
@@ -1750,6 +1751,10 @@ function Scene_OSW() {
           this._dispConfigWindow = new Window_FtkrOptions(layer, width, textWidth, statusWidth);
           this._dispConfigWindow.setHandler('cancel', this.closeOptions.bind(this));
           layer.addChild(this._dispConfigWindow);
+      };
+
+      Scene_Base.prototype.windowChildren = function() {
+          return this._windowLayer ? this._windowLayer.children : [];
       };
 
       //表示コンテンツの設定読込
@@ -1776,7 +1781,7 @@ function Scene_OSW() {
               ], width: 400, textWidth: 220, statusWidth: 120}},
               {type: 'subConfig', name: 'セレクト設定', symbol: 'selectDisp', enabled: configValues.isSelect(), options: {subConfigs: [
                   {type: 'select', name: '表示タイプ　', symbol: '_customDrawType',    enabled: true, options: {select:['テキスト','パーティー','アクター','職業','スキル','アイテム','武器','防具','敵キャラ','敵グループ']}},
-                  {type: 'refer',  name: 'リストタイプ', symbol: '_customListType',    enabled: true, options: {refSymbol:'_customDrawType', refData:[
+                  {type: 'refer',  name: 'リストタイプ', symbol: '_customListType',    enabled: true, options: {refSymbol:['_customDrawType'], refData:[
                       {type: 'none'},
                       {type: 'select', options:{select:['全メンバー', 'バトルメンバー', '控えメンバー']}},
                   ]}},
@@ -1786,11 +1791,19 @@ function Scene_OSW() {
               ], width: 400, textWidth: 220, statusWidth: 120}},
               {type: 'subConfig', name: 'コモン設定', symbol: 'commonDisp', enabled: configValues.isCommon(), options: {subConfigs: [
                   {type: 'select', name: '表示タイプ　', symbol: '_customDrawType',  enabled: true, options: {select:['テキスト','詳細']}},
-                  {type: 'refer',  name: 'アクター設定', symbol: '_customActorId',   enabled: true, options: {refSymbol:'_customDrawType', refData:[
+                  {type: 'refer',  name: 'アクター設定', symbol: '_customActorId',   enabled: true, options: {refSymbol:['_customDrawType'], refData:[
                       {type:'none'},
                       {type:'data', options:{data:$dataActors, property:'name'}}
                   ]}},
-                  {type: 'number', name: 'セレクト参照', symbol: '_customReference', enabled: true, options: {min:0, max: 99, offset: 1}},
+                  {type: 'refer', name: 'セレクト参照', symbol: '_customReference', enabled: true, options: {refSymbol:['_customDrawType','_customActorId'], refData:[
+                      [
+                          {type:'none'}
+                      ],
+                      [
+                          {type:'data', options:{data:[null].concat(this.windowChildren()), property:'name', enabled:'data.isList()' ,string:true}},
+                          {type:'none'}
+                      ]
+                  ]}},
                   {type: 'line'},
                   {type: 'save',   name: '決定'},
               ], width: 400, textWidth: 220, statusWidth: 120}},
@@ -1912,8 +1925,8 @@ function Scene_OSW() {
                   {type: 'string', name: '実行条件', symbol: 'enabled',      enabled: true, options: {}},
                   {type: 'line'},
                   {type: 'select', name: '実行設定', symbol: 'methodType',   enabled: true, options: {select:COMMAND_METHOD}},
-                  {type: 'refer',  name: '実行詳細', symbol: 'methodDetail', enabled: true, options: {refSymbol:'methodType', refData:FTKR_METHOD_DATALIST(this)}},
-                  {type: 'refer',  name: '実行詳細2', symbol: 'methodDetail2', enabled: true, options:  {refSymbol:'methodType', refData:FTKR_METHOD_DATALIST2}},
+                  {type: 'refer',  name: '実行詳細', symbol: 'methodDetail', enabled: true, options: {refSymbol:['methodType'], refData:FTKR_METHOD_DATALIST(this)}},
+                  {type: 'refer',  name: '実行詳細2', symbol: 'methodDetail2', enabled: true, options:  {refSymbol:['methodType'], refData:FTKR_METHOD_DATALIST2}},
                   {type: 'line'},
                   {type: 'save',   name: '決定'},
               ], width: 500, textWidth: 220, statusWidth: 220}},
@@ -2729,26 +2742,45 @@ function Scene_OSW() {
       //------------------------------------------------------------------------
       //データリスト DATA
       //------------------------------------------------------------------------
+      Window_FtkrOptionsBase.prototype.optionDataList = function(options) {
+          return options.enabled ? options.data.filter(function(data){
+              return !!data ? eval(options.enabled) : true;
+          }) : options.data;
+      };
+
       Window_FtkrOptionsBase.prototype.adjustDataStatus = function(options, value) {
           var min = 0;
-          var max = options.data.length - 1;
+          var max = this.optionDataList(options).length - 1;
           value = (value === undefined || isNaN(value)) ? min : Number(value);
           if (value < min) value = max;
           if (value > max) value = min;
           return value;
       };
 
+      Window_FtkrOptionsBase.prototype.convertOptionDataValue = function(options, value) {
+          if(isNaN(value)) {
+              this.optionDataList(options).some(function(data, i){
+                  if(data && (options.property && data[options.property] == value) || data == value) {
+                      value = i;
+                      return true;
+                  }
+              });
+          }
+          return this.adjustDataStatus(options, value);
+      };
+
       Window_FtkrOptionsBase.prototype.dataStatusText = function(options, value) {
-          var data = options.data;
+          var data = this.optionDataList(options);
           var prop = options.property;
-          value = this.adjustDataStatus(options, value);
+          value = this.convertOptionDataValue(options, value);
           if (!value && !data[0]) return 'なし';
           return prop ? data[value][prop] : data[value];
       };
 
       Window_FtkrOptionsBase.prototype.changeDataValue = function(symbol, options, flag) {
-          var data = options.data;
+          var data = this.optionDataList(options);
           var value  = this.getConfigValue(symbol);
+          value = this.convertOptionDataValue(options, value);
           value += flag;
           value = this.adjustDataStatus(options, value);
           this.changeValue(symbol, value);
@@ -2758,8 +2790,13 @@ function Scene_OSW() {
       //参照 REFER
       //------------------------------------------------------------------------
       Window_FtkrOptionsBase.prototype.getReferenceConfig = function(options) {
-          var refValue = this.getConfigValue(options.refSymbol);
-          var config = options.refData[refValue];
+          var refValues = options.refSymbol.map(function(symbol){
+              return this.getConfigValue(symbol);
+          },this);
+          var config = options.refData;
+          refValues.forEach(function(value){
+              config = config[value];
+          });
           if (!config) config = {type:'none'};
           return config;
       };
@@ -2849,7 +2886,7 @@ function Scene_OSW() {
               case 'BOOLEAN':
                   return !!value;
               case 'DATA':
-                  value = this.adjustDataStatus(options, value);
+                  value = this.convertOptionDataValue(options, value);
                   return options.string ? this.dataStatusText(options, value) : value;
               default:
                   return undefined;
@@ -3437,10 +3474,6 @@ function Scene_OSW() {
         this._customActorId = actorId;
     }
 
-    Window_Base.prototype.setReference = function(referenceId) {
-        this._customReference = referenceId;
-    };
-
     Window_Base.prototype.setFontSize = function(value) {
         this._customFontSize = value;
     };
@@ -3455,6 +3488,13 @@ function Scene_OSW() {
 
     Window_Base.prototype.setBackOpacity = function(value) {
         this._customBackOpacity = value;
+    };
+
+    //------------------------------------------------------------------------
+    // _customReference
+    //------------------------------------------------------------------------
+    Window_Base.prototype.setReference = function(windowName) {
+        this._customReference = windowName;
     };
 
     //------------------------------------------------------------------------
@@ -4027,17 +4067,17 @@ function Scene_OSW() {
 
     //=============================================================================
     // SceneManager
-    // ウィンドウ名とウィンドウIDから対象ウィンドウのデータを参照
+    // ウィンドウ名やウィンドウIDから対象ウィンドウのデータを参照
     //=============================================================================
 
-    //ウィンドウ名とウィンドウIDから参照
-    SceneManager.oswWindowDataBase = function(windowName, windowId) {
+    //ウィンドウクラス名とウィンドウIDから参照
+    SceneManager.oswWindowDataBase = function(windowClass, windowId) {
         var sceneName  = this.getSceneName();
         var sceneInfo  = $dataContainerProperties[sceneName];
         if (sceneInfo) {
             var parentName = 'WindowLayer';
             var containerInfo = sceneInfo[parentName];
-            var key           = [windowId, windowName];
+            var key           = [windowId, windowClass];
             if (containerInfo && containerInfo[key]) {
                 var priority = containerInfo[key].priority;
                 return this._scene._windowLayer.children[priority];
@@ -4050,6 +4090,16 @@ function Scene_OSW() {
     SceneManager.oswWindowData = function(windowType, windowId) {
         var windowName = convertWindowName(windowType);
         return this.oswWindowDataBase(windowName, windowId);
+    };
+
+    //ウィンドウ名から参照
+    SceneManager.searchWindowByName = function(windowName) {
+        if (!this._scene || !this._scene._windowLayer) return null;
+        var window = null;
+        this._scene._windowLayer.children.some(function(child){
+            if(child.name == windowName) window = child;
+        },this);
+        return window;
     };
 
     //=============================================================================
@@ -4819,17 +4869,23 @@ function Scene_OSW() {
         return true;
     };
 
+    Window_OswCommon.prototype.referenceWindow = function() {
+        return SceneManager.searchWindowByName(this._customReference);
+    };
+
+    Window_OswCommon.prototype.updateReference = function() {
+        if (!this.isCommon() || !this.referenceWindow()) return;
+        var window = this.referenceWindow();
+        if (this._referenceIndex === window.index()) return;
+        this._referenceIndex = window.index();
+        this._actor = window._actor;
+        if(!!window.item) this._item = window.item(window.index());
+        this.refresh();
+    };
+
     Window_OswCommon.prototype.update = function() {
         Window_Base.prototype.update.call(this);
         this.updateReference();
-    };
-
-    Window_OswCommon.prototype.referenceWindow = function() {
-        return this._referenceWindow;
-    };
-
-    Window_OswCommon.prototype.setReferenceWindow = function(window){
-        this._referenceWindow = window;
     };
 
     Window_OswCommon.prototype.actor = function() {
@@ -4868,16 +4924,6 @@ function Scene_OSW() {
         if (!formula) return '';
         FTKR.setGameData(actor, null, this._item);
         return FTKR.evalStrFormula(formula);
-    };
-
-    Window_OswCommon.prototype.updateReference = function() {
-        if (!this.referenceWindow()) return;
-        var window = this.referenceWindow();
-        if (this._referenceIndex === window.index()) return;
-        this._referenceIndex = window.index();
-        this._actor = window._actor;
-        this._item = window.item(window.index());
-        this.refresh();
     };
 
     Window_OswCommon.prototype.drawContent = function(x, y, width, height) {
