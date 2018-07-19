@@ -5,7 +5,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2018/07/15
 // 最終更新日 : 2018/07/18
-// バージョン : v0.9.5
+// バージョン : v0.9.6
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -23,7 +23,7 @@ FTKR.GDM = FTKR.GDM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v0.9.5 トリアコンタンさんのGUI画面デザインプラグインの機能追加
+ * @plugindesc v0.9.6 トリアコンタンさんのGUI画面デザインプラグインの機能追加
  * @author フトコロ
  *
  * @param autoCreate
@@ -57,17 +57,25 @@ FTKR.GDM = FTKR.GDM || {};
  * @type number
  * @default 192
  * 
- * @param Window Frame
- * @desc ウィンドウ枠を表示にするか
+ * @param Hide Frame
+ * @desc ウィンドウ枠を非表示にするか
  * @type boolean
- * @on 表示する
- * @off 表示しない
+ * @on 非表示
+ * @off 表示する
  * @default false
+ * 
+ * @param Window Background Image Name
+ * @desc ウィンドウの背景に使用する画像ファイル名を指定します。
+ * 画像ファイルは/img/picturesに保存すること
+ * @default []
+ * @require 1
+ * @dir img/pictures/
+ * @type file[]
  * 
  * @param --オリジナルシーンの設定--
  * @desc 
  * 
- * @param Background Image Name
+ * @param Scene Background Image Name
  * @desc 背景に使用する画像ファイル名を指定します。
  * 画像ファイルは/img/systemに保存すること
  * @default 
@@ -258,6 +266,8 @@ FTKR.GDM = FTKR.GDM || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v0.9.6 - ウィンドウ背景画像の設定機能を実装
  * v0.9.5 - コモンウィンドウのセレクト参照機能を実装
  * v0.9.4 - 表示スイッチを無効にできない不具合を修正
  *          プラグインパラメータの初期値見直し
@@ -300,6 +310,18 @@ function Scene_OSW() {
         return;
     }
 
+    var paramParse = function(obj) {
+        return JSON.parse(JSON.stringify(obj, paramReplace));
+    };
+
+    var paramReplace = function(key, value) {
+        try {
+            return JSON.parse(value || null);
+        } catch (e) {
+            return value;
+        }
+    };
+
     //=============================================================================
     //プラグインパラメータを取得
     //=============================================================================
@@ -307,14 +329,16 @@ function Scene_OSW() {
     var autoCreate = JSON.parse(parameters['autoCreate'] || false);
     FTKR.GDM = {
         basic:{
+            enabled    :true,
             fontSize   :Number(parameters['Font Size'] || 28),
             padding    :Number(parameters['Window Padding'] || 0),
             lineHeight :Number(parameters['Window Line Height'] || 36),
             opacity    :Number(parameters['Window Opacity'] || 0),
-            hideFrame  :Number(parameters['Window Frame'] || 0),
+            hideFrame  :Boolean(parameters['Hide Frame'] || false),
         },
+        backgrounds   :JSON.parse(parameters['Window Background Image Name']) || [],
         original:{
-            bgimage   :String(parameters['Background Image Name'] || ''),
+            bgimage   :String(parameters['Scene Background Image Name'] || ''),
         },
         command:{
             x             :Number(parameters['Command Position X'] || 0),
@@ -1762,7 +1786,7 @@ function Scene_OSW() {
           var configContents = [
               {type: 'subConfig', name: '背景', symbol: 'backGround', enabled: true, options: {subConfigs: [
                   {type: 'number', name: '背景透明度', symbol: '_customBackOpacity',  enabled: true, options: {min:0, max: 255, offset: 1}},
-                  {type: 'string', name: '背景画像　', symbol: '_customBackFileName', enabled: true, options: {}},
+                  {type: 'select', name: '背景画像　', symbol: '_customBackFileName', enabled: true, options: {select:[null].concat(FTKR.GDM.backgrounds), string:true}},
                   {type: 'line'},
                   {type: 'save',  name: '決定'},
               ], width: 400, textWidth: 220, statusWidth: 120}},
@@ -2710,6 +2734,18 @@ function Scene_OSW() {
       //------------------------------------------------------------------------
       //セレクトリスト SELECT
       //------------------------------------------------------------------------
+      Window_FtkrOptionsBase.prototype.convertOptionSelectValue = function(options, value) {
+          if(isNaN(value)) {
+              options.select.some(function(data, i){
+                  if(data && data == value) {
+                      value = i;
+                      return true;
+                  }
+              });
+          }
+          return this.adjustSelectStatus(options, value);
+      };
+
       Window_FtkrOptionsBase.prototype.adjustSelectStatus = function(options, value) {
           value = (value === undefined || isNaN(value)) ? 0 : Number(value);
           var min = 0;
@@ -2720,9 +2756,10 @@ function Scene_OSW() {
       };
 
       Window_FtkrOptionsBase.prototype.selectStatusText = function(options, value) {
-          return options.select[this.adjustSelectStatus(options, value)];
+          value = this.convertOptionSelectValue(options, value);
+          return options.select[value] || 'なし';
       };
-      
+      /*
       Window_FtkrOptionsBase.prototype.inputSelectValue = function(symbol, options) {
           var value  = this.getConfigValue(symbol);
           var data   = options.select;
@@ -2730,10 +2767,11 @@ function Scene_OSW() {
           var result = getPromptResult(value);
           value = isNaN(result) ? result : Number(result);
           this.changeValue(symbol, value);
-      };
+      };*/
 
       Window_FtkrOptionsBase.prototype.changeSelectValue = function(symbol, options, flag) {
           var value  = this.getConfigValue(symbol);
+          value = this.convertOptionSelectValue(options, value);
           value += flag;
           value = this.adjustSelectStatus(options, value);
           this.changeValue(symbol, value);
@@ -2881,7 +2919,7 @@ function Scene_OSW() {
               case 'NUMBER':
                   return this.adjustNumberStatus(options, value);
               case 'SELECT':
-                  value = this.adjustSelectStatus(options, value);
+                  value = this.convertOptionSelectValue(options, value);
                   return options.string ? this.selectStatusText(options, value) : value;
               case 'BOOLEAN':
                   return !!value;
@@ -2925,7 +2963,7 @@ function Scene_OSW() {
                   this.inputNumberValue(symbol);
                   break;
               case 'SELECT':
-                  this.inputSelectValue(symbol, options);
+                  this.changeSelectValue(symbol, options);
                   break;
               case 'BOOLEAN':
                   this.changeBooleanValue(symbol);
@@ -4797,7 +4835,6 @@ function Scene_OSW() {
 
     Window_OswCommand.prototype.standardCssLayout = function() {
         var layout = copyObject(FTKR.GDM.basic);
-        layout.enabled = true;
         layout.maxCols = FTKR.GDM.command.maxCols;
         return layout;
     };
@@ -4984,7 +5021,6 @@ function Scene_OSW() {
 
     Window_OswSelect.prototype.standardCssLayout = function() {
         var layout = copyObject(FTKR.GDM.basic);
-        layout.enabled = true;
         layout.maxCols = FTKR.GDM.select.maxCols;
         layout.cursorHeight = FTKR.GDM.select.cursorHeight;
         return layout;
