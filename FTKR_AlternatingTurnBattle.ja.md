@@ -16,7 +16,7 @@
 1. [エネミーのターン](#エネミーのターン)
 1. [行動回数](#行動回数)
 1. [アクションポイント](#アクションポイント)
-1. [FTKR_CustomSimpleActorStatus追加コード](#FTKR_CustomSimpleActorStatus追加コード)
+1. [FTKR_CustomSimpleActorStatus追加コード](#ftkr_customsimpleactorstatus追加コード)
 1. [スクリプト](#スクリプト)
 1. [プラグインコマンド](#プラグインコマンド)
 * [プラグインの更新履歴](#プラグインの更新履歴)
