@@ -1,10 +1,11 @@
 //=============================================================================
 // 敵味方交互にターンが進むターン制戦闘システムのプラグイン
 // FTKR_AlternatingTurnBattle.js
+// プラグインNo : 75
 // 作成者     : フトコロ
 // 作成日     : 2018/04/08
-// 最終更新日 : 2018/05/04
-// バージョン : v1.3.0
+// 最終更新日 : 2018/07/27
+// バージョン : v1.3.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +16,7 @@ FTKR.AltTB = FTKR.AltTB || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.3.0 敵味方交互にターンが進むターン制戦闘システム
+ * @plugindesc v1.3.1 敵味方交互にターンが進むターン制戦闘システム
  * @author フトコロ
  *
  * @param TurnEnd Command
@@ -224,13 +225,19 @@ FTKR.AltTB = FTKR.AltTB || {};
  * 1.「プラグインマネージャー(プラグイン管理)」に、このプラグインを追加して
  *    ください。
  * 
- * 2. 他のプラグインとの組み合わせについて
- *    組み合わせて使用する場合は、以下の順番にしてください。
+ * 2. 以下のプラグインと組み合わせる場合は、プラグイン管理の順番に注意してください。
  * 
- *      YEP_BattleEngineCore.js
- *      YEP_X_ActSeqPack*.js
- *      FTKR_AlternatingTurnBattle.js
- *      AttackChain.js
+ *    FTKR_CustomSimpleActorStatus.js (ステータス表示を変更)
+ *    FTKR_FVActorAnimation.js        (フロントビューでアクター画像にアニメーション)
+ *    YEP_BattleEngineCore.js
+ *    YEP_X_ActSeqPack*.js
+ *    ↑このプラグインよりも上に登録↑
+ *    FTKR_AlternatingTurnBattle.js
+ *    ↓このプラグインよりも下に登録↓
+ *    FTKR_BattleWindowLayout.js      (バトル画面のコマンドの位置を変更)
+ *    FTKR_CSS_BattleStatus.js        (バトル画面のステータス表示を変更)
+ *    FTKR_DisplayCommandFrame.js     (カーソルの変わりに枠や画像を表示)
+ *    AttackChain.js
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -515,6 +522,21 @@ FTKR.AltTB = FTKR.AltTB || {};
  * 
  * 
  *-----------------------------------------------------------------------------
+ * FTKR_CustomSimpleActorStatus.js との組み合わせについて
+ *-----------------------------------------------------------------------------
+ * FTKR_CustomSimpleActorStatus.jsに以下のコードを追加します。
+ * ※英字の大文字小文字はどちらでも可
+ * 
+ *    actc
+ *    - アクターの行動回数を表示します。
+ *    
+ *    actp
+ *    - パーティーのアクションポイントを表示します。
+ *      プラグインパラメータ Display AP を設定している場合は
+ *      「設定した文字列：値」という表示になります。
+ * 
+ * 
+ *-----------------------------------------------------------------------------
  * YEP_BattleEngineCore.js との組み合わせについて
  *-----------------------------------------------------------------------------
  * YEP_BattleEngineCoreプラグインの以下の機能は使用できません。
@@ -542,6 +564,12 @@ FTKR.AltTB = FTKR.AltTB || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.3.1 - 2018/7/27 : 競合回避、ヘルプ修正
+ *    1. FTKR_FVActorAnimation.jsと組み合わせた時に、FTKR_FVActorAnimationの
+ *       アクターエフェクト機能が正常に動作しない不具合を修正。
+ *    2. FTKR_CustomSimpleActorStatus.jsで行動回数とアクションポイントを表示する
+ *       機能を追加。
  * 
  * v1.3.0 - 2018/05/04 : 機能追加
  *    1. 使用したスキル命中時に、<AltTB_GainAP:n>で設定したAP取得の条件を
@@ -1738,8 +1766,12 @@ FTKR.AltTB = FTKR.AltTB || {};
         return Math.min(index * this.maxCols() + col, this.maxItems() - 1);
     };
 
+    Window_Selectable.prototype.isOpenAndDeactive = function() {
+        return this.isOpen() && !this.active;
+    };
+
     Window_BattleStatus.prototype.isTouchedInsideDeactive = function() {
-        return TouchInput.isTriggered() && this.isTouchedInsideFrame() && !this.active;
+        return TouchInput.isTriggered() && this.isTouchedInsideFrame() && this.isOpenAndDeactive();
     };
 
     Window_BattleStatus.prototype.processTouch = function() {
@@ -1947,5 +1979,45 @@ FTKR.AltTB = FTKR.AltTB || {};
     };
 
     }// YEP_BattleEngineCore.js
+
+    //=============================================================================
+    //FTKR_CustomSimpleActorStatus.js の対応
+    //=============================================================================
+    if (Imported.FTKR_CSS) {
+
+    var _AltTB_Window_Base_drawCssActorStatusBase_B = Window_Base.prototype.drawCssActorStatusBase_B;
+    Window_Base.prototype.drawCssActorStatusBase_B = function(index, actor, x, y, width, status, lss, css) {
+        switch (status.toUpperCase()) {
+            case 'ACTC':
+                return this.drawActorActionCount(actor, x, y, width);
+            case 'ACTP':
+                return this.drawPartyActionPoint(x, y, width);
+            default:
+                return _AltTB_Window_Base_drawCssActorStatusBase_B.apply(this, arguments);
+        }
+    };
+
+    Window_Base.prototype.drawActorActionCount = function(actor, x, y, width) {
+        var acw = this.textWidth('0') * FTKR.AltTB.dispAcWidth;
+        width -= acw;
+        var text = FTKR.AltTB.dispACFormat.format(actor.actionCount());
+        this.changeTextColor(this.textColor(FTKR.AltTB.acColor));
+        this.drawText(text, x + width, y, acw, 'right');
+        this.resetTextColor();
+        return 1;
+    };
+
+    Window_Base.prototype.drawPartyActionPoint = function(x, y, width) {
+        var disp = FTKR.AltTB.dispAP, tw = 0;
+        if (disp) {
+            tw = this.textWidth(disp + ':');
+            this.drawText(disp + ':', x, y, tw);
+        }
+        this.drawText($gameParty.actionPoint(), x + tw, y, width - tw, 'right');
+        return 1;
+    }
+
+    }//FTKR_CustomSimpleActorStatus.js
+
 
 }());//EOF
