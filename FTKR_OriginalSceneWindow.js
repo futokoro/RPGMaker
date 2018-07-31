@@ -665,6 +665,7 @@ FTKR.OSW = FTKR.OSW || {};
  * v1.5.6 - 2018/07/31 : 不具合修正
  *    1. セレクトウィンドウで、リストにアクターを設定した場合に、アクターの
  *       ゲームデータが正常に反映されない不具合を修正。
+ *    2. コマンドまたはセレクトウィンドウの選択情報を、正しく取得できない不具合を修正
  * 
  * v1.5.5 - 2018/06/18 : 不具合修正
  *    1．プラグインパラメータEnable Escape Codeの設定が反映されない不具合を修正
@@ -2121,10 +2122,10 @@ function Game_OswScene() {
 
     Window_Base.prototype.updateOswIndex = function() {
         if (!this.active) return;
-        if ($gameOswData._active && $gameOswData._oswIndex !== this.index()) {
+        if ($gameOswData._active && $gameOswData._oswIndex !== this.index() || $gameOswData._oswItem !== this.item(this.index())) {
             $gameOswData._oswIndex = this.index();
             $gameOswData._oswItem = this.item(this.index());
-        } else if (!$gameOswData._active && $gameMap._oswIndex !== this.index()) {
+        } else if (!$gameOswData._active && $gameMap._oswIndex !== this.index() !== $gameMap._oswItem !== this.item(this.index())) {
             $gameMap._oswIndex = this.index();
             $gameMap._oswItem = this.item(this.index());
         }
