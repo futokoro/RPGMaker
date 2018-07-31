@@ -2122,10 +2122,10 @@ function Game_OswScene() {
 
     Window_Base.prototype.updateOswIndex = function() {
         if (!this.active) return;
-        if ($gameOswData._active && $gameOswData._oswIndex !== this.index() || $gameOswData._oswItem !== this.item(this.index())) {
+        if ($gameOswData._active && ($gameOswData._oswIndex !== this.index() || $gameOswData._oswItem !== this.item(this.index()))) {
             $gameOswData._oswIndex = this.index();
             $gameOswData._oswItem = this.item(this.index());
-        } else if (!$gameOswData._active && $gameMap._oswIndex !== this.index() !== $gameMap._oswItem !== this.item(this.index())) {
+        } else if (!$gameOswData._active && ($gameMap._oswIndex !== this.index() !== $gameMap._oswItem !== this.item(this.index()))) {
             $gameMap._oswIndex = this.index();
             $gameMap._oswItem = this.item(this.index());
         }
