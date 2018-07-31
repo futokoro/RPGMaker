@@ -4,8 +4,8 @@
 // プラグインNo : 46
 // 作成者     : フトコロ
 // 作成日     : 2017/06/17
-// 最終更新日 : 2018/06/18
-// バージョン : v1.5.5
+// 最終更新日 : 2018/07/31
+// バージョン : v1.5.6
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.OSW = FTKR.OSW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.5.5 オリジナルのシーンやウィンドウを作成する
+ * @plugindesc v1.5.6 オリジナルのシーンやウィンドウを作成する
  * @author フトコロ
  *
  * @param --ウィンドウの共通設定--
@@ -661,6 +661,10 @@ FTKR.OSW = FTKR.OSW || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.5.6 - 2018/07/31 : 不具合修正
+ *    1. セレクトウィンドウで、リストにアクターを設定した場合に、アクターの
+ *       ゲームデータが正常に反映されない不具合を修正。
  * 
  * v1.5.5 - 2018/06/18 : 不具合修正
  *    1．プラグインパラメータEnable Escape Codeの設定が反映されない不具合を修正
@@ -2458,7 +2462,8 @@ function Game_OswScene() {
 
     Window_OswSelect.prototype.isEnabled = function(item) {
         FTKR.setGameData(this._window._actor, null, item);
-        return FTKR.evalFormula(this._window._enable);
+        var result = FTKR.evalFormula(this._window._enable);
+        return result;
     };
 
     Window_OswSelect.prototype.makeItemList = function() {
@@ -2511,7 +2516,7 @@ function Game_OswScene() {
             case Game_OswBase.SELECT_PARTY_RESERVE:
                 return $gameParty.reserveMembers()[index];
             case Game_OswBase.SELECT_ACTOR:
-                return this.item(index) ? new Game_Actor(this.item(index).id) : null;
+                return this.item(index) ? $gameActors.actor(this.item(index).id) : null;
         }
         return this._window._actor;
     };
