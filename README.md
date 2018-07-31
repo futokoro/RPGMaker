@@ -297,7 +297,7 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_ActionGauge](FTKR_ActionGauge.js) | なし | [v0.7.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ActionGauge.js) | 2017/04/21 | アクションゲージ |
 | [FTKR_addon_TMShooting](FTKR_addon_TMShooting.js) | なし | [v0.2.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_addon_TMShooting.js) | 2018/05/09 | tomoakyさんのシューティングプラグインの機能拡張 |
-| [FTKR_GDM_WindowEditor](FTKR_GDM_WindowEditor.js) | [仮版](FTKR_GDM_WindowEditor.ja.md) | [v0.9.5](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_GDM_WindowEditor.js) | 2018/07/18 | トリアコンタンさんのGUI画面デザインプラグイン(GraphicalDesignMode.js)の機能拡張 |
+| [FTKR_GDM_WindowEditor](FTKR_GDM_WindowEditor.js) | [仮版](FTKR_GDM_WindowEditor.ja.md) | [v0.9.7](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_GDM_WindowEditor.js) | 2018/07/31 | トリアコンタンさんのGUI画面デザインプラグイン(GraphicalDesignMode.js)の機能拡張 |
 | [FTKR_CustomSimpleActorStatus_3](FTKR_CustomSimpleActorStatus_3.js) | なし | [v3.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CustomSimpleActorStatus_3.js) | 2018/07/15 | ステータス表示を変更する 本体プラグイン<br>FTKR_GDM_WindowEditor用 |
 
 # 更新情報

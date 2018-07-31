@@ -4,8 +4,8 @@
 // プラグインNo : 86
 // 作成者     : フトコロ
 // 作成日     : 2018/07/15
-// 最終更新日 : 2018/07/18
-// バージョン : v0.9.6
+// 最終更新日 : 2018/07/31
+// バージョン : v0.9.7
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -23,7 +23,7 @@ FTKR.GDM = FTKR.GDM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v0.9.6 トリアコンタンさんのGUI画面デザインプラグインの機能追加
+ * @plugindesc v0.9.7 トリアコンタンさんのGUI画面デザインプラグインの機能追加
  * @author フトコロ
  *
  * @param autoCreate
@@ -267,6 +267,7 @@ FTKR.GDM = FTKR.GDM || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v0.9.7 - FTKR_OriginalSceneWindow.js v1.5.6 の不具合修正を反映
  * v0.9.6 - ウィンドウ背景画像の設定機能を実装
  * v0.9.5 - コモンウィンドウのセレクト参照機能を実装
  * v0.9.4 - 表示スイッチを無効にできない不具合を修正
@@ -4756,7 +4757,7 @@ function Scene_OSW() {
 
     Window_Base.prototype.updateOswIndex = function() {
         if (!this.active) return;
-        if ($gameOswData._active && $gameOswData._oswIndex !== this.index()) {
+        if ($gameOswData._active && ($gameOswData._oswIndex !== this.index() || $gameOswData._oswItem !== this.item(this.index()))) {
             $gameOswData._oswIndex = this.index();
             $gameOswData._oswItem = this.item(this.index());
         }
@@ -5130,7 +5131,7 @@ function Scene_OSW() {
             case Game_OswData.SELECT_PARTY_RESERVE:
                 return $gameParty.reserveMembers()[index];
             case Game_OswData.SELECT_ACTOR:
-                return this.item(index) ? new Game_Actor(this.item(index).id) : null;
+                return this.item(index) ? $gameActors.actor(this.item(index).id) : null;
         }
         return this.actor();
     };
