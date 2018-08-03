@@ -4,8 +4,8 @@
 // プラグインNo : 7
 // 作成者　　   : フトコロ(futokoro)
 // 作成日　　   : 2017/02/25
-// 最終更新日   : 2018/07/16
-// バージョン   : v1.15.10
+// 最終更新日   : 2018/08/03
+// バージョン   : v1.15.11
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.15.10 ツリー型スキル習得システム
+ * @plugindesc v1.15.11 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -1404,9 +1404,13 @@ FTKR.STS = FTKR.STS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.15.11 - 2018/08/03 : 不具合修正
+ *    1. 習得したスキルを忘れさせ再度習得した場合に、ツリーをリセットしても
+ *       使用したコストが正しく戻らない不具合を修正。
+ * 
  * v1.15.10 - 2018/07/16 : 処理見直し
  *    1. SPの計算処理を見直し。
- *    2. ヘルプの設定方法にFTKR_SkillExpansion.jsを追加。
+ *    2. ヘルプの設定方法にTKR_SkillExpansion.jsを追加。
  * 
  * v1.15.9 - 2018/05/04 : 機能追加
  *    1. 習得回数を取得するスクリプトを追加。(しぐれんさん案)
@@ -2426,14 +2430,12 @@ function Scene_STS() {
     };
 
     Game_Actor.prototype.stsUsedCsp = function(classId, skillId) {
-        if (!this.isStsLearnedSkill(skillId)) return 0;
         if (!this._stsUsedCsp) this._stsUsedCsp = [];
         if (!this._stsUsedCsp[classId]) this._stsUsedCsp[classId] = [];
         return this._stsUsedCsp[classId][skillId] || 0;
     };
 
     Game_Actor.prototype.stsUsedSp = function(skillId) {
-        if (!this.isStsLearnedSkill(skillId)) return 0;
         if (FTKR.STS.sp.enableClassSp) {
             return this.stsUsedCsp(this._classId, skillId);
         } else {
@@ -2456,7 +2458,6 @@ function Scene_STS() {
     };
 
     Game_Actor.prototype.stsUsedGold = function(skillId) {
-        if (!this.isStsLearnedSkill(skillId)) return 0;
         if (!this._stsUsedGold) this._stsUsedGold = [];
         return this._stsUsedGold[skillId] || 0;
     };
@@ -2477,7 +2478,6 @@ function Scene_STS() {
     };
 
     Game_Actor.prototype.stsUsedItems = function(skillId) {
-        if (!this.isStsLearnedSkill(skillId)) return [];
         this.initStsUsedItem(skillId);
         return this._stsUsedItem[skillId];
     };
@@ -2499,7 +2499,6 @@ function Scene_STS() {
     };
 
     Game_Actor.prototype.stsUsedWeapons = function(skillId) {
-        if (!this.isStsLearnedSkill(skillId)) return [];
         this.initStsUsedWeapon(skillId);
         return this._stsUsedWeapon[skillId];
     };
@@ -2521,7 +2520,6 @@ function Scene_STS() {
     };
 
     Game_Actor.prototype.stsUsedArmors = function(skillId) {
-        if (!this.isStsLearnedSkill(skillId)) return [];
         this.initStsUsedArmor(skillId);
         return this._stsUsedArmor[skillId];
     };
@@ -2543,7 +2541,6 @@ function Scene_STS() {
     };
 
     Game_Actor.prototype.stsUsedVars = function(skillId) {
-        if (!this.isStsLearnedSkill(skillId)) return [];
         this.initStsUsedVar(skillId);
         return this._stsUsedVar[skillId];
     };

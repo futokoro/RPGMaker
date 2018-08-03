@@ -2,6 +2,26 @@
 
 # 過去の更新情報
 
+## 2018/07の更新情報
+
+### 2018/07/31
+* [FTKR_OriginalSceneWindow](FTKR_OriginalSceneWindow.ja.md) v1.5.6
+
+### 2018/07/27
+* [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v1.3.1
+
+### 2018/07/16
+* [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.ja.md) v1.15.10
+
+### 2018/07/15
+* [FTKR_GDM_WindowEditor](FTKR_GDM_WindowEditor.js) v0.9.0(新規)
+
+### 2018/07/12
+* [FTKR_ItemCompositionSystem](FTKR_ItemCompositionSystem.ja.md) v1.5.4
+
+### 2018/07/01
+* [FTKR_ExVariablesChange](FTKR_ExVariablesChange.ja.md) v1.2.4
+
 ## 2018/06の更新情報
 
 ### 2018/06/18

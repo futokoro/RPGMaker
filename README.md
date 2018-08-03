@@ -146,7 +146,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
-| [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js) | [あり](FTKR_SkillTreeSystem.ja.md) | [v1.15.10](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillTreeSystem.js) | 2018/05/04 | ツリー型のスキル習得システム |
+| [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js) | [あり](FTKR_SkillTreeSystem.ja.md) | [v1.15.11](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillTreeSystem.js) | 2018/08/03 | ツリー型のスキル習得システム |
 | [FTKR_STS_CustomWindow](FTKR_STS_CustomWindow.js) | [仮版](FTKR_STS_CustomWindow.ja.md) | [v1.2.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_STS_CustomWindow.js) | 2017/06/07 | スキルツリー習得画面のレイアウトを変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js) |
 
 [目次に戻る](#目次)
@@ -304,23 +304,8 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 2018/07の更新情報
 
-### 2018/07/31
-* [FTKR_OriginalSceneWindow](FTKR_OriginalSceneWindow.ja.md) v1.5.6
-
-### 2018/07/27
-* [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v1.3.1
-
-### 2018/07/16
-* [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.ja.md) v1.15.10
-
-### 2018/07/15
-* [FTKR_GDM_WindowEditor](FTKR_GDM_WindowEditor.js) v0.9.0(新規)
-
-### 2018/07/12
-* [FTKR_ItemCompositionSystem](FTKR_ItemCompositionSystem.ja.md) v1.5.4
-
-### 2018/07/01
-* [FTKR_ExVariablesChange](FTKR_ExVariablesChange.ja.md) v1.2.4
+### 2018/08/03
+* [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.ja.md) v1.15.11
 
 [過去の更新情報](note.md)
 
