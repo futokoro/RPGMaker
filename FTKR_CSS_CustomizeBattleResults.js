@@ -4,8 +4,8 @@
 // プラグインNo : 44
 // 作成者     : フトコロ
 // 作成日     : 2017/06/07
-// 最終更新日 : 2018/01/12
-// バージョン : v1.4.3
+// 最終更新日 : 2018/08/04
+// バージョン : v1.5.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ var FTKR = FTKR || {};
 FTKR.CBR = FTKR.CBR || {};
 
 /*:
- * @plugindesc v1.4.3 カスタム可能な戦闘結果画面を表示する
+ * @plugindesc v1.5.0 カスタム可能な戦闘結果画面を表示する
  * @author フトコロ
  *
  * @param --タイトル設定--
@@ -175,6 +175,16 @@ FTKR.CBR = FTKR.CBR || {};
  * @param --アクター別戦績設定--
  * @default
  *
+ * @param Displayed Members
+ * @desc 画面に表示するメンバーを選択します。
+ * テキスト入力でスクリプトを記述可能です。
+ * @type select
+ * @option バトルメンバー
+ * @value 0
+ * @option 全パーティーメンバー
+ * @value 1
+ * @default 0
+ * 
  * @param Actor Status Text1
  * @desc Text1部に表示するステータスを指定します。
  * 詳細はヘルプ参照
@@ -375,6 +385,9 @@ FTKR.CBR = FTKR.CBR || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.5.0 - 2018/08/04 : 機能追加
+ *    1. バトルメンバー以外も画面に表示する機能を追加。
+ * 
  * v1.4.3 - 2018/01/12 : 不具合修正、機能追加
  *    1. FTKR_ExBattleEventと組み合わせたときに、戦闘終了時イベント中に
  *       正しく戦績画面の処理が実行できない不具合を修正。
@@ -430,6 +443,18 @@ function Window_BattleResultActor() {
 
 if (Imported.FTKR_CSS) (function() {
 
+    var paramParse = function(obj) {
+        return JSON.parse(JSON.stringify(obj, paramReplace));
+    };
+
+    var paramReplace = function(key, value) {
+        try {
+            return JSON.parse(value || null);
+        } catch (e) {
+            return value;
+        }
+    };
+
     //=============================================================================
     // プラグイン パラメータ
     //=============================================================================
@@ -472,6 +497,7 @@ if (Imported.FTKR_CSS) (function() {
         },
         actor:{
             enabled     :true,
+            memberType  :paramParse(parameters['Displayed Members'] || 0),
             visibleRows :Number(parameters['Actor Visible Rows'] || 0),
             maxCols     :Number(parameters['Actor Max Cols'] || 0),
             fontSize    :Number(parameters['Actor Font Size'] || 0),
@@ -1046,13 +1072,24 @@ if (Imported.FTKR_CSS) (function() {
         return FTKR.CBR.actor;
     };
 
+    Window_BattleResultActor.prototype.displayMembers = function() {
+        switch(FTKR.CBR.actor.memberType) {
+            case 0:
+                return $gameParty.battleMembers();
+            case 1:
+                return $gameParty.allMembers();
+            default:
+                return eval(FTKR.CBR.actor.memberType);
+        }
+    };
+
     Window_BattleResultActor.prototype.maxItems = function() {
-        return $gameParty.size();
+        return this.displayMembers().length;
     };
 
     Window_BattleResultActor.prototype.drawItem = function(index) {
         var lss = this._lssStatus;
-        var actor = $gameParty.members()[index];
+        var actor = this.displayMembers()[index];
         var rect = this.itemRect(index);
         this.drawCssActorStatus(index, actor, rect.x, rect.y, rect.width, rect.height, lss);
     };
@@ -1067,7 +1104,7 @@ if (Imported.FTKR_CSS) (function() {
     Window_BattleResultActor.prototype.itemHeight = function() {
         return this.lineHeight() * this.cursorHeight();
     };
-
+    
     //=============================================================================
     // アイテム報酬ウィンドウクラス
     //Window_BattleResultItem
