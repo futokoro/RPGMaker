@@ -4,8 +4,8 @@
 // プラグインNo : 75
 // 作成者     : フトコロ
 // 作成日     : 2018/04/08
-// 最終更新日 : 2018/07/27
-// バージョン : v1.3.1
+// 最終更新日 : 2018/08/05
+// バージョン : v1.3.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.AltTB = FTKR.AltTB || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.3.1 敵味方交互にターンが進むターン制戦闘システム
+ * @plugindesc v1.3.2 敵味方交互にターンが進むターン制戦闘システム
  * @author フトコロ
  *
  * @param TurnEnd Command
@@ -107,6 +107,15 @@ FTKR.AltTB = FTKR.AltTB || {};
  * @on 有効
  * @off 無効
  * @default ture
+ *
+ * @param Not Activated Sv Actor Sign
+ * @desc ターン終了時に未行動のSVアクターの表し方を指定します。
+ * @type select
+ * @option 待機モーション
+ * @value 0
+ * @option 停止
+ * @value 1
+ * @default 0
  *
  * @param --- アクションポイント ---
  * 
@@ -565,7 +574,18 @@ FTKR.AltTB = FTKR.AltTB || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
- * v1.3.1 - 2018/7/27 : 競合回避、ヘルプ修正
+ * v1.3.2 - 2018/08/05 : 不具合修正、機能追加
+ *    1. 行動後モーションを停止に設定した場合、ターン開始時に待機モーションに
+ *       戻らない不具合を修正。(サイドビュー)
+ *    2. プレイヤーターン終了時に未行動のアクターのモーションを設定する機能を追加。
+ *    3. キー操作でアクターを変更する場合に、行動回数を追加したアクターから次の
+ *       アクターにカーソルが正常に移らない不具合を修正。
+ *    4. 複数回行動可能なアクターが、行動後にまだ行動回数が残っていても１歩下がって
+ *       しまう不具合を修正。(サイドビュー)
+ *    5. 行動回数消費を無効かつアクターコマンド選択から開始に設定した場合に、
+ *       最初のアクターが前進後にすぐに一歩下がってしまう不具合を修正。(サイドビュー)
+ * 
+ * v1.3.1 - 2018/07/27 : 競合回避、ヘルプ修正
  *    1. FTKR_FVActorAnimation.jsと組み合わせた時に、FTKR_FVActorAnimationの
  *       アクターエフェクト機能が正常に動作しない不具合を修正。
  *    2. FTKR_CustomSimpleActorStatus.jsで行動回数とアクションポイントを表示する
@@ -801,6 +821,7 @@ FTKR.AltTB = FTKR.AltTB || {};
         dispAcWidth     : (paramParse(parameters['Display AC Width']) || 3),
         activated       : (paramParse(parameters['Activated Actor Sign']) || 0),
         activatedSv     : (paramParse(parameters['Activated Sv Actor Sign']) || 0),
+        notActivatedSv  : (paramParse(parameters['Not Activated Sv Actor Sign']) || 0),
         enableAP        : (paramParse(parameters['Enable AP']) || false),
         dispAP          : (paramParse(parameters['Display AP']) || 'AP'),
         partyAp         : (paramParse(parameters['Party AP']) || 0),
@@ -860,9 +881,18 @@ FTKR.AltTB = FTKR.AltTB || {};
 
     BattleManager.changeTrunSide = function(flag) {
         if (!flag) this._phase = 'turn';
+        if (FTKR.AltTB.notActivatedSv && this.isPlayerTurn()) {
+            $gameParty.setActionState('');
+        }
         this._isPlayerTurn = !this._isPlayerTurn;
         this._inputCount = 0;
         if (FTKR.AltTB.enableAP) this.changeAPWindow();
+    };
+
+    Game_Party.prototype.setActionState = function(state) {
+        this.members().forEach(function(member){
+            member.setActionState(state);
+        });
     };
 
     BattleManager.changeAPWindow = function() {
@@ -1054,10 +1084,17 @@ FTKR.AltTB = FTKR.AltTB || {};
         $gameTroop.increaseTurn();
         this.makeActionOrders();
         $gameParty.requestMotionRefresh();
+        $gameParty.resetActionState();
         this._logWindow.startTurn();
         this._statusWindow.refresh();
         if (FTKR.AltTB.enableAP) this._partyApWindow.refresh();
         if (FTKR.AltTB.startActorCmd) this.changeActorAltTB(0);
+    };
+
+    Game_Party.prototype.resetActionState = function() {
+        this.members().forEach(function(member){
+            member.setActionState('undecided');
+        });
     };
 
     //書き換え
@@ -1089,9 +1126,11 @@ FTKR.AltTB = FTKR.AltTB || {};
     };
 
     BattleManager.autoSelectNextActor = function() {
-        if (!FTKR.AltTB.notSelectActivatedActor) return;
-        if (this.actor() && !this.actor().canSelectInput()){
+        if (!FTKR.AltTB.notSelectActivatedActor || !this.actor()) return;
+        if (!this.actor().canSelectInput()){
             this.selectNextCommand();
+        } else {
+            this.actor().setActionState('inputting');
         }
     };
 
@@ -1146,6 +1185,15 @@ FTKR.AltTB = FTKR.AltTB || {};
     };
 
     //書き換え
+    Game_Battler.prototype.performActionEnd = function() {
+        if (this.canInputAction() || FTKR.AltTB.disableAC) {
+            this.setActionState('inputting');
+        } else {
+            this.setActionState('done');
+        }
+    };
+
+    //書き換え
     BattleManager.updateTurnEnd = function() {
         this._phase = 'turnStart';
         this._preemptive = false;
@@ -1177,28 +1225,30 @@ FTKR.AltTB = FTKR.AltTB || {};
     //書き換え
     BattleManager.selectNextCommand = function() {
         do {
-            if (!this.actor() || !this.actor().selectNextCommand()) {
+            if ($gameParty.canInputAction()) {
                 if (this._actorIndex + 1 >= $gameParty.size()) {
                     this.changeActorAltTB(0);
                 } else {
                     this.changeActorAltTB(this._actorIndex + 1);
                 }
+            } else {
+                return;
             }
-            if (!$gameParty.canInputAction()) return;
         } while (!this.actor().canSelectInput());
     };
 
     //書き換え
     BattleManager.selectPreviousCommand = function() {
         do {
-            if (!this.actor() || !this.actor().selectPreviousCommand()) {
+            if ($gameParty.canInputAction()) {
                 if (this._actorIndex - 1 < 0) {
                     this.changeActorAltTB($gameParty.size() - 1);
                 } else {
                     this.changeActorAltTB(this._actorIndex - 1);
                 }
+            } else {
+                return;
             }
-            if (!$gameParty.canInputAction()) return;
         } while (!this.actor().canSelectInput());
     };
     

@@ -135,7 +135,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
-| [FTKR_SkillExpansion](FTKR_SkillExpansion.js) | [仮版](FTKR_SkillExpansion.ja.md) | [v1.3.4](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillExpansion.js) | 2017/10/16 | スキルの仕様を拡張する |
+| [FTKR_SkillExpansion](FTKR_SkillExpansion.js) | [仮版](FTKR_SkillExpansion.ja.md) | [v1.4.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillExpansion.js) | 2018/08/05 | スキルの仕様を拡張する |
 | [FTKR_SEP_ShowSkillStatus](FTKR_SEP_ShowSkillStatus.js) | なし | [v1.4.6](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SEP_ShowSkillStatus.js) | 2018/03/27 | スキル画面の表示を拡張する <br> ＜以下のプラグインが必要＞ <br> [FTKR_SkillExpansion](FTKR_SkillExpansion.js) |
 | [FTKR_SkillUpgradeSystem_Core](FTKR_SkillUpgradeSystem_Core.js) | [ツクマテ](http://tm.lucky-duet.com/viewtopic.php?f=5&t=3076) | [v1.5.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillUpgradeSystem_Core.js) | 2017/10/21 | スキル強化システム <br> ＜以下のプラグインが必要＞ <br>[FTKR_SkillExpansion](FTKR_SkillExpansion.js) |
 | [FTKR_SkillUpgradeSystem_Window](FTKR_SkillUpgradeSystem_Window.js) | なし | [v1.5.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillUpgradeSystem_Window.js) | 2017/10/04 | スキル強化システムの専用画面を実装する <br> ＜以下のプラグインが必要＞ <br>[FTKR_SkillExpansion](FTKR_SkillExpansion.js) <br>[FTKR_SEP_ShowSkillStatus](FTKR_SEP_ShowSkillStatus.js) <br> [FTKR_SkillUpgradeSystem_Core](FTKR_SkillUpgradeSystem_Core.js)|
@@ -205,7 +205,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 | [FTKR_BattleAbortConditions](FTKR_BattleAbortConditions.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_BattleAbortConditions.js) | 2018/02/12 | 設定した条件を満たすと、バトルを中断して勝利または敗北する |
 | [FTKR_MaxBattleMembers](FTKR_MaxBattleMembers.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_MaxBattleMembers.js) | 2018/02/25 | バトルメンバーの最大人数を変数で管理する |
 | [FTKR_ChangeBattleSpeed](FTKR_ChangeBattleSpeed.js) | なし | [v1.0.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ChangeBattleSpeed.js) | 2018/02/27 | バトル中の各種速度を変数で管理する |
-| [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.js) | [仮版](FTKR_AlternatingTurnBattle.ja.md) | [v1.3.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AlternatingTurnBattle.js) | 2018/07/27 | 敵味方交互にターンが進むターン制戦闘システム |
+| [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.js) | [仮版](FTKR_AlternatingTurnBattle.ja.md) | [v1.3.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AlternatingTurnBattle.js) | 2018/08/05 | 敵味方交互にターンが進むターン制戦闘システム |
 | [FTKR_BattleWindowLayout](FTKR_BattleWindowLayout.js) | [あり](FTKR_BattleWindowLayout.ja.md) | [v1.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_BattleWindowLayout.js) | 2018/04/09 | 戦闘時のウィンドウ配置を変更する |
 | [FTKR_ExForceAction](FTKR_ExForceAction.js) | [あり](FTKR_ExForceAction.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExForceAction.js) | 2018/04/14 | 戦闘行動の強制コマンドの機能を拡張する |
 | [FTKR_ExGuardEffect](FTKR_ExGuardEffect.js) | [あり](FTKR_ExGuardEffect.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExGuardEffect.js) | 2018/04/15 | 防御の効果を拡張する |
@@ -303,6 +303,10 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 # 更新情報
 
 2018/07の更新情報
+
+### 2018/08/05
+* [FTKR_SkillExpansion](FTKR_SkillExpansion.ja.md) v1.4.0
+* [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v1.3.2
 
 ### 2018/08/04
 * [FTKR_CSS_CustomizeBattleResults](FTKR_CSS_CustomizeBattleResults.ja.md) v1.5.0

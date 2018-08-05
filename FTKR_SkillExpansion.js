@@ -4,8 +4,8 @@
 // プラグインNo : 4
 // 作成者     : フトコロ
 // 作成日     : 2017/02/18
-// 最終更新日 : 2017/10/16
-// バージョン : v1.3.4
+// 最終更新日 : 2018/08/05
+// バージョン : v1.4.0
 //=======↑本プラグインを改変した場合でも、この欄は消さないでください↑===============
 
 var Imported = Imported || {};
@@ -16,13 +16,20 @@ FTKR.SEP = FTKR.SEP || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.3.4 スキル拡張プラグイン
+ * @plugindesc v1.4.0 スキル拡張プラグイン
  * @author フトコロ
  *
  * @param Elements Damage Calc
  * @desc 複数属性に対するダメージ計算方法
  * 0 - 最大, 1 - 平均, 2 - 累積, 3 - 最小
  * @default 0
+ *
+ * @param Exclude 100% Elements
+ * @desc 最大または平均の場合、ダメージ計算時に100%の属性有効度を除外するか
+ * @type boolean
+ * @on 除外する
+ * @off 除外しない
+ * @default false
  *
  * @param Critical For Each
  * @desc ダメージID毎にクリティカル判定を行うか
@@ -627,13 +634,16 @@ FTKR.SEP = FTKR.SEP || {};
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
- * Copyright (c) 2017 Futokoro
+ * Copyright (c) 2017,2018 Futokoro
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.4.0 - 2018/08/05 : 機能追加
+ *    1. 属性ダメージ計算時に100%の属性有効度を除外できる機能を追加。
  * 
  * v1.3.4 - 2017/10/16 : 不具合修正
  *    1. イベントコマンドの条件分岐で、スキルを覚えていることを
@@ -752,15 +762,16 @@ FTKR.SEP = FTKR.SEP || {};
 //=============================================================================
 // プラグイン パラメータ
 //=============================================================================
-FTKR.SEP.parameters = PluginManager.parameters('FTKR_SkillExpansion');
+var parameters = PluginManager.parameters('FTKR_SkillExpansion');
 
-FTKR.SEP.elementDamageCalc = Number(FTKR.SEP.parameters['Elements Damage Calc'] || 0);
-FTKR.SEP.makeSepForEach = Number(FTKR.SEP.parameters['Make Sep For Each'] || 0);
-FTKR.SEP.defDamageRate = Number(FTKR.SEP.parameters['Damage Rate'] || 0);
-FTKR.SEP.defCriticalRate = Number(FTKR.SEP.parameters['Critical Rate'] || 0);
-FTKR.SEP.criticalForEach = Number(FTKR.SEP.parameters['Critical For Each'] || 0);
-FTKR.SEP.enabledRepeatFailure = Number(FTKR.SEP.parameters['Enabled Repeat Failure'] || 0);
-FTKR.SEP.autoDamageRate = Number(FTKR.SEP.parameters['AutoAddition Damage Rate'] || 0);
+FTKR.SEP.elementDamageCalc = Number(parameters['Elements Damage Calc'] || 0);
+FTKR.SEP.excludeElement    = JSON.parse(parameters['Exclude 100% Elements'] || false);
+FTKR.SEP.makeSepForEach = Number(parameters['Make Sep For Each'] || 0);
+FTKR.SEP.defDamageRate = Number(parameters['Damage Rate'] || 0);
+FTKR.SEP.defCriticalRate = Number(parameters['Critical Rate'] || 0);
+FTKR.SEP.criticalForEach = Number(parameters['Critical For Each'] || 0);
+FTKR.SEP.enabledRepeatFailure = Number(parameters['Enabled Repeat Failure'] || 0);
+FTKR.SEP.autoDamageRate = Number(parameters['AutoAddition Damage Rate'] || 0);
 
 FTKR.Utility = FTKR.Utility || {};
 
@@ -1858,13 +1869,43 @@ Game_Action.prototype.statesData = function() {
     return this.subject().states();
 };
 
+//書き換え
+Game_Action.prototype.elementsMaxRate = function(target, elements) {
+    if (elements.length > 0) {
+        var exclude = 0;
+        var maxRate = Math.max.apply(null, elements.map(function(elementId) {
+            var rate = target.elementRate(elementId);
+            if (FTKR.SEP.excludeElement && rate == 1) {
+                exclude = 1;
+                return null;
+            } else {
+                return rate;
+            }
+        }, this));
+        return maxRate || exclude;
+    } else {
+        return 1;
+    }
+};
+
 Game_Action.prototype.elementsAverageRate = function(target, elements) {
     if (!elements.length) return 1;
-   	var value = 0;
-    elements.forEach(function(elementId) {
-        value += target.elementRate(elementId);
+     var value = 0;
+     var exclude = 0;
+     var count = 0;
+     elements.forEach(function(elementId) {
+        var rate = target.elementRate(elementId);
+        if (FTKR.SEP.excludeElement && rate == 1) {
+            exclude = 1;
+            count++
+            return;
+        }
+        value += rate;
     });
-    return value / elements.length;
+    var calcElms = elements.length - count;
+    if (!calcElms) return 1;
+    if (!value) return exclude;
+    return value / calcElms;
 };
 
 Game_Action.prototype.elementsAccumlateRate = function(target, elements) {
