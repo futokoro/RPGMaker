@@ -184,7 +184,9 @@ Enabled: eval
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.0.0](FTKR_ExItemConfig_Damage.js) | 2017/04/14 | 初版公開 |
+| [ver1.1.0](FTKR_ExItemConfig_Damage.js) | 2018/08/05 | 属性ダメージ計算時に100%の属性有効度を除外できる機能を追加 |
+| ver1.0.1 | 2017/04/29 | FTKR_ItemSelfVariables の v1.1.0以降に対応 |
+| ver1.0.0 | 2017/04/14 | 初版公開 |
 
 ## ライセンス
 
