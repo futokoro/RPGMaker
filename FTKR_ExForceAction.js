@@ -4,8 +4,8 @@
 // プラグインNo : 78
 // 作成者     : フトコロ
 // 作成日     : 2018/04/14
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2018/08/06
+// バージョン : v1.1.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.EFA = FTKR.EFA || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 戦闘行動の強制コマンドの機能を拡張する
+ * @plugindesc v1.1.1 戦闘行動の強制コマンドの機能を拡張する
  * @author フトコロ
  *
  * @param Load Face In Battle Start
@@ -78,6 +78,9 @@ FTKR.EFA = FTKR.EFA || {};
  * EFA_戦闘行動の強制 [主体分類] [主体ID] スキル [スキルID] 対象 [対象ID] (顔表示) (リセット無効) (行動追加)
  * EFA_FORCE_ACTION [battlerType] [battlerId] SKILL [skillId] TARGET [targetId] (SHOW_FACE) (DISABLE_RESET) (ADD_ACTION)
  * 
+ * "スキル(SKILL)"の変わりに"アイテム(ITEM)"に変えることで、アイテムを使用できます。
+ * アイテムにした場合は、"スキルID(skillId)"を"アイテムID(itemId)"を設定してください。
+ * 
  *    主体分類(battlerType)
  *        ：行動させる主体キャラをどのように選ぶかを指定します。
  *        　以下の文字列を入力してください。
@@ -98,6 +101,12 @@ FTKR.EFA = FTKR.EFA || {};
  *        　\v[n] と指定することで変数 n の値を参照できます。
  *        　主体キャラがアクターで、0 と指定した場合は、そのキャラが
  *        　覚えているスキルから、自動戦闘と同じ手法でスキルと対象を自動選択します。
+ * 
+ *    アイテム [アイテムID]
+ *    ITEM [itemId]
+ *        ：主体キャラに使用させるアイテムのIDを指定します。
+ *        　\v[n] と指定することで変数 n の値を参照できます。
+ *        　上記のスキルとは別に使用してください。
  * 
  *    対象 [対象ID]
  *    TARGET [targetId]
@@ -184,6 +193,13 @@ FTKR.EFA = FTKR.EFA || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.1.1 - 2018/08/06 : 不具合修正
+ *    1. スキルやアイテムで「逃げる」を実行した場合に、SVキャラが消えずに
+ *       残ってしまう不具合を修正。
+ * 
+ * v1.1.0 - 2018/05/01 : 機能追加
+ *    1. 戦闘行動の強制で、アイテムを使用できる機能を追加。
  * 
  * v1.0.0 - 2018/04/14 : 初版作成
  * 
@@ -297,7 +313,7 @@ FTKR.EFA = FTKR.EFA || {};
 
     Game_Interpreter.prototype.setForceAction = function(args) {
         var battler = null, battlerId = 0, skillId = 0, targetId = 0,
-            face = FTKR.EFA.showFace, chara = false, reset = true, add = false;
+            face = FTKR.EFA.showFace, chara = false, reset = true, add = false, useItem = false;
         for (var i = 0; i < args.length; i++) {
             var arg = (args[i] + '').toUpperCase();
             switch (arg) {
@@ -322,6 +338,13 @@ FTKR.EFA = FTKR.EFA || {};
                 case 'スキル':
                 case 'SKILL':
                     skillId = setArgNum(args[i+1]);
+                    useItem = false;
+                    i += 1;
+                    break;
+                case 'アイテム':
+                case 'ITEM':
+                    skillId = setArgNum(args[i+1]);
+                    useItem = true;
                     i += 1;
                     break;
                 case '対象':
@@ -350,13 +373,13 @@ FTKR.EFA = FTKR.EFA || {};
             }
         }
         if (battler && !battler.isDeathStateAffected()) {
-            return this.setBattlerForceAction(battler, skillId, targetId, face, chara, reset, add);
+            return this.setBattlerForceAction(battler, skillId, targetId, face, chara, reset, add, useItem);
         }
         return false;
     };
 
-    Game_Interpreter.prototype.setBattlerForceAction = function(battler, skillId, targetId, face, chara, reset, add) {
-        if (battler.isActor() && !skillId) {
+    Game_Interpreter.prototype.setBattlerForceAction = function(battler, skillId, targetId, face, chara, reset, add, useItem) {
+        if (battler.isActor() && !skillId && !useItem) {
             var action = battler.getAutoBattleAction();
             if (action) {
                 skillId = action.item().id;
@@ -367,7 +390,7 @@ FTKR.EFA = FTKR.EFA || {};
         if (chara && battler.isActor() && !battler.isBattleMember()) {
             BattleManager.sideBattler().setBattler(battler);
         }
-        battler.forceActionEx(skillId, targetId, reset, add);
+        battler.forceActionEx(skillId, targetId, reset, add, useItem);
         BattleManager.forceAction(battler);
         this.setWaitMode('action');
         if (face && battler.isActor() && !battler.isBattleMember()) {
@@ -401,10 +424,14 @@ FTKR.EFA = FTKR.EFA || {};
     // Game_Battler
     //=============================================================================
 
-    Game_Battler.prototype.forceActionEx = function(skillId, targetIndex, reset, add) {
+    Game_Battler.prototype.forceActionEx = function(itemId, targetIndex, reset, add, useItem) {
         if (reset) this.clearActions();
         var action = new Game_Action(this, true);
-        action.setSkill(skillId);
+        if (useItem) {
+            action.setItem(itemId);
+        } else {
+            action.setSkill(itemId);
+        }
         if (targetIndex === -2) {
             action.setTarget(this._lastTargetIndex);
         } else if (targetIndex === -1) {
@@ -487,20 +514,17 @@ FTKR.EFA = FTKR.EFA || {};
     Spriteset_Battle.prototype.createActors = function() {
         _EFA_Spriteset_Battle_createActor.call(this);
         var i = $gameParty.maxBattleMembers();
-        this._actorSprites[i] = new Sprite_Actor();
-        this._battleField.addChild(this._actorSprites[i]);
-    };
-
-    //書き換え
-    Spriteset_Battle.prototype.updateActors = function() {
-        var members = $gameParty.battleMembers();
-        for (var i = 0; i < members.length; i++) {
-            this._actorSprites[i].setBattler(members[i]);
-        }
+        this._sideBattlerSprite = new Sprite_Actor();
+        this._battleField.addChild(this._sideBattlerSprite);
     };
 
     Spriteset_Battle.prototype.sideBattler = function() {
-        return this._actorSprites[$gameParty.maxBattleMembers()];
+        return this._sideBattlerSprite;
+    };
+
+    var _EFA_Spriteset_Battle_battlerSprites = Spriteset_Battle.prototype.battlerSprites;
+    Spriteset_Battle.prototype.battlerSprites = function() {
+        return _EFA_Spriteset_Battle_battlerSprites.call(this).concat(this._sideBattlerSprite);
     };
 
     //=============================================================================
