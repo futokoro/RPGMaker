@@ -4,8 +4,8 @@
 // プラグインNo : 81
 // 作成者     : フトコロ
 // 作成日     : 2018/04/15
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2018/08/06
+// バージョン : v1.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,8 +16,15 @@ FTKR.SHW = FTKR.SHW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 選択肢ウィンドウを表示中に選択肢の説明ウィンドウを表示する
+ * @plugindesc v1.1.0 選択肢ウィンドウを表示中に選択肢の説明ウィンドウを表示する
  * @author フトコロ
+ *
+ * @param Enable Hide Window
+ * @desc 選択肢に説明文を設定していない場合に、ウィンドウを非表示にする。
+ * @type boolean
+ * @on 非表示
+ * @off 表示
+ * @default false
  *
  * @help 
  *-----------------------------------------------------------------------------
@@ -73,6 +80,9 @@ FTKR.SHW = FTKR.SHW || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.0 - 2018/08/06 : 機能追加
+ *    1. 注釈の設定がない場合は、説明ウィンドウを非表示にする機能を追加。
+ * 
  * v1.0.0 - 2018/04/15 : 初版作成
  * 
  *-----------------------------------------------------------------------------
@@ -80,6 +90,8 @@ FTKR.SHW = FTKR.SHW || {};
 //=============================================================================
 
 (function() {
+    var parameters = PluginManager.parameters('FTKR_SelectHelpWindow');
+    FTKR.SHW.enableHideWindow = JSON.parse(parameters['Enable Hide Window'] || false);
 
     //=============================================================================
     // Game_Interpreter
@@ -149,12 +161,17 @@ FTKR.SHW = FTKR.SHW || {};
     Window_ChoiceList.prototype.setHelpWindowText = function(text) {
         if (this._helpWindow) {
             this._helpWindow.setText(text);
+            this._helpWindow.show();
         }
     };
 
     Window_ChoiceList.prototype.updateHelp = function() {
         var text = $gameMessage._choiceHelpTexts[this.index()];
-        this.setHelpWindowText(text);
+        if (FTKR.SHW.enableHideWindow && (text == undefined || !text)) {
+            this._helpWindow.hide();
+        } else {
+            this.setHelpWindowText(text);
+        }
     };
 
     Window_ChoiceList.prototype.helpWindow = function() {
