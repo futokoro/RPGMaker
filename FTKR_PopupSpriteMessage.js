@@ -4,8 +4,8 @@
 // プラグインNo : 70
 // 作成者     : フトコロ
 // 作成日     : 2018/01/05
-// 最終更新日 : 2018/03/10
-// バージョン : v1.2.4
+// 最終更新日 : 2018/08/11
+// バージョン : v1.2.5
 //=============================================================================
 //=============================================================================
 // BattleEffectPopup.js　//ベースにしたプラグイン
@@ -23,7 +23,7 @@ FTKR.PSM = FTKR.PSM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.4 任意のメッセージを画面上にポップアップ表示するプラグイン
+ * @plugindesc v1.2.5 任意のメッセージを画面上にポップアップ表示するプラグイン
  * @author フトコロ
  *
  * @param Max Popup Messages
@@ -85,7 +85,7 @@ FTKR.PSM = FTKR.PSM || {};
  * PSM_SHOW_POPUP [popupId] [statusId] [x] [y] [duration] [text] [options]
  * 
  *    ポップアップID(popupId)
- *      ：1から、プラグインパラメータMax Popup Messagesで設定した
+ *      ：1 から、プラグインパラメータMax Popup Messagesで設定した
  *        値の任意の数字を指定します。\v[n]で変数を指定することも可能です。
  *        この値を変えることで、同時に複数の文字列を表示できます。
  * 
@@ -305,6 +305,9 @@ FTKR.PSM = FTKR.PSM || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.2.5 - 2018/08/11 : 不具合修正
+ *    1. プラグイン適用前のセーブデータからゲームを実行したときのエラー回避処理を追加。
+ * 
  * v1.2.4 - 2018/03/10 : 不具合修正、機能追加
  *    1. ポップアップの移動実行中に、別地点への移動コマンドを実行すると
  *       前の移動がキャンセルされて初期位置から移動してしまう不具合を修正。
@@ -461,7 +464,7 @@ FTKR.PSM = FTKR.PSM || {};
     var parameters = PluginManager.parameters('FTKR_PopupSpriteMessage');
 
     FTKR.PSM = {
-        maxPopupMessages : Number(parameters['Max Popup Messages'] || 0),
+        maxPopupMessages : paramParse(parameters['Max Popup Messages'] || 0),
         popupStatus      : paramParse(parameters['Popup Message Status']),
         repop            : paramParse(parameters['Repop Message After Menu']),
     };
@@ -593,66 +596,116 @@ FTKR.PSM = FTKR.PSM || {};
         return FTKR.PSM.maxPopupMessages;// 画面に表示可能な文字列の最大数
     };
 
-    Game_Party.prototype.clearPopupMessage = function(messageId) {
-        this._psmMessage[messageId].popup = false;
+    Game_Party.prototype.psmMessages = function(){
+        if (!this._psmMessage) this._psmMessage = [];
+        return this._psmMessage;
     };
 
-    Game_Party.prototype.clearMoveMessage = function(messageId) {
-        this._psmMessage[messageId].move = false;
+    Game_Party.prototype.psmMessage = function(messageId) {
+        return this.psmMessages()[messageId];
     };
 
-    Game_Party.prototype.clearRotateMessage = function(messageId) {
-        this._psmMessage[messageId].rotate = false;
-    }
-    
-    Game_Party.prototype.requestErasePopupMessage = function(messageId, duration) {
-        if (this._psmMessage[messageId]) {
-            this._psmMessage[messageId].erase = true;
-            this._psmMessage[messageId].eraseDuration = duration;
+    Game_Party.prototype.clearPsmMessage = function(messageId) {
+        if (this.psmMessage(messageId)) {
+            for(var key in this.psmMessage(messageId)) {
+                delete this.psmMessage(messageId)[key];
+            };
+            this._psmMessage[messageId] = null;
         }
     };
 
+    Game_Party.prototype.setPopupMessage = function(messageId, x1, y1, duration,
+            offsetCount, text, flashColor, flashDuration, italic,
+            fontSize, outlineColor, popupHeight, fontFace, opacity, align) {
+        if (messageId > 0 && messageId <= this.maxPopupMessages()) {
+            this.psmMessage(messageId);
+            this._psmMessage[messageId] = {
+                x : x1,
+                y : y1,
+                duration : duration,
+                text : convertEscapeCharacters(text),
+                flashColor : flashColor,
+                flashDuration : flashDuration,
+                popup : true,
+                offsetCount : offsetCount,
+                italic : italic,
+                fontSize : fontSize,
+                outlineColor : outlineColor,
+                popupHeight : popupHeight,
+                fontFace : fontFace,
+                opacity : opacity,
+                align : align,
+            };
+            return true;
+        }
+        return false;
+    };
+
+    Game_Party.prototype.clearPopupMessage = function(messageId) {
+        if (!this.psmMessage(messageId)) return;
+        this.psmMessage(messageId).popup = false;
+    };
+
+    Game_Party.prototype.clearMoveMessage = function(messageId) {
+        if (!this.psmMessage(messageId)) return;
+        this.psmMessage(messageId).move = false;
+    };
+
+    Game_Party.prototype.clearRotateMessage = function(messageId) {
+        if (!this.psmMessage(messageId)) return;
+        this.psmMessage(messageId).rotate = false;
+    }
+    
+    Game_Party.prototype.requestErasePopupMessage = function(messageId, duration) {
+        if (!this.psmMessage(messageId)) return;
+        this.psmMessage(messageId).erase = true;
+        this.psmMessage(messageId).eraseDuration = duration;
+    };
+
     Game_Party.prototype.clearErasePopupMessage = function(messageId) {
-        this._psmMessage[messageId].erase = false;
-        this._psmMessage[messageId].eraseDuration = 0;
+        if (!this.psmMessage(messageId)) return;
+        this.psmMessage(messageId).erase = false;
+        this.psmMessage(messageId).eraseDuration = 0;
     };
 
     Game_Party.prototype.clearChangeColorMessage = function(messageId) {
-        this._psmMessage[messageId].changeColor = false;
+        if (!this.psmMessage(messageId)) return;
+        this.psmMessage(messageId).changeColor = false;
     };
 
     Game_Party.prototype.isPopupMessage = function(messageId) {
-        return this._psmMessage[messageId] && this._psmMessage[messageId].popup;
+        return this.psmMessage(messageId) && this.psmMessage(messageId).popup;
     };
 
     Game_Party.prototype.isMoveMessage = function(messageId) {
-        return this._psmMessage[messageId] && this._psmMessage[messageId].move;
+        return this.psmMessage(messageId) && this.psmMessage(messageId).move;
     };
 
     Game_Party.prototype.isChangeColorMessage = function(messageId) {
-        return this._psmMessage[messageId] && this._psmMessage[messageId].changeColor;
+        return this.psmMessage(messageId) && this.psmMessage(messageId).changeColor;
     };
 
     Game_Party.prototype.isErasePopupMessage = function(messageId) {
-        return this._psmMessage[messageId] && this._psmMessage[messageId].erase;
+        return this.psmMessage(messageId) && this.psmMessage(messageId).erase;
     };
 
     Game_Party.prototype.eraseDuration = function(messageId) {
-        return this._psmMessage[messageId] && this._psmMessage[messageId].eraseDuration || 0
+        return this.psmMessage(messageId) && this.psmMessage(messageId).eraseDuration || 0
     };
 
     Game_Party.prototype.isPsmBusy = function() {
-        return this._psmMessage.some(function(message) {
-            return message.duration > 0 ||
+        return this.psmMessages().some(function(message) {
+            return !!message && 
+              (message.duration > 0 ||
               message.moveDuration >= 0 || 
-              message.colorDuration >= 0;
+              message.colorDuration >= 0);
         });
     };
 
     Game_Party.prototype.movePopupMessage = function(messageId, x2, y2, duration) {
-        if (this._psmMessage) {
-            var message = this._psmMessage[messageId];
-            if (message && message.duration) {
+        var message = this.psmMessage(messageId);
+        if (message) {
+            if (message.duration) {
                 this.stopUpdateMessage(messageId);
             }
             message.dx = x2;
@@ -663,9 +716,9 @@ FTKR.PSM = FTKR.PSM || {};
     };
 
     Game_Party.prototype.rotatePopupMessage = function(messageId, speed, rotate) {
-        if (this._psmMessage) {
-            var message = this._psmMessage[messageId];
-            if (message && message.duration) {
+        var message = this.psmMessage(messageId);
+        if (message) {
+            if (message.duration) {
                 this.stopUpdateMessage(messageId);
             }
             message.rotateSpeed = speed;
@@ -674,9 +727,9 @@ FTKR.PSM = FTKR.PSM || {};
     };
 
     Game_Party.prototype.changeColorMessage = function(messageId, color, opacity, duration){
-        if (this._psmMessage) {
-            var message = this._psmMessage[messageId];
-            if (message && message.duration) {
+        var message = this.psmMessage(messageId);
+        if (message) {
+            if (message.duration) {
                 this.stopUpdateMessage(messageId);
             }
             message.dopacity = opacity;
@@ -684,38 +737,6 @@ FTKR.PSM = FTKR.PSM || {};
             message.colorDuration = duration;
             message.changeColor = true;
         }
-    };
-
-    Game_Party.prototype.setPopupMessage = function(messageId, x1, y1, duration,
-            offsetCount, text, flashColor, flashDuration, italic,
-            fontSize, outlineColor, popupHeight, fontFace, opacity, align) {
-        if (!this._psmMessage) this._psmMessage = [];
-        this._psmMessage[messageId] = {
-            x : x1,
-            y : y1,
-            duration : duration,
-            text : convertEscapeCharacters(text),
-            flashColor : flashColor,
-            flashDuration : flashDuration,
-            popup : true,
-            offsetCount : offsetCount,
-            italic : italic,
-            fontSize : fontSize,
-            outlineColor : outlineColor,
-            popupHeight : popupHeight,
-            fontFace : fontFace,
-            opacity : opacity,
-            align : align,
-        };
-    };
-
-    Game_Party.prototype.clearPsmMessage = function(messageId) {
-        this._psmMessage[messageId] = {};
-    };
-
-    Game_Party.prototype.psmMessage = function(messageId) {
-        if (!this._psmMessage) this._psmMessage = [];
-        return this._psmMessage[messageId];
     };
 
     Game_Party.prototype.stopUpdateMessage = function(messageId) {
@@ -750,7 +771,7 @@ FTKR.PSM = FTKR.PSM || {};
 
     Scene_Map.prototype.repopPsmMessages = function() {
         if (FTKR.PSM.repop) {
-            $gameParty._psmMessage.forEach(function(message, i){
+            $gameParty.psmMessages().forEach(function(message, i){
                 if (message && message.duration) {
                     $gameParty.stopUpdateMessage(i);
                     var sprite = this._spriteset._ftPopupMessages[i];
