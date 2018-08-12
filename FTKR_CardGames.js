@@ -5,7 +5,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2017/07/02
 // 最終更新日 : 2018/08/12
-// バージョン : v1.2.2
+// バージョン : v1.2.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.CRD = FTKR.CRD || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.2 トランプカードゲーム
+ * @plugindesc v1.2.3 トランプカードゲーム
  * @author フトコロ
  *
  * @param --カードの設定--
@@ -250,6 +250,13 @@ FTKR.CRD = FTKR.CRD || {};
  * @desc 手札カードの表示高さを設定します。
  * @default 180
  * @type number
+ *
+ * @param Hand Frame
+ * @desc 手札の背景枠の表示有無を設定します。
+ * @default true
+ * @type boolean
+ * @on 表示する
+ * @off 表示しない
  *
  * @param Dialogue Width
  * @desc 台詞ウィンドウの幅を設定します。
@@ -717,17 +724,13 @@ FTKR.CRD = FTKR.CRD || {};
  * This plugin is released under the MIT License.
  * 
  * 
- * Copyright (c) 2017,2018 Futokoro
- * http://opensource.org/licenses/mit-license.php
- * 
- * 
- * プラグイン公開元
- * https://github.com/futokoro/RPGMaker/blob/master/README.md
- * 
- * 
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.2.3 - 2018/08/12 : 不具合修正
+ *    1. プレイヤーの最後の台詞が、次のゲームまで残ってしまう不具合を修正。
+ *    2. 手札ウィンドウの背景枠の表示有無の設定機能を追加。
  * 
  * v1.2.2 - 2018/08/12 : 不具合修正
  *    1. プレイヤーが最後まで残った場合に、他に残っているNPCがいないのに
@@ -807,6 +810,18 @@ function CardGameManager() {
       });
     }
 
+    var paramParse = function(obj) {
+        return JSON.parse(JSON.stringify(obj, paramReplace));
+    };
+
+    var paramReplace = function(key, value) {
+        try {
+            return JSON.parse(value || null);
+        } catch (e) {
+            return value;
+        }
+    };
+
     var splitConvertNumber = function(param) {
         var results = [];
         (param + '').split(',').forEach( function(split){
@@ -837,6 +852,7 @@ function CardGameManager() {
             targetPosi :Number(parameters['Target Position'] || 0),
             width      :Number(parameters['Hand Width'] || 432),
             height     :Number(parameters['Hand Height'] || 180),
+            frame      :paramParse(parameters['Hand Frame'] || false),
             dialogue:{
                 skin   :String(parameters['Dialogue Skin'] || ''),
                 width  :Number(parameters['Dialogue Width'] || 240),
@@ -2192,6 +2208,7 @@ function CardGameManager() {
         this.clearHands();
         this.clearRanks();
         this.settingGame();
+        this.resetDialogue();
         this._messageBoxWindow.activate();
         this._input = 'deal';
     };
@@ -2641,6 +2658,7 @@ function CardGameManager() {
         this.clearHand();
         Window_Selectable.prototype.initialize.call(this, x, y, width, height);
         this.setCardSize();
+        if (!FTKR.CRD.layout.frame) this.opacity = 0;
         this.refresh();
     };
 
