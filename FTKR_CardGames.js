@@ -4,8 +4,8 @@
 // プラグインNo : 51
 // 作成者     : フトコロ
 // 作成日     : 2017/07/02
-// 最終更新日 : 2017/10/02
-// バージョン : v1.2.1
+// 最終更新日 : 2018/08/12
+// バージョン : v1.2.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.CRD = FTKR.CRD || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.1 トランプカードゲーム
+ * @plugindesc v1.2.2 トランプカードゲーム
  * @author フトコロ
  *
  * @param --カードの設定--
@@ -717,9 +717,24 @@ FTKR.CRD = FTKR.CRD || {};
  * This plugin is released under the MIT License.
  * 
  * 
+ * Copyright (c) 2017,2018 Futokoro
+ * http://opensource.org/licenses/mit-license.php
+ * 
+ * 
+ * プラグイン公開元
+ * https://github.com/futokoro/RPGMaker/blob/master/README.md
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.2.2 - 2018/08/12 : 不具合修正
+ *    1. プレイヤーが最後まで残った場合に、他に残っているNPCがいないのに
+ *       カードが引けてしまいエラーになる不具合を修正。
+ *    2. ２ゲーム目以降で、カードを配っている間に決定ボタンを押すと、カードを
+ *       すべて配っていないにもかかわらず、その時点でカード配りを終了して
+ *       ゲームが始まってしまう不具合を修正。
  * 
  * v1.2.1 - 2017/10/02 : ヘルプ修正
  *    1. NPCの台詞の設定に関する誤記修正
@@ -2178,7 +2193,7 @@ function CardGameManager() {
         this.clearRanks();
         this.settingGame();
         this._messageBoxWindow.activate();
-        this._input = 'start';
+        this._input = 'deal';
     };
 
     Scene_CRD.prototype.clearHands = function() {
@@ -2231,6 +2246,17 @@ function CardGameManager() {
     };
 
     Scene_CRD.prototype.updateEvent = function() {
+        switch (this._phase) {
+//            case 'turnStart':
+            case 'select':
+            case 'draw':
+            case 'checkPair':
+            case 'disCard':
+            case 'turnEnd':
+                if (this.checkGameEnd()) {
+                    return true;
+                }
+        }
         return CardGameManager.updateEvent(this._phase);
     };
 

@@ -265,7 +265,7 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
-| [FTKR_CardGames](FTKR_CardGames.js) | [仮版](FTKR_CardGames.ja.md) | [v1.2.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CardGames.js) | 2017/10/02 | カードゲーム |
+| [FTKR_CardGames](FTKR_CardGames.js) | [仮版](FTKR_CardGames.ja.md) | [v1.2.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CardGames.js) | 2018/08/12 | カードゲーム |
 
 [目次に戻る](#目次)
 
@@ -303,6 +303,9 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 # 更新情報
 
 2018/07の更新情報
+
+### 2018/08/12
+* [FTKR_CardGames](FTKR_CardGames.js) v1.2.2
 
 ### 2018/08/11
 * [FTKR_PopupSpriteMessage](FTKR_PopupSpriteMessage.js) v1.2.5
