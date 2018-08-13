@@ -4,8 +4,8 @@
 // プラグインNo : 4
 // 作成者     : フトコロ
 // 作成日     : 2017/02/18
-// 最終更新日 : 2018/08/05
-// バージョン : v1.4.0
+// 最終更新日 : 2018/08/13
+// バージョン : v1.4.1
 //=======↑本プラグインを改変した場合でも、この欄は消さないでください↑===============
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.SEP = FTKR.SEP || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.4.0 スキル拡張プラグイン
+ * @plugindesc v1.4.1 スキル拡張プラグイン
  * @author フトコロ
  *
  * @param Elements Damage Calc
@@ -108,6 +108,7 @@ FTKR.SEP = FTKR.SEP || {};
  * <他プラグインとの競合について>
  * 1. YEP_BattleEngineCore.js と組み合わせて使用する場合は
  *    本プラグインを、YEP_BattleEngineCore.jsよりも上に配置してください。
+ * 
  * 
  * <セーブデータについて>
  * 本プラグインを適用する場合は、テストプレイ含めて必ず新規データで
@@ -641,6 +642,9 @@ FTKR.SEP = FTKR.SEP || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.4.1 - 2018/08/13 : 競合回避
+ *    1. YEP_SkillCore.js側のHPコスト消費処理の競合を回避。
  * 
  * v1.4.0 - 2018/08/05 : 機能追加
  *    1. 属性ダメージ計算時に100%の属性有効度を除外できる機能を追加。
@@ -1966,13 +1970,13 @@ Game_BattlerBase.prototype.canGuard = function() {
 
 FTKR.SEP.Game_BattlerBase_canPaySkillCost = Game_BattlerBase.prototype.canPaySkillCost;
 Game_BattlerBase.prototype.canPaySkillCost = function(skill) {
-    return this._hp >= this.skillHpCost(skill) && 
+    return this._hp >= this.sepSkillHpCost(skill) && 
         FTKR.SEP.Game_BattlerBase_canPaySkillCost.call(this, skill);
 };
 
 FTKR.SEP.Game_BattlerBase_paySkillCost = Game_BattlerBase.prototype.paySkillCost;
 Game_BattlerBase.prototype.paySkillCost = function(skill) {
-    this._hp -= this.skillHpCost(skill);
+    this._hp -= this.sepSkillHpCost(skill);
     FTKR.SEP.Game_BattlerBase_paySkillCost.call(this, skill);
 };
 
@@ -1990,7 +1994,7 @@ Game_BattlerBase.prototype.skillTpCost = function(skill) {
         FTKR.SEP.Game_BattlerBase_skillTpCost.call(this, skill);
 };
 
-Game_BattlerBase.prototype.skillHpCost = function(skill) {
+Game_BattlerBase.prototype.sepSkillHpCost = function(skill) {
     return skill.sepCost && skill.sepCost.hp ?
         this.evalUsedCostValue(skill, skill.sepCost.hp) : 0;
 };
@@ -2077,9 +2081,9 @@ Game_Enemy.prototype.evalEnabledFormula = function(formula, skill) {
 
 FTKR.SEP.Window_SkillList_drawSkillCost = Window_SkillList.prototype.drawSkillCost;
 Window_SkillList.prototype.drawSkillCost = function(skill, x, y, width) {
-    if (this._actor.skillHpCost(skill) > 0) {
+    if (this._actor.sepSkillHpCost(skill) > 0) {
         this.changeTextColor(this.textColor(21));
-        this.drawText(this._actor.skillHpCost(skill), x, y, width, 'right');
+        this.drawText(this._actor.sepSkillHpCost(skill), x, y, width, 'right');
     } else {
         FTKR.SEP.Window_SkillList_drawSkillCost.call(this, skill, x, y, width);
     }

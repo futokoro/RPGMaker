@@ -1,7 +1,7 @@
 # RPGツクールMV プラグイン
 
 プラグインは逐次追加更新を行っています。最新情報は、[更新情報](#更新情報)を確認してください。<br>
-公開中のプラグインの数：86 (19年度中に 100 にしたいなぁ)
+公開中のプラグインの数：87 (19年度中に 100 にしたいなぁ)
 
 # 目次
 
@@ -275,7 +275,7 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
-| [FTKR_IgnoreScriptError](FTKR_IgnoreScriptError.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_IgnoreScriptError.js) | 2017/05/03 | イベントで実行するスクリプトのエラーを無視する |
+| [FTKR_IgnoreScriptError](FTKR_IgnoreScriptError.js) | なし | [v1.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_IgnoreScriptError.js) | 2018/08/13 | イベントで実行するスクリプトのエラーを無視する |
 | [FTKR_OriginalDebugMode](FTKR_OriginalDebugMode.js) | [あり](FTKR_OriginalDebugMode.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_OriginalDebugMode.js) | 2018/04/02 | オリジナルのデバッグモードを追加する |
 
 [目次に戻る](#目次)
@@ -306,6 +306,9 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 ### 2018/08/13
 * [FTKR_CardGames](FTKR_CardGames.ja.md) v1.2.4
+* [FTKR_SkillExpansion](FTKR_SkillExpansion.ja.md) v1.4.1
+* [FTKR_IgnoreScriptError](FTKR_IgnoreScriptError.js) v1.1.0
+* [FTKR_ConvertEscapeCharactersInScript](FTKR_ConvertEscapeCharactersInScript.js) v1.0.0(新規)
 
 ### 2018/08/12
 * [FTKR_CardGames](FTKR_CardGames.ja.md) v1.2.3
