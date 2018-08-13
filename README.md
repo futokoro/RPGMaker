@@ -304,6 +304,9 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 2018/07の更新情報
 
+### 2018/08/13
+* [FTKR_CardGames](FTKR_CardGames.js) v1.2.4
+
 ### 2018/08/12
 * [FTKR_CardGames](FTKR_CardGames.js) v1.2.3
 
