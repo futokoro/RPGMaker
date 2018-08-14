@@ -110,7 +110,7 @@ FTKR.CEC = FTKR.CEC || {};
     // Control Variables 変数の操作
     var _Game_Interpreter_command122 = Game_Interpreter.prototype.command122;
     Game_Interpreter.prototype.command122 = function() {
-        if (this._pa設定ms[0] == 4) {
+        if (this._params[0] == 4) {
             this._params[4] = convertGameDatas(this._params[4]);
         }
         return _Game_Interpreter_command122.call(this);
