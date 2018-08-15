@@ -1,11 +1,11 @@
 //=============================================================================
-// スクリプトに制御文字を使う
+// イベントコマンドのスクリプトに制御文字を使う
 // FTKR_ConvertEscapeCharactersInScript.js
 // プラグインNo : 87
 // 作成者　　   : フトコロ
 // 作成日　　   : 2018/08/13
-// 最終更新日   : 
-// バージョン   : v1.0.0
+// 最終更新日   : 2018/08/15
+// バージョン   : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.CEC = FTKR.CEC || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 スクリプトに制御文字を使う
+ * @plugindesc v1.0.1 イベントコマンドのスクリプトに制御文字を使う
  * @author フトコロ
  *
  * @help 
@@ -67,6 +67,7 @@ FTKR.CEC = FTKR.CEC || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.1 - 2018/08/15 : 移動ルートのスクリプトの不具合修正
  * v1.0.0 - 2018/08/13 : 初版作成
  * 
  *-----------------------------------------------------------------------------
@@ -93,9 +94,26 @@ FTKR.CEC = FTKR.CEC || {};
     var _Game_Character_processMoveCommand = Game_Character.prototype.processMoveCommand;
     Game_Character.prototype.processMoveCommand = function(command) {
         if (command.code == Game_Character.ROUTE_SCRIPT) {
+            if (!this._originalScriptCommands) {
+                this._originalScriptCommands = [];
+            }
+            if (!this.originalScriptCommand()) {
+                this.setOrizialScriptCommand(command);
+            }
+            if (command.parameters[0] !== this.originalScriptCommand()) {
+                command.parameters[0] = this.originalScriptCommand();
+            }
             command.parameters[0] = convertGameDatas(command.parameters[0]);
         }
         _Game_Character_processMoveCommand.call(this, command);
+    };
+
+    Game_Character.prototype.originalScriptCommand = function() {
+        return this._originalScriptCommands[this._moveRouteIndex];
+    };
+
+    Game_Character.prototype.setOrizialScriptCommand = function(command) {
+        this._originalScriptCommands[this._moveRouteIndex] = command.parameters[0];
     };
 
     // Conditional Branch 条件分岐

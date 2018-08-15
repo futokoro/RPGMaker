@@ -217,7 +217,7 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 # イベント
 
-プラグイン数:4
+プラグイン数:6
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
@@ -225,6 +225,8 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 | [FTKR_EventReSpawnEx](FTKR_EventReSpawnEx.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_EventReSpawnEx.js) | 2017/11/14 | EventReSpawn.jsとTemplateEvent.jsで生成した一時イベントの座標とセルフスイッチを記録する<br> ＜以下のプラグインが必要＞ <br> [EventReSpawn.js(トリアコンタンさんのHPリンク)](https://triacontane.blogspot.jp/2016/08/blog-post.html)  <br>[TemplateEvent.js(トリアコンタンさんのHPリンク)](https://triacontane.blogspot.jp/2016/06/blog-post_25.html) |
 | [FTKR_MenuEvent](FTKR_MenuEvent.js) | なし | [v1.0.3](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_MenuEvent.js) | 2018/02/20 | メニュー画面上でコモンイベントを実行する |
 | [FTKR_EventMoveByInput](FTKR_EventMoveByInput.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_EventMoveByInput.js) | 2018/01/25 | 指定したイベントを画面の中心にしてキー操作で移動させる |
+| [FTKR_ConvertEscapeCharactersInScript](FTKR_ConvertEscapeCharactersInScript.js) | なし | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ConvertEscapeCharactersInScript.js) | 2018/08/13 | イベントコマンドのスクリプトに制御文字を使う |
+| [FTKR_AddRoutineMoveCommands](FTKR_AddRoutineMoveCommands.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AddRoutineMoveCommands.js) | 2018/08/15 | 移動ルートの設定のスクリプトにコマンドを追加する |
 
 [目次に戻る](#目次)
 
@@ -303,6 +305,9 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 # 更新情報
 
 2018/07の更新情報
+### 2018/08/15
+* [FTKR_AddRoutineMoveCommands](FTKR_AddRoutineMoveCommands.js) v1.0.0(新規))
+* [FTKR_ConvertEscapeCharactersInScript](FTKR_ConvertEscapeCharactersInScript.js) v1.0.1
 
 ### 2018/08/13
 * [FTKR_CardGames](FTKR_CardGames.ja.md) v1.2.4
