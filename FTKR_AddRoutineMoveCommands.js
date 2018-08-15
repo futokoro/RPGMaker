@@ -5,7 +5,7 @@
 // 作成者　　   : フトコロ
 // 作成日　　   : 2018/08/15
 // 最終更新日   : 
-// バージョン   : v1.0.0
+// バージョン   : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.RMC = FTKR.RMC || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 移動ルートの設定のスクリプトを使ってIF文などの処理を追加する
+ * @plugindesc v1.0.1 移動ルートの設定のスクリプトを使ってIF文などの処理を追加する
  * @author フトコロ
  *
  * @help 
@@ -130,6 +130,7 @@ FTKR.RMC = FTKR.RMC || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.1 - 2018/08/15 : ELSE_IFの処理が正しく行えない不具合を修正
  * v1.0.0 - 2018/08/15 : 初版作成
  * 
  *-----------------------------------------------------------------------------
@@ -150,8 +151,10 @@ FTKR.RMC = FTKR.RMC || {};
                         this._passIfProcess = !eval(args[2]);
                         return;
                     case 'ELSE_IF':
-                        if (this._isIfProcess && !this._passIfProcess) {
+                        if (this._isIfProcess && this._passIfProcess) {
                             this._passIfProcess = !eval(args[2]);
+                        } else if (this._isIfProcess && !this._passIfProcess) {
+                            this._passIfProcess = !this._passIfProcess
                         }
                         return;
                     case 'START_LOOP':
