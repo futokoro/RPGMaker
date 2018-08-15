@@ -226,7 +226,7 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 | [FTKR_MenuEvent](FTKR_MenuEvent.js) | なし | [v1.0.3](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_MenuEvent.js) | 2018/02/20 | メニュー画面上でコモンイベントを実行する |
 | [FTKR_EventMoveByInput](FTKR_EventMoveByInput.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_EventMoveByInput.js) | 2018/01/25 | 指定したイベントを画面の中心にしてキー操作で移動させる |
 | [FTKR_ConvertEscapeCharactersInScript](FTKR_ConvertEscapeCharactersInScript.js) | なし | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ConvertEscapeCharactersInScript.js) | 2018/08/13 | イベントコマンドのスクリプトに制御文字を使う |
-| [FTKR_AddRoutineMoveCommands](FTKR_AddRoutineMoveCommands.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AddRoutineMoveCommands.js) | 2018/08/15 | 移動ルートの設定のスクリプトにコマンドを追加する |
+| [FTKR_AddRoutineMoveCommands](FTKR_AddRoutineMoveCommands.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AddRoutineMoveCommands.js) | 2018/08/15 | 移動ルートの設定のスクリプトを使ってIF文などの処理を追加する |
 
 [目次に戻る](#目次)
 
