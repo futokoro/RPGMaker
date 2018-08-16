@@ -639,6 +639,10 @@ FTKR.SEP = FTKR.SEP || {};
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
+ * プラグイン公開元
+ * https://github.com/futokoro/RPGMaker/blob/master/README.md
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------

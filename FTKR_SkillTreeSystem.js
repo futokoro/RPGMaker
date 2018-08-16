@@ -4,8 +4,8 @@
 // プラグインNo : 7
 // 作成者　　   : フトコロ(futokoro)
 // 作成日　　   : 2017/02/25
-// 最終更新日   : 2018/08/03
-// バージョン   : v1.15.11
+// 最終更新日   : 2018/08/16
+// バージョン   : v1.15.12
 //=============================================================================
 
 var Imported = Imported || {};
@@ -1404,6 +1404,10 @@ FTKR.STS = FTKR.STS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.15.12 - 2018/08/16 : 不具合修正
+ *    1. プラグイン適用前のセーブデータを使用した時に画面表示時に
+ *       エラーになる不具合を修正。
+ * 
  * v1.15.11 - 2018/08/03 : 不具合修正
  *    1. 習得したスキルを忘れさせ再度習得した場合に、ツリーをリセットしても
  *       使用したコストが正しく戻らない不具合を修正。
@@ -2371,10 +2375,12 @@ function Scene_STS() {
     };
 
     Game_Actor.prototype.stsCount = function(skillId) {
+        if (!this._stsCount) this._stsCount = [];
         return this._stsCount[skillId] || 0;
     };
 
     Game_Actor.prototype.setStsSkillCount = function(skillId, value) {
+        if (!this._stsCount) this._stsCount = [];
         this._stsCount[skillId] = value;
     };
 
