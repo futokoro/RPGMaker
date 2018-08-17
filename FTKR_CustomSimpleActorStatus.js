@@ -4,8 +4,8 @@
 // プラグインNo : 9
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2018/03/17
-// バージョン : v2.7.0
+// 最終更新日 : 2018/08/17
+// バージョン : v2.7.1
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.7.0 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v2.7.1 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -33,6 +33,16 @@ FTKR.CSS = FTKR.CSS || {};
  * 
  * @param --顔画像の設定--
  * @default
+ * 
+ * @param Face Image Width
+ * @desc アクターの顔画像幅を設定します
+ * デフォルトは144
+ * @default 144
+ * 
+ * @param Face Image Height
+ * @desc アクターの顔画像高さを設定します
+ * デフォルトは144
+ * @default 144
  * 
  * @param Face Position X
  * @desc 顔画像を描画エリア内のどこに表示するか。
@@ -1368,6 +1378,10 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.7.1 - 2018/08/17 : 不具合修正
+ *    1. バトルシーンでステータスウィンドウが非表示でも、ステートアイコンが
+ *       表示される不具合を修正。
+ * 
  * v2.7.0 - 2018/03/17 : 機能追加
  *    1. カスタム画像をゲーム中に変更するプラグインコマンドを追加。
  * 
@@ -1575,6 +1589,8 @@ FTKR.CSS = FTKR.CSS || {};
     //オリジナルステータス設定オブジェクト
     FTKR.CSS.cssStatus = {
         face:{
+            width:Number(parameters['Face Image Width'] || 0),
+            height:Number(parameters['Face Image Height'] || 0),
             posiX:Number(parameters['Face Position X'] || 0),
         },
         chara:{
@@ -2153,12 +2169,26 @@ FTKR.CSS = FTKR.CSS || {};
     };
 
     Window_Base.prototype.clearCssSprite = function(index) {
-        if (this.sprite[index]) {
+        if (this.sprite && this.sprite[index]) {
             this.sprite[index].setBattler();
+        }
+        if (this._stateIconSprite && this._stateIconSprite[index]) {
             this._stateIconSprite[index].forEach( function(sprite){
-                sprite.setup();
+                sprite.setup(null);
             });
         }
+    };
+
+    Window_Base.prototype.clearItem = function(index) {
+        //        if (this.sprite && this._faceSprite) {
+            this.clearCssSprite(index);
+//        }
+    };
+
+    var _CSS_Window_Selectable_clearItem = Window_Selectable.prototype.clearItem;
+    Window_Selectable.prototype.clearItem = function(index) {
+        _CSS_Window_Selectable_clearItem.call(this, index);
+        Window_Base.prototype.clearItem.call(this, index);
     };
 
     Window_Base.prototype.showActorNum = function() {
@@ -2365,14 +2395,17 @@ FTKR.CSS = FTKR.CSS || {};
     };
 
     Window_Base.prototype.drawCssFace = function(actor, dx, dy, width, height) {
-        var len = Math.min(width, height);
-        var dh = len || Window_Base._faceHeight;
-        var dw = len || Window_Base._faceWidth;
+//        var len = Math.min(width, height);
+        var fw = FTKR.CSS.cssStatus.face.width || Window_Base._faceWidth;
+        var fh = FTKR.CSS.cssStatus.face.height || Window_Base._faceHeight;
+        var scale = height / fh;
+        var dh = height;
+        var dw = fw * scale;
         var offsetX = this.cssFacePositionX(actor) * (width - dw) / 2;
         dx = Math.floor(dx + offsetX);
         var bitmap = ImageManager.loadFace(actor.faceName());
-        var sw = Window_Base._faceWidth;
-        var sh = Window_Base._faceHeight;
+        var sw = fw;
+        var sh = fh;
         var sx = actor.faceIndex() % 4 * sw;
         var sy = Math.floor(actor.faceIndex() / 4) * sh;
         this.contents.blt(bitmap, sx, sy, sw, sh, dx, dy, dw, dh);
@@ -2568,6 +2601,7 @@ FTKR.CSS = FTKR.CSS || {};
             }
             sprite.move(x + this.padding, y + this.padding);
             sprite.offsetMove(offset * i, line);
+            sprite.opacity = 0;
             if(css.autoScale) sprite.setScale(scale);
         }
         this._stateIconSprite[index] = iconSprites;
@@ -2601,6 +2635,42 @@ FTKR.CSS = FTKR.CSS || {};
         var sx = iconIndex % 16 * pw;
         var sy = Math.floor(iconIndex / 16) * ph;
         this.contents.blt(bitmap, sx, sy, pw, ph, x, y, pw * scale, ph * scale);
+    };
+
+    Window_Base.prototype.showStateIcons = function() {
+        if (this._stateIconSprite) {
+            this._stateIconSprite.forEach(function(sprites){
+                sprites.forEach(function(sprite){
+                    sprite.opacity = 255;
+                });
+            });
+        }
+    };
+
+    Window_Base.prototype.hideStateIcons = function() {
+        if (this._stateIconSprite) {
+            this._stateIconSprite.forEach(function(sprites){
+                sprites.forEach(function(sprite){
+                    sprite.opacity = 0;
+                });
+            });
+        }
+    };
+
+    var _CSS_Window_BattleStatus_initialize = Window_BattleStatus.prototype.initialize;
+    Window_BattleStatus.prototype.initialize = function() {
+        _CSS_Window_BattleStatus_initialize.call(this);
+        this.hideStateIcons();
+    };
+
+    Window_BattleStatus.prototype.open = function() {
+        Window_Selectable.prototype.open.call(this);
+        this.showStateIcons();
+    };
+
+    Window_BattleStatus.prototype.close = function() {
+        Window_Selectable.prototype.close.call(this);
+        this.hideStateIcons();
     };
 
     //------------------------------------------------------------------------
@@ -2780,7 +2850,6 @@ FTKR.CSS = FTKR.CSS || {};
         var sh = bgi.height || bitmap.height;
         var sx = bgi.offsetX || 0;
         var sy = bgi.offsetY || 0;
-        console.log(bgi);
         var dh = sh * bgi.scale / 100;
         var dw = sw * bgi.scale / 100;
         var offsetX = FTKR.CSS.cssStatus.image.posiX * (width - dw) / 2;

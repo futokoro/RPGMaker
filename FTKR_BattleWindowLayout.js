@@ -4,8 +4,8 @@
 // プラグインNo : 76
 // 作成者     : フトコロ
 // 作成日     : 2018/04/08
-// 最終更新日 : 2018/04/09
-// バージョン : v1.1.0
+// 最終更新日 : 2018/08/17
+// バージョン : v1.1.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.BWL = FTKR.BWL || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.0 戦闘時のウィンドウ配置を変更する
+ * @plugindesc v1.1.1 戦闘時のウィンドウ配置を変更する
  * @author フトコロ
  *
  * @param Show Actor Face
@@ -85,6 +85,9 @@ FTKR.BWL = FTKR.BWL || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.1 - 2018/08/17 : 不具合修正
+ *    1. FTKR_FVActorAnimationと処理が重複していた部分を修正。
+ * 
  * v1.1.0 - 2018/04/09 : 機能追加、不具合修正
  *    1. ステータスウィンドウでアクター同士の表示が重なる場合がある不具合を修正。
  *    2. アクターコマンドウィンドウの表示位置を変更する機能を追加。
@@ -125,20 +128,6 @@ FTKR.BWL = FTKR.BWL || {};
     //=============================================================================
 
     Scene_Battle.prototype.updateWindowPositions = function() {
-    };
-
-    Scene_Battle.prototype.createStatusWindow = function() {
-    };
-
-    Scene_Battle.prototype.createFaaStatusWindow = function() {
-        this._statusWindow = new Window_BattleStatus();
-        this.addChild(this._statusWindow);
-    };
-
-    var _FAA_Scene_Battle_createSpriteset = Scene_Battle.prototype.createSpriteset;
-    Scene_Battle.prototype.createSpriteset = function() {
-        _FAA_Scene_Battle_createSpriteset.call(this);
-        this.createFaaStatusWindow();
     };
 
     var _BWL_Scene_Battle_startActorCommandSelection =

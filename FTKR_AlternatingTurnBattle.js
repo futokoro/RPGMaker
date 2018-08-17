@@ -4,8 +4,8 @@
 // プラグインNo : 75
 // 作成者     : フトコロ
 // 作成日     : 2018/04/08
-// 最終更新日 : 2018/08/05
-// バージョン : v1.3.2
+// 最終更新日 : 2018/08/17
+// バージョン : v1.3.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.AltTB = FTKR.AltTB || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.3.2 敵味方交互にターンが進むターン制戦闘システム
+ * @plugindesc v1.3.3 敵味方交互にターンが進むターン制戦闘システム
  * @author フトコロ
  *
  * @param TurnEnd Command
@@ -573,6 +573,10 @@ FTKR.AltTB = FTKR.AltTB || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.3.3 - 2018/08/17 : 不具合修正
+ *    1. FTKR_CustomSimpleActorStatus または FTKR_FVActorAnimation と組合せた時に
+ *       行動済みのアクターの「名前＋顔画像をグレー表示」が正常に動作しない不具合を修正。
  * 
  * v1.3.2 - 2018/08/05 : 不具合修正、機能追加
  *    1. 行動後モーションを停止に設定した場合、ターン開始時に待機モーションに
@@ -1792,13 +1796,24 @@ FTKR.AltTB = FTKR.AltTB || {};
         return line;
     };
 
-    var _AltTB_Window_BattleStatus_drawCssActorFace = Window_BattleStatus.prototype.drawCssActorFace;
-    Window_BattleStatus.prototype.drawCssActorFace = function(actor, x, y, width, lss, scale) {
-        if (FTKR.AltTB.activated === 2) this.changePaintOpacity(actor.canAction());
-        var line = _AltTB_Window_BattleStatus_drawCssActorFace.call(this, actor, x, y, width, lss, scale);
-        this.changePaintOpacity(true);
-        return line;
+    var _AltTB_Window_BattleStatus_drawCssFace = Window_BattleStatus.prototype.drawCssFace;
+    Window_BattleStatus.prototype.drawCssFace = function(actor, dx, dy, width, height) {
+        _AltTB_Window_BattleStatus_drawCssFace.call(this, actor, dx, dy, width, height);
+        if (Imported.FTKR_FAA &&!(!$gameParty.inBattle() || FTKR.FAA.destination !== 1)) {
+            var index = actor.index() % this.showActorNum();
+            this._faceSprite[index].opacity = this.isEnabledChangePaintOpacity(actor) ?
+                255 : this.translucentOpacity();
+        }
     };
+
+    Window_BattleStatus.prototype.isEnabledChangePaintOpacity = function(actor) {
+        var result = FTKR.AltTB.activated === 2 && actor && actor.canAction() || FTKR.AltTB.activated !== 2;
+        if (Imported.FTKR_CSS) {
+            result = Window_Base.prototype.isEnabledChangePaintOpacity.call(this, actor) && result;
+        }
+        return result;
+    };
+
 
     Window_BattleStatus.prototype.isCursorIndexOnMouse = function() {
         if (!this.isTouchedInsideFrame()) return -1;
