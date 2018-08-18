@@ -28,13 +28,13 @@
 顔画像は、プラグインパラメータで表示のON/OFFを変えられます。<br>
 TPは、「バトル画面でTPを表示」にチェックが入っている場合に表示します。
 
-[目次に戻る](#目次)
-
 ![画像](image/FTKR_BattleWindowLayout/n01_001.png)
 
 アクターコマンドウィンドウの表示位置を、ステータスウィンドウの選択中のアクターに重ねます。
 
 ![画像](image/FTKR_BattleWindowLayout/n01_002.png)
+
+[目次に戻る](#目次)
 
 ## プラグインの登録
 
@@ -60,6 +60,7 @@ FTKR_AlternatingTurnBattle.jsと組み合わせる場合は、このプラグイ
 パーティーコマンドウィンドウと同様に、背景を「ウィンドウ」「暗くする」「透明」から選択できます。
 
 プラグインパラメータ`Party Command Window` : `background` : 1
+
 ![画像](image/FTKR_BattleWindowLayout/n01_007.png)
 
 ### ウィンドウサイズの変更
@@ -71,6 +72,7 @@ FTKR_AlternatingTurnBattle.jsと組み合わせる場合は、このプラグイ
 プラグインパラメータ<br>
 `Party Command PositionY` : 1<br>
 `Party Command Window` : `height` : 3
+
 ![画像](image/FTKR_BattleWindowLayout/n01_005.png)
 
 プラグインパラメータ<br>
@@ -78,6 +80,7 @@ FTKR_AlternatingTurnBattle.jsと組み合わせる場合は、このプラグイ
 `Party Command PositionX` : 1<br>
 `Party Command Window` : `width` : 240<br>
 `Party Command Window` : `height` : 3
+
 ![画像](image/FTKR_BattleWindowLayout/n01_009.png)
 
 [目次に戻る](#目次)
@@ -89,16 +92,19 @@ FTKR_AlternatingTurnBattle.jsと組み合わせる場合は、このプラグイ
 ### ステータスウィンドウに重ねる
 プラグインパラメータ<br>
 `Actor Command Position` : 0
+
 ![画像](image/FTKR_BattleWindowLayout/n01_002.png)
 
 ### ステータスウィンドウの上に横に表示
 プラグインパラメータ<br>
 `Actor Command Position` : 1
+
 ![画像](image/FTKR_BattleWindowLayout/n01_004.png)
 
 ### ステータスウィンドウの上に縦に表示
 プラグインパラメータ<br>
 `Actor Command Position` : 2
+
 ![画像](image/FTKR_BattleWindowLayout/n01_006.png)
 
 ### ウィンドウ背景の変更
@@ -109,6 +115,7 @@ FTKR_AlternatingTurnBattle.jsと組み合わせる場合は、このプラグイ
 `Actor Command Position` : 2
 <br>
 `Actor Command Window` : `background` : 2
+
 ![画像](image/FTKR_BattleWindowLayout/n01_008.png)
 
 ### ウィンドウサイズの変更
@@ -120,6 +127,7 @@ FTKR_AlternatingTurnBattle.jsと組み合わせる場合は、このプラグイ
 `Actor Command PositionY` : 2<br>
 `Actor Command Window` : `height` : 2<br>
 `Actor Command Window` : `background` : 1
+
 ![画像](image/FTKR_BattleWindowLayout/n01_010.png)
 
 [目次に戻る](#目次)
