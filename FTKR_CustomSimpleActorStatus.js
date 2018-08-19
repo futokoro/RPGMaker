@@ -2647,6 +2647,32 @@ FTKR.CSS = FTKR.CSS || {};
         return {};
     };
 
+    var _CSS_Window_Base_standardFontSize = Window_Base.prototype.standardFontSize;
+    Window_Base.prototype.standardFontSize = function() {
+        return this._customFontSize ? this._customFontSize : _CSS_Window_Base_standardFontSize.call(this);
+    };
+
+    var _CSS_Window_Base_standardPadding = Window_Base.prototype.standardPadding;
+    Window_Base.prototype.standardPadding = function() {
+        return this._customPadding ? this._customPadding : _CSS_Window_Base_standardPadding.call(this);
+    };
+
+    var _CSS_Window_Base_lineHeight = Window_Base.prototype.lineHeight;
+    Window_Base.prototype.lineHeight = function() {
+        return this._customLineHeight ? this._customLineHeight : _CSS_Window_Base_lineHeight.call(this);
+    };
+
+    var _CSS_Window_Base_standardBackOpacity = Window_Base.prototype.standardBackOpacity;
+    Window_Base.prototype.standardBackOpacity = function() {
+        return this._customBackOpacity ? this._customBackOpacity : _CSS_Window_Base_standardBackOpacity.call(this);
+    };
+
+    //書き換え
+    //ウィンドウ枠の表示
+    Window_Base.prototype._refreshFrame = function() {
+        if (!this._customHideFrame) Window.prototype._refreshFrame.call(this);
+    };
+    
     //=============================================================================
     // Window_Selectableの修正
     //=============================================================================
@@ -2658,6 +2684,72 @@ FTKR.CSS = FTKR.CSS || {};
             this._customMaxCols = lss.maxCols;
             this._customCursorHeight = lss.cursorHeight;
             this._customHorSpacing = lss.hspace;
+        }
+    };
+
+    var _CSS_Window_Selectable_maxCols = Window_Selectable.prototype.maxCols;
+    Window_Selectable.prototype.maxCols = function() {
+        return this._customMaxCols ? this._customMaxCols : _CSS_Window_Selectable_maxCols.call(this);
+    };
+
+    Window_Selectable.prototype.cursorHeight = function() {
+        return this._customCursorHeight;
+    };
+
+    Window_Selectable.prototype.itemHeightSpace = function() {
+        return this._customHorSpacing;
+    };
+    
+    Window_Selectable.prototype.unitHeight = function() {
+        return this.itemHeight() + this.itemHeightSpace();
+    };
+
+    Window_Selectable.prototype.unitWidth = function() {
+        return this.itemWidth() + this.spacing();
+    };
+
+    var _CSS_Window_Selectable_maxPageRows = Window_Selectable.prototype.maxPageRows;
+    Window_Selectable.prototype.maxPageRows = function() {
+        if (this.itemHeightSpace()) {
+            var pageHeight = this.height - this.padding * 2;
+            return Math.floor(pageHeight / this.unitHeight());
+        } else {
+            return _CSS_Window_Selectable_maxPageRows.call(this);
+        }
+    };
+
+    var _CSS_Window_Selectable_topRow = Window_Selectable.prototype.topRow;
+    Window_Selectable.prototype.topRow = function() {
+        return this.itemHeightSpace() ? Math.floor(this._scrollY / this.unitHeight()) :
+            _CSS_Window_Selectable_topRow.call(this);
+    };
+
+    var _CSS_Window_Selectable_setTopRow = Window_Selectable.prototype.setTopRow;
+    Window_Selectable.prototype.setTopRow = function(row) {
+        if (this.itemHeightSpace()) {
+            var scrollY = row.clamp(0, this.maxTopRow()) * this.unitHeight();
+            if (this._scrollY !== scrollY) {
+                this._scrollY = scrollY;
+                this.refresh();
+                this.updateCursor();
+            }
+        } else {
+            return _CSS_Window_Selectable_setTopRow.call(this, row);
+        }
+    };
+
+    var _CSS_Window_Selectable_itemRect = Window_Selectable.prototype.itemRect;
+    Window_Selectable.prototype.itemRect = function(index) {
+        if (this.itemHeightSpace()) {
+            var rect = new Rectangle();
+            var maxCols = this.maxCols();
+            rect.width = this.itemWidth();
+            rect.height = this.itemHeight();
+            rect.x = index % maxCols * this.unitWidth() - this._scrollX;
+            rect.y = Math.floor(index / maxCols) * this.unitHeight() - this._scrollY;
+            return rect;
+        } else {
+            return _CSS_Window_Selectable_itemRect.call(this, index);
         }
     };
 
