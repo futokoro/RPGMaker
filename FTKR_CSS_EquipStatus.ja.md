@@ -122,7 +122,8 @@ FTKR_CSS_EquipStatus.js
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.1.0](FTKR_CSS_EquipStatus.js) | 2017/11/18 | FTKR_CustomSimpleActorStatus.js の v2.6.0に対応 |
+| [ver2.0.0](FTKR_CSS_EquipStatus.js) | 2018/08/19 | FTKR_CustomSimpleActorStatus.js の v3.0.0に対応 |
+| [ver1.1.0](/archive/FTKR_CSS_EquipStatus‗1.1.0.js) | 2017/11/18 | FTKR_CustomSimpleActorStatus.js の v2.6.0に対応 |
 | ver1.0.2 | 2017/07/23 | ウィンドウの設定が反映されない不具合を修正 |
 | ver1.0.1 | 2017/05/17 | 選択中の武器または防具を装備した時のパラメータを参照する機能を追加 |
 | ver1.0.0 | 2017/05/13 | 初版作成 |

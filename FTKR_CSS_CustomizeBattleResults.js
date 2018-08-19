@@ -4,8 +4,8 @@
 // プラグインNo : 44
 // 作成者     : フトコロ
 // 作成日     : 2017/06/07
-// 最終更新日 : 2018/08/04
-// バージョン : v1.5.0
+// 最終更新日 : 2018/08/19
+// バージョン : v2.0.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ var FTKR = FTKR || {};
 FTKR.CBR = FTKR.CBR || {};
 
 /*:
- * @plugindesc v1.5.0 カスタム可能な戦闘結果画面を表示する
+ * @plugindesc v2.0.0 カスタム可能な戦闘結果画面を表示する
  * @author フトコロ
  *
  * @param --タイトル設定--
@@ -60,35 +60,16 @@ FTKR.CBR = FTKR.CBR || {};
  * @param --共通戦績設定--
  * @default
  *
- * @param Party Status Text1
- * @desc Text1部に表示するステータスを指定します。
- * 詳細はヘルプ参照
- * @default text(入手経験値),text(入手ゴールド)
- * 
- * @param Party Status Text2
- * @desc Text2部に表示するステータスを指定します。
- * 詳細はヘルプ参照
- * @default eval(BattleManager._rewards.exp),eval(BattleManager._rewards.gold)
- * 
- * @param Party Status Text3
- * @desc Text3部に表示するステータスを指定します。
- * 詳細はヘルプ参照
- * @default 
- * 
- * @param Party Status Space
- * @desc 各Textの間隔を指定します。
- * @default 0,0,0,0
+ * @param partyStatusList
+ * @desc 表示するステータスとその位置を設定します。
+ * @type struct<status>[]
+ * @default ["{\"text\":\"text(入手経験値)\",\"x\":\"0\",\"y\":\"0\",\"width\":\"width/2\"}","{\"text\":\"text(入手ゴールド)\",\"x\":\"0\",\"y\":\"line\",\"width\":\"width/2\"}","{\"text\":\"eval(BattleManager._rewards.exp)\",\"x\":\"width/2\",\"y\":\"0\",\"width\":\"width/2\"}","{\"text\":\"eval(BattleManager._rewards.gold)\",\"x\":\"width/2\",\"y\":\"line\",\"width\":\"width/2\"}"]
  * 
  * @param Party Status Space In Text
  * @desc Text内で複数表示する場合の間隔を指定します。
  * @type number
  * @default 5
  * 
- * @param Party Status Width Rate
- * @desc Text1~Text3の表示幅の比率を指定します。
- * 詳細はヘルプ参照
- * @default 1,1,1
- *
  * @param Party Visible Rows
  * @desc 共通戦績ウィンドウの縦の行数
  * @type number
@@ -185,34 +166,15 @@ FTKR.CBR = FTKR.CBR || {};
  * @value 1
  * @default 0
  * 
- * @param Actor Status Text1
- * @desc Text1部に表示するステータスを指定します。
- * 詳細はヘルプ参照
- * @default face(3)
- * 
- * @param Actor Status Text2
- * @desc Text2部に表示するステータスを指定します。
- * 詳細はヘルプ参照
- * @default name,{gauge(0)},{message}
- * 
- * @param Actor Status Text3
- * @desc Text3部に表示するステータスを指定します。
- * 詳細はヘルプ参照
- * @default level
- * 
- * @param Actor Status Space
- * @desc 各Textの間隔を指定します。
- * @default 0,0,0,0
+ * @param actorStatusList
+ * @desc 表示するステータスとその位置を設定します。
+ * @type struct<status>[]
+ * @default ["{\"text\":\"face(3)\",\"x\":\"0\",\"y\":\"0\",\"width\":\"width/3\"}","{\"text\":\"name\",\"x\":\"width/3\",\"y\":\"0\",\"width\":\"width/3\"}","{\"text\":\"level\",\"x\":\"width*2/3\",\"y\":\"0\",\"width\":\"width/3\"}","{\"text\":\"gauge(0)\",\"x\":\"width/3\",\"y\":\"line\",\"width\":\"width*2/3\"}","{\"text\":\"message\",\"x\":\"width/3\",\"y\":\"line*2\",\"width\":\"width*2/3\"}"]
  * 
  * @param Actor Status Space In Text
  * @desc Text内で複数表示する場合の間隔を指定します。
  * @type number
  * @default 5
- * 
- * @param Actor Status Width Rate
- * @desc Text1~Text3の表示幅の比率を指定します。
- * 詳細はヘルプ参照
- * @default 1,1,1
  * 
  * @param Actor Visible Rows
  * @desc ステータスウィンドウの縦の行数：デフォルト 8
@@ -354,7 +316,7 @@ FTKR.CBR = FTKR.CBR || {};
  *    ください。
  * 
  * 2. 本プラグインを動作させるためには、
- *    FTKR_CustomSimpleActorStatus.jsが必要です。
+ *    FTKR_CustomSimpleActorStatus.js(v3.0.0以降)が必要です。
  *    本プラグインは、FTKR_CustomSimpleActorStatus.jsよりも下の位置に
  *    なるように追加してください。
  * 
@@ -374,7 +336,7 @@ FTKR.CBR = FTKR.CBR || {};
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
- * Copyright (c) 2017 Futokoro
+ * Copyright (c) 2017,2018 Futokoro
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
@@ -384,6 +346,8 @@ FTKR.CBR = FTKR.CBR || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v2.0.0 - 2018/08/19 : FTKR_CustomSimpleActorStatus v3.0.0 対応版に変更
  * 
  * v1.5.0 - 2018/08/04 : 機能追加
  *    1. バトルメンバー以外も画面に表示する機能を追加。
@@ -432,6 +396,24 @@ FTKR.CBR = FTKR.CBR || {};
  *-----------------------------------------------------------------------------
 */
 //=============================================================================
+/*~struct~status:
+ * @param text
+ * @desc 表示するステータス
+ * @default 
+ *
+ * @param x
+ * @desc 表示するX座標
+ * @default 0
+ *
+ * @param y
+ * @desc 表示するY座標
+ * @default 0
+ *
+ * @param width
+ * @desc 表示する幅
+ * @default 0
+ *
+ */
 
 function Window_BattleResultParty() {
     this.initialize.apply(this, arguments);
@@ -471,18 +453,14 @@ if (Imported.FTKR_CSS) (function() {
             hideFrame   :Number(parameters['Title Hide Frame'] || 0),
         },
         party:{
+            statusList  :paramParse(parameters['partyStatusList']),
             visibleRows :Number(parameters['Party Visible Rows'] || 0),
             fontSize    :Number(parameters['Party Font Size'] || 0),
             padding     :Number(parameters['Party Padding'] || 0),
             lineHeight  :Number(parameters['Party Line Height'] || 0),
             opacity     :Number(parameters['Party Opacity'] || 0),
             hideFrame   :Number(parameters['Party Hide Frame'] || 0),
-            text1       :String(parameters['Party Status Text1'] || ''),
-            text2       :String(parameters['Party Status Text2'] || ''),
-            text3       :String(parameters['Party Status Text3'] || ''),
-            space       :String(parameters['Party Status Space'] || ''),
             spaceIn     :Number(parameters['Party Status Space In Text'] || 0),
-            widthRate   :String(parameters['Party Status Width Rate'] || ''),
         },
         command:{
             status      :String(parameters['Command Display Status'] || ''),
@@ -497,6 +475,7 @@ if (Imported.FTKR_CSS) (function() {
         },
         actor:{
             enabled     :true,
+            statusList  :paramParse(parameters['actorStatusList']),
             memberType  :paramParse(parameters['Displayed Members'] || 0),
             visibleRows :Number(parameters['Actor Visible Rows'] || 0),
             maxCols     :Number(parameters['Actor Max Cols'] || 0),
@@ -507,12 +486,7 @@ if (Imported.FTKR_CSS) (function() {
             hideFrame   :Number(parameters['Actor Hide Frame'] || 0),
             cursorHeight:Number(parameters['Actor Cursor Lines'] || 0),
             hspace      :Number(parameters['Actor Cursor Height Space'] || 0),
-            text1       :String(parameters['Actor Status Text1'] || ''),
-            text2       :String(parameters['Actor Status Text2'] || ''),
-            text3       :String(parameters['Actor Status Text3'] || ''),
-            space       :String(parameters['Actor Status Space'] || ''),
             spaceIn     :Number(parameters['Actor Status Space In Text'] || 0),
-            widthRate   :String(parameters['Actor Status Width Rate'] || ''),
         },
         item:{
             enabled     :true,

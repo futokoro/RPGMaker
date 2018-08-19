@@ -4,8 +4,8 @@
 // プラグインNo : 9
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2018/08/18
-// バージョン : v2.7.2
+// 最終更新日 : 2018/08/19
+// バージョン : v3.0.0
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.7.2 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v3.0.0 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -154,1216 +154,826 @@ FTKR.CSS = FTKR.CSS || {};
  * %1 - アクター名, %2 - 現在レベル, %3 - 上昇したレベル
  * @default \C[17]%3 Level Up!
  * 
- * @param --カスタムパラメータの設定--
- * @default
+ * @param customParam
+ * @text --カスタムパラメータの設定--
  * 
  * @param --Custom Param 0--
  * @default
+ * @parent customParam
  * 
  * @param Custom 0 Display Name
  * @desc Custom(0)の表示名を設定します
  * @default \c[16]現在の経験値
+ * @parent customParam
  * 
  * @param Custom 0 References
  * @desc Custom(0)の値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customParam
  * 
  * @param Custom 0 Unit
  * @desc Custom(0)の単位を設定します。
  * @default 
+ * @parent customParam
  * 
  * @param --Custom Param 1--
  * @default
+ * @parent customParam
  * 
  * @param Custom 1 Display Name
  * @desc Custom(1)の表示名を設定します
  * @default 
+ * @parent customParam
  * 
  * @param Custom 1 References
  * @desc Custom(1)の値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default a.currentExp()
+ * @parent customParam
  * 
  * @param Custom 1 Unit
  * @desc Custom(1)の単位を設定します。
  * @default 
+ * @parent customParam
  * 
  * @param --Custom Param 2--
  * @default
+ * @parent customParam
  * 
  * @param Custom 2 Display Name
  * @desc Custom(2)の表示名を設定します
  * @default \c[16]次のレベルまで
+ * @parent customParam
  * 
  * @param Custom 2 References
  * @desc Custom(2)の値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customParam
  * 
  * @param Custom 2 Unit
  * @desc Custom(2)の単位を設定します。
  * @default 
+ * @parent customParam
  * 
  * @param --Custom Param 3--
  * @default
+ * @parent customParam
  * 
  * @param Custom 3 Display Name
  * @desc Custom(3)の表示名を設定します
  * @default 
+ * @parent customParam
  * 
  * @param Custom 3 References
  * @desc Custom(3)の値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default a.nextRequiredExp()
+ * @parent customParam
  * 
  * @param Custom 3 Unit
  * @desc Custom(3)の単位を設定します。
  * @default 
+ * @parent customParam
  * 
  * @param --Custom Param 4--
  * @default
+ * @parent customParam
  * 
  * @param Custom 4 Display Name
  * @desc Custom(4)の表示名を設定します
  * @default 
+ * @parent customParam
  * 
  * @param Custom 4 References
  * @desc Custom(4)の値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customParam
  * 
  * @param Custom 4 Unit
  * @desc Custom(4)の単位を設定します。
  * @default 
+ * @parent customParam
  * 
  * @param --Custom Param 5--
- * @default
+ * @default 
+ * @parent customParam
  * 
  * @param Custom 5 Display Name
  * @desc Custom(5)の表示名を設定します
  * @default 
+ * @parent customParam
  * 
  * @param Custom 5 References
  * @desc Custom(5)の値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customParam
  * 
  * @param Custom 5 Unit
  * @desc Custom(5)の単位を設定します。
  * @default 
+ * @parent customParam
  * 
  * @param --Custom Param 6--
- * @default
+ * @default 
+ * @parent customParam
  * 
  * @param Custom 6 Display Name
  * @desc Custom(6)の表示名を設定します
  * @default 
+ * @parent customParam
  * 
  * @param Custom 6 References
  * @desc Custom(6)の値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customParam
  * 
  * @param Custom 6 Unit
  * @desc Custom(6)の単位を設定します。
  * @default 
+ * @parent customParam
  * 
  * @param --Custom Param 7--
- * @default
+ * @default 
+ * @parent customParam
  * 
  * @param Custom 7 Display Name
  * @desc Custom(7)の表示名を設定します
  * @default 
+ * @parent customParam
  * 
  * @param Custom 7 References
  * @desc Custom(7)の値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customParam
  * 
  * @param Custom 7 Unit
  * @desc Custom(7)の単位を設定します。
  * @default 
+ * @parent customParam
  * 
  * @param --Custom Param 8--
  * @default
+ * @parent customParam
  * 
  * @param Custom 8 Display Name
  * @desc Custom(8)の表示名を設定します
  * @default 
+ * @parent customParam
  * 
  * @param Custom 8 References
  * @desc Custom(8)の値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customParam
  * 
  * @param Custom 8 Unit
  * @desc Custom(8)の単位を設定します。
  * @default 
+ * @parent customParam
  * 
  * @param --Custom Param 9--
  * @default
+ * @parent customParam
  * 
  * @param Custom 9 Display Name
  * @desc Custom(9)の表示名を設定します
  * @default 
+ * @parent customParam
  * 
  * @param Custom 9 References
  * @desc Custom(9)の値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customParam
  * 
  * @param Custom 9 Unit
  * @desc Custom(9)の単位を設定します。
  * @default 
+ * @parent customParam
  * 
  * @param --Custom Param 10--
  * @default
+ * @parent customParam
  * 
  * @param Custom 10 Display Name
  * @desc Custom(10)の表示名を設定します
  * @default 
+ * @parent customParam
  * 
  * @param Custom 10 References
  * @desc Custom(10)の値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customParam
  * 
  * @param Custom 10 Unit
  * @desc Custom(10)の単位を設定します。
  * @default 
+ * @parent customParam
  * 
  * @param --Custom Param 11--
  * @default
+ * @parent customParam
  * 
  * @param Custom 11 Display Name
  * @desc Custom(11)の表示名を設定します
  * @default 
+ * @parent customParam
  * 
  * @param Custom 11 References
  * @desc Custom(11)の値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customParam
  * 
  * @param Custom 11 Unit
  * @desc Custom(11)の単位を設定します。
  * @default 
+ * @parent customParam
  * 
  * @param --Custom Param 12--
  * @default
+ * @parent customParam
  * 
  * @param Custom 12 Display Name
  * @desc Custom(12)の表示名を設定します
  * @default 
+ * @parent customParam
  * 
  * @param Custom 12 References
  * @desc Custom(12)の値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customParam
  * 
  * @param Custom 12 Unit
  * @desc Custom(12)の単位を設定します。
  * @default 
+ * @parent customParam
  * 
  * @param --Custom Param 13--
  * @default
+ * @parent customParam
  * 
  * @param Custom 13 Display Name
  * @desc Custom(13)の表示名を設定します
  * @default 
+ * @parent customParam
  * 
  * @param Custom 13 References
  * @desc Custom(13)の値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customParam
  * 
  * @param Custom 13 Unit
  * @desc Custom(13)の単位を設定します。
  * @default 
+ * @parent customParam
  * 
  * @param --Custom Param 14--
  * @default
+ * @parent customParam
  * 
  * @param Custom 14 Display Name
  * @desc Custom(14)の表示名を設定します
  * @default 
+ * @parent customParam
  * 
  * @param Custom 14 References
  * @desc Custom(14)の値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customParam
  * 
  * @param Custom 14 Unit
  * @desc Custom(14)の単位を設定します。
  * @default 
+ * @parent customParam
  * 
  * @param --Custom Param 15--
  * @default
+ * @parent customParam
  * 
  * @param Custom 15 Display Name
  * @desc Custom(15)の表示名を設定します
  * @default 
+ * @parent customParam
  * 
  * @param Custom 15 References
  * @desc Custom(15)の値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customParam
  * 
  * @param Custom 15 Unit
  * @desc Custom(15)の単位を設定します。
  * @default 
+ * @parent customParam
  * 
  * @param --Custom Param 16--
  * @default
+ * @parent customParam
  * 
  * @param Custom 16 Display Name
  * @desc Custom(16)の表示名を設定します
  * @default 
+ * @parent customParam
  * 
  * @param Custom 16 References
  * @desc Custom(16)の値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customParam
  * 
  * @param Custom 16 Unit
  * @desc Custom(16)の単位を設定します。
  * @default 
+ * @parent customParam
  * 
  * @param --Custom Param 17--
  * @default
+ * @parent customParam
  * 
  * @param Custom 17 Display Name
  * @desc Custom(17)の表示名を設定します
  * @default 
+ * @parent customParam
  * 
  * @param Custom 17 References
  * @desc Custom(17)の値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customParam
  * 
  * @param Custom 17Unit
  * @desc Custom(17)の単位を設定します。
  * @default 
+ * @parent customParam
  * 
  * @param --Custom Param 18--
  * @default
+ * @parent customParam
  * 
  * @param Custom 18 Display Name
  * @desc Custom(18)の表示名を設定します
  * @default 
+ * @parent customParam
  * 
  * @param Custom 18 References
  * @desc Custom(18)の値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customParam
  * 
  * @param Custom 18 Unit
  * @desc Custom(18)の単位を設定します。
  * @default 
+ * @parent customParam
  * 
  * @param --Custom Param 19--
  * @default
+ * @parent customParam
  * 
  * @param Custom 19 Display Name
  * @desc Custom(19)の表示名を設定します
  * @default 
+ * @parent customParam
  * 
  * @param Custom 19 References
  * @desc Custom(19)の値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customParam
  * 
  * @param Custom 19 Unit
  * @desc Custom(19)の単位を設定します。
  * @default 
+ * @parent customParam
  * 
- * @param --カスタムゲージの設定--
- * @default
+ * @param customGauge
+ * @text --カスタムゲージの設定--
  * 
  * @param Gauge Param Digit
  * @desc 現在値と最大値の表示幅を指定した桁数に設定する
  * @default 4
+ * @parent customGauge
  * 
  * @param --Gauge Param 0--
  * @default
+ * @parent customGauge
  * 
  * @param Gauge 0 Display Name
  * @desc Gauge(0)の表示名を設定します
  * @default \C[16]EXP
+ * @parent customGauge
  * 
  * @param Gauge 0 References
  * @desc Gauge(0)で表示する値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 0 Current
  * @desc Gauge(0)の現在値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default a.isMaxLevel() ? '--------' : a.currentExp()
+ * @parent customGauge
  * 
  * @param Gauge 0 Max
  * @desc Gauge(0)の最大値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default a.isMaxLevel() ? '--------' : a.nextLevelExp()
+ * @parent customGauge
  * 
  * @param Gauge 0 Color1
  * @desc Gauge(0)のゲージの色1を設定します。
  * @default 17
+ * @parent customGauge
  * 
  * @param Gauge 0 Color2
  * @desc Gauge(0)のゲージの色2を設定します。
  * @default 6
+ * @parent customGauge
  * 
  * @param --Gauge Param 1--
  * @default
+ * @parent customGauge
  * 
  * @param Gauge 1 Display Name
  * @desc Gauge(1)の表示名を設定します
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 1 References
  * @desc Gauge(1)で表示する値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 1 Current
  * @desc Gauge(1)の現在値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 1 Max
  * @desc Gauge(1)の最大値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 1 Color1
  * @desc Gauge(1)のゲージの色1を設定します。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 1 Color2
  * @desc Gauge(1)のゲージの色2を設定します。
  * @default 
+ * @parent customGauge
  * 
  * @param --Gauge Param 2--
  * @default
+ * @parent customGauge
  * 
  * @param Gauge 2 Display Name
  * @desc Gauge(2)の表示名を設定します
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 2 References
  * @desc Gauge(2)で表示する値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 2 Current
  * @desc Gauge(2)の現在値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 2 Max
  * @desc Gauge(2)の最大値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 2 Color1
  * @desc Gauge(2)のゲージの色1を設定します。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 2 Color2
  * @desc Gauge(2)のゲージの色2を設定します。
  * @default 
+ * @parent customGauge
  * 
  * @param --Gauge Param 3--
  * @default
+ * @parent customGauge
  * 
  * @param Gauge 3 Display Name
  * @desc Gauge(3)の表示名を設定します
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 3 References
  * @desc Gauge(3)で表示する値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 3 Current
  * @desc Gauge(3)の現在値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 3 Max
  * @desc Gauge(3)の最大値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 3 Color1
  * @desc Gauge(3)のゲージの色1を設定します。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 3 Color2
  * @desc Gauge(3)のゲージの色2を設定します。
  * @default 
+ * @parent customGauge
  * 
  * @param --Gauge Param 4--
  * @default
+ * @parent customGauge
  * 
  * @param Gauge 4 Display Name
  * @desc Gauge(4)の表示名を設定します
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 4 References
  * @desc Gauge(4)で表示する値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 4 Current
  * @desc Gauge(4)の現在値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 4 Max
  * @desc Gauge(4)の最大値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 4 Color1
  * @desc Gauge(4)のゲージの色1を設定します。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 4 Color2
  * @desc Gauge(4)のゲージの色2を設定します。
  * @default 
+ * @parent customGauge
  * 
  * @param --Gauge Param 5--
  * @default
+ * @parent customGauge
  * 
  * @param Gauge 5 Display Name
  * @desc Gauge(5)の表示名を設定します
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 5 References
  * @desc Gauge(5)で表示する値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 5 Current
  * @desc Gauge(5)の現在値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 5 Max
  * @desc Gauge(5)の最大値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 5 Color1
  * @desc Gauge(5)のゲージの色1を設定します。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 5 Color2
  * @desc Gauge(5)のゲージの色2を設定します。
  * @default 
+ * @parent customGauge
  * 
  * @param --Gauge Param 6--
  * @default
+ * @parent customGauge
  * 
  * @param Gauge 6 Display Name
  * @desc Gauge(6)の表示名を設定します
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 6 References
  * @desc Gauge(6)で表示する値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 6 Current
  * @desc Gauge(6)の現在値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 6 Max
  * @desc Gauge(6)の最大値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 6 Color1
  * @desc Gauge(6)のゲージの色1を設定します。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 6 Color2
  * @desc Gauge(6)のゲージの色2を設定します。
  * @default 
+ * @parent customGauge
  * 
  * @param --Gauge Param 7--
  * @default
+ * @parent customGauge
  * 
  * @param Gauge 7 Display Name
  * @desc Gauge(7)の表示名を設定します
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 7 References
  * @desc Gauge(7)で表示する値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 7 Current
  * @desc Gauge(7)の現在値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 7 Max
  * @desc Gauge(7)の最大値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 7 Color1
  * @desc Gauge(7)のゲージの色1を設定します。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 7 Color2
  * @desc Gauge(7)のゲージの色2を設定します。
  * @default 
+ * @parent customGauge
  * 
  * @param --Gauge Param 8--
  * @default
+ * @parent customGauge
  * 
  * @param Gauge 8 Display Name
  * @desc Gauge(8)の表示名を設定します
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 8 References
  * @desc Gauge(8)で表示する値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 8 Current
  * @desc Gauge(8)の現在値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 8 Max
  * @desc Gauge(8)の最大値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 8 Color1
  * @desc Gauge(8)のゲージの色1を設定します。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 8 Color2
  * @desc Gauge(8)のゲージの色2を設定します。
  * @default 
+ * @parent customGauge
  * 
  * @param --Gauge Param 9--
  * @default
+ * @parent customGauge
  * 
  * @param Gauge 9 Display Name
  * @desc Gauge(9)の表示名を設定します
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 9 References
  * @desc Gauge(9)で表示する値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 9 Current
  * @desc Gauge(9)の現在値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 9 Max
  * @desc Gauge(9)の最大値の参照先を設定します。
  * アクターを a として、ステータスの参照先を記述すること。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 9 Color1
  * @desc Gauge(9)のゲージの色1を設定します。
  * @default 
+ * @parent customGauge
  * 
  * @param Gauge 9 Color2
  * @desc Gauge(9)のゲージの色2を設定します。
  * @default 
+ * @parent customGauge
  * 
  * @help
  *-----------------------------------------------------------------------------
  * 概要
  *-----------------------------------------------------------------------------
- * 当プラグインは、アクターのステータス表示のレイアウトをより詳細に設定できる
+ * このプラグインは、アクターのステータス表示のレイアウトをより詳細に設定できる
  * 処理を実装します。
  * 
- * 当プラグインの拡張プラグイン(FTKR_CSS_***.js)と組み合わせることで
+ * このプラグインの拡張プラグイン(FTKR_CSS_***.js)と組み合わせることで
  * メニュー画面や、バトル画面などさまざまなステータス画面を設定できるように
  * なります。
  * 
+ * v3.0.0から採用するステータスごとの表示位置指定方式については、拡張プラグインの
+ * v2.0.0以降を使用してください。
+ * ※従来の方式についても、v1の拡張プラグインで使用可能
  * 
- * また、トリアコンタンさん製作のGraphicalDesignMode.jsを使って
- * 拡張プラグインのステータス表示のレイアウトをゲーム画面上で変更できます。
+ * 
+ * プラグインの使い方は、下のオンラインマニュアルページを見てください。
+ * https://github.com/futokoro/RPGMaker/blob/master/FTKR_CustomSimpleActorStatus.ja.md
  * 
  * 
  *-----------------------------------------------------------------------------
  * 設定方法
  *-----------------------------------------------------------------------------
- * 1.「プラグインマネージャー(プラグイン管理)」に、本プラグインを追加して
+ * 1.「プラグインマネージャー(プラグイン管理)」に、このプラグインを追加して
  *    ください。
  * 
- * 2. 拡張プラグインと組み合わせる場合は、当プラグインが上になるように
- *    配置してください。
+ * 2. 拡張プラグイン(FTKR_CSS_***.js)と組み合わせる場合は、このプラグインが
+ *    上になるように配置してください。
  * 
  * 3. GraphicalDesignMode.jsと組み合わせる場合は、
- *    本プラグインが下になるように配置してください。
+ *    このプラグインが下になるように配置してください。
+ * 
+ * 4. このプラグインを使う上で、設定が必須なプラグインパラメータはありません。
  * 
  * 
  *-----------------------------------------------------------------------------
- * アクターの簡易ステータス表示の設定
+ * プラグインのライセンスについて(License)
  *-----------------------------------------------------------------------------
- * プラグインパラメータの設定により、アクターのステータスの表示レイアウトを
- * 変更することができます。
- * この仕様は、当プラグインの拡張プラグインで共通です。
- * 
- * <Actor Status Text1>
- * <Actor Status Text2>
- * <Actor Status Text3>
- *    :ステータスウィンドウは、表示の処理を縦に3分割で分けています。
- *    :Text1~Text3が、それぞれ左側、中央、右側の表示に相当します。
- *    :各パラメータに入力したステータスが、それぞれの部位で表示します。
- *    :
- *    :入力できるパラメータ名は、
- *    :face(x), chara, sv, name, class, nickname, hp, mp, tp, level, 
- *    :state, state2(x), profile, param(x), custom(x), gauge(x), 
- *    :equip(x), text(x), image, eparam(x), agauge(x), cgauge(x)
- *    :eval(x), streval(x), eaop(x) です。
- *    :
- *    :face, face(x) -
- *    : 顔画像を表示します。
- *    : x を数値で指定すると、x行分に画像を拡大収縮して表示します。
- *    : デフォルトサイズは 4行分です。
- *    :
- *    :state, state2(x) - 
- *    : アクターが付与されているステートを並べて表示します。
- *    :
- *    :profile - 
- *    : アクターのプロフィール文を表示します。
- *    : 制御文字が使用できます。
- *    :
- *    :param(x) -
- *    : x は 0 ~ 7 の値を指定します。
- *    : 指定した x の値に従い、下記のパラメータを表示します。
- *    : 0 - 最大HP、1 - 最大MP、2 - 攻撃力、3 - 防御力、4 - 魔法攻撃、
- *    : 5 - 魔法防御、6 - 敏捷性、7 - 運
- *    : パラメータの名称は、データベースの用語で登録した文字列を使用します。
- *    :
- *    :custom(x) -
- *    : x は 0 ~ 19 の値を指定します。
- *    : プラグインパラメータの Custom Param x で設定したパラメータを表示します。
- *    :
- *    :gauge(x) -
- *    : x は 0 ~ 9 の値を指定します。
- *    : プラグインパラメータの Gauge Param x で設定したパラメータを表示します。
- *    :
- *    :equip(x) -
- *    : x は 装備タイプを指定します。
- *    : 該当する装備タイプの武器・防具のアイコンおよび名前を表示します。
- *    : 装備していない場合は、空欄を表示します。
- *    :
- *    :text(x) -
- *    : 文字列 x を表示します。
- *    : 制御文字が使用できます。
- *    : なお、x はパラメータの参照コードを入力することが可能です。
- *    : 例) text($dataItems[1].name) で、アイテムID1の名前を表示
- *    :
- *    :image - 
- *    : アクターのメモ欄で設定したカスタム画像を表示します。
- *    :
- *    :eparam(x) -
- *    : 装備画面にて使用可能な、パラメータ表示用コードです。
- *    : 選択したアイテムを装備した時のパラメータを表示します。
- *    : x は 0 ~ 7 の値で、下記のパラメータを指定します。
- *    : 0 - 最大HP、1 - 最大MP、2 - 攻撃力、3 - 防御力、4 - 魔法攻撃、
- *    : 5 - 魔法防御、6 - 敏捷性、7 - 運
- *    : 矢印記号は、プラグインパラメータ<Equip Right Arror>で変更できます。
- *    :
- *    :eaop(x) -
- *    : 装備画面にて使用可能な、AOPパラメータ(*)表示用コードです。
- *    : 選択したアイテムを装備した時のパラメータを表示します。
- *    : AOPパラメータとは、FTKR_AddOriginalParameters.js により作成した
- *    : オリジナルパラメータのことです。
- *    : x は AOOPパラメータIDを指定します。
- *    : 矢印記号は、プラグインパラメータ<Equip Right Arror>で変更できます。
- *    :
- *    :agauge(x) - 
- *    : アクターのメモ欄で設定したカスタムゲージを表示します。
- *    :
- *    :cgauge(x) - 
- *    : クラスのメモ欄で設定したカスタムゲージを表示します。
- *    :
- *    :eval(x) - 
- *    : JS計算式 x を評価して、その結果を数値で表示します。
- *    :
- *    :streval(x) - 
- *    : JS計算式 x を評価して、その結果を文字列で表示します。
- *    :
- *    :カンマ(,)で区切って複数のパラメータを入力した場合は、
- *    :行を変えてそれぞれのパラメータを表示します。
- *    :表示に必要な行数は、 faceが4、charaとsvが2、それ以外が1行です。
- *    :
- *    :角括弧[]を使用することで、複数のステータスを1つの行内に表示する
- *    :ことができます。
- *    :角括弧内では、スラッシュ(/)でパラメータを区切ってください。
- *    :入力例)
- *    : class,[hp/mp],tp
- *    :  - 1行目にクラス名を表示し、2行目にHPとMPを表示、3行目にTPを表示する。
- *    :
- *    :波括弧{}を使用することで、括弧内のステータスをすべての列を使用して
- *    :表示させることができます。
- *    :入力例) Text1に以下を入力
- *    : {name},hp,mp
- *    :  - 1行目すべて(Text1~Text3の表示エリア)を使ってアクター名を表示し
- *    :    2行目と3行目はText1の表示エリア内で表示します。
- * 
- * <Actor Status Space>
- *    :各Textの間隔をカンマ(,)で区切って指定します。単位はpixelです。
- *    :入力例)
- *    : 10,20,30,40
- *    : - 左端からText1までの間隔を10、Text1とText2の間隔を20、
- *    :   Text2とText3の間隔を30、Text3から右端までの間隔を40に設定します。
- * 
- * <Actor Status Space In Text>
- *    :角括弧[]を使用して、複数のステータスを1つのText内に表示した場合の間隔を
- *    :指定します。単位はpixelです。
- * 
- * <Actor Status Width Rate>
- *    :ウィンドウを3分割する場合に、Text1~Text3の表示エリアをどのような比率で
- *    :確保するか設定します。
- *    :それぞれの比率を、カンマ(,)で区切って入力します。
- *    : 0 を入力した部位は、表示しません。
- *    :入力例)
- *    : 1,1,1 - 3等分します。それぞれの表示サイズは同じです。
- *    : 1,1,0 - Text1とText2だけで2等分します。Text3のサイズは 0 になり
- *    :         表示しません。
- *    : 2,1,1 - Text1で全体の半分を使用します。
- *    :         Text2とText3で残りの半分を2等分します。
- * 
- * 
- *-----------------------------------------------------------------------------
- * 顔画像の設定 [ face ]
- *-----------------------------------------------------------------------------
- * プラグインパラメータ<Actor Status Text*>にて、'face'を入力した場合
- * アクターの顔画像を表示します。
- * 顔画像について、以下のパラメータで設定を変更できます。
- * 
- * <Face Position X>
- *    :アクターの顔画像を描画エリアのどの位置に表示するか設定します。
- *    :0 - 左寄せ, 1 - 中央(デフォルト), 2 - 右寄せ
- *    :描画エリアの幅が、顔画像の表示幅よりも大きい場合に機能します。
- *    :また、波括弧を使って描画エリアを拡張した場合にも有効です。
- * 
- * 
- *-----------------------------------------------------------------------------
- * キャラクタ画像の設定 [ chara ]
- *-----------------------------------------------------------------------------
- * プラグインパラメータ<Actor Status Text*>にて、'chara'を入力した場合
- * アクターのキャラクタ画像(歩行キャラ)を表示します。
- * キャラクタ画像について、以下のパラメータで設定を変更できます。
- * 
- * <Chara Image Width>
- * <Chara Image Height>
- *    :アクターのキャラクタ画像のサイズを設定します。
- *    :標準では48*48の画像を使用していますが、それ以外のサイズの
- *    :キャラ画像を使用している場合に、設定値を変えてください。
- * 
- * <Chara Position X>
- *    :アクターのキャラクタ画像を描画エリアのどの位置に表示するか設定します。
- *    :0 - 左寄せ, 1 - 中央(デフォルト), 2 - 右寄せ
- * 
- * <Chara Direction>
- *    :アクターのキャラクタ画像の向きを設定します。
- *    :0 - 正面固定, 1 - マップ上の先頭プレイヤーの向き
- * 
- * 
- *-----------------------------------------------------------------------------
- * SVキャラクタ画像の設定 [ sv ]
- *-----------------------------------------------------------------------------
- * プラグインパラメータ<Actor Status Text*>にて、'sv'を入力した場合
- * アクターのSVキャラクタ画像(SV戦闘キャラ)を表示します。
- * SVキャラクタ画像について、以下のパラメータで設定を変更できます。
- * 
- * <Sv Image Width>
- * <Sv Image Height>
- *    :アクターのSVキャラクタ画像のサイズを設定します。
- *    :標準では64*64の画像を使用していますが、それ以外のサイズの
- *    :キャラ画像を使用している場合に、設定値を変えてください。
- * 
- * <Sv Position X>
- *    :アクターのSVキャラクタ画像を描画エリアのどの位置に表示するか設定します。
- *    :0 - 左寄せ, 1 - 中央(デフォルト), 2 - 右寄せ
- * 
- * <Enabled Sv Motion>
- *    :アクターのSVキャラクタ画像のモーションを有効にするか設定します。
- *    :0 - 無効, 1 - 有効, 2 - 戦闘時以外有効
- *    :無効にした場合は、モーションを表示しません。
- *    :表示する画像は、画像ファイル内の左上のSVキャラクタ画像で固定です。
- *    :フロントビューモードの場合は、強制的に無効になります。
- * 
- * <Sv Image Motion>
- *    :標準で表示するモーションを設定します。
- *    :入力するパラメータ名は、以下から選択できます。
- *    : walk, wait, chant, guard, damage, evade, thrust, swing,
- *    : missile, skill, spell, item, escape, victory, dying,
- *    : abnormal, sleep, dead
- * 
- * <Enabled State Motion>
- *    :ステートモーションを有効にするか設定します。
- *    :0 - 無効, 1 - 有効
- *    :状態異常、戦闘不能、睡眠になっているキャラは、そのステートの
- *    :モーションが表示されます。
- * 
- * 
- *-----------------------------------------------------------------------------
- * ステートの設定 [ state/state2(x) ]
- *-----------------------------------------------------------------------------
- * プラグインパラメータ<Actor Status Text*>にて、'state'を入力した場合
- * アクターのステートを表示します。
- * 
- * state     - 横に並べられるだけ表示します。
- * state2(x) - 縦に x 行分表示します。(Enable CSS Statesが有効の場合のみ)
- * 
- * 並べきれないアイコンは、切り替え時間に合わせて表示が替わります。
- * 
- * 
- * 以下のパラメータで設定を変更できます。
- * <Enable CSS States>
- *    :ステートアイコンの表示について当プラグインの専用描画処理を有効にするか
- *    :設定します。
- *    :有効にすると、以下のプラグインの設定に従いステートアイコンを表示します。
- *    :無効の場合はMVのデフォルトの描画処理を使用します。
- * 
- * <Animation Wait>
- *    :ステートアイコンの切り替え時間を指定します。
- * 
- * <Enable Overlap>
- *    :ステートアイコンの重なり表示を有効にする。
- *    :0 - 無効, 1 - 有効
- *    :有効にすると、アイコンを重ねて表示させることで
- *    :一度に表示できるアイコン数を増やします。
- * 
- * <Overlap Rate>
- *    :ステートアイコンの重なり表示を有効にした場合に、
- *    :アイコンサイズの重なりの許容できる比率を指定します。
- *    : 0 ~ 1 の値を設定してください。
- * 
- * <Enable Auto Scale>
- *    :行の高さに合わせてアイコンサイズを縮小するか。
- *    :0 - 無効, 1 - 有効
- *    :アイコンサイズ以上に拡大はしません。
- * 
- * 
- *-----------------------------------------------------------------------------
- * カスタムパラメータの設定 [ custom(x) ]
- *-----------------------------------------------------------------------------
- * プラグインパラメータ<Actor Status Text*>にて、'custom(x)'を入力した場合
- * <Custom Param x>で設定したパラメータを表示することができます。
- * カスタムパラメータは、最大で20種類設定できます。
- * 
- * <Custom x Display Name>
- *    :パラメータの表示名を設定します。
- *    :表示名には制御文字が使用できます。
- * 
- * <Custom x References>
- *    :パラメータの値の参照先をeval値で設定します。
- * 
- * <Custom x Unit>
- *    :パラメータの値の単位を設定します。
- *    :単位には制御文字が使用できます。
- * 
- * [eval の値について]
- * eval部は、ダメージ計算式のように、計算式を入力することで、固定値以外の値を
- * 使用することができます。以下のコードを使用できます。
- *  a.param - 使用者のパラメータを参照します。(a.hit で使用者の命中率)
- *  v[x]    - 変数ID x の値を参照します。
- *  s[x]    - スイッチID x の値を参照します。
- * 
- * 命中率のような百分率の値の場合、'a.hit'のように記述すると少数で表示します。
- * そのため、'a.hit * 100'や、'Math.parcent(a.hit)'などと記述して
- * 整数に変換するようにします。
- * 
- * 
- *-----------------------------------------------------------------------------
- * カスタムゲージの設定 [ gauge(x) ]
- *-----------------------------------------------------------------------------
- * プラグインパラメータ<Actor Status Text*>にて、'gauge(x)'を入力した場合
- * <Gauge Param x>で設定したゲージを表示することができます。
- * カスタムゲージは、最大で10種類設定できます。
- * 
- * １．共通設定
- * <Gauge Param Digit>
- *    :現在値と最大値の表示幅を指定した桁数に設定します。
- *    :この桁数以上の値の場合、横に圧縮して表示します。
- * 
- * ２．個別設定
- * <Gauge x Display Name>
- *    :ゲージの表示名を設定します。
- *    :表示名には制御文字が使用できます。
- *    :表示名を設定しない場合、ゲージの現在値と最大値の数値を表示しません。
- * 
- * <Gauge x References>
- *    :ゲージで表示する値の参照先をeval値で設定します。
- *    :この値を設定すると、現在値と最大値は表示しません。
- * 
- * <Gauge x Current>
- *    :ゲージの現在値の参照先をeval値で設定します。
- * 
- * <Gauge x Max>
- *    :ゲージの最大値の参照先をeval値で設定します。
- *    :最大値の数値は、描画エリアの幅が足りない場合には表示しません。
- * 
- * <Gauge x Color1>
- * <Gauge x Color2>
- *    :ゲージの色1と色2を設定します。
- *    :色1と色2の値を変えることで、HPゲージのようにグラデーションになります。
- *    :-1 を指定すると、ゲージバーが非表示になります。
- * 
- * [eval の値について]
- * eval部は、ダメージ計算式のように、計算式を入力することで、固定値以外の値を
- * 使用することができます。以下のコードを使用できます。
- *  a.param - 使用者のパラメータを参照します。(a.hit で使用者の命中率)
- *  v[x]    - 変数ID x の値を参照します。
- *  s[x]    - スイッチID x の値を参照します。
- * 
- * 命中率のような百分率の値の場合、'a.hit'のように記述すると少数で表示します。
- * そのため、'a.hit * 100'や、'Math.parcent(a.hit)'などと記述して
- * 整数に変換するようにします。
- * 
- * 
- *-----------------------------------------------------------------------------
- * カスタム画像を表示する [ image / image(x) ]
- *-----------------------------------------------------------------------------
- * プラグインパラメータ<Actor Status Text*>にて、'image' または 'image(x)'を
- * 入力した場合、以下のタグをアクターのメモ欄に追記することで、指定した画像を
- * 表示することができます。
- * 画像は複数登録することができます。
- * 
- *    image    - 最初に登録した画像を表示します。
- *    image(x) - 画像を登録した順番に x = 0,1,2,... と指定します。
- *               この番号をカスタム画像IDと呼びます。
- * 
- * <CSS_画像:ImageName>
- * code
- * </CSS_画像>
- *    :ImageName - 表示させたい画像名を入力します。(*1)
- * 
- * または
- * <CSS_IMAGE:ImageName>
- * code
- * </CSS_IMAGE>
- * 
- * (*1)画像は、プロジェクトフォルダ内の/img/pictures/に保存してください。
- * 
- * [code に使用できる項目]
- * 以下のタグで、画像を四角に切り取って表示(トリミング)することができます。
- * 
- * Bgi offset X: n
- *    :画像ファイルを四角に切り取る時の左上のX座標を入力します。
- *    :指定しない場合は 0 になります。
- * 
- * Bgi offset Y: n
- *    :画像ファイルを四角に切り取る時の左上のY座標を入力します。
- *    :指定しない場合は 0 になります。
- * 
- * Bgi width: n
- *    :画像ファイルを四角に切り取る時の幅を入力します。
- *    :指定しない場合は 画像のサイズ になります。
- * 
- * Bgi height: n
- *    :画像ファイルを四角に切り取る時の高さを入力します。
- *    :指定しない場合は 画像のサイズ になります。
- * 
- * Bgi scale: n
- *    :画像ファイルを表示するときの拡大率(%)を入力します。
- *    :指定しない場合は原寸サイズで表示します。(原寸サイズ = 100)
- * 
- * 
- * 指定した画像は、以下のプラグインパラメータで設定を変更できます。
- * 
- * <Image Position X>
- *    :指定した画像を描画エリアのどの位置に表示するか設定します。
- *    :0 - 左寄せ, 1 - 中央(デフォルト), 2 - 右寄せ
- *    :描画エリアの幅が、顔画像の表示幅よりも大きい場合に機能します。
- *    :また、波括弧を使って描画エリアを拡張した場合にも有効です。
- * 
- * 
- * なお、設定したカスタム画像は、以下のプラグインコマンドを実行することで
- * ゲーム中に変更できます。
- * ※[]は実際の入力に使用しません
- * 
- * CSS_カスタム画像変更 [アクター または パーティー] [アクターID または パーティー順番] [カスタム画像ID] [画像名] [X座標] [Y座標] [幅] [高さ] [拡大率]
- * CSS_CHANGE_CUSTOM_IMAGE [ACTOR or PARTY] [actorID or partyNumber] [customImageID] [imageName] [offsetX] [offsetY] [width] [height] [scale]
- * 
- *    アクター または パーティー(ACTOR or PARTY)
- *      ：変更したい対象アクターの指定方法を選択します。
- *        いずれかの文字列を記載してください。
- * 
- *    アクターID または パーティー順番(actorID or partyNumber)
- *      ：上記で設定した指定方法に合わせて
- *        アクターIDかパーティー順番の番号を入力します。
- *        なお、パーティー順番は、先頭キャラを 0番と数えます。
- *        \v[n]で変数を指定することも可能です。
- * 
- *    カスタム画像ID(customImageID)
- *      ：変更したいカスタム画像IDを設定します。
- *        \v[n]で変数を指定することも可能です。
- * 
- *    画像名(imageName)
- *      ：変更する画像ファイル名を文字列で設定します。
- *        画像は、プロジェクトフォルダ内の/img/pictures/に保存してください。
- *        なお、このファイルはディプロイメントの「未使用ファイルを含まない」の対象外です。
- *        別途イベントでピクチャとして登録しておくなど、回避手段を講じてください。
- * 
- *    X座標(offsetX)
- *    Y座標(offsetY)
- *    幅(width)
- *    高さ(height)
- *    拡大率(scale)
- *      ：画像ファイルの表示設定を変更します。
- *        アクターのメモ欄の設定方法と同じです。
- *        変更しない場合は、-1 と入力します。
- *        \v[n]で変数を指定することも可能です。
- * 
- * 入力例）
- * ◆プラグインコマンド：CSS_カスタム画像変更 アクター 1 0 Package1_2 -1 -1 -1 -1 50
- * 
- * このコマンドで、アクターID 1 のカスタム画像ID 0 の画像を
- * /img/pictures/Package1_2.png に変更した上で
- * トリミングサイズは変更せず、拡大率を 50% に設定します。
- * 
- * 
- *-----------------------------------------------------------------------------
- * アクター別のカスタムゲージの設定 [ agauge(x) ]
- *-----------------------------------------------------------------------------
- * プラグインパラメータ<Actor Status Text*>にて、'agauge(x)'を入力した場合
- * アクターのメモ欄で設定したゲージを表示することができます。
- * 現在値と最大値の表示桁数はカスタムゲージの設定を使用します。
- * 
- * 使用する場合は、以下のタグをアクターのメモ欄に追記してください。
- * 
- * <CSS_カスタム:x>
- * code
- * </CSS_カスタム>
- * 
- * または
- * 
- * <CSS_CUSTOM:x>
- * code
- * </CSS_CUSTOM>
- * 
- * [code に使用できる項目]
- * 表示名: y
- * NAME: y
- *    :ゲージの表示名を y に設定します。
- *    :表示名には制御文字が使用できます。
- *    :表示名を設定しない場合、ゲージの現在値と最大値の数値を表示しません。
- * 
- * 参照先: eval
- * REFERENCES: eval
- *    :ゲージで表示する値の参照先をeval値で設定します。
- *    :この値を設定すると、現在値と最大値は表示しません。
- * 
- * 現在値: eval
- * CURRENT: eval
- *    :ゲージの現在値の参照先をeval値で設定します。
- * 
- * 最大値: eval
- * MAX: eval
- *    :ゲージの最大値の参照先をeval値で設定します。
- *    :最大値の数値は、描画エリアの幅が足りない場合には表示しません。
- * 
- * 色: y1,y2
- * COLOR: y1,y2
- *    :ゲージの色1を y1 に、色2を y2 に設定します。
- *    :色1と色2の値を変えることで、HPゲージのようにグラデーションになります。
- *    :-1 を指定すると、ゲージバーが非表示になります。
- * 
- * [eval の値について]
- * eval部は、ダメージ計算式のように、計算式を入力することで、固定値以外の値を
- * 使用することができます。以下のコードを使用できます。
- *  a.param - 使用者のパラメータを参照します。(a.hit で使用者の命中率)
- *  v[x]    - 変数ID x の値を参照します。
- *  s[x]    - スイッチID x の値を参照します。
- * 
- * 命中率のような百分率の値の場合、'a.hit'のように記述すると少数で表示します。
- * そのため、'a.hit * 100'や、'Math.parcent(a.hit)'などと記述して
- * 整数に変換するようにします。
- * 
- * 
- *-----------------------------------------------------------------------------
- * クラス別のカスタムゲージの設定 [ cgauge(x) ]
- *-----------------------------------------------------------------------------
- * プラグインパラメータ<Actor Status Text*>にて、'cgauge(x)'を入力した場合
- * クラスのメモ欄で設定したゲージを表示することができます。
- * 現在値と最大値の表示桁数はカスタムゲージの設定を使用します。
- * 
- * 使用する場合は、以下のタグをアクターのメモ欄に追記してください。
- * code部の仕様は、アクター別のカスタムゲージと同じです。
- * 
- * <CSS_カスタム:x>
- * code
- * </CSS_カスタム>
- * 
- * または
- * 
- * <CSS_CUSTOM:x>
- * code
- * </CSS_CUSTOM>
- * 
- * 
- *-----------------------------------------------------------------------------
- * GraphicalDesignMode.jsと連動したGUIベース画面設定
- *-----------------------------------------------------------------------------
- * トリアコンタンさん製作のGraphicalDesignMode.jsを使って
- * FTKR_CSSプラグインのステータス表示のレイアウトをゲーム画面上で変更できます。
- * 
- * デザインモードにて、ウィンドウ内にマウスカーソルを合わせて
- * 英字キーを押下すると、各プロパティを変更できます。
- * 
- * ※英字とプロパティの対応
- *
- * R. Text1部に表示するステータス
- * F. Text2部に表示するステータス
- * V. Text3部に表示するステータス
- * T. 各Textの間隔
- * G. Text内で複数表示する場合の間隔
- * B. Text1~Text3の表示幅の比率
- * 
- * 以下のキー操作はメニュー画面、バトル画面、戦績画面のみ有効
- * Y. アクターを横に並べる数
- * H. アクター１人分の表示高さ
- * N. 縦のカーソル間隔
- * 
- * 
- * 設定可能なステータスウィンドウ
- * ・メニュー画面
- * ・スキル画面
- * ・装備画面
- * ・ステータス画面(*1)
- * ・バトル画面
- * ・戦績画面(FTKR_CSS_CustomizeBattleResults.jsが必要)
- * ・ショップ画面(FTKR_CSS_ShopStatus.jsが必要)
- * 
- * (*1)ステータス画面の設定は、FTKR_CSS_DetailedStatus.jsと異なります。
- *     ステータス画面を縦に４分割した表示エリアごとに個別に設定します。
- *     設定する際には、マウスカーソル位置を各表示エリアに合わせてください。
- *  
- * 
- * 補足情報
- * 1．Text1～Text3の表示を消したい場合。
- * 
- *    半角スペースだけを入力することで、無表示になります。
- *    何も入力しない(空欄)の場合は、デフォルトの表示になります。
- * 
- * 
- *-----------------------------------------------------------------------------
- * 本プラグインのライセンスについて(License)
- *-----------------------------------------------------------------------------
- * 本プラグインはMITライセンスのもとで公開しています。
+ * このプラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
  * Copyright (c) 2017,2018 Futokoro
@@ -1377,6 +987,13 @@ FTKR.CSS = FTKR.CSS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v3.0.0 - 2018/08/19 : 仕様変更
+ *    1. ステータスの表示とパラメータの入力に、ステータスごとの表示位置指定方式を採用。
+ *    2. FTKR_GDM_WindowEditor対応版に修正。
+ *    3. ヘルプの記述を削減。
+ *    4. 顔画像のサイズを調整する機能を追加。
+ *    5. GraphicalDesignMode.jsとの連携機能を、FTKR_GDM_Editorに移行。
  * 
  * v2.7.2 - 2018/08/18 : 不具合修正
  *    1. 拡張プラグイン使用時にステートアイコンが表示されない不具合を修正。
@@ -1902,6 +1519,41 @@ FTKR.CSS = FTKR.CSS || {};
         }
     };
 
+    //配列を複製する
+    var copyArray = function(arr) {
+        var newArr = [];
+        arr.forEach(function(data, prop) {
+            if (data instanceof Object) {
+                if (data instanceof Array) {
+                    newArr[prop] = copyArray(data);
+                } else {
+                    newArr[prop] = copyObject(data);
+                }
+            } else {
+                newArr[prop] = data;
+            }
+        });
+        return newArr;
+    };
+
+    //オブジェクトを複製する
+    var copyObject = function(obj) {
+        var newObj = {};
+        Object.getOwnPropertyNames(obj).forEach(function(prop) {
+            var data = obj[prop];
+            if (data instanceof Object) {
+                if (data instanceof Array) {
+                    newObj[prop] = copyArray(data);
+                } else {
+                    newObj[prop] = copyObject(data);
+                }
+            } else {
+                newObj[prop] = data;
+            }
+        });
+        return newObj;
+    };
+    
     // 配列の要素の合計
     Math.sam = function(arr) {
         return arr.reduce( function(prev, current, i, arr) {
@@ -2183,9 +1835,7 @@ FTKR.CSS = FTKR.CSS || {};
     };
 
     Window_Base.prototype.clearItem = function(index) {
-        //        if (this.sprite && this._faceSprite) {
-            this.clearCssSprite(index);
-//        }
+        this.clearCssSprite(index);
     };
 
     var _CSS_Window_Selectable_clearItem = Window_Selectable.prototype.clearItem;
@@ -2226,6 +1876,16 @@ FTKR.CSS = FTKR.CSS || {};
     lss   :簡易ステータスオブジェクト
     -------------------------------------------------------------*/
     Window_Base.prototype.drawCssActorStatus = function(index, actor, x, y, width, height, lss) {
+        if (lss && lss.statusList) {
+            lss.statusList.forEach(function(status){
+                this.drawCssActorStatusText(index, actor, x, y, width, height, status, lss);
+            },this);
+        } else {
+            this.drawCssActorStatus_v2(index, actor, x, y, width, height, lss);
+        }
+    };
+
+    Window_Base.prototype.drawCssActorStatus_v2 = function(index, actor, x, y, width, height, lss) {
         if (!lss) lss = FTKR.CSS.simpleStatus;
         var w = width;
         var h = height;
@@ -2238,7 +1898,7 @@ FTKR.CSS = FTKR.CSS || {};
         for (var i = 0; i < 3; i++) {
             aws[i] = (w - Math.sam(spc)) * wrs[i] / Math.sam(wrs);
             axs[i] = i > 0 ? axs[i-1] + aws[i-1] + spc[i]: x + spc[0];
-            this.drawCssActorStatusText(index, actor, axs[i], y, aws[i], status[i], lss);
+            this.drawCssActorStatusText(index, actor, axs[i], y, aws[i], height, status[i], lss);
             this._dispWidth -= aws[i] + spc[i+1];
         }
     };
@@ -2254,7 +1914,28 @@ FTKR.CSS = FTKR.CSS || {};
     statusnames :描画エリアの表示コードの配列
     lss         :簡易ステータスオブジェクト
     -------------------------------------------------------------*/
-    Window_Base.prototype.drawCssActorStatusText = function(index, actor, x, y, width, statusnames, lss) {
+    Window_Base.prototype.drawCssActorStatusText = function(index, actor, x, y, width, height, status, lss) {
+        if (lss && lss.statusList) {
+            var dx = this.parseIntCssStatus(status.x, x, y, width, height);
+            var dy = this.parseIntCssStatus(status.y, x, y, width, height);
+            var dw = this.parseIntCssStatus(status.width, x, y, width, height);
+            dw = dw < 0 ? width - x - dx : Math.min(dw, width);
+            this.drawCssActorStatusBases(index, actor, x + dx, y + dy, dw, status.text, lss);
+        } else {
+            this.drawCssActorStatusText_v2(index, actor, x, y, width, height, status, lss);
+        }
+    };
+
+    Window_Base.prototype.parseIntCssStatus = function(value, x, y, width, height) {
+        if (parseInt(value)) {
+            return parseInt(value);
+        } else {
+            var line = this.lineHeight();
+            return eval(value);
+        }
+    };
+
+    Window_Base.prototype.drawCssActorStatusText_v2 = function(index, actor, x, y, width, height, statusnames, lss) {
         var dy = this.lineHeight();
         var line = 0;
         statusnames.forEach( function(status) {
@@ -2263,6 +1944,21 @@ FTKR.CSS = FTKR.CSS || {};
     };
 
     Window_Base.prototype.drawCssActorStatusBases = function(index, actor, x, y, width, status, lss) {
+        if (lss && lss.statusList) {
+            var statuses = status.match(/^\[(.+)\]$/i) ? RegExp.$1.split('/') : [status];
+            var len = statuses.length;
+            var sIn = Number(lss.spaceIn);
+            if (len > 1) width = (width - sIn * (len - 1))/ len;
+            statuses.forEach( function(element, i) {
+                var dx = (width + sIn) * i;
+                this.drawCssActorStatusBase(index, actor, x + dx, y, width, element, lss);
+            },this);
+        } else {
+            return this.drawCssActorStatusBases_v2(index, actor, x, y, width, status, lss);
+        }
+    };
+
+    Window_Base.prototype.drawCssActorStatusBases_v2 = function(index, actor, x, y, width, status, lss) {
         if (status.match(/^\{(.+)\}$/i)) {
             status = RegExp.$1;
             width = this._dispWidth;
@@ -2398,12 +2094,17 @@ FTKR.CSS = FTKR.CSS || {};
     };
 
     Window_Base.prototype.drawCssFace = function(actor, dx, dy, width, height) {
-//        var len = Math.min(width, height);
         var fw = FTKR.CSS.cssStatus.face.width || Window_Base._faceWidth;
         var fh = FTKR.CSS.cssStatus.face.height || Window_Base._faceHeight;
-        var scale = height / fh;
-        var dh = height;
-        var dw = fw * scale;
+        var scaleh = height / fh;
+        var scaleW = width / fw;
+        if (scaleh < scaleW) {
+            var dh = height;
+            var dw = fw * scaleh;
+        } else {
+            var dh = fh * scaleW;
+            var dw = width;
+        }
         var offsetX = this.cssFacePositionX(actor) * (width - dw) / 2;
         dx = Math.floor(dx + offsetX);
         var bitmap = ImageManager.loadFace(actor.faceName());
@@ -2929,13 +2630,11 @@ FTKR.CSS = FTKR.CSS || {};
     Window_Base.prototype.initCssLayout = function() {
         var lss = this.standardCssLayout();
         if (lss && lss.enabled) {
-            this._css_spacing = 0;
-            this._css_fontSize = lss.fontSize;
-            this._css_numVisibleRows = lss.numVisibleRows;
-            this._css_padding = lss.padding;
-            this._css_lineHeight = lss.lineHeight;
-            this._css_opacity = lss.opacity;
-            this._css_hideFrame = lss.hideFrame;
+            this._customFontSize    = lss.fontSize;
+            this._customPadding     = lss.padding;
+            this._customLineHeight  = lss.lineHeight;
+            this._customBackOpacity = lss.opacity;
+            this._customHideFrame   = lss.hideFrame;
         }
         this._lssStatus = this.standardCssStatus();
     };
@@ -2948,38 +2647,6 @@ FTKR.CSS = FTKR.CSS || {};
         return {};
     };
 
-    var _CSS_Window_Base_numVisibleRows = Window_Base.prototype.numVisibleRows;
-    Window_Base.prototype.numVisibleRows = function() {
-        return this._css_numVisibleRows ? this._css_numVisibleRows :
-            _CSS_Window_Base_numVisibleRows.call(this);
-    };
-
-    var _CSS_Window_Base_standardFontSize = Window_Base.prototype.standardFontSize;
-    Window_Base.prototype.standardFontSize = function() {
-        return this._css_fontSize ? this._css_fontSize : _CSS_Window_Base_standardFontSize.call(this);
-    };
-
-    var _CSS_Window_Base_standardPadding = Window_Base.prototype.standardPadding;
-    Window_Base.prototype.standardPadding = function() {
-        return this._css_padding ? this._css_padding : _CSS_Window_Base_standardPadding.call(this);
-    };
-
-    var _CSS_Window_Base_lineHeight = Window_Base.prototype.lineHeight;
-    Window_Base.prototype.lineHeight = function() {
-        return this._css_lineHeight ? this._css_lineHeight : _CSS_Window_Base_lineHeight.call(this);
-    };
-
-    var _CSS_Window_Base_standardBackOpacity = Window_Base.prototype.standardBackOpacity;
-    Window_Base.prototype.standardBackOpacity = function() {
-        return this._css_opacity ? this._css_opacity : _CSS_Window_Base_standardBackOpacity.call(this);
-    };
-
-    //書き換え
-    //ウィンドウ枠の表示
-    Window_Base.prototype._refreshFrame = function() {
-        if (!this._css_hideFrame) Window.prototype._refreshFrame.call(this);
-    };
-
     //=============================================================================
     // Window_Selectableの修正
     //=============================================================================
@@ -2988,80 +2655,9 @@ FTKR.CSS = FTKR.CSS || {};
         Window_Base.prototype.initCssLayout.call(this);
         var lss = this.standardCssLayout();
         if (lss && lss.enabled) {
-            this._css_maxCols = lss.maxCols;
-            this._css_cursorHeight = lss.cursorHeight;
-            this._css_hSpace = lss.hspace;
-        }
-    };
-
-    var _CSS_Window_Selectable_spacing = Window_Selectable.prototype.spacing;
-    Window_Selectable.prototype.spacing = function() {
-        return this._css_spacing ? this._css_spacing : _CSS_Window_Selectable_spacing.call(this);
-    };
-
-    var _CSS_Window_Selectable_maxCols = Window_Selectable.prototype.maxCols;
-    Window_Selectable.prototype.maxCols = function() {
-        return this._css_maxCols ? this._css_maxCols : _CSS_Window_Selectable_maxCols.call(this);
-    };
-
-    Window_Selectable.prototype.cursorHeight = function() {
-        return this._css_cursorHeight;
-    };
-
-    Window_Selectable.prototype.itemHeightSpace = function() {
-        return this._css_hSpace;
-    };
-
-    Window_Selectable.prototype.unitHeight = function() {
-        return this.itemHeight() + this.itemHeightSpace();
-    };
-
-    Window_Selectable.prototype.unitWidth = function() {
-        return this.itemWidth() + this.spacing();
-    };
-
-    var _CSS_Window_Selectable_maxPageRows = Window_Selectable.prototype.maxPageRows;
-    Window_Selectable.prototype.maxPageRows = function() {
-        if (this.itemHeightSpace()) {
-            var pageHeight = this.height - this.padding * 2;
-            return Math.floor(pageHeight / this.unitHeight());
-        } else {
-            return _CSS_Window_Selectable_maxPageRows.call(this);
-        }
-    };
-
-    var _CSS_Window_Selectable_topRow = Window_Selectable.prototype.topRow;
-    Window_Selectable.prototype.topRow = function() {
-        return this.itemHeightSpace() ? Math.floor(this._scrollY / this.unitHeight()) :
-            _CSS_Window_Selectable_topRow.call(this);
-    };
-
-    var _CSS_Window_Selectable_setTopRow = Window_Selectable.prototype.setTopRow;
-    Window_Selectable.prototype.setTopRow = function(row) {
-        if (this.itemHeightSpace()) {
-            var scrollY = row.clamp(0, this.maxTopRow()) * this.unitHeight();
-            if (this._scrollY !== scrollY) {
-                this._scrollY = scrollY;
-                this.refresh();
-                this.updateCursor();
-            }
-        } else {
-            return _CSS_Window_Selectable_setTopRow.call(this, row);
-        }
-    };
-
-    var _CSS_Window_Selectable_itemRect = Window_Selectable.prototype.itemRect;
-    Window_Selectable.prototype.itemRect = function(index) {
-        if (this.itemHeightSpace()) {
-            var rect = new Rectangle();
-            var maxCols = this.maxCols();
-            rect.width = this.itemWidth();
-            rect.height = this.itemHeight();
-            rect.x = index % maxCols * this.unitWidth() - this._scrollX;
-            rect.y = Math.floor(index / maxCols) * this.unitHeight() - this._scrollY;
-            return rect;
-        } else {
-            return _CSS_Window_Selectable_itemRect.call(this, index);
+            this._customMaxCols = lss.maxCols;
+            this._customCursorHeight = lss.cursorHeight;
+            this._customHorSpacing = lss.hspace;
         }
     };
 
@@ -3098,47 +2694,30 @@ FTKR.CSS = FTKR.CSS || {};
     //=============================================================================
     if (typeof $dataContainerProperties !== 'undefined') {
     
-    Input.keyMapper[82] = 'keyR';
-    Input.keyMapper[70] = 'keyF';
-    Input.keyMapper[86] = 'keyV';
-    Input.keyMapper[84] = 'keyT';
-    Input.keyMapper[71] = 'keyG';
-    Input.keyMapper[66] = 'keyB';
-    Input.keyMapper[89] = 'keyY';
-    Input.keyMapper[72] = 'keyH';
-    Input.keyMapper[78] = 'keyN';
-    
     var _Window_Base_loadProperty = Window_Base.prototype.loadProperty;
     Window_Base.prototype.loadProperty = function(containerInfo) {
         _Window_Base_loadProperty.apply(this, arguments);
+        if (containerInfo._customCssStatus) this._customCssStatus  = copyArray(containerInfo._customCssStatus);
+        if (containerInfo._customCssSpaceIn) this._customCssSpaceIn   = containerInfo._customCssSpaceIn;
         if (containerInfo._customCssText1) this._customCssText1    = containerInfo._customCssText1;
         if (containerInfo._customCssText2) this._customCssText2    = containerInfo._customCssText2;
         if (containerInfo._customCssText3) this._customCssText3    = containerInfo._customCssText3;
         if (containerInfo._customCssSpace) this._customCssSpace    = containerInfo._customCssSpace;
-        if (containerInfo._customCssSpaceIn) this._customCssSpaceIn   = containerInfo._customCssSpaceIn;
         if (containerInfo._customCssWidthRate) this._customCssWidthRate = containerInfo._customCssWidthRate;
-        if (containerInfo._customCssMaxCols) this._customCssMaxCols = containerInfo._customCssMaxCols;
-        if (containerInfo._customCssCursorHeight) this._customCssCursorHeight = containerInfo._customCssCursorHeight;
-        if (containerInfo._customCssHSpace) this._customCssHSpace = containerInfo._customCssHSpace;
         this.setCssStatus();
-        this.setMaxCols();
-        this.setCursorHeight();
-        this.setHSpace();
         this.refresh();
     };
     
     var _Window_Base_saveProperty = Window_Base.prototype.saveProperty;
     Window_Base.prototype.saveProperty = function(containerInfo) {
         _Window_Base_saveProperty.apply(this, arguments);
+        if (this._customCssStatus) containerInfo._customCssStatus   = copyArray(this._customCssStatus);
+        containerInfo._customCssSpaceIn  = this._customCssSpaceIn;
         containerInfo._customCssText1    = this._customCssText1;
         containerInfo._customCssText2    = this._customCssText2;
         containerInfo._customCssText3    = this._customCssText3;
         containerInfo._customCssSpace    = this._customCssSpace;
-        containerInfo._customCssSpaceIn    = this._customCssSpaceIn;
         containerInfo._customCssWidthRate  = this._customCssWidthRate;
-        containerInfo._customCssMaxCols  = this._customCssMaxCols;
-        containerInfo._customCssCursorHeight  = this._customCssCursorHeight;
-        containerInfo._customCssHSpace  = this._customCssHSpace;
       };
       
     var _Window_Base_initialize      = Window_Base.prototype.initialize;
@@ -3146,39 +2725,16 @@ FTKR.CSS = FTKR.CSS || {};
         _Window_Base_initialize.apply(this, arguments);
         if (this._lssStatus) {
             var lss = this.standardCssStatus();
+            if (lss.statusList) this._customCssStatus   = copyArray(lss.statusList);
+            this._customCssSpaceIn  = lss.spaceIn;
             this._customCssText1    = lss.text1;
             this._customCssText2    = lss.text2;
             this._customCssText3    = lss.text3;
             this._customCssSpace    = lss.space;
-            this._customCssSpaceIn   = lss.spaceIn;
             this._customCssWidthRate = lss.widthRate;
         }
-        if(this.maxCols) this._customCssMaxCols = this.maxCols();
-        if(this.cursorHeight) this._customCssCursorHeight = this.cursorHeight();
-        if(this.itemHeightSpace) this._customCssHSpace = this.itemHeightSpace();
     };
 
-    var _CSS_Window_Base_processInput = Window_Base.prototype.processInput;
-    Window_Base.prototype.processInput = function() {
-        if (this.isPreparedEvent()) {
-            var cssparams = [
-                ['keyR', 'Text1', '_customCssText1', null, null, this.setCssStatus.bind(this), true],
-                ['keyF', 'Text2', '_customCssText2', null, null, this.setCssStatus.bind(this), true],
-                ['keyV', 'Text3', '_customCssText3', null, null, this.setCssStatus.bind(this), true],
-                ['keyT', '列間隔',  '_customCssSpace', null, null, this.setCssStatus.bind(this), true],
-                ['keyG', '列内の間隔', '_customCssSpaceIn', null, null, this.setCssStatus.bind(this), true],
-                ['keyB', '表示幅の比率', '_customCssWidthRate', null, null, this.setCssStatus.bind(this), true],
-                ['keyY', 'アクターの列数', '_customCssMaxCols', null, null, this.setMaxCols.bind(this), true],
-                ['keyH', 'アクター１人分の行数', '_customCssCursorHeight', null, null, this.setCursorHeight.bind(this), true],
-                ['keyN', '縦のカーソル間隔', '_customCssHSpace', null, null, this.setHSpace.bind(this), true],
-            ];
-            return cssparams.some(function(param) {
-                return this.processSetProperty.apply(this, param);
-            }.bind(this)) ? true : _CSS_Window_Base_processInput.apply(this);
-        }
-        return false
-    };
-    
     Window_Base.prototype.clearCssSpriteAll = function() {
         $gameParty.allMembers().forEach( function(member, i) {
             this.clearCssSprite(i);
@@ -3188,28 +2744,14 @@ FTKR.CSS = FTKR.CSS || {};
     Window_Base.prototype.setCssStatus = function() {
         if (this._lssStatus) {
             this.clearCssSpriteAll();
+            if (this._customCssStatus) this._lssStatus.statusList = copyArray(this._customCssStatus);
+            if (this._customCssSpaceIn) this._lssStatus.spaceIn = this._customCssSpaceIn;
             if (this._customCssText1) this._lssStatus.text1 = this._customCssText1;
             if (this._customCssText2) this._lssStatus.text2 = this._customCssText2;
             if (this._customCssText3) this._lssStatus.text3 = this._customCssText3;
             if (this._customCssSpace) this._lssStatus.space = this._customCssSpace;
-            if (this._customCssSpaceIn) this._lssStatus.spaceIn = this._customCssSpaceIn;
             if (this._customCssWidthRate) this._lssStatus.widthRate = this._customCssWidthRate;
         }
-    };
-
-    Window_Base.prototype.setMaxCols = function() {
-        this.clearCssSpriteAll();
-        if (this._customCssMaxCols) this._css_maxCols = Number(this._customCssMaxCols);
-    };
-
-    Window_Base.prototype.setCursorHeight = function() {
-        this.clearCssSpriteAll();
-        if (this._customCssCursorHeight) this._css_cursorHeight = Number(this._customCssCursorHeight);
-    };
-
-    Window_Base.prototype.setHSpace = function(){
-        this.clearCssSpriteAll();
-        if (this._customCssHSpace) this._css_hSpace = Number(this._customCssHSpace);
     };
 
     }//GraphicalDesignMode.js

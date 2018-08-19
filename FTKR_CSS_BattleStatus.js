@@ -4,8 +4,8 @@
 // プラグインNo : 16
 // 作成者     : フトコロ
 // 作成日     : 2017/04/11
-// 最終更新日 : 2017/11/18
-// バージョン : v1.3.0
+// 最終更新日 : 2018/08/19
+// バージョン : v2.0.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -17,7 +17,7 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.3.0 バトル画面のステータス表示を変更するプラグイン
+ * @plugindesc v2.0.0 バトル画面のステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @param --バトルパーティー設定--
@@ -31,34 +31,15 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  * @param --レイアウト設定--
  * @desc 
  * 
- * @param Actor Status Text1
- * @desc Text1部に表示するステータスを指定します。
- * 詳細はヘルプ参照
- * @default name
- * 
- * @param Actor Status Text2
- * @desc Text2部に表示するステータスを指定します。
- * 詳細はヘルプ参照
- * @default state
- * 
- * @param Actor Status Text3
- * @desc Text3部に表示するステータスを指定します。
- * 詳細はヘルプ参照
- * @default [hp/mp/tp]
- * 
- * @param Actor Status Space
- * @desc 各Textの間隔を指定します。
- * @default 0,5,5,0
+ * @param statusList
+ * @desc 表示するステータスとその位置を設定します。
+ * @type struct<status>[]
+ * @default ["{\"text\":\"name\",\"x\":\"0\",\"y\":\"0\",\"width\":\"150\"}","{\"text\":\"state\",\"x\":\"156\",\"y\":\"0\",\"width\":\"150\"}","{\"text\":\"[hp/mp]\",\"x\":\"312\",\"y\":\"0\",\"width\":\"width - 312\"}"]
  * 
  * @param Actor Status Space In Text
  * @desc Text内で複数表示する場合の間隔を指定します。
  * @default 5
  * 
- * @param Actor Status Width Rate
- * @desc Text1~Text3の表示幅の比率を指定します。
- * 詳細はヘルプ参照
- * @default 1,1,3
- *
  * @param --ウィンドウ設定--
  * @desc 
  * 
@@ -153,7 +134,7 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  *    ください。
  * 
  * 2. 本プラグインを動作させるためには、
- *    FTKR_CustomSimpleActorStatus.jsが必要です。
+ *    FTKR_CustomSimpleActorStatus.js(v3.0.0以降)が必要です。
  *    本プラグインは、FTKR_CustomSimpleActorStatus.jsよりも下の位置に
  *    なるように追加してください。
  * 
@@ -268,7 +249,7 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
- * Copyright (c) 2017 Futokoro
+ * Copyright (c) 2017,2018 Futokoro
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
@@ -278,6 +259,8 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v2.0.0 - 2018/08/19 : FTKR_CustomSimpleActorStatus v3.0.0 対応版に変更
  * 
  * v1.3.0 - 2017/11/18 : 仕様変更
  *    1. FTKR_CustomSimpleActorStatus.js の v2.6.0に対応。
@@ -307,8 +290,37 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  *-----------------------------------------------------------------------------
  */
 //=============================================================================
+/*~struct~status:
+ * @param text
+ * @desc 表示するステータス
+ * @default 
+ *
+ * @param x
+ * @desc 表示するX座標
+ * @default 0
+ *
+ * @param y
+ * @desc 表示するY座標
+ * @default 0
+ *
+ * @param width
+ * @desc 表示する幅
+ * @default 0
+ *
+ */
 
 (function() {
+    var paramParse = function(obj) {
+        return JSON.parse(JSON.stringify(obj, paramReplace));
+    };
+
+    var paramReplace = function(key, value) {
+        try {
+            return JSON.parse(value || null);
+        } catch (e) {
+            return value;
+        }
+    };
 
     //=============================================================================
     // プラグイン パラメータ
@@ -335,12 +347,8 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
 
     //簡易ステータスオブジェクト
     FTKR.CSS.BS.simpleStatus = {
-        text1     :String(parameters['Actor Status Text1'] || ''),
-        text2     :String(parameters['Actor Status Text2'] || ''),
-        text3     :String(parameters['Actor Status Text3'] || ''),
-        space     :String(parameters['Actor Status Space'] || ''),
+        statusList : paramParse(parameters['statusList']),
         spaceIn   :Number(parameters['Actor Status Space In Text'] || 0),
-        widthRate :String(parameters['Actor Status Width Rate'] || ''),
     };
 
     FTKR.CSS.BS.position = {

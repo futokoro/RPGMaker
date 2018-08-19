@@ -4,8 +4,8 @@
 // プラグインNo : 52
 // 作成者     : フトコロ
 // 作成日     : 2017/07/23
-// 最終更新日 : 2017/12/02
-// バージョン : v1.2.2
+// 最終更新日 : 2018/08/19
+// バージョン : v2.0.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,133 +16,57 @@ FTKR.CSS = FTKR.CSS || {};
 FTKR.CSS.SpS = FTKR.CSS.SpS || {};
 
 /*:
- * @plugindesc v1.2.2 ショップ画面のステータスレイアウトを変更する
+ * @plugindesc v2.0.0 ショップ画面のステータスレイアウトを変更する
  * @author フトコロ
  *
  * @param --共通レイアウト設定--
  * @default
  * 
- * @param Common Status Text1
- * @desc Text1部に表示するステータスを指定します。
- * 詳細はヘルプ参照
- * @default text(\c[16]持っている数)
- * 
- * @param Common Status Text2
- * @desc Text2部に表示するステータスを指定します。
- * 詳細はヘルプ参照
- * @default eval($gameParty.numItems(item))
- * 
- * @param Common Status Text3
- * @desc Text3部に表示するステータスを指定します。
- * 詳細はヘルプ参照
- * @default 
- * 
- * @param Common Status Space
- * @desc 各Textの間隔を指定します。
- * @default 0,0,0,0
+ * @param commonStatusList
+ * @desc 表示するステータスとその位置を設定します。
+ * @type struct<status>[]
+ * @default ["{\"text\":\"text(\\\\c[16]持っている数)\",\"x\":\"0\",\"y\":\"0\",\"width\":\"width/2\"}","{\"text\":\"eval($gameParty.numItems(item))\",\"x\":\"width/2\",\"y\":\"0\",\"width\":\"width/2\"}"]
  * 
  * @param Common Status Space In Text
  * @desc Text内で複数表示する場合の間隔を指定します。
  * @default 5
  * 
- * @param Common Status Width Rate
- * @desc Text1~Text3の表示幅の比率を指定します。
- * 詳細はヘルプ参照
- * @default 1,1,0
- *
  * @param --武器のレイアウト設定--
  * @default
  * 
- * @param Weapon Status Text1
- * @desc Text1部に表示するステータスを指定します。
- * 詳細はヘルプ参照
- * @default name,{equip(item.etypeId-1)}
- * 
- * @param Weapon Status Text2
- * @desc Text2部に表示するステータスを指定します。
- * 詳細はヘルプ参照
- * @default eparam(2)
- * 
- * @param Weapon Status Text3
- * @desc Text3部に表示するステータスを指定します。
- * 詳細はヘルプ参照
- * @default 
- * 
- * @param Weapon Status Space
- * @desc 各Textの間隔を指定します。
- * @default 0,0,0,0
+ * @param weaponStatusList
+ * @desc 表示するステータスとその位置を設定します。
+ * @type struct<status>[]
+ * @default ["{\"text\":\"name\",\"x\":\"0\",\"y\":\"0\",\"width\":\"width/2\"}","{\"text\":\"eparam(2)\",\"x\":\"width/2\",\"y\":\"0\",\"width\":\"width/2\"}","{\"text\":\"equip(item.etypeId-1)\",\"x\":\"0\",\"y\":\"line\",\"width\":\"width\"}"]
  * 
  * @param Weapon Status Space In Text
  * @desc Text内で複数表示する場合の間隔を指定します。
  * @default 5
  * 
- * @param Weapon Status Width Rate
- * @desc Text1~Text3の表示幅の比率を指定します。
- * 詳細はヘルプ参照
- * @default 1,1,0
- *
  * @param --防具のレイアウト設定--
  * @default
  * 
- * @param Armor Status Text1
- * @desc Text1部に表示するステータスを指定します。
- * 詳細はヘルプ参照
- * @default name,{equip(item.etypeId-1)}
- * 
- * @param Armor Status Text2
- * @desc Text2部に表示するステータスを指定します。
- * 詳細はヘルプ参照
- * @default eparam(3)
- * 
- * @param Armor Status Text3
- * @desc Text3部に表示するステータスを指定します。
- * 詳細はヘルプ参照
- * @default 
- * 
- * @param Armor Status Space
- * @desc 各Textの間隔を指定します。
- * @default 0,0,0,0
+ * @param armorStatusList
+ * @desc 表示するステータスとその位置を設定します。
+ * @type struct<status>[]
+ * @default ["{\"text\":\"name\",\"x\":\"0\",\"y\":\"0\",\"width\":\"width/2\"}","{\"text\":\"eparam(3)\",\"x\":\"width/2\",\"y\":\"0\",\"width\":\"width/2\"}","{\"text\":\"equip(item.etypeId-1)\",\"x\":\"0\",\"y\":\"line\",\"width\":\"width\"}"]
  * 
  * @param Armor Status Space In Text
  * @desc Text内で複数表示する場合の間隔を指定します。
  * @default 5
  * 
- * @param Armor Status Width Rate
- * @desc Text1~Text3の表示幅の比率を指定します。
- * 詳細はヘルプ参照
- * @default 1,1,0
- *
  * @param --武器防具以外のレイアウト設定--
  * @default
  * 
- * @param Item Status Text1
- * @desc Text1部に表示するステータスを指定します。
- * 詳細はヘルプ参照
- * @default 
- * 
- * @param Item Status Text2
- * @desc Text2部に表示するステータスを指定します。
- * 詳細はヘルプ参照
- * @default 
- * 
- * @param Item Status Text3
- * @desc Text3部に表示するステータスを指定します。
- * 詳細はヘルプ参照
- * @default 
- * 
- * @param Item Status Space
- * @desc 各Textの間隔を指定します。
- * @default 0,0,0,0
+ * @param itemStatusList
+ * @desc 表示するステータスとその位置を設定します。
+ * @type struct<status>[]
+ * @default []
  * 
  * @param Item Status Space In Text
  * @desc Text内で複数表示する場合の間隔を指定します。
  * @default 5
  * 
- * @param Item Status Width Rate
- * @desc Text1~Text3の表示幅の比率を指定します。
- * 詳細はヘルプ参照
- * @default 1,0,0
- *
  * @param --共通ウィンドウ設定--
  * @desc 
  * 
@@ -351,6 +275,8 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.0.0 - 2018/08/19 : FTKR_CustomSimpleActorStatus v3.0.0 対応版に変更
+ * 
  * v1.2.2 - 2017/12/02 : 不具合修正
  *    1. GraphicalDesignMode.jsがないとエラーで立ち上がらない不具合を修正。
  * 
@@ -370,8 +296,26 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
  * v1.0.0 - 2017/07/23 : 初版作成
  * 
  *-----------------------------------------------------------------------------
-*/
+*
 //=============================================================================
+/*~struct~status:
+ * @param text
+ * @desc 表示するステータス
+ * @default 
+ *
+ * @param x
+ * @desc 表示するX座標
+ * @default 0
+ *
+ * @param y
+ * @desc 表示するY座標
+ * @default 0
+ *
+ * @param width
+ * @desc 表示する幅
+ * @default 0
+ *
+ */
 
 function Window_ShopItemStatus() {
   this.initialize.apply(this, arguments);
@@ -387,6 +331,18 @@ function Window_ShopArmorStatus() {
 
 if (Imported.FTKR_CSS) (function() {
 
+    var paramParse = function(obj) {
+        return JSON.parse(JSON.stringify(obj, paramReplace));
+    };
+
+    var paramReplace = function(key, value) {
+        try {
+            return JSON.parse(value || null);
+        } catch (e) {
+            return value;
+        }
+    };
+
     //=============================================================================
     // プラグイン パラメータ
     //=============================================================================
@@ -394,42 +350,26 @@ if (Imported.FTKR_CSS) (function() {
 
     //簡易ステータスオブジェクト
     FTKR.CSS.SpS.comStatus = {
-        text1     :String(parameters['Common Status Text1'] || ''),
-        text2     :String(parameters['Common Status Text2'] || ''),
-        text3     :String(parameters['Common Status Text3'] || ''),
-        space     :String(parameters['Common Status Space'] || ''),
+        statusList : paramParse(parameters['commonStatusList']),
         spaceIn   :Number(parameters['Common Status Space In Text'] || 0),
-        widthRate :String(parameters['Common Status Width Rate'] || ''),
         target    :null,
     };
 
     FTKR.CSS.SpS.itemStatus = {
-        text1     :String(parameters['Item Status Text1'] || ''),
-        text2     :String(parameters['Item Status Text2'] || ''),
-        text3     :String(parameters['Item Status Text3'] || ''),
-        space     :String(parameters['Item Status Space'] || ''),
+        statusList : paramParse(parameters['itemStatusList']),
         spaceIn   :Number(parameters['Item Status Space In Text'] || 0),
-        widthRate :String(parameters['Item Status Width Rate'] || ''),
         target    :null,
     };
 
     FTKR.CSS.SpS.weaponStatus = {
-        text1     :String(parameters['Weapon Status Text1'] || ''),
-        text2     :String(parameters['Weapon Status Text2'] || ''),
-        text3     :String(parameters['Weapon Status Text3'] || ''),
-        space     :String(parameters['Weapon Status Space'] || ''),
+        statusList : paramParse(parameters['weaponStatusList']),
         spaceIn   :Number(parameters['Weapon Status Space In Text'] || 0),
-        widthRate :String(parameters['Weapon Status Width Rate'] || ''),
         target    :null,
     };
 
     FTKR.CSS.SpS.armorStatus = {
-        text1     :String(parameters['Armor Status Text1'] || ''),
-        text2     :String(parameters['Armor Status Text2'] || ''),
-        text3     :String(parameters['Armor Status Text3'] || ''),
-        space     :String(parameters['Armor Status Space'] || ''),
+        statusList : paramParse(parameters['armorStatusList']),
         spaceIn   :Number(parameters['Armor Status Space In Text'] || 0),
-        widthRate :String(parameters['Armor Status Width Rate'] || ''),
         target    :null,
     };
 

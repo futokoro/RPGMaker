@@ -182,7 +182,8 @@ x はオリジナルパラメータIDを指定してください。
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.2.2](FTKR_CSS_ShopStatus.js) | 2017/12/02 | GraphicalDesignMode.jsがないとエラーで立ち上がらない不具合を修正 |
+| [ver2.0.0](FTKR_CSS_ShopStatus.js) | 2018/08/19 | FTKR_CustomSimpleActorStatus.js の v3.0.0に対応 |
+| [ver1.2.2](/archive/FTKR_CSS_ShopStatus_1.2.2.js) | 2017/12/02 | GraphicalDesignMode.jsがないとエラーで立ち上がらない不具合を修正 |
 | ver1.2.1 | 2017/11/18 | GraphicalDesignMode.jsのレイアウト変更が一部反映されない不具合を修正 |
 | ver1.2.0 | 2017/11/08 | GraphicalDesignMode.jsとFTKR_CSS_GDM.jsにより、デザインモード中にゲーム内でレイアウトを変更する機能を追加 |
 | ver1.1.2 | 2017/11/01 | 装備のパラメータが正しく表示できない場合がある不具合を修正 |

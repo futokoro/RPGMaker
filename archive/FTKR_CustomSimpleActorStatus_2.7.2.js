@@ -4,8 +4,8 @@
 // プラグインNo : 9
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2018/08/17
-// バージョン : v2.7.1
+// 最終更新日 : 2018/08/18
+// バージョン : v2.7.2
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.7.1 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v2.7.2 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -1378,6 +1378,9 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.7.2 - 2018/08/18 : 不具合修正
+ *    1. 拡張プラグイン使用時にステートアイコンが表示されない不具合を修正。
+ * 
  * v2.7.1 - 2018/08/17 : 不具合修正
  *    1. バトルシーンでステータスウィンドウが非表示でも、ステートアイコンが
  *       表示される不具合を修正。
@@ -2601,7 +2604,6 @@ FTKR.CSS = FTKR.CSS || {};
             }
             sprite.move(x + this.padding, y + this.padding);
             sprite.offsetMove(offset * i, line);
-            sprite.opacity = 0;
             if(css.autoScale) sprite.setScale(scale);
         }
         this._stateIconSprite[index] = iconSprites;
@@ -2635,42 +2637,6 @@ FTKR.CSS = FTKR.CSS || {};
         var sx = iconIndex % 16 * pw;
         var sy = Math.floor(iconIndex / 16) * ph;
         this.contents.blt(bitmap, sx, sy, pw, ph, x, y, pw * scale, ph * scale);
-    };
-
-    Window_Base.prototype.showStateIcons = function() {
-        if (this._stateIconSprite) {
-            this._stateIconSprite.forEach(function(sprites){
-                sprites.forEach(function(sprite){
-                    sprite.opacity = 255;
-                });
-            });
-        }
-    };
-
-    Window_Base.prototype.hideStateIcons = function() {
-        if (this._stateIconSprite) {
-            this._stateIconSprite.forEach(function(sprites){
-                sprites.forEach(function(sprite){
-                    sprite.opacity = 0;
-                });
-            });
-        }
-    };
-
-    var _CSS_Window_BattleStatus_initialize = Window_BattleStatus.prototype.initialize;
-    Window_BattleStatus.prototype.initialize = function() {
-        _CSS_Window_BattleStatus_initialize.call(this);
-        this.hideStateIcons();
-    };
-
-    Window_BattleStatus.prototype.open = function() {
-        Window_Selectable.prototype.open.call(this);
-        this.showStateIcons();
-    };
-
-    Window_BattleStatus.prototype.close = function() {
-        Window_Selectable.prototype.close.call(this);
-        this.hideStateIcons();
     };
 
     //------------------------------------------------------------------------
@@ -3330,11 +3296,18 @@ Sprite_CssStateIcon.prototype.offsetMove = function(offset, vartical) {
 
 Sprite_CssStateIcon.prototype.update = function() {
     Sprite.prototype.update.call(this);
+    this.updateOpacity();
     this._animationCount++;
     if (this._animationCount >= this.animationWait()) {
         this.updateIcon();
         this.updateFrame();
         this._animationCount = 0;
+    }
+};
+
+Sprite_CssStateIcon.prototype.updateOpacity = function() {
+    if (this.opacity != this.parent.openness) {
+        this.opacity = this.parent.openness;
     }
 };
 
