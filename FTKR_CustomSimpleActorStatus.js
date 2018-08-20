@@ -4,8 +4,8 @@
 // プラグインNo : 9
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2018/08/19
-// バージョン : v3.0.0
+// 最終更新日 : 2018/08/20
+// バージョン : v3.0.1
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v3.0.0 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v3.0.1 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -988,6 +988,10 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v3.0.1 - 2018/08/20 : 不具合修正
+ *    1. 拡張プラグインでステータスウィンドウの設定を有効にした場合にエラーになる
+ *       不具合を修正。
+ * 
  * v3.0.0 - 2018/08/19 : 仕様変更
  *    1. ステータスの表示とパラメータの入力に、ステータスごとの表示位置指定方式を採用。
  *    2. FTKR_GDM_WindowEditor対応版に修正。
@@ -1886,7 +1890,7 @@ FTKR.CSS = FTKR.CSS || {};
     };
 
     Window_Base.prototype.drawCssActorStatus_v2 = function(index, actor, x, y, width, height, lss) {
-        if (!lss) lss = FTKR.CSS.simpleStatus;
+        if (!lss) lss = {};
         var w = width;
         var h = height;
         var wrs = lss.widthRate.split(',').num();
@@ -2417,7 +2421,7 @@ FTKR.CSS = FTKR.CSS || {};
             this.drawText(ref, x + tx, y, width - tx, 'right');
         } else {
             if (tx) this.drawCssCurrentAndMax(tx, current, max, x, y, width,
-                                  this.normalColor(), this.normalColor());
+                                this.normalColor(), this.normalColor());
         }
         return 1;
     };
