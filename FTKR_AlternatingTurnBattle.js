@@ -4,8 +4,8 @@
 // プラグインNo : 75
 // 作成者     : フトコロ
 // 作成日     : 2018/04/08
-// 最終更新日 : 2018/08/19
-// バージョン : v1.4.0
+// 最終更新日 : 2018/08/21
+// バージョン : v1.4.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.AltTB = FTKR.AltTB || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.4.0 敵味方交互にターンが進むターン制戦闘システム
+ * @plugindesc v1.4.1 敵味方交互にターンが進むターン制戦闘システム
  * @author フトコロ
  *
  * @param TurnEnd Command
@@ -55,6 +55,13 @@ FTKR.AltTB = FTKR.AltTB || {};
  * @off 無効にしない
  * @default false
  * 
+ * @param Default Max AC
+ * @desc 行動回数に最大値を設定します。
+ * 0 の場合は最大値なし
+ * @default 0
+ * @type number
+ * @min 0
+ *
  * @param Show Action Count
  * @desc アクターの残り行動回数を表示する
  * @type boolean
@@ -62,10 +69,25 @@ FTKR.AltTB = FTKR.AltTB || {};
  * @off 無効
  * @default false
  * 
+ * @param AC Draw Type
+ * @desc 行動回数の表示方法を選択します。
+ * @type select
+ * @option 数値
+ * @value 0
+ * @option アイコン(現在値のみ)
+ * @value 1
+ * @option アイコン(現在値と最大値)
+ * @value 2
+ * @default 0
+ * 
+ * @param acvalue
+ * @text 数値で表示
+ * 
  * @param Display AC Format
  * @desc 行動回数の表示内容を設定します。
- * %1 - 行動回数
+ * %1 - 行動回数, %2 - 最大値
  * @default [%1]
+ * @parent acvalue
  * 
  * @param AC Color
  * @desc 行動回数の表示色を設定します。
@@ -73,11 +95,59 @@ FTKR.AltTB = FTKR.AltTB || {};
  * @type number
  * @min 0
  * @max 31
+ * @parent acvalue
  *
  * @param Display AC Width
  * @desc 行動回数の表示幅を設定します。(半角文字数)
  * @default 3
  * @type number
+ * @parent acvalue
+ *
+ * @param acgauge
+ * @text ゲージで表示
+ * 
+ * @param Display AC Gauge
+ * @desc 行動回数のゲージを表示します。
+ * @type boolean
+ * @on 表示する
+ * @off 表示しない
+ * @default false
+ * @parent acgauge
+ * 
+ * @param AC Gauge Color1
+ * @desc 行動回数のゲージ色1を設定します。
+ * @default 13
+ * @type number
+ * @min 0
+ * @max 31
+ * @parent acgauge
+ *
+ * @param AC Gauge Color2
+ * @desc 行動回数のゲージ色2を設定します。
+ * @default 5
+ * @type number
+ * @min 0
+ * @max 31
+ * @parent acgauge
+ * 
+ * @param acicon
+ * @text アイコンで表示
+ * 
+ * @param AC Icon Index
+ * @parent acIcon
+ * @desc 行動回数の現在値を表すアイコンを設定します。
+ * @default 163
+ * @type number
+ * @min 0
+ * @parent acicon
+ *
+ * @param AC Empty Icon Index
+ * @desc 行動回数の空部分を表すアイコンを設定します。
+ * 行動回数の最大値を設定した場合のみ有効です。
+ * @default 160
+ * @type number
+ * @min 0
+ * @parent acicon
  *
  * @param --- 行動済みのアクター ---
  * 
@@ -148,8 +218,10 @@ FTKR.AltTB = FTKR.AltTB || {};
  * @value 0
  * @option 数値(現在値と最大値)
  * @value 1
- * @option アイコン
+ * @option アイコン(現在値と最大値)
  * @value 2
+ * @option アイコン(現在値のみ)
+ * @value 3
  * @default 0
  * 
  * @param apGauge
@@ -388,15 +460,23 @@ FTKR.AltTB = FTKR.AltTB || {};
  *-----------------------------------------------------------------------------
  * 行動回数
  *-----------------------------------------------------------------------------
- * アクターは設定された行動回数の分だけ、毎ターン行動できます。
+ * アクターは設定された行動回数(基準行動回数)の分だけ、毎ターン行動できます。
  * 
- * アクターの行動回数は、特徴の行動回数追加の合計＋１回です。
+ * アクターの基準行動回数は、「特徴の行動回数追加の合計＋１」回です。
  * この値が毎ターンの行動回数になります。
  * 
- * ただし、ターン中にプラグインコマンドを実行することで
- * そのターンだけ行動回数を増減させることができます。
  * 
- * プラグインコマンドで変化させた行動回数は、次のターンには元に戻ります。
+ * ターン中にプラグインコマンドを実行することで
+ * そのターンだけ行動回数を増減させることができます。
+ * これは基準行動回数以上に増加させることができます。
+ * 
+ * ただし、プラグインパラメータ Default Max AC を設定している場合は
+ * その数値以上に増加させることはできません。
+ * アクターのメモ欄に<AltTB_Max_AC: n> を記述すると、個別に最大値 n を
+ * 設定することができます。
+ * 
+ * 
+ * プラグインコマンドで変化させた行動回数は、次のターンには元の基準行動回数に戻ります。
  * 
  * 行動回数は、プラグインパラメータ Show AC を有効にすると
  * 画面に各アクターの残り回数を表示します。
@@ -422,14 +502,12 @@ FTKR.AltTB = FTKR.AltTB || {};
  * 各アクターは行動時に、行動回数とは別に、このアクションポイントを消費します。
  * アクションポイントの現在値を超える行動はすることができません。
  * 
- * 消費したアクションポイントは、ターン開始時に一定量回復します。
- * 
  * アクションポイントの消費量は、使用したスキルごとに個別に変わります。
  * 
  * 
  * ＜パーティーのアクションポイントの設定＞
- * パーティーのアクションポイント最大値は、プラグインパラメータ Party AP で
- * 設定できます。
+ * パーティーのアクションポイント最大値は、プラグインパラメータ Party Max AP で
+ * 設定できます。現在値の初期値は Party AP です。
  * また、プラグインコマンドで、現在値や最大値を変更できます。
  * 
  * 
@@ -450,7 +528,6 @@ FTKR.AltTB = FTKR.AltTB || {};
  * </AltTB_GainAP_Conditions>
  * 
  * 入力例は後述。
- * 
  * 
  * 
  * ＜ターン毎のアクションポイント回復量＞
@@ -536,13 +613,27 @@ FTKR.AltTB = FTKR.AltTB || {};
  * 
  *    敵グループの n 番目のキャラの場合
  *       $gameTroop.members()[n-1].actionCount();
- *  
  * 
- * ２．パーティーのアクションポイントの現在値の取得
+ * 
+ * ２.行動回数の基準値の取得(毎ターンこの値まで回数が回復する、最大値ではない)
+ *    アクターID n の場合
+ *       $gameActors.actor(n).baseActionCount();
+ * 
+ *    パーティーおよび敵グループの場合も上記１と同様。
+ * 
+ * 
+ * ３.行動回数の最大値の取得
+ *    アクターID n の場合
+ *       $gameActors.actor(n).maxActionCount();
+ * 
+ *    パーティーおよび敵グループの場合も上記１と同様。
+ * 
+ * 
+ * ４．パーティーのアクションポイントの現在値の取得
  *       $gameParty.actionPoint();
  * 
  * 
- * ３．パーティーのアクションポイントの最大値の取得
+ * ５．パーティーのアクションポイントの最大値の取得
  *       $gameParty.maxActionPoint();
  * 
  * 
@@ -555,6 +646,7 @@ FTKR.AltTB = FTKR.AltTB || {};
  * １．行動回数の増加
  * 対象の行動回数を操作します。減らすことも出来ます。
  * 減らしたことで、行動回数が 0 になった対象は、そのターン行動できなくなります。
+ * 基準の行動回数以上に増やすことが可能です。
  * 
  * AltTB_行動回数増加 [対象分類] [対象ID] [増加量]
  * AltTB_ADD_AC [targetType] [targetId] [value]
@@ -595,6 +687,7 @@ FTKR.AltTB = FTKR.AltTB || {};
  * ２．アクションポイントの増加
  * パーティーのアクションポイントの値を操作します。減らすこともできます。
  * 減らしたことで、アクションポイントが 0 になった場合は、プレイヤーターンを終了します。
+ * 最大値を超えて現在値を増やすことはできません。
  * 
  * 現在値の操作：
  * 
@@ -613,6 +706,7 @@ FTKR.AltTB = FTKR.AltTB || {};
  * 
  * 
  * 最大値の操作：
+ * ※最大値を増やしても現在値は変わりません。
  * 
  * AltTB_アクションポイント増加 [増加量] 最大値
  * AltTB_ADD_AP [value] MAX
@@ -666,6 +760,12 @@ FTKR.AltTB = FTKR.AltTB || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.4.1 - 2018/08/21 : 仕様変更、機能追加、ヘルプ追記
+ *    1. 戦闘シーン以外でも actionCount() にて行動回数を取得できるように修正。
+ *    2. 行動回数に最大値を設定する機能を追加。
+ *    3. 行動回数の表示方式に、ゲージとアイコンを追加。
+ *    4. 各アクターの行動回数の基準値に関してヘルプに追記。
  * 
  * v1.4.0 - 2018/08/19 : 機能追加、仕様変更
  *    1. アクションポイントの最大値を設定する機能を追加。
@@ -940,6 +1040,13 @@ FTKR.AltTB = FTKR.AltTB || {};
         dispACFormat    : (paramParse(parameters['Display AC Format']) || '[%1]'),
         acColor         : (paramParse(parameters['AC Color']) || 0),
         dispAcWidth     : (paramParse(parameters['Display AC Width']) || 3),
+        acDrawType      : (paramParse(parameters['AC Draw Type']) || 0),
+        defaultMaxAC    : (paramParse(parameters['Default Max AC']) || 0),
+        acIcon          : (paramParse(parameters['AC Icon Index']) || 163),
+        acEmptyIcon     : (paramParse(parameters['AC Empty Icon Index']) || 160),
+        dispACGauge     : (paramParse(parameters['Display AC Gauge']) || false),
+        acGaugeColor1   : (paramParse(parameters['AC Gauge Color1']) || 0),
+        acGaugeColor2   : (paramParse(parameters['AC Gauge Color2']) || 0),
         activated       : (paramParse(parameters['Activated Actor Sign']) || 0),
         activatedSv     : (paramParse(parameters['Activated Sv Actor Sign']) || 0),
         notActivatedSv  : (paramParse(parameters['Not Activated Sv Actor Sign']) || 0),
@@ -1536,10 +1643,25 @@ FTKR.AltTB = FTKR.AltTB || {};
 
     Game_Battler.prototype.resetActionCount = function() {
         this._actionCount = this.numActions();
+        this.refreshActionCount();
     };
 
     Game_Battler.prototype.actionCount = function() {
-        return this._actionCount;
+        return $gameParty.inBattle() ? this._actionCount : this.baseActionCount();
+    };
+
+    Game_Battler.prototype.baseActionCount = function() {
+        var mac = this.maxActionCount();
+        var bac = this.makeActionTimes();
+        return mac > 0 ? Math.min(mac, bac) : bac;
+    };
+
+    Game_Battler.prototype.maxActionCount = function() {
+        return FTKR.AltTB.defaultMaxAC;
+    };
+
+    Game_Battler.prototype.acRate = function() {
+        return this.maxActionCount() ? this.actionCount() / this.maxActionCount() : 0;
     };
 
     Game_Battler.prototype.hasActionCount = function() {
@@ -1552,7 +1674,12 @@ FTKR.AltTB = FTKR.AltTB || {};
 
     Game_Battler.prototype.getActionCount = function(value) {
         this._actionCount += value;
-        if (this._actionCount < 0) this._actionCount = 0;
+        this.refreshActionCount();
+    };
+
+    Game_Battler.prototype.refreshActionCount = function() {
+        if (this.actionCount() < 0) this._actionCount = 0;
+        if (this.maxActionCount() && this.actionCount() > this.maxActionCount()) this._actionCount = this.maxActionCount();
     };
 
     Game_Battler.prototype.payActionCount = function() {
@@ -1598,6 +1725,10 @@ FTKR.AltTB = FTKR.AltTB || {};
 
     Game_Actor.prototype.removeCurrentAction = function() {
         Game_Battler.prototype.removeCurrentAction.call(this);
+    };
+
+    Game_Actor.prototype.maxActionCount = function() {
+        return +readObjectMeta(this.actor(), ['ALTTB_MAX_AC']) || Game_Battler.prototype.maxActionCount.call(this);
     };
 
     //=============================================================================
@@ -1686,6 +1817,14 @@ FTKR.AltTB = FTKR.AltTB || {};
         return this.members().some(function(actor) {
             return actor.canUseAltTBnoForcing(item);
         });
+    };
+
+    //=============================================================================
+    // Game_Enemy
+    //=============================================================================
+    
+    Game_Enemy.prototype.maxActionCount = function() {
+        return +readObjectMeta(this.enemy(), ['ALTTB_MAX_AC']) || Game_Battler.prototype.maxActionCount.call(this);
     };
 
     //=============================================================================
@@ -1810,6 +1949,173 @@ FTKR.AltTB = FTKR.AltTB || {};
         BattleManager._subject = BattleManager.actor();
         BattleManager._inputCount++;
         BattleManager.processTurn();
+    };
+
+    //=============================================================================
+    // Window_Base
+    //=============================================================================
+
+    Window_Base.prototype.drawActorActionCount = function(actor, x, y, width) {
+        var ac = actor.actionCount();
+        var mac = actor.maxActionCount();
+        var icon1 = FTKR.AltTB.acIcon;
+        var icon2 = FTKR.AltTB.acEmptyIcon;
+        this.drawACGauge(actor,x, y, width);
+        switch (+FTKR.AltTB.acDrawType) {
+            case 1:
+                this.drawCssIconValue(x, y, width, ac, icon1);
+                break;
+            case 2:
+                if (mac) this.drawIconGauge(x, y, width, ac, mac, icon1, icon2);
+                break;
+            default:
+                var acw = this.textWidth('0') * FTKR.AltTB.dispAcWidth;
+                width -= acw;
+                this.drawCssNumberValue(x + width, y, acw, ac, mac);
+                break;
+        }
+        return 1;
+    };
+
+    Window_Base.prototype.drawCssNumberValue = function(x, y, width, value, max) {
+        var text = FTKR.AltTB.dispACFormat.format(value, max);
+        this.changeTextColor(this.textColor(FTKR.AltTB.acColor));
+        this.drawText(text, x, y, width, 'right');
+        this.resetTextColor();
+    };
+
+    Window_Base.prototype.drawCssIconValue = function(x, y, width, value, icon) {
+        var space = 0;
+        var iw = Window_Base._iconWidth;
+        if (value > 1) {
+            if (width >= (iw + 2) * value - 2) {
+                space = iw + 2;
+            } else {
+                space = (width - iw - 4) / (value - 1);
+            }
+        }
+        for (var i = 0; i < value; i++) {
+            this.drawIcon(icon, x + space * i, y + 2);
+        }
+    };
+
+    Window_Base.prototype.drawIconGauge = function(x, y, width, current, max, icon1, icon2) {
+        var space = 0;
+        var iw = Window_Base._iconWidth;
+        if (max > 1) {
+            if (width >= (iw + 2) * max - 2) {
+                space = iw + 2;
+            } else {
+                space = (width - iw - 4) / (max - 1);
+            }
+        }
+        for (var i = 0; i < max; i++) {
+            var icon = i < current ? icon1 : icon2;
+            this.drawIcon(icon, x + space * i, y + 2);
+        }
+    };
+    
+    Window_Base.prototype.drawACGauge = function(actor, x, y, width) {
+        if (FTKR.AltTB.dispACGauge && !FTKR.AltTB.acDrawType && actor.maxActionCount() > 0) {
+            var color1 = this.acGaugeColor1();
+            var color2 = this.acGaugeColor2();
+            this.drawGauge(x, y, width, actor.acRate(), color1, color2);
+        }
+    };
+
+    Window_Base.prototype.acGaugeColor1 = function() {
+        return this.textColor(FTKR.AltTB.acGaugeColor1);
+    };
+
+    Window_Base.prototype.acGaugeColor2 = function() {
+        return this.textColor(FTKR.AltTB.acGaugeColor2);
+    };
+
+    Window_Base.prototype.drawAPGauge = function(x, y, width) {
+        if (FTKR.AltTB.dispAPGauge && FTKR.AltTB.apDrawType !== 2) {
+            var color1 = this.apGaugeColor1();
+            var color2 = this.apGaugeColor2();
+            this.drawGauge(x, y, width, $gameParty.apRate(), color1, color2);
+        }
+    };
+
+    Window_Base.prototype.apGaugeColor1 = function() {
+        return this.textColor(FTKR.AltTB.apGaugeColor1);
+    };
+
+    Window_Base.prototype.apGaugeColor2 = function() {
+        return this.textColor(FTKR.AltTB.apGaugeColor2);
+    };
+
+    Window_Base.prototype.drawActionPoint = function(x, y, width) {
+        width = width || 186;
+        var tw = 44;
+        this.drawAPGauge(x, y, width);
+        this.drawAPLabel(x, y, tw);
+        this.drawAPValue(x + tw, y, width - tw);
+        return 1;
+    };
+
+    Window_Base.prototype.drawAPGauge = function(x, y, width) {
+        if (FTKR.AltTB.dispAPGauge && FTKR.AltTB.apDrawType !== 2) {
+            var color1 = this.apGaugeColor1();
+            var color2 = this.apGaugeColor2();
+            this.drawGauge(x, y, width, $gameParty.apRate(), color1, color2);
+        }
+    };
+
+    Window_Base.prototype.apGaugeColor1 = function() {
+        return this.textColor(FTKR.AltTB.apGaugeColor1);
+    };
+
+    Window_Base.prototype.apGaugeColor2 = function() {
+        return this.textColor(FTKR.AltTB.apGaugeColor2);
+    };
+
+    Window_Base.prototype.drawAPLabel = function(x, y, width) {
+        this.changeTextColor(this.systemColor());
+        this.drawText(FTKR.AltTB.dispAP, x, y, width);
+    };
+
+    Window_Base.prototype.drawAPValue = function(x, y, width) {
+        var ap = $gameParty.actionPoint();
+        var map = $gameParty.maxActionPoint();
+        var icon = FTKR.AltTB.apIcon;
+        switch (+FTKR.AltTB.apDrawType) {
+            case 2:
+                this.drawIconGauge(x, y, width, ap, map, icon, FTKR.AltTB.apEmptyIcon);
+                break;
+            case 3:
+                this.drawCssIconValue(x, y, width, ap, icon);
+                break;
+            default:
+                var color = this.normalColor();
+                this.drawApCurrentAndMax(ap, map, x, y, width, color, color);
+                break;
+        }
+    };
+
+    Window_Base.prototype.apValueWidth = function() {
+        return this.textWidth('0000');
+    };
+
+    Window_Base.prototype.drawApCurrentAndMax = function(current, max, x, y,
+                                                      width, color1, color2) {
+        var valueWidth = this.apValueWidth();
+        var slashWidth = this.textWidth('/');
+        var x1 = x + width - valueWidth;
+        var x2 = x1 - slashWidth;
+        var x3 = x2 - valueWidth;
+        if (x3 >= x && FTKR.AltTB.apDrawType == 1) {
+            this.changeTextColor(color1);
+            this.drawText(current, x3, y, valueWidth, 'right');
+            this.changeTextColor(color2);
+            this.drawText('/', x2, y, slashWidth, 'right');
+            this.drawText(max, x1, y, valueWidth, 'right');
+        } else {
+            this.changeTextColor(color1);
+            this.drawText(current, x1, y, valueWidth, 'right');
+        }
     };
 
     //=============================================================================
@@ -1961,12 +2267,7 @@ FTKR.AltTB = FTKR.AltTB || {};
     Window_BattleStatus.prototype.drawActorName = function(actor, x, y, width) {
         if (FTKR.AltTB.activated) this.changePaintOpacity(actor.canAction());
         if (FTKR.AltTB.showAC) {
-            var acw = this.textWidth('0') * FTKR.AltTB.dispAcWidth;
-            width -= acw;
-            var text = FTKR.AltTB.dispACFormat.format(actor.actionCount());
-            this.changeTextColor(this.textColor(FTKR.AltTB.acColor));
-            this.drawText(text, x + width, y, acw, 'right');
-            this.resetTextColor();
+            this.drawActorActionCount(actor, x, y, width);
         }
         _AltTB_Window_BattleStatus_drawActorName.call(this, actor, x, y, width);
         this.changePaintOpacity(true);
@@ -2118,78 +2419,6 @@ FTKR.AltTB = FTKR.AltTB || {};
         Window_Base.prototype.open.call(this);
     };
 
-    Window_Base.prototype.drawActionPoint = function(x, y, width) {
-        width = width || 186;
-        var tw = 44;
-        this.drawAPGauge(x, y, width);
-        this.drawAPLabel(x, y, tw);
-        this.drawAPValue(x + tw, y, width - tw);
-        return 1;
-    };
-
-    Window_Base.prototype.drawAPGauge = function(x, y, width) {
-        if (FTKR.AltTB.dispAPGauge && FTKR.AltTB.apDrawType !== 2) {
-            var color1 = this.apGaugeColor1();
-            var color2 = this.apGaugeColor2();
-            this.drawGauge(x, y, width, $gameParty.apRate(), color1, color2);
-        }
-    };
-
-    Window_Base.prototype.apGaugeColor1 = function() {
-        return this.textColor(FTKR.AltTB.apGaugeColor1);
-    };
-
-    Window_Base.prototype.apGaugeColor2 = function() {
-        return this.textColor(FTKR.AltTB.apGaugeColor2);
-    };
-
-    Window_Base.prototype.drawAPLabel = function(x, y, width) {
-        this.changeTextColor(this.systemColor());
-        this.drawText(FTKR.AltTB.dispAP, x, y, width);
-    };
-
-    Window_Base.prototype.drawAPValue = function(x, y, width) {
-        var ap = $gameParty.actionPoint();
-        var map = $gameParty.maxActionPoint();
-        if (FTKR.AltTB.apDrawType !== 2) {
-            var color = this.normalColor();
-            this.drawApCurrentAndMax(ap, map, x, y, width, color, color);
-        } else {
-            this.drawIconGauge(x, y, width, ap, map, FTKR.AltTB.apIcon, FTKR.AltTB.apEmptyIcon);
-        }
-    };
-
-    Window_Base.prototype.drawIconGauge = function(x, y, width, current, max, icon1, icon2) {
-        var space = max > 1 ? (width - Window_Base._iconWidth - 4) / (max-1) : 0;
-        for (var i = 0; i < max; i++) {
-            var icon = i < current ? icon1 : icon2;
-            this.drawIcon(icon, x + space * i, y + 2);
-        }
-    };
-
-    Window_Base.prototype.apValueWidth = function() {
-        return this.textWidth('0000');
-    };
-
-    Window_Base.prototype.drawApCurrentAndMax = function(current, max, x, y,
-                                                      width, color1, color2) {
-        var valueWidth = this.apValueWidth();
-        var slashWidth = this.textWidth('/');
-        var x1 = x + width - valueWidth;
-        var x2 = x1 - slashWidth;
-        var x3 = x2 - valueWidth;
-        if (x3 >= x && FTKR.AltTB.apDrawType == 1) {
-            this.changeTextColor(color1);
-            this.drawText(current, x3, y, valueWidth, 'right');
-            this.changeTextColor(color2);
-            this.drawText('/', x2, y, slashWidth, 'right');
-            this.drawText(max, x1, y, valueWidth, 'right');
-        } else {
-            this.changeTextColor(color1);
-            this.drawText(current, x1, y, valueWidth, 'right');
-        }
-    };
-
     //=============================================================================
     // Yanfly YEP_BattleEngineCore.js の対応
     //=============================================================================
@@ -2314,16 +2543,6 @@ FTKR.AltTB = FTKR.AltTB || {};
             default:
                 return _AltTB_Window_Base_drawCssActorStatusBase_B.apply(this, arguments);
         }
-    };
-
-    Window_Base.prototype.drawActorActionCount = function(actor, x, y, width) {
-        var acw = this.textWidth('0') * FTKR.AltTB.dispAcWidth;
-        width -= acw;
-        var text = FTKR.AltTB.dispACFormat.format(actor.actionCount());
-        this.changeTextColor(this.textColor(FTKR.AltTB.acColor));
-        this.drawText(text, x + width, y, acw, 'right');
-        this.resetTextColor();
-        return 1;
     };
 
     }//FTKR_CustomSimpleActorStatus.js
