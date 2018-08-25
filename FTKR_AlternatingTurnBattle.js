@@ -4,8 +4,8 @@
 // プラグインNo : 75
 // 作成者     : フトコロ
 // 作成日     : 2018/04/08
-// 最終更新日 : 2018/08/25
-// バージョン : v1.4.2
+// 最終更新日 : 2018/08/26
+// バージョン : v1.4.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.AltTB = FTKR.AltTB || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.4.2 敵味方交互にターンが進むターン制戦闘システム
+ * @plugindesc v1.4.3 敵味方交互にターンが進むターン制戦闘システム
  * @author フトコロ
  *
  * @param TurnEnd Command
@@ -760,6 +760,10 @@ FTKR.AltTB = FTKR.AltTB || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.4.3 - 2018/08/26 : 不具合修正
+ *    1. v1.4.2の修正箇所の不具合(最大値設定無しの場合にプラグインコマンドで
+ *       行動回数が増加しない)修正。
  * 
  * v1.4.2 - 2018/08/25 : 不具合修正
  *    1. 戦闘中にプラグインコマンドで行動回数を増加させても、行動選択時にエラーになる
@@ -1553,6 +1557,7 @@ FTKR.AltTB = FTKR.AltTB || {};
                 this.altTBSkillNoteTags($dataSkills);
                 this.altTBSkillNoteTags($dataItems);
             }
+            _AltTB_DatabaseLoaded = true;
         }
         return true;
     };
@@ -1682,9 +1687,8 @@ FTKR.AltTB = FTKR.AltTB || {};
         var now = this._actionCount;
         var max = this.maxActionCount();
         var diff = 0;
-//        this._actionCount += value;
-        if (max && value > 0) {
-            diff = now + value < max ? value : max - now;
+        if (value > 0) {
+            diff = !max || now + value < max ? value : max - now;
         } else if (value < 0) {
             diff = now + value > 0 ? value : -now;
         }
