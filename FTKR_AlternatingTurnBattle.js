@@ -4,8 +4,8 @@
 // プラグインNo : 75
 // 作成者     : フトコロ
 // 作成日     : 2018/04/08
-// 最終更新日 : 2018/08/21
-// バージョン : v1.4.1
+// 最終更新日 : 2018/08/25
+// バージョン : v1.4.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.AltTB = FTKR.AltTB || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.4.1 敵味方交互にターンが進むターン制戦闘システム
+ * @plugindesc v1.4.2 敵味方交互にターンが進むターン制戦闘システム
  * @author フトコロ
  *
  * @param TurnEnd Command
@@ -760,6 +760,12 @@ FTKR.AltTB = FTKR.AltTB || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.4.2 - 2018/08/25 : 不具合修正
+ *    1. 戦闘中にプラグインコマンドで行動回数を増加させても、行動選択時にエラーになる
+ *       不具合を修正。
+ *    2. 戦闘中にプラグインコマンドで行動回数が増減した場合に、ステータスウィンドウに
+ *       反映されない不具合を修正。
  * 
  * v1.4.1 - 2018/08/21 : 仕様変更、機能追加、ヘルプ追記
  *    1. 戦闘シーン以外でも actionCount() にて行動回数を取得できるように修正。
@@ -1673,13 +1679,33 @@ FTKR.AltTB = FTKR.AltTB || {};
     };
 
     Game_Battler.prototype.getActionCount = function(value) {
-        this._actionCount += value;
+        var now = this._actionCount;
+        var max = this.maxActionCount();
+        var diff = 0;
+//        this._actionCount += value;
+        if (max && value > 0) {
+            diff = now + value < max ? value : max - now;
+        } else if (value < 0) {
+            diff = now + value > 0 ? value : -now;
+        }
+        this._actionCount += diff;
         this.refreshActionCount();
+        this.refreshBattleStatus(diff);
     };
 
     Game_Battler.prototype.refreshActionCount = function() {
         if (this.actionCount() < 0) this._actionCount = 0;
         if (this.maxActionCount() && this.actionCount() > this.maxActionCount()) this._actionCount = this.maxActionCount();
+    };
+
+    Game_Battler.prototype.refreshBattleStatus = function(diff) {
+        if (!diff || !$gameParty.inBattle()) return;
+        if (diff > 0) {
+            for(var i = 0; i < diff; i++) {
+                this._actions.push(new Game_Action(this));
+            }
+        }
+        BattleManager._statusWindow.refresh();
     };
 
     Game_Battler.prototype.payActionCount = function() {
