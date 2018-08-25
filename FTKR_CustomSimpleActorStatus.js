@@ -4,8 +4,8 @@
 // プラグインNo : 9
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2018/08/20
-// バージョン : v3.0.1
+// 最終更新日 : 2018/08/25
+// バージョン : v3.0.2
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v3.0.1 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v3.0.2 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -987,6 +987,10 @@ FTKR.CSS = FTKR.CSS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v3.0.2 - 2018/08/25 : 不具合修正
+ *    1. 拡張プラグインで、余白と背景透明度を 0 に設定した場合に、設定が無効になる
+ *       不具合を修正。
  * 
  * v3.0.1 - 2018/08/20 : 不具合修正
  *    1. 拡張プラグインでステータスウィンドウの設定を有効にした場合にエラーになる
@@ -2658,7 +2662,7 @@ FTKR.CSS = FTKR.CSS || {};
 
     var _CSS_Window_Base_standardPadding = Window_Base.prototype.standardPadding;
     Window_Base.prototype.standardPadding = function() {
-        return this._customPadding ? this._customPadding : _CSS_Window_Base_standardPadding.call(this);
+        return this._customPadding >= 0 ? this._customPadding : _CSS_Window_Base_standardPadding.call(this);
     };
 
     var _CSS_Window_Base_lineHeight = Window_Base.prototype.lineHeight;
@@ -2668,7 +2672,7 @@ FTKR.CSS = FTKR.CSS || {};
 
     var _CSS_Window_Base_standardBackOpacity = Window_Base.prototype.standardBackOpacity;
     Window_Base.prototype.standardBackOpacity = function() {
-        return this._customBackOpacity ? this._customBackOpacity : _CSS_Window_Base_standardBackOpacity.call(this);
+        return this._customBackOpacity >= 0 ? this._customBackOpacity : _CSS_Window_Base_standardBackOpacity.call(this);
     };
 
     //書き換え
