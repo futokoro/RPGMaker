@@ -4,8 +4,8 @@
 // プラグインNo : 56
 // 作成者     : フトコロ
 // 作成日     : 2017/11/12
-// 最終更新日 : 2017/12/25
-// バージョン : v1.1.0
+// 最終更新日 : 2018/08/25
+// バージョン : v1.1.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.FAA = FTKR.FAA || {};
 
 //=============================================================================
 /*:ja
- * @plugindesc v1.1.0 フロントビューモードでアクター側にアニメーションを表示するプラグイン
+ * @plugindesc v1.1.1 フロントビューモードでアクター側にアニメーションを表示するプラグイン
  * @author フトコロ
  *
  * @param --アニメーション--
@@ -189,7 +189,7 @@ FTKR.FAA = FTKR.FAA || {};
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
- * Copyright (c) 2017 Futokoro
+ * Copyright (c) 2017,2018 Futokoro
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
@@ -200,6 +200,9 @@ FTKR.FAA = FTKR.FAA || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.1.1 - 2018/08/25 : 不具合修正、リファクタリング
+ *    1. 味方対象のアニメーションが表示されない不具合を修正。
  * 
  * v1.1.0 - 2017/12/25 : 仕様変更
  *    1. バトルシーンのレイヤー構成を変更。
@@ -283,6 +286,10 @@ function Sprite_FaceAnimation() {
   this.initialize.apply(this, arguments);
 }
 
+function Window_BattleSpriteStatus() {
+    this.initialize.apply(this, arguments);
+}
+
 (function() {
 
     //配列の要素を、すべて数値に変換する。
@@ -324,6 +331,32 @@ function Sprite_FaceAnimation() {
     };
 
     //=============================================================================
+    // アクター側のアニメーション表示用レイヤーを追加
+    //=============================================================================
+    //カーソルとステータスの間に追加
+    var _FAA_Window_createAllParts = Window.prototype._createAllParts;
+    Window.prototype._createAllParts = function() {
+        _FAA_Window_createAllParts.call(this);
+        this._createWindowCssSprite();
+    };
+
+    Window.prototype._createWindowCssSprite = function() {
+        this._windowCssSprite = new Sprite();
+        var index = 0;
+        this.children.some(function(child, i){
+            if (child == this._windowCursorSprite) {
+                index = i + 1;
+                return true;
+            }
+        },this);
+        if (index) {
+            this.addChildAt(this._windowCssSprite, index);
+        } else {
+            this.addChild(this._windowCssSprite);
+        }
+    };
+
+    //=============================================================================
     // フロントビューモードでも、アクター側にダメージエフェクトが発生するように修正
     //=============================================================================
 
@@ -336,35 +369,6 @@ function Sprite_FaceAnimation() {
     };
 
     //=============================================================================
-    // アクター側のアニメーション表示用レイヤーを追加
-    //=============================================================================
-
-    //書き換え
-    Window.prototype._createAllParts = function() {
-        this._windowSpriteContainer = new PIXI.Container();
-        this._windowBackSprite = new Sprite();
-        this._windowCursorSprite = new Sprite();
-        this._windowFrameSprite = new Sprite();
-        this._windowCssSprite = new Sprite(); //追加
-        this._windowCssSprite.setFrame(0, 0, Graphics.width, Graphics.height);
-        this._windowContentsSprite = new Sprite();
-        this._downArrowSprite = new Sprite();
-        this._upArrowSprite = new Sprite();
-        this._windowPauseSignSprite = new Sprite();
-        this._windowBackSprite.bitmap = new Bitmap(1, 1);
-        this._windowBackSprite.alpha = 192 / 255;
-        this.addChild(this._windowSpriteContainer);
-        this._windowSpriteContainer.addChild(this._windowBackSprite);
-        this._windowSpriteContainer.addChild(this._windowFrameSprite);
-        this.addChild(this._windowCursorSprite);
-        this.addChild(this._windowCssSprite); //カーソルとステータスの間に追加
-        this.addChild(this._windowContentsSprite);
-        this.addChild(this._downArrowSprite);
-        this.addChild(this._upArrowSprite);
-        this.addChild(this._windowPauseSignSprite);
-    };
-
-    //=============================================================================
     // アクターの顔画像表示処理をスプライト方式に修正
     //=============================================================================
 
@@ -374,85 +378,8 @@ function Sprite_FaceAnimation() {
         this._faceSprite = [];
     };
 
-    //書き換え
-    var _FAA_Window_Base_drawActorFace = Window_BattleStatus.prototype.drawActorFace;
-    Window_BattleStatus.prototype.drawActorFace = function(actor, x, y, width, height) {
-        if (!$gameParty.inBattle() || FTKR.FAA.destination !== 1) {
-            return _FAA_Window_Base_drawActorFace.call(this, actor, x, y, width, height);
-        } else {
-            width = width || Window_Base._faceWidth;
-            height = height || Window_Base._faceHeight;
-            this.drawCssFace(actor, x, y, width, height);
-        }
-    };
-
     Window_Base.prototype.showActorNum = function() {
         return this.maxPageItems ? this.maxPageItems() : 1;
-    };
-
-    //書き換え
-    var _FAA_Window_Base_drawCssFace = Window_BattleStatus.prototype.drawCssFace;
-    Window_BattleStatus.prototype.drawCssFace = function(actor, dx, dy, width, height) {
-        if (!$gameParty.inBattle() || FTKR.FAA.destination !== 1) {
-            return _FAA_Window_Base_drawCssFace.call(this, actor, dx, dy, width, height);
-        } else {
-            var index = actor.index() % this.showActorNum();
-            var sprite = this._faceSprite[index];
-            var fh = Window_Base._faceHeight;
-            var fsize = Math.min(height, fh);
-            var scale = Imported.FTKR_CSS ? fsize / fh : 1;
-            if (!sprite) {
-                sprite = new Sprite_ActorFace(actor, this);
-                this._windowCssSprite.addChild(sprite);
-                this._faceSprite[index] = sprite;
-            } else if (sprite._actor !== actor){
-                sprite.setBattler(actor);
-            }
-            dx = dx + fsize * scale / 2 + this.padding;
-            if (Imported.FTKR_CSS) {
-                dx += FTKR.CSS.cssStatus.face.posiX * (width - fsize * scale) / 2;
-            }
-            var sx = Math.floor(dx);
-            var sy = dy + fsize + this.padding;
-            sprite.setHome(sx, sy);
-            sprite.startEntryMotion();
-            sprite.setScale(scale);
-        }
-    };
-
-    //書き換え
-    var _FAA_Window_Base_drawCssImage = Window_BattleStatus.prototype.drawCssImage;
-    Window_BattleStatus.prototype.drawCssImage = function(actor, dx, dy, width, id) {
-        if (!$gameParty.inBattle() || FTKR.FAA.destination !== 2) {
-            return _FAA_Window_Base_drawCssImage.call(this, actor, dx, dy, width, id);
-        } else {
-            var bgi = actor.actor().cssbgi[id];
-            var bitmap = ImageManager.loadPicture(bgi.name);
-            if (!bitmap) return 1;
-            var index = actor.index() % this.showActorNum();
-            var sprite = this._faceSprite[index];
-            var fw = bgi.width || bitmap.width;
-            var fh = bgi.height || bitmap.height;
-            var scale = bgi.scale / 100;
-            var dh = fh * scale;
-            var dw = fw * scale;
-            if (!sprite) {
-                sprite = new Sprite_ActorImage(actor, this);
-                this._windowCssSprite.addChild(sprite);
-                this._faceSprite[index] = sprite;
-            } else if (sprite._actor !== actor){
-                sprite.setBattler(actor);
-            }
-            dx = dx + dw / 2 + this.padding;
-            dx += FTKR.CSS.cssStatus.image.posiX * (width - dw) / 2;
-            var sx = dx;
-            var sy = dy + dh + this.padding;
-            sprite.setImageId(id);
-            sprite.setHome(sx, sy);
-            sprite.startEntryMotion();
-            sprite.setScale(scale);
-            return Math.ceil(dh / this.lineHeight()) || 1;
-        }
     };
 
     var _FAA_Window_Base_clearCssSprite = Window_Base.prototype.clearCssSprite;
@@ -483,6 +410,55 @@ function Sprite_FaceAnimation() {
         this._faceSprite.forEach( function(sprite){
             sprite.hide();
         });
+    };
+
+    //=============================================================================
+    // BattleManager
+    // バトルマネージャー
+    //=============================================================================
+
+    //ステータスウィンドウにアニメーションを表示している間、次の処理に移らないようにする
+    var _FAA_BattleManager_isBusy = BattleManager.isBusy;
+    BattleManager.isBusy = function() {
+        return (_FAA_BattleManager_isBusy.call(this) || this._statusWindow.isBusy());
+    };
+
+    //=============================================================================
+    // バトル終了後に、逃走フラグを削除
+    //=============================================================================
+
+    var _FAA_Scene_Map_start = Scene_Map.prototype.start;
+    Scene_Map.prototype.start = function() {
+        _FAA_Scene_Map_start.call(this);
+        BattleManager._escaped = false;
+    };
+
+    //=============================================================================
+    // バトルシーンのレイヤー構成を変更
+    //=============================================================================
+    //書き換え
+    Scene_Battle.prototype.createStatusWindow = function() {
+    };
+
+    Scene_Battle.prototype.createFaaStatusWindow = function() {
+        this._statusWindow = new Window_BattleSpriteStatus();
+        this.addChild(this._statusWindow);
+    };
+
+    var _FAA_Scene_Battle_createSpriteset = Scene_Battle.prototype.createSpriteset;
+    Scene_Battle.prototype.createSpriteset = function() {
+        _FAA_Scene_Battle_createSpriteset.call(this);
+        this.createFaaStatusWindow();
+    };
+
+    var _FAA_Scene_Battle_updateWindowPositions = Scene_Battle.prototype.updateWindowPositions;
+    Scene_Battle.prototype.updateWindowPositions = function() {
+        if (this._actorWindow.visible || this._enemyWindow.visible || $gameMessage.isBusy()) {
+            this._statusWindow.hide();
+        } else {
+            this._statusWindow.show();
+        }
+        _FAA_Scene_Battle_updateWindowPositions.call(this);
     };
 
     //=============================================================================
@@ -729,22 +705,24 @@ function Sprite_FaceAnimation() {
     };
 
     //=============================================================================
-    // Window_BattleStatus
-    // バトル画面のステータス表示用ウィンドウクラスの修正
+    // Window_BattleSpriteStatus
+    // バトル画面のステータス表示用ウィンドウクラス
     //=============================================================================
     
-    Window_BattleStatus.prototype.isBusy = function() {
+    Window_BattleSpriteStatus.prototype = Object.create(Window_BattleStatus.prototype);
+    Window_BattleSpriteStatus.prototype.constructor = Window_BattleSpriteStatus;
+    
+    Window_BattleSpriteStatus.prototype.isBusy = function() {
         return this.isFaceSpriteBusy();
     };
 
     //アクター選択中のエフェクト表示を追加
-    var _FAA_Window_BattleStatus_select = Window_BattleStatus.prototype.select;
-    Window_BattleStatus.prototype.select = function(index) {
-        _FAA_Window_BattleStatus_select.call(this, index);
+    Window_BattleSpriteStatus.prototype.select = function(index) {
+        Window_BattleStatus.prototype.select.call(this, index);
         this.setActorImageEffect(index);
     };
 
-    Window_BattleStatus.prototype.setActorImageEffect = function(index) {
+    Window_BattleSpriteStatus.prototype.setActorImageEffect = function(index) {
         if (!FTKR.FAA.select.cursor) {
             this.setCursorRect(0, 0, 0, 0);
         }
@@ -755,8 +733,7 @@ function Sprite_FaceAnimation() {
         }
     };
 
-    //書き換え
-    Window_BattleStatus.prototype.updateOpen = function() {
+    Window_BattleSpriteStatus.prototype.updateOpen = function() {
         if (this._opening) {
             this.openness += 32;
             if (this.isOpen()) {
@@ -766,72 +743,85 @@ function Sprite_FaceAnimation() {
         }
     };
 
-    var _FAA_Window_BattleStatus_updateClose = Window_BattleStatus.prototype.updateClose;
-    Window_BattleStatus.prototype.updateClose = function() {
+    Window_BattleSpriteStatus.prototype.updateClose = function() {
         if (this._closing) {
             this.hideFaceSprites();
         }
-        _FAA_Window_BattleStatus_updateClose.call(this);
+        Window_BattleStatus.prototype.updateClose.call(this);
     };
 
-    //=============================================================================
-    // BattleManager
-    // バトルマネージャー
-    //=============================================================================
-
-    //ステータスウィンドウにアニメーションを表示している間、次の処理に移らないようにする
-    var _FAA_BattleManager_isBusy = BattleManager.isBusy;
-    BattleManager.isBusy = function() {
-        return (_FAA_BattleManager_isBusy.call(this) || this._statusWindow.isBusy());
-    };
-
-    //=============================================================================
-    // バトル終了後に、逃走フラグを削除
-    //=============================================================================
-
-    var _FAA_Scene_Map_start = Scene_Map.prototype.start;
-    Scene_Map.prototype.start = function() {
-        _FAA_Scene_Map_start.call(this);
-        BattleManager._escaped = false;
-    };
-
-    //=============================================================================
-    // バトルシーンのレイヤー構成を変更
-    //=============================================================================
-    //書き換え
-    Scene_Battle.prototype.createAllWindows = function() {
-        this.createLogWindow();
-    //    this.createStatusWindow();
-        this.createPartyCommandWindow();
-        this.createActorCommandWindow();
-        this.createHelpWindow();
-        this.createSkillWindow();
-        this.createItemWindow();
-        this.createActorWindow();
-        this.createEnemyWindow();
-        this.createMessageWindow();
-        this.createScrollTextWindow();
-    };
-
-    Scene_Battle.prototype.createFaaStatusWindow = function() {
-        this._statusWindow = new Window_BattleStatus();
-        this.addChild(this._statusWindow);
-    };
-
-    var _FAA_Scene_Battle_createSpriteset = Scene_Battle.prototype.createSpriteset;
-    Scene_Battle.prototype.createSpriteset = function() {
-        _FAA_Scene_Battle_createSpriteset.call(this);
-        this.createFaaStatusWindow();
-    };
-
-    var _FAA_Scene_Battle_updateWindowPositions = Scene_Battle.prototype.updateWindowPositions;
-    Scene_Battle.prototype.updateWindowPositions = function() {
-        if (this._actorWindow.visible || this._enemyWindow.visible || $gameMessage.isBusy()) {
-            this._statusWindow.hide();
+    Window_BattleSpriteStatus.prototype.drawActorFace = function(actor, x, y, width, height) {
+        if (!$gameParty.inBattle() || FTKR.FAA.destination !== 1) {
+            return Window_BattleStatus.prototype.drawActorFace.call(this, actor, x, y, width, height);
         } else {
-            this._statusWindow.show();
+            width = width || Window_Base._faceWidth;
+            height = height || Window_Base._faceHeight;
+            this.drawCssFace(actor, x, y, width, height);
         }
-        _FAA_Scene_Battle_updateWindowPositions.call(this);
     };
+
+    //書き換え
+    Window_BattleSpriteStatus.prototype.drawCssFace = function(actor, dx, dy, width, height) {
+        if (!$gameParty.inBattle() || FTKR.FAA.destination !== 1) {
+            return Window_BattleStatus.prototype.drawCssFace.call(this, actor, dx, dy, width, height);
+        } else {
+            var index = actor.index() % this.showActorNum();
+            var sprite = this._faceSprite[index];
+            var fh = Window_Base._faceHeight;
+            var fsize = Math.min(height, fh);
+            var scale = Imported.FTKR_CSS ? fsize / fh : 1;
+            if (!sprite) {
+                sprite = new Sprite_ActorFace(actor, this);
+                this._windowCssSprite.addChild(sprite);
+                this._faceSprite[index] = sprite;
+            } else if (sprite._actor !== actor){
+                sprite.setBattler(actor);
+            }
+            dx = dx + fsize * scale / 2 + this.padding;
+            if (Imported.FTKR_CSS) {
+                dx += FTKR.CSS.cssStatus.face.posiX * (width - fsize * scale) / 2;
+            }
+            var sx = Math.floor(dx);
+            var sy = dy + fsize + this.padding;
+            sprite.setHome(sx, sy);
+            sprite.startEntryMotion();
+            sprite.setScale(scale);
+        }
+    };
+
+    //書き換え
+    Window_BattleSpriteStatus.prototype.drawCssImage = function(actor, dx, dy, width, id) {
+        if (!$gameParty.inBattle() || FTKR.FAA.destination !== 2) {
+            return Window_BattleStatus.prototype.drawCssImage.call(this, actor, dx, dy, width, id);
+        } else {
+            var bgi = actor.actor().cssbgi[id];
+            var bitmap = ImageManager.loadPicture(bgi.name);
+            if (!bitmap) return 1;
+            var index = actor.index() % this.showActorNum();
+            var sprite = this._faceSprite[index];
+            var fw = bgi.width || bitmap.width;
+            var fh = bgi.height || bitmap.height;
+            var scale = bgi.scale / 100;
+            var dh = fh * scale;
+            var dw = fw * scale;
+            if (!sprite) {
+                sprite = new Sprite_ActorImage(actor, this);
+                this._windowCssSprite.addChild(sprite);
+                this._faceSprite[index] = sprite;
+            } else if (sprite._actor !== actor){
+                sprite.setBattler(actor);
+            }
+            dx = dx + dw / 2 + this.padding;
+            dx += FTKR.CSS.cssStatus.image.posiX * (width - dw) / 2;
+            var sx = dx;
+            var sy = dy + dh + this.padding;
+            sprite.setImageId(id);
+            sprite.setHome(sx, sy);
+            sprite.startEntryMotion();
+            sprite.setScale(scale);
+            return Math.ceil(dh / this.lineHeight()) || 1;
+        }
+    };
+
 
 }());//EOF
