@@ -4,8 +4,8 @@
 // プラグインNo : 7
 // 作成者　　   : フトコロ(futokoro)
 // 作成日　　   : 2017/02/25
-// 最終更新日   : 2018/08/16
-// バージョン   : v1.15.12
+// 最終更新日   : 2018/08/26
+// バージョン   : v1.15.13
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.15.11 ツリー型スキル習得システム
+ * @plugindesc v1.15.13 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -306,6 +306,13 @@ FTKR.STS = FTKR.STS || {};
  * @desc 説明文に制御文字が使えなくなる代わりに枠内に自動で納まるように調整する。(0 - 無効, 1 - 有効)
  * @default 0
  * @type number
+ * 
+ * @param Prioritize Skill Desc
+ * @desc <STS DESC>の設定を、FTKR_SkillExpansionの設定よりも優先させる。
+ * @default false
+ * @type boolean
+ * @on 優先する
+ * @off 優先しない
  * 
  * @param --コストウィンドウの設定(Cost Window)--
  * @default 
@@ -1077,6 +1084,14 @@ FTKR.STS = FTKR.STS || {};
  * 文章
  * </STS DESC>
  * 
+ * ただし、FTKR_SkillExpansionと組み合わせている場合には、
+ * FTKR_SkillExpansionの説明文の設定が優先され、このタグの設定は無効になります。
+ * 
+ * プラグインパラメータ
+ * <Prioritize Skill Desc>
+ *    :この設定を「優先する」にした場合、上記のタグで設定した説明文を
+ *    :FTKR_SkillExpansion の設定よりも優先して、スキルツリー画面に表示します。
+ * 
  * 
  *-----------------------------------------------------------------------------
  * 習得コストウィンドウの表示設定
@@ -1404,6 +1419,12 @@ FTKR.STS = FTKR.STS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.15.13 - 2018/08/26 : 不具合修正、機能追加
+ *    1. FTKR_SkillExpansionと組み合わせている場合に、スキルツリー画面の
+ *       スキル説明文が正しく表示できない不具合を修正。
+ *    2. FTKR_SkillExpansionと組み合わせていても、スキルツリー側の説明文の
+ *       設定を優先して表示する機能を追加。
+ * 
  * v1.15.12 - 2018/08/16 : 不具合修正
  *    1. プラグイン適用前のセーブデータを使用した時に画面表示時に
  *       エラーになる不具合を修正。
@@ -1414,7 +1435,7 @@ FTKR.STS = FTKR.STS || {};
  * 
  * v1.15.10 - 2018/07/16 : 処理見直し
  *    1. SPの計算処理を見直し。
- *    2. ヘルプの設定方法にTKR_SkillExpansion.jsを追加。
+ *    2. ヘルプの設定方法にFTKR_SkillExpansion.jsを追加。
  * 
  * v1.15.9 - 2018/05/04 : 機能追加
  *    1. 習得回数を取得するスクリプトを追加。(しぐれんさん案)
@@ -1680,6 +1701,18 @@ function Scene_STS() {
 
 (function() {
 
+    var paramParse = function(obj) {
+        return JSON.parse(JSON.stringify(obj, paramReplace));
+    };
+
+    var paramReplace = function(key, value) {
+        try {
+            return JSON.parse(value || null);
+        } catch (e) {
+            return value;
+        }
+    };
+
     //=============================================================================
     // プラグイン パラメータ
     //=============================================================================
@@ -1712,7 +1745,7 @@ function Scene_STS() {
         icon:Number(parameters['Cost Sp Icon'] || 0),
         hideCost0:Number(parameters['Hide Sp Cost 0'] || 0),
         format:String(parameters['Display Get Sp'] || ''),
-        enableClassSp:(JSON.parse(parameters['Enable Class Sp']) || false),
+        enableClassSp:(paramParse(parameters['Enable Class Sp']) || false),
     };
 
     //スキル枠
@@ -1772,8 +1805,9 @@ function Scene_STS() {
     };
     //スキルステータスウィンドウ設定
     FTKR.STS.skillStatus = {
-        titleFormat:String(parameters['Skill Status Title Format'] || ''),
-        adjustWidth:Number(parameters['Adjust Skill Desc Width'] || 0),
+        titleFormat     :String(parameters['Skill Status Title Format'] || ''),
+        adjustWidth     :Number(parameters['Adjust Skill Desc Width'] || 0),
+        prioritizeDesc  :paramParse(parameters['Prioritize Skill Desc'] || false),
     };
     //ツリータイプウィンドウ設定
     FTKR.STS.treeTypes = {
@@ -3018,18 +3052,26 @@ function Scene_STS() {
 
     //スキルの説明文を取得する関数
     Window_Base.prototype.getStsDesc = function(skill) {
+        var text = FTKR.STS.skillStatus.prioritizeDesc ?
+            this.getStsSubDesc(skill) : null;
         if (Imported.FTKR_SEP) {
-            var actor = $gameActors.actor(skill.actorId);
-            if (!actor) return this.ftItemDesc(skill);
+            var actor = this._actor;
+            if (!actor || text) {
+                return text ? text : this.ftItemDesc(skill);
+            }
             var descs = skill.descs.filter( function(desc) {
                 return actor.evalEnabledFormula(desc.enabled, skill);
             });
             var desc = descs.pop();
             return desc ? desc.description : '';
         } else {
-            var desc = this.getStsSubDesc(skill);
-            return desc ? desc : this.ftItemDesc(skill);
+            return text ? text : this.ftItemDesc(skill);
         }
+    };
+
+    Window_Base.prototype.getStsDescBase = function(skill) {
+        var desc = this.getStsSubDesc(skill);
+        return desc ? desc : this.ftItemDesc(skill);
     };
 
     Window_Base.prototype.getStsSubDesc = function(skill) {
