@@ -4,8 +4,8 @@
 // プラグインNo : 86
 // 作成者     : フトコロ
 // 作成日     : 2018/07/15
-// 最終更新日 : 2018/07/31
-// バージョン : v0.9.7
+// 最終更新日 : 2018/08/26
+// バージョン : v0.9.8
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -23,7 +23,7 @@ FTKR.GDM = FTKR.GDM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v0.9.7 トリアコンタンさんのGUI画面デザインプラグインの機能追加
+ * @plugindesc v0.9.8 トリアコンタンさんのGUI画面デザインプラグインの機能追加
  * @author フトコロ
  *
  * @param autoCreate
@@ -206,6 +206,9 @@ FTKR.GDM = FTKR.GDM || {};
  * [Twitter    ] https://twitter.com/futokoro_mv
  * 
  * 
+ * なお、FTKR_CustomSimpleActorStatusのv3.0.0 から追加した
+ * ステータスの新表示方式にはまだ対応していません。
+ * 
  *-----------------------------------------------------------------------------
  * 使い方
  *-----------------------------------------------------------------------------
@@ -267,6 +270,11 @@ FTKR.GDM = FTKR.GDM || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v0.9.8 - 背景画像を指定しない場合にエラーになる不具合修正。
+ *          マップシーンで作成したウィンドウが生成されない不具合修正。
+ *          作成したウィンドウの自動更新機能を追加。
+ *          FTKR_CustomSimpleActorStatusのv3.0.0に追加したステータスの
+ *          新表示方式に変更、仮実装。
  * v0.9.7 - FTKR_OriginalSceneWindow.js v1.5.6 の不具合修正を反映
  * v0.9.6 - ウィンドウ背景画像の設定機能を実装
  * v0.9.5 - コモンウィンドウのセレクト参照機能を実装
@@ -848,47 +856,6 @@ function Scene_OSW() {
               fs.mkdirSync(dirPath);
           }
           fs.writeFileSync(filePath, data);
-      };
-
-      //=============================================================================
-      //ウィンドウのタイプ判別処理を追加
-      //=============================================================================
-
-      Window_Base.prototype.isOswOption = function() {
-          return false;
-      };
-
-      Window_Base.prototype.isCssContentsWindow = function() {
-          return Imported.FTKR_CSS && !!this._lssStatus &&
-            (!isNaN(this._lssStatus.widthRate) || this._customDrawType);
-      };
-
-      Window_Base.prototype.isCommon = function() {
-          return !this.isList();
-      };
-
-      Window_Base.prototype.isList = function() {
-          return this.isCommand() || this.isSelect();
-      };
-
-      Window_Base.prototype.isCommand = function() {
-          return false;
-      };
-
-      Window_Base.prototype.isSelect = function() {
-          return false;
-      };
-
-      Window_Selectable.prototype.isSelect = function() {
-          return true;
-      };
-
-      Window_Command.prototype.isSelect = function() {
-          return false;
-      };
-
-      Window_Command.prototype.isCommand = function() {
-          return true;
       };
 
       //=============================================================================
@@ -1607,6 +1574,7 @@ function Scene_OSW() {
           this.createFtkrCommandOptions();
           this.createFtkrSelectOptions();
           this.createFtkrCommonOptions();
+          this.createFtkrStatusListOptions();
           this.createConfTitleWindow();
           this.createConfWindow();
       };
@@ -1794,6 +1762,7 @@ function Scene_OSW() {
               {type: 'subConfig', name: '表示設定', symbol: 'showEdit', enabled: true, options: {subConfigs: [
                   {type: 'data',    name: '表示スイッチ',   symbol: '_customShowSwId',  enabled: true, options: {data:$dataSystem.switches}},
                   {type: 'boolean', name: '枠非表示　　',   symbol: '_customHideFrame', enabled: true, options: {}},
+                  {type: 'boolean', name: '表示自動更新',   symbol: '_autoRefreshed', enabled: true, options: {}},
                   {type: 'line'},
                   {type: 'save', name: '決定'},
               ], width: 400, textWidth: 220, statusWidth: 120}},
@@ -1833,6 +1802,8 @@ function Scene_OSW() {
                   {type: 'save',   name: '決定'},
               ], width: 400, textWidth: 220, statusWidth: 120}},
               {type: 'subConfig', name: '表示エリア', symbol: 'cssArea', enabled: configValues.isCssContentsWindow(), options: {subConfigs: [
+                  {type: 'command', name: 'パラメータリスト',  symbol: 'cmdCssStatus',         enabled: true, options: {method:this.cmdCssStatus.bind(this)}},
+                  {type: 'line'},
                   {type: 'string', name: '描画エリア１内容', symbol: '_customCssText1',      enabled: true, options: {}},
                   {type: 'string', name: '描画エリア２内容', symbol: '_customCssText2',      enabled: true, options: {}},
                   {type: 'string', name: '描画エリア３内容', symbol: '_customCssText3',      enabled: true, options: {}},
@@ -1872,6 +1843,18 @@ function Scene_OSW() {
           this.saveConfigValues();
           this._dispConfigWindow.hideAll();
           this.cwCloseConfig();
+      };
+
+      Scene_Base.prototype.cmdCssStatus = function() {
+          var cssWindow = this._dispConfigWindow._childWindows[5];
+          cssWindow.deactivate();
+          console.log(this._touchWindow);
+          if (!this._touchWindow._customCssStatus) {
+              this._touchWindow._customCssStatus = [];
+          }
+          this._dispConfigWindow._statusListWindow.setStatusList(this._touchWindow._customCssStatus);
+          this._dispConfigWindow._statusListWindow.setPositionReferWindowIndex(cssWindow);
+          this._dispConfigWindow._statusListWindow.activateWindow();
       };
 
       //配置変更
@@ -2351,6 +2334,24 @@ function Scene_OSW() {
       Scene_Base.prototype.cwCreateNewCancel = function() {
           this._mainConfigWindow.activate();
           this._cwCreateNewW.hide();
+      };
+
+      Scene_Base.prototype.createFtkrStatusListOptions = function() {
+          this._statusListWindow = new Window_StatusListConfig();
+          this._statusListWindow.setHandler('ok',     this.cwStatusListOk.bind(this));
+          this._statusListWindow.setHandler('cancel', this.cwStatusListCancel.bind(this));
+          this._dispConfigWindow._statusListWindow = this._statusListWindow;
+//          this._settingLayer.addChild(this._statusListWindow);
+          console.log('create', 'statusList');
+      };
+
+      Scene_Base.prototype.cwStatusListOk = function() {
+          this._statusListWindow.activate();
+      };
+
+      Scene_Base.prototype.cwStatusListCancel = function() {
+          this._statusListWindow.hide();
+          this._dispConfigWindow.childWindows()[5].activate();
       };
 
       //=============================================================================
@@ -2921,7 +2922,8 @@ function Scene_OSW() {
                   return this.adjustNumberStatus(options, value);
               case 'SELECT':
                   value = this.convertOptionSelectValue(options, value);
-                  return options.string ? this.selectStatusText(options, value) : value;
+                  value = options.string ? this.selectStatusText(options, value) : value;
+                  return value === 'なし' ? '' : value;
               case 'BOOLEAN':
                   return !!value;
               case 'DATA':
@@ -3118,6 +3120,8 @@ function Scene_OSW() {
           this.childWindows().forEach(function(window){
               this.windowLayer().addChild(window);
           },this);
+          if (this._statusListWindow) this.windowLayer().addChild(this._statusListWindow);
+          console.log('create', 'optionChildren');
       };
 
       //=============================================================================
@@ -3281,11 +3285,126 @@ function Scene_OSW() {
           this.addCommand('削除しない', 'cancel');
       };
 
+      //=============================================================================
+      // パラメータリスト設定用ウィンドウ
+      //=============================================================================
+      function Window_StatusListConfig() {
+          this.initialize.apply(this, arguments);
+      }
+
+      Window_StatusListConfig.prototype = Object.create(Window_Selectable.prototype);
+      Window_StatusListConfig.prototype.constructor = Window_StatusListConfig;
+
+      Window_StatusListConfig.prototype.initialize = function() {
+        this._ftkrEditor = true;
+        this._statusList = [];
+        var height = this.windowHeight();
+        Window_Selectable.prototype.initialize.call(this, 0, 0, 480, height);
+        this.hide();
+      };
+
+      Window_StatusListConfig.prototype.windowHeight = function() {
+        return this.fittingHeight(10);
+      };
+
+      Window_StatusListConfig.prototype.setStatusList = function(list) {
+        this._statusList = list;
+        this.refresh();
+      };
+
+      Window_StatusListConfig.prototype.standardFontSize = function() {
+          return optionFontSize;
+      };
+
+      Window_StatusListConfig.prototype.lineHeight = function() {
+          return optionLineHeight;
+      };
+
+      Window_StatusListConfig.prototype.maxItems = function() {
+        return this._statusList.length;
+      };
+
+      Window_StatusListConfig.prototype.drawItem = function(index) {
+        var item = this._statusList[index];
+        if (item) {
+            var rect = this.itemRect(index);
+            var width = rect.width / 4;
+            this.drawText(item.text, rect.x, rect.y, width);
+            this.drawText(item.x, rect.x + width*1, rect.y, width);
+            this.drawText(item.y, rect.x + width*2, rect.y, width);
+            this.drawText(item.width, rect.x + width*3, rect.y, width);
+        }
+      };
+
     };//デザインモード
 
 //ここから下は、デザインモードと関係なく実行
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      //=============================================================================
+      //ウィンドウのタイプ判別処理を追加
+      //=============================================================================
+
+      Window_Base.prototype.isOswOption = function() {
+        return false;
+    };
+
+    Window_Base.prototype.isCssContentsWindow = function() {
+        return Imported.FTKR_CSS && !!this._lssStatus &&
+          (!isNaN(this._lssStatus.widthRate) || this._customDrawType);
+    };
+
+    Window_Base.prototype.isCommon = function() {
+        return !this.isList();
+    };
+
+    Window_Base.prototype.isList = function() {
+        return this.isCommand() || this.isSelect();
+    };
+
+    Window_Base.prototype.isCommand = function() {
+        return false;
+    };
+
+    Window_Base.prototype.isSelect = function() {
+        return false;
+    };
+
+    Window_Selectable.prototype.isSelect = function() {
+        return true;
+    };
+
+    Window_Command.prototype.isSelect = function() {
+        return false;
+    };
+
+    Window_Command.prototype.isCommand = function() {
+        return true;
+    };
 
     //=============================================================================
     // JSONにウィンドウデータを保存
@@ -3347,6 +3466,7 @@ function Scene_OSW() {
         containerInfo._customMaxCols      = this._customMaxCols;
         containerInfo._customCursorHeight = this._customCursorHeight;
         containerInfo._customHorSpacing   = this._customHorSpacing;
+        containerInfo._autoRefreshed   = this._autoRefreshed;
     };
 
     Window_Selectable.prototype.saveProperty = function(containerInfo) {
@@ -3422,6 +3542,7 @@ function Scene_OSW() {
         if(containerInfo._customCursorHeight) this._customCursorHeight = containerInfo._customCursorHeight;
         if(containerInfo._customHorSpacing) this._customHorSpacing = containerInfo._customHorSpacing;
         if(containerInfo._customList)      this._customList = copyArray(containerInfo._customList);
+        if(containerInfo._autoRefreshed)   this._autoRefreshed = containerInfo._autoRefreshed;
         _Window_Base_loadProperty.apply(this, arguments);
         this._firstUpdated = false;
     };
@@ -3469,10 +3590,11 @@ function Scene_OSW() {
         this._customShow      = false;
         this._customActivate  = false;
         this._customSpacing   = this.spacing();
+        this._autoRefreshed   = false;
         if(this.maxCols) this._customMaxCols = this.maxCols();
         if(this.cursorHeight) this._customCursorHeight = this.cursorHeight();
         if(this.itemHeightSpace) this._customHorSpacing = this.itemHeightSpace();
-        if (!this._ftkrEditor && this._windowId == undefined) {
+        if(!this._ftkrEditor && this._windowId == undefined) {
             var windowType = getClassName(this);
             this._windowId = SceneManager.getWindowTypeNumber(windowType);
             SceneManager._scene.addOswWindow(windowType, this._windowId, true);
@@ -3712,7 +3834,7 @@ function Scene_OSW() {
         this._customCssSpaceIn = value;
         this.setCssStatus();
     };
-
+    
     Window_Base.prototype.setContentWidthRate = function(values) {
         var rates = values.split(',');
         this._customCssWidthRate1 = rates[0] || 0;
@@ -4022,12 +4144,27 @@ function Scene_OSW() {
         this._oswDisale = true;
     };
 
+    //マップシーンは処理を変更
+    var _Scene_Map_initialize = Scene_Map.prototype.initialize;
+    Scene_Map.prototype.initialize = function() {
+        _Scene_Map_initialize.call(this);
+        this._oswDisale = true;
+    };
+
     var _SceneManager_onSceneCreate = SceneManager.onSceneCreate;
     SceneManager.onSceneCreate = function() {
+        console.log('SceneManager', 'onSceneCreate');
         if (this._scene && !this._scene._oswDisale && this._scene._windowLayer) {
             this._scene.createAllOswWindows();
         }
         _SceneManager_onSceneCreate.call(this);
+    };
+
+    var _Scene_Map_createDisplayObjects = Scene_Map.prototype.createDisplayObjects;
+    Scene_Map.prototype.createDisplayObjects = function() {
+        console.log('Scene_Map', 'createObjects');
+        _Scene_Map_createDisplayObjects.call(this);
+        this.createAllOswWindows();
     };
 
     Scene_Base.prototype.createAllOswWindows = function() {
@@ -4039,9 +4176,11 @@ function Scene_OSW() {
         if (sceneInfo && sceneInfo._oswWindowList) {
             this._oswWindowList = sceneInfo._oswWindowList.clone();
         }
+        console.log('createOswWindows');
         this.oswWindowList().forEach( function(data) {
             this.createOswWindow(data);
             data.creative = true;
+            console.log(data);
         },this);
     };
 
@@ -4873,6 +5012,7 @@ function Scene_OSW() {
     Window_OswCommand.prototype.update = function() {
         this.updateOswIndex();
         Window_Command.prototype.update.call(this);
+        if (this._autoRefreshed) this.refresh();
     };
 
     Window_OswCommand.prototype.setCustomListHeight = function() {
@@ -4924,6 +5064,7 @@ function Scene_OSW() {
     Window_OswCommon.prototype.update = function() {
         Window_Base.prototype.update.call(this);
         this.updateReference();
+        if (this._autoRefreshed) this.refresh();
     };
 
     Window_OswCommon.prototype.actor = function() {
@@ -5147,6 +5288,7 @@ function Scene_OSW() {
     Window_OswSelect.prototype.update = function() {
         this.updateOswIndex();
         Window_Selectable.prototype.update.call(this);
+        if (this._autoRefreshed) this.refresh();
     };
 
     Window_OswSelect.prototype.select = function(index) {
