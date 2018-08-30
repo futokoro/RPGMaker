@@ -270,7 +270,8 @@ name,state,hp,mp
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver2.0.0](FTKR_CSS_BattleStatus.js) | 2018/08/19 | FTKR_CustomSimpleActorStatus.js の v3.0.0に対応 |
+| [ver2.1.0](FTKR_CSS_BattleStatus.js) | 2018/08/30 | FTKR_CustomSimpleActorStatus.js の v3.1.0に対応 |
+| ver2.0.0 | 2018/08/19 | FTKR_CustomSimpleActorStatus.js の v3.0.0に対応 |
 | [ver1.3.0](/archive/FTKR_CSS_BattleStatus_1.3.0.js) | 2017/11/18 | FTKR_CustomSimpleActorStatus.js の v2.6.0に対応 |
 | ver1.2.1 | 2017/06/11 | バトルに参加する最大人数を設定する機能を追加 |
 | ver1.2.0 | 2017/05/31 | バトルフィールド上のSVキャラの初期位置変更機能拡張 |

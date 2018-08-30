@@ -4,8 +4,8 @@
 // プラグインNo : 38
 // 作成者     : フトコロ
 // 作成日     : 2017/05/13
-// 最終更新日 : 2018/08/19
-// バージョン : v2.0.0
+// 最終更新日 : 2018/08/30
+// バージョン : v2.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,8 +15,9 @@ var FTKR = FTKR || {};
 FTKR.CSS = FTKR.CSS || {};
 FTKR.CSS.ES = FTKR.CSS.ES || {};
 
+//=============================================================================
 /*:
- * @plugindesc v2.0.0 装備画面のステータスレイアウトを変更する
+ * @plugindesc v2.1.0 装備画面のステータスレイアウトを変更する
  * @author フトコロ
  *
  * @param --レイアウト設定--
@@ -25,7 +26,7 @@ FTKR.CSS.ES = FTKR.CSS.ES || {};
  * @param statusList
  * @desc 表示するステータスとその位置を設定します。
  * @type struct<status>[]
- * @default ["{\"text\":\"name\",\"x\":\"6\",\"y\":\"0\",\"width\":\"150\"}","{\"text\":\"param(2)\",\"x\":\"6\",\"y\":\"line*1\",\"width\":\"width * 2 / 3 - 6\"}","{\"text\":\"param(3)\",\"x\":\"6\",\"y\":\"line*2\",\"width\":\"width * 2 / 3 - 6\"}","{\"text\":\"param(4)\",\"x\":\"6\",\"y\":\"line*3\",\"width\":\"width * 2 / 3 - 6\"}","{\"text\":\"param(5)\",\"x\":\"6\",\"y\":\"line*4\",\"width\":\"width * 2 / 3 - 6\"}","{\"text\":\"param(6)\",\"x\":\"6\",\"y\":\"line*5\",\"width\":\"width * 2 / 3 - 6\"}","{\"text\":\"param(7)\",\"x\":\"6\",\"y\":\"line*6\",\"width\":\"width * 2 / 3 - 6\"}","{\"text\":\"eparam(2)\",\"x\":\"width * 2 / 3\",\"y\":\"line*1\",\"width\":\"width / 3\"}","{\"text\":\"eparam(3)\",\"x\":\"width * 2 / 3\",\"y\":\"line*2\",\"width\":\"width / 3\"}","{\"text\":\"eparam(4)\",\"x\":\"width * 2 / 3\",\"y\":\"line*3\",\"width\":\"width / 3\"}","{\"text\":\"eparam(5)\",\"x\":\"width * 2 / 3\",\"y\":\"line*4\",\"width\":\"width / 3\"}","{\"text\":\"eparam(6)\",\"x\":\"width * 2 / 3\",\"y\":\"line*5\",\"width\":\"width / 3\"}","{\"text\":\"eparam(7)\",\"x\":\"width * 2 / 3\",\"y\":\"line*6\",\"width\":\"width / 3\"}"]
+ * @default ["{\"text\":\"name\",\"x\":\"6\",\"y\":\"0\",\"width\":\"150\"}","{\"text\":\"param(%1)\",\"value\":\"2\",\"x\":\"6\",\"y\":\"line*1\",\"width\":\"width * 2 / 3 - 6\"}","{\"text\":\"param(%1)\",\"value\":\"3\",\"x\":\"6\",\"y\":\"line*2\",\"width\":\"width * 2 / 3 - 6\"}","{\"text\":\"param(%1)\",\"value\":\"4\",\"x\":\"6\",\"y\":\"line*3\",\"width\":\"width * 2 / 3 - 6\"}","{\"text\":\"param(%1)\",\"value\":\"5\",\"x\":\"6\",\"y\":\"line*4\",\"width\":\"width * 2 / 3 - 6\"}","{\"text\":\"param(%1)\",\"value\":\"6\",\"x\":\"6\",\"y\":\"line*5\",\"width\":\"width * 2 / 3 - 6\"}","{\"text\":\"param(%1)\",\"value\":\"7\",\"x\":\"6\",\"y\":\"line*6\",\"width\":\"width * 2 / 3 - 6\"}","{\"text\":\"eparam(%1)\",\"value\":\"2\",\"x\":\"width * 2 / 3\",\"y\":\"line*1\",\"width\":\"width / 3\"}","{\"text\":\"eparam(%1)\",\"value\":\"3\",\"x\":\"width * 2 / 3\",\"y\":\"line*2\",\"width\":\"width / 3\"}","{\"text\":\"eparam(%1)\",\"value\":\"4\",\"x\":\"width * 2 / 3\",\"y\":\"line*3\",\"width\":\"width / 3\"}","{\"text\":\"eparam(%1)\",\"value\":\"5\",\"x\":\"width * 2 / 3\",\"y\":\"line*4\",\"width\":\"width / 3\"}","{\"text\":\"eparam(%1)\",\"value\":\"6\",\"x\":\"width * 2 / 3\",\"y\":\"line*5\",\"width\":\"width / 3\"}","{\"text\":\"eparam(%1)\",\"value\":\"7\",\"x\":\"width * 2 / 3\",\"y\":\"line*6\",\"width\":\"width / 3\"}"]
  * 
  * @param Actor Status Space In Text
  * @desc Text内で複数表示する場合の間隔を指定します。
@@ -200,6 +201,9 @@ FTKR.CSS.ES = FTKR.CSS.ES || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.1.0 - 2018/08/30 : 機能追加
+ *    1. プラグインパラメータで表示するステータスをリストで選択できる機能を追加。
+ * 
  * v2.0.0 - 2018/08/19 : FTKR_CustomSimpleActorStatus v3.0.0 対応版に変更
  * 
  * v1.1.0 - 2017/11/18 : 仕様変更
@@ -218,9 +222,73 @@ FTKR.CSS.ES = FTKR.CSS.ES || {};
 //=============================================================================
 /*~struct~status:
  * @param text
- * @desc 表示するステータス
+ * @desc 表示するステータスを選択
+ * リストにない場合は、直接テキストで記述
  * @default 
+ * @type select
+ * @option 名前
+ * @value name
+ * @option 二つ名
+ * @value nickname
+ * @option 職業
+ * @value class
+ * @option レベル
+ * @value level
+ * @option HP
+ * @value hp
+ * @option MP
+ * @value mp
+ * @option TP
+ * @value tp
+ * @option 顔画像
+ * @value face
+ * @option 顔画像(サイズ指定)
+ * @value face(%1)
+ * @option 歩行キャラ画像
+ * @value chara
+ * @option SV戦闘キャラ画像
+ * @value sv
+ * @option ステート(横)
+ * @value state
+ * @option ステート(縦)
+ * @value state2(%1)
+ * @option プロフィール
+ * @value profile
+ * @option 通常能力値
+ * @value param(%1)
+ * @option 装備
+ * @value equip(%1)
+ * @option 装備パラメータ
+ * @value eparam(%1)
+ * @option AOP装備パラメータ
+ * @value eaop(%1)
+ * @option カスタムパラメータ
+ * @value custom(%1)
+ * @option カスタムゲージ
+ * @value gauge(%1)
+ * @option アクター別カスタムゲージ
+ * @value agauge(%1)
+ * @option クラス別カスタムゲージ
+ * @value cgauge(%1)
+ * @option カスタム画像
+ * @value image
+ * @option カスタム画像(登録ID)
+ * @value image(%1)
+ * @option メッセージ
+ * @value message
+ * @option テキスト
+ * @value text(%1)
+ * @option JS計算式(数値表示)
+ * @value eval(%1)
+ * @option JS計算式(文字列表示)
+ * @value streval(%1)
+ * @option 横線
+ * @value line
  *
+ * @param value
+ * @desc code(%1)の形式で設定するステータスの%1の内容を入力
+ * @default 
+ * 
  * @param x
  * @desc 表示するX座標
  * @default 0

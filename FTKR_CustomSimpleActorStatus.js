@@ -4,8 +4,8 @@
 // プラグインNo : 9
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2018/08/25
-// バージョン : v3.0.2
+// 最終更新日 : 2018/08/30
+// バージョン : v3.1.0
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v3.0.2 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v3.1.0 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -988,6 +988,10 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v3.1.0 - 2018/08/30 : 機能追加
+ *    1. 拡張プラグインのプラグインパラメータで表示するステータスをリストで
+ *       選択できる機能を追加。
+ * 
  * v3.0.2 - 2018/08/25 : 不具合修正
  *    1. 拡張プラグインで、余白と背景透明度を 0 に設定した場合に、設定が無効になる
  *       不具合を修正。
@@ -1928,7 +1932,11 @@ FTKR.CSS = FTKR.CSS || {};
             var dy = this.parseIntCssStatus(status.y, x, y, width, height);
             var dw = this.parseIntCssStatus(status.width, x, y, width, height);
             dw = dw < 0 ? width - x - dx : Math.min(dw, width);
-            this.drawCssActorStatusBases(index, actor, x + dx, y + dy, dw, status.text, lss);
+            var text = status.text;
+            if (/([^\(]+)\(\%1\)/i.test(status.text)) {
+                text = text.format(status.value);
+            }
+            this.drawCssActorStatusBases(index, actor, x + dx, y + dy, dw, text, lss);
         } else {
             this.drawCssActorStatusText_v2(index, actor, x, y, width, height, status, lss);
         }

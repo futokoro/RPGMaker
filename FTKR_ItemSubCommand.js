@@ -4,8 +4,8 @@
 // 作成者     : フトコロ
 // プラグインNo : 43
 // 作成日     : 2017/06/04
-// 最終更新日 : 2018/03/15
-// バージョン : v1.5.2
+// 最終更新日 : 2018/08/30
+// バージョン : v1.6.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ var FTKR = FTKR || {};
 FTKR.ISC = FTKR.ISC || {};
 
 /*:
- * @plugindesc v1.5.2 アイテムボックスにサブコマンドを追加する
+ * @plugindesc v1.6.0 アイテムボックスにサブコマンドを追加する
  * @author フトコロ
  *
  * @param --アイテム情報取得--
@@ -97,6 +97,18 @@ FTKR.ISC = FTKR.ISC || {};
  * (参考値：1行 = 36、余白 = 18)(-1 で、画面下端まで)
  * @default -1
  * 
+ * @param --アクター選択画面--
+ * @default
+ * 
+ * @param Disable Select Single Actor
+ * @desc アクターが１人の時にアクター選択画面を表示しない。
+ * @default 0
+ * @type select
+ * @option 表示する
+ * @value 0
+ * @option 表示しない
+ * @value 1
+ *
  * @param --確認画面--
  * @default
  *
@@ -104,6 +116,11 @@ FTKR.ISC = FTKR.ISC || {};
  * @desc アイテム廃棄実行時に確認画面を表示するか。
  *  1 - 表示する, 0 - 表示しない
  * @default 1
+ * @type select
+ * @option 表示する
+ * @value 1
+ * @option 表示しない
+ * @value 0
  *
  * @param Conf Title Format
  * @desc アイテム廃棄実行時の確認内容を設定します。
@@ -407,6 +424,9 @@ FTKR.ISC = FTKR.ISC || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.6.0 - 2018/08/30 : 機能追加
+ *    1. アクターが１人の場合に、装備コマンドでアクター選択を不要にする機能を追加。
+ * 
  * v1.5.2 - 2018/03/15 : 不具合修正
  *    1. カスタムコマンド名が表示されない不具合を修正。
  * 
@@ -448,6 +468,17 @@ function Window_ItemSubCommand() {
 }
 
 (function() {
+    var paramParse = function(obj) {
+        return JSON.parse(JSON.stringify(obj, paramReplace));
+    };
+
+    var paramReplace = function(key, value) {
+        try {
+            return JSON.parse(value || null);
+        } catch (e) {
+            return value;
+        }
+    };
 
     //=============================================================================
     // プラグイン パラメータ
@@ -456,7 +487,8 @@ function Window_ItemSubCommand() {
 
     FTKR.ISC = {
         subcom:{
-            enableConf:Number(parameters['Enable Confirmation'] || 0),
+            enableConf    :paramParse(parameters['Enable Confirmation'] || 0),
+            disableSelect :paramParse(parameters['Disable Select Single Actor'] || 0),
             data:{
                 itemId  :Number(parameters['Use Item Id'] || 0),
             },
@@ -764,7 +796,14 @@ function Window_ItemSubCommand() {
         switch (symbol) {
             case 'use':
                 this._subCommandWindow.hide();
-                _ISC_Scene_Item_onitemOk.call(this);
+                if (FTKR.ISC.subcom.disableSelect && $gameParty.members().length == 1) {
+                    $gameParty.setLastItem(this.item());
+                    this._actorWindow.selectLast();
+                    this.onActorOk();
+                    this.activateItemWindow();
+                } else {
+                    _ISC_Scene_Item_onitemOk.call(this);
+                }
                 break;
             case 'discard':
                 this._numberWindow.setup(item, $gameParty.numItems(item));
@@ -772,11 +811,16 @@ function Window_ItemSubCommand() {
                 this._numberWindow.activate();
                 break;
             case 'equip':
-                this._isSubComEquip = true;
-                this._actorWindow.x = Graphics.boxWidth - this._actorWindow.width;
-                this._actorWindow.show();
-                this._actorWindow.activate();
-                this._actorWindow.select(0);
+                if (FTKR.ISC.subcom.disableSelect && $gameParty.members().length == 1) {
+                    var item = this._subCommandWindow._item;
+                    this.equipTargetActor($gameParty.members()[0], item)
+                } else {
+                    this._isSubComEquip = true;
+                    this._actorWindow.x = Graphics.boxWidth - this._actorWindow.width;
+                    this._actorWindow.show();
+                    this._actorWindow.activate();
+                    this._actorWindow.select(0);
+                }
                 break;
             default:
                 var match = /custom(\d+)/i.exec(symbol);
@@ -801,22 +845,28 @@ function Window_ItemSubCommand() {
             this._isSubComEquip = false;
             var item = this._subCommandWindow._item;
             var actor = $gameParty.targetActor();
-            if (actor && actor.canEquip(item)) {
-                SoundManager.playEquip();
-                actor.changeEquip(item.etypeId - 1, item);
-                this._actorWindow.refresh();
-                this._subCommandWindow.hide();
-                this._itemWindow.refresh();
-                this._itemWindow.select(0);
-                this._itemWindow.activate();
-            } else {
-                SoundManager.playBuzzer();
-                this._subCommandWindow.activate();
-            }
+            this.equipTargetActor(actor, item);
             this._actorWindow.deactivate();
             this._actorWindow.hide();
         } else {
             _ISC_Scene_Item_onActorOk.call(this);
+        }
+    };
+
+
+
+    Scene_Item.prototype.equipTargetActor = function(actor, item) {
+        if (actor && actor.canEquip(item)) {
+            SoundManager.playEquip();
+            actor.changeEquip(item.etypeId - 1, item);
+            this._actorWindow.refresh();
+            this._subCommandWindow.hide();
+            this._itemWindow.refresh();
+            this._itemWindow.select(0);
+            this._itemWindow.activate();
+        } else {
+            SoundManager.playBuzzer();
+            this._subCommandWindow.activate();
         }
     };
 

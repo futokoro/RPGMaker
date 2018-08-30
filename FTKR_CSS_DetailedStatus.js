@@ -4,8 +4,8 @@
 // プラグインNo : 27
 // 作成者     : フトコロ
 // 作成日     : 2017/04/21
-// 最終更新日 : 2018/08/19
-// バージョン : v2.0.0
+// 最終更新日 : 2018/08/30
+// バージョン : v2.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.CSS.DS = FTKR.CSS.DS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.0.0 詳細ステータス画面の表示内容を変更するプラグイン
+ * @plugindesc v2.1.0 詳細ステータス画面の表示内容を変更するプラグイン
  * @author フトコロ
  *
  * @param --詳細ステータスの表示設定--
@@ -25,7 +25,7 @@ FTKR.CSS.DS = FTKR.CSS.DS || {};
  * @param statusList
  * @desc 表示するステータスとその位置を設定します。
  * @type struct<status>[]
- * @default ["{\"text\":\"name\",\"x\":\"6\",\"y\":\"0\",\"width\":\"150\"}","{\"text\":\"class\",\"x\":\"192\",\"y\":\"0\",\"width\":\"150\"}","{\"text\":\"nickname\",\"x\":\"432\",\"y\":\"0\",\"width\":\"150\"}","{\"text\":\"line\",\"x\":\"0\",\"y\":\"36\",\"width\":\"width\"}","{\"text\":\"face\",\"x\":\"12\",\"y\":\"72\",\"width\":\"144\"}","{\"text\":\"name\",\"x\":\"204\",\"y\":\"72\",\"width\":\"150\"}","{\"text\":\"state\",\"x\":\"204\",\"y\":\"108\",\"width\":\"150\"}","{\"text\":\"hp\",\"x\":\"204\",\"y\":\"144\",\"width\":\"150\"}","{\"text\":\"mp\",\"x\":\"204\",\"y\":\"180\",\"width\":\"150\"}","{\"text\":\"custom(0)\",\"x\":\"456\",\"y\":\"72\",\"width\":\"270\"}","{\"text\":\"custom(1)\",\"x\":\"456\",\"y\":\"108\",\"width\":\"270\"}","{\"text\":\"custom(2)\",\"x\":\"456\",\"y\":\"144\",\"width\":\"270\"}","{\"text\":\"custom(3)\",\"x\":\"456\",\"y\":\"180\",\"width\":\"270\"}","{\"text\":\"line\",\"x\":\"0\",\"y\":\"line*6\",\"width\":\"width\"}","{\"text\":\"param(2)\",\"x\":\"48\",\"y\":\"line*7\",\"width\":\"160\"}","{\"text\":\"param(3)\",\"x\":\"48\",\"y\":\"line*8\",\"width\":\"160\"}","{\"text\":\"param(4)\",\"x\":\"48\",\"y\":\"line*9\",\"width\":\"160\"}","{\"text\":\"param(5)\",\"x\":\"48\",\"y\":\"line*10\",\"width\":\"160\"}","{\"text\":\"param(6)\",\"x\":\"48\",\"y\":\"line*11\",\"width\":\"160\"}","{\"text\":\"param(7)\",\"x\":\"48\",\"y\":\"line*12\",\"width\":\"160\"}","{\"text\":\"equip(0)\",\"x\":\"432\",\"y\":\"line*7\",\"width\":\"312\"}","{\"text\":\"equip(1)\",\"x\":\"432\",\"y\":\"line*8\",\"width\":\"312\"}","{\"text\":\"equip(2)\",\"x\":\"432\",\"y\":\"line*9\",\"width\":\"312\"}","{\"text\":\"equip(3)\",\"x\":\"432\",\"y\":\"line*10\",\"width\":\"312\"}","{\"text\":\"equip(4)\",\"x\":\"432\",\"y\":\"line*11\",\"width\":\"312\"}","{\"text\":\"equip(5)\",\"x\":\"432\",\"y\":\"line*12\",\"width\":\"312\"}","{\"text\":\"equip(0)\",\"x\":\"432\",\"y\":\"line*7\",\"width\":\"312\"}","{\"text\":\"line\",\"x\":\"0\",\"y\":\"line*13\",\"width\":\"width\"}","{\"text\":\"profile\",\"x\":\"0\",\"y\":\"line*14\",\"width\":\"width\"}"]
+ * @default ["{\"text\":\"name\",\"value\":\"\",\"x\":\"6\",\"y\":\"0\",\"width\":\"150\"}","{\"text\":\"class\",\"value\":\"\",\"x\":\"192\",\"y\":\"0\",\"width\":\"150\"}","{\"text\":\"nickname\",\"x\":\"432\",\"y\":\"0\",\"width\":\"150\"}","{\"text\":\"line\",\"x\":\"0\",\"y\":\"36\",\"width\":\"width\"}","{\"text\":\"face\",\"x\":\"12\",\"y\":\"72\",\"width\":\"144\"}","{\"text\":\"name\",\"x\":\"204\",\"y\":\"72\",\"width\":\"150\"}","{\"text\":\"state\",\"x\":\"204\",\"y\":\"108\",\"width\":\"150\"}","{\"text\":\"hp\",\"x\":\"204\",\"y\":\"144\",\"width\":\"150\"}","{\"text\":\"mp\",\"x\":\"204\",\"y\":\"180\",\"width\":\"150\"}","{\"text\":\"custom(%1)\",\"value\":\"0\",\"x\":\"456\",\"y\":\"72\",\"width\":\"270\"}","{\"text\":\"custom(%1)\",\"value\":\"1\",\"x\":\"456\",\"y\":\"108\",\"width\":\"270\"}","{\"text\":\"custom(%1)\",\"value\":\"2\",\"x\":\"456\",\"y\":\"144\",\"width\":\"270\"}","{\"text\":\"custom(%1)\",\"value\":\"3\",\"x\":\"456\",\"y\":\"180\",\"width\":\"270\"}","{\"text\":\"line\",\"x\":\"0\",\"y\":\"line*6\",\"width\":\"width\"}","{\"text\":\"param(%1)\",\"value\":\"2\",\"x\":\"48\",\"y\":\"line*7\",\"width\":\"160\"}","{\"text\":\"param(%1)\",\"value\":\"3\",\"x\":\"48\",\"y\":\"line*8\",\"width\":\"160\"}","{\"text\":\"param(%1)\",\"value\":\"4\",\"x\":\"48\",\"y\":\"line*9\",\"width\":\"160\"}","{\"text\":\"param(%1)\",\"value\":\"5\",\"x\":\"48\",\"y\":\"line*10\",\"width\":\"160\"}","{\"text\":\"param(%1)\",\"value\":\"6\",\"x\":\"48\",\"y\":\"line*11\",\"width\":\"160\"}","{\"text\":\"param(%1)\",\"value\":\"7\",\"x\":\"48\",\"y\":\"line*12\",\"width\":\"160\"}","{\"text\":\"equip(%1)\",\"value\":\"0\",\"x\":\"432\",\"y\":\"line*7\",\"width\":\"312\"}","{\"text\":\"equip(%1)\",\"value\":\"1\",\"x\":\"432\",\"y\":\"line*8\",\"width\":\"312\"}","{\"text\":\"equip(%1)\",\"value\":\"2\",\"x\":\"432\",\"y\":\"line*9\",\"width\":\"312\"}","{\"text\":\"equip(%1)\",\"value\":\"3\",\"x\":\"432\",\"y\":\"line*10\",\"width\":\"312\"}","{\"text\":\"equip(%1)\",\"value\":\"4\",\"x\":\"432\",\"y\":\"line*11\",\"width\":\"312\"}","{\"text\":\"equip(%1)\",\"value\":\"5\",\"x\":\"432\",\"y\":\"line*12\",\"width\":\"312\"}","{\"text\":\"line\",\"x\":\"0\",\"y\":\"line*13\",\"width\":\"width\"}","{\"text\":\"profile\",\"x\":\"0\",\"y\":\"line*14\",\"width\":\"width\"}"]
  * 
  * @param DS Space In Text
  * @desc Text内で複数表示する場合の間隔を指定します。
@@ -38,6 +38,11 @@ FTKR.CSS.DS = FTKR.CSS.DS || {};
  * @desc ウィンドウのレイアウト変更機能を使うか。
  * 0 - 無効, 1 - 有効
  * @default 0
+ * @type select
+ * @option 無効にする
+ * @value 0
+ * @option 有効にする
+ * @value 1
  * 
  * @param Number Visible Rows
  * @desc ステータスウィンドウの縦の行数
@@ -63,6 +68,17 @@ FTKR.CSS.DS = FTKR.CSS.DS || {};
  * @desc ウィンドウ枠を非表示にするか
  * 1 - 非表示にする、0 - 表示する
  * @default 0
+ * @type select
+ * @option 表示する
+ * @value 0
+ * @option 非表示にする
+ * @value 1
+ * 
+ * @param Auto Refresh Window
+ * @desc 表示内容の自動更新に関する設定
+ * この設定は、レイアウト変更が無効でも効果があります
+ * @type struct<update>
+ * @default {"enabled":"false","count":"60"}
  * 
  * @help
  *-----------------------------------------------------------------------------
@@ -167,6 +183,10 @@ FTKR.CSS.DS = FTKR.CSS.DS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.1.0 - 2018/08/30 : 機能追加
+ *    1. ウィンドウの表示内容を自動更新する機能を追加。
+ *    2. プラグインパラメータで表示するステータスをリストで選択できる機能を追加。
+ * 
  * v2.0.0 - 2018/08/19 : FTKR_CustomSimpleActorStatus v3.0.0 対応版に変更
  * 
  * v1.1.0 - 2017/11/18 : 仕様変更
@@ -185,9 +205,73 @@ FTKR.CSS.DS = FTKR.CSS.DS || {};
 //=============================================================================
 /*~struct~status:
  * @param text
- * @desc 表示するステータス
+ * @desc 表示するステータスを選択
+ * リストにない場合は、直接テキストで記述
  * @default 
+ * @type select
+ * @option 名前
+ * @value name
+ * @option 二つ名
+ * @value nickname
+ * @option 職業
+ * @value class
+ * @option レベル
+ * @value level
+ * @option HP
+ * @value hp
+ * @option MP
+ * @value mp
+ * @option TP
+ * @value tp
+ * @option 顔画像
+ * @value face
+ * @option 顔画像(サイズ指定)
+ * @value face(%1)
+ * @option 歩行キャラ画像
+ * @value chara
+ * @option SV戦闘キャラ画像
+ * @value sv
+ * @option ステート(横)
+ * @value state
+ * @option ステート(縦)
+ * @value state2(%1)
+ * @option プロフィール
+ * @value profile
+ * @option 通常能力値
+ * @value param(%1)
+ * @option 装備
+ * @value equip(%1)
+ * @option 装備パラメータ
+ * @value eparam(%1)
+ * @option AOP装備パラメータ
+ * @value eaop(%1)
+ * @option カスタムパラメータ
+ * @value custom(%1)
+ * @option カスタムゲージ
+ * @value gauge(%1)
+ * @option アクター別カスタムゲージ
+ * @value agauge(%1)
+ * @option クラス別カスタムゲージ
+ * @value cgauge(%1)
+ * @option カスタム画像
+ * @value image
+ * @option カスタム画像(登録ID)
+ * @value image(%1)
+ * @option メッセージ
+ * @value message
+ * @option テキスト
+ * @value text(%1)
+ * @option JS計算式(数値表示)
+ * @value eval(%1)
+ * @option JS計算式(文字列表示)
+ * @value streval(%1)
+ * @option 横線
+ * @value line
  *
+ * @param value
+ * @desc code(%1)の形式で設定するステータスの%1の内容を入力
+ * @default 
+ * 
  * @param x
  * @desc 表示するX座標
  * @default 0
@@ -201,6 +285,21 @@ FTKR.CSS.DS = FTKR.CSS.DS || {};
  * @default 0
  *
  */
+/*~struct~update:
+ * @param enabled
+ * @desc ウィンドウの表示を自動更新するか
+ * @default false
+ * @type boolean
+ * @on 自動更新ON
+ * @off 自動更新OFF
+ * 
+ * @param count
+ * @desc 表示更新間隔を設定します。
+ * @default 60
+ * @type number
+ *
+*/
+
 if (Imported.FTKR_CSS) (function(){
     var paramParse = function(obj) {
         return JSON.parse(JSON.stringify(obj, paramReplace));
@@ -226,13 +325,14 @@ if (Imported.FTKR_CSS) (function(){
     };
 
     FTKR.CSS.DS.window = {
-        enabled       :Number(parameters['Enabled Custom Window'] || 0),
+        enabled       :paramParse(parameters['Enabled Custom Window'] || 0),
         numVisibleRows:Number(parameters['Number Visible Rows'] || 0),
         fontSize      :Number(parameters['Font Size'] || 0),
         padding       :Number(parameters['Window Padding'] || 0),
         lineHeight    :Number(parameters['Window Line Height'] || 0),
         opacity       :Number(parameters['Window Opacity'] || 0),
-        hideFrame     :Number(parameters['Hide Window Frame'] || 0),
+        hideFrame     :paramParse(parameters['Hide Window Frame'] || 0),
+        autoRefresh   :paramParse(parameters['Auto Refresh Window']) || {},
     };
 
     //=============================================================================
@@ -265,193 +365,16 @@ if (Imported.FTKR_CSS) (function(){
         _DS_Window_Status_numVisibleRows.call(this);
     };
 
-}());//TKR_CustomSimpleActorStatus.jsが必要
-/*
-//=============================================================================
-// GraphicalDesignMode.jsに対応
-// 
-//=============================================================================
-if (typeof $dataContainerProperties !== 'undefined') (function() {
-  
-    //=============================================================================
-    // Window_Status
-    // ステータス画面のステータスウィンドウの表示クラス
-    //=============================================================================
-
-    //書き換え
-    Window_Status.prototype.refresh = function() {
-    };
-
-    //=============================================================================
-    // Window_StatusArea
-    // ステータス画面の表示エリアごとのステータスウィンドウの表示クラス
-    //=============================================================================
-
-    function Window_StatusArea() {
-        this.initialize.apply(this, arguments);
-    }
-
-    Window_StatusArea.prototype = Object.create(Window_Status.prototype);
-    Window_StatusArea.prototype.constructor = Window_StatusArea;
-    
-    Window_StatusArea.prototype.initialize = function(x, y, width, height, lss) {
-        this._lssStatus = lss;
-        Window_Selectable.prototype.initialize.call(this, x, y, width, height);
-        this._actor = null;
-        this.refresh();
-    };
-
-    Window_StatusArea.prototype.standardCssStatus = function() {
-        return this._lssStatus;
-    };
-
-    Window_StatusArea.prototype.standardPadding = function() {
-        return 0;
-    };
-
-    Window_StatusArea.prototype._refreshFrame = function() {
-        this._margin = 0;
-    };
-
-    Window_StatusArea.prototype.refresh = function() {
-        this.contents.clear();
-        if (this._actor) {
-            var lss = this._lssStatus;
-            var w = this.width - this.padding * 2;
-            var h = this.height - this.padding * 2;
-            this.drawCssActorStatus(0, this._actor, 0, 0, w, h, lss);
+    var _DS_Window_Status_update = Window_Status.prototype.update;
+    Window_Status.prototype.update = function() {
+        _DS_Window_Status_update.call(this);
+        if(FTKR.CSS.DS.window.autoRefresh.enabled && !this._cssUpdateCount) {
+            this.refresh();
+            this._cssUpdateCount = FTKR.CSS.DS.window.autoRefresh.count;
+        } else {
+            this._cssUpdateCount--;
         }
     };
 
-    //=============================================================================
-    // Scene_Status
-    // ステータス画面のシーンクラス
-    //=============================================================================
+}());//TKR_CustomSimpleActorStatus.jsが必要
 
-    var _CSS_Scene_Status_create = Scene_Status.prototype.create;
-    Scene_Status.prototype.create = function() {
-        _CSS_Scene_Status_create.call(this);
-        this.createCssArea1();
-        this.createCssArea2();
-        this.createCssArea3();
-        this.createCssArea4();
-    };
-
-    Scene_Status.prototype.createCssArea1 = function() {
-        var stw = this._statusWindow;
-        var x = stw.x + stw.standardPadding();
-        var y = stw.y + stw.standardPadding();
-        var width = Graphics.boxWidth - stw.standardPadding() * 2;
-        var height = stw.lineHeight() * 2;
-        var lss = this.cssStatusArea1();
-        this._statusArea1Window = new Window_StatusArea(x, y, width, height, lss);
-        this._statusArea1Window.reserveFaceImages();
-        this.addWindow(this._statusArea1Window);
-    };
-
-    Scene_Status.prototype.detailedStatus = function(index) {
-        var ds = FTKR.CSS.DS.detailedStatus;
-        index -= 1;
-        var texts = ds.line[index].split(';');
-        return {
-            text1     :texts[0] + ',{line}',
-            text2     :texts[1],
-            text3     :texts[2],
-            space     :ds.space[index],
-            spaceIn   :ds.spaceIn[index],
-            widthRate :ds.widthRate[index],
-        };
-    };
-
-    Scene_Status.prototype.cssStatusArea1 = function() {
-        return FTKR.CSS.DS ? this.detailedStatus(1) : {
-            text1     :'name,{line}',
-            text2     :'class',
-            text3     :'nickname',
-            space     :'0,20,50,0',
-            spaceIn   :'5',
-            widthRate :'1,1,1',
-        };
-    };
-
-    Scene_Status.prototype.createCssArea2 = function() {
-        var stw = this._statusArea1Window;
-        var x = stw.x;
-        var y = stw.y + stw.height;
-        var width = stw.width;
-        var height = stw.lineHeight() * 5;
-        var lss = this.cssStatusArea2();
-        this._statusArea2Window = new Window_StatusArea(x, y, width, height, lss);
-        this._statusArea2Window.reserveFaceImages();
-        this.addWindow(this._statusArea2Window);
-    };
-
-    Scene_Status.prototype.cssStatusArea2 = function() {
-        return FTKR.CSS.DS ? this.detailedStatus(2) : {
-            text1     :'face(4),{line}',
-            text2     :'level,state,hp,mp',
-            text3     :'custom(0),custom(1),custom(2),custom(3)',
-            space     :'0,20,50,0',
-            spaceIn   :'5',
-            widthRate :'2,2,3',
-        };
-    };
-
-    Scene_Status.prototype.createCssArea3 = function() {
-        var stw = this._statusArea2Window;
-        var x = stw.x;
-        var y = stw.y + stw.height;
-        var width = stw.width;
-        var height = stw.lineHeight() * 7;
-        var lss = this.cssStatusArea3();
-        this._statusArea3Window = new Window_StatusArea(x, y, width, height, lss);
-        this._statusArea3Window.reserveFaceImages();
-        this.addWindow(this._statusArea3Window);
-    };
-
-    Scene_Status.prototype.cssStatusArea3 = function() {
-        return FTKR.CSS.DS ? this.detailedStatus(3) : {
-            text1     :'param(2),param(3),param(4),param(5),param(6),param(7),{line}',
-            text2     :'',
-            text3     :'equip(0),equip(1),equip(2),equip(3),equip(4)',
-            space     :'0,100,0,0',
-            spaceIn   :'5',
-            widthRate :'4,1,5',
-        };
-    };
-
-    Scene_Status.prototype.createCssArea4 = function() {
-        var stw = this._statusArea3Window;
-        var x = stw.x;
-        var y = stw.y + stw.height;
-        var width = stw.width;
-        var height = stw.lineHeight() * 2;
-        var lss = this.cssStatusArea4();
-        this._statusArea4Window = new Window_StatusArea(x, y, width, height, lss);
-        this._statusArea4Window.reserveFaceImages();
-        this.addWindow(this._statusArea4Window);
-    };
-
-    Scene_Status.prototype.cssStatusArea4 = function() {
-        return FTKR.CSS.DS ? this.detailedStatus(4) : {
-            text1     :'profile',
-            text2     :'',
-            text3     :'',
-            space     :'0,20,50,0',
-            spaceIn   :'5',
-            widthRate :'1,0,0',
-        };
-    };
-
-    var _CSS_Scene_Status_refreshActor = Scene_Status.prototype.refreshActor;
-    Scene_Status.prototype.refreshActor = function() {
-        _CSS_Scene_Status_refreshActor.call(this);
-        var actor = this.actor();
-        this._statusArea1Window.setActor(actor);
-        this._statusArea2Window.setActor(actor);
-        this._statusArea3Window.setActor(actor);
-        this._statusArea4Window.setActor(actor);
-    };
-}()); 
-
-*/
