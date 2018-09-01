@@ -4,8 +4,8 @@
 // プラグインNo : 86
 // 作成者     : フトコロ
 // 作成日     : 2018/07/15
-// 最終更新日 : 2018/08/26
-// バージョン : v0.9.8
+// 最終更新日 : 2018/09/01
+// バージョン : v0.9.9
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -23,7 +23,7 @@ FTKR.GDM = FTKR.GDM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v0.9.8 トリアコンタンさんのGUI画面デザインプラグインの機能追加
+ * @plugindesc v0.9.9 トリアコンタンさんのGUI画面デザインプラグインの機能追加
  * @author フトコロ
  *
  * @param autoCreate
@@ -270,6 +270,10 @@ FTKR.GDM = FTKR.GDM || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v0.9.9 - 表示していないウィンドウも編集できてしまう不具合を修正。
+ *          FTKR_CustomSimpleActorStatusのv3.0.0に追加したステータスの
+ *          新表示方式に対応。
+ *          マウスポインタを合わせたウィンドウの行の色を変える機能を修正。
  * v0.9.8 - 背景画像を指定しない場合にエラーになる不具合修正。
  *          マップシーンで作成したウィンドウが生成されない不具合修正。
  *          作成したウィンドウの自動更新機能を追加。
@@ -422,6 +426,7 @@ function Scene_OSW() {
 
     var optionFontSize   = 21;
     var optionLineHeight = 28;
+    var optionOffsetX    = 50;
 
     var $configSelectLists = {};
 
@@ -544,6 +549,9 @@ function Scene_OSW() {
                         newObj[prop] = obj[prop];
                     }
                 });
+            } else if (type == 'window') {
+                var prop = content.symbol;
+                newObj[prop] = copyArray(obj[prop]);
             } else if (content.symbol &&
                     !['COMMAND', 'HANDLER'].contains(content.symbol.toUpperCase())) {
                 var prop = content.symbol;
@@ -809,2532 +817,2818 @@ function Scene_OSW() {
     //=============================================================================
     if (Utils.isDesignMode()) {
 
-      var FTKR_METHOD_DATALIST = function(scene) {
-          var list = scene ? scene._windowLayer.children : [];
-          return [
-              {type:'none'},
-              {type:'none'},
-              {type:'select', options:{select:SCENE_LISTS}},
-              {type:'data',   options:{data:$dataCommonEvents, property:'name'}},
-              {type:'data',   options:{data:list, property:'name', enabled:'data.isList()', string:true}}
-          ];
-      };
-
-      var FTKR_METHOD_DATALIST2 = [
-          {type:'none'},
-          {type:'none'},
-          {type:'none'},
-          {type:'none'},
-          {type:'select', options:{select:['ウィンドウ残す', 'ウィンドウ非表示化']}}
-      ];
-
-      //=============================================================================
-      //シーン開始時にウィンドウデータを自動保存
-      //=============================================================================
-      var _GDM_Scene_Base_start1 = Scene_Base.prototype.start;
-      Scene_Base.prototype.start = function() {
-          if (autoCreate && this._windowLayer) {
-              this._windowLayer.children.forEach(function(child){
-                  if (!child.containerProp()) {
-                      child.saveContainerInfo();
-                  }
-              });
-          }
-          _GDM_Scene_Base_start1.call(this);
-      };
-
-      //=============================================================================
-      // StorageManager
-      //  ウィンドウポジションをjson形式で保存する処理を追加定義します。
-      //=============================================================================
-      StorageManager.saveToLocalDataFile = function(fileName, json) {
-          var data     = JSON.stringify(json, null, 2);//整形して出力
-          var fs       = require('fs');
-          var dirPath  = this.localDataFileDirectoryPath();
-          var filePath = dirPath + fileName;
-          if (!fs.existsSync(dirPath)) {
-              fs.mkdirSync(dirPath);
-          }
-          fs.writeFileSync(filePath, data);
-      };
-
-      //=============================================================================
-      // デザインモード中の一部操作の変更
-      //=============================================================================
-
-      //編集ウィンドウを表示していない間は、カーソルのマウス操作を無効にする
-      Window_Selectable.prototype.processTouch = function() {
-          if (!SceneManager.isWindowSettingMode()) return;
-          this.processTouchDefault();
-      };
-
-      Window_Selectable.prototype.processTouchDefault = function() {
-          if (this.isOpenAndActive()) {
-              if (TouchInput.isTriggered() && this.isTouchedInsideFrame()) {
-                  this._touching = true;
-                  this.onTouch(true);
-              } else if (TouchInput.isCancelled()) {
-                  if (this.isCancelEnabled()) {
-                      this.processCancel();
-                  }
-              }
-              if (this._touching) {
-                  if (TouchInput.isPressed()) {
-                      this.onTouch(false);
-                  } else {
-                      this._touching = false;
-                  }
-              }
-          } else {
-              this._touching = false;
-          }
-      };
-
-      //マウスによるマップへのタッチ操作を無効化
-      Scene_Map.prototype.processMapTouch = function() {
-      };
-
-      //マウス右ボタンによるメニュー開閉を禁止する
-      Scene_Map.prototype.isMenuCalled = function() {
-          return !this.isWindowSettingMode() && Input.isTriggered('menu');//TouchInput.isCancelled()
-      };
-
-      //編集メニュー表示中はキャラの移動禁止
-      var _Game_Player_canMove = Game_Player.prototype.canMove;
-      Game_Player.prototype.canMove = function() {
-          if(SceneManager.isWindowSettingMode()) return false;
-          return _Game_Player_canMove.call(this);
-      };
-
-      //右クリックで枠を非表示にする処理を無効化
-      Window_Base.prototype.processOpacity = function() {
-          return false;
-      };
-
-      //マウスポインタを合わせたウィンドウの枠色を変更する処理を無効化
-      Window_Base.prototype.processFrameChange = function() {
-      };
-
-      //ウィンドウ編集モードの判定
-      SceneManager.isWindowSettingMode = function() {
-          return this._scene.isWindowSettingMode();
-      };
-
-      Scene_Base.prototype.isWindowSettingMode = function() {
-          return this._mainConfigWindow.visible ||
-              this._cmdConfigWindow.visible ||
-              this._commonConfigWindow.visible ||
-              this._selectConfigWindow.visible ||
-              this._cwCreateNewW.visible;
-      };
-
-      //=============================================================================
-      //マウスのボタン操作の処理を変更
-      //=============================================================================
-
-      //初期化
-      Scene_Base.prototype.clearTouchedParam = function() {
-          this._touchedFrame = false;
-          this._touchHolding = false;
-          this._touchHoldCount = 0;
-          this._smcInitX = 0;
-          this._smcInitY = 0;
-          this._holdX = 0;
-          this._holdY = 0;
-          this._holdW = 0;
-          this._holdH = 0;
-      };
-
-      Scene_Base.prototype.releaceTouchWindow = function() {
-          this._touchWindow = null;
-          this._touchWindowIndex = -2;
-          this.clearTouchedParam();
-      }
-
-      Window_Base.prototype.releaseByCmdSet = function() {
-          this._holding = false;
-          this._windowBackSprite.setBlendColor([0, 0, 0, 0]);
-          this._windowContentsSprite.setBlendColor([0, 0, 0, 0]);
-      };
-
-      //ウィンドウのドラッグ＆ドロップ操作
-      var _OSW_Scene_Base_updateDrag = Scene_Base.prototype.updateDrag;
-      Scene_Base.prototype.updateDrag = function() {
-          if (this.isWindowSettingMode()) {
-              return false;
-          } else if (TouchInput.isCancelled()) {
-              this.actionMouseRightPush();
-          } else {
-              if (this.updateWidnowFrameTouch()) {
-                  this.updateWindowSize();
-                  this.processFrameChange();
-              } else {
-                  _OSW_Scene_Base_updateDrag.call(this);
-              }
-          }
-      };
-
-      //マウスのクリック、ドラッグ＆ドロップを判定
-      Scene_Base.prototype.updateWidnowFrameTouch = function() {
-          if (TouchInput.isTriggered()) {
-              return this.actionMouseLeftPush();
-          } else if (this._touchHolding && TouchInput.isPressed()) {
-              return this.actionMouseLeftKeep();
-          } else if (this._touchHolding && !TouchInput.isPressed()) {
-              return this.actionMouseLeftRelease();
-          }
-          return false;
-      };
-
-      //マウスの左ボタンを押したときの処理
-      Scene_Base.prototype.actionMouseLeftPush = function() {
-          this._touchHoldCount = 0;
-          this._touchHolding = true;
-          this._touchedFrame = false;
-          //クリックした場所にウィンドウがあるか調べる
-          var windowOnMouse = this.getWindowOnMouse();
-          this._touchWindow = windowOnMouse;
-          if (!!windowOnMouse) {
-              this._touchWindowIndex = windowOnMouse.isCursorIndexOnMouse();
-              //フレームにタッチしたか
-              if (windowOnMouse.isTouchedFrame()) {
-                  this._holding = true;
-                  this._touchedFrame = true;
-                  this._touchWindow.sizeHold();
-                  this._smcInitX = TouchInput.x;
-                  this._smcInitY = TouchInput.y;
-                  return true;
-              }
-          } else {
-              this._touchHolding = false;
-          }
-          return false;
-      };
-
-      //マウスの左ボタンを押しつづけているときの処理
-      Scene_Base.prototype.actionMouseLeftKeep = function() {
-          if (this._touchedFrame) return true;
-          this._touchHoldCount++;
-          if (this._touchHoldCount > 10) {
-              this._touchHolding = false;
-              this._touchHoldCount = 0;
-              this._touchWindow = null;
-              return false;
-          } else {
-              return true;
-          }
-      };
-
-      //マウスの左ボタンを離したときの処理
-      Scene_Base.prototype.actionMouseLeftRelease = function() {
-          //短時間クリックで、クリックした行を個別編集するウィンドウを表示
-          if (this._touchHolding && !this._touchedFrame && this._touchWindow && this._touchWindow.visible) {
-              if (this._touchWindow.isCommand()) {
-                  if(this.setupCommandConfigWindow()) return true;
-              } else if (this._touchWindow.isSelect()) {
-                  if(this.setupSelectConfigWindow()) return true;
-              } else if (this._touchWindow.isCommon()) {
-                  if(this.setupCommonConfigWindow()) return true;
-              }
-          }
-          this.releaceTouchWindow();
-          return false;
-      }
-
-      //コマンドウィンドウの個別編集メニューを表示
-      Scene_Base.prototype.setupCommandConfigWindow = function() {
-          var command = this.currentListCommand()
-          if (this._touchWindowIndex < 0 || !command) {
-              return false;
-          }
-          this._touchWindow.releaseByCmdSet();
-          this.reserveActiveWindow();
-          this.setConfigContents_command(command);
-          this._cmdConfigWindow.activateWindow();
-          this.clearTouchedParam();
-          return true;
-      };
-
-      //セレクトウィンドウの個別編集メニューを表示
-      Scene_Base.prototype.setupSelectConfigWindow = function() {
-          var command = this.currentListCommand()
-          if (this._touchWindowIndex < 0 || !command || this._touchWindow._customDrawType) {
-              return false;
-          }
-          this._touchWindow.releaseByCmdSet();
-          this.reserveActiveWindow();
-          this.setConfigContents_select(this._touchWindow);
-          this._selectConfigWindow.activateWindow();
-          this.clearTouchedParam();
-          return true;
-      };
-
-      //コモンウィンドウの個別編集メニューを表示
-      Scene_Base.prototype.setupCommonConfigWindow = function() {
-          var command = this.currentListCommand()
-          if (this._touchWindowIndex < 0 || !command || this._touchWindow._customDrawType) {
-              return false;
-          }
-          this._touchWindow.releaseByCmdSet();
-          this.reserveActiveWindow();
-          this.setConfigContents_common(this._touchWindow);
-          this._commonConfigWindow.activateWindow();
-          this.clearTouchedParam();
-          return true;
-      };
-
-      //マウスの右ボタンを押したときの処理
-      Scene_Base.prototype.actionMouseRightPush = function() {
-          //クリックした場所にウィンドウがあるか調べる
-          var windowOnMouse = this.getWindowOnMouse();
-          this.reserveActiveWindow();
-          if (!!windowOnMouse) {
-              //ウィンドウをクリックした場合、ウィンドウデータを取得、編集画面を表示
-              this._touchWindow = windowOnMouse;
-              this._mainConfigWindow.setWindow(this._touchWindow);
-          } else {
-              this._mainConfigWindow.setWindow(null);
-          }
-          this._mainConfigWindow.activateWindow();
-          return true;
-      };
-
-      //=============================================================================
-      // アクティブ状態がONのウィンドウの保存処理
-      //=============================================================================
-
-      var _GDM_Scene_Base_initialize = Scene_Base.prototype.initialize;
-      Scene_Base.prototype.initialize = function() {
-          _GDM_Scene_Base_initialize.call(this);
-          this._activeWindows = [];
-      };
-
-      //アクティブ状態がONのウィンドウを記録し、OFFに変更
-      Scene_Base.prototype.reserveActiveWindow = function() {
-          if (this._windowLayer && this._windowLayer.children.length) {
-              this._windowLayer.children.forEach( function(window){
-                  if (window.active) {
-                      this._activeWindows.push(window);
-                      window.deactivate();
-                  }
-                  window._holdDeactivate = true;
-              },this);
-          }
-      };
-
-      Scene_Base.prototype.releaseActiveWindow = function() {
-          if (this._windowLayer && this._windowLayer.children.length) {
-              this._windowLayer.children.forEach( function(window){
-                  window._holdDeactivate = false;
-              },this);
-          }
-          this._activeWindows.forEach( function(window){
-              window.activate();
-          });
-          this._activeWindows = [];
-      };
-
-      var _GDM_Window_Base_activate = Window_Base.prototype.activate;
-      Window_Base.prototype.activate = function() {
-          if (this._holdDeactivate) return;
-          _GDM_Window_Base_activate.call(this);
-      };
-
-      //=============================================================================
-      // ウィンドウの枠とマウスポインタ位置の判別処理
-      //=============================================================================
-
-      Window_Base.prototype.isTouchedInsideFrame = function() {
-          var x = this.canvasToLocalX(TouchInput.x);
-          var y = this.canvasToLocalY(TouchInput.y);
-          return x >= 0 && y >= 0 && x < this.width && y < this.height;
-      };
-
-      Window_Base.prototype.isTouchedInsideMargin = function() {
-          var x = this.canvasToLocalX(TouchInput.x);
-          var y = this.canvasToLocalY(TouchInput.y);
-          var left = this.margin;
-          var top = this.margin;
-          var right = this.width - this.margin;
-          var bottom = this.height - this.margin;
-          return (x >= left && y >= top && x < right && y < bottom);
-      };
-
-      Window_Base.prototype.isTouchedFrame = function() {
-          return this.isTouchedInsideFrame() && !this.isTouchedInsideMargin();
-      };
-
-      Window_Base.prototype.isTouchedFrameTop = function() {
-          return this.isTouchedFrame() && this.y + this.margin >= TouchInput.y;
-      }
-
-      Window_Base.prototype.isTouchedFrameBottom = function() {
-          return this.isTouchedFrame() && this.y + this.height - this.margin <= TouchInput.y;
-      }
-
-      Window_Base.prototype.isTouchedFrameLeft = function() {
-          return this.isTouchedFrame() && this.x + this.margin >= TouchInput.x;
-      }
-
-      Window_Base.prototype.isTouchedFrameRight = function() {
-          return this.isTouchedFrame() && this.x + this.width - this.margin <= TouchInput.x;
-      }
-
-      //マウスポインタと重なっているウィンドウを取得
-      Scene_Base.prototype.getWindowOnMouse = function() {
-          var pointWindow = null;
-          this.allWindowChildren().forEach( function(window){
-              if (window.visible && window.isTouchedInsideFrame()) {
-                  pointWindow = window;
-              }
-          },this);
-          return pointWindow;
-      };
-
-      Scene_Base.prototype.allWindowChildren = function() {
-          return !!this._windowLayer ? this._windowLayer.children : [];
-      };
-
-      //マウスポインタが指している行を取得
-      Window_Base.prototype.isCursorIndexOnMouse = function() {
-          if (!this.isTouchedInsideFrame()) return -2;
-          var pd = this._padding;
-          var lh = this.lineHeight() || 36;
-          return Math.floor((TouchInput._y - this.y - pd) / lh);
-      };
-
-      Window_Selectable.prototype.isCursorIndexOnMouse = function() {
-          if (!this.isTouchedInsideFrame()) return -2;
-          var ih = this.itemHeight() || 36;
-          var iw = this.itemWidth() || this.width;
-          var index = Math.floor((TouchInput.y - this.y - this.padding) / ih) + this.topRow();
-          var x = this.x;
-          for(var i = 0; i < this.maxCols(); i++) {
-              if (TouchInput.x >= x && TouchInput.x < x + iw + this.spacing()) {
-                  var col = i;
-                  break;
-              }
-              x += iw + this.spacing();
-          }
-          return index * this.maxCols() + col;
-//          return Math.min(index * this.maxCols() + col, this.maxItems() - 1);
-      };
-
-      //マウスポインタが指している行のリスト番号を取得
-      Scene_Base.prototype.currentListIndex = function() {
-          var touchIndex = -1;
-          if (!!this._touchWindow && this._touchWindowIndex >= 0) {
-              if (!this._touchWindow.isCommand()) return this._touchWindowIndex;
-              var list = this._touchWindow._list[this._touchWindowIndex];
-              this._touchWindow._customList.some(function(cmd, i){
-                  if(list && list.symbol === cmd.symbol) {
-                      touchIndex = i;
-                      return true;
-                  }
-              },this);
-          }
-          return touchIndex;
-      };
-
-      //マウスポインタが指している行のリストデータを取得
-      Scene_Base.prototype.currentListCommand = function() {
-          return this._touchWindow ? this._touchWindow._customList[this.currentListIndex()] : null;
-      };
-
-      //=============================================================================
-      // ウィンドウサイズの拡大縮小処理
-      //=============================================================================
-
-      //ウィンドウサイズの更新
-      Scene_Base.prototype.updateWindowSize = function() {
-          if (!!this._touchWindow && this._touchHolding && this._touchedFrame) {
-              this._touchWindow.updateSmcSize(
-                  TouchInput.x - this._smcInitX,
-                  TouchInput.y - this._smcInitY);
-          }
-      };
-
-      //サイズ変更前の状態を一時保存
-      Window_Base.prototype.sizeHold = function() {
-          this._holdX = this.x;
-          this._holdY = this.y;
-          this._holdW = this.width;
-          this._holdH = this.height;
-          if (this.isTouchedFrameLeft()) {
-              this._onFrameX = -1;
-          } else if (this.isTouchedFrameRight()) {
-              this._onFrameX = 1;
-          } else {
-              this._onFrameX = 0;
-          }
-          if (this.isTouchedFrameTop()) {
-              this._onFrameY = -1;
-          } else if (this.isTouchedFrameBottom()) {
-              this._onFrameY = 1;
-          } else {
-              this._onFrameY = 0;
-          }
-      };
-
-      //サイズ変更
-      Window_Base.prototype.updateSmcSize = function(dx, dy) {
-          var x = this.x;
-          var y = this.y;
-          var width = this.width;
-          var height = this.height;
-          if (Input.isPressed('control')) {
-              var size = paramGridSize;
-              if (size !== 0) {
-                  if (this._onFrameX > 0) {
-                      width = this._holdW + dx;
-                      width += (width % size > size / 2 ? size - width % size : -(width % size));
-                  } else if (this._onFrameX < 0) {
-                      x = this._holdX + dx;
-                      x += (x % size > size / 2 ? size - x % size : -(x % size));
-                      width = this._holdW + this._holdX - x;
-                  }
-                  if (this._onFrameY > 0) {
-                      height = this._holdH + dy;
-                      height += (height % size > size / 2 ? size - height % size : -(height % size));
-                  } else if (this._onFrameY < 0) {
-                      y = this._holdY + dy;
-                      y += (y % size > size / 2 ? size - y % size : -(y % size));
-                      height = this._holdH + this._holdY - y;
-                  }
-              }
-          } else {
-              if (this._onFrameX > 0) {
-                  width = this._holdW + dx;
-              } else if (this._onFrameX < 0) {
-                  width = this._holdW - dx;
-                  x = this._holdX + dx;
-              }
-              if (this._onFrameY > 0) {
-                  height = this._holdH + dy;
-              } else if (this._onFrameY < 0) {
-                  height = this._holdH - dy;
-                  y = this._holdY + dy;
-              }
-          }
-          this.position.x = x;
-          this.position.y = y;
-          this.move(x, y, width, height);
-          this.saveContainerInfo();
-          this.reDrawContents();
-      };
-
-      //=============================================================================
-      // マウスポインタの位置に合わせてウィンドウ内の行の色を変更する処理を追加
-      //=============================================================================
-
-      var _OSW_Window_Base_update = Window_Base.prototype.update;
-      Window_Base.prototype.update = function() {
-          _OSW_Window_Base_update.call(this);
-          this.updateOswContentAreaColor();
-          this.updateScaleArrows();
-      };
-
-      Window_Base.prototype.itemRect = function(index) {
-          index = Math.min(index, this._customList.length - 1);
-          var rect = new Rectangle();
-          rect.width = this.contentsWidth();
-          rect.height = this.lineHeight();
-          rect.x = 0;
-          rect.y = index * this.lineHeight();
-          return rect;
-      };
-      
-      //コモンウィンドウのテキストモードなら行ごとに変更
-      Window_Base.prototype.updateOswContentAreaColor = function() {
-          if (this.isOswOption()) return;
-          var index = this.isCursorIndexOnMouse();
-          if (index >= 0) {
-              var rect = this.itemRect(index);
-              this.setMousePointRect(rect.x, rect.y, rect.width, rect.height);
-          } else if (index < 0) {
-              this.setMousePointRect(0, 0, 0, 0);
-          }
-      };
-
-      Window.prototype.setMousePointRect = function(x, y, width, height) {
-          var cx = Math.floor(x || 0);
-          var cy = Math.floor(y || 0);
-          var cw = Math.floor(width || 0);
-          var ch = Math.floor(height || 0);
-          var rect = this._mousePointRect;
-          if (rect.x !== cx || rect.y !== cy || rect.width !== cw || rect.height !== ch) {
-              this._mousePointRect.x = cx;
-              this._mousePointRect.y = cy;
-              this._mousePointRect.width = cw;
-              this._mousePointRect.height = ch;
-              this._refreshMousePointRect();
-          }
-      };
-
-      Window.prototype._refreshMousePointRect = function() {
-          var pad = this._padding;
-          var x = this._mousePointRect.x + pad - this.origin.x;
-          var y = this._mousePointRect.y + pad - this.origin.y;
-          var w = this._mousePointRect.width;
-          var h = this._mousePointRect.height;
-          var m = 4;
-          var x2 = Math.max(x, pad);
-          var y2 = Math.max(y, pad);
-          var ox = x - x2;
-          var oy = y - y2;
-          var w2 = Math.min(w, this._width - pad - x2);
-          var h2 = Math.min(h, this._height - pad - y2);
-          var bitmap = new Bitmap(w2, h2);
-      
-          this._windowMousePointSprite.bitmap = bitmap;
-          this._windowMousePointSprite.setFrame(0, 0, w2, h2);
-          this._windowMousePointSprite.move(x2, y2);
-      
-          if (w > 0 && h > 0 && this._windowskin) {
-              var skin = this._windowskin;
-              var p = 96;
-              var q = 48;
-              bitmap.blt(skin, p+m, p+m, q-m*2, q-m*2, ox+m, oy+m, w-m*2, h-m*2);
-              bitmap.blt(skin, p+m, p+0, q-m*2, m, ox+m, oy+0, w-m*2, m);
-              bitmap.blt(skin, p+m, p+q-m, q-m*2, m, ox+m, oy+h-m, w-m*2, m);
-              bitmap.blt(skin, p+0, p+m, m, q-m*2, ox+0, oy+m, m, h-m*2);
-              bitmap.blt(skin, p+q-m, p+m, m, q-m*2, ox+w-m, oy+m, m, h-m*2);
-              bitmap.blt(skin, p+0, p+0, m, m, ox+0, oy+0, m, m);
-              bitmap.blt(skin, p+q-m, p+0, m, m, ox+w-m, oy+0, m, m);
-              bitmap.blt(skin, p+0, p+q-m, m, m, ox+0, oy+h-m, m, m);
-              bitmap.blt(skin, p+q-m, p+q-m, m, m, ox+w-m, oy+h-m, m, m);
-          }
-      };
-
-      //=============================================================================
-      // ウィンドウサイズ変更時に表示するカーソルを定義
-      //=============================================================================
-
-      Window_Base.prototype.updateScaleArrows = function() {
-          if (this.isTouchedFrame() && !this.isOswOption()) {
-              this.oswUpDownArrowVisible = this.isTouchedFrameTop() || this.isTouchedFrameBottom();
-              this.oswLeftRightArrowVisible = this.isTouchedFrameLeft() || this.isTouchedFrameRight();
-          } else {
-              this.oswUpDownArrowVisible = false;
-              this.oswLeftRightArrowVisible = false;
-          }
-      };
-
-      var _OSW_Window_createAllParts = Window.prototype._createAllParts;
-      Window.prototype._createAllParts = function() {
-          _OSW_Window_createAllParts.call(this);
-          this._oswDownArrowSprite = new Sprite();
-          this._oswUpArrowSprite = new Sprite();
-          this._oswLeftArrowSprite = new Sprite();
-          this._oswRightArrowSprite = new Sprite();
-          this._mousePointRect = new Rectangle();
-          this._windowMousePointSprite = new Sprite();
-          this.addChild(this._windowMousePointSprite);
-          this.addChild(this._oswDownArrowSprite);
-          this.addChild(this._oswUpArrowSprite);
-          this.addChild(this._oswLeftArrowSprite);
-          this.addChild(this._oswRightArrowSprite);
-      };
-
-      var _OSW_Window_refreshAllParts = Window.prototype._refreshAllParts;
-      Window.prototype._refreshAllParts = function() {
-          _OSW_Window_refreshAllParts.call(this);
-          this._refreshMousePointRect();
-          this._refreshScaleArrows();
-      };
-
-      Window.prototype._refreshScaleArrows = function() {
-          var p = 24;
-          var q = p/2;
-          var sx = 96+p;
-          var sy = 0+p;
-          this._oswDownArrowSprite.bitmap = this._windowskin;
-          this._oswDownArrowSprite.anchor.x = 0;
-          this._oswDownArrowSprite.anchor.y = 0;
-          this._oswDownArrowSprite.setFrame(sx+q, sy+q+p, p, q);
-          this._oswDownArrowSprite.move(0, 0);
-          this._oswUpArrowSprite.bitmap = this._windowskin;
-          this._oswUpArrowSprite.anchor.x = 0;
-          this._oswUpArrowSprite.anchor.y = 0;
-          this._oswUpArrowSprite.setFrame(sx+q, sy, p, q);
-          this._oswUpArrowSprite.move(0, 0);
-          this._oswLeftArrowSprite.bitmap = this._windowskin;
-          this._oswLeftArrowSprite.anchor.x = 0;
-          this._oswLeftArrowSprite.anchor.y = 0;
-          this._oswLeftArrowSprite.setFrame(sx, sy+q/2+p/2, q, p);
-          this._oswLeftArrowSprite.move(0, 0);
-          this._oswRightArrowSprite.bitmap = this._windowskin;
-          this._oswRightArrowSprite.anchor.x = 0;
-          this._oswRightArrowSprite.anchor.y = 0;
-          this._oswRightArrowSprite.setFrame(sx+q+p, sy+q/2+p/2, q, p);
-          this._oswRightArrowSprite.move(0, 0);
-      };
-
-      var _OSW_Window_updateTransform = Window.prototype.updateTransform;
-      Window.prototype.updateTransform = function() {
-          this._updateScaleArrows();
-          _OSW_Window_updateTransform.call(this);
-      };
-
-      Window.prototype._updateScaleArrows = function() {
-          if (this.isOpen() && this.oswUpDownArrowVisible) {
-              this._oswDownArrowSprite.visible = true;
-              this._oswUpArrowSprite.visible = true;
-              var bitmap = this._oswDownArrowSprite;
-              this._oswDownArrowSprite.move(
-                  TouchInput._x - this.x - bitmap.width,
-                  TouchInput._y - this.y
-              );
-              this._oswUpArrowSprite.move(
-                  TouchInput._x - this.x - bitmap.width,
-                  TouchInput._y - this.y - bitmap.height
-              );
-          } else {
-              this._oswDownArrowSprite.visible = false;
-              this._oswUpArrowSprite.visible = false;
-          }
-          if (this.isOpen() && this.oswLeftRightArrowVisible) {
-              this._oswLeftArrowSprite.visible = true;
-              this._oswRightArrowSprite.visible = true;
-              var bitmap = this._oswLeftArrowSprite;
-              this._oswLeftArrowSprite.move(
-                  TouchInput._x - this.x - bitmap.width,
-                  TouchInput._y - this.y - bitmap.height*3/4
-              );
-              this._oswRightArrowSprite.move(
-                  TouchInput._x - this.x,
-                  TouchInput._y - this.y - bitmap.height*3/4
-              );
-          } else {
-              this._oswLeftArrowSprite.visible = false;
-              this._oswRightArrowSprite.visible = false;
-          }
-      };
-
-      //=============================================================================
-      // 編集メニューコマンドウィンドウの設定
-      //=============================================================================
-      var _OSW_Scene_Base_createWindowLayer = Scene_Base.prototype.createWindowLayer;
-      Scene_Base.prototype.createWindowLayer = function() {
-          _OSW_Scene_Base_createWindowLayer.call(this);
-          this.createSettingLayer();
-          this.createFtkrOptionWindows();
-          this.createSettingNewWindow();
-      };
-
-      Scene_Base.prototype.createSettingLayer = function() {
-          var width = Graphics.boxWidth;
-          var height = Graphics.boxHeight;
-          var x = (Graphics.width - width) / 2;
-          var y = (Graphics.height - height) / 2;
-          this._settingLayer = new WindowLayer();
-          this._settingLayer.move(x, y, width, height);
-          this.addChild(this._settingLayer);
-      };
-
-      //------------------------------------------------------------------------
-      //編集用ウィンドウの作成
-      //------------------------------------------------------------------------
-      /*
-      configContetns配列内のオプジェクトのプロパティ
-          name    : 表示名
-          symbol  : コンフィグデータの参照先
-          type    : 表示データの分類名
-                  :   number    表示されるデータは数値に変換
-                  :   select    リスト内の文字列に変換
-                  :   data      データベースのデータに変換
-                  :   boolean   ON か OFF に変換
-                  :   string    文字列としてそのまま表示
-                  :   line      横線を描写する(type以外の設定不要)
-                  :   subConfig サブウィンドウを表示する
-                  :   handler   setHander(symbol, xxx)で設定した実行処理を呼び出す(xxxメソッドは別途定義が必要)
-                  :   command   optionsで指定したメソッドを呼び出す。
-                  :   none      何も表示しない
-          enabled : コンフィグ変更可否のフラグ
-          options : 上記分類ごとの個別設定
-                  :   numberの場合は最小値x、最大値y、変化量z を指定
-                  :     options = {min: x, max: y, offset: z}
-                  :   selectの場合はリストの表示内容をselectで指定する。valueを設定することで、取得する値も指定可能。
-                  :     options = {select :[list1, list2, ...], value:[value1, value2,...]}
-                  :   dataの場合は参照するデータベースと表示させるプロパティを指定
-                  :     options = {data: xxx, property: yyy, enabled: zzz}
-                  :   boolean および文字列の場合は設定不要
-                  :   subConfigの場合は、サブウィンドウに表示するコンフィグおよびサブウィンドウ幅の設定
-                  :     options = {subConfigs: [{name:xxx, type:yyy, symbol:zzz, options:{}},... ]
-                  :                width: www,
-                  :                textWidth: ttt,
-                  :                statusWidth: sss}
-                  :   command の場合は、実行するメソッドを指定(xxxメソッドは別途定義が必要)
-                  :     options = {method: this.xxx.bind(this)}
-      */
-      Scene_Base.prototype.createFtkrOptionWindows = function() {
-          this.createMainConfigCommand();
-          this.createFtkrEditOptions();
-          this.createFtkrDisplayOptions();
-          this.createFtkrCommandOptions();
-          this.createFtkrSelectOptions();
-          this.createFtkrCommonOptions();
-          this.createFtkrStatusListOptions();
-          this.createConfTitleWindow();
-          this.createConfWindow();
-      };
-
-      Scene_Base.prototype.configLayer = function() {
-          return this._settingLayer;
-      };
-
-      Window_Base.prototype.activateWindow = function() {
-          this.select(0);
-          this.activate();
-          this.show();
-      };
-
-      Window_Base.prototype.setPosition = function(x, y) {
-          this.x = x;
-          this.y = y;
-      };
-
-      Window_Base.prototype.setPositionReferWindowIndex = function(window) {
-          var x = window.x + 100;
-          var y = window.y + window.index() * window.lineHeight();
-          this.setPosition(x, y);
-      };
-
-      //------------------------------------------------------------------------
-      //メインコマンドウィンドウの設定
-      //------------------------------------------------------------------------
-      Scene_Base.prototype.createMainConfigCommand = function() {
-          this._mainConfigWindow = new Window_MainConfigCommand();
-          this._mainConfigWindow.setHandler('create',  this.cwCreateCmd.bind(this));
-          this._mainConfigWindow.setHandler('edit',    this.cwEditCmd.bind(this));
-          this._mainConfigWindow.setHandler('display', this.cwDisplayCmd.bind(this));
-          this._mainConfigWindow.setHandler('delete',  this.cwDeleteCmd.bind(this));
-          this._mainConfigWindow.setHandler('cancel',  this.cwCloseConfig.bind(this));
-          this.configLayer().addChild(this._mainConfigWindow);
-      };
-
-      //ウィンドウ作成コマンド
-      Scene_Base.prototype.cwCreateCmd = function() {
-          this._cwCreateNewW.setPositionReferWindowIndex(this._mainConfigWindow);
-          this._cwCreateNewW.activateWindow();
-      };
-
-      //ウィンドウ編集コマンド
-      Scene_Base.prototype.cwEditCmd = function() {
-          this._touchWindow.readCssStatus();
-          this.setConfigContents_edit(this._touchWindow);
-          this._editConfigWindow.setPositionReferWindowIndex(this._mainConfigWindow);
-          this._editConfigWindow.activateWindow();
-      };
-
-      //ウィンドウ表示コマンド
-      Scene_Base.prototype.cwDisplayCmd = function() {
-          this.setConfigContents_Display(this._touchWindow);
-          this._dispConfigWindow.setPositionReferWindowIndex(this._mainConfigWindow);
-          this._dispConfigWindow.activateWindow();
-      };
-
-      //ウィンドウ削除コマンド
-      Scene_Base.prototype.cwDeleteCmd = function() {
-          this._stsConfTitleWindow.setConf(this._touchWindow.name);
-          this._stsConfWindow.activateWindow();
-      };
-
-      //コンフィグウィンドウの終了
-      Scene_Base.prototype.cwCloseConfig = function() {
-          this._touchWindow = null;
-          this._mainConfigWindow.hide();
-          this._mainConfigWindow.deactivate();
-          this._cmdConfigWindow.hideAll();
-          this._commonConfigWindow.hideAll();
-          this._selectConfigWindow.hideAll();
-          this.releaseActiveWindow();
-      };
-
-      Window_Base.prototype.updateWindowConfig = function() {
-          this.updatePadding();
-          this.resetFontSettings();
-          this.updateBackOpacity();
-      };
-
-      //コンフィグデータをセーブして再描画する
-      Scene_Base.prototype.saveConfigValues = function() {
-          if (this._touchWindow) {
-              this._touchWindow.updateWindowConfig();
-              this._touchWindow.setOswMethod();
-              this._touchWindow.saveContainerInfo();
-              if (Imported.FTKR_CSS) {
-                  this._touchWindow.setCssStatus();
-              }
-              this._touchWindow._refreshAllParts();
-              this._touchWindow.refresh();
-              this.refreshDisplayPriority();
-          }
-      };
-
-      //------------------------------------------------------------------------
-      //オプションウィンドウの生成
-      //------------------------------------------------------------------------
-      //編集コマンド用
-      Scene_Base.prototype.createFtkrEditOptions = function() {
-          var width = 240, textWidth = 206, statusWidth = 0;
-          var layer = this.configLayer();
-          this._editConfigWindow = new Window_FtkrOptions(layer, width, textWidth, statusWidth);
-          this._editConfigWindow.setHandler('cancel', this.closeOptions.bind(this));
-          layer.addChild(this._editConfigWindow);
-      };
-
-      Scene_Base.prototype.closeOptions = function() {
-          this._mainConfigWindow.activate();
-          this._editConfigWindow.hideAll();
-          this._dispConfigWindow.hideAll();
-      };
-
-      //編集コンテンツの設定読込
-      Scene_Base.prototype.setConfigContents_edit = function(configValues) {
-          var configContents = [
-              {type: 'subConfig', name: 'ウィンドウ', symbol: 'windowEdit', enabled: true, options: {subConfigs: [
-                  {type: 'string', name: '名前',      symbol: 'name',               enabled: true, options: {}},
-                  {type: 'number', name: 'X座標',     symbol: 'x',                  enabled: true, options: {min:0, max: Graphics.boxWidth, offset: 1}},
-                  {type: 'number', name: 'Y座標',     symbol: 'y',                  enabled: true, options: {min:0, max: Graphics.boxHeight, offset: 1}},
-                  {type: 'number', name: '横幅',      symbol: 'width',              enabled: true, options: {min:0, max: Graphics.boxWidth, offset: 1}},
-                  {type: 'number', name: '高さ',      symbol: 'height',            enabled: true, options: {min:0, max: Graphics.boxHeight, offset: 1}},
-                  {type: 'number', name: '余白',      symbol: '_customPadding',     enabled: true, options: {min:0, max: graphicsMinSize(), offset: 1}},
-                  {type: 'line'},
-                  {type: 'save',  name: '決定'},
-              ], width: 400, textWidth: 120, statusWidth: 220}},
-              {type: 'subConfig', name: 'フォント設定', symbol: 'fontEdit', enabled: true, options: {subConfigs: [
-                  {type: 'string', name: 'フォント　　　', symbol: '_customFontFace', enabled: true, options: {}},
-                  {type: 'number', name: 'フォントサイズ', symbol: '_customFontSize', enabled: true, options: {min:1, max: graphicsMinSize(), offset: 1}},
-                  {type: 'line'},
-                  {type: 'save',  name: '決定'},
-              ], width: 400, textWidth: 220, statusWidth: 120}},
-              {type: 'line'},
-              {type: 'subConfig', name: '行列設定', symbol: 'lineEdit', enabled: true, options: {subConfigs: [
-                  {type: 'number', name: '行高さ',    symbol: '_customLineHeight',  enabled: true, options: {min:1, max: graphicsMinSize(), offset: 1}},
-//                  {type: 'number', name: '高さ(行数)', symbol: '_customLineNumber', enabled: true, options: {min:0, max: 99, offset: 1}},
-                  {type: 'number', name: '表示行間隔　', symbol: '_customHorSpacing',   enabled: configValues.isList(), options: {min:0, max: graphicsMinSize(), offset: 1}},
-                  {type: 'number', name: '表示列数　　', symbol: '_customMaxCols',      enabled: configValues.isList(), options: {min:1, max: 99, offset: 1}},
-                  {type: 'number', name: '表示列間隔　', symbol: '_customSpacing',      enabled: configValues.isList(), options: {min:0, max: graphicsMinSize(), offset: 1}},
-                  {type: 'number', name: 'カーソル行数', symbol: '_customCursorHeight', enabled: configValues.isList(), options: {min:1, max: 99, offset: 1}},
-                  {type: 'line'},
-                  {type: 'save',   name: '決定'},
-              ], width: 400, textWidth: 220, statusWidth: 120}},
-              {type: 'subConfig',  name: '処理設定', symbol: 'methodEdit', enabled: configValues.isList(), options: {subConfigs: [
-                  {type: 'select', name: '実行設定　　　　', symbol: '_customOkMethodType',       enabled: configValues.isSelect(), options: {select:COMMAND_METHOD}},
-                  {type: 'refer',  name: '実行詳細　　　　', symbol: '_customOkMethodDetail',     enabled: configValues.isSelect(), options: {refSymbol:['_customOkMethodType'], refData:FTKR_METHOD_DATALIST(this)}},
-                  {type: 'refer',  name: '実行詳細２　　　', symbol: '_customOkMethodDetail2',    enabled: configValues.isSelect(), options: {refSymbol:['_customOkMethodType'], refData:FTKR_METHOD_DATALIST2}},
-                  {type: 'select', name: 'キャンセル設定　', symbol: '_customCancelMethodType',   enabled: true, options: {select:COMMAND_METHOD}},
-                  {type: 'refer',  name: 'キャンセル詳細　', symbol: '_customCancelMethodDetail', enabled: true, options: {refSymbol:['_customCancelMethodType'], refData:FTKR_METHOD_DATALIST(this)}},
-                  {type: 'refer',  name: 'キャンセル詳細２', symbol: '_customCancelMethodDetail2',enabled: true, options: {refSymbol:['_customCancelMethodType'], refData:FTKR_METHOD_DATALIST2}},
-                  {type: 'line'},
-                  {type: 'save',   name: '決定'},
-              ], width: 500, textWidth: 220, statusWidth: 220}},
-          ];
-          //設定したコンテンツデータをオプションウィンドウに反映
-          this._editConfigWindow.setConfigContents(configContents, configValues);
-      };
-    
-      //------------------------------------------------------------------------
-      //表示コマンド用のウィンドウを設定
-      //------------------------------------------------------------------------
-      Scene_Base.prototype.createFtkrDisplayOptions = function() {
-          var width = 240, textWidth = 206, statusWidth = 0;
-          var layer = this.configLayer();
-          this._dispConfigWindow = new Window_FtkrOptions(layer, width, textWidth, statusWidth);
-          this._dispConfigWindow.setHandler('cancel', this.closeOptions.bind(this));
-          layer.addChild(this._dispConfigWindow);
-      };
-
-      Scene_Base.prototype.windowChildren = function() {
-          return this._windowLayer ? this._windowLayer.children : [];
-      };
-
-      //表示コンテンツの設定読込
-      Scene_Base.prototype.setConfigContents_Display = function(configValues) {
-          var configContents = [
-              {type: 'subConfig', name: '背景', symbol: 'backGround', enabled: true, options: {subConfigs: [
-                  {type: 'number', name: '背景透明度', symbol: '_customBackOpacity',  enabled: true, options: {min:0, max: 255, offset: 1}},
-                  {type: 'select', name: '背景画像　', symbol: '_customBackFileName', enabled: true, options: {select:[null].concat(FTKR.GDM.backgrounds), string:true}},
-                  {type: 'line'},
-                  {type: 'save',  name: '決定'},
-              ], width: 400, textWidth: 220, statusWidth: 120}},
-              {type: 'subConfig', name: '表示設定', symbol: 'showEdit', enabled: true, options: {subConfigs: [
-                  {type: 'data',    name: '表示スイッチ',   symbol: '_customShowSwId',  enabled: true, options: {data:$dataSystem.switches}},
-                  {type: 'boolean', name: '枠非表示　　',   symbol: '_customHideFrame', enabled: true, options: {}},
-                  {type: 'boolean', name: '表示自動更新',   symbol: '_autoRefreshed', enabled: true, options: {}},
-                  {type: 'line'},
-                  {type: 'save', name: '決定'},
-              ], width: 400, textWidth: 220, statusWidth: 120}},
-              {type: 'line'},
-              {type: 'subConfig', name: 'コマンド設定', symbol: 'cmdDisp', enabled: configValues.isCommand(), options: {subConfigs: [
-                  {type: 'select',  name: 'コマンド表示位置',   symbol: '_customTextAlign',  enabled: true, options: {select:['左寄せ','中央','右寄せ']}},
-                  {type: 'command', name: 'コマンド非表示解除', symbol: 'cmdShow',           enabled: true, options: {method:this.allCmdVisible.bind(this)}},
-                  {type: 'line'},
-                  {type: 'save',    name: '決定'},
-              ], width: 400, textWidth: 220, statusWidth: 120}},
-              {type: 'subConfig', name: 'セレクト設定', symbol: 'selectDisp', enabled: configValues.isSelect(), options: {subConfigs: [
-                  {type: 'select', name: '表示タイプ　', symbol: '_customDrawType',    enabled: true, options: {select:['テキスト','パーティー','アクター','職業','スキル','アイテム','武器','防具','敵キャラ','敵グループ']}},
-                  {type: 'refer',  name: 'リストタイプ', symbol: '_customListType',    enabled: true, options: {refSymbol:['_customDrawType'], refData:[
-                      {type: 'none'},
-                      {type: 'select', options:{select:['全メンバー', 'バトルメンバー', '控えメンバー']}},
-                  ]}},
-                  {type: 'string', name: '表示条件　　', symbol: '_customListEnabled', enabled: true, options: {}},
-                  {type: 'line'},
-                  {type: 'save',   name: '決定'},
-              ], width: 400, textWidth: 220, statusWidth: 120}},
-              {type: 'subConfig', name: 'コモン設定', symbol: 'commonDisp', enabled: configValues.isCommon(), options: {subConfigs: [
-                  {type: 'select', name: '表示タイプ　', symbol: '_customDrawType',  enabled: true, options: {select:['テキスト','詳細']}},
-                  {type: 'refer',  name: 'アクター設定', symbol: '_customActorId',   enabled: true, options: {refSymbol:['_customDrawType'], refData:[
-                      {type:'none'},
-                      {type:'data', options:{data:$dataActors, property:'name'}}
-                  ]}},
-                  {type: 'refer', name: 'セレクト参照', symbol: '_customReference', enabled: true, options: {refSymbol:['_customDrawType','_customActorId'], refData:[
-                      [
-                          {type:'none'}
-                      ],
-                      [
-                          {type:'data', options:{data:[null].concat(this.windowChildren()), property:'name', enabled:'data.isList()' ,string:true}},
-                          {type:'none'}
-                      ]
-                  ]}},
-                  {type: 'line'},
-                  {type: 'save',   name: '決定'},
-              ], width: 400, textWidth: 220, statusWidth: 120}},
-              {type: 'subConfig', name: '表示エリア', symbol: 'cssArea', enabled: configValues.isCssContentsWindow(), options: {subConfigs: [
-                  {type: 'command', name: 'パラメータリスト',  symbol: 'cmdCssStatus',         enabled: true, options: {method:this.cmdCssStatus.bind(this)}},
-                  {type: 'line'},
-                  {type: 'string', name: '描画エリア１内容', symbol: '_customCssText1',      enabled: true, options: {}},
-                  {type: 'string', name: '描画エリア２内容', symbol: '_customCssText2',      enabled: true, options: {}},
-                  {type: 'string', name: '描画エリア３内容', symbol: '_customCssText3',      enabled: true, options: {}},
-                  {type: 'line'},
-                  {type: 'number', name: '空白エリア１幅　', symbol: '_customCssSpace1',     enabled: true, options: {min:0, max: graphicsMinSize(), offset: 1}},
-                  {type: 'number', name: '空白エリア２幅　', symbol: '_customCssSpace2',     enabled: true, options: {min:0, max: graphicsMinSize(), offset: 1}},
-                  {type: 'number', name: '空白エリア３幅　', symbol: '_customCssSpace3',     enabled: true, options: {min:0, max: graphicsMinSize(), offset: 1}},
-                  {type: 'number', name: '空白エリア４幅　', symbol: '_customCssSpace4',     enabled: true, options: {min:0, max: graphicsMinSize(), offset: 1}},
-                  {type: 'line'},
-                  {type: 'number', name: '複数列間隔　　　', symbol: '_customCssSpaceIn',    enabled: true, options: {min:0, max: graphicsMinSize(), offset: 1}},
-                  {type: 'line'},
-                  {type: 'number', name: '描画エリア１比率', symbol: '_customCssWidthRate1', enabled: true, options: {min:0, max: 100, offset: 1}},
-                  {type: 'number', name: '描画エリア２比率', symbol: '_customCssWidthRate2', enabled: true, options: {min:0, max: 100, offset: 1}},
-                  {type: 'number', name: '描画エリア３比率', symbol: '_customCssWidthRate3', enabled: true, options: {min:0, max: 100, offset: 1}},
-                  {type: 'line'},
-                  {type: 'save',   name: '決定'},
-              ], width: 500, textWidth: 220, statusWidth: 220}},
-              {type: 'line'},
-              {type: 'subConfig', name: '配置', symbol: 'priority', enabled: true, options: {subConfigs: [
-                  {type: 'command', name: '前面に配置　', symbol: 'toFront',    enabled: true, options: {method:this.cwToFront.bind(this)}},
-                  {type: 'command', name: '最前面に配置', symbol: 'totheFront', enabled: true, options: {method:this.cwToTheFront.bind(this)}},
-                  {type: 'line'},
-                  {type: 'command', name: '背面に配置　', symbol: 'toBack',     enabled: true, options: {method:this.cwToBack.bind(this)}},
-                  {type: 'command', name: '最背面に配置', symbol: 'totheBack',  enabled: true, options: {method:this.cwToTheBack.bind(this)}},
-              ], width: 240, textWidth: 204, statusWidth: 0}},
-          ];
-          //設定したコンテンツデータをオプションウィンドウに反映
-          this._dispConfigWindow.setConfigContents(configContents, configValues);
-      };
-
-      //コマンド非表示解除
-      Scene_Base.prototype.allCmdVisible = function() {
-          SoundManager.playSave();
-          this._touchWindow._customList.forEach(function(list){
-              list.visible = true;
-          });
-          this.saveConfigValues();
-          this._dispConfigWindow.hideAll();
-          this.cwCloseConfig();
-      };
-
-      Scene_Base.prototype.cmdCssStatus = function() {
-          var cssWindow = this._dispConfigWindow._childWindows[5];
-          cssWindow.deactivate();
-          console.log(this._touchWindow);
-          if (!this._touchWindow._customCssStatus) {
-              this._touchWindow._customCssStatus = [];
-          }
-          this._dispConfigWindow._statusListWindow.setStatusList(this._touchWindow._customCssStatus);
-          this._dispConfigWindow._statusListWindow.setPositionReferWindowIndex(cssWindow);
-          this._dispConfigWindow._statusListWindow.activateWindow();
-      };
-
-      //配置変更
-      Scene_Base.prototype.cwhidePriority = function() {
-          SoundManager.playMagicEvasion();
-          this._windowLayer.children.forEach(function(child){
-              child.saveContainerInfo();
-          });
-          this._touchWindow.refresh();
-          this._touchWindow = null;
-          this._dispConfigWindow.hideAll();
-          this.cwCloseConfig();
-          this.refreshDisplayPriority();
-      };
-
-      Scene_Base.prototype.cwToFront = function() {
-          this._windowLayer.children.some(function(child){
-              if (child.priority === this._touchWindow.priority + 1) {
-                  child.priority--;
-                  this._touchWindow.priority++;
-                  return true;
-              }
-          },this);
-          this.cwhidePriority();
-      };
-
-      Scene_Base.prototype.cwToTheFront = function() {
-          this._windowLayer.children.forEach(function(child){
-              if (child.priority > this._touchWindow.priority) {
-                  child.priority--;
-                  return true;
-              }
-          },this);
-          this._touchWindow.priority = this._windowLayer.children.length - 1;
-          this.cwhidePriority();
-      };
-
-      Scene_Base.prototype.cwToBack = function() {
-          this._windowLayer.children.some(function(child){
-              if (child.priority === this._touchWindow.priority - 1) {
-                  child.priority++;
-                  this._touchWindow.priority--;
-                  return true;
-              }
-          },this);
-          this.cwhidePriority();
-      };
-
-      Scene_Base.prototype.cwToTheBack = function() {
-          this._windowLayer.children.forEach(function(child){
-              if (child.priority < this._touchWindow.priority) {
-                  child.priority++;
-                  return true;
-              }
-          },this);
-          this._touchWindow.priority = 0;
-          this.cwhidePriority();
-      };
-
-      //------------------------------------------------------------------------
-      //コマンドウィンドウのコマンド編集用ウィンドウを設定
-      //------------------------------------------------------------------------
-      Scene_Base.prototype.createFtkrCommandOptions = function() {
-          var width = 240, textWidth = 220, statusWidth = 0;
-          var layer = this.configLayer();
-          this._cmdConfigWindow = new Window_FtkrOptions(layer, width, textWidth, statusWidth);
-          this._cmdConfigWindow.setHandler('cancel', this.cwCloseConfig.bind(this));
-          layer.addChild(this._cmdConfigWindow);
-      };
-
-      //コマンドコンテンツの設定読込
-      Scene_Base.prototype.setConfigContents_command = function(configValues) {
-          var configContents = [
-              {type: 'subConfig', name: 'コマンド編集', symbol: 'editCmd', enabled: true, options: {subConfigs: [
-                  {type: 'string', name: '表示名',   symbol: 'name',         enabled: true, options: {}},
-                  {type: 'string', name: '実行条件', symbol: 'enabled',      enabled: true, options: {}},
-                  {type: 'line'},
-                  {type: 'select', name: '実行設定', symbol: 'methodType',   enabled: true, options: {select:COMMAND_METHOD}},
-                  {type: 'refer',  name: '実行詳細', symbol: 'methodDetail', enabled: true, options: {refSymbol:['methodType'], refData:FTKR_METHOD_DATALIST(this)}},
-                  {type: 'refer',  name: '実行詳細2', symbol: 'methodDetail2', enabled: true, options:  {refSymbol:['methodType'], refData:FTKR_METHOD_DATALIST2}},
-                  {type: 'line'},
-                  {type: 'save',   name: '決定'},
-              ], width: 500, textWidth: 220, statusWidth: 220}},
-              {type: 'line'},
-              {type: 'subConfig', name: '表示順番', symbol: 'order', enabled: true, options: {subConfigs: [
-                  {type: 'command', name: '上部に移動　', symbol: 'toTop',       enabled: true, options: {method:this.cwToTop.bind(this)}},
-                  {type: 'command', name: '最上部に移動', symbol: 'toTheTop',    enabled: true, options: {method:this.cwToTheTop.bind(this)}},
-                  {type: 'line'},
-                  {type: 'command', name: '下部に移動　', symbol: 'toBottom',    enabled: true, options: {method:this.cwToBottom.bind(this)}},
-                  {type: 'command', name: '最下部に移動', symbol: 'toTheBottom', enabled: true, options: {method:this.cwToTheBottom.bind(this)}},
-              ], width: 240, textWidth: 204, statusWidth: 0}},
-              {type: 'line'},
-              {type: 'subConfig', name: 'コマンド追加', symbol: 'addCmd', enabled: true, options: {subConfigs: [
-                  {type: 'command', name: '上部に追加', symbol: 'addTop',       enabled: true, options: {method:this.cwAddTop.bind(this)}},
-                  {type: 'command', name: '下部に追加', symbol: 'addBottom',    enabled: true, options: {method:this.cwAddBottom.bind(this)}},
-              ], width: 240, textWidth: 204, statusWidth: 0}},
-              {type: 'line'},
-              {type: 'command', name: 'コマンド非表示',   symbol: 'hide',   enabled: true, options: {method:this.cwHideCommand.bind(this)}},
-              {type: 'command', name: 'コマンド削除　',   symbol: 'delete', enabled: true, options: {method:this.cwDeleteCommand.bind(this)}},
-          ];
-          //設定したコンテンツデータをオプションウィンドウに反映
-          this._cmdConfigWindow.setConfigContents(configContents, configValues);
-      };
-
-      Scene_Base.prototype.cwSetCmdListOrder = function() {
-          SoundManager.playMagicEvasion();
-          this._touchWindow.saveContainerInfo();
-          this._touchWindow.createContents();
-          this._touchWindow.refresh();
-          if (this._cmdConfigWindow.visible) {
-              this._cmdConfigWindow.hideAll();
-          } else if (this._selectConfigWindow.visible) {
-              this._selectConfigWindow.hideAll();
-          } else if (this._commonConfigWindow.visible) {
-              this._commonConfigWindow.hideAll();
-          }
-          this.releaceTouchWindow();
-          this.releaseActiveWindow();
-      };
-      
-      Scene_Base.prototype.cwToTop = function() {
-          var currentCmd = this.currentListCommand();
-          consoleLogWIndex('コマンド順番変更', this.currentListIndex(), currentCmd);
-          this._touchWindow._customList.some(function(child){
-              if (child.index === currentCmd.index - 1) {
-                  child.index++;
-                  currentCmd.index--;
-                  return true;
-              }
-          },this);
-          this._touchWindow.sortCustomList();
-          consoleLogWCommand();
-          this.cwSetCmdListOrder();
-      };
-
-      Scene_Base.prototype.cwToTheTop = function() {
-          var currentCmd = this.currentListCommand();
-          consoleLogWIndex('コマンド順番変更', this.currentListIndex(), currentCmd);
-          this._touchWindow._customList.forEach(function(child){
-              if (child.index < currentCmd.index) {
-                  child.index++;
-                  return true;
-              }
-          },this);
-          currentCmd.index = 0;
-          this._touchWindow.sortCustomList();
-          consoleLogWCommand();
-          this.cwSetCmdListOrder();
-      };
-
-      Scene_Base.prototype.cwToBottom = function() {
-          var currentCmd = this.currentListCommand();
-          consoleLogWIndex('コマンド順番変更', this.currentListIndex(), currentCmd);
-          this._touchWindow._customList.some(function(child){
-              if (child.index === currentCmd.index + 1) {
-                  child.index--;
-                  currentCmd.index++;
-                  return true;
-              }
-          },this);
-          this._touchWindow.sortCustomList();
-          consoleLogWCommand();
-          this.cwSetCmdListOrder();
-      };
-
-      Scene_Base.prototype.cwToTheBottom = function() {
-          var currentCmd = this.currentListCommand();
-          consoleLogWIndex('コマンド順番変更', this.currentListIndex(), currentCmd);
-          this._touchWindow._customList.forEach(function(child){
-              if (child.index > currentCmd.index) {
-                  child.index--;
-                  return true;
-              }
-          },this);
-          currentCmd.index = this._touchWindow._customList.length - 1;
-          this._touchWindow.sortCustomList();
-          consoleLogWCommand();
-          this.cwSetCmdListOrder();
-      };
-
-      Scene_Base.prototype.addCustomCommandAt = function(index) {
-          var i = this._touchWindow._customList.length;
-          this._touchWindow.addCustomCommandAt(index, 'コマンド' + i, 'cmd' + i, 'true');
-          consoleLogWIndex('コマンド追加', index, this._touchWindow._customList);
-          consoleLogWCommand();
-          this.cwSetCmdListOrder();
-      };
-
-      Scene_Base.prototype.cwAddTop = function() {
-          var index = this.currentListIndex();
-          this.addCustomCommandAt(index);
-      };
-    
-      Scene_Base.prototype.cwAddBottom = function() {
-          var index = this.currentListIndex() + 1;
-          this.addCustomCommandAt(index);
-      };
-
-      Scene_Base.prototype.cwHideCommand = function() {
-          var index = this.currentListIndex();
-          this._touchWindow._customList[index].visible = false;
-          consoleLogWIndex('コマンド非表示', index, this._touchWindow._customList[index]);
-          this.cwSetCmdListOrder();
-      };
-    
-      Scene_Base.prototype.cwDeleteCommand = function() {
-          var index = this.currentListIndex();
-          var data = this._touchWindow._customList.splice(index, 1);
-          this._touchWindow._customList.forEach(function(cmd, i){
-              if (i >= index) {
-                  cmd.index--;
-              }
-          });
-          consoleLogWIndex('コマンド削除', null, data);
-          this.cwSetCmdListOrder();
-      };
-
-      var consoleLogWIndex = function(text, index, result) {
-          var scene = SceneManager._scene;
-          text = text + '：';
-          if(index == null) index = this._touchWindowIndex;
-          var name = !!scene._touchWindow ? scene._touchWindow.name : undefined;
-          console.log(text, name, '行数', index, '内容', result);
-      };
-
-      var consoleLogWCommand = function() {
-          SceneManager._scene._touchWindow._customList.forEach(function(cmd){
-              console.log('行番', cmd.index, 'コマンド名', cmd.name, '表示', cmd.visible);
-          });
-      };
-
-      //------------------------------------------------------------------------
-      //セレクトウィンドウのテキスト編集用ウィンドウを設定
-      //------------------------------------------------------------------------
-      Scene_Base.prototype.createFtkrSelectOptions = function() {
-          var width = 240, textWidth = 220, statusWidth = 0;
-          var layer = this.configLayer();
-          this._selectConfigWindow = new Window_FtkrOptions(layer, width, textWidth, statusWidth);
-          this._selectConfigWindow.setHandler('cancel', this.cwCloseConfig.bind(this));
-          layer.addChild(this._selectConfigWindow);
-      };
-
-      //セレクトコンテンツの設定読込
-      Scene_Base.prototype.setConfigContents_select = function(configValues) {
-          var configContents = [
-              {type: 'command', name: 'テキスト編集', symbol: 'setText', enabled: true, options: {method:this.cwSetText.bind(this)}},
-              {type: 'subConfig', name: 'テキスト追加', symbol: 'addText', enabled: true, options: {subConfigs: [
-                  {type: 'command', name: '上部に追加', symbol: 'addTop',       enabled: true, options: {method:this.cwAddTopText.bind(this)}},
-                  {type: 'command', name: '下部に追加', symbol: 'addBottom',    enabled: true, options: {method:this.cwAddBottomText.bind(this)}},
-              ], width: 240, textWidth: 204, statusWidth: 0}},
-              {type: 'command', name: 'テキスト削除　',   symbol: 'delete', enabled: true, options: {method:this.cwDeleteCommand.bind(this)}},
-          ];
-          //設定したコンテンツデータをオプションウィンドウに反映
-          this._selectConfigWindow.setConfigContents(configContents, configValues);
-      };
-    
-      //------------------------------------------------------------------------
-      //コモンウィンドウのテキスト編集用ウィンドウを設定
-      //------------------------------------------------------------------------
-      Scene_Base.prototype.createFtkrCommonOptions = function() {
-          var width = 240, textWidth = 220, statusWidth = 0;
-          var layer = this.configLayer();
-          this._commonConfigWindow = new Window_FtkrOptions(layer, width, textWidth, statusWidth);
-          this._commonConfigWindow.setHandler('cancel', this.cwCloseConfig.bind(this));
-          layer.addChild(this._commonConfigWindow);
-      };
-
-      //コモンコンテンツの設定読込
-      Scene_Base.prototype.setConfigContents_common = function(configValues) {
-          var configContents = [
-              {type: 'command', name: 'テキスト編集', symbol: 'setText', enabled: true, options: {method:this.cwSetText.bind(this)}},
-              {type: 'subConfig', name: '表示順番', symbol: 'order', enabled: true, options: {subConfigs: [
-                  {type: 'command', name: '上部に移動　', symbol: 'toTop',       enabled: true, options: {method:this.cwToTop.bind(this)}},
-                  {type: 'command', name: '最上部に移動', symbol: 'toTheTop',    enabled: true, options: {method:this.cwToTheTop.bind(this)}},
-                  {type: 'line'},
-                  {type: 'command', name: '下部に移動　', symbol: 'toBottom',    enabled: true, options: {method:this.cwToBottom.bind(this)}},
-                  {type: 'command', name: '最下部に移動', symbol: 'toTheBottom', enabled: true, options: {method:this.cwToTheBottom.bind(this)}},
-              ], width: 240, textWidth: 204, statusWidth: 0}},
-              {type: 'subConfig', name: 'テキスト追加', symbol: 'addText', enabled: true, options: {subConfigs: [
-                  {type: 'command', name: '上部に追加', symbol: 'addTop',       enabled: true, options: {method:this.cwAddTopText.bind(this)}},
-                  {type: 'command', name: '下部に追加', symbol: 'addBottom',    enabled: true, options: {method:this.cwAddBottomText.bind(this)}},
-              ], width: 240, textWidth: 204, statusWidth: 0}},
-              {type: 'command', name: 'テキスト削除　',   symbol: 'delete', enabled: true, options: {method:this.cwDeleteCommand.bind(this)}},
-          ];
-          //設定したコンテンツデータをオプションウィンドウに反映
-          this._commonConfigWindow.setConfigContents(configContents, configValues);
-      };
-    
-      Scene_Base.prototype.cwSetText = function() {
-          var list = this._touchWindow._customList[this._touchWindowIndex];
-          if (!(list instanceof Object)) list = {name:'', index:this._touchWindowIndex, visible:true};
-          var oldStr = list.name;
-          list.name = getPromptResult(list.name);
-          if (oldStr !== list.name) {
-              consoleLogWIndex('テキスト編集', null, list.name);
-          }
-          this.cwSetCmdListOrder();
-      };
-
-      Scene_Base.prototype.addCustomTextAt = function(index) {
-          var i = this._touchWindow._customList.length;
-          this._touchWindow.addCustomCommandAt(index, 'テキスト' + i);
-          consoleLogWIndex('テキスト追加', index, this._touchWindow._customList);
-          consoleLogWCommand();
-          this.cwSetCmdListOrder();
-      };
-
-      Scene_Base.prototype.cwAddTopText = function() {
-          var index = this._touchWindowIndex;
-          this.addCustomTextAt(index);
-          /*
-          var i = this._touchWindow._customList.length;
-          this._touchWindow.addCustomCommandAt(index, 'テキスト' + i);
-          consoleLogWIndex('テキスト追加', index, this._touchWindow._customList);
-          consoleLogWCommand();
-          this.cwSetCmdListOrder();
-          */
-      };
-    
-      Scene_Base.prototype.cwAddBottomText = function() {
-          var index = this._touchWindowIndex + 1;
-          this.addCustomTextAt(index);
-          /*
-          var i = this._touchWindow._customList.length;
-          this._touchWindow.addCustomCommandAt(index, 'テキスト' + i);
-          consoleLogWIndex('テキスト追加', index, this._touchWindow._customList);
-          consoleLogWCommand();
-          this.cwSetCmdListOrder();
-          */
-      };
-
-      //------------------------------------------------------------------------
-      //ウィンドウ削除時の確認ウィンドウを設定
-      //------------------------------------------------------------------------
-      Scene_Base.prototype.createConfTitleWindow = function() {
-          var layer = this.configLayer();
-          this._stsConfTitleWindow = new Window_OSWConfTitle();
-          layer.addChild(this._stsConfTitleWindow);
-          this._stsConfTitleWindow.hide();
-      };
-
-      Scene_Base.prototype.createConfWindow = function() {
-          this._stsConfWindow = new Window_OSWConf();
-          var layer = this.configLayer();
-          var window = this._stsConfWindow;
-          window.setHandler('delete', this.onConfirmationOk.bind(this));
-          window.setHandler('cancel', this.onConfirmationCancel.bind(this));
-          layer.addChild(window);
-      };
-
-      Scene_Base.prototype.onConfirmationOk = function() {
-          this.deleteTouchWindow();
-          this._touchWindow = null;
-          this._stsConfTitleWindow.hide();
-          this._stsConfWindow.hide();
-          this._stsConfWindow.deactivate();
-          this._mainConfigWindow.hide();
-      };
-
-      Scene_Base.prototype.deleteTouchWindow = function() {
-          console.log('ウィンドウ削除：', this._touchWindow.name);
-          this._windowLayer.removeChild(this._touchWindow);
-          var type = this._touchWindow._windowType;
-          var windowId = this._touchWindow._windowId;
-          switch(type) {
-              case Game_OswData.WINDOW_COMMON:
-                  this._oswCommonWindows[windowId] = null;
-                  break;
-              case Game_OswData.WINDOW_COMMAND:
-                  this._oswCommandWindows[windowId] = null;
-                  break;
-              case Game_OswData.WINDOW_SELECTABLE:
-                  this._oswSelectWindows[windowId] = null;
-                  break;
-              default:
-                  return;
-          }
-          this.removeOswWindow(convertWindowName(type), windowId);
-      };
-
-      Scene_Base.prototype.removeOswWindow = function(windowType, windowId) {
-          this._oswWindowList.some(function(list, i){
-              if (list.type == windowType && list.id == windowId) {
-                  this._oswWindowList.splice(i, 1);
-                  return true;
-              }
-          },this);
-          this.saveOswWindowList();
-      };
-
-      Scene_Base.prototype.onConfirmationCancel = function() {
-          this._stsConfTitleWindow.hide();
-          this._stsConfWindow.hide();
-          this._stsConfWindow.deactivate();
-          this._mainConfigWindow.activate();
-      };
-
-      //------------------------------------------------------------------------
-      //ウィンドウ作成コマンド用のウィンドウを設定
-      //------------------------------------------------------------------------
-      Scene_Base.prototype.createSettingNewWindow = function() {
-          this._cwCreateNewW = new Window_CreateNewWindowCommand();
-          this._cwCreateNewW.setHandler('common', this.cwSetCommon.bind(this));
-          this._cwCreateNewW.setHandler('select', this.cwSetSelect.bind(this));
-          this._cwCreateNewW.setHandler('command', this.cwSetCommand.bind(this));
-          this._cwCreateNewW.setHandler('cancel', this.cwCreateNewCancel.bind(this));
-          this._settingLayer.addChild(this._cwCreateNewW);
-      };
-
-      Scene_Base.prototype.cwSetCommon = function() {
-          this.cwCreateNewWindow(Game_OswData.WINDOW_COMMON);
-      };
-
-      Scene_Base.prototype.cwSetSelect = function() {
-          this.cwCreateNewWindow(Game_OswData.WINDOW_SELECTABLE);
-      };
-
-      Scene_Base.prototype.cwSetCommand = function() {
-          this.cwCreateNewWindow(Game_OswData.WINDOW_COMMAND);
-      };
-
-      Scene_Base.prototype.cwCreateNewWindow = function(windowType, windowId) {
-          var createWindow = null;
-          switch (windowType) {
-              case Game_OswData.WINDOW_COMMON:
-                  if(window !== undefined) {
-                      if (!this._oswCommonWindows) this._oswCommonWindows = [];
-                      if(!this._oswCommonWindows.some(function(window, i){
-                          if (!window) {
-                              windowId = i;
-                              return true;
-                          }
-                      })) windowId = this._oswCommonWindows.length;
-                  }
-                  this.createOswCommonWindow(windowId);
-                  createWindow = this._oswCommonWindows[windowId];
-                  break;
-              case Game_OswData.WINDOW_COMMAND:
-                  if(window !== undefined) {
-                      if(!this._oswCommandWindows) this._oswCommandWindows = [];
-                      if(!this._oswCommandWindows.some(function(window, i){
-                          if (!window) {
-                              windowId = i;
-                              return true;
-                          }
-                      })) windowId = this._oswCommandWindows.length;
-                  }
-                  this.createOswCommandWindow(windowId);
-                  createWindow = this._oswCommandWindows[windowId];
-                  break;
-              case Game_OswData.WINDOW_SELECTABLE:
-                  if(window !== undefined) {
-                      if(!this._oswSelectWindows) this._oswSelectWindows = [];
-                      if(!this._oswSelectWindows.some(function(window, i){
-                          if (!window) {
-                              windowId = i;
-                              return true;
-                          }
-                      })) windowId = this._oswSelectWindows.length;
-                  }
-                  this.createOswSelectWindow(windowId);
-                  createWindow = this._oswSelectWindows[windowId];
-                  break;
-          }
-          SoundManager.playMagicEvasion();
-          this.addOswWindow(convertWindowName(windowType), windowId);
-          this.saveOswWindowList();
-          createWindow.priority = this._windowLayer.children.length - 1;
-          createWindow.name = windowId + '_' + getClassName(createWindow);
-          createWindow.saveContainerInfo();
-          this._cwCreateNewW.hide();
-          console.log('ウィンドウ作成：', createWindow.name);
-          this.cwCloseConfig();
-          return createWindow;
-      };
-
-      Scene_Base.prototype.cwCreateNewCancel = function() {
-          this._mainConfigWindow.activate();
-          this._cwCreateNewW.hide();
-      };
-
-      Scene_Base.prototype.createFtkrStatusListOptions = function() {
-          this._statusListWindow = new Window_StatusListConfig();
-          this._statusListWindow.setHandler('ok',     this.cwStatusListOk.bind(this));
-          this._statusListWindow.setHandler('cancel', this.cwStatusListCancel.bind(this));
-          this._dispConfigWindow._statusListWindow = this._statusListWindow;
-//          this._settingLayer.addChild(this._statusListWindow);
-          console.log('create', 'statusList');
-      };
-
-      Scene_Base.prototype.cwStatusListOk = function() {
-          this._statusListWindow.activate();
-      };
-
-      Scene_Base.prototype.cwStatusListCancel = function() {
-          this._statusListWindow.hide();
-          this._dispConfigWindow.childWindows()[5].activate();
-      };
-
-      //=============================================================================
-      // 編集メニューのサブコマンドウィンドウの設定
-      //=============================================================================
-      function Window_CreateNewWindowCommand() {
-          this.initialize.apply(this, arguments);
-      }
-
-      Window_CreateNewWindowCommand.prototype = Object.create(Window_Command.prototype);
-      Window_CreateNewWindowCommand.prototype.constructor = Window_CreateNewWindowCommand;
-      
-      Window_CreateNewWindowCommand.prototype.initialize = function() {
-          this._ftkrEditor = true;
-          Window_Command.prototype.initialize.call(this, 0, 0);
-          var x = Graphics.boxWidth - this.windowWidth();
-          var y = Graphics.boxHeight - this.windowHeight();
-          this.move(x/2, y/2, this.width, this.height);
-          this.deactivate();
-          this.hide();
-      };
-
-      Window_CreateNewWindowCommand.prototype.isOswOption = function() {
-          return true;
-      };
-
-      Window_CreateNewWindowCommand.prototype.windowWidth = function() {
-          return 240;
-      };
-
-      Window_CreateNewWindowCommand.prototype.standardFontSize = function() {
-          return optionFontSize;
-      };
-
-      Window_CreateNewWindowCommand.prototype.lineHeight = function() {
-          return optionLineHeight;
-      };
-
-      Window_CreateNewWindowCommand.prototype.makeCommandList = function() {
-          this.addCommand('コモンウィンドウ',   'common');
-          this.addCommand('セレクトウィンドウ', 'select');
-          this.addCommand('コマンドウィンドウ', 'command');
-      };
-
-      //=============================================================================
-      // パラメータ設定用ウィンドウベース
-      //=============================================================================
-      function Window_FtkrOptionsBase() {
-          this.initialize.apply(this, arguments);
-      }
-
-      Window_FtkrOptionsBase.prototype = Object.create(Window_Command.prototype);
-      Window_FtkrOptionsBase.prototype.constructor = Window_FtkrOptionsBase;
-      
-      Window_FtkrOptionsBase.prototype.initialize = function(layer, width, textWidth, statusWidth, symbol, parentWindow) {
-          this._ftkrEditor = true;
-          this._parentWindow   = parentWindow;
-          this._childWindows = [];
-          this._windowSymbol   = symbol;
-          this._windowWidth    = width;
-          this._textWidth      = textWidth;
-          this._statusWidth    = statusWidth;
-          this._configContents = [];
-          this._configValues   = {};
-          this._oldConfigValues = {};
-          this.setWindowLayer(layer);
-          Window_Command.prototype.initialize.call(this, 0, 0);
-//          this.updatePlacement();
-          this.deactivate();
-          this.hide();
-      };
-
-      Window_FtkrOptionsBase.prototype.isOswOption = function() {
-          return true;
-      };
-
-      //親ウィンドウかどうかの判定
-      Window_FtkrOptionsBase.prototype.isParent = function() {
-          return !this._parentWindow;
-      };
-
-      Window_FtkrOptionsBase.prototype.childWindows = function() {
-          return this._childWindows;
-      };
-
-      Window_FtkrOptionsBase.prototype.windowLayer = function() {
-          return this._windowLayer;
-      };
-
-      Window_FtkrOptionsBase.prototype.setWindowLayer = function(layer) {
-          this._windowLayer = layer;
-      };
-
-      Window_FtkrOptionsBase.prototype.standardFontSize = function() {
-          return optionFontSize;
-      };
-
-      Window_FtkrOptionsBase.prototype.lineHeight = function() {
-          return optionLineHeight;
-      };
-
-      //再描画処理
-      Window_FtkrOptionsBase.prototype.refresh = function() {
-          this.clearCommandList();
-          this.makeCommandList();
-          this.updatePlacement();
-          this.createContents();
-          Window_Selectable.prototype.refresh.call(this);
-          this.childWindows().forEach(function(window){
-              if (window) window.refresh();
-          },this);
-      };
-
-      //------------------------------------------------------------------------
-      //コンフィグ内容の参照
-      //------------------------------------------------------------------------
-      Window_FtkrOptionsBase.prototype.setConfigContents = function(configContents, configValues) {
-          this._configContents = configContents;
-          this._oldConfigValues = configValues;
-          this._configValues = copyConfigSymbolvalues(configContents, configValues);
-          this.refresh();
-      };
-
-      Window_FtkrOptionsBase.prototype.configContentOptions = function(index) {
-          return this.configContents()[index].options;
-      };
-
-      Window_FtkrOptionsBase.prototype.findConfigContentSymbol = function(symbol) {
-          for (var i = 0; i < this.configContents().length; i++) {
-              if (this.configContents()[i].symbol === symbol) {
-                  return i;
-              }
-          }
-          return -1;
-      };
-
-      Window_FtkrOptionsBase.prototype.configContents = function() {
-          return this.isParent() ? this._configContents :
-              this._parentWindow._configContents;
-      };
-
-      //------------------------------------------------------------------------
-      //コンフィグデータの参照
-      //------------------------------------------------------------------------
-      Window_FtkrOptionsBase.prototype.oldConfigValues = function() {
-          return this.isParent() ? this._oldConfigValues :
-              this._parentWindow._oldConfigValues;
-      };
-
-      Window_FtkrOptionsBase.prototype.configValues = function() {
-          return this.isParent() ? this._configValues :
-              this._parentWindow._configValues;
-      };
-
-      Window_FtkrOptionsBase.prototype.getConfigValue = function(symbol) {
-          return this.isParent() ? this._configValues[symbol] :
-              this._parentWindow._configValues[symbol];
-      };
-
-      Window_FtkrOptionsBase.prototype.setConfigValue = function(symbol, value) {
-          if (this.isParent()) {
-              this._configValues[symbol] = value;
-          } else {
-              this._parentWindow._configValues[symbol] = value;
-          }
-      };
-
-      //------------------------------------------------------------------------
-      //サイズ設定
-      //------------------------------------------------------------------------
-      Window_FtkrOptionsBase.prototype.windowWidth = function() {
-          return this._windowWidth;
-      };
-      
-      Window_FtkrOptionsBase.prototype.windowHeight = function() {
-          return this.fittingHeight(Math.min(this._list.length, 12));
-      };
-      
-      Window_FtkrOptionsBase.prototype.textWidth = function() {
-          return this._textWidth;
-      };
-
-      Window_FtkrOptionsBase.prototype.statusWidth = function() {
-          return this._statusWidth;
-      };
-
-      Window_FtkrOptionsBase.prototype.updatePlacement = function() {
-          this.width  = this.windowWidth();
-          this.height = this.windowHeight();
-//          this.x = (Graphics.boxWidth - this.width) / 2;
-//          this.y = (Graphics.boxHeight - this.height) / 2;
-      };
-      
-      //------------------------------------------------------------------------
-      //表示するコンテンツリストの設定
-      //------------------------------------------------------------------------
-      Window_FtkrOptionsBase.prototype.makeCommandList = function() {
-          if (this.isParent()) {
-              var configList = this.configContents();
-          } else {
-              var index = this.findConfigContentSymbol(this._windowSymbol);
-              if (index < 0) return;
-              var configList = this.configContentOptions(index).subConfigs;
-          }
-          configList.forEach( function(item) {
-              this.addConfig(item.name, item.type, item.symbol, item.enabled, item.options);
-          },this);
-      };
-
-      Window_FtkrOptionsBase.prototype.addConfig = function(name, type, symbol, enabled, options) {
-          if (enabled === undefined) {
-              enabled = true;
-          }
-          if (options === undefined || !(options instanceof Object)) {
-              options = {};
-          }
-          if (type !== undefined && type.toUpperCase() === 'COMMAND' && !!this._handlers) {
-              this.setHandler(symbol, options.method);
-          }
-          this._list.push({ name: name, type: type, symbol: symbol, enabled: enabled, ext: null, options:options});
-      };
-
-      Window_FtkrOptionsBase.prototype.list = function(index) {
-          return this._list[index];
-      };
-
-      Window_FtkrOptionsBase.prototype.commandName = function(index) {
-          return this.list(index).name;
-      };
-
-      Window_FtkrOptionsBase.prototype.commandSymbol = function(index) {
-          return this.list(index).symbol;
-      };
-
-      Window_FtkrOptionsBase.prototype.isCommandEnabled = function(index) {
-          return this.list(index).enabled;
-      };
-
-      Window_FtkrOptionsBase.prototype.commandType = function(index) {
-          return this.list(index).type;
-      };
-
-      Window_FtkrOptionsBase.prototype.commandOptions = function(index) {
-          return this.list(index).options;
-      };
-
-      //------------------------------------------------------------------------
-      //描画処理
-      //------------------------------------------------------------------------
-      Window_FtkrOptionsBase.prototype.drawItem = function(index) {
-          var rect = this.itemRectForText(index);
-          var statusWidth = this.statusWidth();
-          var titleWidth = this.textWidth();
-          this.resetTextColor();
-          this.changePaintOpacity(this.isCommandEnabled(index));
-          if (this.commandType(index).toUpperCase() === 'LINE') {
-              this.drawHorzLine(rect.y);
-          } else {
-              this.drawText(this.commandName(index), rect.x, rect.y, titleWidth, 'left');
-              this.drawText(this.statusText(index), rect.width - statusWidth, rect.y, statusWidth, 'right');
-          }
-      };
-      
-      Window_FtkrOptionsBase.prototype.statusText = function(index) {
-          var type   = this.commandType(index);
-          var symbol = this.commandSymbol(index);
-          var value  = this.getConfigValue(symbol);
-          var options = this.commandOptions(index);
-          return this.statusTextBase(type, options, value);
-      };
-
-      Window_FtkrOptionsBase.prototype.statusTextBase = function(type, options, value) {
-          switch((type + '').toUpperCase()) {
-              case 'NUMBER':
-                  return this.numberStatusText(options, value);
-              case 'SELECT':
-                  return this.selectStatusText(options, value);
-              case 'BOOLEAN':
-                  return this.booleanStatusText(value);
-              case 'DATA':
-                  return this.dataStatusText(options, value);
-              case 'REFER':
-                  return this.referenceStatusText(options, value);;
-              case 'NONE':
-              case 'COMMAND':
-              case 'HANDLER':
-                  return '';
-              default:
-                  return value;
-          }
-      };
-
-      //------------------------------------------------------------------------
-      // コンフィグデータの変更処理
-      //------------------------------------------------------------------------
-      Window_FtkrOptionsBase.prototype.redrawAllItems = function() {
-          var topIndex = this.topIndex();
-          for (var i = 0; i < this.maxPageItems(); i++) {
-              var index = topIndex + i;
-              if (index < this.maxItems()) {
-                  this.redrawItem(index);
-              }
-          }
-      };
-
-      Window_FtkrOptionsBase.prototype.changeValue = function(symbol, value) {
-          var lastValue = this.getConfigValue(symbol);
-          if (lastValue !== value) {
-              this.setConfigValue(symbol, value);
-              this.redrawAllItems();
-              SoundManager.playCursor();
-          }
-      };
-
-      //------------------------------------------------------------------------
-      //行線 LINE
-      //------------------------------------------------------------------------
-      Window_FtkrOptionsBase.prototype.drawHorzLine = function(y) {
-          var lineY = y + this.lineHeight() / 2 - 1;
-          this.contents.paintOpacity = 48;
-          this.contents.fillRect(0, lineY, this.contentsWidth(), 2, this.lineColor());
-          this.contents.paintOpacity = 255;
-      };
-
-      Window_FtkrOptionsBase.prototype.lineColor = function() {
-          return this.normalColor();
-      };
-      
-      //------------------------------------------------------------------------
-      //文字列 STRING
-      //------------------------------------------------------------------------
-      Window_FtkrOptionsBase.prototype.inputStringValue = function(symbol) {
-          var value  = this.getConfigValue(symbol);
-          value = getPromptResult(value);
-          this.changeValue(symbol, value);
-      };
-
-      //------------------------------------------------------------------------
-      //数値 NUMBER
-      //------------------------------------------------------------------------
-      Window_FtkrOptionsBase.prototype.adjustNumberStatus = function(options, value) {
-          value = (value === undefined || isNaN(value)) ? 0 : Number(value);
-          if (options.min !== undefined) value = Math.max(value, options.min);
-          if (options.max !== undefined) value = Math.min(value, options.max);
-          return value;
-      };
-
-      Window_FtkrOptionsBase.prototype.numberStatusText = function(options, value) {
-          return this.adjustNumberStatus(options, value);
-      };
-
-      Window_FtkrOptionsBase.prototype.inputNumberValue = function(symbol) {
-          var value  = this.getConfigValue(symbol);
-          value = Number(getPromptResult(value));
-          this.changeValue(symbol, value);
-      };
-
-      Window_FtkrOptionsBase.prototype.changeNumberValue = function(symbol, options, flag) {
-          var value  = this.getConfigValue(symbol);
-          value += this.numberOffset(options) * flag;
-          value = this.adjustNumberStatus(options, value);
-          this.changeValue(symbol, value);
-      };
-
-      Window_FtkrOptionsBase.prototype.numberOffset = function(options) {
-          var offset = Number(options.offset) || 0;
-          return offset * (Input.isPressed('shift') ? 10 : 1);
-      };
-
-      //------------------------------------------------------------------------
-      //論理型 BOOLEAN
-      //------------------------------------------------------------------------
-      Window_FtkrOptionsBase.prototype.booleanStatusText = function(value) {
-          return !!value ? 'ON' : 'OFF';
-      };
-
-      Window_FtkrOptionsBase.prototype.changeBooleanValue = function(symbol) {
-          var value  = this.getConfigValue(symbol);
-          this.changeValue(symbol, !value);
-      };
-
-      //------------------------------------------------------------------------
-      //セレクトリスト SELECT
-      //------------------------------------------------------------------------
-      Window_FtkrOptionsBase.prototype.convertOptionSelectValue = function(options, value) {
-          if(isNaN(value)) {
-              options.select.some(function(data, i){
-                  if(data && data == value) {
-                      value = i;
-                      return true;
-                  }
-              });
-          }
-          return this.adjustSelectStatus(options, value);
-      };
-
-      Window_FtkrOptionsBase.prototype.adjustSelectStatus = function(options, value) {
-          value = (value === undefined || isNaN(value)) ? 0 : Number(value);
-          var min = 0;
-          var max = options.select.length - 1;
-          if (value < min) value = max;
-          if (value > max) value = min;
-          return value;
-      };
-
-      Window_FtkrOptionsBase.prototype.selectStatusText = function(options, value) {
-          value = this.convertOptionSelectValue(options, value);
-          return options.select[value] || 'なし';
-      };
-      /*
-      Window_FtkrOptionsBase.prototype.inputSelectValue = function(symbol, options) {
-          var value  = this.getConfigValue(symbol);
-          var data   = options.select;
-          value = isNaN(value) ? value : data[value];
-          var result = getPromptResult(value);
-          value = isNaN(result) ? result : Number(result);
-          this.changeValue(symbol, value);
-      };*/
-
-      Window_FtkrOptionsBase.prototype.changeSelectValue = function(symbol, options, flag) {
-          var value  = this.getConfigValue(symbol);
-          value = this.convertOptionSelectValue(options, value);
-          value += flag;
-          value = this.adjustSelectStatus(options, value);
-          this.changeValue(symbol, value);
-      };
-
-      //------------------------------------------------------------------------
-      //データリスト DATA
-      //------------------------------------------------------------------------
-      Window_FtkrOptionsBase.prototype.optionDataList = function(options) {
-          return options.enabled ? options.data.filter(function(data){
-              return !!data ? eval(options.enabled) : true;
-          }) : options.data;
-      };
-
-      Window_FtkrOptionsBase.prototype.adjustDataStatus = function(options, value) {
-          var min = 0;
-          var max = this.optionDataList(options).length - 1;
-          value = (value === undefined || isNaN(value)) ? min : Number(value);
-          if (value < min) value = max;
-          if (value > max) value = min;
-          return value;
-      };
-
-      Window_FtkrOptionsBase.prototype.convertOptionDataValue = function(options, value) {
-          if(isNaN(value)) {
-              this.optionDataList(options).some(function(data, i){
-                  if(data && (options.property && data[options.property] == value) || data == value) {
-                      value = i;
-                      return true;
-                  }
-              });
-          }
-          return this.adjustDataStatus(options, value);
-      };
-
-      Window_FtkrOptionsBase.prototype.dataStatusText = function(options, value) {
-          var data = this.optionDataList(options);
-          var prop = options.property;
-          value = this.convertOptionDataValue(options, value);
-          if (!value && !data[0]) return 'なし';
-          return prop ? data[value][prop] : data[value];
-      };
-
-      Window_FtkrOptionsBase.prototype.changeDataValue = function(symbol, options, flag) {
-          var data = this.optionDataList(options);
-          var value  = this.getConfigValue(symbol);
-          value = this.convertOptionDataValue(options, value);
-          value += flag;
-          value = this.adjustDataStatus(options, value);
-          this.changeValue(symbol, value);
-      };
-
-      //------------------------------------------------------------------------
-      //参照 REFER
-      //------------------------------------------------------------------------
-      Window_FtkrOptionsBase.prototype.getReferenceConfig = function(options) {
-          var refValues = options.refSymbol.map(function(symbol){
-              return this.getConfigValue(symbol);
-          },this);
-          var config = options.refData;
-          refValues.forEach(function(value){
-              config = config[value];
-          });
-          if (!config) config = {type:'none'};
-          return config;
-      };
-
-      Window_FtkrOptionsBase.prototype.referenceStatusText = function(options, value) {
-          var config = this.getReferenceConfig(options);
-          var result = this.statusTextBase(config.type, config.options, value);
-          return result;
-      };
-
-      Window_FtkrOptionsBase.prototype.inputReferenceValue = function(symbol, options, flag) {
-          var config = this.getReferenceConfig(options);
-          this.processInputValueBase(config.type, symbol, config.options);
-      };
-
-      Window_FtkrOptionsBase.prototype.changeReferenceValue = function(symbol, options, flag) {
-          var config = this.getReferenceConfig(options);
-          this.processChangeValueBase(config.type, symbol, config.options, flag);
-      };
-
-      //------------------------------------------------------------------------
-      //サブコンフィグ SUBCONFIG
-      //------------------------------------------------------------------------
-      Window_FtkrOptionsBase.prototype.showSubConfigs = function(symbol) {
-          if(this.childWindows().some(function(window){
-              if (window._windowSymbol === symbol) {
-                  window.setPositionReferWindowIndex(this);
-                  window.activateWindow();
-                  return true;
-              }
-          },this)) {
-              this.deactivate();
-              SoundManager.playCursor();
-          }
-      };
-
-      //------------------------------------------------------------------------
-      //決定(コンフィグデータの保存) SAVE
-      //------------------------------------------------------------------------
-      Window_FtkrOptionsBase.prototype.callSaveConfigValues = function(symbol) {
-          this.deactivate();
-          this.hide();
-          this.configContents().forEach(function(config){
-              if (config.type.toUpperCase() == 'SUBCONFIG') {
-                  config.options.subConfigs.forEach(function(subConf){
-                      this.saveConfigValue(subConf);
-                  },this);
-              } else {
-                  this.saveConfigValue(config);
-              }
-          },this);
-          SoundManager.playSave();
-          this.callHandler('saveConfig');
-      };
-
-      Window_FtkrOptionsBase.prototype.saveConfigValue = function(config) {
-          var type    = config.type;
-          var symbol  = config.symbol;
-          var options = config.options;
-          if (!symbol) return;
-          var value = this.getConfigValue(symbol);
-          var oldValue = this.oldConfigValues()[symbol];
-          if (type.toUpperCase() == 'REFER') {
-              var referConfig = this.getReferenceConfig(options);
-              value = this.convertConfigValue(referConfig, value);
-          } else {
-              value = this.convertConfigValue(config, value);
-              if(value === undefined) return;
-          }
-          if (this.oldConfigValues()[symbol] !== value) {
-              this.oldConfigValues()[symbol] = value;
-              console.log('データ更新：', symbol, value, '←', oldValue);
-          }
-      };
-
-      Window_FtkrOptionsBase.prototype.convertConfigValue = function(config, value) {
-          var type    = config.type;
-          var options = config.options;
-          switch(type.toUpperCase()) {
-              case 'STRING':
-                  return value + '';
-              case 'NUMBER':
-                  return this.adjustNumberStatus(options, value);
-              case 'SELECT':
-                  value = this.convertOptionSelectValue(options, value);
-                  value = options.string ? this.selectStatusText(options, value) : value;
-                  return value === 'なし' ? '' : value;
-              case 'BOOLEAN':
-                  return !!value;
-              case 'DATA':
-                  value = this.convertOptionDataValue(options, value);
-                  return options.string ? this.dataStatusText(options, value) : value;
-              default:
-                  return undefined;
-          }
-      };
-
-      //------------------------------------------------------------------------
-      //決定キーを押したときの処理
-      //------------------------------------------------------------------------
-      Window_FtkrOptionsBase.prototype.isCurrentItemEnabled = function() {
-          return this.currentData() ? this.currentData().enabled : false;
-      };
-
-      Window_FtkrOptionsBase.prototype.processOk = function() {
-          if (this.isCurrentItemEnabled()) {
-              this.processInputValue();
-          } else {
-              this.playBuzzerSound();
-          }
-      };
-
-      Window_FtkrOptionsBase.prototype.processInputValue = function() {
-          var index  = this.index();
-          var type   = this.commandType(index);
-          var symbol = this.commandSymbol(index);
-          var options = this.commandOptions(index);
-          this.processInputValueBase(type, symbol, options);
-      };
-
-      Window_FtkrOptionsBase.prototype.processInputValueBase = function(type, symbol, options) {
-          switch((type + '').toUpperCase()) {
-              case 'STRING':
-                  this.inputStringValue(symbol);
-                  break;
-              case 'NUMBER':
-                  this.inputNumberValue(symbol);
-                  break;
-              case 'SELECT':
-                  this.changeSelectValue(symbol, options);
-                  break;
-              case 'BOOLEAN':
-                  this.changeBooleanValue(symbol);
-                  break;
-              case 'DATA':
-                  this.changeDataValue(symbol, options, 1);
-                  break;
-              case 'REFER':
-                  this.inputReferenceValue(symbol, options);
-                  break;
-              case 'SUBCONFIG':
-                  this.showSubConfigs(symbol);
-                  break;
-              case 'HANDLER':
-                  this.callHandler(symbol);
-                  break;
-              case 'SAVE':
-                  this.callSaveConfigValues();
-                  break;
-              case 'COMMAND':
-                  this.callHandler(symbol);
-                  break;
-          }
-          this.updateInputData();
-      };
-
-      //------------------------------------------------------------------------
-      //キャンセルキーを押したときの処理
-      //------------------------------------------------------------------------
-  /*
-      Window_FtkrOptionsBase.prototype.processCancel = function() {
-          SoundManager.playCancel();
-          this.updateInputData();
-          this.deactivate();
-          this.callCancelHandler();
-      };
-  */
-      //------------------------------------------------------------------------
-      //左右キーを押したときの処理
-      //------------------------------------------------------------------------
-      //右キー
-      Window_FtkrOptionsBase.prototype.cursorRight = function(wrap) {
-          if (this.isCurrentItemEnabled()) {
-              this.processChangeValue(1);
-          } else {
-  //            this.playBuzzerSound();
-          }
-      };
-
-      //左キー
-      Window_FtkrOptionsBase.prototype.cursorLeft = function(wrap) {
-          if (this.isCurrentItemEnabled()) {
-              this.processChangeValue(-1);
-          } else {
-  //            this.playBuzzerSound();
-          }
-      };    
-
-      Window_FtkrOptionsBase.prototype.processChangeValue = function(flag) {
-          var index  = this.index();
-          var type   = this.commandType(index);
-          var symbol = this.commandSymbol(index);
-          var options = this.commandOptions(index);
-          this.processChangeValueBase(type, symbol, options, flag);
-      };
-
-      Window_FtkrOptionsBase.prototype.processChangeValueBase = function(type, symbol, options, flag) {
-          switch((type + '').toUpperCase()) {
-              case 'NUMBER':
-                  this.changeNumberValue(symbol, options, flag);
-                  break;
-              case 'SELECT':
-                  this.changeSelectValue(symbol, options, flag);
-                  break;
-              case 'BOOLEAN':
-                  this.changeBooleanValue(symbol);
-                  break;
-              case 'DATA':
-                  this.changeDataValue(symbol, options, flag);
-                  break;
-              case 'REFER':
-                  this.changeReferenceValue(symbol, options, flag);
-                  break;
-              default:
-                  return;
-          }
-          this.updateInputData();
-      };
-
-      //=============================================================================
-      // パラメータ設定用ウィンドウ
-      //=============================================================================
-      function Window_FtkrOptions() {
-          this.initialize.apply(this, arguments);
-      }
-
-      Window_FtkrOptions.prototype = Object.create(Window_FtkrOptionsBase.prototype);
-      Window_FtkrOptions.prototype.constructor = Window_FtkrOptions;
-      
-      Window_FtkrOptions.prototype.initialize = function(layer, width, textWidth, statusWidth, symbol) {
-          width = width || 400;
-          textWidth = textWidth || 240;
-          statusWidth = statusWidth || 120;
-          Window_FtkrOptionsBase.prototype.initialize.call(this, layer, width, textWidth, statusWidth, symbol);
-          this.createChildWindows(width, textWidth, statusWidth);
-      };
-
-      Window_FtkrOptions.prototype.createChildWindows = function(width, textWidth, statusWidth) {
-          this._childWindows.length = 0;
-          this.configContents().forEach(function(config){
-              if(config.type && config.type.toUpperCase() === 'SUBCONFIG' && config.symbol) {
-                  width       = config.options.width || width;
-                  textWidth   = config.options.textWidth || textWidth;
-                  statusWidth = config.options.statusWidth || statusWidth;
-                  var childWindow = new Window_FtkrOptionsBase(this.windowLayer(), width, textWidth, statusWidth, config.symbol, this);
-                  childWindow.setHandler('cancel',     this.hideChildWindows.bind(this, config.symbol));
-                  childWindow.setHandler('saveConfig', this.saveConfigValues.bind(this, config.symbol));
-                  this._childWindows.push(childWindow);
-              }
-          },this);
-      };
-
-      Window_FtkrOptions.prototype.hideAll = function() {
-          this.hideChildWindows();
-          this.deactivate();
-          this.hide();
-      };
-
-      Window_FtkrOptions.prototype.hideChildWindows = function(symbol) {
-          this.activate();
-          this.childWindows().forEach(function(window){
-              window.hide();
-          });
-      };
-
-      Window_FtkrOptions.prototype.saveConfigValues = function(symbol) {
-          this.hideChildWindows();
-          SceneManager._scene.saveConfigValues();
-          this.callHandler('cancel');
-      };
-
-      Window_FtkrOptions.prototype.setConfigContents = function(configContents, configValues) {
-          this.childWindows().forEach(function(window){
-              this.windowLayer().removeChild(window);
-          },this);
-          this._configContents = configContents;
-          this._oldConfigValues = configValues;
-          this._configValues = copyConfigSymbolvalues(configContents, configValues);
-          this.createChildWindows(this.windowWidth(), this.textWidth(), this.statusWidth());
-          this.refresh();
-          this.childWindows().forEach(function(window){
-              this.windowLayer().addChild(window);
-          },this);
-          if (this._statusListWindow) this.windowLayer().addChild(this._statusListWindow);
-          console.log('create', 'optionChildren');
-      };
-
-      //=============================================================================
-      // オプション用コマンドウィンドウ
-      //=============================================================================
-      function Window_MainConfigCommand() {
-          this.initialize.apply(this, arguments);
-      }
-
-      Window_MainConfigCommand.prototype = Object.create(Window_Command.prototype);
-      Window_MainConfigCommand.prototype.constructor = Window_MainConfigCommand;
-
-      Window_MainConfigCommand.prototype.initialize = function() {
-          this._ftkrEditor = true;
-          this._touchWindow = null;
-          Window_Command.prototype.initialize.call(this, 0, 0);
-          this.deactivate();
-          this.hide();
-      };
-
-      Window_MainConfigCommand.prototype.isOswOption = function() {
-          return true;
-      };
-
-      Window_MainConfigCommand.prototype.windowWidth = function() {
-          return 240;
-      };
-
-      Window_MainConfigCommand.prototype.standardFontSize = function() {
-          return optionFontSize;
-      };
-
-      Window_MainConfigCommand.prototype.lineHeight = function() {
-          return optionLineHeight;
-      };
-
-      Window_MainConfigCommand.prototype.setWindow = function(window) {
-          this._touchWindow = window;
-          this.refresh();
-      };
-
-      Window_MainConfigCommand.prototype.updatePlacement = function() {
-          this.x = (Graphics.boxWidth - this.width) / 2;
-          this.y = (Graphics.boxHeight - this.height) / 2;
-      };
-
-      Window_MainConfigCommand.prototype.refresh = function() {
-          this.clearCommandList();
-          this.makeCommandList();
-          this.createContents();
-          Window_Selectable.prototype.refresh.call(this);
-      };
-
-      Window_MainConfigCommand.prototype.makeCommandList = function() {
-          this.addCommand('作成', 'create',  !this._touchWindow);
-          this.addCommand('編集', 'edit',    this._touchWindow);
-          this.addCommand('表示', 'display', this._touchWindow);
-          this.addCommand('削除', 'delete',  this._touchWindow && this._touchWindow.isOsw());
-      };
-
-      //=============================================================================
-      // Window_OSWConfTitle
-      //=============================================================================
-
-      function Window_OSWConfTitle() {
-          this.initialize.apply(this, arguments);
-      }
-
-      Window_OSWConfTitle.prototype = Object.create(Window_Base.prototype);
-      Window_OSWConfTitle.prototype.constructor = Window_OSWConfTitle;
-
-      Window_OSWConfTitle.prototype.initialize = function() {
-          this._ftkrEditor = true;
-          this._text = '';
-          Window_Base.prototype.initialize.call(this, 0, 0, 500, this.fittingHeight(1));
-          this.updatePlacement();
-          this.refresh();
-      };
-
-      Window_OSWConfTitle.prototype.isOswOption = function() {
-          return true;
-      };
-
-      Window_OSWConfTitle.prototype.standardFontSize = function() {
-          return optionFontSize;
-      };
-
-      Window_OSWConfTitle.prototype.lineHeight = function() {
-          return optionLineHeight;
-      };
-
-      Window_OSWConfTitle.prototype.updatePlacement = function() {
-          this.x = (Graphics.boxWidth - this.width) / 2;
-          this.y = Graphics.boxHeight / 2 - this.height;
-      };
-
-      Window_OSWConfTitle.prototype.refresh = function () {
-          this.contents.clear();
-          this.drawText(this._text, 0, 0, this.contentsWidth(), 'center');
-      };
-
-      Window_OSWConfTitle.prototype.setConf = function(text) {
-          this._text = text + ' を削除しますか？';
-          this.refresh();
-          this.show();
-      };
-      
-      //=============================================================================
-      // Window_OSWConf
-      //=============================================================================
-
-      function Window_OSWConf() {
-          this.initialize.apply(this, arguments);
-      }
-
-      Window_OSWConf.prototype = Object.create(Window_HorzCommand.prototype);
-      Window_OSWConf.prototype.constructor = Window_OSWConf;
-
-      Window_OSWConf.prototype.initialize = function() {
-          this._ftkrEditor = true;
-          Window_HorzCommand.prototype.initialize.call(this, 0, 0);
-          this.updatePlacement();
-          this.deactivate();
-          this.hide();
-      };
-
-      Window_OSWConf.prototype.isOswOption = function() {
-          return true;
-      };
-
-      Window_OSWConf.prototype.standardFontSize = function() {
-          return optionFontSize;
-      };
-
-      Window_OSWConf.prototype.lineHeight = function() {
-          return optionLineHeight;
-      };
-
-      Window_OSWConf.prototype.maxCols = function() {
-          return 2;
-      };
-
-      Window_OSWConf.prototype.windowWidth = function() {
-          return 500;
-      };
-
-      Window_OSWConf.prototype.updatePlacement = function() {
-          this.x = (Graphics.boxWidth - this.width) / 2;
-          this.y = Graphics.boxHeight / 2;
-      };
-
-      Window_OSWConf.prototype.refresh = function() {
-          this.clearCommandList();
-          this.makeCommandList();
-          this.createContents();
-          Window_Selectable.prototype.refresh.call(this);
-      };
-
-      Window_OSWConf.prototype.makeCommandList = function() {
-          this.addCommand('削除する', 'delete');
-          this.addCommand('削除しない', 'cancel');
-      };
-
-      //=============================================================================
-      // パラメータリスト設定用ウィンドウ
-      //=============================================================================
-      function Window_StatusListConfig() {
-          this.initialize.apply(this, arguments);
-      }
-
-      Window_StatusListConfig.prototype = Object.create(Window_Selectable.prototype);
-      Window_StatusListConfig.prototype.constructor = Window_StatusListConfig;
-
-      Window_StatusListConfig.prototype.initialize = function() {
-        this._ftkrEditor = true;
-        this._statusList = [];
-        var height = this.windowHeight();
-        Window_Selectable.prototype.initialize.call(this, 0, 0, 480, height);
-        this.hide();
-      };
-
-      Window_StatusListConfig.prototype.windowHeight = function() {
-        return this.fittingHeight(10);
-      };
-
-      Window_StatusListConfig.prototype.setStatusList = function(list) {
-        this._statusList = list;
-        this.refresh();
-      };
-
-      Window_StatusListConfig.prototype.standardFontSize = function() {
-          return optionFontSize;
-      };
-
-      Window_StatusListConfig.prototype.lineHeight = function() {
-          return optionLineHeight;
-      };
-
-      Window_StatusListConfig.prototype.maxItems = function() {
-        return this._statusList.length;
-      };
-
-      Window_StatusListConfig.prototype.drawItem = function(index) {
-        var item = this._statusList[index];
-        if (item) {
-            var rect = this.itemRect(index);
-            var width = rect.width / 4;
-            this.drawText(item.text, rect.x, rect.y, width);
-            this.drawText(item.x, rect.x + width*1, rect.y, width);
-            this.drawText(item.y, rect.x + width*2, rect.y, width);
-            this.drawText(item.width, rect.x + width*3, rect.y, width);
+        var FTKR_METHOD_DATALIST = function(scene) {
+            var list = scene ? scene._windowLayer.children : [];
+            return [
+                {type:'none'},
+                {type:'none'},
+                {type:'select', options:{select:SCENE_LISTS}},
+                {type:'data',   options:{data:$dataCommonEvents, property:'name'}},
+                {type:'data',   options:{data:list, property:'name', enabled:'data.isList()', string:true}}
+            ];
+        };
+
+        var FTKR_METHOD_DATALIST2 = [
+            {type:'none'},
+            {type:'none'},
+            {type:'none'},
+            {type:'none'},
+            {type:'select', options:{select:['ウィンドウ残す', 'ウィンドウ非表示化']}}
+        ];
+
+        //=============================================================================
+        //シーン開始時にウィンドウデータを自動保存
+        //=============================================================================
+        var _GDM_Scene_Base_start1 = Scene_Base.prototype.start;
+        Scene_Base.prototype.start = function() {
+            if (autoCreate && this._windowLayer) {
+                this._windowLayer.children.forEach(function(child){
+                    if (!child.containerProp()) {
+                        child.saveContainerInfo();
+                    }
+                });
+            }
+            _GDM_Scene_Base_start1.call(this);
+        };
+
+        //=============================================================================
+        // StorageManager
+        //  ウィンドウポジションをjson形式で保存する処理を追加定義します。
+        //=============================================================================
+        StorageManager.saveToLocalDataFile = function(fileName, json) {
+            var data     = JSON.stringify(json, null, 2);//整形して出力
+            var fs       = require('fs');
+            var dirPath  = this.localDataFileDirectoryPath();
+            var filePath = dirPath + fileName;
+            if (!fs.existsSync(dirPath)) {
+                fs.mkdirSync(dirPath);
+            }
+            fs.writeFileSync(filePath, data);
+        };
+
+        //=============================================================================
+        // デザインモード中の一部操作の変更
+        //=============================================================================
+
+        //編集ウィンドウを表示していない間は、カーソルのマウス操作を無効にする
+        Window_Selectable.prototype.processTouch = function() {
+            if (!SceneManager.isWindowSettingMode()) return;
+            this.processTouchDefault();
+        };
+
+        Window_Selectable.prototype.processTouchDefault = function() {
+            if (this.isOpenAndActive()) {
+                if (TouchInput.isTriggered() && this.isTouchedInsideFrame()) {
+                    this._touching = true;
+                    this.onTouch(true);
+                } else if (TouchInput.isCancelled()) {
+                    if (this.isCancelEnabled()) {
+                        this.processCancel();
+                    }
+                }
+                if (this._touching) {
+                    if (TouchInput.isPressed()) {
+                        this.onTouch(false);
+                    } else {
+                        this._touching = false;
+                    }
+                }
+            } else {
+                this._touching = false;
+            }
+        };
+
+        //マウスによるマップへのタッチ操作を無効化
+        Scene_Map.prototype.processMapTouch = function() {
+        };
+
+        //マウス右ボタンによるメニュー開閉を禁止する
+        Scene_Map.prototype.isMenuCalled = function() {
+            return !this.isWindowSettingMode() && Input.isTriggered('menu');//TouchInput.isCancelled()
+        };
+
+        //編集メニュー表示中はキャラの移動禁止
+        var _Game_Player_canMove = Game_Player.prototype.canMove;
+        Game_Player.prototype.canMove = function() {
+            if(SceneManager.isWindowSettingMode()) return false;
+            return _Game_Player_canMove.call(this);
+        };
+
+        //右クリックで枠を非表示にする処理を無効化
+        Window_Base.prototype.processOpacity = function() {
+            return false;
+        };
+
+        //マウスポインタを合わせたウィンドウの枠色を変更する処理を無効化
+        Window_Base.prototype.processFrameChange = function() {
+        };
+
+        //ウィンドウ編集モードの判定
+        SceneManager.isWindowSettingMode = function() {
+            return this._scene.isWindowSettingMode();
+        };
+
+        Scene_Base.prototype.isWindowSettingMode = function() {
+            return this._mainConfigWindow.visible ||
+                this._cmdConfigWindow.visible ||
+                this._commonConfigWindow.visible ||
+                this._selectConfigWindow.visible ||
+                this._cwCreateNewW.visible;
+        };
+
+        //=============================================================================
+        //マウスのボタン操作の処理を変更
+        //=============================================================================
+
+        //初期化
+        Scene_Base.prototype.clearTouchedParam = function() {
+            this._touchedFrame = false;
+            this._touchHolding = false;
+            this._touchHoldCount = 0;
+            this._smcInitX = 0;
+            this._smcInitY = 0;
+            this._holdX = 0;
+            this._holdY = 0;
+            this._holdW = 0;
+            this._holdH = 0;
+        };
+
+        Scene_Base.prototype.releaceTouchWindow = function() {
+            this._touchWindow = null;
+            this._touchWindowIndex = -2;
+            this.clearTouchedParam();
         }
-      };
+
+        Window_Base.prototype.releaseByCmdSet = function() {
+            this._holding = false;
+            this._windowBackSprite.setBlendColor([0, 0, 0, 0]);
+            this._windowContentsSprite.setBlendColor([0, 0, 0, 0]);
+        };
+
+        //ウィンドウのドラッグ＆ドロップ操作
+        var _OSW_Scene_Base_updateDrag = Scene_Base.prototype.updateDrag;
+        Scene_Base.prototype.updateDrag = function() {
+            if (this.isWindowSettingMode()) {
+                return false;
+            } else if (TouchInput.isCancelled()) {
+                this.actionMouseRightPush();
+            } else {
+                if (this.updateWidnowFrameTouch()) {
+                    this.updateWindowSize();
+                    this.processFrameChange();
+                } else {
+                    _OSW_Scene_Base_updateDrag.call(this);
+                }
+            }
+        };
+
+        //マウスのクリック、ドラッグ＆ドロップを判定
+        Scene_Base.prototype.updateWidnowFrameTouch = function() {
+            if (TouchInput.isTriggered()) {
+                return this.actionMouseLeftPush();
+            } else if (this._touchHolding && TouchInput.isPressed()) {
+                return this.actionMouseLeftKeep();
+            } else if (this._touchHolding && !TouchInput.isPressed()) {
+                return this.actionMouseLeftRelease();
+            }
+            return false;
+        };
+
+        //マウスの左ボタンを押したときの処理
+        Scene_Base.prototype.actionMouseLeftPush = function() {
+            this._touchHoldCount = 0;
+            this._touchHolding = true;
+            this._touchedFrame = false;
+            //クリックした場所にウィンドウがあるか調べる
+            var windowOnMouse = this.getWindowOnMouse();
+            this._touchWindow = windowOnMouse;
+            if (!!windowOnMouse) {
+                this._touchWindowIndex = windowOnMouse.isCursorIndexOnMouse();
+                //フレームにタッチしたか
+                if (windowOnMouse.isTouchedFrame()) {
+                    this._holding = true;
+                    this._touchedFrame = true;
+                    this._touchWindow.sizeHold();
+                    this._smcInitX = TouchInput.x;
+                    this._smcInitY = TouchInput.y;
+                    return true;
+                }
+            } else {
+                this._touchHolding = false;
+            }
+            return false;
+        };
+
+        //マウスの左ボタンを押しつづけているときの処理
+        Scene_Base.prototype.actionMouseLeftKeep = function() {
+            if (this._touchedFrame) return true;
+            this._touchHoldCount++;
+            if (this._touchHoldCount > 10) {
+                this._touchHolding = false;
+                this._touchHoldCount = 0;
+                this._touchWindow = null;
+                return false;
+            } else {
+                return true;
+            }
+        };
+
+        //マウスの左ボタンを離したときの処理
+        Scene_Base.prototype.actionMouseLeftRelease = function() {
+            //短時間クリックで、クリックした行を個別編集するウィンドウを表示
+            if (this._touchHolding && !this._touchedFrame && this._touchWindow && this._touchWindow.visible) {
+                if (this._touchWindow.isCommand()) {
+                    if(this.setupCommandConfigWindow()) return true;
+                } else if (this._touchWindow.isSelect()) {
+                    if(this.setupSelectConfigWindow()) return true;
+                } else if (this._touchWindow.isCommon()) {
+                    if(this.setupCommonConfigWindow()) return true;
+                }
+            }
+            this.releaceTouchWindow();
+            return false;
+        }
+
+        //コマンドウィンドウの個別編集メニューを表示
+        Scene_Base.prototype.setupCommandConfigWindow = function() {
+            var command = this.currentListCommand()
+            if (this._touchWindowIndex < 0 || !command) {
+                return false;
+            }
+            this._touchWindow.releaseByCmdSet();
+            this.reserveActiveWindow();
+            this.setConfigContents_command(command);
+            this._cmdConfigWindow.activateWindow();
+            this.clearTouchedParam();
+            return true;
+        };
+
+        //セレクトウィンドウの個別編集メニューを表示
+        Scene_Base.prototype.setupSelectConfigWindow = function() {
+            var command = this.currentListCommand()
+            if (this._touchWindowIndex < 0 || !command || this._touchWindow._customDrawType) {
+                return false;
+            }
+            this._touchWindow.releaseByCmdSet();
+            this.reserveActiveWindow();
+            this.setConfigContents_select(this._touchWindow);
+            this._selectConfigWindow.activateWindow();
+            this.clearTouchedParam();
+            return true;
+        };
+
+        //コモンウィンドウの個別編集メニューを表示
+        Scene_Base.prototype.setupCommonConfigWindow = function() {
+            var command = this.currentListCommand()
+            if (this._touchWindowIndex < 0 || !command || this._touchWindow._customDrawType) {
+                return false;
+            }
+            this._touchWindow.releaseByCmdSet();
+            this.reserveActiveWindow();
+            this.setConfigContents_common(this._touchWindow);
+            this._commonConfigWindow.activateWindow();
+            this.clearTouchedParam();
+            return true;
+        };
+
+        //マウスの右ボタンを押したときの処理
+        Scene_Base.prototype.actionMouseRightPush = function() {
+            //クリックした場所にウィンドウがあるか調べる
+            var windowOnMouse = this.getWindowOnMouse();
+            this.reserveActiveWindow();
+            if (!!windowOnMouse) {
+                //ウィンドウをクリックした場合、ウィンドウデータを取得、編集画面を表示
+                this._touchWindow = windowOnMouse;
+                this._mainConfigWindow.setWindow(this._touchWindow);
+            } else {
+                this._mainConfigWindow.setWindow(null);
+            }
+            this._mainConfigWindow.activateWindow();
+            return true;
+        };
+
+        //=============================================================================
+        // アクティブ状態がONのウィンドウの保存処理
+        //=============================================================================
+
+        var _GDM_Scene_Base_initialize = Scene_Base.prototype.initialize;
+        Scene_Base.prototype.initialize = function() {
+            _GDM_Scene_Base_initialize.call(this);
+            this._activeWindows = [];
+        };
+
+        //アクティブ状態がONのウィンドウを記録し、OFFに変更
+        Scene_Base.prototype.reserveActiveWindow = function() {
+            if (this._windowLayer && this._windowLayer.children.length) {
+                this._windowLayer.children.forEach( function(window){
+                    if (window.active) {
+                        this._activeWindows.push(window);
+                        window.deactivate();
+                    }
+                    window._holdDeactivate = true;
+                },this);
+            }
+        };
+
+        Scene_Base.prototype.releaseActiveWindow = function() {
+            if (this._windowLayer && this._windowLayer.children.length) {
+                this._windowLayer.children.forEach( function(window){
+                    window._holdDeactivate = false;
+                },this);
+            }
+            this._activeWindows.forEach( function(window){
+                window.activate();
+            });
+            this._activeWindows = [];
+        };
+
+        var _GDM_Window_Base_activate = Window_Base.prototype.activate;
+        Window_Base.prototype.activate = function() {
+            if (this._holdDeactivate) return;
+            _GDM_Window_Base_activate.call(this);
+        };
+
+        //=============================================================================
+        // ウィンドウの枠とマウスポインタ位置の判別処理
+        //=============================================================================
+
+        Window_Base.prototype.isTouchedInsideFrame = function() {
+            var x = this.canvasToLocalX(TouchInput.x);
+            var y = this.canvasToLocalY(TouchInput.y);
+            return x >= 0 && y >= 0 && x < this.width && y < this.height;
+        };
+
+        Window_Base.prototype.isTouchedInsideMargin = function() {
+            var x = this.canvasToLocalX(TouchInput.x);
+            var y = this.canvasToLocalY(TouchInput.y);
+            var left = this.margin;
+            var top = this.margin;
+            var right = this.width - this.margin;
+            var bottom = this.height - this.margin;
+            return (x >= left && y >= top && x < right && y < bottom);
+        };
+
+        Window_Base.prototype.isTouchedFrame = function() {
+            return this.isTouchedInsideFrame() && !this.isTouchedInsideMargin();
+        };
+
+        Window_Base.prototype.isTouchedFrameTop = function() {
+            return this.isTouchedFrame() && this.y + this.margin >= TouchInput.y;
+        }
+
+        Window_Base.prototype.isTouchedFrameBottom = function() {
+            return this.isTouchedFrame() && this.y + this.height - this.margin <= TouchInput.y;
+        }
+
+        Window_Base.prototype.isTouchedFrameLeft = function() {
+            return this.isTouchedFrame() && this.x + this.margin >= TouchInput.x;
+        }
+
+        Window_Base.prototype.isTouchedFrameRight = function() {
+            return this.isTouchedFrame() && this.x + this.width - this.margin <= TouchInput.x;
+        }
+
+        //マウスポインタと重なっているウィンドウを取得
+        Scene_Base.prototype.getWindowOnMouse = function() {
+            var pointWindow = null;
+            console.log('getWindowOnMouse', 'search window');
+            this.allWindowChildren().forEach( function(window){
+                console.log(window.name, window.visible, window.isOpen());
+                if (window.visible && window.isOpen() && window.isTouchedInsideFrame()) {
+                    pointWindow = window;
+                    console.log('get window');
+                }
+            },this);
+            console.log('return');
+            console.log(pointWindow);
+            console.log('----------------------------------------')
+            return pointWindow;
+        };
+
+        Scene_Base.prototype.allWindowChildren = function() {
+            return !!this._windowLayer ? this._windowLayer.children : [];
+        };
+
+        //マウスポインタが指している行を取得
+        Window_Base.prototype.isCursorIndexOnMouse = function() {
+            if (!this.isTouchedInsideFrame()) return -2;
+            var pd = this._padding;
+            var lh = this.lineHeight() || 36;
+            return Math.floor((TouchInput._y - this.y - pd) / lh);
+        };
+
+        Window_Selectable.prototype.isCursorIndexOnMouse = function() {
+            if (!this.isTouchedInsideFrame()) return -2;
+            var ih = this.itemHeight() || 36;
+            var iw = this.itemWidth() || this.width;
+            var index = Math.floor((TouchInput.y - this.y - this.padding) / ih) + this.topRow();
+            var x = this.x;
+            for(var i = 0; i < this.maxCols(); i++) {
+                if (TouchInput.x >= x && TouchInput.x < x + iw + this.spacing()) {
+                    var col = i;
+                    break;
+                }
+                x += iw + this.spacing();
+            }
+            return index * this.maxCols() + col;
+    //          return Math.min(index * this.maxCols() + col, this.maxItems() - 1);
+        };
+
+        //マウスポインタが指している行のリスト番号を取得
+        Scene_Base.prototype.currentListIndex = function() {
+            var touchIndex = -1;
+            if (!!this._touchWindow && this._touchWindowIndex >= 0) {
+                if (!this._touchWindow.isCommand()) return this._touchWindowIndex;
+                var list = this._touchWindow._list[this._touchWindowIndex];
+                this._touchWindow._customList.some(function(cmd, i){
+                    if(list && list.symbol === cmd.symbol) {
+                        touchIndex = i;
+                        return true;
+                    }
+                },this);
+            }
+            return touchIndex;
+        };
+
+        //マウスポインタが指している行のリストデータを取得
+        Scene_Base.prototype.currentListCommand = function() {
+            return this._touchWindow ? this._touchWindow._customList[this.currentListIndex()] : null;
+        };
+
+        //=============================================================================
+        // ウィンドウサイズの拡大縮小処理
+        //=============================================================================
+
+        //ウィンドウサイズの更新
+        Scene_Base.prototype.updateWindowSize = function() {
+            if (!!this._touchWindow && this._touchHolding && this._touchedFrame) {
+                this._touchWindow.updateSmcSize(
+                    TouchInput.x - this._smcInitX,
+                    TouchInput.y - this._smcInitY);
+            }
+        };
+
+        //サイズ変更前の状態を一時保存
+        Window_Base.prototype.sizeHold = function() {
+            this._holdX = this.x;
+            this._holdY = this.y;
+            this._holdW = this.width;
+            this._holdH = this.height;
+            if (this.isTouchedFrameLeft()) {
+                this._onFrameX = -1;
+            } else if (this.isTouchedFrameRight()) {
+                this._onFrameX = 1;
+            } else {
+                this._onFrameX = 0;
+            }
+            if (this.isTouchedFrameTop()) {
+                this._onFrameY = -1;
+            } else if (this.isTouchedFrameBottom()) {
+                this._onFrameY = 1;
+            } else {
+                this._onFrameY = 0;
+            }
+        };
+
+        //サイズ変更
+        Window_Base.prototype.updateSmcSize = function(dx, dy) {
+            var x = this.x;
+            var y = this.y;
+            var width = this.width;
+            var height = this.height;
+            if (Input.isPressed('control')) {
+                var size = paramGridSize;
+                if (size !== 0) {
+                    if (this._onFrameX > 0) {
+                        width = this._holdW + dx;
+                        width += (width % size > size / 2 ? size - width % size : -(width % size));
+                    } else if (this._onFrameX < 0) {
+                        x = this._holdX + dx;
+                        x += (x % size > size / 2 ? size - x % size : -(x % size));
+                        width = this._holdW + this._holdX - x;
+                    }
+                    if (this._onFrameY > 0) {
+                        height = this._holdH + dy;
+                        height += (height % size > size / 2 ? size - height % size : -(height % size));
+                    } else if (this._onFrameY < 0) {
+                        y = this._holdY + dy;
+                        y += (y % size > size / 2 ? size - y % size : -(y % size));
+                        height = this._holdH + this._holdY - y;
+                    }
+                }
+            } else {
+                if (this._onFrameX > 0) {
+                    width = this._holdW + dx;
+                } else if (this._onFrameX < 0) {
+                    width = this._holdW - dx;
+                    x = this._holdX + dx;
+                }
+                if (this._onFrameY > 0) {
+                    height = this._holdH + dy;
+                } else if (this._onFrameY < 0) {
+                    height = this._holdH - dy;
+                    y = this._holdY + dy;
+                }
+            }
+            this.position.x = x;
+            this.position.y = y;
+            this.move(x, y, width, height);
+            this.saveContainerInfo();
+            this.reDrawContents();
+        };
+
+        //=============================================================================
+        // マウスポインタの位置に合わせてウィンドウ内の行の色を変更する処理を追加
+        //=============================================================================
+
+        var _OSW_Window_Base_update = Window_Base.prototype.update;
+        Window_Base.prototype.update = function() {
+            _OSW_Window_Base_update.call(this);
+            this.updateOswContentAreaColor();
+            this.updateScaleArrows();
+        };
+
+        Window_Base.prototype.itemRect = function(index) {
+            index = Math.min(index, this._customList.length - 1);
+            var rect = new Rectangle();
+            rect.width = this.contentsWidth();
+            rect.height = this.lineHeight();
+            rect.x = 0;
+            rect.y = index * this.lineHeight();
+            return rect;
+        };
+        
+        //コモンウィンドウのテキストモードなら行ごとに変更
+        Window_Base.prototype.updateOswContentAreaColor = function() {
+            if (this.isOswOption()) return;
+            if (SceneManager.isWindowSettingMode()) return;
+            var index = this.isCursorIndexOnMouse();
+            if (index >= 0) {
+                var rect = this.itemRect(index);
+                this.setMousePointRect(rect.x, rect.y, rect.width, rect.height);
+            } else if (index < 0) {
+                this.setMousePointRect(0, 0, 0, 0);
+            }
+        };
+
+        Window_Base.prototype.setMousePointRect = function(x, y, width, height) {
+            var cx = Math.floor(x || 0);
+            var cy = Math.floor(y || 0);
+            var cw = Math.floor(width || 0);
+            var ch = Math.floor(height || 0);
+            var rect = this._mousePointRect;
+            if (rect.x !== cx || rect.y !== cy || rect.width !== cw || rect.height !== ch) {
+                this._mousePointRect.x = cx;
+                this._mousePointRect.y = cy;
+                this._mousePointRect.width = cw;
+                this._mousePointRect.height = ch;
+                this._refreshMousePointRect();
+            }
+        };
+
+        Window_Base.prototype._refreshMousePointRect = function() {
+            var pad = this._padding;
+            var x = this._mousePointRect.x + pad - this.origin.x;
+            var y = this._mousePointRect.y + pad - this.origin.y;
+            var w = this._mousePointRect.width;
+            var h = this._mousePointRect.height;
+            var x2 = Math.max(x, pad);
+            var y2 = Math.max(y, pad);
+            var w2 = Math.min(w, this._width - pad - x2);
+            var h2 = Math.min(h, this._height - pad - y2);
+            var color1 = 6;
+            var color2 = 6;
+            var bitmap = new Bitmap(w2, h2);
+        
+            this._windowMousePointSprite.bitmap = bitmap;
+            this._windowMousePointSprite.setFrame(0, 0, w2, h2);
+            this._windowMousePointSprite.move(x2, y2);
+            if (w > 0 && h > 0) {
+                bitmap.paintOpacity = 108;
+                bitmap.gradientFillRect(0, 0, w2, h2, this.textColor(color1), this.textColor(color2));
+                bitmap.paintOpacity = 255;
+            }
+        };
+
+        //=============================================================================
+        // ウィンドウサイズ変更時に表示するカーソルを定義
+        //=============================================================================
+
+        Window_Base.prototype.updateScaleArrows = function() {
+            if (this.isTouchedFrame() && !this.isOswOption()) {
+                this.oswUpDownArrowVisible = this.isTouchedFrameTop() || this.isTouchedFrameBottom();
+                this.oswLeftRightArrowVisible = this.isTouchedFrameLeft() || this.isTouchedFrameRight();
+            } else {
+                this.oswUpDownArrowVisible = false;
+                this.oswLeftRightArrowVisible = false;
+            }
+        };
+
+        var _OSW_Window_createAllParts = Window.prototype._createAllParts;
+        Window.prototype._createAllParts = function() {
+            _OSW_Window_createAllParts.call(this);
+            this._oswDownArrowSprite = new Sprite();
+            this._oswUpArrowSprite = new Sprite();
+            this._oswLeftArrowSprite = new Sprite();
+            this._oswRightArrowSprite = new Sprite();
+            this._mousePointRect = new Rectangle();
+            this._windowMousePointSprite = new Sprite();
+            this.addChild(this._windowMousePointSprite);
+            this.addChild(this._oswDownArrowSprite);
+            this.addChild(this._oswUpArrowSprite);
+            this.addChild(this._oswLeftArrowSprite);
+            this.addChild(this._oswRightArrowSprite);
+        };
+
+        var _OSW_Window_refreshAllParts = Window.prototype._refreshAllParts;
+        Window.prototype._refreshAllParts = function() {
+            _OSW_Window_refreshAllParts.call(this);
+            this._refreshMousePointRect();
+            this._refreshScaleArrows();
+        };
+
+        Window.prototype._refreshScaleArrows = function() {
+            var p = 24;
+            var q = p/2;
+            var sx = 96+p;
+            var sy = 0+p;
+            this._oswDownArrowSprite.bitmap = this._windowskin;
+            this._oswDownArrowSprite.anchor.x = 0;
+            this._oswDownArrowSprite.anchor.y = 0;
+            this._oswDownArrowSprite.setFrame(sx+q, sy+q+p, p, q);
+            this._oswDownArrowSprite.move(0, 0);
+            this._oswUpArrowSprite.bitmap = this._windowskin;
+            this._oswUpArrowSprite.anchor.x = 0;
+            this._oswUpArrowSprite.anchor.y = 0;
+            this._oswUpArrowSprite.setFrame(sx+q, sy, p, q);
+            this._oswUpArrowSprite.move(0, 0);
+            this._oswLeftArrowSprite.bitmap = this._windowskin;
+            this._oswLeftArrowSprite.anchor.x = 0;
+            this._oswLeftArrowSprite.anchor.y = 0;
+            this._oswLeftArrowSprite.setFrame(sx, sy+q/2+p/2, q, p);
+            this._oswLeftArrowSprite.move(0, 0);
+            this._oswRightArrowSprite.bitmap = this._windowskin;
+            this._oswRightArrowSprite.anchor.x = 0;
+            this._oswRightArrowSprite.anchor.y = 0;
+            this._oswRightArrowSprite.setFrame(sx+q+p, sy+q/2+p/2, q, p);
+            this._oswRightArrowSprite.move(0, 0);
+        };
+
+        var _OSW_Window_updateTransform = Window.prototype.updateTransform;
+        Window.prototype.updateTransform = function() {
+            this._updateScaleArrows();
+            _OSW_Window_updateTransform.call(this);
+        };
+
+        Window.prototype._updateScaleArrows = function() {
+            if (this.isOpen() && this.oswUpDownArrowVisible) {
+                this._oswDownArrowSprite.visible = true;
+                this._oswUpArrowSprite.visible = true;
+                var bitmap = this._oswDownArrowSprite;
+                this._oswDownArrowSprite.move(
+                    TouchInput._x - this.x - bitmap.width,
+                    TouchInput._y - this.y
+                );
+                this._oswUpArrowSprite.move(
+                    TouchInput._x - this.x - bitmap.width,
+                    TouchInput._y - this.y - bitmap.height
+                );
+            } else {
+                this._oswDownArrowSprite.visible = false;
+                this._oswUpArrowSprite.visible = false;
+            }
+            if (this.isOpen() && this.oswLeftRightArrowVisible) {
+                this._oswLeftArrowSprite.visible = true;
+                this._oswRightArrowSprite.visible = true;
+                var bitmap = this._oswLeftArrowSprite;
+                this._oswLeftArrowSprite.move(
+                    TouchInput._x - this.x - bitmap.width,
+                    TouchInput._y - this.y - bitmap.height*3/4
+                );
+                this._oswRightArrowSprite.move(
+                    TouchInput._x - this.x,
+                    TouchInput._y - this.y - bitmap.height*3/4
+                );
+            } else {
+                this._oswLeftArrowSprite.visible = false;
+                this._oswRightArrowSprite.visible = false;
+            }
+        };
+
+        //=============================================================================
+        // 編集メニューコマンドウィンドウの設定
+        //=============================================================================
+        var _OSW_Scene_Base_createWindowLayer = Scene_Base.prototype.createWindowLayer;
+        Scene_Base.prototype.createWindowLayer = function() {
+            _OSW_Scene_Base_createWindowLayer.call(this);
+            this.createSettingLayer();
+            this.createFtkrOptionWindows();
+            this.createSettingNewWindow();
+        };
+
+        Scene_Base.prototype.createSettingLayer = function() {
+            var width = Graphics.boxWidth;
+            var height = Graphics.boxHeight;
+            var x = (Graphics.width - width) / 2;
+            var y = (Graphics.height - height) / 2;
+            this._settingLayer = new WindowLayer();
+            this._settingLayer.move(x, y, width, height);
+            this.addChild(this._settingLayer);
+        };
+
+        //------------------------------------------------------------------------
+        //編集用ウィンドウの作成
+        //------------------------------------------------------------------------
+        /*
+        configContetns配列内のオプジェクトのプロパティ
+            name    : 表示名
+            symbol  : コンフィグデータの参照先
+            type    : 表示データの分類名
+                    :   number    表示されるデータは数値に変換
+                    :   select    リスト内の文字列に変換
+                    :   data      データベースのデータに変換
+                    :   boolean   ON か OFF に変換
+                    :   string    文字列としてそのまま表示
+                    :   line      横線を描写する(type以外の設定不要)
+                    :   subConfig サブウィンドウを表示する
+                    :   handler   setHander(symbol, xxx)で設定した実行処理を呼び出す(xxxメソッドは別途定義が必要)
+                    :   command   optionsで指定したメソッドを呼び出す。
+                    :   none      何も表示しない
+            enabled : コンフィグ変更可否のフラグ
+            options : 上記分類ごとの個別設定
+                    :   numberの場合は最小値x、最大値y、変化量z を指定
+                    :     options = {min: x, max: y, offset: z}
+                    :   selectの場合はリストの表示内容をselectで指定する。valueを設定することで、取得する値も指定可能。
+                    :     options = {select :[list1, list2, ...], value:[value1, value2,...]}
+                    :   dataの場合は参照するデータベースと表示させるプロパティを指定
+                    :     options = {data: xxx, property: yyy, enabled: zzz}
+                    :   boolean および文字列の場合は設定不要
+                    :   subConfigの場合は、サブウィンドウに表示するコンフィグおよびサブウィンドウ幅の設定
+                    :     options = {subConfigs: [{name:xxx, type:yyy, symbol:zzz, options:{}},... ]
+                    :                width: www,
+                    :                textWidth: ttt,
+                    :                statusWidth: sss}
+                    :   command の場合は、実行するメソッドを指定(xxxメソッドは別途定義が必要)
+                    :     options = {method: this.xxx.bind(this)}
+        */
+        Scene_Base.prototype.createFtkrOptionWindows = function() {
+            this.createMainConfigCommand();
+            this.createFtkrEditOptions();
+            this.createFtkrDisplayOptions();
+            this.createFtkrCommandOptions();
+            this.createFtkrSelectOptions();
+            this.createFtkrCommonOptions();
+            this.createConfTitleWindow();
+            this.createConfWindow();
+        };
+
+        Scene_Base.prototype.configLayer = function() {
+            return this._settingLayer;
+        };
+
+        Window_Base.prototype.activateWindow = function() {
+            this.select(0);
+            this.activate();
+            this.refresh();
+            this.show();
+        };
+
+        Window_Base.prototype.setPosition = function(x, y) {
+            this.x = x;
+            this.y = y;
+        };
+
+        Window_Base.prototype.setPositionReferWindowIndex = function(window) {
+            var x = window.x + optionOffsetX;
+            if (x + this.width < Graphics.boxWidth) {
+                x = Graphics.boxWidth - this.width;
+            }
+            var y = window.y + window.index() * window.lineHeight();
+            if (y + this.height > Graphics.boxHeight) {
+                y = Graphics.boxHeight - this.height;
+            }
+            this.setPosition(x, y);
+        };
+
+        //------------------------------------------------------------------------
+        //メインコマンドウィンドウの設定
+        //------------------------------------------------------------------------
+        Scene_Base.prototype.createMainConfigCommand = function() {
+            this._mainConfigWindow = new Window_MainConfigCommand();
+            this._mainConfigWindow.setHandler('create',  this.cwCreateCmd.bind(this));
+            this._mainConfigWindow.setHandler('edit',    this.cwEditCmd.bind(this));
+            this._mainConfigWindow.setHandler('display', this.cwDisplayCmd.bind(this));
+            this._mainConfigWindow.setHandler('delete',  this.cwDeleteCmd.bind(this));
+            this._mainConfigWindow.setHandler('cancel',  this.cwCloseConfig.bind(this));
+            this.configLayer().addChild(this._mainConfigWindow);
+        };
+
+        //ウィンドウ作成コマンド
+        Scene_Base.prototype.cwCreateCmd = function() {
+            this._cwCreateNewW.setPositionReferWindowIndex(this._mainConfigWindow);
+            this._cwCreateNewW.activateWindow();
+        };
+
+        //ウィンドウ編集コマンド
+        Scene_Base.prototype.cwEditCmd = function() {
+            this._touchWindow.readCssStatus();
+            this.setConfigContents_edit(this._touchWindow);
+            this._editConfigWindow.setPositionReferWindowIndex(this._mainConfigWindow);
+            this._editConfigWindow.activateWindow();
+        };
+
+        //ウィンドウ表示コマンド
+        Scene_Base.prototype.cwDisplayCmd = function() {
+            this.setConfigContents_Display(this._touchWindow);
+            this._dispConfigWindow.setPositionReferWindowIndex(this._mainConfigWindow);
+            this._dispConfigWindow.activateWindow();
+        };
+
+        //ウィンドウ削除コマンド
+        Scene_Base.prototype.cwDeleteCmd = function() {
+            this._stsConfTitleWindow.setConf(this._touchWindow.name);
+            this._stsConfWindow.activateWindow();
+        };
+
+        //コンフィグウィンドウの終了
+        Scene_Base.prototype.cwCloseConfig = function() {
+            this._touchWindow = null;
+            this._mainConfigWindow.hide();
+            this._mainConfigWindow.deactivate();
+            this._cmdConfigWindow.hideAll();
+            this._commonConfigWindow.hideAll();
+            this._selectConfigWindow.hideAll();
+            this.releaseActiveWindow();
+        };
+
+        Window_Base.prototype.updateWindowConfig = function() {
+            this.updatePadding();
+            this.resetFontSettings();
+            this.updateBackOpacity();
+        };
+
+        //コンフィグデータをセーブして再描画する
+        Scene_Base.prototype.saveConfigValues = function() {
+            if (this._touchWindow) {
+                this._touchWindow.updateWindowConfig();
+                this._touchWindow.setOswMethod();
+                this._touchWindow.saveContainerInfo();
+                if (Imported.FTKR_CSS) {
+                    this._touchWindow.setCssStatus();
+                }
+                this._touchWindow._refreshAllParts();
+                this._touchWindow.refresh();
+                this.refreshDisplayPriority();
+            }
+        };
+
+        //------------------------------------------------------------------------
+        //オプションウィンドウの生成
+        //------------------------------------------------------------------------
+        //編集コマンド用
+        Scene_Base.prototype.createFtkrEditOptions = function() {
+            var width = 240, textWidth = 206, statusWidth = 0;
+            var layer = this.configLayer();
+            this._editConfigWindow = new Window_FtkrOptions(layer, width, textWidth, statusWidth);
+            this._editConfigWindow.setHandler('cancel', this.closeOptions.bind(this));
+            layer.addChild(this._editConfigWindow);
+        };
+
+        Scene_Base.prototype.closeOptions = function() {
+            this._mainConfigWindow.activate();
+            this._editConfigWindow.hideAll();
+            this._dispConfigWindow.hideAll();
+        };
+
+        //編集コンテンツの設定読込
+        Scene_Base.prototype.setConfigContents_edit = function(configValues) {
+            var configContents = [
+                {type: 'subConfig', name: 'ウィンドウ', symbol: 'windowEdit', enabled: true, options: {subConfigs: [
+                    {type: 'string', name: '名前',      symbol: 'name',               enabled: true, options: {}},
+                    {type: 'number', name: 'X座標',     symbol: 'x',                  enabled: true, options: {min:0, max: Graphics.boxWidth, offset: 1}},
+                    {type: 'number', name: 'Y座標',     symbol: 'y',                  enabled: true, options: {min:0, max: Graphics.boxHeight, offset: 1}},
+                    {type: 'number', name: '横幅',      symbol: 'width',              enabled: true, options: {min:0, max: Graphics.boxWidth, offset: 1}},
+                    {type: 'number', name: '高さ',      symbol: 'height',            enabled: true, options: {min:0, max: Graphics.boxHeight, offset: 1}},
+                    {type: 'number', name: '余白',      symbol: '_customPadding',     enabled: true, options: {min:0, max: graphicsMinSize(), offset: 1}},
+                    {type: 'line'},
+                    {type: 'save',  name: '決定'},
+                ], width: 400, textWidth: 120, statusWidth: 220}},
+                {type: 'subConfig', name: 'フォント設定', symbol: 'fontEdit', enabled: true, options: {subConfigs: [
+                    {type: 'string', name: 'フォント　　　', symbol: '_customFontFace', enabled: true, options: {}},
+                    {type: 'number', name: 'フォントサイズ', symbol: '_customFontSize', enabled: true, options: {min:1, max: graphicsMinSize(), offset: 1}},
+                    {type: 'line'},
+                    {type: 'save',  name: '決定'},
+                ], width: 400, textWidth: 220, statusWidth: 120}},
+                {type: 'line'},
+                {type: 'subConfig', name: '行列設定', symbol: 'lineEdit', enabled: true, options: {subConfigs: [
+                    {type: 'number', name: '行高さ',    symbol: '_customLineHeight',  enabled: true, options: {min:1, max: graphicsMinSize(), offset: 1}},
+    //                  {type: 'number', name: '高さ(行数)', symbol: '_customLineNumber', enabled: true, options: {min:0, max: 99, offset: 1}},
+                    {type: 'number', name: '表示行間隔　', symbol: '_customHorSpacing',   enabled: configValues.isList(), options: {min:0, max: graphicsMinSize(), offset: 1}},
+                    {type: 'number', name: '表示列数　　', symbol: '_customMaxCols',      enabled: configValues.isList(), options: {min:1, max: 99, offset: 1}},
+                    {type: 'number', name: '表示列間隔　', symbol: '_customSpacing',      enabled: configValues.isList(), options: {min:0, max: graphicsMinSize(), offset: 1}},
+                    {type: 'number', name: 'カーソル行数', symbol: '_customCursorHeight', enabled: configValues.isList(), options: {min:1, max: 99, offset: 1}},
+                    {type: 'line'},
+                    {type: 'save',   name: '決定'},
+                ], width: 400, textWidth: 220, statusWidth: 120}},
+                {type: 'subConfig',  name: '処理設定', symbol: 'methodEdit', enabled: configValues.isList(), options: {subConfigs: [
+                    {type: 'select', name: '実行設定　　　　', symbol: '_customOkMethodType',       enabled: configValues.isSelect(), options: {select:COMMAND_METHOD}},
+                    {type: 'refer',  name: '実行詳細　　　　', symbol: '_customOkMethodDetail',     enabled: configValues.isSelect(), options: {refSymbol:['_customOkMethodType'], refData:FTKR_METHOD_DATALIST(this)}},
+                    {type: 'refer',  name: '実行詳細２　　　', symbol: '_customOkMethodDetail2',    enabled: configValues.isSelect(), options: {refSymbol:['_customOkMethodType'], refData:FTKR_METHOD_DATALIST2}},
+                    {type: 'select', name: 'キャンセル設定　', symbol: '_customCancelMethodType',   enabled: true, options: {select:COMMAND_METHOD}},
+                    {type: 'refer',  name: 'キャンセル詳細　', symbol: '_customCancelMethodDetail', enabled: true, options: {refSymbol:['_customCancelMethodType'], refData:FTKR_METHOD_DATALIST(this)}},
+                    {type: 'refer',  name: 'キャンセル詳細２', symbol: '_customCancelMethodDetail2',enabled: true, options: {refSymbol:['_customCancelMethodType'], refData:FTKR_METHOD_DATALIST2}},
+                    {type: 'line'},
+                    {type: 'save',   name: '決定'},
+                ], width: 500, textWidth: 220, statusWidth: 220}},
+            ];
+            //設定したコンテンツデータをオプションウィンドウに反映
+            this._editConfigWindow.setConfigContents(configContents, configValues);
+        };
+        
+        //------------------------------------------------------------------------
+        //表示コマンド用のウィンドウを設定
+        //------------------------------------------------------------------------
+        Scene_Base.prototype.createFtkrDisplayOptions = function() {
+            var width = 240, textWidth = 206, statusWidth = 0;
+            var layer = this.configLayer();
+            this._dispConfigWindow = new Window_FtkrOptions(layer, width, textWidth, statusWidth);
+            this._dispConfigWindow.setHandler('cancel', this.closeOptions.bind(this));
+            layer.addChild(this._dispConfigWindow);
+        };
+
+        Scene_Base.prototype.windowChildren = function() {
+            return this._windowLayer ? this._windowLayer.children : [];
+        };
+
+        //表示コンテンツの設定読込
+        Scene_Base.prototype.setConfigContents_Display = function(configValues) {
+            var configContents = [
+                {type: 'subConfig', name: '背景', symbol: 'backGround', enabled: true, options: {subConfigs: [
+                    {type: 'number', name: '背景透明度', symbol: '_customBackOpacity',  enabled: true, options: {min:0, max: 255, offset: 1}},
+                    {type: 'select', name: '背景画像　', symbol: '_customBackFileName', enabled: true, options: {select:[null].concat(FTKR.GDM.backgrounds), string:true}},
+                    {type: 'line'},
+                    {type: 'save',  name: '決定'},
+                ], width: 400, textWidth: 220, statusWidth: 120}},
+                {type: 'subConfig', name: '表示設定', symbol: 'showEdit', enabled: true, options: {subConfigs: [
+                    {type: 'data',    name: '表示スイッチ',   symbol: '_customShowSwId',  enabled: true, options: {data:$dataSystem.switches}},
+                    {type: 'boolean', name: '枠非表示　　',   symbol: '_customHideFrame', enabled: true, options: {}},
+                    {type: 'boolean', name: '表示自動更新',   symbol: '_autoRefreshed', enabled: true, options: {}},
+                    {type: 'line'},
+                    {type: 'save', name: '決定'},
+                ], width: 400, textWidth: 220, statusWidth: 120}},
+                {type: 'line'},
+                {type: 'subConfig', name: 'コマンド設定', symbol: 'cmdDisp', enabled: configValues.isCommand(), options: {subConfigs: [
+                    {type: 'select',  name: 'コマンド表示位置',   symbol: '_customTextAlign',  enabled: true, options: {select:['左寄せ','中央','右寄せ']}},
+                    {type: 'command', name: 'コマンド非表示解除', symbol: 'cmdShow',           enabled: true, options: {method:this.allCmdVisible.bind(this)}},
+                    {type: 'line'},
+                    {type: 'save',    name: '決定'},
+                ], width: 400, textWidth: 220, statusWidth: 120}},
+                {type: 'subConfig', name: 'セレクト設定', symbol: 'selectDisp', enabled: configValues.isSelect(), options: {subConfigs: [
+                    {type: 'select', name: '表示タイプ　', symbol: '_customDrawType',    enabled: true, options: {select:['テキスト','パーティー','アクター','職業','スキル','アイテム','武器','防具','敵キャラ','敵グループ']}},
+                    {type: 'refer',  name: 'リストタイプ', symbol: '_customListType',    enabled: true, options: {refSymbol:['_customDrawType'], refData:[
+                        {type: 'none'},
+                        {type: 'select', options:{select:['全メンバー', 'バトルメンバー', '控えメンバー']}},
+                    ]}},
+                    {type: 'string', name: '表示条件　　', symbol: '_customListEnabled', enabled: true, options: {}},
+                    {type: 'line'},
+                    {type: 'save',   name: '決定'},
+                ], width: 400, textWidth: 220, statusWidth: 120}},
+                {type: 'subConfig', name: 'コモン設定', symbol: 'commonDisp', enabled: configValues.isCommon(), options: {subConfigs: [
+                    {type: 'select', name: '表示タイプ　', symbol: '_customDrawType',  enabled: true, options: {select:['テキスト','詳細']}},
+                    {type: 'refer',  name: 'アクター設定', symbol: '_customActorId',   enabled: true, options: {refSymbol:['_customDrawType'], refData:[
+                        {type:'none'},
+                        {type:'data', options:{data:$dataActors, property:'name'}}
+                    ]}},
+                    {type: 'refer', name: 'セレクト参照', symbol: '_customReference', enabled: true, options: {refSymbol:['_customDrawType','_customActorId'], refData:[
+                        [
+                            {type:'none'}
+                        ],
+                        [
+                            {type:'data', options:{data:[null].concat(this.windowChildren()), property:'name', enabled:'data.isList()' ,string:true}},
+                            {type:'none'}
+                        ]
+                    ]}},
+                    {type: 'line'},
+                    {type: 'save',   name: '決定'},
+                ], width: 400, textWidth: 220, statusWidth: 120}},
+                {type: 'subConfig', name: '表示エリア', symbol: 'cssArea', enabled: configValues.isCssContentsWindow(), options: {subConfigs: [
+                    {type: 'window', name: 'パラメータリスト',  symbol: '_customCssStatus', enabled: true, options: {subConfigs: [
+                        {type: 'subConfig', name: 'パラメータ編集', symbol: 'editStatus', enabled: true, options: {subConfigs: [
+                            {type: 'subConfig', name: 'パラメータ設定', symbol: 'customCssStatus', enabled: true, options: {subConfigs: [
+                                {type: 'string', name: 'パラメータ名',   symbol: '_customCssStatus[index].text',  enabled: true, options: {setArray: true}},
+                                {type: 'string', name: 'X座標',         symbol: '_customCssStatus[index].x',     enabled: true, options: {setArray: true}},
+                                {type: 'string', name: 'Y座標',         symbol: '_customCssStatus[index].y',     enabled: true, options: {setArray: true}},
+                                {type: 'string', name: '幅',            symbol: '_customCssStatus[index].width', enabled: true, options: {setArray: true}},
+                                {type: 'line'},
+                                {type: 'save',   name: '決定', options: {refreshWindow:['_customCssStatus']}},
+                            ], width: 360, textWidth: 120, statusWidth: 220}},
+                            {type: 'line'},
+                            {type: 'subConfig', name: '表示順番', symbol: 'order', enabled: true, options: {subConfigs: [
+                                {type: 'command', name: '上部に移動　', symbol: 'toTop',       enabled: true, options: {method:this.csspToTop.bind(this, '_customCssStatus')}},
+                                {type: 'command', name: '最上部に移動', symbol: 'toTheTop',    enabled: true, options: {method:this.csspToTheTop.bind(this, '_customCssStatus')}},
+                                {type: 'line'},
+                                {type: 'command', name: '下部に移動　', symbol: 'toBottom',    enabled: true, options: {method:this.csspToBottom.bind(this, '_customCssStatus')}},
+                                {type: 'command', name: '最下部に移動', symbol: 'toTheBottom', enabled: true, options: {method:this.csspToTheBottom.bind(this, '_customCssStatus')}},
+                            ], width: 240, textWidth: 204, statusWidth: 0}},
+                            {type: 'line'},
+                            {type: 'subConfig', name: 'パラメータ追加', symbol: 'addCmd', enabled: true, options: {subConfigs: [
+                                {type: 'command', name: '上部に追加', symbol: 'addTop',       enabled: true, options: {method:this.csspAddTop.bind(this, '_customCssStatus')}},
+                                {type: 'command', name: '下部に追加', symbol: 'addBottom',    enabled: true, options: {method:this.csspAddBottom.bind(this, '_customCssStatus')}},
+                            ], width: 240, textWidth: 204, statusWidth: 0}},
+                            {type: 'line'},
+                            {type: 'command', name: 'パラメータ削除　',   symbol: 'delete', enabled: true, options: {method:this.csspDeleteCommand.bind(this, '_customCssStatus')}},
+                        ], width: 240, textWidth: 204, statusWidth: 0}},
+                    ], width:480}},
+                    {type: 'subConfig', name: '旧方式編集', symbol: 'editCssText', enabled: true, options: {subConfigs: [
+                        {type: 'string', name: '描画エリア１内容', symbol: '_customCssText1',      enabled: true, options: {}},
+                        {type: 'string', name: '描画エリア２内容', symbol: '_customCssText2',      enabled: true, options: {}},
+                        {type: 'string', name: '描画エリア３内容', symbol: '_customCssText3',      enabled: true, options: {}},
+                        {type: 'line'},
+                        {type: 'number', name: '空白エリア１幅　', symbol: '_customCssSpace1',     enabled: true, options: {min:0, max: graphicsMinSize(), offset: 1}},
+                        {type: 'number', name: '空白エリア２幅　', symbol: '_customCssSpace2',     enabled: true, options: {min:0, max: graphicsMinSize(), offset: 1}},
+                        {type: 'number', name: '空白エリア３幅　', symbol: '_customCssSpace3',     enabled: true, options: {min:0, max: graphicsMinSize(), offset: 1}},
+                        {type: 'number', name: '空白エリア４幅　', symbol: '_customCssSpace4',     enabled: true, options: {min:0, max: graphicsMinSize(), offset: 1}},
+                        {type: 'line'},
+                        {type: 'number', name: '描画エリア１比率', symbol: '_customCssWidthRate1', enabled: true, options: {min:0, max: 100, offset: 1}},
+                        {type: 'number', name: '描画エリア２比率', symbol: '_customCssWidthRate2', enabled: true, options: {min:0, max: 100, offset: 1}},
+                        {type: 'number', name: '描画エリア３比率', symbol: '_customCssWidthRate3', enabled: true, options: {min:0, max: 100, offset: 1}},
+                        {type: 'line'},
+                        {type: 'save',   name: '決定'},
+                    ], width: 500, textWidth: 220, statusWidth: 220}},
+                    {type: 'line'},
+                    {type: 'number', name: '複数列間隔　　　', symbol: '_customCssSpaceIn',    enabled: true, options: {min:0, max: graphicsMinSize(), offset: 1}},
+                    {type: 'save',   name: '決定'},
+                ], width: 500, textWidth: 220, statusWidth: 220}},
+                {type: 'line'},
+                {type: 'subConfig', name: '配置', symbol: 'priority', enabled: true, options: {subConfigs: [
+                    {type: 'command', name: '前面に配置　', symbol: 'toFront',    enabled: true, options: {method:this.cwToFront.bind(this)}},
+                    {type: 'command', name: '最前面に配置', symbol: 'totheFront', enabled: true, options: {method:this.cwToTheFront.bind(this)}},
+                    {type: 'line'},
+                    {type: 'command', name: '背面に配置　', symbol: 'toBack',     enabled: true, options: {method:this.cwToBack.bind(this)}},
+                    {type: 'command', name: '最背面に配置', symbol: 'totheBack',  enabled: true, options: {method:this.cwToTheBack.bind(this)}},
+                ], width: 240, textWidth: 204, statusWidth: 0}},
+            ];
+            //設定したコンテンツデータをオプションウィンドウに反映
+            this._dispConfigWindow.setConfigContents(configContents, configValues);
+        };
+
+        //コマンド非表示解除
+        Scene_Base.prototype.allCmdVisible = function() {
+            SoundManager.playSave();
+            this._touchWindow._customList.forEach(function(list){
+                list.visible = true;
+            });
+            this.saveConfigValues();
+            this._dispConfigWindow.hideAll();
+            this.cwCloseConfig();
+        };
+
+        //配置変更
+        Scene_Base.prototype.cwhidePriority = function() {
+            SoundManager.playMagicEvasion();
+            this._windowLayer.children.forEach(function(child){
+                child.saveContainerInfo();
+            });
+            this._touchWindow.refresh();
+            this._touchWindow = null;
+            this._dispConfigWindow.hideAll();
+            this.cwCloseConfig();
+            this.refreshDisplayPriority();
+        };
+
+        Scene_Base.prototype.cwToFront = function() {
+            this._windowLayer.children.some(function(child){
+                if (child.priority === this._touchWindow.priority + 1) {
+                    child.priority--;
+                    this._touchWindow.priority++;
+                    return true;
+                }
+            },this);
+            this.cwhidePriority();
+        };
+
+        Scene_Base.prototype.cwToTheFront = function() {
+            this._windowLayer.children.forEach(function(child){
+                if (child.priority > this._touchWindow.priority) {
+                    child.priority--;
+                    return true;
+                }
+            },this);
+            this._touchWindow.priority = this._windowLayer.children.length - 1;
+            this.cwhidePriority();
+        };
+
+        Scene_Base.prototype.cwToBack = function() {
+            this._windowLayer.children.some(function(child){
+                if (child.priority === this._touchWindow.priority - 1) {
+                    child.priority++;
+                    this._touchWindow.priority--;
+                    return true;
+                }
+            },this);
+            this.cwhidePriority();
+        };
+
+        Scene_Base.prototype.cwToTheBack = function() {
+            this._windowLayer.children.forEach(function(child){
+                if (child.priority < this._touchWindow.priority) {
+                    child.priority++;
+                    return true;
+                }
+            },this);
+            this._touchWindow.priority = 0;
+            this.cwhidePriority();
+        };
+
+        /*
+        パラメータ表示設定変更
+        */
+        Scene_Base.prototype.csspSetCmdListOrder = function(parentSymbol) {
+            SoundManager.playSave();
+            this._touchWindow.refresh();
+            this.saveConfigValues();
+            parent = this.getOptionWindow(parentSymbol);
+            parent.hideChildWindowsAll();
+            parent.refresh();
+            parent.activate();
+        };
+
+        Scene_Base.prototype.getOptionWindow = function(symbol) {
+            var result = null;
+            this._settingLayer.children.some(function(child) {
+                if (child && child._windowSymbol === symbol) result = child;
+            },this);
+            return result;
+        };
+
+        Scene_Base.prototype.currentOptionWindow = function() {
+            var result = null;
+            this._settingLayer.children.some(function(child) {
+                if (child && child.active) result = child;
+            },this);
+            return result;
+        };
+
+        Scene_Base.prototype.currentCssStatusIndex = function(parent) {
+            var current = this.getOptionWindow(parent);
+            if (current) {
+                var index = current.index();
+                return index;
+            }
+            return -1;
+        };
+
+        Scene_Base.prototype.csspToTop = function(parent) {
+            var index = this.currentCssStatusIndex(parent);
+            consoleLogWIndex('パラメータ順番変更', this.currentCssStatusIndex(parent), this._touchWindow._customCssStatus[index]);
+            var currentStatus = this._touchWindow._customCssStatus.splice(index, 1)[0];
+            this._touchWindow._customCssStatus.splice(Math.max(index - 1, 0), 0, currentStatus);
+            consoleLogWCssStatus();
+            this.csspSetCmdListOrder(parent);
+        };
+
+        Scene_Base.prototype.csspToTheTop = function(parent) {
+            var index = this.currentCssStatusIndex(parent);
+            consoleLogWIndex('パラメータ順番変更', this.currentCssStatusIndex(parent), this._touchWindow._customCssStatus[index]);
+            var currentStatus = this._touchWindow._customCssStatus.splice(index, 1)[0];
+            this._touchWindow._customCssStatus.unshift(currentStatus);
+            consoleLogWCssStatus();
+            this.csspSetCmdListOrder(parent);
+        };
+
+        Scene_Base.prototype.csspToBottom = function(parent) {
+            var index = this.currentCssStatusIndex(parent);
+            consoleLogWIndex('パラメータ順番変更', this.currentCssStatusIndex(parent), this._touchWindow._customCssStatus[index]);
+            var currentStatus = this._touchWindow._customCssStatus.splice(index, 1)[0];
+            var max = this._touchWindow._customCssStatus.length;
+            this._touchWindow._customCssStatus.splice(Math.min(index + 1, max - 1), 0, currentStatus);
+            consoleLogWCssStatus();
+            this.csspSetCmdListOrder(parent);
+        };
+
+        Scene_Base.prototype.csspToTheBottom = function(parent) {
+            var index = this.currentCssStatusIndex(parent);
+            consoleLogWIndex('パラメータ順番変更', this.currentCssStatusIndex(parent), this._touchWindow._customCssStatus[index]);
+            var currentStatus = this._touchWindow._customCssStatus.splice(index, 1)[0];
+            this._touchWindow._customCssStatus.push(currentStatus);
+            consoleLogWCssStatus();
+            this.csspSetCmdListOrder(parent);
+        };
+
+        Scene_Base.prototype.addCustomCssStatusAt = function(index, parent) {
+            var i = this._touchWindow._customCssStatus.length;
+            if (index >= i) {
+                this._touchWindow._customCssStatus.push({text: 'name', x: 0, y: 0, width:0});
+            } else if (index <= 0){
+                this._touchWindow._customCssStatus.unshift({text: 'name', x: 0, y: 0, width:0});
+            } else {
+                this._touchWindow._customCssStatus.splice(index, 0, {text: 'name', x: 0, y: 0, width:0});
+            }
+            consoleLogWIndex('パラメータ追加', index, this._touchWindow._customCssStatus);
+            this.csspSetCmdListOrder(parent);
+        };
+
+        Scene_Base.prototype.csspAddTop = function(parent) {
+            var index = this.currentCssStatusIndex(parent);
+            this.addCustomCssStatusAt(index, parent);
+        };
+        
+        Scene_Base.prototype.csspAddBottom = function(parent) {
+            var index = this.currentCssStatusIndex(parent) + 1;
+            this.addCustomCssStatusAt(index, parent);
+        };
+
+        Scene_Base.prototype.csspDeleteCommand = function(parent) {
+            var index = this.currentCssStatusIndex(parent);
+            console.log(index, this._touchWindow._customCssStatus.length);
+            var data = this._touchWindow._customCssStatus.splice(index, 1);
+            consoleLogWIndex('パラメータ削除', null, data);
+            this.csspSetCmdListOrder(parent);
+        };
+
+        var consoleLogWCssStatus = function() {
+            SceneManager._scene._touchWindow._customCssStatus.forEach(function(cmd, i){
+                console.log('表示番号', i, 'パラメータ名', cmd.text, '表示位置', cmd.x, cmd.y, cmd.width);
+            });
+        };
+
+        //------------------------------------------------------------------------
+        //コマンドウィンドウのコマンド編集用ウィンドウを設定
+        //------------------------------------------------------------------------
+        Scene_Base.prototype.createFtkrCommandOptions = function() {
+            var width = 240, textWidth = 220, statusWidth = 0;
+            var layer = this.configLayer();
+            this._cmdConfigWindow = new Window_FtkrOptions(layer, width, textWidth, statusWidth);
+            this._cmdConfigWindow.setHandler('cancel', this.cwCloseConfig.bind(this));
+            layer.addChild(this._cmdConfigWindow);
+        };
+
+        //コマンドコンテンツの設定読込
+        Scene_Base.prototype.setConfigContents_command = function(configValues) {
+            var configContents = [
+                {type: 'subConfig', name: 'コマンド編集', symbol: 'editCmd', enabled: true, options: {subConfigs: [
+                    {type: 'string', name: '表示名',   symbol: 'name',         enabled: true, options: {}},
+                    {type: 'string', name: '実行条件', symbol: 'enabled',      enabled: true, options: {}},
+                    {type: 'line'},
+                    {type: 'select', name: '実行設定', symbol: 'methodType',   enabled: true, options: {select:COMMAND_METHOD}},
+                    {type: 'refer',  name: '実行詳細', symbol: 'methodDetail', enabled: true, options: {refSymbol:['methodType'], refData:FTKR_METHOD_DATALIST(this)}},
+                    {type: 'refer',  name: '実行詳細2', symbol: 'methodDetail2', enabled: true, options:  {refSymbol:['methodType'], refData:FTKR_METHOD_DATALIST2}},
+                    {type: 'line'},
+                    {type: 'save',   name: '決定'},
+                ], width: 500, textWidth: 220, statusWidth: 220}},
+                {type: 'line'},
+                {type: 'subConfig', name: '表示順番', symbol: 'order', enabled: true, options: {subConfigs: [
+                    {type: 'command', name: '上部に移動　', symbol: 'toTop',       enabled: true, options: {method:this.cwToTop.bind(this)}},
+                    {type: 'command', name: '最上部に移動', symbol: 'toTheTop',    enabled: true, options: {method:this.cwToTheTop.bind(this)}},
+                    {type: 'line'},
+                    {type: 'command', name: '下部に移動　', symbol: 'toBottom',    enabled: true, options: {method:this.cwToBottom.bind(this)}},
+                    {type: 'command', name: '最下部に移動', symbol: 'toTheBottom', enabled: true, options: {method:this.cwToTheBottom.bind(this)}},
+                ], width: 240, textWidth: 204, statusWidth: 0}},
+                {type: 'line'},
+                {type: 'subConfig', name: 'コマンド追加', symbol: 'addCmd', enabled: true, options: {subConfigs: [
+                    {type: 'command', name: '上部に追加', symbol: 'addTop',       enabled: true, options: {method:this.cwAddTop.bind(this)}},
+                    {type: 'command', name: '下部に追加', symbol: 'addBottom',    enabled: true, options: {method:this.cwAddBottom.bind(this)}},
+                ], width: 240, textWidth: 204, statusWidth: 0}},
+                {type: 'line'},
+                {type: 'command', name: 'コマンド非表示',   symbol: 'hide',   enabled: true, options: {method:this.cwHideCommand.bind(this)}},
+                {type: 'command', name: 'コマンド削除　',   symbol: 'delete', enabled: true, options: {method:this.cwDeleteCommand.bind(this)}},
+            ];
+            //設定したコンテンツデータをオプションウィンドウに反映
+            this._cmdConfigWindow.setConfigContents(configContents, configValues);
+        };
+
+        Scene_Base.prototype.cwSetCmdListOrder = function() {
+            SoundManager.playMagicEvasion();
+            this._touchWindow.saveContainerInfo();
+            this._touchWindow.createContents();
+            this._touchWindow.refresh();
+            if (this._cmdConfigWindow.visible) {
+                this._cmdConfigWindow.hideAll();
+            } else if (this._selectConfigWindow.visible) {
+                this._selectConfigWindow.hideAll();
+            } else if (this._commonConfigWindow.visible) {
+                this._commonConfigWindow.hideAll();
+            }
+            this.releaceTouchWindow();
+            this.releaseActiveWindow();
+        };
+        
+        Scene_Base.prototype.cwToTop = function() {
+            var currentCmd = this.currentListCommand();
+            consoleLogWIndex('コマンド順番変更', this.currentListIndex(), currentCmd);
+            this._touchWindow._customList.some(function(child){
+                if (child.index === currentCmd.index - 1) {
+                    child.index++;
+                    currentCmd.index--;
+                    return true;
+                }
+            },this);
+            this._touchWindow.sortCustomList();
+            consoleLogWCommand();
+            this.cwSetCmdListOrder();
+        };
+
+        Scene_Base.prototype.cwToTheTop = function() {
+            var currentCmd = this.currentListCommand();
+            consoleLogWIndex('コマンド順番変更', this.currentListIndex(), currentCmd);
+            this._touchWindow._customList.forEach(function(child){
+                if (child.index < currentCmd.index) {
+                    child.index++;
+                    return true;
+                }
+            },this);
+            currentCmd.index = 0;
+            this._touchWindow.sortCustomList();
+            consoleLogWCommand();
+            this.cwSetCmdListOrder();
+        };
+
+        Scene_Base.prototype.cwToBottom = function() {
+            var currentCmd = this.currentListCommand();
+            consoleLogWIndex('コマンド順番変更', this.currentListIndex(), currentCmd);
+            this._touchWindow._customList.some(function(child){
+                if (child.index === currentCmd.index + 1) {
+                    child.index--;
+                    currentCmd.index++;
+                    return true;
+                }
+            },this);
+            this._touchWindow.sortCustomList();
+            consoleLogWCommand();
+            this.cwSetCmdListOrder();
+        };
+
+        Scene_Base.prototype.cwToTheBottom = function() {
+            var currentCmd = this.currentListCommand();
+            consoleLogWIndex('コマンド順番変更', this.currentListIndex(), currentCmd);
+            this._touchWindow._customList.forEach(function(child){
+                if (child.index > currentCmd.index) {
+                    child.index--;
+                    return true;
+                }
+            },this);
+            currentCmd.index = this._touchWindow._customList.length - 1;
+            this._touchWindow.sortCustomList();
+            consoleLogWCommand();
+            this.cwSetCmdListOrder();
+        };
+
+        Scene_Base.prototype.addCustomCommandAt = function(index) {
+            var i = this._touchWindow._customList.length;
+            this._touchWindow.addCustomCommandAt(index, 'コマンド' + i, 'cmd' + i, 'true');
+            consoleLogWIndex('コマンド追加', index, this._touchWindow._customList);
+            consoleLogWCommand();
+            this.cwSetCmdListOrder();
+        };
+
+        Scene_Base.prototype.cwAddTop = function() {
+            var index = this.currentListIndex();
+            this.addCustomCommandAt(index);
+        };
+        
+        Scene_Base.prototype.cwAddBottom = function() {
+            var index = this.currentListIndex() + 1;
+            this.addCustomCommandAt(index);
+        };
+
+        Scene_Base.prototype.cwHideCommand = function() {
+            var index = this.currentListIndex();
+            this._touchWindow._customList[index].visible = false;
+            consoleLogWIndex('コマンド非表示', index, this._touchWindow._customList[index]);
+            this.cwSetCmdListOrder();
+        };
+        
+        Scene_Base.prototype.cwDeleteCommand = function() {
+            var index = this.currentListIndex();
+            var data = this._touchWindow._customList.splice(index, 1);
+            this._touchWindow._customList.forEach(function(cmd, i){
+                if (i >= index) {
+                    cmd.index--;
+                }
+            });
+            consoleLogWIndex('コマンド削除', null, data);
+            this.cwSetCmdListOrder();
+        };
+
+        var consoleLogWIndex = function(text, index, result) {
+            var scene = SceneManager._scene;
+            text = text + '：';
+            if(index == null) index = this._touchWindowIndex;
+            var name = !!scene._touchWindow ? scene._touchWindow.name : undefined;
+            console.log(text, name, '行数', index, '内容', result);
+        };
+
+        var consoleLogWCommand = function() {
+            SceneManager._scene._touchWindow._customList.forEach(function(cmd){
+                console.log('行番', cmd.index, 'コマンド名', cmd.name, '表示', cmd.visible);
+            });
+        };
+
+        //------------------------------------------------------------------------
+        //セレクトウィンドウのテキスト編集用ウィンドウを設定
+        //------------------------------------------------------------------------
+        Scene_Base.prototype.createFtkrSelectOptions = function() {
+            var width = 240, textWidth = 220, statusWidth = 0;
+            var layer = this.configLayer();
+            this._selectConfigWindow = new Window_FtkrOptions(layer, width, textWidth, statusWidth);
+            this._selectConfigWindow.setHandler('cancel', this.cwCloseConfig.bind(this));
+            layer.addChild(this._selectConfigWindow);
+        };
+
+        //セレクトコンテンツの設定読込
+        Scene_Base.prototype.setConfigContents_select = function(configValues) {
+            var configContents = [
+                {type: 'command', name: 'テキスト編集', symbol: 'setText', enabled: true, options: {method:this.cwSetText.bind(this)}},
+                {type: 'subConfig', name: 'テキスト追加', symbol: 'addText', enabled: true, options: {subConfigs: [
+                    {type: 'command', name: '上部に追加', symbol: 'addTop',       enabled: true, options: {method:this.cwAddTopText.bind(this)}},
+                    {type: 'command', name: '下部に追加', symbol: 'addBottom',    enabled: true, options: {method:this.cwAddBottomText.bind(this)}},
+                ], width: 240, textWidth: 204, statusWidth: 0}},
+                {type: 'command', name: 'テキスト削除　',   symbol: 'delete', enabled: true, options: {method:this.cwDeleteCommand.bind(this)}},
+            ];
+            //設定したコンテンツデータをオプションウィンドウに反映
+            this._selectConfigWindow.setConfigContents(configContents, configValues);
+        };
+        
+        //------------------------------------------------------------------------
+        //コモンウィンドウのテキスト編集用ウィンドウを設定
+        //------------------------------------------------------------------------
+        Scene_Base.prototype.createFtkrCommonOptions = function() {
+            var width = 240, textWidth = 220, statusWidth = 0;
+            var layer = this.configLayer();
+            this._commonConfigWindow = new Window_FtkrOptions(layer, width, textWidth, statusWidth);
+            this._commonConfigWindow.setHandler('cancel', this.cwCloseConfig.bind(this));
+            layer.addChild(this._commonConfigWindow);
+        };
+
+        //コモンコンテンツの設定読込
+        Scene_Base.prototype.setConfigContents_common = function(configValues) {
+            var configContents = [
+                {type: 'command', name: 'テキスト編集', symbol: 'setText', enabled: true, options: {method:this.cwSetText.bind(this)}},
+                {type: 'subConfig', name: '表示順番', symbol: 'order', enabled: true, options: {subConfigs: [
+                    {type: 'command', name: '上部に移動　', symbol: 'toTop',       enabled: true, options: {method:this.cwToTop.bind(this)}},
+                    {type: 'command', name: '最上部に移動', symbol: 'toTheTop',    enabled: true, options: {method:this.cwToTheTop.bind(this)}},
+                    {type: 'line'},
+                    {type: 'command', name: '下部に移動　', symbol: 'toBottom',    enabled: true, options: {method:this.cwToBottom.bind(this)}},
+                    {type: 'command', name: '最下部に移動', symbol: 'toTheBottom', enabled: true, options: {method:this.cwToTheBottom.bind(this)}},
+                ], width: 240, textWidth: 204, statusWidth: 0}},
+                {type: 'subConfig', name: 'テキスト追加', symbol: 'addText', enabled: true, options: {subConfigs: [
+                    {type: 'command', name: '上部に追加', symbol: 'addTop',       enabled: true, options: {method:this.cwAddTopText.bind(this)}},
+                    {type: 'command', name: '下部に追加', symbol: 'addBottom',    enabled: true, options: {method:this.cwAddBottomText.bind(this)}},
+                ], width: 240, textWidth: 204, statusWidth: 0}},
+                {type: 'command', name: 'テキスト削除　',   symbol: 'delete', enabled: true, options: {method:this.cwDeleteCommand.bind(this)}},
+            ];
+            //設定したコンテンツデータをオプションウィンドウに反映
+            this._commonConfigWindow.setConfigContents(configContents, configValues);
+        };
+        
+        Scene_Base.prototype.cwSetText = function() {
+            var list = this._touchWindow._customList[this._touchWindowIndex];
+            if (!(list instanceof Object)) list = {name:'', index:this._touchWindowIndex, visible:true};
+            var oldStr = list.name;
+            list.name = getPromptResult(list.name);
+            if (oldStr !== list.name) {
+                consoleLogWIndex('テキスト編集', null, list.name);
+            }
+            this.cwSetCmdListOrder();
+        };
+
+        Scene_Base.prototype.addCustomTextAt = function(index) {
+            var i = this._touchWindow._customList.length;
+            this._touchWindow.addCustomCommandAt(index, 'テキスト' + i);
+            consoleLogWIndex('テキスト追加', index, this._touchWindow._customList);
+            consoleLogWCommand();
+            this.cwSetCmdListOrder();
+        };
+
+        Scene_Base.prototype.cwAddTopText = function() {
+            var index = this._touchWindowIndex;
+            this.addCustomTextAt(index);
+        };
+        
+        Scene_Base.prototype.cwAddBottomText = function() {
+            var index = this._touchWindowIndex + 1;
+            this.addCustomTextAt(index);
+        };
+
+        //------------------------------------------------------------------------
+        //ウィンドウ削除時の確認ウィンドウを設定
+        //------------------------------------------------------------------------
+        Scene_Base.prototype.createConfTitleWindow = function() {
+            var layer = this.configLayer();
+            this._stsConfTitleWindow = new Window_OSWConfTitle();
+            layer.addChild(this._stsConfTitleWindow);
+            this._stsConfTitleWindow.hide();
+        };
+
+        Scene_Base.prototype.createConfWindow = function() {
+            this._stsConfWindow = new Window_OSWConf();
+            var layer = this.configLayer();
+            var window = this._stsConfWindow;
+            window.setHandler('delete', this.onConfirmationOk.bind(this));
+            window.setHandler('cancel', this.onConfirmationCancel.bind(this));
+            layer.addChild(window);
+        };
+
+        Scene_Base.prototype.onConfirmationOk = function() {
+            this.deleteTouchWindow();
+            this._touchWindow = null;
+            this._stsConfTitleWindow.hide();
+            this._stsConfWindow.hide();
+            this._stsConfWindow.deactivate();
+            this._mainConfigWindow.hide();
+        };
+
+        Scene_Base.prototype.deleteTouchWindow = function() {
+            console.log('ウィンドウ削除：', this._touchWindow.name);
+            this._windowLayer.removeChild(this._touchWindow);
+            var type = this._touchWindow._windowType;
+            var windowId = this._touchWindow._windowId;
+            switch(type) {
+                case Game_OswData.WINDOW_COMMON:
+                    this._oswCommonWindows[windowId] = null;
+                    break;
+                case Game_OswData.WINDOW_COMMAND:
+                    this._oswCommandWindows[windowId] = null;
+                    break;
+                case Game_OswData.WINDOW_SELECTABLE:
+                    this._oswSelectWindows[windowId] = null;
+                    break;
+                default:
+                    return;
+            }
+            this.removeOswWindow(convertWindowName(type), windowId);
+        };
+
+        Scene_Base.prototype.removeOswWindow = function(windowType, windowId) {
+            this._oswWindowList.some(function(list, i){
+                if (list.type == windowType && list.id == windowId) {
+                    this._oswWindowList.splice(i, 1);
+                    return true;
+                }
+            },this);
+            this.saveOswWindowList();
+        };
+
+        Scene_Base.prototype.onConfirmationCancel = function() {
+            this._stsConfTitleWindow.hide();
+            this._stsConfWindow.hide();
+            this._stsConfWindow.deactivate();
+            this._mainConfigWindow.activate();
+        };
+
+        //------------------------------------------------------------------------
+        //ウィンドウ作成コマンド用のウィンドウを設定
+        //------------------------------------------------------------------------
+        Scene_Base.prototype.createSettingNewWindow = function() {
+            this._cwCreateNewW = new Window_CreateNewWindowCommand();
+            this._cwCreateNewW.setHandler('common', this.cwSetCommon.bind(this));
+            this._cwCreateNewW.setHandler('select', this.cwSetSelect.bind(this));
+            this._cwCreateNewW.setHandler('command', this.cwSetCommand.bind(this));
+            this._cwCreateNewW.setHandler('cancel', this.cwCreateNewCancel.bind(this));
+            this._settingLayer.addChild(this._cwCreateNewW);
+        };
+
+        Scene_Base.prototype.cwSetCommon = function() {
+            this.cwCreateNewWindow(Game_OswData.WINDOW_COMMON);
+        };
+
+        Scene_Base.prototype.cwSetSelect = function() {
+            this.cwCreateNewWindow(Game_OswData.WINDOW_SELECTABLE);
+        };
+
+        Scene_Base.prototype.cwSetCommand = function() {
+            this.cwCreateNewWindow(Game_OswData.WINDOW_COMMAND);
+        };
+
+        Scene_Base.prototype.cwCreateNewWindow = function(windowType, windowId) {
+            var createWindow = null;
+            switch (windowType) {
+                case Game_OswData.WINDOW_COMMON:
+                    if(window !== undefined) {
+                        if (!this._oswCommonWindows) this._oswCommonWindows = [];
+                        if(!this._oswCommonWindows.some(function(window, i){
+                            if (!window) {
+                                windowId = i;
+                                return true;
+                            }
+                        })) windowId = this._oswCommonWindows.length;
+                    }
+                    this.createOswCommonWindow(windowId);
+                    createWindow = this._oswCommonWindows[windowId];
+                    break;
+                case Game_OswData.WINDOW_COMMAND:
+                    if(window !== undefined) {
+                        if(!this._oswCommandWindows) this._oswCommandWindows = [];
+                        if(!this._oswCommandWindows.some(function(window, i){
+                            if (!window) {
+                                windowId = i;
+                                return true;
+                            }
+                        })) windowId = this._oswCommandWindows.length;
+                    }
+                    this.createOswCommandWindow(windowId);
+                    createWindow = this._oswCommandWindows[windowId];
+                    break;
+                case Game_OswData.WINDOW_SELECTABLE:
+                    if(window !== undefined) {
+                        if(!this._oswSelectWindows) this._oswSelectWindows = [];
+                        if(!this._oswSelectWindows.some(function(window, i){
+                            if (!window) {
+                                windowId = i;
+                                return true;
+                            }
+                        })) windowId = this._oswSelectWindows.length;
+                    }
+                    this.createOswSelectWindow(windowId);
+                    createWindow = this._oswSelectWindows[windowId];
+                    break;
+            }
+            SoundManager.playMagicEvasion();
+            this.addOswWindow(convertWindowName(windowType), windowId);
+            this.saveOswWindowList();
+            createWindow.priority = this._windowLayer.children.length - 1;
+            createWindow.name = windowId + '_' + getClassName(createWindow);
+            createWindow.saveContainerInfo();
+            this._cwCreateNewW.hide();
+            console.log('ウィンドウ作成：', createWindow.name);
+            this.cwCloseConfig();
+            return createWindow;
+        };
+
+        Scene_Base.prototype.cwCreateNewCancel = function() {
+            this._mainConfigWindow.activate();
+            this._cwCreateNewW.hide();
+        };
+
+        Scene_Base.prototype.cwStatusListOk = function() {
+            this._statusListWindow.activate();
+        };
+
+        Scene_Base.prototype.cwStatusListCancel = function() {
+            this._statusListWindow.hide();
+            this._dispConfigWindow.childWindows()[5].activate();
+        };
+
+        //=============================================================================
+        // 編集メニューのサブコマンドウィンドウの設定
+        //=============================================================================
+        function Window_CreateNewWindowCommand() {
+            this.initialize.apply(this, arguments);
+        }
+
+        Window_CreateNewWindowCommand.prototype = Object.create(Window_Command.prototype);
+        Window_CreateNewWindowCommand.prototype.constructor = Window_CreateNewWindowCommand;
+        
+        Window_CreateNewWindowCommand.prototype.initialize = function() {
+            this._ftkrEditor = true;
+            Window_Command.prototype.initialize.call(this, 0, 0);
+            var x = Graphics.boxWidth - this.windowWidth();
+            var y = Graphics.boxHeight - this.windowHeight();
+            this.move(x/2, y/2, this.width, this.height);
+            this.deactivate();
+            this.hide();
+        };
+
+        Window_CreateNewWindowCommand.prototype.isOswOption = function() {
+            return true;
+        };
+
+        Window_CreateNewWindowCommand.prototype.windowWidth = function() {
+            return 240;
+        };
+
+        Window_CreateNewWindowCommand.prototype.standardFontSize = function() {
+            return optionFontSize;
+        };
+
+        Window_CreateNewWindowCommand.prototype.lineHeight = function() {
+            return optionLineHeight;
+        };
+
+        Window_CreateNewWindowCommand.prototype.makeCommandList = function() {
+            this.addCommand('コモンウィンドウ',   'common');
+            this.addCommand('セレクトウィンドウ', 'select');
+            this.addCommand('コマンドウィンドウ', 'command');
+        };
+
+        //=============================================================================
+        // パラメータ設定用ウィンドウベース
+        //=============================================================================
+        function Window_FtkrOptionsBase() {
+            this.initialize.apply(this, arguments);
+        }
+
+        Window_FtkrOptionsBase.prototype = Object.create(Window_Command.prototype);
+        Window_FtkrOptionsBase.prototype.constructor = Window_FtkrOptionsBase;
+        
+        Window_FtkrOptionsBase.prototype.initialize = function(layer, width, textWidth, statusWidth, symbol, parentConfig, parentWindow, masterWindow) {
+            this._ftkrEditor = true;
+            this._parentConfig   = parentConfig;
+            this._masterWindow   = masterWindow;
+            this._parentWindow   = parentWindow;
+//            this._parentIndex    = -1;
+            this._childWindows = [];
+            this._windowSymbol   = symbol;
+            this._windowWidth    = width;
+            this._textWidth      = textWidth;
+            this._statusWidth    = statusWidth;
+            this._configContents = [];
+            this._configValues   = {};
+            this._oldConfigValues = {};
+            this.setWindowLayer(layer);
+            Window_Command.prototype.initialize.call(this, 0, 0);
+    //          this.updatePlacement();
+            this.deactivate();
+            this.hide();
+        };
+
+        Window_FtkrOptionsBase.prototype.isOswOption = function() {
+            return true;
+        };
+
+        //親ウィンドウかどうかの判定
+        Window_FtkrOptionsBase.prototype.isParent = function() {
+            return !this._parentWindow;
+        };
+
+        Window_FtkrOptionsBase.prototype.childWindows = function() {
+            return this._childWindows;
+        };
+
+        Window_FtkrOptionsBase.prototype.windowLayer = function() {
+            return this._windowLayer;
+        };
+
+        Window_FtkrOptionsBase.prototype.setWindowLayer = function(layer) {
+            this._windowLayer = layer;
+        };
+
+        Window_FtkrOptionsBase.prototype.standardFontSize = function() {
+            return optionFontSize;
+        };
+
+        Window_FtkrOptionsBase.prototype.lineHeight = function() {
+            return optionLineHeight;
+        };
+
+        //再描画処理
+        Window_FtkrOptionsBase.prototype.refresh = function() {
+            this.clearCommandList();
+            this.makeCommandList();
+            this.updatePlacement();
+            this.createContents();
+            Window_Selectable.prototype.refresh.call(this);
+            this.childWindows().forEach(function(window){
+                if (window) window.refresh();
+            },this);
+        };
+
+        //------------------------------------------------------------------------
+        //コンフィグ内容の参照
+        //------------------------------------------------------------------------
+        Window_FtkrOptionsBase.prototype.setConfigContents = function(configContents, configValues) {
+            this._configContents = configContents;
+            this._oldConfigValues = configValues;
+            this._configValues = copyConfigSymbolvalues(configContents, configValues);
+            this.refresh();
+        };
+
+        Window_FtkrOptionsBase.prototype.configContentOptions = function(index) {
+            return this.configContents()[index].options;
+        };
+
+        Window_FtkrOptionsBase.prototype.findConfigContentSymbol = function(symbol) {
+            for (var i = 0; i < this.configContents().length; i++) {
+                if (this.configContents()[i].symbol === symbol) {
+                    return i;
+                }
+            }
+            return -1;
+        };
+
+        Window_FtkrOptionsBase.prototype.configContents = function() {
+            return this._parentConfig;
+        };
+
+        //------------------------------------------------------------------------
+        //コンフィグデータの参照
+        //------------------------------------------------------------------------
+        Window_FtkrOptionsBase.prototype.oldConfigValues = function() {
+            return this._masterWindow._oldConfigValues;
+        };
+
+        Window_FtkrOptionsBase.prototype.configValues = function() {
+            return this._masterWindow._configValues;
+        };
+
+        Window_FtkrOptionsBase.prototype.getConfigValue = function(symbol) {
+            var match = /([^\[]+)\[([^\]]+)\].(.+)/i.exec(symbol);
+            if (match) {
+                var refSymbol = this._masterWindow._configValues[match[1]]
+                var prop = match[2] == 'index' ? this._parentWindow._parentIndex : match[2];
+                if (refSymbol && !(prop < 0)) {
+                    var refSymbolA = refSymbol[prop];
+                    if (refSymbolA) {
+                        return refSymbolA[match[3]];
+                    }
+                }
+            }
+            return this._masterWindow._configValues[symbol];
+        };
+
+        Window_FtkrOptionsBase.prototype.setConfigValue = function(symbol, value) {
+            var match = /([^\[]+)\[([^\]]+)\].(.+)/i.exec(symbol);
+            if (match) {
+                var refSymbol = this._masterWindow._configValues[match[1]]
+                var prop = match[2] == 'index' ? this._parentWindow._parentIndex : match[2];
+                if (refSymbol && !(prop < 0)) {
+                    var refSymbolA = refSymbol[prop];
+                    if (refSymbolA) {
+                        refSymbolA[match[3]] = value;
+                        return;
+                    }
+                }
+            }
+            this._masterWindow._configValues[symbol] = value;
+        };
+
+        //------------------------------------------------------------------------
+        //サイズ設定
+        //------------------------------------------------------------------------
+        Window_FtkrOptionsBase.prototype.windowWidth = function() {
+            return this._windowWidth;
+        };
+        
+        Window_FtkrOptionsBase.prototype.windowHeight = function() {
+            return this.fittingHeight(Math.min(this._list.length, 12));
+        };
+        
+        Window_FtkrOptionsBase.prototype.textWidth = function() {
+            return this._textWidth;
+        };
+
+        Window_FtkrOptionsBase.prototype.statusWidth = function() {
+            return this._statusWidth;
+        };
+
+        Window_FtkrOptionsBase.prototype.updatePlacement = function() {
+            this.width  = this.windowWidth();
+            this.height = this.windowHeight();
+        };
+        
+        //------------------------------------------------------------------------
+        //表示するコンテンツリストの設定
+        //------------------------------------------------------------------------
+        Window_FtkrOptionsBase.prototype.makeCommandList = function() {
+            this.configContents().forEach( function(item) {
+                this.addConfig(item.name, item.type, item.symbol, item.enabled, item.options);
+            },this);
+        };
+
+        Window_FtkrOptionsBase.prototype.addConfig = function(name, type, symbol, enabled, options) {
+            if (enabled === undefined) {
+                enabled = true;
+            }
+            if (options === undefined || !(options instanceof Object)) {
+                options = {};
+            }
+            if (type !== undefined && type.toUpperCase() === 'COMMAND' && !!this._handlers) {
+                this.setHandler(symbol, options.method);
+            }
+            this._list.push({ name: name, type: type, symbol: symbol, enabled: enabled, ext: null, options:options});
+        };
+
+        Window_FtkrOptionsBase.prototype.list = function(index) {
+            return this._list[index];
+        };
+
+        Window_FtkrOptionsBase.prototype.commandName = function(index) {
+            return this.list(index).name;
+        };
+
+        Window_FtkrOptionsBase.prototype.commandSymbol = function(index) {
+            return this.list(index).symbol;
+        };
+
+        Window_FtkrOptionsBase.prototype.isCommandEnabled = function(index) {
+            return this.list(index).enabled;
+        };
+
+        Window_FtkrOptionsBase.prototype.commandType = function(index) {
+            return this.list(index).type;
+        };
+
+        Window_FtkrOptionsBase.prototype.commandOptions = function(index) {
+            return this.list(index).options;
+        };
+
+        //------------------------------------------------------------------------
+        //描画処理
+        //------------------------------------------------------------------------
+        Window_FtkrOptionsBase.prototype.drawItem = function(index) {
+            var rect = this.itemRectForText(index);
+            var statusWidth = this.statusWidth();
+            var titleWidth = this.textWidth();
+            this.resetTextColor();
+            this.changePaintOpacity(this.isCommandEnabled(index));
+            if (this.commandType(index).toUpperCase() === 'LINE') {
+                this.drawHorzLine(rect.y);
+            } else {
+                this.drawText(this.commandName(index), rect.x, rect.y, titleWidth, 'left');
+                this.drawText(this.statusText(index), rect.width - statusWidth, rect.y, statusWidth, 'right');
+            }
+        };
+        
+        Window_FtkrOptionsBase.prototype.statusText = function(index) {
+            var type   = this.commandType(index);
+            var symbol = this.commandSymbol(index);
+            var value  = this.getConfigValue(symbol);
+            var options = this.commandOptions(index);
+//            console.log('statusText', 'index', index, 'type', type, 'symbol', symbol, 'value', value, 'options', options);
+            return this.statusTextBase(type, options, value);
+        };
+
+        Window_FtkrOptionsBase.prototype.statusTextBase = function(type, options, value) {
+            switch((type + '').toUpperCase()) {
+                case 'NUMBER':
+                    return this.numberStatusText(options, value);
+                case 'SELECT':
+                    return this.selectStatusText(options, value);
+                case 'BOOLEAN':
+                    return this.booleanStatusText(value);
+                case 'DATA':
+                    return this.dataStatusText(options, value);
+                case 'REFER':
+                    return this.referenceStatusText(options, value);
+                case 'STRING':
+                    return value;
+                case 'NONE':
+                case 'COMMAND':
+                case 'HANDLER':
+                case 'SUBCONFIG':
+                case 'WINDOW':
+                default:
+                    return '';
+            }
+        };
+
+        //------------------------------------------------------------------------
+        // コンフィグデータの変更処理
+        //------------------------------------------------------------------------
+        Window_FtkrOptionsBase.prototype.redrawAllItems = function() {
+            var topIndex = this.topIndex();
+            for (var i = 0; i < this.maxPageItems(); i++) {
+                var index = topIndex + i;
+                if (index < this.maxItems()) {
+                    this.redrawItem(index);
+                }
+            }
+        };
+
+        Window_FtkrOptionsBase.prototype.changeValue = function(symbol, value) {
+            var lastValue = this.getConfigValue(symbol);
+            if (lastValue !== value) {
+                this.setConfigValue(symbol, value);
+                this.redrawAllItems();
+                SoundManager.playCursor();
+            }
+        };
+
+        //------------------------------------------------------------------------
+        //行線 LINE
+        //------------------------------------------------------------------------
+        Window_FtkrOptionsBase.prototype.drawHorzLine = function(y) {
+            var lineY = y + this.lineHeight() / 2 - 1;
+            this.contents.paintOpacity = 48;
+            this.contents.fillRect(0, lineY, this.contentsWidth(), 2, this.lineColor());
+            this.contents.paintOpacity = 255;
+        };
+
+        Window_FtkrOptionsBase.prototype.lineColor = function() {
+            return this.normalColor();
+        };
+        
+        //------------------------------------------------------------------------
+        //文字列 STRING
+        //------------------------------------------------------------------------
+        Window_FtkrOptionsBase.prototype.inputStringValue = function(symbol) {
+            var value  = this.getConfigValue(symbol);
+            value = getPromptResult(value);
+            this.changeValue(symbol, value);
+        };
+
+        //------------------------------------------------------------------------
+        //数値 NUMBER
+        //------------------------------------------------------------------------
+        Window_FtkrOptionsBase.prototype.adjustNumberStatus = function(options, value) {
+            value = (value === undefined || isNaN(value)) ? 0 : Number(value);
+            if (options.min !== undefined) value = Math.max(value, options.min);
+            if (options.max !== undefined) value = Math.min(value, options.max);
+            return value;
+        };
+
+        Window_FtkrOptionsBase.prototype.numberStatusText = function(options, value) {
+            return this.adjustNumberStatus(options, value);
+        };
+
+        Window_FtkrOptionsBase.prototype.inputNumberValue = function(symbol) {
+            var value  = this.getConfigValue(symbol);
+            value = Number(getPromptResult(value));
+            this.changeValue(symbol, value);
+        };
+
+        Window_FtkrOptionsBase.prototype.changeNumberValue = function(symbol, options, flag) {
+            var value  = this.getConfigValue(symbol);
+            value += this.numberOffset(options) * flag;
+            value = this.adjustNumberStatus(options, value);
+            this.changeValue(symbol, value);
+        };
+
+        Window_FtkrOptionsBase.prototype.numberOffset = function(options) {
+            var offset = Number(options.offset) || 0;
+            return offset * (Input.isPressed('shift') ? 10 : 1);
+        };
+
+        //------------------------------------------------------------------------
+        //論理型 BOOLEAN
+        //------------------------------------------------------------------------
+        Window_FtkrOptionsBase.prototype.booleanStatusText = function(value) {
+            return !!value ? 'ON' : 'OFF';
+        };
+
+        Window_FtkrOptionsBase.prototype.changeBooleanValue = function(symbol) {
+            var value  = this.getConfigValue(symbol);
+            this.changeValue(symbol, !value);
+        };
+
+        //------------------------------------------------------------------------
+        //セレクトリスト SELECT
+        //------------------------------------------------------------------------
+        Window_FtkrOptionsBase.prototype.convertOptionSelectValue = function(options, value) {
+            if(isNaN(value)) {
+                options.select.some(function(data, i){
+                    if(data && data == value) {
+                        value = i;
+                        return true;
+                    }
+                });
+            }
+            return this.adjustSelectStatus(options, value);
+        };
+
+        Window_FtkrOptionsBase.prototype.adjustSelectStatus = function(options, value) {
+            value = (value === undefined || isNaN(value)) ? 0 : Number(value);
+            var min = 0;
+            var max = options.select.length - 1;
+            if (value < min) value = max;
+            if (value > max) value = min;
+            return value;
+        };
+
+        Window_FtkrOptionsBase.prototype.selectStatusText = function(options, value) {
+            value = this.convertOptionSelectValue(options, value);
+            return options.select[value] || 'なし';
+        };
+        /*
+        Window_FtkrOptionsBase.prototype.inputSelectValue = function(symbol, options) {
+            var value  = this.getConfigValue(symbol);
+            var data   = options.select;
+            value = isNaN(value) ? value : data[value];
+            var result = getPromptResult(value);
+            value = isNaN(result) ? result : Number(result);
+            this.changeValue(symbol, value);
+        };*/
+
+        Window_FtkrOptionsBase.prototype.changeSelectValue = function(symbol, options, flag) {
+            var value  = this.getConfigValue(symbol);
+            value = this.convertOptionSelectValue(options, value);
+            value += flag;
+            value = this.adjustSelectStatus(options, value);
+            this.changeValue(symbol, value);
+        };
+
+        //------------------------------------------------------------------------
+        //データリスト DATA
+        //------------------------------------------------------------------------
+        Window_FtkrOptionsBase.prototype.optionDataList = function(options) {
+            return options.enabled ? options.data.filter(function(data){
+                return !!data ? eval(options.enabled) : true;
+            }) : options.data;
+        };
+
+        Window_FtkrOptionsBase.prototype.adjustDataStatus = function(options, value) {
+            var min = 0;
+            var max = this.optionDataList(options).length - 1;
+            value = (value === undefined || isNaN(value)) ? min : Number(value);
+            if (value < min) value = max;
+            if (value > max) value = min;
+            return value;
+        };
+
+        Window_FtkrOptionsBase.prototype.convertOptionDataValue = function(options, value) {
+            if(isNaN(value)) {
+                this.optionDataList(options).some(function(data, i){
+                    if(data && (options.property && data[options.property] == value) || data == value) {
+                        value = i;
+                        return true;
+                    }
+                });
+            }
+            return this.adjustDataStatus(options, value);
+        };
+
+        Window_FtkrOptionsBase.prototype.dataStatusText = function(options, value) {
+            var data = this.optionDataList(options);
+            var prop = options.property;
+            value = this.convertOptionDataValue(options, value);
+            if (!value && !data[0]) return 'なし';
+            return prop ? data[value][prop] : data[value];
+        };
+
+        Window_FtkrOptionsBase.prototype.changeDataValue = function(symbol, options, flag) {
+            var data = this.optionDataList(options);
+            var value  = this.getConfigValue(symbol);
+            value = this.convertOptionDataValue(options, value);
+            value += flag;
+            value = this.adjustDataStatus(options, value);
+            this.changeValue(symbol, value);
+        };
+
+        //------------------------------------------------------------------------
+        //参照 REFER
+        //------------------------------------------------------------------------
+        Window_FtkrOptionsBase.prototype.getReferenceConfig = function(options) {
+            var refValues = options.refSymbol.map(function(symbol){
+                return this.getConfigValue(symbol);
+            },this);
+            var config = options.refData;
+            refValues.forEach(function(value, i){
+                if (value !== undefined) {
+                    config = config[value];
+                }
+            });
+            /*
+            refValues.forEach(function(value){
+                console.log(value);
+                config = config[value];
+            });*/
+            if (!config) config = {type:'none'};
+            return config;
+        };
+
+        Window_FtkrOptionsBase.prototype.referenceStatusText = function(options, value) {
+            var config = this.getReferenceConfig(options);
+            var result = this.statusTextBase(config.type, config.options, value);
+            return result;
+        };
+
+        Window_FtkrOptionsBase.prototype.inputReferenceValue = function(symbol, options, flag) {
+            var config = this.getReferenceConfig(options);
+            this.processInputValueBase(config.type, symbol, config.options);
+        };
+
+        Window_FtkrOptionsBase.prototype.changeReferenceValue = function(symbol, options, flag) {
+            var config = this.getReferenceConfig(options);
+            this.processChangeValueBase(config.type, symbol, config.options, flag);
+        };
+
+        //------------------------------------------------------------------------
+        //サブコンフィグ SUBCONFIG
+        //------------------------------------------------------------------------
+        Window_FtkrOptionsBase.prototype.showSubConfigs = function(symbol) {
+            if(this.childWindows().some(function(window){
+                if (window._windowSymbol === symbol) {
+                    window.setPositionReferWindowIndex(this);
+                    window.activateWindow();
+                    return true;
+                }
+            },this)) {
+                this.deactivate();
+                SoundManager.playCursor();
+            }
+        };
+
+        //------------------------------------------------------------------------
+        //決定(コンフィグデータの保存) SAVE
+        //------------------------------------------------------------------------
+        Window_FtkrOptionsBase.prototype.callSaveConfigValues = function(options) {
+            this.deactivate();
+            this.hide();
+            if (options && options.refreshWindow) {
+                options.refreshWindow.forEach(function(symbol){
+                    var child = SceneManager._scene.getOptionWindow(symbol);
+                    if (child) child.refresh();
+                },this);
+            }
+            this.configContents().forEach(function(config){
+                if (config.type.toUpperCase() == 'SUBCONFIG') {
+                    config.options.subConfigs.forEach(function(subConf){
+                        this.saveConfigValue(subConf);
+                    },this);
+                } else {
+                    this.saveConfigValue(config);
+                }
+            },this);
+            SoundManager.playSave();
+            this.callHandler('saveConfig');
+        };
+
+        Window_FtkrOptionsBase.prototype.saveConfigValue = function(config) {
+            var type    = config.type;
+            var symbol  = config.symbol;
+            var options = config.options;
+            if (!symbol) return;
+            var value = this.getConfigValue(symbol);
+            var oldValue = this.oldConfigValues()[symbol];
+            if (type.toUpperCase() == 'REFER') {
+                var referConfig = this.getReferenceConfig(options);
+                value = this.convertConfigValue(referConfig, value);
+            } else {
+                value = this.convertConfigValue(config, value);
+                if(value === undefined) return;
+            }
+            if (this.oldConfigValues()[symbol] !== value) {
+                this.oldConfigValues()[symbol] = value;
+                console.log('データ更新：', symbol, value, '←', oldValue);
+            }
+        };
+
+        Window_FtkrOptionsBase.prototype.convertConfigValue = function(config, value) {
+            var type    = config.type;
+            var options = config.options;
+            switch(type.toUpperCase()) {
+                case 'STRING':
+                    return value + '';
+                case 'NUMBER':
+                    return this.adjustNumberStatus(options, value);
+                case 'SELECT':
+                    value = this.convertOptionSelectValue(options, value);
+                    value = options.string ? this.selectStatusText(options, value) : value;
+                    return value === 'なし' ? '' : value;
+                case 'BOOLEAN':
+                    return !!value;
+                case 'DATA':
+                    value = this.convertOptionDataValue(options, value);
+                    return options.string ? this.dataStatusText(options, value) : value;
+                default:
+                    return undefined;
+            }
+        };
+
+        //------------------------------------------------------------------------
+        //決定キーを押したときの処理
+        //------------------------------------------------------------------------
+        Window_FtkrOptionsBase.prototype.isCurrentItemEnabled = function() {
+            return this.currentData() ? this.currentData().enabled : false;
+        };
+
+        Window_FtkrOptionsBase.prototype.processOk = function() {
+            if (this.isCurrentItemEnabled()) {
+                this.processInputValue();
+            } else {
+                this.playBuzzerSound();
+            }
+        };
+
+        Window_FtkrOptionsBase.prototype.processInputValue = function() {
+            var index  = this.index();
+            var type   = this.commandType(index);
+            var symbol = this.commandSymbol(index);
+            var options = this.commandOptions(index);
+            this.processInputValueBase(type, symbol, options);
+        };
+
+        Window_FtkrOptionsBase.prototype.processInputValueBase = function(type, symbol, options) {
+            switch((type + '').toUpperCase()) {
+                case 'STRING':
+                    this.inputStringValue(symbol);
+                    break;
+                case 'NUMBER':
+                    this.inputNumberValue(symbol);
+                    break;
+                case 'SELECT':
+                    this.changeSelectValue(symbol, options);
+                    break;
+                case 'BOOLEAN':
+                    this.changeBooleanValue(symbol);
+                    break;
+                case 'DATA':
+                    this.changeDataValue(symbol, options, 1);
+                    break;
+                case 'REFER':
+                    this.inputReferenceValue(symbol, options);
+                    break;
+                case 'SUBCONFIG':
+                case 'WINDOW':
+                    this.showSubConfigs(symbol);
+                    break;
+                case 'HANDLER':
+                    this.callHandler(symbol);
+                    break;
+                case 'SAVE':
+                    this.callSaveConfigValues(options);
+                    break;
+                case 'COMMAND':
+                    this.callHandler(symbol);
+                    break;
+            }
+            this.updateInputData();
+        };
+
+        //------------------------------------------------------------------------
+        //キャンセルキーを押したときの処理
+        //------------------------------------------------------------------------
+    /*
+        Window_FtkrOptionsBase.prototype.processCancel = function() {
+            SoundManager.playCancel();
+            this.updateInputData();
+            this.deactivate();
+            this.callCancelHandler();
+        };
+    */
+        //------------------------------------------------------------------------
+        //左右キーを押したときの処理
+        //------------------------------------------------------------------------
+        //右キー
+        Window_FtkrOptionsBase.prototype.cursorRight = function(wrap) {
+            if (this.isCurrentItemEnabled()) {
+                this.processChangeValue(1);
+            } else {
+    //            this.playBuzzerSound();
+            }
+        };
+
+        //左キー
+        Window_FtkrOptionsBase.prototype.cursorLeft = function(wrap) {
+            if (this.isCurrentItemEnabled()) {
+                this.processChangeValue(-1);
+            } else {
+    //            this.playBuzzerSound();
+            }
+        };    
+
+        Window_FtkrOptionsBase.prototype.processChangeValue = function(flag) {
+            var index  = this.index();
+            var type   = this.commandType(index);
+            var symbol = this.commandSymbol(index);
+            var options = this.commandOptions(index);
+            this.processChangeValueBase(type, symbol, options, flag);
+        };
+
+        Window_FtkrOptionsBase.prototype.processChangeValueBase = function(type, symbol, options, flag) {
+            switch((type + '').toUpperCase()) {
+                case 'NUMBER':
+                    this.changeNumberValue(symbol, options, flag);
+                    break;
+                case 'SELECT':
+                    this.changeSelectValue(symbol, options, flag);
+                    break;
+                case 'BOOLEAN':
+                    this.changeBooleanValue(symbol);
+                    break;
+                case 'DATA':
+                    this.changeDataValue(symbol, options, flag);
+                    break;
+                case 'REFER':
+                    this.changeReferenceValue(symbol, options, flag);
+                    break;
+                default:
+                    return;
+            }
+            this.updateInputData();
+        };
+
+        Window_FtkrOptionsBase.prototype.hideChildWindows = function(symbol) {
+            this._parentWindow.activate();
+            this.hide();
+        };
+
+        Window_FtkrOptionsBase.prototype.saveConfigValues = function(symbol) {
+            this.hideChildWindows();
+            this._parentWindow.refresh();
+            SceneManager._scene.saveConfigValues();
+            this.callHandler('cancel');
+        };
+
+        //=============================================================================
+        // パラメータ設定用ウィンドウ
+        //=============================================================================
+        function Window_FtkrOptions() {
+            this.initialize.apply(this, arguments);
+        }
+
+        Window_FtkrOptions.prototype = Object.create(Window_FtkrOptionsBase.prototype);
+        Window_FtkrOptions.prototype.constructor = Window_FtkrOptions;
+        
+        Window_FtkrOptions.prototype.initialize = function(layer, width, textWidth, statusWidth, symbol) {
+            width = width || 400;
+            textWidth = textWidth || 240;
+            statusWidth = statusWidth || 120;
+            Window_FtkrOptionsBase.prototype.initialize.call(this, layer, width, textWidth, statusWidth, symbol);
+            this.createChildWindows(width, textWidth, statusWidth);
+        };
+
+        Window_FtkrOptions.prototype.createChildWindows = function(width, textWidth, statusWidth) {
+            this._childWindows.length = 0;
+            var configs = this.configContents();
+            var parent = this;
+            var childConfigs = [];
+            while(!!configs) {
+                configs.forEach(function(config){
+                    if (!!config.parent) parent = config.parent;
+                    var childWindow = this.createChildOptionWindow(this, parent, config, width, textWidth, statusWidth);
+                    if (!!childWindow && !!config.options.subConfigs) {
+                        config.options.subConfigs.forEach(function(subConf){
+                            subConf.parent = childWindow;
+                        },this);
+                        childConfigs = childConfigs.concat(config.options.subConfigs);
+                    }
+                },this);
+                configs = null;
+                parent = null;
+                if (childConfigs.length) {
+                    configs = childConfigs;
+                    childConfigs = [];
+                }
+            }
+        };
+
+        Window_FtkrOptions.prototype.createChildOptionWindow = function(master, parent, config, width, textWidth, statusWidth) {
+            if(config.type && config.type.toUpperCase() === 'SUBCONFIG' && config.symbol) {
+                var cwd = config.options.width || width;
+                var ctw = config.options.textWidth || textWidth;
+                var csw = config.options.statusWidth || statusWidth;
+                var childWindow = new Window_FtkrOptionsBase(this.windowLayer(), cwd, ctw, csw, config.symbol, config.options.subConfigs, parent, master);
+                childWindow.setHandler('cancel',     childWindow.hideChildWindows.bind(childWindow, config.symbol));
+                childWindow.setHandler('saveConfig', childWindow.saveConfigValues.bind(childWindow, config.symbol));
+                parent._childWindows.push(childWindow);
+                this.windowLayer().addChild(childWindow);
+                return childWindow;
+            } else if (config.type && config.type.toUpperCase() === 'WINDOW' && config.symbol) {
+                var cwd = config.options.width || width;
+                var childWindow = new Window_StatusListConfig(this.windowLayer(), cwd, config.symbol, config.options.subConfigs, parent, master);
+                childWindow.setHandler('ok',         childWindow.cwStatusListOk.bind(childWindow));
+                childWindow.setHandler('cancel',     childWindow.hideChildWindows.bind(childWindow, config.symbol));
+                parent._childWindows.push(childWindow);
+                this.windowLayer().addChild(childWindow);
+                return childWindow;
+            }
+            return null;
+        };
+
+        Window_FtkrOptions.prototype.cwStatusListCancel = function() {
+            this.hide();
+            this._dispConfigWindow.childWindows()[5].activate();
+        };
+
+        Window_FtkrOptions.prototype.setConfigContents = function(configContents, configValues) {
+            this.childWindows().forEach(function(window){
+                this.windowLayer().removeChild(window);
+            },this);
+            this._configContents = configContents;
+            this._oldConfigValues = configValues;
+            this._configValues = copyConfigSymbolvalues(configContents, configValues);
+            this.createChildWindows(this.windowWidth(), this.textWidth(), this.statusWidth());
+            this.refresh();
+//            if (this._statusListWindow) this.windowLayer().addChild(this._statusListWindow);
+            console.log('setConfigContents');
+        };
+
+        Window_FtkrOptionsBase.prototype.hideAll = function() {
+            this.hideChildWindowsAll();
+            this.deactivate();
+            this.hide();
+        };
+
+        Window_FtkrOptions.prototype.hideAll = function() {
+            this.hideChildWindowsAll();
+            this.deactivate();
+            this.hide();
+        };
+
+        Window_FtkrOptionsBase.prototype.hideChildWindowsAll = function(symbol) {
+            var children = this.childWindows();
+            var nextChildren = [];
+            while(!!children) {
+                children.forEach(function(window){
+                    window.hide();
+                    window.deactivate();
+                    if (window._childWindows) {
+                        nextChildren = nextChildren.concat(window._childWindows);
+                    }
+                });
+                children = null;
+                if (nextChildren.length) {
+                    children = nextChildren;
+                    nextChildren = [];
+                }
+            }
+        };
+
+        Window_FtkrOptions.prototype.configContents = function() {
+            return this._configContents;
+        };
+
+        Window_FtkrOptions.prototype.oldConfigValues = function() {
+            return this._oldConfigValues;
+        };
+
+        Window_FtkrOptions.prototype.configValues = function() {
+            return this._configValues;
+        };
+
+        Window_FtkrOptions.prototype.getConfigValue = function(symbol) {
+            return this._configValues[symbol];
+        };
+
+        Window_FtkrOptions.prototype.setConfigValue = function(symbol, value) {
+            this._configValues[symbol] = value;
+        };
+
+        //=============================================================================
+        // オプション用コマンドウィンドウ
+        //=============================================================================
+        function Window_MainConfigCommand() {
+            this.initialize.apply(this, arguments);
+        }
+
+        Window_MainConfigCommand.prototype = Object.create(Window_Command.prototype);
+        Window_MainConfigCommand.prototype.constructor = Window_MainConfigCommand;
+
+        Window_MainConfigCommand.prototype.initialize = function() {
+            this._ftkrEditor = true;
+            this._touchWindow = null;
+            Window_Command.prototype.initialize.call(this, 0, 0);
+            this.deactivate();
+            this.hide();
+        };
+
+        Window_MainConfigCommand.prototype.isOswOption = function() {
+            return true;
+        };
+
+        Window_MainConfigCommand.prototype.windowWidth = function() {
+            return 240;
+        };
+
+        Window_MainConfigCommand.prototype.standardFontSize = function() {
+            return optionFontSize;
+        };
+
+        Window_MainConfigCommand.prototype.lineHeight = function() {
+            return optionLineHeight;
+        };
+
+        Window_MainConfigCommand.prototype.setWindow = function(window) {
+            this._touchWindow = window;
+            this.refresh();
+        };
+
+        Window_MainConfigCommand.prototype.updatePlacement = function() {
+            this.x = (Graphics.boxWidth - this.width) / 2;
+            this.y = (Graphics.boxHeight - this.height) / 2;
+        };
+
+        Window_MainConfigCommand.prototype.refresh = function() {
+            this.clearCommandList();
+            this.makeCommandList();
+            this.createContents();
+            Window_Selectable.prototype.refresh.call(this);
+        };
+
+        Window_MainConfigCommand.prototype.makeCommandList = function() {
+            this.addCommand('作成', 'create',  !this._touchWindow);
+            this.addCommand('編集', 'edit',    this._touchWindow);
+            this.addCommand('表示', 'display', this._touchWindow);
+            this.addCommand('削除', 'delete',  this._touchWindow && this._touchWindow.isOsw());
+        };
+
+        //=============================================================================
+        // Window_OSWConfTitle
+        //=============================================================================
+
+        function Window_OSWConfTitle() {
+            this.initialize.apply(this, arguments);
+        }
+
+        Window_OSWConfTitle.prototype = Object.create(Window_Base.prototype);
+        Window_OSWConfTitle.prototype.constructor = Window_OSWConfTitle;
+
+        Window_OSWConfTitle.prototype.initialize = function() {
+            this._ftkrEditor = true;
+            this._text = '';
+            Window_Base.prototype.initialize.call(this, 0, 0, 500, this.fittingHeight(1));
+            this.updatePlacement();
+            this.refresh();
+        };
+
+        Window_OSWConfTitle.prototype.isOswOption = function() {
+            return true;
+        };
+
+        Window_OSWConfTitle.prototype.standardFontSize = function() {
+            return optionFontSize;
+        };
+
+        Window_OSWConfTitle.prototype.lineHeight = function() {
+            return optionLineHeight;
+        };
+
+        Window_OSWConfTitle.prototype.updatePlacement = function() {
+            this.x = (Graphics.boxWidth - this.width) / 2;
+            this.y = Graphics.boxHeight / 2 - this.height;
+        };
+
+        Window_OSWConfTitle.prototype.refresh = function () {
+            this.contents.clear();
+            this.drawText(this._text, 0, 0, this.contentsWidth(), 'center');
+        };
+
+        Window_OSWConfTitle.prototype.setConf = function(text) {
+            this._text = text + ' を削除しますか？';
+            this.refresh();
+            this.show();
+        };
+        
+        //=============================================================================
+        // Window_OSWConf
+        //=============================================================================
+
+        function Window_OSWConf() {
+            this.initialize.apply(this, arguments);
+        }
+
+        Window_OSWConf.prototype = Object.create(Window_HorzCommand.prototype);
+        Window_OSWConf.prototype.constructor = Window_OSWConf;
+
+        Window_OSWConf.prototype.initialize = function() {
+            this._ftkrEditor = true;
+            Window_HorzCommand.prototype.initialize.call(this, 0, 0);
+            this.updatePlacement();
+            this.deactivate();
+            this.hide();
+        };
+
+        Window_OSWConf.prototype.isOswOption = function() {
+            return true;
+        };
+
+        Window_OSWConf.prototype.standardFontSize = function() {
+            return optionFontSize;
+        };
+
+        Window_OSWConf.prototype.lineHeight = function() {
+            return optionLineHeight;
+        };
+
+        Window_OSWConf.prototype.maxCols = function() {
+            return 2;
+        };
+
+        Window_OSWConf.prototype.windowWidth = function() {
+            return 500;
+        };
+
+        Window_OSWConf.prototype.updatePlacement = function() {
+            this.x = (Graphics.boxWidth - this.width) / 2;
+            this.y = Graphics.boxHeight / 2;
+        };
+
+        Window_OSWConf.prototype.refresh = function() {
+            this.clearCommandList();
+            this.makeCommandList();
+            this.createContents();
+            Window_Selectable.prototype.refresh.call(this);
+        };
+
+        Window_OSWConf.prototype.makeCommandList = function() {
+            this.addCommand('削除する', 'delete');
+            this.addCommand('削除しない', 'cancel');
+        };
+
+        //=============================================================================
+        // パラメータリスト設定用ウィンドウ
+        //=============================================================================
+        function Window_StatusListConfig() {
+            this.initialize.apply(this, arguments);
+        }
+
+        Window_StatusListConfig.prototype = Object.create(Window_Selectable.prototype);
+        Window_StatusListConfig.prototype.constructor = Window_StatusListConfig;
+
+        Window_StatusListConfig.prototype.initialize = function(layer, width, symbol, parentConfig, parentWindow, masterWindow) {
+            this._ftkrEditor = true;
+            this._parentConfig   = parentConfig;
+            this._masterWindow   = masterWindow;
+            this._parentWindow   = parentWindow;
+            this._childWindows = [];
+            this._windowSymbol   = symbol;
+            this._windowWidth    = width;
+            this._statusList = [];
+            this.setWindowLayer(layer);
+            var height = this.windowHeight();
+            Window_Selectable.prototype.initialize.call(this, 0, 0, width, height);
+            this.setStatusList(this._masterWindow._configValues._customCssStatus);
+            console.log(this._masterWindow._configValues, this._masterWindow._oldConfigValues);
+            this.hide();
+        };
+
+        Window_StatusListConfig.prototype.isOswOption = function() {
+            return true;
+        };
+
+        Window_StatusListConfig.prototype.windowLayer = function() {
+            return this._windowLayer;
+        };
+
+        Window_StatusListConfig.prototype.setWindowLayer = function(layer) {
+            this._windowLayer = layer;
+        };
+
+        Window_StatusListConfig.prototype.windowWidth = function() {
+            return this._windowWidth;
+        };
+        
+        Window_StatusListConfig.prototype.windowHeight = function() {
+            return this.fittingHeight(10);
+        };
+
+        Window_StatusListConfig.prototype.setStatusList = function(list) {
+            if (!list) return;
+            this._statusList = list;
+            this.refresh();
+        };
+
+        Window_StatusListConfig.prototype.standardFontSize = function() {
+            return optionFontSize;
+        };
+
+        Window_StatusListConfig.prototype.lineHeight = function() {
+            return optionLineHeight;
+        };
+
+        Window_StatusListConfig.prototype.maxItems = function() {
+            return this._statusList.length;
+        };
+
+        Window_StatusListConfig.prototype.item = function() {
+            return this.index() >=0 ? this._statusList[this.index()] : null;
+        };
+
+        Window_StatusListConfig.prototype.drawItem = function(index) {
+            var item = this._statusList[index];
+            if (item) {
+                var rect = this.itemRect(index);
+                var width = rect.width / 4;
+                this.drawText(item.text, rect.x, rect.y, width);
+                this.drawText(item.x, rect.x + width*1, rect.y, width);
+                this.drawText(item.y, rect.x + width*2, rect.y, width);
+                this.drawText(item.width, rect.x + width*3, rect.y, width);
+            }
+        };
+
+        Window_StatusListConfig.prototype.cwStatusListOk = function(symbol) {
+            this._childWindows[0].setPositionReferWindowIndex(this);
+            this._childWindows[0]._parentIndex = this.index();
+            this._childWindows[0].activateWindow();
+            console.log(this._childWindows[0]);
+            this.deactivate();
+        };
+
+        Window_StatusListConfig.prototype.hideChildWindows = function(symbol) {
+            this._parentWindow.activate();
+            this.hide();
+        };
+
+        Window_StatusListConfig.prototype.childWindows = function() {
+            return this._childWindows;
+        };
+
+        Window_StatusListConfig.prototype.hideAll = function() {
+            this.hideChildWindowsAll();
+            this.deactivate();
+            this.hide();
+        };
+
+        Window_StatusListConfig.prototype.hideChildWindowsAll = function(symbol) {
+            var children = this.childWindows();
+            var nextChildren = [];
+            while(!!children) {
+                children.forEach(function(window){
+                    window.hide();
+                    window.deactivate();
+                    if (window._childWindows) {
+                        nextChildren = nextChildren.concat(window._childWindows);
+                    }
+                });
+                children = null;
+                if (nextChildren.length) {
+                    children = nextChildren;
+                    nextChildren = [];
+                }
+            }
+        };
+
 
     };//デザインモード
 
@@ -3375,7 +3669,9 @@ function Scene_OSW() {
 
     Window_Base.prototype.isCssContentsWindow = function() {
         return Imported.FTKR_CSS && !!this._lssStatus &&
-          (!isNaN(this._lssStatus.widthRate) || this._customDrawType);
+          (!isNaN(this._lssStatus.widthRate) || 
+            (this._lssStatus.statusList && this._lssStatus.statusList.length) ||
+            this._customDrawType);
     };
 
     Window_Base.prototype.isCommon = function() {
