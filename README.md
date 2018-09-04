@@ -146,9 +146,9 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
-| [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js) | [あり](FTKR_SkillTreeSystem.ja.md) | [v1.16.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillTreeSystem.js) | 2018/09/04 | ツリー型のスキル習得システム |
+| [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js) | [あり](FTKR_SkillTreeSystem.ja.md) | [v1.16.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillTreeSystem.js) | 2018/09/04 | ツリー型のスキル習得システム |
 | [FTKR_STS_CustomWindow](FTKR_STS_CustomWindow.js) | [仮版](FTKR_STS_CustomWindow.ja.md) | [v1.3.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_STS_CustomWindow.js) | 2017/06/07 | スキルツリー習得画面のレイアウトを変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js) |
-| [FTKR_STS_CustomSkillStatus](FTKR_STS_CustomSkillStatus.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_STS_CustomSkillStatus.js) | 2017/06/07 | スキルツリーウィンドウに表示するスキルパラメータを変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js)<br> [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) |
+| [FTKR_STS_CustomSkillStatus](FTKR_STS_CustomSkillStatus.js) | なし | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_STS_CustomSkillStatus.js) | 2017/06/07 | スキルツリーウィンドウに表示するスキルパラメータを変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js)<br> [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) |
 
 [目次に戻る](#目次)
 
@@ -307,9 +307,9 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 2018/09の更新情報
 
 ### 2018/09/04
-* [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.ja.md) v1.16.0
+* [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.ja.md) v1.16.1
 * [FTKR_STS_CustomWindow](FTKR_STS_CustomWindow.ja.md) v1.3.0s
-* [FTKR_STS_CustomSkillStatus](FTKR_STS_CustomSkillStatus.js) v1.0.0(新規)
+* [FTKR_STS_CustomSkillStatus](FTKR_STS_CustomSkillStatus.js) v1.0.1(新規)
 
 ### 2018/09/01
 * [FTKR_GDM_WindowEditor](FTKR_GDM_WindowEditor.ja.md) v0.9.9

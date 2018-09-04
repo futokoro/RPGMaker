@@ -5,7 +5,7 @@
 // 作成者　　   : フトコロ(futokoro)
 // 作成日　　   : 2017/02/25
 // 最終更新日   : 2018/09/04
-// バージョン   : v1.16.0
+// バージョン   : v1.16.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.16.0 ツリー型スキル習得システム
+ * @plugindesc v1.16.1 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -1418,6 +1418,8 @@ FTKR.STS = FTKR.STS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.16.1 - 2018/09/04 : 不具合修正(v1.16.0)
  * 
  * v1.16.0 - 2018/09/04 : 機能追加
  *    1. プラグインパラメータ Cost Title Format と Preskill Title Format の値を
@@ -3396,7 +3398,7 @@ function Scene_STS() {
 
     Window_SkillTree.prototype.spacing = function() {
         var allSpacing = this.width - this.padding * 2 - this.wSpacing() - this.itemWidth() * this.maxCols();
-        return allSpacing / (this.maxCols() - 1);
+        return this.maxCols() > 1 ? allSpacing / (this.maxCols() - 1) : 0;
     };
 
     Window_SkillTree.prototype.itemHeightSpace = function() {

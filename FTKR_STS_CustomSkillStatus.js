@@ -5,7 +5,7 @@
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2018/09/04
 // 最終更新日 : 
-// バージョン : v1.0.0
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -17,7 +17,7 @@ FTKR.STS.CST = FTKR.STS.CST || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 ツリー型スキル習得システム用 スキルツリーウィンドウ表示変更プラグイン
+ * @plugindesc v1.0.1 ツリー型スキル習得システム用 スキルツリーウィンドウ表示変更プラグイン
  * @author フトコロ
  *
  * @param --ステータス表示設定--
@@ -26,7 +26,7 @@ FTKR.STS.CST = FTKR.STS.CST || {};
  * @param statusList
  * @desc 表示するステータスとその位置を設定します。
  * @type struct<status>[]
- * @default ["{\"text\":\"iicon\",\"value\":\"\",\"x\":\"-2\",\"y\":\"4\",\"width\":\"0\"}"]
+ * @default ["{\"text\":\"iicon\",\"value\":\"\",\"x\":\"4\",\"y\":\"4\",\"width\":\"0\"}"]
  * 
  * @param Skill Status Space In Text
  * @desc Text内で複数表示する場合の間隔を指定します。
@@ -73,6 +73,7 @@ FTKR.STS.CST = FTKR.STS.CST || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.1 - 2018/09/04 : 不具合修正
  * v1.0.0 - 2018/09/04 : 初版作成
  * 
  *-----------------------------------------------------------------------------
@@ -196,10 +197,8 @@ if(Imported.FTKR_STS) {
 
     var _AltTB_Window_Base_drawCssActorStatusBase_A1 = Window_Base.prototype.drawCssActorStatusBase_A1;
     Window_Base.prototype.drawCssActorStatusBase_A1 = function(index, actor, x, y, width, match, lss, css) {
-        console.log(match[1]);
         switch(match[1].toUpperCase()) {
             case 'ISTSCOST':
-                console.log('ok');
                 return this.drawCssItemStsCost(actor, x, y, width, match[2]);
             default:
                 return _AltTB_Window_Base_drawCssActorStatusBase_A1.apply(this, arguments);
@@ -226,7 +225,7 @@ if(Imported.FTKR_STS) {
 
     Window_Base.prototype.drawCssItemName = function(actor, x, y, width) {
         var name = FTKR.gameData.item ? FTKR.gameData.item.name : '';
-        this.drawTextEx(name, x, y);
+        this.drawText(name, x, y, width);
         return 1;
     };
 
@@ -265,9 +264,10 @@ if(Imported.FTKR_STS) {
             this.drawTreeLineRect(data, rect);
             this.drawFrame(index, skill, data);
             var lss = FTKR.STS.CST.simpleStatus;
-            var rect = this.itemRectForText(index);
+            var rect = this.itemRect(index);
             FTKR.setGameData(this._actor, null, skill);
             this.drawCssActorStatus(index, this._actor, rect.x, rect.y, rect.width, rect.height, lss);
+            this.changeTextColor(this.textColor(0));
             this.changePaintOpacity(1);
         }
     };
