@@ -4,8 +4,8 @@
 // プラグインNo : 13
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/03/31
-// 最終更新日 : 2017/06/07
-// バージョン : v1.2.1
+// 最終更新日 : 2018/09/04
+// バージョン : v1.3.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -17,7 +17,7 @@ FTKR.STS.CW = FTKR.STS.CW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.1 ツリー型スキル習得システム用 ウィンドウレイアウト変更プラグイン
+ * @plugindesc v1.3.0 ツリー型スキル習得システム用 ウィンドウレイアウト変更プラグイン
  * @author フトコロ
  *
  * @param --ツリータイプウィンドウの設定(Tree Types Window)--
@@ -177,8 +177,14 @@ FTKR.STS.CW = FTKR.STS.CW || {};
  *
  * @param Always Display Cost
  * @desc コストに常に表示するか。
- *  1 - 表示する, 0 - 表示しない
  * @default 1
+ * @type select
+ * @option 表示しない(選択時のみ表示)
+ * @value 0
+ * @option 表示する
+ * @value 1
+ * @option 表示しない(常時)
+ * @value 2
  *
  * @param Cost Max Cols
  * @desc コストを横に並べる最大数を指定します。
@@ -226,8 +232,14 @@ FTKR.STS.CW = FTKR.STS.CW || {};
  *
  * @param Always Display Preskill
  * @desc 前提スキルに常に表示するか。
- *  1 - 表示する, 0 - 表示しない
  * @default 0
+ * @type select
+ * @option 表示しない(選択時のみ表示)
+ * @value 0
+ * @option 表示する
+ * @value 1
+ * @option 表示しない(常時)
+ * @value 2
  *
  * @param Preskill Max Cols
  * @desc 前提スキルを横に並べる最大数を指定します。
@@ -322,6 +334,47 @@ FTKR.STS.CW = FTKR.STS.CW || {};
  * 0 - 表示する(show), 1 - 表示しない(hide)
  * @default 0
  *
+ * @param --ツリータイトルウィンドウの設定(TreeTitle Window)--
+ * @default 
+ *
+ * @param Tree Title Format
+ * @desc ツリータイトルウィンドウの表示内容を設定します。
+ * 制御文字が使用可能です。空欄の場合はウィンドウを表示しません。
+ * @default 
+ * 
+ * @param Tree Title Position X
+ * @desc ツリータイトルウィンドウの左上のX座標を指定します。
+ * (参考値：デフォルト画面幅サイズ = 816)
+ * @default 
+ *
+ * @param Tree Title Position Y
+ * @desc ツリータイトルウィンドウの左上のY座標を指定します。
+ * (参考値：デフォルト画面高さサイズ = 624)
+ * @default 
+ *
+ * @param Tree Title Width
+ * @desc ツリータイトルウィンドウの幅を指定します。
+ * (参考値：余白 = 18) (-1 で、画面右端まで)
+ * @default 
+ *
+ * @param Tree Title Height
+ * @desc ツリータイトルウィンドウの高さを指定します。
+ * (参考値：余白 = 18) (-1 で、画面右端まで)
+ * @default 
+ *
+ * @param Tree Title Opacity
+ * @desc ツリータイトルウィンドウの透明率を指定します。
+ * @default 192
+ * 
+ * @param Tree Title Padding
+ * @desc ツリータイトルウィンドウの余白幅を指定します。
+ * @default 18
+ *
+ * @param Tree Title Frame Hide
+ * @desc ツリータイトルウィンドウの枠を非表示にするか。
+ * 0 - 表示する(show), 1 - 表示しない(hide)
+ * @default 0
+ *
  * @param --背景設定(Background Window)--
  * @default 
  * 
@@ -366,7 +419,7 @@ FTKR.STS.CW = FTKR.STS.CW || {};
  *-----------------------------------------------------------------------------
  * 設定方法/PluginManager Setting
  *-----------------------------------------------------------------------------
- * 1. 本プラグインには、FTKR_SkillTreeSystem.js が必要です。
+ * 1. 本プラグインには、FTKR_SkillTreeSystem.js (v1.16.0以降) が必要です。
  * 
  *    FTKR_SkillTreeSystem.js is required.
  * 
@@ -443,13 +496,21 @@ FTKR.STS.CW = FTKR.STS.CW || {};
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
- * Copyright (c) 2017 Futokoro
+ * Copyright (c) 2017,2018 Futokoro
  * http://opensource.org/licenses/mit-license.php
+ * 
+ * 
+ * プラグイン公開元
+ * https://github.com/futokoro/RPGMaker/blob/master/README.md
  * 
  * 
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.3.0 : 2018/09/04 : 機能追加
+ *    1. コストウィンドウと前提スキルウィンドウを常時表示させない機能を追加。
+ *    2. スキルツリータイトルとして固定の文字列を表示可能なウィンドウを追加。
  * 
  * v1.2.1 : 2017/06/07 : 不具合修正
  *    1. アクター立ち絵のタグが正しく読み取れない不具合を修正。
@@ -482,455 +543,489 @@ FTKR.STS.CW = FTKR.STS.CW || {};
 
 if(Imported.FTKR_STS) {
 
-//=============================================================================
-// プラグイン パラメータ
-//=============================================================================
-FTKR.STS.CW.parameters = PluginManager.parameters('FTKR_STS_CustomWindow');
+function Window_SkillTreeTitle() {
+    this.initialize.apply(this, arguments);
+}
 
-FTKR.STS.CW.alwaysDispCost = Number(FTKR.STS.CW.parameters['Always Display Cost'] || 0);
-FTKR.STS.CW.alwaysDispPreskill = Number(FTKR.STS.CW.parameters['Always Display Preskill'] || 0);
+(function() {
 
-//背景設定
-FTKR.STS.CW.background = {
-    name:String(FTKR.STS.CW.parameters['Background Image Name'] || ''),
-};
-
-//ツリータイプウィンドウ設定
-FTKR.STS.CW.treeTypes = {
-    maxCols:Number(FTKR.STS.CW.parameters['Tree Types Max Cols'] || 0),
-    hspace:Number(FTKR.STS.CW.parameters['Tree Types Height Space'] || 0),
-    posiX:Number(FTKR.STS.CW.parameters['Tree Types Position X'] || 0),
-    posiY:Number(FTKR.STS.CW.parameters['Tree Types Position Y'] || 0),
-    width:Number(FTKR.STS.CW.parameters['Tree Types Width'] || 0),
-    height:Number(FTKR.STS.CW.parameters['Tree Types Height'] || 0),
-    opacity:Number(FTKR.STS.CW.parameters['Tree Types Opacity'] || 0),
-    padding:Number(FTKR.STS.CW.parameters['Tree Types Padding'] || 0),
-    frame:Number(FTKR.STS.CW.parameters['Tree Types Frame Hide'] || 0),
-};
-//スキルツリーウィンドウ設定
-FTKR.STS.CW.skillTree = {
-    posiX:Number(FTKR.STS.CW.parameters['Skill Tree Position X'] || 0),
-    posiY:Number(FTKR.STS.CW.parameters['Skill Tree Position Y'] || 0),
-    width:Number(FTKR.STS.CW.parameters['Skill Tree Width'] || 0),
-    height:Number(FTKR.STS.CW.parameters['Skill Tree Height'] || 0),
-    opacity:Number(FTKR.STS.CW.parameters['Skill Tree Opacity'] || 0),
-    padding:Number(FTKR.STS.CW.parameters['Skill Tree Padding'] || 0),
-    frame:Number(FTKR.STS.CW.parameters['Skill Tree Frame Hide'] || 0),
-};
-//スキルステータスウィンドウ設定
-FTKR.STS.CW.skillStatus = {
-    posiX:Number(FTKR.STS.CW.parameters['Skill Status Position X'] || 0),
-    posiY:Number(FTKR.STS.CW.parameters['Skill Status Position Y'] || 0),
-    width:Number(FTKR.STS.CW.parameters['Skill Status Width'] || 0),
-    height:Number(FTKR.STS.CW.parameters['Skill Status Height'] || 0),
-    opacity:Number(FTKR.STS.CW.parameters['Skill Status Opacity'] || 0),
-    padding:Number(FTKR.STS.CW.parameters['Skill Status Padding'] || 0),
-    frame:Number(FTKR.STS.CW.parameters['Skill Status Frame Hide'] || 0),
-};
-//アクターステータスウィンドウ設定
-FTKR.STS.CW.actorStatus = {
-    posiX:Number(FTKR.STS.CW.parameters['Actor Status Position X'] || 0),
-    posiY:Number(FTKR.STS.CW.parameters['Actor Status Position Y'] || 0),
-    width:Number(FTKR.STS.CW.parameters['Actor Status Width'] || 0),
-    height:Number(FTKR.STS.CW.parameters['Actor Status Height'] || 0),
-    opacity:Number(FTKR.STS.CW.parameters['Actor Status Opacity'] || 0),
-    padding:Number(FTKR.STS.CW.parameters['Actor Status Padding'] || 0),
-    frame:Number(FTKR.STS.CW.parameters['Actor Status Frame Hide'] || 0),
-};
-//コストウィンドウ設定
-FTKR.STS.CW.cost = {
-    maxCols:Number(FTKR.STS.CW.parameters['Cost Max Cols'] || 0),
-    spacing:Number(FTKR.STS.CW.parameters['Cost Spacing'] || 0),
-    posiX:Number(FTKR.STS.CW.parameters['Cost Position X'] || 0),
-    posiY:Number(FTKR.STS.CW.parameters['Cost Position Y'] || 0),
-    width:Number(FTKR.STS.CW.parameters['Cost Width'] || 0),
-    height:Number(FTKR.STS.CW.parameters['Cost Height'] || 0),
-    opacity:Number(FTKR.STS.CW.parameters['Cost Opacity'] || 0),
-    padding:Number(FTKR.STS.CW.parameters['Cost Padding'] || 0),
-    frame:Number(FTKR.STS.CW.parameters['Cost Frame Hide'] || 0),
-};
-//前提スキルウィンドウ設定
-FTKR.STS.CW.preskill = {
-    maxCols:Number(FTKR.STS.CW.parameters['Preskill Max Cols'] || 0),
-    spacing:Number(FTKR.STS.CW.parameters['Preskill Spacing'] || 0),
-    posiX:Number(FTKR.STS.CW.parameters['Preskill Position X'] || 0),
-    posiY:Number(FTKR.STS.CW.parameters['Preskill Position Y'] || 0),
-    width:Number(FTKR.STS.CW.parameters['Preskill Width'] || 0),
-    height:Number(FTKR.STS.CW.parameters['Preskill Height'] || 0),
-    opacity:Number(FTKR.STS.CW.parameters['Preskill Opacity'] || 0),
-    padding:Number(FTKR.STS.CW.parameters['Preskill Padding'] || 0),
-    frame:Number(FTKR.STS.CW.parameters['Preskill Frame Hide'] || 0),
-};
-//確認ウィンドウ設定
-FTKR.STS.CW.confTitle = {
-    posiX:Number(FTKR.STS.CW.parameters['Conf Title Position X'] || 0),
-    posiY:Number(FTKR.STS.CW.parameters['Conf Title Position Y'] || 0),
-    width:Number(FTKR.STS.CW.parameters['Conf Title Width'] || 0),
-    height:Number(FTKR.STS.CW.parameters['Conf Title Height'] || 0),
-    opacity:Number(FTKR.STS.CW.parameters['Conf Title Opacity'] || 0),
-    padding:Number(FTKR.STS.CW.parameters['Conf Title Padding'] || 0),
-    frame:Number(FTKR.STS.CW.parameters['Conf Title Frame Hide'] || 0),
-};
-//確認コマンドウィンドウ設定
-FTKR.STS.CW.conf = {
-    opacity:Number(FTKR.STS.CW.parameters['Confirmation Opacity'] || 0),
-    padding:Number(FTKR.STS.CW.parameters['Confirmation Padding'] || 0),
-    frame:Number(FTKR.STS.CW.parameters['Confirmation Frame Hide'] || 0),
-};
-
-//=============================================================================
-// DataManager
-//=============================================================================
-
-FTKR.STS.CW.DatabaseLoaded = false;
-FTKR.STS.CW.DataManager_isDatabaseLoaded = DataManager.isDatabaseLoaded;
-DataManager.isDatabaseLoaded = function() {
-    if (!FTKR.STS.CW.DataManager_isDatabaseLoaded.call(this)) return false;
-    if (!FTKR.STS.CW.DatabaseLoaded) {
-        this.stsBgiDataNotetags($dataActors);
-        FTKR.STS.CW.DatabaseLoaded = true;
-    }
-    return true;
-};
-
-DataManager.stsBgiDataNotetags = function(group) {
-    var note1a = /<STS_IMAGE:(.+)>/i;
-    var note1aj = /<STS_画像:(.+)>/i;
-    var note1b = /<\/STS_IMAGE>/i;
-    var note1bj = /<\/STS_画像>/i;
-
-    for (var n = 1; n < group.length; n++) {
-        var obj = group[n];
-        var notedata = obj.note.split(/[\r\n]+/);
-
-        var setMode = 'none';
-        obj.sts.bgi = {
-          name:'',
-          offsetX:0,
-          offsetY:0,
-        };
-        for (var i = 0; i < notedata.length; i++) {
-            var line = notedata[i];
-            if (line.match(note1a) || line.match(note1aj)) {
-                var text = '';
-                setMode = 'data';
-                obj.sts.bgi.name = RegExp.$1;
-            } else if (note1b.test(line) || note1bj.test(line)) {
-                setMode = 'none';
-                obj.sts.data = text;
-            } else if (setMode === 'data') {
-                text += line + ';';
-            }
-        }
-        this.setStsBgiData(obj);
-    }
-};
-
-DataManager.setStsBgiData = function(obj) {
-    var stsdata = obj.sts.data;
-    if (stsdata) {
-        var case2 = /(?:BGI OFFSET X):[ ]*(\d+)/i;
-        var case3 = /(?:BGI OFFSET Y):[ ]*(\d+)/i;
-
-        var datas = stsdata.split(';');
-        for (var i = 0; i < datas.length; i++) {
-            var data = datas[i];
-            if(data.match(case2)) {
-                obj.sts.bgi.offsetX = Number(RegExp.$1);
-            } else if(data.match(case3)) {
-                obj.sts.bgi.offsetY = Number(RegExp.$1);
-            }
-        }
-        obj.sts.data = '';
-    }
-};
-
-//=============================================================================
-// Game_Actor
-//=============================================================================
-
-FTKR.STS.CW.Game_Actor_setup = Game_Actor.prototype.setup;
-Game_Actor.prototype.setup = function(actorId) {
-    FTKR.STS.CW.Game_Actor_setup.call(this, actorId);
-    ImageManager.loadSystem(this.actor().sts.bgi.name);
-};
-
-//=============================================================================
-// Scene_STS
-//=============================================================================
-
-Scene_STS.prototype.createBackground = function() {
-    this._backgroundSprite = new Sprite();
-    var bgiName = FTKR.STS.CW.background.name;
-    this._backgroundSprite.bitmap = bgiName ?
-        ImageManager.loadSystem(bgiName) : SceneManager.backgroundBitmap();
-    this.addChild(this._backgroundSprite);
-    this._contents = new Sprite();
-    this.addChild(this._contents);
-};
-
-FTKR.STS.CW.Scene_STS_refreshActor = Scene_STS.prototype.refreshActor;
-Scene_STS.prototype.refreshActor = function() {
-    FTKR.STS.CW.Scene_STS_refreshActor.call(this);
-    var actor = this.actor();
-    if (actor) {
-        var bgi = actor.actor().sts.bgi;
-        if (bgi.name) {
-            this._contents.bitmap = ImageManager.loadSystem(bgi.name);
-            this._contents.move(bgi.offsetX, bgi.offsetY);
-        }
-    }
-    if(!FTKR.STS.CW.alwaysDispCost)this._stsCostWindow.hide();
-    this._stsPreskillWindow.show();
-    if(!FTKR.STS.CW.alwaysDispPreskill) this._stsPreskillWindow.hide();
-};
-
-FTKR.STS.CW.Scene_STS_stsConfHide = Scene_STS.prototype.stsConfHide;
-Scene_STS.prototype.stsConfHide = function() {
-    FTKR.STS.CW.Scene_STS_stsConfHide.call(this);
-    this._stsPreskillWindow.show();
-    if(!FTKR.STS.CW.alwaysDispCost) this._stsCostWindow.hide();
-    if(!FTKR.STS.CW.alwaysDispPreskill) this._stsPreskillWindow.hide();
-};
-
-FTKR.STS.CW.Scene_STS_stsConfShow = Scene_STS.prototype.stsConfShow;
-Scene_STS.prototype.stsConfShow = function() {
-    FTKR.STS.CW.Scene_STS_stsConfShow.call(this);
-    this._stsPreskillWindow.hide();
-    if(!FTKR.STS.CW.alwaysDispCost) this._stsCostWindow.show();
-    if(!FTKR.STS.CW.alwaysDispPreskill) this._stsPreskillWindow.show();
-};
-
-//=============================================================================
-// Window_Base
-//=============================================================================
-
-Window_Base.prototype.setWubdiwLayout = function(layout) {
-    this.x = layout.posiX;
-    this.y = layout.posiY;
-    this.width = layout.width === -1 ? Graphics.boxWidth - this.x : layout.width;
-    this.height = layout.height === -1 ? Graphics.boxHeight - this.y : layout.height;
-};
-
-Window_Base.prototype.getWindowLayout = function(layout) {
-    return {
-        x:layout.posiX,
-        y:layout.posiY,
-        width:layout.width === -1 ? Graphics.boxWidth - layout.posiX : layout.width,
-        height:layout.height === -1 ? Graphics.boxHeight - layout.posiY : layout.height,
+    var paramParse = function(obj) {
+        return JSON.parse(JSON.stringify(obj, paramReplace));
     };
-};
 
-//=============================================================================
-// Window_TreeType
-//=============================================================================
+    var paramReplace = function(key, value) {
+        try {
+            return JSON.parse(value || null);
+        } catch (e) {
+            return value;
+        }
+    };
 
-FTKR.STS.CW.Window_TreeType_initialize = Window_TreeType.prototype.initialize;
-Window_TreeType.prototype.initialize = function(x, y, width, height) {
-    var layout = this.getWindowLayout(FTKR.STS.CW.treeTypes);
-    FTKR.STS.CW.Window_TreeType_initialize.call(this, layout.x, layout.y, layout.width, layout.height);
-};
+    //=============================================================================
+    // プラグイン パラメータ
+    //=============================================================================
+    var parameters = PluginManager.parameters('FTKR_STS_CustomWindow');
 
-Window_TreeType.prototype.itemHeightSpace = function() {
-    return FTKR.STS.CW.treeTypes.hspace;
-};
+    FTKR.STS.CW.alwaysDispCost     = Number(paramParse(parameters['Always Display Cost'] || 0));
+    FTKR.STS.CW.alwaysDispPreskill = Number(paramParse(parameters['Always Display Preskill'] || 0));
 
-Window_TreeType.prototype.standardBackOpacity = function() {
-    return FTKR.STS.CW.treeTypes.opacity;
-};
+    //背景設定
+    FTKR.STS.CW.background = {
+        name    :String(parameters['Background Image Name'] || ''),
+    };
 
-Window_TreeType.prototype.standardPadding = function() {
-    return FTKR.STS.CW.treeTypes.padding;
-};
+    //ツリータイプウィンドウ設定
+    FTKR.STS.CW.treeTypes = {
+        maxCols :Number(parameters['Tree Types Max Cols'] || 0),
+        hspace  :Number(parameters['Tree Types Height Space'] || 0),
+        posiX   :Number(parameters['Tree Types Position X'] || 0),
+        posiY   :Number(parameters['Tree Types Position Y'] || 0),
+        width   :Number(parameters['Tree Types Width'] || 0),
+        height  :Number(parameters['Tree Types Height'] || 0),
+        opacity :Number(parameters['Tree Types Opacity'] || 0),
+        padding :Number(parameters['Tree Types Padding'] || 0),
+        frame   :Number(parameters['Tree Types Frame Hide'] || 0),
+    };
+    //スキルツリーウィンドウ設定
+    FTKR.STS.CW.skillTree = {
+        posiX   :Number(parameters['Skill Tree Position X'] || 0),
+        posiY   :Number(parameters['Skill Tree Position Y'] || 0),
+        width   :Number(parameters['Skill Tree Width'] || 0),
+        height  :Number(parameters['Skill Tree Height'] || 0),
+        opacity :Number(parameters['Skill Tree Opacity'] || 0),
+        padding :Number(parameters['Skill Tree Padding'] || 0),
+        frame   :Number(parameters['Skill Tree Frame Hide'] || 0),
+    };
+    //スキルツリータイトルウィンドウ設定
+    FTKR.STS.CW.treeTitle = {
+        format  :String(parameters['Tree Title Format']),
+        posiX   :Number(parameters['Tree Title Position X'] || 0),
+        posiY   :Number(parameters['Tree Title Position Y'] || 0),
+        width   :Number(parameters['Tree Title Width'] || 0),
+        height  :Number(parameters['Tree Title Height'] || 0),
+        opacity :Number(parameters['Tree Title Opacity'] || 0),
+        padding :Number(parameters['Tree Title Padding'] || 0),
+        frame   :Number(parameters['Tree Title Frame Hide'] || 0),
+    };
 
-Window_TreeType.prototype.maxCols = function() {
-  return Math.max(FTKR.STS.CW.treeTypes.maxCols, 1);
-};
+    //スキルステータスウィンドウ設定
+    FTKR.STS.CW.skillStatus = {
+        posiX   :Number(parameters['Skill Status Position X'] || 0),
+        posiY   :Number(parameters['Skill Status Position Y'] || 0),
+        width   :Number(parameters['Skill Status Width'] || 0),
+        height  :Number(parameters['Skill Status Height'] || 0),
+        opacity :Number(parameters['Skill Status Opacity'] || 0),
+        padding :Number(parameters['Skill Status Padding'] || 0),
+        frame   :Number(parameters['Skill Status Frame Hide'] || 0),
+    };
+    //アクターステータスウィンドウ設定
+    FTKR.STS.CW.actorStatus = {
+        posiX   :Number(parameters['Actor Status Position X'] || 0),
+        posiY   :Number(parameters['Actor Status Position Y'] || 0),
+        width   :Number(parameters['Actor Status Width'] || 0),
+        height  :Number(parameters['Actor Status Height'] || 0),
+        opacity :Number(parameters['Actor Status Opacity'] || 0),
+        padding :Number(parameters['Actor Status Padding'] || 0),
+        frame   :Number(parameters['Actor Status Frame Hide'] || 0),
+    };
+    //コストウィンドウ設定
+    FTKR.STS.CW.cost = {
+        maxCols :Number(parameters['Cost Max Cols'] || 0),
+        spacing :Number(parameters['Cost Spacing'] || 0),
+        posiX   :Number(parameters['Cost Position X'] || 0),
+        posiY   :Number(parameters['Cost Position Y'] || 0),
+        width   :Number(parameters['Cost Width'] || 0),
+        height  :Number(parameters['Cost Height'] || 0),
+        opacity :Number(parameters['Cost Opacity'] || 0),
+        padding :Number(parameters['Cost Padding'] || 0),
+        frame   :Number(parameters['Cost Frame Hide'] || 0),
+    };
+    //前提スキルウィンドウ設定
+    FTKR.STS.CW.preskill = {
+        maxCols :Number(parameters['Preskill Max Cols'] || 0),
+        spacing :Number(parameters['Preskill Spacing'] || 0),
+        posiX   :Number(parameters['Preskill Position X'] || 0),
+        posiY   :Number(parameters['Preskill Position Y'] || 0),
+        width   :Number(parameters['Preskill Width'] || 0),
+        height  :Number(parameters['Preskill Height'] || 0),
+        opacity :Number(parameters['Preskill Opacity'] || 0),
+        padding :Number(parameters['Preskill Padding'] || 0),
+        frame   :Number(parameters['Preskill Frame Hide'] || 0),
+    };
+    //確認ウィンドウ設定
+    FTKR.STS.CW.confTitle = {
+        posiX   :Number(parameters['Conf Title Position X'] || 0),
+        posiY   :Number(parameters['Conf Title Position Y'] || 0),
+        width   :Number(parameters['Conf Title Width'] || 0),
+        height  :Number(parameters['Conf Title Height'] || 0),
+        opacity :Number(parameters['Conf Title Opacity'] || 0),
+        padding :Number(parameters['Conf Title Padding'] || 0),
+        frame   :Number(parameters['Conf Title Frame Hide'] || 0),
+    };
+    //確認コマンドウィンドウ設定
+    FTKR.STS.CW.conf = {
+        opacity :Number(parameters['Confirmation Opacity'] || 0),
+        padding :Number(parameters['Confirmation Padding'] || 0),
+        frame   :Number(parameters['Confirmation Frame Hide'] || 0),
+    };
 
-Window_TreeType.prototype._refreshFrame = function() {
-    if (!FTKR.STS.CW.treeTypes.frame) Window.prototype._refreshFrame.call(this);
-};
+    //=============================================================================
+    // DataManager
+    //=============================================================================
 
-Window_TreeType.prototype.maxPageRows = function() {
-    var pageHeight = this.height - this.padding * 2;
-    return Math.floor(pageHeight / this.unitHeight());
-};
+    FTKR.STS.CW.DatabaseLoaded = false;
+    FTKR.STS.CW.DataManager_isDatabaseLoaded = DataManager.isDatabaseLoaded;
+    DataManager.isDatabaseLoaded = function() {
+        if (!FTKR.STS.CW.DataManager_isDatabaseLoaded.call(this)) return false;
+        if (!FTKR.STS.CW.DatabaseLoaded) {
+            this.stsBgiDataNotetags($dataActors);
+            FTKR.STS.CW.DatabaseLoaded = true;
+        }
+        return true;
+    };
 
-Window_TreeType.prototype.topRow = function() {
-    return Math.floor(this._scrollY / this.unitHeight());
-};
+    DataManager.stsBgiDataNotetags = function(group) {
+        var note1a = /<STS_IMAGE:(.+)>/i;
+        var note1aj = /<STS_画像:(.+)>/i;
+        var note1b = /<\/STS_IMAGE>/i;
+        var note1bj = /<\/STS_画像>/i;
 
-Window_TreeType.prototype.setTopRow = function(row) {
-    var scrollY = row.clamp(0, this.maxTopRow()) * this.unitHeight();
-    if (this._scrollY !== scrollY) {
-        this._scrollY = scrollY;
-        this.refresh();
-        this.updateCursor();
-    }
-};
+        for (var n = 1; n < group.length; n++) {
+            var obj = group[n];
+            var notedata = obj.note.split(/[\r\n]+/);
 
-Window_TreeType.prototype.itemRect = function(index) {
-    var rect = new Rectangle();
-    var maxCols = this.maxCols();
-    rect.width = this.itemWidth();
-    rect.height = this.itemHeight();
-    rect.x = index % maxCols * this.unitWidth() - this._scrollX;
-    rect.y = Math.floor(index / maxCols) * this.unitHeight() - this._scrollY;
-    return rect;
-};
-
-//=============================================================================
-// Window_SkillTree
-//=============================================================================
-
-FTKR.STS.CW.Window_SkillTree_initialize = Window_SkillTree.prototype.initialize;
-Window_SkillTree.prototype.initialize = function(x, y, width, height) {
-    var layout = this.getWindowLayout(FTKR.STS.CW.skillTree);
-    FTKR.STS.CW.Window_SkillTree_initialize.call(this, layout.x, layout.y, layout.width, layout.height);
-};
-
-Window_SkillTree.prototype.standardBackOpacity = function() {
-    return FTKR.STS.CW.skillTree.opacity;
-};
-
-Window_SkillTree.prototype.standardPadding = function() {
-    return FTKR.STS.CW.skillTree.padding;
-};
-
-Window_SkillTree.prototype._refreshFrame = function() {
-    if (!FTKR.STS.CW.skillTree.frame) Window.prototype._refreshFrame.call(this);
-};
-
-//=============================================================================
-// Window_StsSkillStatus
-//=============================================================================
-
-FTKR.STS.CW.Window_StsSkillStatus_initialize = Window_StsSkillStatus.prototype.initialize;
-Window_StsSkillStatus.prototype.initialize = function(x, y, width, height) {
-    var layout = this.getWindowLayout(FTKR.STS.CW.skillStatus);
-    FTKR.STS.CW.Window_StsSkillStatus_initialize.call(this, layout.x, layout.y, layout.width, layout.height);
-};
-
-Window_StsSkillStatus.prototype.standardBackOpacity = function() {
-    return FTKR.STS.CW.skillStatus.opacity;
-};
-
-Window_StsSkillStatus.prototype.standardPadding = function() {
-    return FTKR.STS.CW.skillStatus.padding;
-};
-
-Window_StsSkillStatus.prototype._refreshFrame = function() {
-    if (!FTKR.STS.CW.skillStatus.frame) Window.prototype._refreshFrame.call(this);
-};
-
-//=============================================================================
-// Window_StsActorStatus
-//=============================================================================
-
-FTKR.STS.CW.Window_StsActorStatus_initialize = Window_StsActorStatus.prototype.initialize;
-Window_StsActorStatus.prototype.initialize = function(x, y, width, height) {
-    var layout = this.getWindowLayout(FTKR.STS.CW.actorStatus);
-    FTKR.STS.CW.Window_StsActorStatus_initialize.call(this, layout.x, layout.y, layout.width, layout.height);
-};
-
-Window_StsActorStatus.prototype.standardBackOpacity = function() {
-    return FTKR.STS.CW.actorStatus.opacity;
-};
-
-Window_StsActorStatus.prototype.standardPadding = function() {
-    return FTKR.STS.CW.actorStatus.padding;
-};
-
-Window_StsActorStatus.prototype._refreshFrame = function() {
-    if (!FTKR.STS.CW.actorStatus.frame) Window.prototype._refreshFrame.call(this);
-};
-
-//=============================================================================
-// Window_StsCost
-//=============================================================================
-
-FTKR.STS.CW.Window_StsCost_initialize = Window_StsCost.prototype.initialize;
-Window_StsCost.prototype.initialize = function(x, y, width, height) {
-    var layout = this.getWindowLayout(FTKR.STS.CW.cost);
-    FTKR.STS.CW.Window_StsCost_initialize.call(this, layout.x, layout.y, layout.width, layout.height);
-};
-
-Window_StsCost.prototype.standardBackOpacity = function() {
-    return FTKR.STS.CW.cost.opacity;
-};
-
-Window_StsCost.prototype.standardPadding = function() {
-    return FTKR.STS.CW.cost.padding;
-};
-
-Window_StsCost.prototype._refreshFrame = function() {
-    if (!FTKR.STS.CW.cost.frame) Window.prototype._refreshFrame.call(this);
-};
-
-Window_StsCost.prototype.drawAllCost = function() {
-    if (this._actor) {
-        var skill = this._skillId ? this._actor.stsSkill(this._skillId) : null;
-        var width = this.width - this.padding * 2;
-        var y = this.lineHeight();
-        this.drawStsDescTitle(FTKR.STS.cost.titleFormat, 0, 0, width, skill);
-        if (this._skillId) {
-            var costs = skill.sts.costs;
-            var cols = FTKR.STS.CW.cost.maxCols;
-            var spacing = FTKR.STS.CW.cost.spacing;
-            var cw = (width - spacing * (cols - 1))/ cols
-            var cx = 0, cy = 0;
-            for (var i = 0, n = 0; i< costs.length; i++) {
-                var cost = costs[i];
-                if (cost) {
-                    if (FTKR.STS.sp.hideCost0 && cost.type === 'sp' &&
-                        (!cost.value || Number(cost.value) === 0)) {
-                        n -= 1;
-                        continue;
-                    }
-                    if (!((i + n) % cols)) {
-                        cx = 0;
-                        cy += 1;
-                    } else {
-                        cx += cw + spacing;
-                    }
-                    FTKR.setGameData(this._actor, null, skill);
-                    this.drawStsCost(cost, cx, y * cy, cw);
+            var setMode = 'none';
+            obj.sts.bgi = {
+            name:'',
+            offsetX:0,
+            offsetY:0,
+            };
+            for (var i = 0; i < notedata.length; i++) {
+                var line = notedata[i];
+                if (line.match(note1a) || line.match(note1aj)) {
+                    var text = '';
+                    setMode = 'data';
+                    obj.sts.bgi.name = RegExp.$1;
+                } else if (note1b.test(line) || note1bj.test(line)) {
+                    setMode = 'none';
+                    obj.sts.data = text;
+                } else if (setMode === 'data') {
+                    text += line + ';';
                 }
             }
+            this.setStsBgiData(obj);
         }
-    }
-};
+    };
 
-//=============================================================================
-// Window_StsPreskill
-//=============================================================================
+    DataManager.setStsBgiData = function(obj) {
+        var stsdata = obj.sts.data;
+        if (stsdata) {
+            var case2 = /(?:BGI OFFSET X):[ ]*(\d+)/i;
+            var case3 = /(?:BGI OFFSET Y):[ ]*(\d+)/i;
 
-FTKR.STS.CW.Window_StsPreskill_initialize = Window_StsPreskill.prototype.initialize;
-Window_StsPreskill.prototype.initialize = function(x, y, width, height) {
-    var layout = this.getWindowLayout(FTKR.STS.CW.preskill);
-    FTKR.STS.CW.Window_StsPreskill_initialize.call(this, layout.x, layout.y, layout.width, layout.height);
-};
+            var datas = stsdata.split(';');
+            for (var i = 0; i < datas.length; i++) {
+                var data = datas[i];
+                if(data.match(case2)) {
+                    obj.sts.bgi.offsetX = Number(RegExp.$1);
+                } else if(data.match(case3)) {
+                    obj.sts.bgi.offsetY = Number(RegExp.$1);
+                }
+            }
+            obj.sts.data = '';
+        }
+    };
 
-Window_StsPreskill.prototype.standardBackOpacity = function() {
-    return FTKR.STS.CW.preskill.opacity;
-};
+    //=============================================================================
+    // Game_Actor
+    //=============================================================================
 
-Window_StsPreskill.prototype.standardPadding = function() {
-    return FTKR.STS.CW.preskill.padding;
-};
+    FTKR.STS.CW.Game_Actor_setup = Game_Actor.prototype.setup;
+    Game_Actor.prototype.setup = function(actorId) {
+        FTKR.STS.CW.Game_Actor_setup.call(this, actorId);
+        ImageManager.loadSystem(this.actor().sts.bgi.name);
+    };
 
-Window_StsPreskill.prototype._refreshFrame = function() {
-    if (!FTKR.STS.CW.preskill.frame) Window.prototype._refreshFrame.call(this);
-};
+    //=============================================================================
+    // Scene_STS
+    //=============================================================================
 
-Window_StsPreskill.prototype.drawAllPreskill = function(index) {
-    if (this._actor) {
-        var actor = this._actor;
-        var skill = this._skillId ? actor.stsSkill(this._skillId) : null;
-        var width = this.width - this.padding * 2;
-        var y = this.lineHeight();
-        this.drawStsDescTitle(FTKR.STS.preskill.titleFormat, 0, 0, width, skill);
+    Scene_STS.prototype.createBackground = function() {
+        this._backgroundSprite = new Sprite();
+        var bgiName = FTKR.STS.CW.background.name;
+        this._backgroundSprite.bitmap = bgiName ?
+            ImageManager.loadSystem(bgiName) : SceneManager.backgroundBitmap();
+        this.addChild(this._backgroundSprite);
+        this._contents = new Sprite();
+        this.addChild(this._contents);
+    };
+
+    FTKR.STS.CW.Scene_STS_refreshActor = Scene_STS.prototype.refreshActor;
+    Scene_STS.prototype.refreshActor = function() {
+        FTKR.STS.CW.Scene_STS_refreshActor.call(this);
+        var actor = this.actor();
+        if (actor) {
+            var bgi = actor.actor().sts.bgi;
+            if (bgi.name) {
+                this._contents.bitmap = ImageManager.loadSystem(bgi.name);
+                this._contents.move(bgi.offsetX, bgi.offsetY);
+            }
+        }
+        if(FTKR.STS.CW.alwaysDispCost !== 1) this._stsCostWindow.hide();
+        this._stsPreskillWindow.show();
+        if(FTKR.STS.CW.alwaysDispPreskill !== 1) this._stsPreskillWindow.hide();
+    };
+
+    FTKR.STS.CW.Scene_STS_stsConfHide = Scene_STS.prototype.stsConfHide;
+    Scene_STS.prototype.stsConfHide = function() {
+        FTKR.STS.CW.Scene_STS_stsConfHide.call(this);
+        this._stsPreskillWindow.show();
+        if(!FTKR.STS.CW.alwaysDispCost) this._stsCostWindow.hide();
+        if(!FTKR.STS.CW.alwaysDispPreskill) this._stsPreskillWindow.hide();
+    };
+
+    FTKR.STS.CW.Scene_STS_stsConfShow = Scene_STS.prototype.stsConfShow;
+    Scene_STS.prototype.stsConfShow = function() {
+        FTKR.STS.CW.Scene_STS_stsConfShow.call(this);
+        this._stsPreskillWindow.hide();
+        if(!FTKR.STS.CW.alwaysDispCost) this._stsCostWindow.show();
+        if(!FTKR.STS.CW.alwaysDispPreskill) this._stsPreskillWindow.show();
+    };
+
+    var _Scene_STS_createSkillTreeWindow = Scene_STS.prototype.createSkillTreeWindow;
+    Scene_STS.prototype.createSkillTreeWindow = function() {
+        _Scene_STS_createSkillTreeWindow.call(this);
+        if (FTKR.STS.CW.treeTitle.format) {
+            this.createStsSkillTreeTitleWindow();
+        }
+    };
+
+    Scene_STS.prototype.createStsSkillTreeTitleWindow = function() {
+        this._stsTreeTitleWindow = new Window_SkillTreeTitle();
+        this.addWindow(this._stsTreeTitleWindow);
+    };
+  
+  
+    //=============================================================================
+    // Window_Base
+    //=============================================================================
+
+    Window_Base.prototype.setWubdiwLayout = function(layout) {
+        this.x = layout.posiX;
+        this.y = layout.posiY;
+        this.width = layout.width === -1 ? Graphics.boxWidth - this.x : layout.width;
+        this.height = layout.height === -1 ? Graphics.boxHeight - this.y : layout.height;
+    };
+
+    Window_Base.prototype.getWindowLayout = function(layout) {
+        return {
+            x:layout.posiX,
+            y:layout.posiY,
+            width:layout.width === -1 ? Graphics.boxWidth - layout.posiX : layout.width,
+            height:layout.height === -1 ? Graphics.boxHeight - layout.posiY : layout.height,
+        };
+    };
+
+    //=============================================================================
+    // Window_TreeType
+    //=============================================================================
+
+    FTKR.STS.CW.Window_TreeType_initialize = Window_TreeType.prototype.initialize;
+    Window_TreeType.prototype.initialize = function(x, y, width, height) {
+        var layout = this.getWindowLayout(FTKR.STS.CW.treeTypes);
+        FTKR.STS.CW.Window_TreeType_initialize.call(this, layout.x, layout.y, layout.width, layout.height);
+    };
+
+    Window_TreeType.prototype.itemHeightSpace = function() {
+        return FTKR.STS.CW.treeTypes.hspace;
+    };
+
+    Window_TreeType.prototype.standardBackOpacity = function() {
+        return FTKR.STS.CW.treeTypes.opacity;
+    };
+
+    Window_TreeType.prototype.standardPadding = function() {
+        return FTKR.STS.CW.treeTypes.padding;
+    };
+
+    Window_TreeType.prototype.maxCols = function() {
+    return Math.max(FTKR.STS.CW.treeTypes.maxCols, 1);
+    };
+
+    Window_TreeType.prototype._refreshFrame = function() {
+        if (!FTKR.STS.CW.treeTypes.frame) Window.prototype._refreshFrame.call(this);
+    };
+
+    Window_TreeType.prototype.maxPageRows = function() {
+        var pageHeight = this.height - this.padding * 2;
+        return Math.floor(pageHeight / this.unitHeight());
+    };
+
+    Window_TreeType.prototype.topRow = function() {
+        return Math.floor(this._scrollY / this.unitHeight());
+    };
+
+    Window_TreeType.prototype.setTopRow = function(row) {
+        var scrollY = row.clamp(0, this.maxTopRow()) * this.unitHeight();
+        if (this._scrollY !== scrollY) {
+            this._scrollY = scrollY;
+            this.refresh();
+            this.updateCursor();
+        }
+    };
+
+    Window_TreeType.prototype.itemRect = function(index) {
+        var rect = new Rectangle();
+        var maxCols = this.maxCols();
+        rect.width = this.itemWidth();
+        rect.height = this.itemHeight();
+        rect.x = index % maxCols * this.unitWidth() - this._scrollX;
+        rect.y = Math.floor(index / maxCols) * this.unitHeight() - this._scrollY;
+        return rect;
+    };
+
+    //=============================================================================
+    // Window_SkillTree
+    //=============================================================================
+
+    FTKR.STS.CW.Window_SkillTree_initialize = Window_SkillTree.prototype.initialize;
+    Window_SkillTree.prototype.initialize = function(x, y, width, height) {
+        var layout = this.getWindowLayout(FTKR.STS.CW.skillTree);
+        FTKR.STS.CW.Window_SkillTree_initialize.call(this, layout.x, layout.y, layout.width, layout.height);
+    };
+
+    Window_SkillTree.prototype.standardBackOpacity = function() {
+        return FTKR.STS.CW.skillTree.opacity;
+    };
+
+    Window_SkillTree.prototype.standardPadding = function() {
+        return FTKR.STS.CW.skillTree.padding;
+    };
+
+    Window_SkillTree.prototype._refreshFrame = function() {
+        if (!FTKR.STS.CW.skillTree.frame) Window.prototype._refreshFrame.call(this);
+    };
+
+    //=============================================================================
+    // Window_StsSkillStatus
+    //=============================================================================
+
+    FTKR.STS.CW.Window_StsSkillStatus_initialize = Window_StsSkillStatus.prototype.initialize;
+    Window_StsSkillStatus.prototype.initialize = function(x, y, width, height) {
+        var layout = this.getWindowLayout(FTKR.STS.CW.skillStatus);
+        FTKR.STS.CW.Window_StsSkillStatus_initialize.call(this, layout.x, layout.y, layout.width, layout.height);
+    };
+
+    Window_StsSkillStatus.prototype.standardBackOpacity = function() {
+        return FTKR.STS.CW.skillStatus.opacity;
+    };
+
+    Window_StsSkillStatus.prototype.standardPadding = function() {
+        return FTKR.STS.CW.skillStatus.padding;
+    };
+
+    Window_StsSkillStatus.prototype._refreshFrame = function() {
+        if (!FTKR.STS.CW.skillStatus.frame) Window.prototype._refreshFrame.call(this);
+    };
+
+    //=============================================================================
+    // Window_StsActorStatus
+    //=============================================================================
+
+    FTKR.STS.CW.Window_StsActorStatus_initialize = Window_StsActorStatus.prototype.initialize;
+    Window_StsActorStatus.prototype.initialize = function(x, y, width, height) {
+        var layout = this.getWindowLayout(FTKR.STS.CW.actorStatus);
+        FTKR.STS.CW.Window_StsActorStatus_initialize.call(this, layout.x, layout.y, layout.width, layout.height);
+    };
+
+    Window_StsActorStatus.prototype.standardBackOpacity = function() {
+        return FTKR.STS.CW.actorStatus.opacity;
+    };
+
+    Window_StsActorStatus.prototype.standardPadding = function() {
+        return FTKR.STS.CW.actorStatus.padding;
+    };
+
+    Window_StsActorStatus.prototype._refreshFrame = function() {
+        if (!FTKR.STS.CW.actorStatus.frame) Window.prototype._refreshFrame.call(this);
+    };
+
+    //=============================================================================
+    // Window_StsCost
+    //=============================================================================
+
+    FTKR.STS.CW.Window_StsCost_initialize = Window_StsCost.prototype.initialize;
+    Window_StsCost.prototype.initialize = function(x, y, width, height) {
+        var layout = this.getWindowLayout(FTKR.STS.CW.cost);
+        FTKR.STS.CW.Window_StsCost_initialize.call(this, layout.x, layout.y, layout.width, layout.height);
+    };
+
+    Window_StsCost.prototype.standardBackOpacity = function() {
+        return FTKR.STS.CW.cost.opacity;
+    };
+
+    Window_StsCost.prototype.standardPadding = function() {
+        return FTKR.STS.CW.cost.padding;
+    };
+
+    Window_StsCost.prototype._refreshFrame = function() {
+        if (!FTKR.STS.CW.cost.frame) Window.prototype._refreshFrame.call(this);
+    };
+
+    Window_StsCost.prototype.drawCostValues = function(skill, x, y, width) {
+        if (!this._skillId) return;
+        var lh = this.lineHeight();
+        var costs = skill.sts.costs;
+        var cols = FTKR.STS.CW.cost.maxCols;
+        var spacing = FTKR.STS.CW.cost.spacing;
+        var cw = (width - spacing * (cols - 1))/ cols
+        var cx = 0, cy = 0;
+        for (var i = 0, n = 0; i< costs.length; i++) {
+            var cost = costs[i];
+            if (cost) {
+                if (FTKR.STS.sp.hideCost0 && cost.type === 'sp' &&
+                    (!cost.value || Number(cost.value) === 0)) {
+                    n -= 1;
+                    continue;
+                }
+                if (!((i + n) % cols)) {
+                    cx = 0;
+                    cy += 1;
+                } else {
+                    cx += cw + spacing;
+                }
+                FTKR.setGameData(this._actor, null, skill);
+                this.drawStsCost(cost, x + cx, y + lh * (cy - 1), cw);
+            }
+        }
+    };
+
+    //=============================================================================
+    // Window_StsPreskill
+    //=============================================================================
+
+    FTKR.STS.CW.Window_StsPreskill_initialize = Window_StsPreskill.prototype.initialize;
+    Window_StsPreskill.prototype.initialize = function(x, y, width, height) {
+        var layout = this.getWindowLayout(FTKR.STS.CW.preskill);
+        FTKR.STS.CW.Window_StsPreskill_initialize.call(this, layout.x, layout.y, layout.width, layout.height);
+    };
+
+    Window_StsPreskill.prototype.standardBackOpacity = function() {
+        return FTKR.STS.CW.preskill.opacity;
+    };
+
+    Window_StsPreskill.prototype.standardPadding = function() {
+        return FTKR.STS.CW.preskill.padding;
+    };
+
+    Window_StsPreskill.prototype._refreshFrame = function() {
+        if (!FTKR.STS.CW.preskill.frame) Window.prototype._refreshFrame.call(this);
+    };
+
+    Window_StsPreskill.prototype.drawPreSkills = function(x, y, width) {
         if (this._skillId && this._tTypeId) {
+            var actor = this._actor;
+            var lh = this.lineHeight();
             var preskillIds = actor.getPreskillId(this._skillId, this._tTypeId);
             var cols = FTKR.STS.CW.preskill.maxCols;
             var spacing = FTKR.STS.CW.preskill.spacing;
@@ -946,52 +1041,88 @@ Window_StsPreskill.prototype.drawAllPreskill = function(index) {
                         cx += cw + spacing;
                     }
                     this.changePaintOpacity(actor.isStsLearnedSkill(preskill.id));
-                    this.drawFormatTextEx(FTKR.STS.preskill.itemFormat, cx, y * cy, [preskill.name], cw);
+                    this.drawFormatTextEx(FTKR.STS.preskill.itemFormat, x + cx, y + lh * (cy - 1), [preskill.name], cw);
                     this.changePaintOpacity(1);
                 }
             }
         }
-    }
-};
+    };
 
-//=============================================================================
-// Window_StsConfTitle
-//=============================================================================
+    //=============================================================================
+    // Window_StsConfTitle
+    //=============================================================================
 
-FTKR.STS.CW.Window_StsConfTitle_initialize = Window_StsConfTitle.prototype.initialize;
-Window_StsConfTitle.prototype.initialize = function(x, y, width, height) {
-    var layout = this.getWindowLayout(FTKR.STS.CW.confTitle);
-    FTKR.STS.CW.Window_StsConfTitle_initialize.call(this, layout.x, layout.y, layout.width, layout.height);
-};
+    FTKR.STS.CW.Window_StsConfTitle_initialize = Window_StsConfTitle.prototype.initialize;
+    Window_StsConfTitle.prototype.initialize = function(x, y, width, height) {
+        var layout = this.getWindowLayout(FTKR.STS.CW.confTitle);
+        FTKR.STS.CW.Window_StsConfTitle_initialize.call(this, layout.x, layout.y, layout.width, layout.height);
+    };
 
-Window_StsConfTitle.prototype.standardBackOpacity = function() {
-    return FTKR.STS.CW.confTitle.opacity;
-};
+    Window_StsConfTitle.prototype.standardBackOpacity = function() {
+        return FTKR.STS.CW.confTitle.opacity;
+    };
 
-Window_StsConfTitle.prototype.standardPadding = function() {
-    return FTKR.STS.CW.confTitle.padding;
-};
+    Window_StsConfTitle.prototype.standardPadding = function() {
+        return FTKR.STS.CW.confTitle.padding;
+    };
 
-Window_StsConfTitle.prototype._refreshFrame = function() {
-    if (!FTKR.STS.CW.confTitle.frame) Window.prototype._refreshFrame.call(this);
-};
+    Window_StsConfTitle.prototype._refreshFrame = function() {
+        if (!FTKR.STS.CW.confTitle.frame) Window.prototype._refreshFrame.call(this);
+    };
 
-//=============================================================================
-// Window_StsConf
-//=============================================================================
+    //=============================================================================
+    // Window_StsConf
+    //=============================================================================
 
-Window_StsConf.prototype.standardBackOpacity = function() {
-    return FTKR.STS.CW.conf.opacity;
-};
+    Window_StsConf.prototype.standardBackOpacity = function() {
+        return FTKR.STS.CW.conf.opacity;
+    };
 
-Window_StsConf.prototype.standardPadding = function() {
-    return FTKR.STS.CW.conf.padding;
-};
+    Window_StsConf.prototype.standardPadding = function() {
+        return FTKR.STS.CW.conf.padding;
+    };
 
-Window_StsConf.prototype._refreshFrame = function() {
-    if (!FTKR.STS.CW.conf.frame) Window.prototype._refreshFrame.call(this);
-};
+    Window_StsConf.prototype._refreshFrame = function() {
+        if (!FTKR.STS.CW.conf.frame) Window.prototype._refreshFrame.call(this);
+    };
 
+    //=============================================================================
+    // Window_SkillTreeTitle
+    //=============================================================================
+
+    Window_SkillTreeTitle.prototype = Object.create(Window_Base.prototype);
+    Window_SkillTreeTitle.prototype.constructor = Window_SkillTreeTitle;
+
+    Window_SkillTreeTitle.prototype.initialize = function() {
+        var layout = this.getWindowLayout(FTKR.STS.CW.treeTitle);
+        Window_Base.prototype.initialize.call(this, layout.x, layout.y, layout.width, layout.height);
+        this.refresh();
+    };
+
+    Window_SkillTreeTitle.prototype.standardBackOpacity = function() {
+        return FTKR.STS.CW.treeTitle.opacity;
+    };
+
+    Window_SkillTreeTitle.prototype.standardPadding = function() {
+        return FTKR.STS.CW.treeTitle.padding;
+    };
+
+    Window_SkillTreeTitle.prototype._refreshFrame = function() {
+        if (!FTKR.STS.CW.treeTitle.frame) Window.prototype._refreshFrame.call(this);
+    };
+
+    Window_SkillTreeTitle.prototype.refresh = function () {
+        this.contents.clear();
+        this.drawStsText(FTKR.STS.CW.treeTitle.format);
+    };
+
+    Window_SkillTreeTitle.prototype.drawStsText = function(format) {
+        //var width = this.width - this.standardPadding() * 2;
+        this.drawTextEx(format, 0, 0);
+    };
+
+
+}());
 //=============================================================================
 } else {
     var text = '';

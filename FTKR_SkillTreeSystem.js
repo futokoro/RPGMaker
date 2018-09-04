@@ -4,8 +4,8 @@
 // プラグインNo : 7
 // 作成者　　   : フトコロ(futokoro)
 // 作成日　　   : 2017/02/25
-// 最終更新日   : 2018/08/26
-// バージョン   : v1.15.13
+// 最終更新日   : 2018/09/04
+// バージョン   : v1.16.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.15.13 ツリー型スキル習得システム
+ * @plugindesc v1.16.0 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -1418,6 +1418,12 @@ FTKR.STS = FTKR.STS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.16.0 - 2018/09/04 : 機能追加
+ *    1. プラグインパラメータ Cost Title Format と Preskill Title Format の値を
+ *       空欄にした場合に、それぞれのウィンドウ上のコストや前提スキルの表示位置を
+ *       一段上げるように修正。
+ *    2. 拡張プラグインの修正に合わせてリファクタリング。
  * 
  * v1.15.13 - 2018/08/26 : 不具合修正、機能追加
  *    1. FTKR_SkillExpansionと組み合わせている場合に、スキルツリー画面の
@@ -3854,25 +3860,34 @@ function Scene_STS() {
     };
 
     Window_StsCost.prototype.drawAllCost = function() {
-      if (this._actor) {
-        var skill = this._skillId ? this._actor.stsSkill(this._skillId) : null;
-        var width = this.width - this.padding * 2;
-        var y = this.lineHeight();
-        this.drawStsDescTitle(FTKR.STS.cost.titleFormat, 0, 0, width, skill);
-        if (this._skillId) {
-          for (var i = 0; i< 3; i++) {
+        if (this._actor) {
+            var skill = this._skillId ? this._actor.stsSkill(this._skillId) : null;
+            var width = this.width - this.padding * 2;
+            var y = this.lineHeight();
+            var len = 0;
+            var title = FTKR.STS.cost.titleFormat;
+            if (title) {
+                len = 1;
+                this.drawStsDescTitle(title, 0, 0, width, skill);
+            }
+            this.drawCostValues(skill, 0, len * y, width);
+        }
+    };
+
+    Window_StsCost.prototype.drawCostValues = function(skill, x, y, width) {
+        if (!this._skillId) return;
+        var lh = this.lineHeight();
+        for (var i = 0; i< 3; i++) {
             var cost = skill.sts.costs[i];
             if (cost) {
                 FTKR.setGameData(this._actor, null, skill);
                 if (FTKR.STS.sp.hideCost0 && cost.type === 'sp' && (!cost.value || Number(cost.value) === 0)) continue;
-                this.drawStsCost(cost, 0, y*(1+i), width);
+                this.drawStsCost(cost, x, y + lh * i, width);
             }
-          }
         }
-      }
     };
 
-    Window_StsCost.prototype.drawStsCost = function(cost, x, y, width) {
+    Window_Base.prototype.drawStsCost = function(cost, x, y, width) {
         var iw = Window_Base._iconWidth + 4;
         width = width - iw;
         this.drawIcon(this.setStsCost(cost).icon, x + 2, y + 2);
@@ -3926,24 +3941,35 @@ function Scene_STS() {
     };
 
     Window_StsPreskill.prototype.drawAllPreskill = function(index) {
-      if (this._actor) {
-        var actor = this._actor;
-        var skill = this._skillId ? actor.stsSkill(this._skillId) : null;
-        var width = this.width - this.padding * 2;
-        var y = this.lineHeight();
-        this.drawStsDescTitle(FTKR.STS.preskill.titleFormat, 0, 0, width, skill);
-        if (this._skillId && this._tTypeId) {
-          var preskillIds = actor.getPreskillId(this._skillId, this._tTypeId);
-          for (var i = 0; i< preskillIds.length; i++) {
-            var preskill = actor.stsSkill(preskillIds[i]);
-            if (preskill) {
-              this.changePaintOpacity(actor.isStsLearnedSkill(preskill.id));
-              this.drawFormatTextEx(FTKR.STS.preskill.itemFormat, 0, y*(1+i), [preskill.name], width);
-              this.changePaintOpacity(1);
+        if (this._actor) {
+            var actor = this._actor;
+            var skill = this._skillId ? actor.stsSkill(this._skillId) : null;
+            var width = this.width - this.padding * 2;
+            var lh = this.lineHeight();
+            var len = 0;
+            var title = FTKR.STS.preskill.titleFormat;
+            if (title) {
+                len = 1;
+                this.drawStsDescTitle(title, 0, 0, width, skill);
             }
-          }
+            this.drawPreSkills(0, lh * len, width);
         }
-      }
+    };
+
+    Window_StsPreskill.prototype.drawPreSkills = function(x, y, width) {
+        if (this._skillId && this._tTypeId) {
+            var actor = this._actor;
+            var lh = this.lineHeight();
+            var preskillIds = actor.getPreskillId(this._skillId, this._tTypeId);
+            for (var i = 0; i< preskillIds.length; i++) {
+                var preskill = actor.stsSkill(preskillIds[i]);
+                if (preskill) {
+                    this.changePaintOpacity(actor.isStsLearnedSkill(preskill.id));
+                    this.drawFormatTextEx(FTKR.STS.preskill.itemFormat, x, y + lh * i, [preskill.name], width);
+                    this.changePaintOpacity(1);
+                }
+            }
+        }
     };
 
     //=============================================================================
