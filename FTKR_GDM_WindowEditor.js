@@ -4,8 +4,8 @@
 // プラグインNo : 86
 // 作成者     : フトコロ
 // 作成日     : 2018/07/15
-// 最終更新日 : 2018/09/01
-// バージョン : v0.9.9
+// 最終更新日 : 2018/09/06
+// バージョン : v0.9.10
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -23,7 +23,7 @@ FTKR.GDM = FTKR.GDM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v0.9.9 トリアコンタンさんのGUI画面デザインプラグインの機能追加
+ * @plugindesc v0.9.10 トリアコンタンさんのGUI画面デザインプラグインの機能追加
  * @author フトコロ
  *
  * @param autoCreate
@@ -206,9 +206,6 @@ FTKR.GDM = FTKR.GDM || {};
  * [Twitter    ] https://twitter.com/futokoro_mv
  * 
  * 
- * なお、FTKR_CustomSimpleActorStatusのv3.0.0 から追加した
- * ステータスの新表示方式にはまだ対応していません。
- * 
  *-----------------------------------------------------------------------------
  * 使い方
  *-----------------------------------------------------------------------------
@@ -270,6 +267,8 @@ FTKR.GDM = FTKR.GDM || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v0.9.10 - 編集ウィンドウの表示位置が画面右に寄ってしまう不具合を修正。
+ *           一部のウィンドウの編集内容が反映されない不具合を修正。
  * v0.9.9 - 表示していないウィンドウも編集できてしまう不具合を修正。
  *          FTKR_CustomSimpleActorStatusのv3.0.0に追加したステータスの
  *          新表示方式に対応。
@@ -1600,7 +1599,7 @@ function Scene_OSW() {
 
         Window_Base.prototype.setPositionReferWindowIndex = function(window) {
             var x = window.x + optionOffsetX;
-            if (x + this.width < Graphics.boxWidth) {
+            if (x + this.width > Graphics.boxWidth) {
                 x = Graphics.boxWidth - this.width;
             }
             var y = window.y + window.index() * window.lineHeight();
@@ -3741,7 +3740,7 @@ function Scene_OSW() {
     };
 
     PIXI.Container.prototype.saveProperty = function(containerInfo) {
-        containerInfo.priority = this.parent.getChildIndex(this);
+        containerInfo.priority = this.priority >= 0 ? this.priority : this.parent.getChildIndex(this);
         containerInfo.containerIndex = this.containerIndex;
         containerInfo.x = this.x;
         containerInfo.y = this.y;
@@ -3791,7 +3790,14 @@ function Scene_OSW() {
         var sceneInfo  = $dataContainerProperties[sceneName];
         if (sceneInfo) {
             var containerInfo = sceneInfo[parentName];
-            var key           = [this.parent.getChildIndex(this), getClassName(this)];
+            if (this._windowId >= 0) {
+                var key = [this._windowId, getClassName(this)];
+            } else {
+                if (this.containerIndex === undefined) {
+                    this.containerIndex = this.parent.getChildIndex(this);
+                }
+                var key = [this.containerIndex, getClassName(this)];
+            }
             if (containerInfo && containerInfo[key]) {
                 this.loadProperty(containerInfo[key]);
                 this._positionLock = true;
@@ -3814,7 +3820,7 @@ function Scene_OSW() {
     };
 
     PIXI.Container.prototype.loadProperty = function(containerInfo) {
-        if(containerInfo.priority) this.priority       = containerInfo.priority;
+        if(containerInfo.priority !== undefined) this.priority = containerInfo.priority;
         if(containerInfo.containerIndex === undefined) {
             this.containerIndex = this.parent.getChildIndex(this);
         } else {
@@ -3827,33 +3833,33 @@ function Scene_OSW() {
     var _Window_Base_loadProperty = Window_Base.prototype.loadProperty;
     Window_Base.prototype.loadProperty = function(containerInfo) {
         if(containerInfo.name) this.name = containerInfo.name;
-        if(containerInfo._customActorId)   this._customActorId = containerInfo._customActorId;
-        if(containerInfo._customReference) this._customReference = containerInfo._customReference;
-        if(containerInfo._customShowSwId)  this._customShowSwId = containerInfo._customShowSwId;
-        if(containerInfo._customShow)      this._customShow = containerInfo._customShow;
-        if(containerInfo._customHideFrame) this._customHideFrame = containerInfo._customHideFrame;
-        if(containerInfo._customActivate)  this._customActivate = containerInfo._customActivate;
-        if(containerInfo._customSpacing)   this._customSpacing   = containerInfo._customSpacing;
-        if(containerInfo._customMaxCols)   this._customMaxCols = containerInfo._customMaxCols;
-        if(containerInfo._customCursorHeight) this._customCursorHeight = containerInfo._customCursorHeight;
-        if(containerInfo._customHorSpacing) this._customHorSpacing = containerInfo._customHorSpacing;
-        if(containerInfo._customList)      this._customList = copyArray(containerInfo._customList);
-        if(containerInfo._autoRefreshed)   this._autoRefreshed = containerInfo._autoRefreshed;
+        if(containerInfo._customActorId !== undefined)   this._customActorId = containerInfo._customActorId;
+        if(containerInfo._customReference !== undefined) this._customReference = containerInfo._customReference;
+        if(containerInfo._customShowSwId !== undefined)  this._customShowSwId = containerInfo._customShowSwId;
+        if(containerInfo._customShow !== undefined)      this._customShow = containerInfo._customShow;
+        if(containerInfo._customHideFrame !== undefined) this._customHideFrame = containerInfo._customHideFrame;
+        if(containerInfo._customActivate !== undefined)  this._customActivate = containerInfo._customActivate;
+        if(containerInfo._customSpacing !== undefined)   this._customSpacing   = containerInfo._customSpacing;
+        if(containerInfo._customMaxCols !== undefined)   this._customMaxCols = containerInfo._customMaxCols;
+        if(containerInfo._customCursorHeight !== undefined) this._customCursorHeight = containerInfo._customCursorHeight;
+        if(containerInfo._customHorSpacing !== undefined) this._customHorSpacing = containerInfo._customHorSpacing;
+        if(containerInfo._customList !== undefined)      this._customList = copyArray(containerInfo._customList);
+        if(containerInfo._autoRefreshed !== undefined)   this._autoRefreshed = containerInfo._autoRefreshed;
         _Window_Base_loadProperty.apply(this, arguments);
         this._firstUpdated = false;
     };
 
     var _Window_Selectable_loadProperty = Window_Selectable.prototype.loadProperty;
     Window_Selectable.prototype.loadProperty = function(containerInfo){
-        if(containerInfo._customListType)  this._customListType = containerInfo._customListType;
-        if(containerInfo._customListEnabled) this._customListEnabled = containerInfo._customListEnabled;
-        if(containerInfo._customDrawType)  this._customDrawType = containerInfo._customDrawType;
-        if(containerInfo._customHandlers)  this._customHandlers = copyObject(containerInfo._customHandlers);
-        if(containerInfo._customTextAlign) this._customTextAlign = containerInfo._customTextAlign;
-        if(containerInfo._customOkMethodType) this._customOkMethodType = containerInfo._customOkMethodType;
-        if(containerInfo._customOkMethodDetail) this._customOkMethodDetail = containerInfo._customOkMethodDetail;
-        if(containerInfo._customCancelMethodType) this._customCancelMethodType = containerInfo._customCancelMethodType;
-        if(containerInfo._customCancelMethodDetail) this._customCancelMethodDetail = containerInfo._customCancelMethodDetail;
+        if(containerInfo._customListType !== undefined)  this._customListType = containerInfo._customListType;
+        if(containerInfo._customListEnabled !== undefined) this._customListEnabled = containerInfo._customListEnabled;
+        if(containerInfo._customDrawType !== undefined)  this._customDrawType = containerInfo._customDrawType;
+        if(containerInfo._customHandlers !== undefined)  this._customHandlers = copyObject(containerInfo._customHandlers);
+        if(containerInfo._customTextAlign !== undefined) this._customTextAlign = containerInfo._customTextAlign;
+        if(containerInfo._customOkMethodType !== undefined) this._customOkMethodType = containerInfo._customOkMethodType;
+        if(containerInfo._customOkMethodDetail !== undefined) this._customOkMethodDetail = containerInfo._customOkMethodDetail;
+        if(containerInfo._customCancelMethodType !== undefined) this._customCancelMethodType = containerInfo._customCancelMethodType;
+        if(containerInfo._customCancelMethodDetail !== undefined) this._customCancelMethodDetail = containerInfo._customCancelMethodDetail;
         _Window_Selectable_loadProperty.call(this, containerInfo);
         this.setOswMethod();
     };
