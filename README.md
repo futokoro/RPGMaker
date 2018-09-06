@@ -125,7 +125,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_SkillCounter](FTKR_SkillCounter.js) | [あり](FTKR_SkillCounter.ja.md) | [v1.0.5](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillCounter.js) | 2017/04/29 | 相手のスキルに対抗して効果を変える |
 | [FTKR_SkillSubCommand](FTKR_SkillSubCommand.js) | [仮版](FTKR_SkillSubCommand.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillSubCommand.js) | 2017/04/15 | スキル画面にサブコマンドを追加する <br> FTKR_SEP_ShowSkillStatusと組み合わせて使用できません |
-| [FTKR_AutoInvokeSkill](FTKR_AutoInvokeSkill.js) | なし | [v1.3.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AutoInvokeSkill.js) | 2017/11/04 | 特定条件で自動でスキルを発動させる |
+| [FTKR_AutoInvokeSkill](FTKR_AutoInvokeSkill.js) | なし | [v1.3.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AutoInvokeSkill.js) | 2018/09/07 | 特定条件で自動でスキルを発動させる |
 | [FTKR_AISkillEvaluate](FTKR_AISkillEvaluate.js) | なし | [v1.2.4](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AISkillEvaluate.js) | 2018/03/10 | 自動戦闘時に使用するスキルの評価値を個別に設定する |
 | [FTKR_SkillCastingMotion](FTKR_SkillCastingMotion.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillCastingMotion.js) | 2018/04/11 | スキル毎に詠唱モーションのONOFFを設定する |
 
@@ -305,6 +305,9 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 # 更新情報
 
 2018/09の更新情報
+
+### 2018/09/07
+* [FTKR_AutoInvokeSkill](FTKR_AutoInvokeSkill.js) v1.3.2
 
 ### 2018/09/06
 * [FTKR_GDM_WindowEditor](FTKR_GDM_WindowEditor.ja.md) v0.9.10

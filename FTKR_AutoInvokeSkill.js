@@ -4,8 +4,8 @@
 // プラグインNo : 34
 // 作成者     : フトコロ
 // 作成日     : 2017/05/03
-// 最終更新日 : 2017/11/04
-// バージョン : v1.3.1
+// 最終更新日 : 2018/09/07
+// バージョン : v1.3.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.AIS = FTKR.AIS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.3.1 特定条件で自動でスキルを発動させるプラグイン
+ * @plugindesc v1.3.2 特定条件で自動でスキルを発動させるプラグイン
  * @author フトコロ
  *
  * @help 
@@ -236,6 +236,12 @@ FTKR.AIS = FTKR.AIS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.3.2 - 2018/09/07 : 不具合修正
+ *    1. FTKR_AlternatingTurnBattle.jsと組み合わせた時に、複数回行動可能なキャラが
+ *       自動スキルを発動させた場合、その次の行動でエラーになる不具合を修正。
+ *    2. FTKR_AlternatingTurnBattle.jsと組み合わせた時に、ターン終了の条件で
+ *       ステート解除時発動スキルを設定した場合に、次ターンに発動する不具合を修正。
  * 
  * v1.3.1 - 2017/11/04 : ヘルプ修正
  * 
@@ -484,21 +490,31 @@ FTKR.AIS = FTKR.AIS || {};
         }
     };
 
-    var _AIS_BattleManager_endTurn = BattleManager.endTurn;
-    BattleManager.endTurn = function() {
-        _AIS_BattleManager_endTurn.call(this);
-        if (this._autoSkills && this._autoSkills.length) {
-            this._keepPhase = this._phase;
-            this._phase = 'autoSkill'
-        }
-    };
+    if (Imported.FTKR_AltTB) {
+        var _AIS_BattleManager_updateTurnEnd = BattleManager.updateTurnEnd;
+        BattleManager.updateTurnEnd = function() {
+            _AIS_BattleManager_updateTurnEnd.call(this);
+            if (this._autoSkills && this._autoSkills.length) {
+                this._keepPhase = this._phase;
+                this._phase = 'autoSkill'
+            }
+        };
+    } else {
+        var _AIS_BattleManager_endTurn = BattleManager.endTurn;
+        BattleManager.endTurn = function() {
+            _AIS_BattleManager_endTurn.call(this);
+            if (this._autoSkills && this._autoSkills.length) {
+                this._keepPhase = this._phase;
+                this._phase = 'autoSkill'
+            }
+        };
+    }
 
     BattleManager.updateAutoSkill = function() {
         $gameParty.requestMotionRefresh();
         var autoSkill = this._autoSkills.shift();
         if (autoSkill) {
             this.startAutoSkillAction(autoSkill);
-            this._subject.removeCurrentAction();
         } else {
             this._phase = this._keepPhase;
         }
