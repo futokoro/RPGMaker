@@ -4,8 +4,8 @@
 // プラグインNo : 89
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2018/09/04
-// 最終更新日 : 
-// バージョン : v1.0.1
+// 最終更新日 : 2018/09/07
+// バージョン : v1.0.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -17,7 +17,7 @@ FTKR.STS.CST = FTKR.STS.CST || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.1 ツリー型スキル習得システム用 スキルツリーウィンドウ表示変更プラグイン
+ * @plugindesc v1.0.2 ツリー型スキル習得システム用 スキルツリーウィンドウ表示変更プラグイン
  * @author フトコロ
  *
  * @param --ステータス表示設定--
@@ -73,6 +73,8 @@ FTKR.STS.CST = FTKR.STS.CST || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.2 - 2018/09/07 : 機能追加
+ *    1. スキル習得回数を表示するパラメータを追加。
  * v1.0.1 - 2018/09/04 : 不具合修正
  * v1.0.0 - 2018/09/04 : 初版作成
  * 
@@ -149,6 +151,8 @@ FTKR.STS.CST = FTKR.STS.CST || {};
  * @value iicon
  * @option スキル習得コスト
  * @value istscost(%1)
+ * @option スキル習得回数
+ * @value istscount
  *
  * @param value
  * @desc code(%1)の形式で設定するステータスの%1の内容を入力
@@ -212,6 +216,8 @@ if(Imported.FTKR_STS) {
                 return this.drawCssItemIcon(actor, x, y, width);
             case 'INAME':
                 return this.drawCssItemName(actor, x, y, width);
+            case 'ISTSCOUNT':
+                return this.drawCssItemStsCount(actor, x, y, width);
             default:
                 return _AltTB_Window_Base_drawCssActorStatusBase_B.apply(this, arguments);
         }
@@ -233,7 +239,39 @@ if(Imported.FTKR_STS) {
         var item = FTKR.gameData.item;
         if (item) {
             var cost = item.sts.costs[+costId];
-            this.drawStsCost(cost, x, y, width);
+            this.drawStsCost(cost, x, y, width, item.id);
+        }
+        return 1;
+    };
+
+    Window_Base.prototype.drawCssItemStsCount = function(actor, x, y, width) {
+        var item = FTKR.gameData.item;
+        if (item) {
+            var iw = Window_Base._iconWidth;
+            var cfl = FTKR.STS.cFrame;
+            var scx = x + width + cfl.offsetX;
+            var scy = y + cfl.offsetY;
+            var sch = cfl.height;
+            var rate = sch / iw;
+            var thick = cfl.thick;
+            var sctx = scx + thick + cfl.count.offsetX;
+            var scty = scy + thick + cfl.count.offsetY;
+            var count = !actor.isStsLearnedSkill(skill.id) ? 0 : actor.stsCount(skill.id);
+            if (FTKR.STS.enableSkillCount) {
+                this.drawFormatTextEx(cfl.format, sctx, scty, [count]);
+            }
+            if (actor.isStsLearnedSkill(skill.id) && !actor.isStsLearnedOk(skill.id)) {
+                this.drawIconCustom(FTKR.STS.skillLearnedIcon, scx, scy, rate);
+            }
+        }
+        return 1;
+    };
+    
+    Window_SkillTree.prototype.drawCssItemStsCount = function(actor, x, y, width) {
+        var item = FTKR.gameData.item;
+        if (item) {
+            var color = this.setFrameColor(item);
+            this.drawSkillCount(actor, item, item, x, y, width, color);
         }
         return 1;
     };

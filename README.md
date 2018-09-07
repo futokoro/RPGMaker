@@ -1,7 +1,7 @@
 # RPGツクールMV プラグイン
 
 プラグインは逐次追加更新を行っています。最新情報は、[更新情報](#更新情報)を確認してください。<br>
-公開中のプラグインの数：88 (19年度中に 100 にしたいなぁ)
+公開中のプラグインの数：89 (19年度中に 100 にしたいなぁ)
 
 # 目次
 
@@ -146,9 +146,9 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
-| [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js) | [あり](FTKR_SkillTreeSystem.ja.md) | [v1.16.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillTreeSystem.js) | 2018/09/04 | ツリー型のスキル習得システム |
+| [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js) | [あり](FTKR_SkillTreeSystem.ja.md) | [v1.16.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillTreeSystem.js) | 2018/09/07 | ツリー型のスキル習得システム |
 | [FTKR_STS_CustomWindow](FTKR_STS_CustomWindow.js) | [仮版](FTKR_STS_CustomWindow.ja.md) | [v1.3.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_STS_CustomWindow.js) | 2017/06/07 | スキルツリー習得画面のレイアウトを変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js) |
-| [FTKR_STS_CustomSkillStatus](FTKR_STS_CustomSkillStatus.js) | なし | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_STS_CustomSkillStatus.js) | 2017/06/07 | スキルツリーウィンドウに表示するスキルパラメータを変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js)<br> [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) |
+| [FTKR_STS_CustomSkillStatus](FTKR_STS_CustomSkillStatus.js) | なし | [v1.0.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_STS_CustomSkillStatus.js) | 2018/09/07 | スキルツリーウィンドウに表示するスキルパラメータを変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js)<br> [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) |
 
 [目次に戻る](#目次)
 
@@ -308,6 +308,8 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 ### 2018/09/07
 * [FTKR_AutoInvokeSkill](FTKR_AutoInvokeSkill.js) v1.3.2
+* [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.ja.md) v1.16.2
+* [FTKR_STS_CustomSkillStatus](FTKR_STS_CustomSkillStatus.js) v1.0.2
 
 ### 2018/09/06
 * [FTKR_GDM_WindowEditor](FTKR_GDM_WindowEditor.ja.md) v0.9.10

@@ -4,8 +4,8 @@
 // プラグインNo : 7
 // 作成者　　   : フトコロ(futokoro)
 // 作成日　　   : 2017/02/25
-// 最終更新日   : 2018/09/04
-// バージョン   : v1.16.1
+// 最終更新日   : 2018/09/07
+// バージョン   : v1.16.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.16.1 ツリー型スキル習得システム
+ * @plugindesc v1.16.2 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -336,6 +336,10 @@ FTKR.STS = FTKR.STS || {};
  * 0 - 指定しない
  * @default 0
  * @type number
+ *
+ * @param Cost Max Count Format
+ * @desc 最大習得回数に達した場合のコスト数値の表示内容を記述します。
+ * @default 
  *
  * @param --前提スキルウィンドウの設定(Pre Skill Window)--
  * @default 
@@ -1419,6 +1423,9 @@ FTKR.STS = FTKR.STS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.16.2 - 2018/09/07 : 機能追加
+ *    1. 最大習得回数に達した時にコスト数値の表示内容を変更できる機能を追加。
+ * 
  * v1.16.1 - 2018/09/04 : 不具合修正(v1.16.0)
  * 
  * v1.16.0 - 2018/09/04 : 機能追加
@@ -1823,10 +1830,11 @@ function Scene_STS() {
     };
     //コストウィンドウ設定
     FTKR.STS.cost = {
-        titleFormat:String(parameters['Cost Title Format'] || ''),
-        itemFormat:String(parameters['Cost Item Format'] || ''),
+        titleFormat :String(parameters['Cost Title Format'] || ''),
+        itemFormat  :String(parameters['Cost Item Format'] || ''),
         numberFormat:String(parameters['Cost Number Format'] || ''),
-        numberWidth:Number(parameters['Cost Number Width'] || 0),
+        numberWidth :Number(parameters['Cost Number Width'] || 0),
+        maxFormat   :String(parameters['Cost Max Count Format'] || ''),
     };
     //スキルツリーウィンドウ設定
     FTKR.STS.skillTree = {
@@ -2419,6 +2427,10 @@ function Scene_STS() {
     Game_Actor.prototype.stsCount = function(skillId) {
         if (!this._stsCount) this._stsCount = [];
         return this._stsCount[skillId] || 0;
+    };
+
+    Game_Actor.prototype.isStsMaxCount = function(skillId) {
+        return this.stsSkill(skillId) && this.stsCount(skillId) >= this.stsSkill(skillId).sts.maxCount;
     };
 
     Game_Actor.prototype.setStsSkillCount = function(skillId, value) {
@@ -3130,7 +3142,7 @@ function Scene_STS() {
         this.contents.blt(bitmap, sx, sy, pw, ph, x, y, pw * scale, ph * scale);
     };
 
-    // 制御文字を使えるフォーマットテキスト描画関数
+    // 制御文字を使えないフォーマットテキスト描画関数
     Window_Base.prototype.drawStsFormatText = function(fmt, x, y, params, width, position) {
         var text = fmt.format(params[0], params[1], params[2], params[3], params[4]);
         this.drawText(text, x, y, width, position);
@@ -3518,11 +3530,10 @@ function Scene_STS() {
 
     //スキルの習得回数を表示
     Window_SkillTree.prototype.drawSkillCountRect = function(skill, data, rect, color) {
-        this.drawSkillCount(skill, data, rect.x, rect.y, rect.width, color);
+        this.drawSkillCount(this._actor, skill, data, rect.x, rect.y, rect.width, color);
     };
     
-    Window_SkillTree.prototype.drawSkillCount = function(skill, data, x, y, width, color){
-      var actor = this._actor;
+    Window_SkillTree.prototype.drawSkillCount = function(actor, skill, data, x, y, width, color){
       var iw = Window_Base._iconWidth;
       var ih = Window_Base._iconHeight;
       var cfl = FTKR.STS.cFrame;
@@ -3884,12 +3895,12 @@ function Scene_STS() {
             if (cost) {
                 FTKR.setGameData(this._actor, null, skill);
                 if (FTKR.STS.sp.hideCost0 && cost.type === 'sp' && (!cost.value || Number(cost.value) === 0)) continue;
-                this.drawStsCost(cost, x, y + lh * i, width);
+                this.drawStsCost(cost, x, y + lh * i, width, skill.id);
             }
         }
     };
 
-    Window_Base.prototype.drawStsCost = function(cost, x, y, width) {
+    Window_Base.prototype.drawStsCost = function(cost, x, y, width, skillId) {
         var iw = Window_Base._iconWidth + 4;
         width = width - iw;
         this.drawIcon(this.setStsCost(cost).icon, x + 2, y + 2);
@@ -3902,7 +3913,9 @@ function Scene_STS() {
         this.changeTextColor(this.textColor(parseInt(num[0])));
         var numberWidth = FTKR.STS.cost.numberWidth || width + iw;
         var diff = width + iw - numberWidth;
-        this.drawStsFormatText(num[1], x + diff, y, params, numberWidth, 'right');
+        var value = this._actor.isStsMaxCount(skillId) && FTKR.STS.cost.maxFormat ?
+                FTKR.STS.cost.maxFormat : num[1];
+        this.drawStsFormatText(value, x + diff, y, params, numberWidth, 'right');
     };
 
     //=============================================================================
