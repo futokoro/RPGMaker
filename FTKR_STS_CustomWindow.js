@@ -4,8 +4,8 @@
 // プラグインNo : 13
 // 作成者     : フトコロ(futokoro)
 // 作成日     : 2017/03/31
-// 最終更新日 : 2018/09/04
-// バージョン : v1.3.0
+// 最終更新日 : 2018/09/08
+// バージョン : v1.3.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -17,7 +17,7 @@ FTKR.STS.CW = FTKR.STS.CW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.3.0 ツリー型スキル習得システム用 ウィンドウレイアウト変更プラグイン
+ * @plugindesc v1.3.1 ツリー型スキル習得システム用 ウィンドウレイアウト変更プラグイン
  * @author フトコロ
  *
  * @param --ツリータイプウィンドウの設定(Tree Types Window)--
@@ -508,6 +508,10 @@ FTKR.STS.CW = FTKR.STS.CW || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.3.1 : 2018/09/08 : 不具合修正
+ *    1. コストウィンドウと前提スキルウィンドウを常時表示させない設定にした場合に
+ *       正しく機能しない不具合修正。
+ * 
  * v1.3.0 : 2018/09/04 : 機能追加
  *    1. コストウィンドウと前提スキルウィンドウを常時表示させない機能を追加。
  *    2. スキルツリータイトルとして固定の文字列を表示可能なウィンドウを追加。
@@ -772,24 +776,29 @@ function Window_SkillTreeTitle() {
             }
         }
         if(FTKR.STS.CW.alwaysDispCost !== 1) this._stsCostWindow.hide();
-        this._stsPreskillWindow.show();
-        if(FTKR.STS.CW.alwaysDispPreskill !== 1) this._stsPreskillWindow.hide();
+        if(FTKR.STS.CW.alwaysDispPreskill == 1) this._stsPreskillWindow.show();
     };
 
-    FTKR.STS.CW.Scene_STS_stsConfHide = Scene_STS.prototype.stsConfHide;
     Scene_STS.prototype.stsConfHide = function() {
-        FTKR.STS.CW.Scene_STS_stsConfHide.call(this);
-        this._stsPreskillWindow.show();
-        if(!FTKR.STS.CW.alwaysDispCost) this._stsCostWindow.hide();
-        if(!FTKR.STS.CW.alwaysDispPreskill) this._stsPreskillWindow.hide();
+        this._stsConfWindow.hide();
+        this._stsConfTitleWindow.hide();
+        if(FTKR.STS.CW.alwaysDispCost !== 1) {
+            this._stsCostWindow.hide();
+        }
+        if(FTKR.STS.CW.alwaysDispPreskill !== 1) {
+            this._stsPreskillWindow.hide();
+        }
     };
 
-    FTKR.STS.CW.Scene_STS_stsConfShow = Scene_STS.prototype.stsConfShow;
     Scene_STS.prototype.stsConfShow = function() {
-        FTKR.STS.CW.Scene_STS_stsConfShow.call(this);
-        this._stsPreskillWindow.hide();
-        if(!FTKR.STS.CW.alwaysDispCost) this._stsCostWindow.show();
-        if(!FTKR.STS.CW.alwaysDispPreskill) this._stsPreskillWindow.show();
+        this._stsConfWindow.show();
+        this._stsConfTitleWindow.show();
+        if(!FTKR.STS.CW.alwaysDispCost) {
+            this._stsCostWindow.show();
+        }
+        if(!FTKR.STS.CW.alwaysDispPreskill) {
+            this._stsPreskillWindow.show();
+        }
     };
 
     var _Scene_STS_createSkillTreeWindow = Scene_STS.prototype.createSkillTreeWindow;
