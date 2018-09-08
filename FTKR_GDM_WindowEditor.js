@@ -4,8 +4,8 @@
 // プラグインNo : 86
 // 作成者     : フトコロ
 // 作成日     : 2018/07/15
-// 最終更新日 : 2018/09/06
-// バージョン : v0.9.10
+// 最終更新日 : 2018/09/08
+// バージョン : v0.9.11
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -23,7 +23,7 @@ FTKR.GDM = FTKR.GDM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v0.9.10 トリアコンタンさんのGUI画面デザインプラグインの機能追加
+ * @plugindesc v0.9.11 トリアコンタンさんのGUI画面デザインプラグインの機能追加
  * @author フトコロ
  *
  * @param autoCreate
@@ -267,8 +267,9 @@ FTKR.GDM = FTKR.GDM || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v0.9.11 - 一部のウィンドウの編集内容(表示列、表示列間隔)が反映されない不具合を修正。
  * v0.9.10 - 編集ウィンドウの表示位置が画面右に寄ってしまう不具合を修正。
- *           一部のウィンドウの編集内容が反映されない不具合を修正。
+ *           一部のウィンドウの編集内容反映されない不具合を修正。
  * v0.9.9 - 表示していないウィンドウも編集できてしまう不具合を修正。
  *          FTKR_CustomSimpleActorStatusのv3.0.0に追加したステータスの
  *          新表示方式に対応。
@@ -1222,15 +1223,15 @@ function Scene_OSW() {
             var iw = this.itemWidth() || this.width;
             var index = Math.floor((TouchInput.y - this.y - this.padding) / ih) + this.topRow();
             var x = this.x;
-            for(var i = 0; i < this.maxCols(); i++) {
-                if (TouchInput.x >= x && TouchInput.x < x + iw + this.spacing()) {
+            for(var i = 0; i < this.customMaxCols(); i++) {
+                if (TouchInput.x >= x && TouchInput.x < x + iw + this.customSpacing()) {
                     var col = i;
                     break;
                 }
-                x += iw + this.spacing();
+                x += iw + this.customSpacing();
             }
-            return index * this.maxCols() + col;
-    //          return Math.min(index * this.maxCols() + col, this.maxItems() - 1);
+            return index * this.customMaxCols() + col;
+    //          return Math.min(index * this.customMaxCols() + col, this.maxItems() - 1);
         };
 
         //マウスポインタが指している行のリスト番号を取得
@@ -3972,6 +3973,10 @@ function Scene_OSW() {
         return this._customSpacing >= 0 ? this._customSpacing : _CSS_Window_Selectable_spacing.call(this);
     };
 
+    Window_Selectable.prototype.customSpacing = function() {
+        return this._customSpacing >= 0 ? this._customSpacing : this.spacing();
+    };
+
     //------------------------------------------------------------------------
     // _customMaxCols
     //------------------------------------------------------------------------
@@ -3984,6 +3989,75 @@ function Scene_OSW() {
         this._customMaxCols = value;
     };
 
+    Window_Selectable.prototype.customMaxCols = function() {
+        return this._customMaxCols ? this._customMaxCols : this.maxCols();
+    };
+
+    //書き換え
+    Window_Selectable.prototype.maxRows = function() {
+        return Math.max(Math.ceil(this.maxItems() / this.customMaxCols()), 1);
+    };
+    
+    //書き換え
+    Window_Selectable.prototype.row = function() {
+        return Math.floor(this.index() / this.customMaxCols());
+    };
+    
+    //書き換え
+    Window_Selectable.prototype.maxPageItems = function() {
+        return this.maxPageRows() * this.customMaxCols();
+    };
+    
+    //書き換え
+    Window_Selectable.prototype.topIndex = function() {
+        return this.topRow() * this.customMaxCols();
+    };
+    
+    //書き換え
+    Window_Selectable.prototype.cursorDown = function(wrap) {
+        var index = this.index();
+        var maxItems = this.maxItems();
+        var maxCols = this.customMaxCols();
+        if (index < maxItems - maxCols || (wrap && maxCols === 1)) {
+            this.select((index + maxCols) % maxItems);
+        }
+    };
+    
+    //書き換え
+    Window_Selectable.prototype.cursorUp = function(wrap) {
+        var index = this.index();
+        var maxItems = this.maxItems();
+        var maxCols = this.customMaxCols();
+        if (index >= maxCols || (wrap && maxCols === 1)) {
+            this.select((index - maxCols + maxItems) % maxItems);
+        }
+    };
+    
+    //書き換え
+    Window_Selectable.prototype.cursorRight = function(wrap) {
+        var index = this.index();
+        var maxItems = this.maxItems();
+        var maxCols = this.customMaxCols();
+        if (maxCols >= 2 && (index < maxItems - 1 || (wrap && this.isHorizontal()))) {
+            this.select((index + 1) % maxItems);
+        }
+    };
+    
+    //書き換え
+    Window_Selectable.prototype.cursorLeft = function(wrap) {
+        var index = this.index();
+        var maxItems = this.maxItems();
+        var maxCols = this.customMaxCols();
+        if (maxCols >= 2 && (index > 0 || (wrap && this.isHorizontal()))) {
+            this.select((index - 1 + maxItems) % maxItems);
+        }
+    };
+    
+    //書き換え
+    Window_Command.prototype.numVisibleRows = function() {
+        return Math.ceil(this.maxItems() / this.customMaxCols());
+    };
+    
     //------------------------------------------------------------------------
     // _customCursorHeight
     //------------------------------------------------------------------------
@@ -4011,9 +4085,15 @@ function Scene_OSW() {
     };
 
     Window_Selectable.prototype.unitWidth = function() {
-        return this.itemWidth() + this.spacing();
+        return this.itemWidth() + this.customSpacing();
     };
 
+    //書き換え
+    Window_Selectable.prototype.itemWidth = function() {
+        return Math.floor((this.width - this.padding * 2 +
+                           this.customSpacing()) / this.customMaxCols() - this.customSpacing());
+    };
+    
     var _CSS_Window_Selectable_maxPageRows = Window_Selectable.prototype.maxPageRows;
     Window_Selectable.prototype.maxPageRows = function() {
         if (this.itemHeightSpace()) {
@@ -4048,7 +4128,7 @@ function Scene_OSW() {
     Window_Selectable.prototype.itemRect = function(index) {
         if (this.itemHeightSpace()) {
             var rect = new Rectangle();
-            var maxCols = this.maxCols();
+            var maxCols = this.customMaxCols();
             rect.width = this.itemWidth();
             rect.height = this.itemHeight();
             rect.x = index % maxCols * this.unitWidth() - this._scrollX;
@@ -4060,7 +4140,7 @@ function Scene_OSW() {
     };
 
     //------------------------------------------------------------------------
-    // _reserveCursor
+    // _customHideFrame
     //------------------------------------------------------------------------
     Window_Base.prototype.showFrame = function() {
         this._customHideFrame = false;
@@ -4082,7 +4162,8 @@ function Scene_OSW() {
     };
 
     //------------------------------------------------------------------------
-    // _reserveCursor
+    // _customShow
+    // _customActivate
     //------------------------------------------------------------------------
     var _SA_Window_Base_update = Window_Base.prototype.update;
     Window_Base.prototype.update = function() {
