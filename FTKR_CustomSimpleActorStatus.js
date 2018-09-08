@@ -4,8 +4,8 @@
 // プラグインNo : 9
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2018/08/30
-// バージョン : v3.1.0
+// 最終更新日 : 2018/09/09
+// バージョン : v3.1.1
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v3.1.0 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v3.1.1 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -987,6 +987,8 @@ FTKR.CSS = FTKR.CSS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v3.1.1 - 2018/09/09 : GraphicalDesignMode.js 用の記述を削除
  * 
  * v3.1.0 - 2018/08/30 : 機能追加
  *    1. 拡張プラグインのプラグインパラメータで表示するステータスをリストで
@@ -2796,73 +2798,6 @@ FTKR.CSS = FTKR.CSS || {};
         if (!this.canMove()) return;
         FTKR.CSS.Sprite_Actor_updateTargetPosition.call(this);
     };
-
-    //=============================================================================
-    // GraphicalDesignMode.jsに対応
-    //=============================================================================
-    if (typeof $dataContainerProperties !== 'undefined') {
-    
-    var _Window_Base_loadProperty = Window_Base.prototype.loadProperty;
-    Window_Base.prototype.loadProperty = function(containerInfo) {
-        _Window_Base_loadProperty.apply(this, arguments);
-        if (containerInfo._customCssStatus) this._customCssStatus  = copyArray(containerInfo._customCssStatus);
-        if (containerInfo._customCssSpaceIn) this._customCssSpaceIn   = containerInfo._customCssSpaceIn;
-        if (containerInfo._customCssText1) this._customCssText1    = containerInfo._customCssText1;
-        if (containerInfo._customCssText2) this._customCssText2    = containerInfo._customCssText2;
-        if (containerInfo._customCssText3) this._customCssText3    = containerInfo._customCssText3;
-        if (containerInfo._customCssSpace) this._customCssSpace    = containerInfo._customCssSpace;
-        if (containerInfo._customCssWidthRate) this._customCssWidthRate = containerInfo._customCssWidthRate;
-        this.setCssStatus();
-        this.refresh();
-    };
-    
-    var _Window_Base_saveProperty = Window_Base.prototype.saveProperty;
-    Window_Base.prototype.saveProperty = function(containerInfo) {
-        _Window_Base_saveProperty.apply(this, arguments);
-        if (this._customCssStatus) containerInfo._customCssStatus   = copyArray(this._customCssStatus);
-        containerInfo._customCssSpaceIn  = this._customCssSpaceIn;
-        containerInfo._customCssText1    = this._customCssText1;
-        containerInfo._customCssText2    = this._customCssText2;
-        containerInfo._customCssText3    = this._customCssText3;
-        containerInfo._customCssSpace    = this._customCssSpace;
-        containerInfo._customCssWidthRate  = this._customCssWidthRate;
-      };
-      
-    var _Window_Base_initialize      = Window_Base.prototype.initialize;
-    Window_Base.prototype.initialize = function(x, y, width, height) {
-        _Window_Base_initialize.apply(this, arguments);
-        if (this._lssStatus) {
-            var lss = this.standardCssStatus();
-            if (lss.statusList) this._customCssStatus   = copyArray(lss.statusList);
-            this._customCssSpaceIn  = lss.spaceIn;
-            this._customCssText1    = lss.text1;
-            this._customCssText2    = lss.text2;
-            this._customCssText3    = lss.text3;
-            this._customCssSpace    = lss.space;
-            this._customCssWidthRate = lss.widthRate;
-        }
-    };
-
-    Window_Base.prototype.clearCssSpriteAll = function() {
-        $gameParty.allMembers().forEach( function(member, i) {
-            this.clearCssSprite(i);
-        },this);
-    };
-
-    Window_Base.prototype.setCssStatus = function() {
-        if (this._lssStatus) {
-            this.clearCssSpriteAll();
-            if (this._customCssStatus) this._lssStatus.statusList = copyArray(this._customCssStatus);
-            if (this._customCssSpaceIn) this._lssStatus.spaceIn = this._customCssSpaceIn;
-            if (this._customCssText1) this._lssStatus.text1 = this._customCssText1;
-            if (this._customCssText2) this._lssStatus.text2 = this._customCssText2;
-            if (this._customCssText3) this._lssStatus.text3 = this._customCssText3;
-            if (this._customCssSpace) this._lssStatus.space = this._customCssSpace;
-            if (this._customCssWidthRate) this._lssStatus.widthRate = this._customCssWidthRate;
-        }
-    };
-
-    }//GraphicalDesignMode.js
 
 }());//END
 

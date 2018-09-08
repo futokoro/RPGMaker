@@ -4,8 +4,8 @@
 // プラグインNo : 86
 // 作成者     : フトコロ
 // 作成日     : 2018/07/15
-// 最終更新日 : 2018/09/08
-// バージョン : v0.9.11
+// 最終更新日 : 2018/09/09
+// バージョン : v0.9.12
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -23,7 +23,7 @@ FTKR.GDM = FTKR.GDM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v0.9.11 トリアコンタンさんのGUI画面デザインプラグインの機能追加
+ * @plugindesc v0.9.12 トリアコンタンさんのGUI画面デザインプラグインの機能追加
  * @author フトコロ
  *
  * @param autoCreate
@@ -267,6 +267,9 @@ FTKR.GDM = FTKR.GDM || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v0.9.12 - 一部コマンドの選択可否処理を見直し。
+ *           セレクトウィンドウのアクター設定が正しく反映されない不具合を修正。
+ *           リスト形式の編集項目を、ウィンドウを新たに表示し選択する方式に変更。
  * v0.9.11 - 一部のウィンドウの編集内容(表示列、表示列間隔)が反映されない不具合を修正。
  * v0.9.10 - 編集ウィンドウの表示位置が画面右に寄ってしまう不具合を修正。
  *           一部のウィンドウの編集内容反映されない不具合を修正。
@@ -822,9 +825,9 @@ function Scene_OSW() {
             return [
                 {type:'none'},
                 {type:'none'},
-                {type:'select', options:{select:SCENE_LISTS}},
-                {type:'data',   options:{data:$dataCommonEvents, property:'name'}},
-                {type:'data',   options:{data:list, property:'name', enabled:'data.isList()', string:true}}
+                {type:'selectwindow', options:{select:SCENE_LISTS}},
+                {type:'datawindow',   options:{data:$dataCommonEvents, property:'name'}},
+                {type:'datawindow',   options:{data:list, property:'name', enabled:'data.isList()', string:true}}
             ];
         };
 
@@ -833,7 +836,7 @@ function Scene_OSW() {
             {type:'none'},
             {type:'none'},
             {type:'none'},
-            {type:'select', options:{select:['ウィンドウ残す', 'ウィンドウ非表示化']}}
+            {type:'selectwindow', options:{select:['ウィンドウ残す', 'ウィンドウ非表示化']}}
         ];
 
         //=============================================================================
@@ -1105,6 +1108,10 @@ function Scene_OSW() {
             }
             this._mainConfigWindow.activateWindow();
             return true;
+        };
+
+        SceneManager.gdmTouchWindow = function() {
+            return this._scene._touchWindow;
         };
 
         //=============================================================================
@@ -1689,7 +1696,7 @@ function Scene_OSW() {
         Scene_Base.prototype.createFtkrEditOptions = function() {
             var width = 240, textWidth = 206, statusWidth = 0;
             var layer = this.configLayer();
-            this._editConfigWindow = new Window_FtkrOptions(layer, width, textWidth, statusWidth);
+            this._editConfigWindow = new Window_FtkrOptions(layer, width, textWidth, statusWidth, 'editConfig');
             this._editConfigWindow.setHandler('cancel', this.closeOptions.bind(this));
             layer.addChild(this._editConfigWindow);
         };
@@ -1731,10 +1738,10 @@ function Scene_OSW() {
                     {type: 'save',   name: '決定'},
                 ], width: 400, textWidth: 220, statusWidth: 120}},
                 {type: 'subConfig',  name: '処理設定', symbol: 'methodEdit', enabled: configValues.isList(), options: {subConfigs: [
-                    {type: 'select', name: '実行設定　　　　', symbol: '_customOkMethodType',       enabled: configValues.isSelect(), options: {select:COMMAND_METHOD}},
+                    {type: 'selectwindow', name: '実行設定　　　　', symbol: '_customOkMethodType',       enabled: configValues.isSelect(), options: {select:COMMAND_METHOD}},
                     {type: 'refer',  name: '実行詳細　　　　', symbol: '_customOkMethodDetail',     enabled: configValues.isSelect(), options: {refSymbol:['_customOkMethodType'], refData:FTKR_METHOD_DATALIST(this)}},
                     {type: 'refer',  name: '実行詳細２　　　', symbol: '_customOkMethodDetail2',    enabled: configValues.isSelect(), options: {refSymbol:['_customOkMethodType'], refData:FTKR_METHOD_DATALIST2}},
-                    {type: 'select', name: 'キャンセル設定　', symbol: '_customCancelMethodType',   enabled: true, options: {select:COMMAND_METHOD}},
+                    {type: 'selectwindow', name: 'キャンセル設定　', symbol: '_customCancelMethodType',   enabled: true, options: {select:COMMAND_METHOD}},
                     {type: 'refer',  name: 'キャンセル詳細　', symbol: '_customCancelMethodDetail', enabled: true, options: {refSymbol:['_customCancelMethodType'], refData:FTKR_METHOD_DATALIST(this)}},
                     {type: 'refer',  name: 'キャンセル詳細２', symbol: '_customCancelMethodDetail2',enabled: true, options: {refSymbol:['_customCancelMethodType'], refData:FTKR_METHOD_DATALIST2}},
                     {type: 'line'},
@@ -1751,7 +1758,7 @@ function Scene_OSW() {
         Scene_Base.prototype.createFtkrDisplayOptions = function() {
             var width = 240, textWidth = 206, statusWidth = 0;
             var layer = this.configLayer();
-            this._dispConfigWindow = new Window_FtkrOptions(layer, width, textWidth, statusWidth);
+            this._dispConfigWindow = new Window_FtkrOptions(layer, width, textWidth, statusWidth, 'dispConfig');
             this._dispConfigWindow.setHandler('cancel', this.closeOptions.bind(this));
             layer.addChild(this._dispConfigWindow);
         };
@@ -1770,7 +1777,7 @@ function Scene_OSW() {
                     {type: 'save',  name: '決定'},
                 ], width: 400, textWidth: 220, statusWidth: 120}},
                 {type: 'subConfig', name: '表示設定', symbol: 'showEdit', enabled: true, options: {subConfigs: [
-                    {type: 'data',    name: '表示スイッチ',   symbol: '_customShowSwId',  enabled: true, options: {data:$dataSystem.switches}},
+                    {type: 'datawindow',    name: '表示スイッチ',   symbol: '_customShowSwId',  enabled: true, options: {data:$dataSystem.switches}},
                     {type: 'boolean', name: '枠非表示　　',   symbol: '_customHideFrame', enabled: true, options: {}},
                     {type: 'boolean', name: '表示自動更新',   symbol: '_autoRefreshed', enabled: true, options: {}},
                     {type: 'line'},
@@ -1778,43 +1785,43 @@ function Scene_OSW() {
                 ], width: 400, textWidth: 220, statusWidth: 120}},
                 {type: 'line'},
                 {type: 'subConfig', name: 'コマンド設定', symbol: 'cmdDisp', enabled: configValues.isCommand(), options: {subConfigs: [
-                    {type: 'select',  name: 'コマンド表示位置',   symbol: '_customTextAlign',  enabled: true, options: {select:['左寄せ','中央','右寄せ']}},
+                    {type: 'selectwindow',  name: 'コマンド表示位置',   symbol: '_customTextAlign',  enabled: true, options: {select:['左寄せ','中央','右寄せ']}},
                     {type: 'command', name: 'コマンド非表示解除', symbol: 'cmdShow',           enabled: true, options: {method:this.allCmdVisible.bind(this)}},
                     {type: 'line'},
                     {type: 'save',    name: '決定'},
                 ], width: 400, textWidth: 220, statusWidth: 120}},
                 {type: 'subConfig', name: 'セレクト設定', symbol: 'selectDisp', enabled: configValues.isSelect(), options: {subConfigs: [
-                    {type: 'select', name: '表示タイプ　', symbol: '_customDrawType',    enabled: true, options: {select:['テキスト','パーティー','アクター','職業','スキル','アイテム','武器','防具','敵キャラ','敵グループ']}},
+                    {type: 'selectwindow', name: '表示タイプ　', symbol: '_customDrawType',    enabled: true, options: {select:['テキスト','パーティー','アクター','職業','スキル','アイテム','武器','防具','敵キャラ','敵グループ']}},
                     {type: 'refer',  name: 'リストタイプ', symbol: '_customListType',    enabled: true, options: {refSymbol:['_customDrawType'], refData:[
                         {type: 'none'},
-                        {type: 'select', options:{select:['全メンバー', 'バトルメンバー', '控えメンバー']}},
+                        {type: 'selectwindow', options:{select:['全メンバー', 'バトルメンバー', '控えメンバー']}},
                     ]}},
                     {type: 'string', name: '表示条件　　', symbol: '_customListEnabled', enabled: true, options: {}},
                     {type: 'line'},
-                    {type: 'save',   name: '決定'},
+                    {type: 'save',   name: '決定', options:{refreshWindow:['dispConfig']}},
                 ], width: 400, textWidth: 220, statusWidth: 120}},
                 {type: 'subConfig', name: 'コモン設定', symbol: 'commonDisp', enabled: configValues.isCommon(), options: {subConfigs: [
-                    {type: 'select', name: '表示タイプ　', symbol: '_customDrawType',  enabled: true, options: {select:['テキスト','詳細']}},
+                    {type: 'selectwindow', name: '表示タイプ　', symbol: '_customDrawType',  enabled: true, options: {select:['テキスト','詳細']}},
                     {type: 'refer',  name: 'アクター設定', symbol: '_customActorId',   enabled: true, options: {refSymbol:['_customDrawType'], refData:[
                         {type:'none'},
-                        {type:'data', options:{data:$dataActors, property:'name'}}
+                        {type:'datawindow', options:{data:$dataActors, property:'name'}}
                     ]}},
                     {type: 'refer', name: 'セレクト参照', symbol: '_customReference', enabled: true, options: {refSymbol:['_customDrawType','_customActorId'], refData:[
                         [
                             {type:'none'}
                         ],
                         [
-                            {type:'data', options:{data:[null].concat(this.windowChildren()), property:'name', enabled:'data.isList()' ,string:true}},
+                            {type:'datawindow', options:{data:[null].concat(this.windowChildren()), property:'name', enabled:'data.isList()' ,string:true}},
                             {type:'none'}
                         ]
                     ]}},
                     {type: 'line'},
-                    {type: 'save',   name: '決定'},
+                    {type: 'save',   name: '決定', options:{refreshWindow:['dispConfig']}},
                 ], width: 400, textWidth: 220, statusWidth: 120}},
-                {type: 'subConfig', name: '表示エリア', symbol: 'cssArea', enabled: configValues.isCssContentsWindow(), options: {subConfigs: [
+                {type: 'subConfig', name: '表示エリア', symbol: 'cssArea', enabled: 'SceneManager.gdmTouchWindow().isCssContentsWindow()', options: {subConfigs: [
                     {type: 'window', name: 'パラメータリスト',  symbol: '_customCssStatus', enabled: true, options: {subConfigs: [
                         {type: 'subConfig', name: 'パラメータ編集', symbol: 'editStatus', enabled: true, options: {subConfigs: [
-                            {type: 'subConfig', name: 'パラメータ設定', symbol: 'customCssStatus', enabled: true, options: {subConfigs: [
+                            {type: 'subConfig', name: 'パラメータ設定', symbol: 'customCssStatus', enabled: 'this.hasCssStatus()', options: {subConfigs: [
                                 {type: 'string', name: 'パラメータ名',   symbol: '_customCssStatus[index].text',  enabled: true, options: {setArray: true}},
                                 {type: 'string', name: 'X座標',         symbol: '_customCssStatus[index].x',     enabled: true, options: {setArray: true}},
                                 {type: 'string', name: 'Y座標',         symbol: '_customCssStatus[index].y',     enabled: true, options: {setArray: true}},
@@ -1823,7 +1830,7 @@ function Scene_OSW() {
                                 {type: 'save',   name: '決定', options: {refreshWindow:['_customCssStatus']}},
                             ], width: 360, textWidth: 120, statusWidth: 220}},
                             {type: 'line'},
-                            {type: 'subConfig', name: '表示順番', symbol: 'order', enabled: true, options: {subConfigs: [
+                            {type: 'subConfig', name: '表示順番', symbol: 'order', enabled: 'this.hasCssStatus()', options: {subConfigs: [
                                 {type: 'command', name: '上部に移動　', symbol: 'toTop',       enabled: true, options: {method:this.csspToTop.bind(this, '_customCssStatus')}},
                                 {type: 'command', name: '最上部に移動', symbol: 'toTheTop',    enabled: true, options: {method:this.csspToTheTop.bind(this, '_customCssStatus')}},
                                 {type: 'line'},
@@ -1836,7 +1843,7 @@ function Scene_OSW() {
                                 {type: 'command', name: '下部に追加', symbol: 'addBottom',    enabled: true, options: {method:this.csspAddBottom.bind(this, '_customCssStatus')}},
                             ], width: 240, textWidth: 204, statusWidth: 0}},
                             {type: 'line'},
-                            {type: 'command', name: 'パラメータ削除　',   symbol: 'delete', enabled: true, options: {method:this.csspDeleteCommand.bind(this, '_customCssStatus')}},
+                            {type: 'command', name: 'パラメータ削除　',   symbol: 'delete', enabled: 'this.hasCssStatus()', options: {method:this.csspDeleteCommand.bind(this, '_customCssStatus')}},
                         ], width: 240, textWidth: 204, statusWidth: 0}},
                     ], width:480}},
                     {type: 'subConfig', name: '旧方式編集', symbol: 'editCssText', enabled: true, options: {subConfigs: [
@@ -2058,7 +2065,7 @@ function Scene_OSW() {
         Scene_Base.prototype.createFtkrCommandOptions = function() {
             var width = 240, textWidth = 220, statusWidth = 0;
             var layer = this.configLayer();
-            this._cmdConfigWindow = new Window_FtkrOptions(layer, width, textWidth, statusWidth);
+            this._cmdConfigWindow = new Window_FtkrOptions(layer, width, textWidth, statusWidth, 'cmdConfig');
             this._cmdConfigWindow.setHandler('cancel', this.cwCloseConfig.bind(this));
             layer.addChild(this._cmdConfigWindow);
         };
@@ -2070,7 +2077,7 @@ function Scene_OSW() {
                     {type: 'string', name: '表示名',   symbol: 'name',         enabled: true, options: {}},
                     {type: 'string', name: '実行条件', symbol: 'enabled',      enabled: true, options: {}},
                     {type: 'line'},
-                    {type: 'select', name: '実行設定', symbol: 'methodType',   enabled: true, options: {select:COMMAND_METHOD}},
+                    {type: 'selectwindow', name: '実行設定', symbol: 'methodType',   enabled: true, options: {select:COMMAND_METHOD}},
                     {type: 'refer',  name: '実行詳細', symbol: 'methodDetail', enabled: true, options: {refSymbol:['methodType'], refData:FTKR_METHOD_DATALIST(this)}},
                     {type: 'refer',  name: '実行詳細2', symbol: 'methodDetail2', enabled: true, options:  {refSymbol:['methodType'], refData:FTKR_METHOD_DATALIST2}},
                     {type: 'line'},
@@ -2711,7 +2718,8 @@ function Scene_OSW() {
         };
 
         Window_FtkrOptionsBase.prototype.isCommandEnabled = function(index) {
-            return this.list(index).enabled;
+            var enabled = this.list(index).enabled;
+            return typeof enabled === 'string' ? !!eval(enabled) : enabled;
         };
 
         Window_FtkrOptionsBase.prototype.commandType = function(index) {
@@ -2753,10 +2761,12 @@ function Scene_OSW() {
                 case 'NUMBER':
                     return this.numberStatusText(options, value);
                 case 'SELECT':
+                case 'SELECTWINDOW':
                     return this.selectStatusText(options, value);
                 case 'BOOLEAN':
                     return this.booleanStatusText(value);
                 case 'DATA':
+                case 'DATAWINDOW':
                     return this.dataStatusText(options, value);
                 case 'REFER':
                     return this.referenceStatusText(options, value);
@@ -2889,15 +2899,10 @@ function Scene_OSW() {
             value = this.convertOptionSelectValue(options, value);
             return options.select[value] || 'なし';
         };
-        /*
+        
         Window_FtkrOptionsBase.prototype.inputSelectValue = function(symbol, options) {
-            var value  = this.getConfigValue(symbol);
-            var data   = options.select;
-            value = isNaN(value) ? value : data[value];
-            var result = getPromptResult(value);
-            value = isNaN(result) ? result : Number(result);
-            this.changeValue(symbol, value);
-        };*/
+            
+        };
 
         Window_FtkrOptionsBase.prototype.changeSelectValue = function(symbol, options, flag) {
             var value  = this.getConfigValue(symbol);
@@ -2963,7 +2968,7 @@ function Scene_OSW() {
             },this);
             var config = options.refData;
             refValues.forEach(function(value, i){
-                if (value !== undefined) {
+                if (value !== undefined && config) {
                     config = config[value];
                 }
             });
@@ -2995,9 +3000,10 @@ function Scene_OSW() {
         //------------------------------------------------------------------------
         //サブコンフィグ SUBCONFIG
         //------------------------------------------------------------------------
-        Window_FtkrOptionsBase.prototype.showSubConfigs = function(symbol) {
+        Window_FtkrOptionsBase.prototype.showSubConfigs = function(symbol, list, options) {
             if(this.childWindows().some(function(window){
                 if (window._windowSymbol === symbol) {
+                    if (list) window.setSelectList(list, options);
                     window.setPositionReferWindowIndex(this);
                     window.activateWindow();
                     return true;
@@ -3014,10 +3020,12 @@ function Scene_OSW() {
         Window_FtkrOptionsBase.prototype.callSaveConfigValues = function(options) {
             this.deactivate();
             this.hide();
+            console.log('call save config value', options);
             if (options && options.refreshWindow) {
                 options.refreshWindow.forEach(function(symbol){
                     var child = SceneManager._scene.getOptionWindow(symbol);
                     if (child) child.refresh();
+                    console.log(symbol, child);
                 },this);
             }
             this.configContents().forEach(function(config){
@@ -3062,12 +3070,14 @@ function Scene_OSW() {
                 case 'NUMBER':
                     return this.adjustNumberStatus(options, value);
                 case 'SELECT':
+                case 'SELECTWINDOW':
                     value = this.convertOptionSelectValue(options, value);
                     value = options.string ? this.selectStatusText(options, value) : value;
                     return value === 'なし' ? '' : value;
                 case 'BOOLEAN':
                     return !!value;
                 case 'DATA':
+                case 'DATAWINDOW':
                     value = this.convertOptionDataValue(options, value);
                     return options.string ? this.dataStatusText(options, value) : value;
                 default:
@@ -3079,7 +3089,7 @@ function Scene_OSW() {
         //決定キーを押したときの処理
         //------------------------------------------------------------------------
         Window_FtkrOptionsBase.prototype.isCurrentItemEnabled = function() {
-            return this.currentData() ? this.currentData().enabled : false;
+            return this.isCommandEnabled(this.index());
         };
 
         Window_FtkrOptionsBase.prototype.processOk = function() {
@@ -3099,6 +3109,7 @@ function Scene_OSW() {
         };
 
         Window_FtkrOptionsBase.prototype.processInputValueBase = function(type, symbol, options) {
+            console.log(type, symbol, options);
             switch((type + '').toUpperCase()) {
                 case 'STRING':
                     this.inputStringValue(symbol);
@@ -3121,6 +3132,12 @@ function Scene_OSW() {
                 case 'SUBCONFIG':
                 case 'WINDOW':
                     this.showSubConfigs(symbol);
+                    break;
+                case 'SELECTWINDOW':
+                    this.showSubConfigs(symbol, options.select);
+                    break;
+                case 'DATAWINDOW':
+                    this.showSubConfigs(symbol, options.data, options);
                     break;
                 case 'HANDLER':
                     this.callHandler(symbol);
@@ -3210,6 +3227,15 @@ function Scene_OSW() {
             this.callHandler('cancel');
         };
 
+        Window_FtkrOptionsBase.prototype.hasCssStatus = function() {
+            return this._parentWindow && this._parentWindow.item();
+        };
+
+        Window_FtkrOptionsBase.prototype.setSelectListIndex = function(symbol, index) {
+            this.setConfigValue(symbol, index);
+            this.refresh();
+        };
+
         //=============================================================================
         // パラメータ設定用ウィンドウ
         //=============================================================================
@@ -3235,6 +3261,7 @@ function Scene_OSW() {
             var childConfigs = [];
             while(!!configs) {
                 configs.forEach(function(config){
+                    console.log(config);
                     if (!!config.parent) parent = config.parent;
                     var childWindow = this.createChildOptionWindow(this, parent, config, width, textWidth, statusWidth);
                     if (!!childWindow && !!config.options.subConfigs) {
@@ -3242,6 +3269,23 @@ function Scene_OSW() {
                             subConf.parent = childWindow;
                         },this);
                         childConfigs = childConfigs.concat(config.options.subConfigs);
+                    }
+                    if (config.options && config.options.refData) {
+                        var subchildren = [];
+                        config.options.refData.forEach(function(ref){
+                            if (ref instanceof Array) {
+                                ref.forEach(function(subref){
+                                    subref.parent = parent;
+                                    subref.symbol = config.symbol;
+                                    subchildren.push(subref);
+                                });
+                            } else {
+                                ref.parent = parent;
+                                ref.symbol = config.symbol;
+                                subchildren.push(ref);
+                            }
+                        });
+                        childConfigs = childConfigs.concat(subchildren);
                     }
                 },this);
                 configs = null;
@@ -3272,6 +3316,22 @@ function Scene_OSW() {
                 parent._childWindows.push(childWindow);
                 this.windowLayer().addChild(childWindow);
                 return childWindow;
+             } else if (config.type && config.type.toUpperCase() === 'SELECTWINDOW' && config.symbol) {
+                var cwd = config.options.width || width;
+                var childWindow = new Window_SelectListOptions(this.windowLayer(), cwd, config.symbol, config.options.select, parent, master);
+                childWindow.setHandler('ok',         childWindow.cwSelectListOk.bind(childWindow));
+                childWindow.setHandler('cancel',     childWindow.hideChildWindows.bind(childWindow, config.symbol));
+                parent._childWindows.push(childWindow);
+                this.windowLayer().addChild(childWindow);
+                return childWindow;
+            } else if (config.type && config.type.toUpperCase() === 'DATAWINDOW' && config.symbol) {
+                var cwd = config.options.width || width;
+                var childWindow = new Window_SelectListOptions(this.windowLayer(), cwd, config.symbol, config.options.data, parent, master, config.options.property);
+                childWindow.setHandler('ok',         childWindow.cwSelectListOk.bind(childWindow));
+                childWindow.setHandler('cancel',     childWindow.hideChildWindows.bind(childWindow, config.symbol));
+                parent._childWindows.push(childWindow);
+                this.windowLayer().addChild(childWindow);
+                return childWindow;
             }
             return null;
         };
@@ -3290,7 +3350,6 @@ function Scene_OSW() {
             this._configValues = copyConfigSymbolvalues(configContents, configValues);
             this.createChildWindows(this.windowWidth(), this.textWidth(), this.statusWidth());
             this.refresh();
-//            if (this._statusListWindow) this.windowLayer().addChild(this._statusListWindow);
             console.log('setConfigContents');
         };
 
@@ -3629,6 +3688,127 @@ function Scene_OSW() {
             }
         };
 
+        //=============================================================================
+        // セレクト・リスト選択用ウィンドウ
+        //=============================================================================
+        function Window_SelectListOptions() {
+            this.initialize.apply(this, arguments);
+        }
+
+        Window_SelectListOptions.prototype = Object.create(Window_Selectable.prototype);
+        Window_SelectListOptions.prototype.constructor = Window_SelectListOptions;
+
+        Window_SelectListOptions.prototype.initialize = function(layer, width, symbol, list, parentWindow, masterWindow, prop) {
+            this._ftkrEditor = true;
+            this._masterWindow   = masterWindow;
+            this._parentWindow   = parentWindow;
+            this._childWindows = [];
+            this._windowSymbol   = symbol;
+            this._windowWidth    = width;
+            this._prop = prop;
+            this._list = list || [];
+            this.setWindowLayer(layer);
+            var height = this.windowHeight();
+            Window_Selectable.prototype.initialize.call(this, 0, 0, width, height);
+            this.hide();
+        };
+
+        Window_SelectListOptions.prototype.setSelectList = function(list, options) {
+            this._list = list;
+            if (options) {
+                this._prop = options.property;
+                this._enabled = options.enabled;
+            } else {
+                this._prop = null;
+                this._enabled = null;
+            }
+            console.log(this._list, this._prop, this._enabled);
+            this.refresh();
+        };
+
+        Window_SelectListOptions.prototype.isOswOption = function() {
+            return true;
+        };
+
+        Window_SelectListOptions.prototype.standardFontSize = function() {
+            return optionFontSize;
+        };
+
+        Window_SelectListOptions.prototype.lineHeight = function() {
+            return optionLineHeight;
+        };
+
+        Window_SelectListOptions.prototype.windowLayer = function() {
+            return this._windowLayer;
+        };
+
+        Window_SelectListOptions.prototype.setWindowLayer = function(layer) {
+            this._windowLayer = layer;
+        };
+
+        Window_Selectable.prototype.maxItems = function() {
+            return this.lists().length;
+        };
+
+        Window_SelectListOptions.prototype.windowHeight = function() {
+            return this.fittingHeight(Math.min(this.maxItems(), 10));
+        };
+
+        Window_SelectListOptions.prototype.lists = function() {
+            return this._enabled ? this._list.filter(function(data){
+                return !!data ? eval(this._enabled) : true;
+            },this) : this._list;
+        };
+
+        Window_SelectListOptions.prototype.drawItem = function(index) {
+            var item = this.lists()[index];
+            var rect = this.itemRect(index);
+            var nw = this.textWidth('0') * 5;
+            this.drawText(index, rect.x, rect.y, nw);
+            var text = item ? (this._prop ? item[this._prop] : item) : item;
+            this.drawText(text, rect.x + nw, rect.y, rect.width - nw);
+        };
+
+        Window_SelectListOptions.prototype.cwSelectListOk = function(symbol) {
+            this._parentWindow.setSelectListIndex(this._windowSymbol ,this.index());
+            this.deactivate();
+            this.hideChildWindows();
+        };
+
+        Window_SelectListOptions.prototype.hideChildWindows = function(symbol) {
+            this._parentWindow.activate();
+            this.hide();
+        };
+
+        Window_SelectListOptions.prototype.childWindows = function() {
+            return this._childWindows;
+        };
+
+        Window_SelectListOptions.prototype.hideAll = function() {
+            this.hideChildWindowsAll();
+            this.deactivate();
+            this.hide();
+        };
+
+        Window_SelectListOptions.prototype.hideChildWindowsAll = function(symbol) {
+            var children = this.childWindows();
+            var nextChildren = [];
+            while(!!children) {
+                children.forEach(function(window){
+                    window.hide();
+                    window.deactivate();
+                    if (window._childWindows) {
+                        nextChildren = nextChildren.concat(window._childWindows);
+                    }
+                });
+                children = null;
+                if (nextChildren.length) {
+                    children = nextChildren;
+                    nextChildren = [];
+                }
+            }
+        };
+
 
     };//デザインモード
 
@@ -3668,10 +3848,12 @@ function Scene_OSW() {
     };
 
     Window_Base.prototype.isCssContentsWindow = function() {
+        return Imported.FTKR_CSS && this._customDrawType;
+        /*
         return Imported.FTKR_CSS && !!this._lssStatus &&
           (!isNaN(this._lssStatus.widthRate) || 
             (this._lssStatus.statusList && this._lssStatus.statusList.length) ||
-            this._customDrawType);
+            this._customDrawType);*/
     };
 
     Window_Base.prototype.isCommon = function() {
@@ -4244,10 +4426,61 @@ function Scene_OSW() {
         }
     };
 
-    var _Window_Base_setCssStatus = Window_Base.prototype.setCssStatus;
+    var _CSS_Window_Base_loadProperty = Window_Base.prototype.loadProperty;
+    Window_Base.prototype.loadProperty = function(containerInfo) {
+        _CSS_Window_Base_loadProperty.apply(this, arguments);
+        if (containerInfo._customCssStatus) this._customCssStatus  = copyArray(containerInfo._customCssStatus);
+        if (containerInfo._customCssSpaceIn) this._customCssSpaceIn = containerInfo._customCssSpaceIn;
+        if (containerInfo._customCssText1) this._customCssText1    = containerInfo._customCssText1;
+        if (containerInfo._customCssText2) this._customCssText2    = containerInfo._customCssText2;
+        if (containerInfo._customCssText3) this._customCssText3    = containerInfo._customCssText3;
+        if (containerInfo._customCssSpace) this._customCssSpace    = containerInfo._customCssSpace;
+        if (containerInfo._customCssWidthRate) this._customCssWidthRate = containerInfo._customCssWidthRate;
+        this.setCssStatus();
+        this.refresh();
+    };
+    
+    var _CSS_Window_Base_saveProperty = Window_Base.prototype.saveProperty;
+    Window_Base.prototype.saveProperty = function(containerInfo) {
+        _CSS_Window_Base_saveProperty.apply(this, arguments);
+        containerInfo._customCssStatus   = copyArray(this._customCssStatus);
+        containerInfo._customCssSpaceIn  = this._customCssSpaceIn;
+        containerInfo._customCssText1    = this._customCssText1;
+        containerInfo._customCssText2    = this._customCssText2;
+        containerInfo._customCssText3    = this._customCssText3;
+        containerInfo._customCssSpace    = this._customCssSpace;
+        containerInfo._customCssWidthRate  = this._customCssWidthRate;
+      };
+      
+    var _CSS_Window_Base_initialize      = Window_Base.prototype.initialize;
+    Window_Base.prototype.initialize = function(x, y, width, height) {
+        _CSS_Window_Base_initialize.apply(this, arguments);
+        var lss = this._lssStatus ? this.standardCssStatus() : {};
+        this._customCssStatus    = lss.statusList ? copyArray(lss.statusList) : [];
+        this._customCssSpaceIn   = lss.spaceIn;
+        this._customCssText1     = lss.text1;
+        this._customCssText2     = lss.text2;
+        this._customCssText3     = lss.text3;
+        this._customCssSpace     = lss.space;
+        this._customCssWidthRate = lss.widthRate;
+    };
+
+    Window_Base.prototype.clearCssSpriteAll = function() {
+        $gameParty.allMembers().forEach( function(member, i) {
+            this.clearCssSprite(i);
+        },this);
+    };
+
     Window_Base.prototype.setCssStatus = function() {
-        _Window_Base_setCssStatus.call(this);
         if (this._lssStatus) {
+            this.clearCssSpriteAll();
+            if (this._customCssStatus) this._lssStatus.statusList = copyArray(this._customCssStatus);
+            if (this._customCssSpaceIn) this._lssStatus.spaceIn = this._customCssSpaceIn;
+            if (this._customCssText1) this._lssStatus.text1 = this._customCssText1;
+            if (this._customCssText2) this._lssStatus.text2 = this._customCssText2;
+            if (this._customCssText3) this._lssStatus.text3 = this._customCssText3;
+            if (this._customCssSpace) this._lssStatus.space = this._customCssSpace;
+            if (this._customCssWidthRate) this._lssStatus.widthRate = this._customCssWidthRate;
             if (this._customCssSpace1 !== undefined) {
                 var space = [
                     this._customCssSpace1 || 0,
@@ -5424,6 +5657,7 @@ function Scene_OSW() {
         this._show = false;
         this._referenceIndex = -1;
         this.refresh();
+        console.log(this);
     };
 
     Window_OswCommon.prototype.isOsw = function() {
@@ -5556,6 +5790,7 @@ function Scene_OSW() {
     };
 
     Window_OswSelect.prototype.setItemsList = function() {
+        console.log('setItemList');
         switch (this._customDrawType) {
             case Game_OswData.SELECT_TEXT_LIST:
                 return this._customList;
@@ -5647,22 +5882,26 @@ function Scene_OSW() {
     };
 
     Window_OswSelect.prototype.setActor = function(index) {
-        switch (this._customListType) {
-            case Game_OswData.SELECT_PARTY_ALL:
-                return $gameParty.allMembers()[index];
-            case Game_OswData.SELECT_PARTY_BATTLE:
-                return $gameParty.battleMembers()[index];
-            case Game_OswData.SELECT_PARTY_RESERVE:
-                return $gameParty.reserveMembers()[index];
-            case Game_OswData.SELECT_ACTOR:
+        switch (this._customDrawType) {
+            case Game_OswData.SELECT_PARTY_LIST:
+                switch (this._customListType) {
+                    case Game_OswData.SELECT_PARTY_ALL:
+                        return $gameParty.allMembers()[index];
+                    case Game_OswData.SELECT_PARTY_BATTLE:
+                        return $gameParty.battleMembers()[index];
+                    case Game_OswData.SELECT_PARTY_RESERVE:
+                        return $gameParty.reserveMembers()[index];
+                }
+                break;
+            case Game_OswData.SELECT_ACTOR_LIST:
                 return this.item(index) ? $gameActors.actor(this.item(index).id) : null;
         }
         return this.actor();
     };
 
     Window_OswSelect.prototype.setCssOpacity = function(index) {
-        switch (this._customListType) {
-            case Game_OswData.SELECT_ACTOR:
+        switch (this._customDrawType) {
+            case Game_OswData.SELECT_ACTOR_LIST:
                 return true;
         }
         return false;
