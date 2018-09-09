@@ -5,7 +5,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2018/07/15
 // 最終更新日 : 2018/09/09
-// バージョン : v0.9.12
+// バージョン : v0.9.13
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -23,7 +23,7 @@ FTKR.GDM = FTKR.GDM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v0.9.12 トリアコンタンさんのGUI画面デザインプラグインの機能追加
+ * @plugindesc v0.9.13 トリアコンタンさんのGUI画面デザインプラグインの機能追加
  * @author フトコロ
  *
  * @param autoCreate
@@ -267,6 +267,7 @@ FTKR.GDM = FTKR.GDM || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v0.9.13 - 表示エリアのパラメータ入力方式を、リストから選択する方式に変更。
  * v0.9.12 - 一部コマンドの選択可否処理を見直し。
  *           セレクトウィンドウのアクター設定が正しく反映されない不具合を修正。
  *           リスト形式の編集項目を、ウィンドウを新たに表示し選択する方式に変更。
@@ -837,6 +838,37 @@ function Scene_OSW() {
             {type:'none'},
             {type:'none'},
             {type:'selectwindow', options:{select:['ウィンドウ残す', 'ウィンドウ非表示化']}}
+        ];
+
+        var FTKR_CSS_CODES = [
+            {text:'直接入力'},
+            {text:'名前',               value:'name' },
+            {text:'二つ名',             value:'nickname' },
+            {text:'職業',           value:'class' },
+            {text:'レベル',         value:'level' },
+            {text:'HP',             value:'hp' },
+            {text:'MP',             value:'mp' },
+            {text:'TP',             value:'tp' },
+            {text:'顔画像',             value:'face(%1)' },
+            {text:'歩行キャラ画像',     value:'chara' },
+            {text:'SV戦闘キャラ画像',   value:'sv' },
+            {text:'ステート(横)',       value:'state' },
+            {text:'ステート(縦)',       value:'state2(%1)' },
+            {text:'プロフィール',       value:'profile' },
+            {text:'通常能力値',         value:'param(%1)' },
+            {text:'装備',               value:'equip(%1)' },
+            {text:'装備パラメータ',         value:'eparam(%1)' },
+            {text:'AOP装備パラメータ',      value:'eaop(%1)' },
+            {text:'カスタムパラメータ',     value:'custom(%1)' },
+            {text:'カスタムゲージ',         value:'gauge(%1)' },
+            {text:'アクター別カスタムゲージ', value:'agauge(%1)' },
+            {text:'職業別カスタムゲージ',   value:'cgauge(%1)' },
+            {text:'カスタム画像',           value:'image(%1)' },
+            {text:'メッセージ',             value:'message' },
+            {text:'テキスト表示',           value:'text(%1)' },
+            {text:'JS計算式(数値表示)',     value:'eval(%1)' },
+            {text:'JS計算式(文字列表示)',   value:'streval(%1)' },
+            {text:'横線',                   value:'line' },
         ];
 
         //=============================================================================
@@ -1822,10 +1854,11 @@ function Scene_OSW() {
                     {type: 'window', name: 'パラメータリスト',  symbol: '_customCssStatus', enabled: true, options: {subConfigs: [
                         {type: 'subConfig', name: 'パラメータ編集', symbol: 'editStatus', enabled: true, options: {subConfigs: [
                             {type: 'subConfig', name: 'パラメータ設定', symbol: 'customCssStatus', enabled: 'this.hasCssStatus()', options: {subConfigs: [
-                                {type: 'string', name: 'パラメータ名',   symbol: '_customCssStatus[index].text',  enabled: true, options: {setArray: true}},
-                                {type: 'string', name: 'X座標',         symbol: '_customCssStatus[index].x',     enabled: true, options: {setArray: true}},
-                                {type: 'string', name: 'Y座標',         symbol: '_customCssStatus[index].y',     enabled: true, options: {setArray: true}},
-                                {type: 'string', name: '幅',            symbol: '_customCssStatus[index].width', enabled: true, options: {setArray: true}},
+                                {type: 'selectwindow',  name: 'パラメータ名',   symbol: '_customCssStatus[index].text',  enabled: true, options: {setArray: true, select:FTKR_CSS_CODES, property:'text', value: true}},
+                                {type: 'string',        name: 'パラメータ詳細', symbol: '_customCssStatus[index].value', enabled: true, options: {setArray: true}},
+                                {type: 'string',        name: 'X座標',         symbol: '_customCssStatus[index].x',     enabled: true, options: {setArray: true}},
+                                {type: 'string',        name: 'Y座標',         symbol: '_customCssStatus[index].y',     enabled: true, options: {setArray: true}},
+                                {type: 'string',        name: '幅',            symbol: '_customCssStatus[index].width', enabled: true, options: {setArray: true}},
                                 {type: 'line'},
                                 {type: 'save',   name: '決定', options: {refreshWindow:['_customCssStatus']}},
                             ], width: 360, textWidth: 120, statusWidth: 220}},
@@ -2752,7 +2785,9 @@ function Scene_OSW() {
             var symbol = this.commandSymbol(index);
             var value  = this.getConfigValue(symbol);
             var options = this.commandOptions(index);
-//            console.log('statusText', 'index', index, 'type', type, 'symbol', symbol, 'value', value, 'options', options);
+            if (type.toUpperCase() === 'SELECTWINDOW') {
+                console.log('statusText', 'index', index, 'type', type, 'symbol', symbol, 'value', value, 'options', options);
+            }
             return this.statusTextBase(type, options, value);
         };
 
@@ -2877,9 +2912,16 @@ function Scene_OSW() {
         Window_FtkrOptionsBase.prototype.convertOptionSelectValue = function(options, value) {
             if(isNaN(value)) {
                 options.select.some(function(data, i){
-                    if(data && data == value) {
-                        value = i;
-                        return true;
+                    if(options.value) {
+                        if(data && data.value== value) {
+                            value = i;
+                            return true;
+                        }
+                    } else {
+                        if(data && data == value) {
+                            value = i;
+                            return true;
+                        }
                     }
                 });
             }
@@ -2897,7 +2939,12 @@ function Scene_OSW() {
 
         Window_FtkrOptionsBase.prototype.selectStatusText = function(options, value) {
             value = this.convertOptionSelectValue(options, value);
-            return options.select[value] || 'なし';
+            return (options.value ? options.select[value].text : options.select[value]) || 'なし';
+        };
+        
+        Window_FtkrOptionsBase.prototype.selectStatusTextValue = function(options, value) {
+            value = this.convertOptionSelectValue(options, value);
+            return options.select[value].value || '';
         };
         
         Window_FtkrOptionsBase.prototype.inputSelectValue = function(symbol, options) {
@@ -3072,7 +3119,11 @@ function Scene_OSW() {
                 case 'SELECT':
                 case 'SELECTWINDOW':
                     value = this.convertOptionSelectValue(options, value);
-                    value = options.string ? this.selectStatusText(options, value) : value;
+                    if (options.string) {
+                        value = this.selectStatusText(options, value);
+                    } else if (options.value) {
+                        value = this.selectStatusTextValue(options, value);
+                    }
                     return value === 'なし' ? '' : value;
                 case 'BOOLEAN':
                     return !!value;
@@ -3134,7 +3185,7 @@ function Scene_OSW() {
                     this.showSubConfigs(symbol);
                     break;
                 case 'SELECTWINDOW':
-                    this.showSubConfigs(symbol, options.select);
+                    this.showSubConfigs(symbol, options.select, options);
                     break;
                 case 'DATAWINDOW':
                     this.showSubConfigs(symbol, options.data, options);
@@ -3232,6 +3283,10 @@ function Scene_OSW() {
         };
 
         Window_FtkrOptionsBase.prototype.setSelectListIndex = function(symbol, index) {
+            if (!index) {
+                index = this.getConfigValue(symbol);
+                index = getPromptResult(index);
+            }
             this.setConfigValue(symbol, index);
             this.refresh();
         };
@@ -3718,11 +3773,12 @@ function Scene_OSW() {
             if (options) {
                 this._prop = options.property;
                 this._enabled = options.enabled;
+                this._value = options.value;
             } else {
                 this._prop = null;
                 this._enabled = null;
+                this._value = false;
             }
-            console.log(this._list, this._prop, this._enabled);
             this.refresh();
         };
 
@@ -3770,7 +3826,8 @@ function Scene_OSW() {
         };
 
         Window_SelectListOptions.prototype.cwSelectListOk = function(symbol) {
-            this._parentWindow.setSelectListIndex(this._windowSymbol ,this.index());
+            var value = this._value ? this.lists()[this.index()].value : this.index();
+            this._parentWindow.setSelectListIndex(this._windowSymbol, value);
             this.deactivate();
             this.hideChildWindows();
         };
