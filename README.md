@@ -300,11 +300,14 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_ActionGauge](FTKR_ActionGauge.js) | なし | [v0.7.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ActionGauge.js) | 2017/04/21 | アクションゲージ |
 | [FTKR_addon_TMShooting](FTKR_addon_TMShooting.js) | なし | [v0.2.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_addon_TMShooting.js) | 2018/05/09 | tomoakyさんのシューティングプラグインの機能拡張 |
-| [FTKR_GDM_WindowEditor](FTKR_GDM_WindowEditor.js) | [仮版](FTKR_GDM_WindowEditor.ja.md) | [v0.9.13](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_GDM_WindowEditor.js) | 2018/09/09 | トリアコンタンさんのGUI画面デザインプラグイン(GraphicalDesignMode.js)の機能拡張 |
+| [FTKR_GDM_WindowEditor](FTKR_GDM_WindowEditor.js) | [仮版](FTKR_GDM_WindowEditor.ja.md) | [v0.9.14](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_GDM_WindowEditor.js) | 2018/09/10 | トリアコンタンさんのGUI画面デザインプラグイン(GraphicalDesignMode.js)の機能拡張 |
 
 # 更新情報
 
 2018/09の更新情報
+
+### 2018/09/10
+* [FTKR_GDM_WindowEditor](FTKR_GDM_WindowEditor.ja.md) v0.9.14
 
 ### 2018/09/09
 * [FTKR_GDM_WindowEditor](FTKR_GDM_WindowEditor.ja.md) v0.9.12 v0.9.13

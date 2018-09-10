@@ -4,8 +4,8 @@
 // プラグインNo : 86
 // 作成者     : フトコロ
 // 作成日     : 2018/07/15
-// 最終更新日 : 2018/09/09
-// バージョン : v0.9.13
+// 最終更新日 : 2018/09/10
+// バージョン : v0.9.14
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -23,7 +23,7 @@ FTKR.GDM = FTKR.GDM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v0.9.13 トリアコンタンさんのGUI画面デザインプラグインの機能追加
+ * @plugindesc v0.9.14 トリアコンタンさんのGUI画面デザインプラグインの機能追加
  * @author フトコロ
  *
  * @param autoCreate
@@ -267,6 +267,8 @@ FTKR.GDM = FTKR.GDM || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v0.9.14 - スキル画面のスキルタイプウィンドウが正しく表示できない不具合を修正。
+ *           FTKR_ItemSubCommand.jsとの競合回避
  * v0.9.13 - 表示エリアのパラメータ入力方式を、リストから選択する方式に変更。
  * v0.9.12 - 一部コマンドの選択可否処理を見直し。
  *           セレクトウィンドウのアクター設定が正しく反映されない不具合を修正。
@@ -1093,6 +1095,7 @@ function Scene_OSW() {
             this._touchWindow.releaseByCmdSet();
             this.reserveActiveWindow();
             this.setConfigContents_command(command);
+            console.log(command);
             this._cmdConfigWindow.activateWindow();
             this.clearTouchedParam();
             return true;
@@ -1230,12 +1233,13 @@ function Scene_OSW() {
         //マウスポインタと重なっているウィンドウを取得
         Scene_Base.prototype.getWindowOnMouse = function() {
             var pointWindow = null;
+            console.log('----------------------------------------')
             console.log('getWindowOnMouse', 'search window');
             this.allWindowChildren().forEach( function(window){
-                console.log(window.name, window.visible, window.isOpen());
+//                console.log(window.name, window.visible, window.isOpen());
                 if (window.visible && window.isOpen() && window.isTouchedInsideFrame()) {
                     pointWindow = window;
-                    console.log('get window');
+//                    console.log('get window');
                 }
             },this);
             console.log('return');
@@ -1280,11 +1284,14 @@ function Scene_OSW() {
                 if (!this._touchWindow.isCommand()) return this._touchWindowIndex;
                 var list = this._touchWindow._list[this._touchWindowIndex];
                 this._touchWindow._customList.some(function(cmd, i){
-                    if(list && list.symbol === cmd.symbol) {
+                    if(list && list.symbol === cmd.symbol && (list.ext !== undefined && list.ext == cmd.ext)) {
                         touchIndex = i;
                         return true;
                     }
                 },this);
+            }
+            if(!!this._touchWindow) {
+                console.log('windowname', this._touchWindow.name, 'touchWindowIndex', this._touchWindowIndex ,'listIndex', touchIndex, );
             }
             return touchIndex;
         };
@@ -1617,8 +1624,8 @@ function Scene_OSW() {
             this.createFtkrCommandOptions();
             this.createFtkrSelectOptions();
             this.createFtkrCommonOptions();
-            this.createConfTitleWindow();
-            this.createConfWindow();
+            this.createOswConfTitleWindow();
+            this.createOswConfWindow();
         };
 
         Scene_Base.prototype.configLayer = function() {
@@ -2353,23 +2360,23 @@ function Scene_OSW() {
         //------------------------------------------------------------------------
         //ウィンドウ削除時の確認ウィンドウを設定
         //------------------------------------------------------------------------
-        Scene_Base.prototype.createConfTitleWindow = function() {
+        Scene_Base.prototype.createOswConfTitleWindow = function() {
             var layer = this.configLayer();
             this._stsConfTitleWindow = new Window_OSWConfTitle();
             layer.addChild(this._stsConfTitleWindow);
             this._stsConfTitleWindow.hide();
         };
 
-        Scene_Base.prototype.createConfWindow = function() {
+        Scene_Base.prototype.createOswConfWindow = function() {
             this._stsConfWindow = new Window_OSWConf();
             var layer = this.configLayer();
             var window = this._stsConfWindow;
-            window.setHandler('delete', this.onConfirmationOk.bind(this));
-            window.setHandler('cancel', this.onConfirmationCancel.bind(this));
+            window.setHandler('delete', this.onOswConfirmationOk.bind(this));
+            window.setHandler('cancel', this.onOswConfirmationCancel.bind(this));
             layer.addChild(window);
         };
 
-        Scene_Base.prototype.onConfirmationOk = function() {
+        Scene_Base.prototype.onOswConfirmationOk = function() {
             this.deleteTouchWindow();
             this._touchWindow = null;
             this._stsConfTitleWindow.hide();
@@ -2409,7 +2416,7 @@ function Scene_OSW() {
             this.saveOswWindowList();
         };
 
-        Scene_Base.prototype.onConfirmationCancel = function() {
+        Scene_Base.prototype.onOswConfirmationCancel = function() {
             this._stsConfTitleWindow.hide();
             this._stsConfWindow.hide();
             this._stsConfWindow.deactivate();
@@ -2785,9 +2792,6 @@ function Scene_OSW() {
             var symbol = this.commandSymbol(index);
             var value  = this.getConfigValue(symbol);
             var options = this.commandOptions(index);
-            if (type.toUpperCase() === 'SELECTWINDOW') {
-                console.log('statusText', 'index', index, 'type', type, 'symbol', symbol, 'value', value, 'options', options);
-            }
             return this.statusTextBase(type, options, value);
         };
 
@@ -3316,7 +3320,6 @@ function Scene_OSW() {
             var childConfigs = [];
             while(!!configs) {
                 configs.forEach(function(config){
-                    console.log(config);
                     if (!!config.parent) parent = config.parent;
                     var childWindow = this.createChildOptionWindow(this, parent, config, width, textWidth, statusWidth);
                     if (!!childWindow && !!config.options.subConfigs) {
@@ -3802,7 +3805,7 @@ function Scene_OSW() {
             this._windowLayer = layer;
         };
 
-        Window_Selectable.prototype.maxItems = function() {
+        Window_SelectListOptions.prototype.maxItems = function() {
             return this.lists().length;
         };
 
@@ -4162,11 +4165,12 @@ function Scene_OSW() {
     Window_Command.prototype.initialize = function(x, y, width, height) {
         _Window_Command_initialize.apply(this, arguments);
         this._customTextAlign = convertAlign(this.itemTextAlign());
+        /*
         if (!this._customList.length) {
           this._list.forEach(function(list, i){
               this._customList.push({name: list.name, symbol: list.symbol, enabled: true, ext: null, index: i, visible:true});
           },this);
-        }
+        }*/
     };
 
     //=============================================================================
@@ -4627,6 +4631,28 @@ function Scene_OSW() {
     };
 
     Window_Command.prototype.makeCustomCommandList = function() {
+        if (!this._customList) this._customList = [];
+        if (!this._customList.length) {
+            this._list.forEach(function(cmd, i){
+                cmd.visible = true;
+                cmd.index = i;
+                this._customList.push(cmd);
+            },this);
+        }
+        this._customList.forEach(function(list){
+            if (list.symbol && list.method) {
+                var method = eval(list.method);
+                this.setHandler(list.symbol, method);
+            }
+            return true;
+        },this);
+        this._list = this._customList.filter(function(list){
+            return list.visible;
+        });
+        this._list.sort(function(a, b){
+            return a.index - b.index;
+        });
+        /*
         if (this._customList) {
             this._list.forEach(function(mlist){
                 var result = this._customList.some(function(list){
@@ -4652,6 +4678,7 @@ function Scene_OSW() {
                 return a.index - b.index;
             });
         }
+        */
     };
 
     Window_Command.prototype.refresh = function() {
