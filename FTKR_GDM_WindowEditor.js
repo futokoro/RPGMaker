@@ -4,8 +4,8 @@
 // プラグインNo : 86
 // 作成者     : フトコロ
 // 作成日     : 2018/07/15
-// 最終更新日 : 2018/09/10
-// バージョン : v0.9.14
+// 最終更新日 : 2018/09/11
+// バージョン : v0.9.15
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -23,7 +23,7 @@ FTKR.GDM = FTKR.GDM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v0.9.14 トリアコンタンさんのGUI画面デザインプラグインの機能追加
+ * @plugindesc v0.9.15 トリアコンタンさんのGUI画面デザインプラグインの機能追加
  * @author フトコロ
  *
  * @param autoCreate
@@ -237,13 +237,12 @@ FTKR.GDM = FTKR.GDM || {};
  * 1.「プラグインマネージャー(プラグイン管理)」に、本プラグインを追加して
  *    ください。
  * 
- * 2. このプラグインの動作には、GraphicalDesignMode.jsプラグインが必要です。
+ * 2. このプラグインには、GraphicalDesignMode.jsプラグインが必要です。
  *    このプラグインは、GraphicalDesignMode.jsの下に配置してください。
  * 
- * 3. FTKR_CustomSimpleActorStatusプラグインと組み合わせる場合は
- *    このプラグインをFTKR_CustomSimpleActorStatusプラグインよりも下に
- *    配置してください。
- *    なお、FTKR_CustomSimpleActorStatus v3.0.0 以降が必要です。
+ * 3. このプラグインには、 FTKR_CustomSimpleActorStatus プラグインが必要です。
+ *    このプラグインは、FTKR_CustomSimpleActorStatusの下に配置してください。
+ *    なお、FTKR_CustomSimpleActorStatus v3.2.0 以降が必要です。
  * 
  * 4. このプラグインは、FTKR_OriginalSceneWindowプラグインと組み合わせて
  *    使用できません。
@@ -267,6 +266,8 @@ FTKR.GDM = FTKR.GDM || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v0.9.15 - カーソル高さおよび、表示列数を編集しても正しく反映されない不具合を修正。
+ *           一部の処理を FTKR_CustomSimpleActorStatus に移動。
  * v0.9.14 - スキル画面のスキルタイプウィンドウが正しく表示できない不具合を修正。
  *           FTKR_ItemSubCommand.jsとの競合回避
  * v0.9.13 - 表示エリアのパラメータ入力方式を、リストから選択する方式に変更。
@@ -437,6 +438,7 @@ function Scene_OSW() {
     var $configSelectLists = {};
 
     var SCENE_LISTS = [
+        '直接入力',
         'Scene_Item',
         'Scene_Skill',
         'Scene_Equip',
@@ -716,7 +718,7 @@ function Scene_OSW() {
             case 1://シーン終了
                 return method;
             case 2://シーン変更
-                var detail = SCENE_LISTS[methodDetail];
+                var detail = isNaN(methodDetail) ? methodDetail : SCENE_LISTS[methodDetail];
                 break;
             case 3://コモンイベント
                 var detail = methodDetail;
@@ -828,7 +830,7 @@ function Scene_OSW() {
             return [
                 {type:'none'},
                 {type:'none'},
-                {type:'selectwindow', options:{select:SCENE_LISTS}},
+                {type:'selectwindow', options:{select:SCENE_LISTS, string: true, prompt: true}},
                 {type:'datawindow',   options:{data:$dataCommonEvents, property:'name'}},
                 {type:'datawindow',   options:{data:list, property:'name', enabled:'data.isList()', string:true}}
             ];
@@ -872,6 +874,48 @@ function Scene_OSW() {
             {text:'JS計算式(文字列表示)',   value:'streval(%1)' },
             {text:'横線',                   value:'line' },
         ];
+
+        TextManager.paramNames = function() {
+            return $dataSystem ? $dataSystem.terms.params.slice(0, 8) : [];
+        };
+
+        TextManager.equipTypes = function() {
+            return $dataSystem ? $dataSystem.equipTypes.slice(1, $dataSystem.equipTypes.length) : [];
+        };
+
+
+        var FTKR_CSS_CODES_VALUE = function() {
+            return [
+                {type:'none'},
+                {type:'none'},
+                {type:'none'},
+                {type:'none'},
+                {type:'none'},
+                {type:'none'},
+                {type:'none'},
+                {type:'none'},
+                {type:'string',         options:{}},//face(%1)
+                {type:'none'},
+                {type:'none'},
+                {type:'none'},
+                {type:'string',         options:{}},//state2(%1)
+                {type:'none'},
+                {type:'selectwindow',   options:{select:TextManager.paramNames()}},//param(%1)
+                {type:'selectwindow',   options:{select:TextManager.equipTypes()}},//equip(%1)
+                {type:'selectwindow',   options:{select:TextManager.paramNames()}},//eparam(%1)
+                {type:'string',         options:{}},//eaop(%1)
+                {type:'datawindow',     options:{data:FTKR.CSS.cssStatus.customs, property:'name'}},//custom(%1)
+                {type:'datawindow',     options:{data:FTKR.CSS.cssStatus.gauges, property:'name'}},//gauge(%1)
+                {type:'string',         options:{}},//agauge(%1)
+                {type:'string',         options:{}},//cgauge(%1)
+                {type:'string',         options:{}},//image(%1)
+                {type:'none'},
+                {type:'string',         options:{}},//text()
+                {type:'string',         options:{}},//eval()
+                {type:'string',         options:{}},//streval()
+                {type:'none'}
+            ];
+        };
 
         //=============================================================================
         //シーン開始時にウィンドウデータを自動保存
@@ -1861,8 +1905,9 @@ function Scene_OSW() {
                     {type: 'window', name: 'パラメータリスト',  symbol: '_customCssStatus', enabled: true, options: {subConfigs: [
                         {type: 'subConfig', name: 'パラメータ編集', symbol: 'editStatus', enabled: true, options: {subConfigs: [
                             {type: 'subConfig', name: 'パラメータ設定', symbol: 'customCssStatus', enabled: 'this.hasCssStatus()', options: {subConfigs: [
-                                {type: 'selectwindow',  name: 'パラメータ名',   symbol: '_customCssStatus[index].text',  enabled: true, options: {setArray: true, select:FTKR_CSS_CODES, property:'text', value: true}},
-                                {type: 'string',        name: 'パラメータ詳細', symbol: '_customCssStatus[index].value', enabled: true, options: {setArray: true}},
+                                {type: 'selectwindow',  name: 'パラメータ名',   symbol: '_customCssStatus[index].text',  enabled: true, options: {setArray: true, select:FTKR_CSS_CODES, property:'text', value: true, prompt: true}},
+//                                {type: 'string',        name: 'パラメータ詳細', symbol: '_customCssStatus[index].value', enabled: true, options: {setArray: true}},
+                                {type: 'refer',         name: 'パラメータ詳細', symbol: '_customCssStatus[index].value', enabled: true, options: {refSymbol:['_customCssStatus[index].text'], refIndex: FTKR_CSS_CODES, property: 'value', refData:FTKR_CSS_CODES_VALUE()}},
                                 {type: 'string',        name: 'X座標',         symbol: '_customCssStatus[index].x',     enabled: true, options: {setArray: true}},
                                 {type: 'string',        name: 'Y座標',         symbol: '_customCssStatus[index].y',     enabled: true, options: {setArray: true}},
                                 {type: 'string',        name: '幅',            symbol: '_customCssStatus[index].width', enabled: true, options: {setArray: true}},
@@ -3017,6 +3062,19 @@ function Scene_OSW() {
             var refValues = options.refSymbol.map(function(symbol){
                 return this.getConfigValue(symbol);
             },this);
+            if (options.refIndex) {
+                refValues = refValues.map(function(value){
+                    var index = -1;
+                    var prop = options.property;
+                    options.refIndex.some(function(data, i) {
+                        if ((prop ? data[prop] : data) == value) {
+                            index = i;
+                            return true;
+                        }
+                    },this);
+                    return index >= 0 ? index : value;
+                },this);
+            }
             var config = options.refData;
             refValues.forEach(function(value, i){
                 if (value !== undefined && config) {
@@ -3286,8 +3344,8 @@ function Scene_OSW() {
             return this._parentWindow && this._parentWindow.item();
         };
 
-        Window_FtkrOptionsBase.prototype.setSelectListIndex = function(symbol, index) {
-            if (!index) {
+        Window_FtkrOptionsBase.prototype.setSelectListIndex = function(symbol, index, prompt) {
+            if (!index && prompt) {
                 index = this.getConfigValue(symbol);
                 index = getPromptResult(index);
             }
@@ -3777,10 +3835,12 @@ function Scene_OSW() {
                 this._prop = options.property;
                 this._enabled = options.enabled;
                 this._value = options.value;
+                this._prompt = options.prompt;
             } else {
                 this._prop = null;
                 this._enabled = null;
                 this._value = false;
+                this._prompt = false;
             }
             this.refresh();
         };
@@ -3830,7 +3890,7 @@ function Scene_OSW() {
 
         Window_SelectListOptions.prototype.cwSelectListOk = function(symbol) {
             var value = this._value ? this.lists()[this.index()].value : this.index();
-            this._parentWindow.setSelectListIndex(this._windowSymbol, value);
+            this._parentWindow.setSelectListIndex(this._windowSymbol, value, this._prompt);
             this.deactivate();
             this.hideChildWindows();
         };
@@ -4207,107 +4267,20 @@ function Scene_OSW() {
     //------------------------------------------------------------------------
     // _customSpacing
     //------------------------------------------------------------------------
-    Window_Base.prototype.spacing = function() {
-        return 0;
-    };
-
-    var _CSS_Window_Selectable_spacing = Window_Selectable.prototype.spacing;
-    Window_Selectable.prototype.spacing = function() {
-        return this._customSpacing >= 0 ? this._customSpacing : _CSS_Window_Selectable_spacing.call(this);
-    };
-
-    Window_Selectable.prototype.customSpacing = function() {
-        return this._customSpacing >= 0 ? this._customSpacing : this.spacing();
+    Window_Base.prototype.setSpacing = function(value){
+        this._customSpacing = value;
     };
 
     //------------------------------------------------------------------------
     // _customMaxCols
     //------------------------------------------------------------------------
-    var _CSS_Window_Selectable_maxCols = Window_Selectable.prototype.maxCols;
-    Window_Selectable.prototype.maxCols = function() {
-        return this._customMaxCols ? this._customMaxCols : _CSS_Window_Selectable_maxCols.call(this);
-    };
-
     Window_Base.prototype.setMaxCols = function(value) {
         this._customMaxCols = value;
     };
 
-    Window_Selectable.prototype.customMaxCols = function() {
-        return this._customMaxCols ? this._customMaxCols : this.maxCols();
-    };
-
-    //書き換え
-    Window_Selectable.prototype.maxRows = function() {
-        return Math.max(Math.ceil(this.maxItems() / this.customMaxCols()), 1);
-    };
-    
-    //書き換え
-    Window_Selectable.prototype.row = function() {
-        return Math.floor(this.index() / this.customMaxCols());
-    };
-    
-    //書き換え
-    Window_Selectable.prototype.maxPageItems = function() {
-        return this.maxPageRows() * this.customMaxCols();
-    };
-    
-    //書き換え
-    Window_Selectable.prototype.topIndex = function() {
-        return this.topRow() * this.customMaxCols();
-    };
-    
-    //書き換え
-    Window_Selectable.prototype.cursorDown = function(wrap) {
-        var index = this.index();
-        var maxItems = this.maxItems();
-        var maxCols = this.customMaxCols();
-        if (index < maxItems - maxCols || (wrap && maxCols === 1)) {
-            this.select((index + maxCols) % maxItems);
-        }
-    };
-    
-    //書き換え
-    Window_Selectable.prototype.cursorUp = function(wrap) {
-        var index = this.index();
-        var maxItems = this.maxItems();
-        var maxCols = this.customMaxCols();
-        if (index >= maxCols || (wrap && maxCols === 1)) {
-            this.select((index - maxCols + maxItems) % maxItems);
-        }
-    };
-    
-    //書き換え
-    Window_Selectable.prototype.cursorRight = function(wrap) {
-        var index = this.index();
-        var maxItems = this.maxItems();
-        var maxCols = this.customMaxCols();
-        if (maxCols >= 2 && (index < maxItems - 1 || (wrap && this.isHorizontal()))) {
-            this.select((index + 1) % maxItems);
-        }
-    };
-    
-    //書き換え
-    Window_Selectable.prototype.cursorLeft = function(wrap) {
-        var index = this.index();
-        var maxItems = this.maxItems();
-        var maxCols = this.customMaxCols();
-        if (maxCols >= 2 && (index > 0 || (wrap && this.isHorizontal()))) {
-            this.select((index - 1 + maxItems) % maxItems);
-        }
-    };
-    
-    //書き換え
-    Window_Command.prototype.numVisibleRows = function() {
-        return Math.ceil(this.maxItems() / this.customMaxCols());
-    };
-    
     //------------------------------------------------------------------------
     // _customCursorHeight
     //------------------------------------------------------------------------
-    Window_Selectable.prototype.cursorHeight = function() {
-        return this._customCursorHeight;
-    };
-
     Window_Base.prototype.setCursorHeight = function(value) {
         this._customCursorHeight = value;
     };
@@ -4317,69 +4290,6 @@ function Scene_OSW() {
     //------------------------------------------------------------------------
     Window_Base.prototype.setHorSpacing = function(value){
         this._customHorSpacing = value;
-    };
-
-    Window_Selectable.prototype.itemHeightSpace = function() {
-        return this._customHorSpacing;
-    };
-
-    Window_Selectable.prototype.unitHeight = function() {
-        return this.itemHeight() + this.itemHeightSpace();
-    };
-
-    Window_Selectable.prototype.unitWidth = function() {
-        return this.itemWidth() + this.customSpacing();
-    };
-
-    //書き換え
-    Window_Selectable.prototype.itemWidth = function() {
-        return Math.floor((this.width - this.padding * 2 +
-                           this.customSpacing()) / this.customMaxCols() - this.customSpacing());
-    };
-    
-    var _CSS_Window_Selectable_maxPageRows = Window_Selectable.prototype.maxPageRows;
-    Window_Selectable.prototype.maxPageRows = function() {
-        if (this.itemHeightSpace()) {
-            var pageHeight = this.height - this.padding * 2;
-            return Math.floor(pageHeight / this.unitHeight());
-        } else {
-            return _CSS_Window_Selectable_maxPageRows.call(this);
-        }
-    };
-
-    var _CSS_Window_Selectable_topRow = Window_Selectable.prototype.topRow;
-    Window_Selectable.prototype.topRow = function() {
-        return this.itemHeightSpace() ? Math.floor(this._scrollY / this.unitHeight()) :
-            _CSS_Window_Selectable_topRow.call(this);
-    };
-
-    var _CSS_Window_Selectable_setTopRow = Window_Selectable.prototype.setTopRow;
-    Window_Selectable.prototype.setTopRow = function(row) {
-        if (this.itemHeightSpace()) {
-            var scrollY = row.clamp(0, this.maxTopRow()) * this.unitHeight();
-            if (this._scrollY !== scrollY) {
-                this._scrollY = scrollY;
-                this.refresh();
-                this.updateCursor();
-            }
-        } else {
-            return _CSS_Window_Selectable_setTopRow.call(this, row);
-        }
-    };
-
-    var _CSS_Window_Selectable_itemRect = Window_Selectable.prototype.itemRect;
-    Window_Selectable.prototype.itemRect = function(index) {
-        if (this.itemHeightSpace()) {
-            var rect = new Rectangle();
-            var maxCols = this.customMaxCols();
-            rect.width = this.itemWidth();
-            rect.height = this.itemHeight();
-            rect.x = index % maxCols * this.unitWidth() - this._scrollX;
-            rect.y = Math.floor(index / maxCols) * this.unitHeight() - this._scrollY;
-            return rect;
-        } else {
-            return _CSS_Window_Selectable_itemRect.call(this, index);
-        }
     };
 
     //------------------------------------------------------------------------
@@ -4393,15 +4303,6 @@ function Scene_OSW() {
     Window_Base.prototype.hideFrame = function() {
         this._customHideFrame = true;
         this._refreshFrame();
-    };
-
-    Window_Base.prototype._refreshFrame = function() {
-        Window.prototype._refreshFrame.call(this);
-        if (this._customHideFrame) {
-            this._windowFrameSprite.alpha = 0;//フレームだけ消す
-        } else {
-            this._windowFrameSprite.alpha = 1;
-        }
     };
 
     //------------------------------------------------------------------------

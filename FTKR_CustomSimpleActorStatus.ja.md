@@ -763,7 +763,8 @@ a.hit.parcent()
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver3.1.1](FTKR_CustomSimpleActorStatus.js) | 2018/09/09| GraphicalDesignMode.js 用の記述を削除 |
+| [ver3.2.0](FTKR_CustomSimpleActorStatus.js) | 2018/09/11| FTKR_GDM_WindowEditor.js 用の記述を修正 |
+| ver3.1.1 | 2018/09/09| GraphicalDesignMode.js 用の記述を削除 |
 | ver3.1.0 | 2018/08/30| 拡張プラグインのプラグインパラメータで表示するステータスをリストで選択できる機能を追加 |
 | ver3.0.2 | 2018/08/25| 拡張プラグインで、余白と背景透明度を 0 に設定した場合に、設定が無効になる不具合を修正 |
 | ver3.0.1 | 2018/08/20| 拡張プラグインでステータスウィンドウの設定を有効にした場合にエラーになる不具合を修正 |

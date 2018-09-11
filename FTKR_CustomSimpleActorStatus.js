@@ -4,8 +4,8 @@
 // プラグインNo : 9
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2018/09/09
-// バージョン : v3.1.1
+// 最終更新日 : 2018/09/11
+// バージョン : v3.2.0
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v3.1.1 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v3.2.0 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -987,6 +987,8 @@ FTKR.CSS = FTKR.CSS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v3.2.0 - 2018/09/11 : FTKR_GDM_WindowEditor.js 用の記述を修正。
  * 
  * v3.1.1 - 2018/09/09 : GraphicalDesignMode.js 用の記述を削除
  * 
@@ -2665,6 +2667,20 @@ FTKR.CSS = FTKR.CSS || {};
         return {};
     };
 
+    Window_Selectable.prototype.initCssLayout = function() {
+        Window_Base.prototype.initCssLayout.call(this);
+        var lss = this.standardCssLayout();
+        if (lss && lss.enabled) {
+            this._customMaxCols = lss.maxCols;
+            this._customCursorHeight = lss.cursorHeight;
+            this._customHorSpacing = lss.hspace;
+        }
+    };
+
+    //=============================================================================
+    // customデータの参照
+    //=============================================================================
+
     var _CSS_Window_Base_standardFontSize = Window_Base.prototype.standardFontSize;
     Window_Base.prototype.standardFontSize = function() {
         return this._customFontSize ? this._customFontSize : _CSS_Window_Base_standardFontSize.call(this);
@@ -2685,50 +2701,157 @@ FTKR.CSS = FTKR.CSS || {};
         return this._customBackOpacity >= 0 ? this._customBackOpacity : _CSS_Window_Base_standardBackOpacity.call(this);
     };
 
-    //書き換え
+    //------------------------------------------------------------------------
+    // _customHideFrame
+    //------------------------------------------------------------------------
     //ウィンドウ枠の表示
     Window_Base.prototype._refreshFrame = function() {
-        if (!this._customHideFrame) Window.prototype._refreshFrame.call(this);
-    };
-    
-    //=============================================================================
-    // Window_Selectableの修正
-    //=============================================================================
-
-    Window_Selectable.prototype.initCssLayout = function() {
-        Window_Base.prototype.initCssLayout.call(this);
-        var lss = this.standardCssLayout();
-        if (lss && lss.enabled) {
-            this._customMaxCols = lss.maxCols;
-            this._customCursorHeight = lss.cursorHeight;
-            this._customHorSpacing = lss.hspace;
+        Window.prototype._refreshFrame.call(this);
+        if (this._customHideFrame) {
+            this._windowFrameSprite.alpha = 0;//フレームだけ消す
+        } else {
+            this._windowFrameSprite.alpha = 1;
         }
     };
+
+    //------------------------------------------------------------------------
+    // _customSpacing
+    //------------------------------------------------------------------------
+    Window_Base.prototype.spacing = function() {
+        return 0;
+    };
+
+    var _CSS_Window_Selectable_spacing = Window_Selectable.prototype.spacing;
+    Window_Selectable.prototype.spacing = function() {
+        return this._customSpacing !== undefined ? this._customSpacing : _CSS_Window_Selectable_spacing.call(this);
+    };
+
+    Window_Selectable.prototype.customSpacing = function() {
+        return this._customSpacing !== undefined ? this._customSpacing : this.spacing();
+    };
+
+    //------------------------------------------------------------------------
+    // _customMaxCols
+    //------------------------------------------------------------------------
 
     var _CSS_Window_Selectable_maxCols = Window_Selectable.prototype.maxCols;
     Window_Selectable.prototype.maxCols = function() {
         return this._customMaxCols ? this._customMaxCols : _CSS_Window_Selectable_maxCols.call(this);
     };
 
+    Window_Selectable.prototype.customMaxCols = function() {
+        return this._customMaxCols ? this._customMaxCols : this.maxCols();
+    };
+
+    //------------------------------------------------------------------------
+    // _customCursorHeight
+    //------------------------------------------------------------------------
+
     Window_Selectable.prototype.cursorHeight = function() {
         return this._customCursorHeight;
     };
+
+    //------------------------------------------------------------------------
+    // _customHorSpacing
+    //------------------------------------------------------------------------
 
     Window_Selectable.prototype.itemHeightSpace = function() {
         return this._customHorSpacing;
     };
     
+    //=============================================================================
+    // customデータの反映
+    //=============================================================================
+
+    //書き換え
+    Window_Selectable.prototype.maxRows = function() {
+        return Math.max(Math.ceil(this.maxItems() / this.customMaxCols()), 1);
+    };
+    
+    //書き換え
+    Window_Selectable.prototype.row = function() {
+        return Math.floor(this.index() / this.customMaxCols());
+    };
+    
+    //書き換え
+    Window_Selectable.prototype.maxPageItems = function() {
+        return this.maxPageRows() * this.customMaxCols();
+    };
+    
+    //書き換え
+    Window_Selectable.prototype.topIndex = function() {
+        return this.topRow() * this.customMaxCols();
+    };
+    
+    //書き換え
+    Window_Selectable.prototype.cursorDown = function(wrap) {
+        var index = this.index();
+        var maxItems = this.maxItems();
+        var maxCols = this.customMaxCols();
+        if (index < maxItems - maxCols || (wrap && maxCols === 1)) {
+            this.select((index + maxCols) % maxItems);
+        }
+    };
+    
+    //書き換え
+    Window_Selectable.prototype.cursorUp = function(wrap) {
+        var index = this.index();
+        var maxItems = this.maxItems();
+        var maxCols = this.customMaxCols();
+        if (index >= maxCols || (wrap && maxCols === 1)) {
+            this.select((index - maxCols + maxItems) % maxItems);
+        }
+    };
+    
+    //書き換え
+    Window_Selectable.prototype.cursorRight = function(wrap) {
+        var index = this.index();
+        var maxItems = this.maxItems();
+        var maxCols = this.customMaxCols();
+        if (maxCols >= 2 && (index < maxItems - 1 || (wrap && this.isHorizontal()))) {
+            this.select((index + 1) % maxItems);
+        }
+    };
+    
+    //書き換え
+    Window_Selectable.prototype.cursorLeft = function(wrap) {
+        var index = this.index();
+        var maxItems = this.maxItems();
+        var maxCols = this.customMaxCols();
+        if (maxCols >= 2 && (index > 0 || (wrap && this.isHorizontal()))) {
+            this.select((index - 1 + maxItems) % maxItems);
+        }
+    };
+    
+    //書き換え
+    Window_Command.prototype.numVisibleRows = function() {
+        return Math.ceil(this.maxItems() / this.customMaxCols());
+    };
+        
+    //書き換え
+    Window_Selectable.prototype.itemWidth = function() {
+        return Math.floor((this.width - this.padding * 2 +
+                           this.customSpacing()) / this.customMaxCols() - this.customSpacing());
+    };
+    
+    var _Window_Selectable_itemHeight = Window_Selectable.prototype.itemHeight;
+    Window_Selectable.prototype.itemHeight = function() {
+        return this.cursorHeight() ? 
+            this.lineHeight() * this.cursorHeight() :
+            _Window_Selectable_itemHeight.call(this);
+    };
+
     Window_Selectable.prototype.unitHeight = function() {
         return this.itemHeight() + this.itemHeightSpace();
     };
 
     Window_Selectable.prototype.unitWidth = function() {
-        return this.itemWidth() + this.spacing();
+        return this.itemWidth() + this.customSpacing();
     };
 
     var _CSS_Window_Selectable_maxPageRows = Window_Selectable.prototype.maxPageRows;
     Window_Selectable.prototype.maxPageRows = function() {
-        if (this.itemHeightSpace()) {
+        if (this.itemHeightSpace() !== undefined) {
             var pageHeight = this.height - this.padding * 2;
             return Math.floor(pageHeight / this.unitHeight());
         } else {
@@ -2738,13 +2861,13 @@ FTKR.CSS = FTKR.CSS || {};
 
     var _CSS_Window_Selectable_topRow = Window_Selectable.prototype.topRow;
     Window_Selectable.prototype.topRow = function() {
-        return this.itemHeightSpace() ? Math.floor(this._scrollY / this.unitHeight()) :
+        return this.itemHeightSpace() !== undefined ? Math.floor(this._scrollY / this.unitHeight()) :
             _CSS_Window_Selectable_topRow.call(this);
     };
 
     var _CSS_Window_Selectable_setTopRow = Window_Selectable.prototype.setTopRow;
     Window_Selectable.prototype.setTopRow = function(row) {
-        if (this.itemHeightSpace()) {
+        if (this.itemHeightSpace() !== undefined) {
             var scrollY = row.clamp(0, this.maxTopRow()) * this.unitHeight();
             if (this._scrollY !== scrollY) {
                 this._scrollY = scrollY;
@@ -2758,9 +2881,9 @@ FTKR.CSS = FTKR.CSS || {};
 
     var _CSS_Window_Selectable_itemRect = Window_Selectable.prototype.itemRect;
     Window_Selectable.prototype.itemRect = function(index) {
-        if (this.itemHeightSpace()) {
+        if (this.itemHeightSpace() !== undefined) {
             var rect = new Rectangle();
-            var maxCols = this.maxCols();
+            var maxCols = this.customMaxCols();
             rect.width = this.itemWidth();
             rect.height = this.itemHeight();
             rect.x = index % maxCols * this.unitWidth() - this._scrollX;
