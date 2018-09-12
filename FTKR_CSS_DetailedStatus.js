@@ -4,8 +4,8 @@
 // プラグインNo : 27
 // 作成者     : フトコロ
 // 作成日     : 2017/04/21
-// 最終更新日 : 2018/08/30
-// バージョン : v2.1.0
+// 最終更新日 : 2018/09/12
+// バージョン : v2.1.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.CSS.DS = FTKR.CSS.DS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.1.0 詳細ステータス画面の表示内容を変更するプラグイン
+ * @plugindesc v2.1.1 詳細ステータス画面の表示内容を変更するプラグイン
  * @author フトコロ
  *
  * @param --詳細ステータスの表示設定--
@@ -43,10 +43,6 @@ FTKR.CSS.DS = FTKR.CSS.DS || {};
  * @value 0
  * @option 有効にする
  * @value 1
- * 
- * @param Number Visible Rows
- * @desc ステータスウィンドウの縦の行数
- * @default 16
  * 
  * @param Font Size
  * @desc フォントサイズ
@@ -121,10 +117,6 @@ FTKR.CSS.DS = FTKR.CSS.DS || {};
  *    :スキル画面のウィンドウ変更機能を使うか指定します。
  *    :0 - 無効, 1 - 有効
  * 
- * <Number Visible Rows>
- *    :ステータスウィンドウの縦の行数を変更します。
- *    :デフォルトは16行です。
- * 
  * <Font Size>
  *    :ウィンドウ内のフォントサイズを変更します。
  *    :デフォルトは 28 です。(単位はpixel)
@@ -182,6 +174,8 @@ FTKR.CSS.DS = FTKR.CSS.DS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v2.1.1 - 2018/09/12 : 不要なプラグインパラメータを削除
  * 
  * v2.1.0 - 2018/08/30 : 機能追加
  *    1. ウィンドウの表示内容を自動更新する機能を追加。
@@ -326,7 +320,6 @@ if (Imported.FTKR_CSS) (function(){
 
     FTKR.CSS.DS.window = {
         enabled       :paramParse(parameters['Enabled Custom Window'] || 0),
-        numVisibleRows:Number(parameters['Number Visible Rows'] || 0),
         fontSize      :Number(parameters['Font Size'] || 0),
         padding       :Number(parameters['Window Padding'] || 0),
         lineHeight    :Number(parameters['Window Line Height'] || 0),
@@ -356,13 +349,6 @@ if (Imported.FTKR_CSS) (function(){
 
     Window_Status.prototype.standardCssLayout = function() {
         return FTKR.CSS.DS.window;
-    };
-
-    //ウィンドウの行数
-    var _DS_Window_Status_numVisibleRows = Window_Status.prototype.numVisibleRows;
-    Window_Status.prototype.numVisibleRows = function() {
-        return FTKR.CSS.DS.window.enable ? FTKR.CSS.DS.window.numVisibleRows :
-        _DS_Window_Status_numVisibleRows.call(this);
     };
 
     var _DS_Window_Status_update = Window_Status.prototype.update;

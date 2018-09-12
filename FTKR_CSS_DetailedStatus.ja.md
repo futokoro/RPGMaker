@@ -163,12 +163,6 @@ face;level,state,hp,mp;custom(0),custom(1),custom(2),custom(3)
 * 0 - 無効(デフォルト)
 * 1 - 有効
 
-### 縦の行数
-`Number Visible Rows`
-
-ステータスウィンドウの縦の行数を変更します。
-デフォルトは16行です。
-
 ### フォントサイズ
 `Font Size`
 
@@ -227,7 +221,8 @@ face;level,state,hp,mp;custom(0),custom(1),custom(2),custom(3)
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver2.1.0](FTKR_CSS_DetailedStatus.js) | 2018/08/30 | FTKR_CustomSimpleActorStatus.js の v3.1.0に対応<br>ウィンドウの表示内容を自動更新する機能を追加 |
+| [ver2.1.1](FTKR_CSS_DetailedStatus.js) | 2018/09/12 | 不要なプラグインパラメータ を削除 |
+| ver2.1.0 | 2018/08/30 | FTKR_CustomSimpleActorStatus.js の v3.1.0に対応<br>ウィンドウの表示内容を自動更新する機能を追加 |
 | ver2.0.0 | 2018/08/19 | FTKR_CustomSimpleActorStatus.js の v3.0.0に対応 |
 | [ver1.1.0](/archive/FTKR_CSS_DetailedStatus_1.1.0.js) | 2017/11/18 | FTKR_CustomSimpleActorStatus.js の v2.6.0に対応 |
 | ver1.0.2 | 2017/05/13 | ウィンドウ設定変更機能が正常に機能していない不具合を修正 |

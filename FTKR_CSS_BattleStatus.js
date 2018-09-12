@@ -4,8 +4,8 @@
 // プラグインNo : 16
 // 作成者     : フトコロ
 // 作成日     : 2017/04/11
-// 最終更新日 : 2018/08/30
-// バージョン : v2.1.0
+// 最終更新日 : 2018/09/12
+// バージョン : v2.1.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -17,7 +17,7 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.1.0 バトル画面のステータス表示を変更するプラグイン
+ * @plugindesc v2.1.1 バトル画面のステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @param --バトルパーティー設定--
@@ -260,6 +260,9 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.1.1 - 2018/09/12 : 不具合修正
+ *    1. プラグインパラメータ Number Visible Rows が反映されない不具合を修正。
+ * 
  * v2.1.0 - 2018/08/30 : 機能追加
  *    1. プラグインパラメータで表示するステータスをリストで選択できる機能を追加。
  * 
@@ -419,7 +422,7 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
     };
 
     FTKR.CSS.BS.position = {
-        enable    :Number(parameters['Enable Custom Position'] || 0),
+        enabled   :Number(parameters['Enable Custom Position'] || 0),
         diffX     :Number(parameters['Diff Position X'] || 0),
         diffY     :Number(parameters['Diff Position Y'] || 0),
         diffCol   :Number(parameters['Diff Column'] || 0),
@@ -462,7 +465,7 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
     //ウィンドウの行数
     var _DS_Window_BattleStatus_numVisibleRows = Window_BattleStatus.prototype.numVisibleRows;
     Window_BattleStatus.prototype.numVisibleRows = function() {
-        return FTKR.CSS.BS.window.enable ? FTKR.CSS.BS.window.numVisibleRows :
+        return FTKR.CSS.BS.window.enabled ? FTKR.CSS.BS.window.numVisibleRows :
         _DS_Window_BattleStatus_numVisibleRows.call(this);
     };
 
@@ -483,7 +486,7 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
     var _BS_Sprite_Actor_setActorHome = Sprite_Actor.prototype.setActorHome;
     Sprite_Actor.prototype.setActorHome = function(index) {
         _BS_Sprite_Actor_setActorHome.call(this, index);
-        if (FTKR.CSS.BS.position.enable) {
+        if (FTKR.CSS.BS.position.enabled) {
             this.setHome(this.partyPositionX(index), this.partyPositionY(index));
         }
     };

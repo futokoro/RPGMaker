@@ -4,8 +4,8 @@
 // プラグインNo : 47
 // 作成者     : フトコロ
 // 作成日     : 2017/06/18
-// 最終更新日 : 2018/08/30
-// バージョン : v2.1.0
+// 最終更新日 : 2018/09/12
+// バージョン : v2.1.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -17,7 +17,7 @@ FTKR.CSS.MS = FTKR.CSS.MS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.1.0 メニュー画面のステータス表示を変更するプラグイン
+ * @plugindesc v2.1.1 メニュー画面のステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @param --簡易ステータス表示--
@@ -39,10 +39,6 @@ FTKR.CSS.MS = FTKR.CSS.MS || {};
  * @desc ウィンドウのレイアウト変更機能を使うか。
  * 1 - 有効にする, 0 - 無効にする
  * @default 0
- * 
- * @param Number Visible Rows
- * @desc ステータスウィンドウの縦の行数：デフォルト 16
- * @default 16
  * 
  * @param Number Max Cols
  * @desc アクターを横に並べる数：デフォルト 1
@@ -121,10 +117,6 @@ FTKR.CSS.MS = FTKR.CSS.MS || {};
  *    :メニュー画面のウィンドウ変更機能を使うか指定します。
  *    :0 - 無効, 1 - 有効
  * 
- * <Number Visible Rows>
- *    :ステータスウィンドウの縦の行数を変更します。
- *    :デフォルトは16行です。
- * 
  * <Number Max Cols>
  *    :ウィンドウ内でアクターを横に並べる数を変更します。
  *    :デフォルトは 1 です。
@@ -194,6 +186,8 @@ FTKR.CSS.MS = FTKR.CSS.MS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v2.1.1 - 2018/09/12 : 不要なプラグインパラメータを削除
  * 
  * v2.1.0 - 2018/08/30 : 機能追加
  *    1. プラグインパラメータで表示するステータスをリストで選択できる機能を追加。
@@ -320,7 +314,6 @@ if (Imported.FTKR_CSS) (function() {
     //ウィンドウ設定オブジェクト
     FTKR.CSS.MS.window = {
         enabled         :Number(parameters['Enabled Custom Window'] || 0),
-        numVisibleRows  :Number(parameters['Number Visible Rows'] || 0),
         maxCols         :Number(parameters['Number Max Cols'] || 0),
         fontSize        :Number(parameters['Font Size'] || 0),
         padding         :Number(parameters['Window Padding'] || 0),
@@ -348,13 +341,6 @@ if (Imported.FTKR_CSS) (function() {
         return FTKR.CSS.MS.window.enabled ? 
             this.lineHeight() * this.cursorHeight() :
             _Window_MenuStatus_itemHeight.call(this);
-    };
-
-    //ウィンドウの行数
-    var _DS_Window_MenuStatus_numVisibleRows = Window_MenuStatus.prototype.numVisibleRows;
-    Window_MenuStatus.prototype.numVisibleRows = function() {
-        return FTKR.CSS.MS.window.enable ? FTKR.CSS.MS.window.numVisibleRows :
-        _DS_Window_MenuStatus_numVisibleRows.call(this);
     };
 
     //書き換え

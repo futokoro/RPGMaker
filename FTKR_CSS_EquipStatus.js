@@ -4,8 +4,8 @@
 // プラグインNo : 38
 // 作成者     : フトコロ
 // 作成日     : 2017/05/13
-// 最終更新日 : 2018/08/30
-// バージョン : v2.1.0
+// 最終更新日 : 2018/09/12
+// バージョン : v2.1.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -17,7 +17,7 @@ FTKR.CSS.ES = FTKR.CSS.ES || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.1.0 装備画面のステータスレイアウトを変更する
+ * @plugindesc v2.1.1 装備画面のステータスレイアウトを変更する
  * @author フトコロ
  *
  * @param --レイアウト設定--
@@ -201,6 +201,9 @@ FTKR.CSS.ES = FTKR.CSS.ES || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.1.1 - 2018/09/12 : 不具合修正
+ *    1. プラグインパラメータ Number Visible Rows が反映されない不具合を修正。
+ * 
  * v2.1.0 - 2018/08/30 : 機能追加
  *    1. プラグインパラメータで表示するステータスをリストで選択できる機能を追加。
  * 
@@ -373,7 +376,7 @@ if (Imported.FTKR_CSS) (function() {
     //ウィンドウの行数
     var _DS_Window_EquipStatus_numVisibleRows = Window_EquipStatus.prototype.numVisibleRows;
     Window_EquipStatus.prototype.numVisibleRows = function() {
-        return FTKR.CSS.ES.window.enable ? FTKR.CSS.ES.window.numVisibleRows :
+        return FTKR.CSS.ES.window.enabled ? FTKR.CSS.ES.window.numVisibleRows :
         _DS_Window_EquipStatus_numVisibleRows.call(this);
     };
     
