@@ -4,8 +4,8 @@
 // プラグインNo : 75
 // 作成者     : フトコロ
 // 作成日     : 2018/04/08
-// 最終更新日 : 2018/08/26
-// バージョン : v1.4.3
+// 最終更新日 : 2018/09/15
+// バージョン : v1.4.4
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.AltTB = FTKR.AltTB || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.4.3 敵味方交互にターンが進むターン制戦闘システム
+ * @plugindesc v1.4.4 敵味方交互にターンが進むターン制戦闘システム
  * @author フトコロ
  *
  * @param TurnEnd Command
@@ -46,8 +46,6 @@ FTKR.AltTB = FTKR.AltTB || {};
  * @off 無効
  * @default false
  *
- * @param --- 行動回数 ---
- * 
  * @param Disable AC
  * @desc アクターの行動回数による行動制限を無効にする
  * @type boolean
@@ -420,7 +418,13 @@ FTKR.AltTB = FTKR.AltTB || {};
  * 戦闘開始メッセージ後から１ターン目のプレイヤーコマンド表示の間に
  * イベントを実行します。
  * 
- * ターン終了条件の場合は、*ターン目終了の所で実行します。
+ * 
+ * ターン終了条件の場合は、プレイヤー側の場合は
+ * プラグインパラメータ Player Turn End の設定により、以下のいずれかを選択できます。
+ * 　・プレイヤーターンの終了時
+ * 　・全体のターン終了時
+ * 
+ * エネミー側の場合は、全体のターン終了時が該当します。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -761,9 +765,14 @@ FTKR.AltTB = FTKR.AltTB || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.4.4 - 2018/09/15 : 不具合修正
+ *    1. イベントコマンド「戦闘行動の強制」を使用した場合に、行動選択時にエラーになる
+ *       不具合を修正。
+ *    2. プラグインパラメータ AP Window Layout を設定せずに、APを有効にした場合に
+ *       戦闘開始時にエラーになる不具合を修正。
+ * 
  * v1.4.3 - 2018/08/26 : 不具合修正
- *    1. v1.4.2の修正箇所の不具合(最大値設定無しの場合にプラグインコマンドで
- *       行動回数が増加しない)修正。
+ *    1. v1.4.2の修正箇所の不具合(プラグインコマンドで行動回数が増加しない)修正。
  * 
  * v1.4.2 - 2018/08/25 : 不具合修正
  *    1. 戦闘中にプラグインコマンドで行動回数を増加させても、行動選択時にエラーになる
@@ -1715,7 +1724,10 @@ FTKR.AltTB = FTKR.AltTB || {};
     Game_Battler.prototype.payActionCount = function() {
         if (!FTKR.AltTB.disableAC) {
             var action = this.currentAction();
-            if (action.item().noAC || action._forcing && !FTKR.AltTB.enableFAAC) return;
+            if (action.item().noAC || action._forcing && !FTKR.AltTB.enableFAAC) {
+                this._actions.push(new Game_Action(this));
+                return;
+            }
             this.getActionCount(-1);
         }
     };
@@ -2425,7 +2437,9 @@ FTKR.AltTB = FTKR.AltTB || {};
             y = FTKR.AltTB.layoutAPWindow.positionY;
         }
         Window_Base.prototype.initialize.call(this, x, y, width, height);
-        this.setBackgroundType(+FTKR.AltTB.layoutAPWindow.background);
+        if (!!FTKR.AltTB.layoutAPWindow) {
+            this.setBackgroundType(+FTKR.AltTB.layoutAPWindow.background);
+        }
         this.refresh();
         this.close();
     };
