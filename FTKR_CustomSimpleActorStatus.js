@@ -4,8 +4,8 @@
 // プラグインNo : 9
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2018/09/11
-// バージョン : v3.2.0
+// 最終更新日 : 2018/09/15
+// バージョン : v3.3.0
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v3.2.0 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v3.3.0 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -126,8 +126,14 @@ FTKR.CSS = FTKR.CSS || {};
  * @desc アイコンの重なりを許容する比率を設定します。
  * @default 0.5
  * 
+ * @param State Icon Padding
+ * @desc アイコン表示に必要な余白を指定します。
+ * @default 4
+ * @type number
+ * @min 0
+ * 
  * @param Enable Auto Scale
- * @desc 行の高さに合わせてアイコンサイズを調整するか
+ * @desc 行の高さまたは表示幅に合わせてアイコンサイズを調整するか
  * 1 - 有効にする, 0 - 無効にする
  * @default 0
  * 
@@ -988,6 +994,13 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v3.3.0 - 2018/09/15 : 機能追加
+ *    1. ステータスコードに、アイテム用のコードを追加。
+ *    2. ステータスアイコン同士間の余白サイズを設定する機能を追加。
+ *    3. ステータスアイコンを高さ幅が不足しても最低１つは表示させるように変更。
+ *    4. プラグインパラメータ Enable Auto Scale を有効にした場合に、表示幅が小さい
+ *       場合でもサイズ調整するように変更。
+ * 
  * v3.2.0 - 2018/09/11 : FTKR_GDM_WindowEditor.js 用の記述を修正。
  * 
  * v3.1.1 - 2018/09/09 : GraphicalDesignMode.js 用の記述を削除
@@ -1217,6 +1230,18 @@ FTKR.CSS = FTKR.CSS || {};
 
 (function() {
 
+    var paramParse = function(obj) {
+        return JSON.parse(JSON.stringify(obj, paramReplace));
+    };
+
+    var paramReplace = function(key, value) {
+        try {
+            return JSON.parse(value || null);
+        } catch (e) {
+            return value;
+        }
+    };
+
     //=============================================================================
     // プラグイン パラメータ
     //=============================================================================
@@ -1244,11 +1269,12 @@ FTKR.CSS = FTKR.CSS || {};
             posiX:Number(parameters['Sv Position X'] || 0),
         },
         state:{
-            enable:Number(parameters['Enable CSS States'] || 0),
-            wait:Number(parameters['Animation Wait'] || 0),
-            overlap:Number(parameters['Enable Overlap'] || 0),
-            autoScale:Number(parameters['Enable Auto Scale'] || 0),
-            rate:Number(parameters['Overlap Rate'] || 0),
+            enable      :Number(parameters['Enable CSS States'] || 0),
+            wait        :Number(parameters['Animation Wait'] || 0),
+            overlap     :Number(parameters['Enable Overlap'] || 0),
+            autoScale   :Number(parameters['Enable Auto Scale'] || 0),
+            rate        :Number(parameters['Overlap Rate'] || 0),
+            iconPadding :Number(parameters['State Icon Padding'] || 0),
         },
         equip:{
             arrow:String(parameters['Equip Right Arrow'] || ''),
@@ -2012,7 +2038,6 @@ FTKR.CSS = FTKR.CSS || {};
         if (match) {
             return this.drawCssActorStatusBase_A(index, actor, x, y, width, match, lss, css);
         } else {
-            if (!actor) return 1;
             return this.drawCssActorStatusBase_B(index, actor, x, y, width, status, lss, css);
         }
     };
@@ -2020,6 +2045,8 @@ FTKR.CSS = FTKR.CSS || {};
     // 括弧で表示する内容を指定する表示コード
     Window_Base.prototype.drawCssActorStatusBase_A = function(index, actor, x, y, width, match, lss, css) {
         switch(match[1].toUpperCase()) {
+            case 'IPARAM':
+                return this.drawCssItemParam(actor, x, y, width, match[2], lss);
             case 'STREVAL':
                 return this.drawCssEval(actor, x, y, width, match[2], false);
             case 'EVAL':
@@ -2066,8 +2093,24 @@ FTKR.CSS = FTKR.CSS || {};
     // 括弧を使わない表示コード
     Window_Base.prototype.drawCssActorStatusBase_B = function(index, actor, x, y, width, status, lss, css) {
         switch (status.toUpperCase()) {
+            case 'IICON':
+                return this.drawCssItemIcon(actor, x, y, width, lss);
+            case 'INAME':
+                return this.drawCssItemName(actor, x, y, width, lss);
+            case 'IDESC':
+                return this.drawCssItemDesc(actor, x, y, width, lss);
+            case 'ITYPE':
+                return this.drawCssItemType(actor, x, y, width, lss);
+            case 'IETYPE':
+                return this.drawCssItemEType(actor, x, y, width, lss);
+            case 'ISCOPE':
+                return this.drawCssItemScope(actor, x, y, width, lss);
+            case 'IELEMENT':
+                return this.drawCssItemElement(actor, x, y, width, lss);
             case 'FACE':
                 return this.drawCssActorFace(actor, x, y, width, lss);
+            case 'ECHARA':
+                return this.drawCssEnemyChara(actor, x, y, width);
             case 'CHARA':
                 return this.drawCssActorChara(actor, x, y, width, css.chara);
             case 'SV':
@@ -2100,6 +2143,116 @@ FTKR.CSS = FTKR.CSS || {};
                 return 1;
         }
     };
+
+    //------------------------------------------------------------------------
+    //アイテム名の表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssItemIcon = function(actor, x, y, width, lss) {
+        var index = lss.item ? lss.item.iconIndex : 0;
+        this.drawIcon(index, x, y);
+        return 1;
+    };
+
+    //------------------------------------------------------------------------
+    //アイテムアイコンの表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssItemName = function(actor, x, y, width, lss) {
+        var name = lss.item ? lss.item.name : '';
+        this.drawText(name, x, y, width);
+        return 1;
+    };
+
+    //------------------------------------------------------------------------
+    //アイテムの説明の表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssItemDesc = function(actor, x, y, width, lss) {
+        var name = lss.item ? lss.item.description : '';
+        this.drawTextEx(name, x, y);
+        return 2;
+    };
+
+    //------------------------------------------------------------------------
+    //アイテムの設定の表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssItemParam = function(actor, x, y, width, param, lss) {
+        var item = lss.item;
+        if (!item) return 1;
+        this.drawText(item[param], x, y, width);
+        return 1;
+    };
+
+    //------------------------------------------------------------------------
+    //アイテムのタイプ（スキルタイプ、武器タイプ、防具タイプ）
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssItemType = function(actor, x, y, width, lss) {
+        this.drawText(DataManager.itemTypeName(lss.item), x, y, width);
+        return 1;
+    };
+
+    Window_Base.ITEM_TYPES = [
+        '',
+        '一般アイテム',
+        '大事なもの',
+        '隠しアイテムA',
+        '隠しアイテムB',
+    ];
+
+    DataManager.itemTypeName = function(item) {
+        if (this.isSkill(item)) {
+            return $dataSystem.skillTypes[item.stypeId];
+        } else if (this.isItem(item)) {
+            return Window_Base.ITEM_TYPES[item.itypeId];
+        } else if (this.isWeapon(item)) {
+            return $dataSystem.weaponTypes[item.wtypeId];
+        } else if (this.isArmor(item)) {
+            return $dataSystem.armorTypes[item.atypeId];
+        } else {
+            return '';
+        }
+    };
+
+    //------------------------------------------------------------------------
+    //アイテムの装備タイプ
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssItemEType = function(actor, x, y, width, lss) {
+        var name = lss.item ?  $dataSystem.equipTypes[lss.item.etypeId] : '';
+        this.drawText(name, x, y, width);
+        return 1;
+    };
+
+    //------------------------------------------------------------------------
+    //アイテムの範囲
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssItemScope = function(actor, x, y, width, lss) {
+        var name = lss.item ? Window_Base.ITEM_SCOPE[lss.item.scope] : '';
+        this.drawText(name, x, y, width);
+        return 1;
+    };
+
+    Window_Base.ITEM_SCOPE = [
+        '',
+        '敵単体',
+        '敵全体',
+        '敵１体ランダム',
+        '敵２体ランダム',
+        '敵３体ランダム',
+        '敵４体ランダム',
+        '味方単体',
+        '味方全体',
+        '味方単体（戦闘不能）',
+        '味方全体（戦闘不能）',
+        '使用者'
+    ];
+
+    //------------------------------------------------------------------------
+    //アイテムの属性
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssItemElement = function(actor, x, y, width, lss) {
+        var name = lss.item && lss.item.damage ? $dataSystem.elements[lss.item.damage.elementId] : '';
+        this.drawText(name, x, y, width);
+        return 1;
+    };
+
 
     //------------------------------------------------------------------------
     //アクターの顔画像の表示関数
@@ -2137,6 +2290,23 @@ FTKR.CSS = FTKR.CSS || {};
 
     Window_Base.prototype.cssFacePositionX = function(actor) {
         return FTKR.CSS.cssStatus.face.posiX;
+    };
+
+    //------------------------------------------------------------------------
+    //エネミーの戦闘画像の表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssEnemyChara = function(actor, dx, dy, width) {
+        if (!actor) return 1;
+        var bitmap = ImageManager.loadPicture(actor.battlerName());
+        if (!bitmap) return 1;
+        var sw = bitmap.width;
+        var sh = bitmap.height;
+        var sx = 0;
+        var sy = 0;
+        var dh = sh;
+        var dw = sw;
+        this.contents.blt(bitmap, sx, sy, sw, sh, dx, dy, dw, dh);
+        return Math.ceil(dh / this.lineHeight()) || 1;
     };
 
     //------------------------------------------------------------------------
@@ -2243,6 +2413,7 @@ FTKR.CSS = FTKR.CSS || {};
     //アクターの名前の表示関数
     //------------------------------------------------------------------------
     Window_Base.prototype.drawCssActorName = function(actor, x, y, width) {
+        if (!actor) return 1;
         this.changeTextColor(this.hpColor(actor));
         this.drawText(actor.name(), x, y, width);
         return 1;
@@ -2294,18 +2465,20 @@ FTKR.CSS = FTKR.CSS || {};
     Window_Base.prototype.drawCssIconsSprite = function(index, actor, x, y, width, line) {
         var css = FTKR.CSS.cssStatus.state;
         var iw = Window_Base._iconWidth;
+        var iconPadding = css.iconPadding;
         index = index % this.showActorNum();
         var iconSprites = this._stateIconSprite[index];
         if (!iconSprites) {
             iconSprites = [];
         }
         if(css.autoScale) {
-            var scale = this.iconScale();
+            var scale = this.iconScale(width);
             iw = iw * scale;
+            console.log(scale);
         }
         var maxlen = line ? this.lineHeight() * line : width;
         var offset = css.overlap ? this.getOverlapValue(actor, iw, maxlen, css) : iw;
-        var showNum = Math.min(Math.floor((maxlen - 4) / offset));
+        var showNum = Math.max(Math.floor((maxlen - iconPadding) / offset), 1);
         if (showNum < iconSprites.length) {
             iconSprites.forEach(function(sprite,i){
                 if (i < showNum) return;
@@ -2333,28 +2506,33 @@ FTKR.CSS = FTKR.CSS || {};
 
     Window_Base.prototype.getOverlapValue = function(actor, iw, maxlen, css) {
         var iconlen = actor.allIcons().length;
-        var diff = Math.max((maxlen - iw - 4) / (iconlen - 1), iw * css.rate);
+        var iconPadding = FTKR.CSS.cssStatus.state.iconPadding;
+        var diff = Math.max((maxlen - iw - iconPadding) / (iconlen - 1), iw * css.rate);
         return diff && diff < iw ? diff : iw;
     };
 
     Window_Base.prototype.iconOverlapOffset = function(iw, number, width, vartical) {
-        var len = vartical ? (number - 1) * this.lineHeight() + 4 : width - iw - 4;
+        var iconPadding = FTKR.CSS.cssStatus.state.iconPadding;
+        var len = vartical ? (number - 1) * this.lineHeight() + iconPadding : width - iw - iconPadding;
         var diff = number > 1 ? len / (number - 1) : 0;
         return diff < iw ? diff : iw;
     };
 
-    Window_Base.prototype.iconScale = function() {
+    Window_Base.prototype.iconScale = function(width) {
+        var iconPadding = FTKR.CSS.cssStatus.state.iconPadding;
         var iw = Window_Base._iconWidth;
-        return Math.min(Math.max(this.lineHeight() - 4, 0) / iw, 1);
+        var len = Math.min(this.lineHeight(), width);
+        return Math.min(Math.max(len - iconPadding, 0) / iw);
     };
 
     //アイコンの表示スケールを指定できる表示関数
     Window_Base.prototype.drawCssIcon = function(iconIndex, x, y, scale, auto) {
+        var iconPadding = FTKR.CSS.cssStatus.state.iconPadding;
         scale = scale || 1;
         var bitmap = ImageManager.loadSystem('IconSet');
         var pw = Window_Base._iconWidth;
         var ph = Window_Base._iconHeight;
-        if (auto) scale = Math.min(Math.max(this.lineHeight() - 4, 0) / pw, 1);
+        if (auto) scale = Math.min(Math.max(this.lineHeight() - iconPadding, 0) / pw, 1);
         var sx = iconIndex % 16 * pw;
         var sy = Math.floor(iconIndex / 16) * ph;
         this.contents.blt(bitmap, sx, sy, pw, ph, x, y, pw * scale, ph * scale);

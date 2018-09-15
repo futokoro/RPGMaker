@@ -4,8 +4,8 @@
 // プラグインNo : 86
 // 作成者     : フトコロ
 // 作成日     : 2018/07/15
-// 最終更新日 : 2018/09/11
-// バージョン : v0.9.15
+// 最終更新日 : 2018/09/15
+// バージョン : v0.9.16
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -23,7 +23,7 @@ FTKR.GDM = FTKR.GDM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v0.9.15 トリアコンタンさんのGUI画面デザインプラグインの機能追加
+ * @plugindesc v0.9.16 トリアコンタンさんのGUI画面デザインプラグインの機能追加
  * @author フトコロ
  *
  * @param autoCreate
@@ -266,6 +266,7 @@ FTKR.GDM = FTKR.GDM || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v0.9.16 - アイテム(スキルや武器防具なども含む)用の表示パラメータをリストに追加。
  * v0.9.15 - カーソル高さおよび、表示列数を編集しても正しく反映されない不具合を修正。
  *           一部の処理を FTKR_CustomSimpleActorStatus に移動。
  * v0.9.14 - スキル画面のスキルタイプウィンドウが正しく表示できない不具合を修正。
@@ -346,7 +347,7 @@ function Scene_OSW() {
     //プラグインパラメータを取得
     //=============================================================================
     var parameters = PluginManager.parameters('FTKR_GDM_WindowEditor');
-    var autoCreate = JSON.parse(parameters['autoCreate'] || false);
+    var autoCreate = paramParse(parameters['autoCreate'] || false);
     FTKR.GDM = {
         basic:{
             enabled    :true,
@@ -354,9 +355,9 @@ function Scene_OSW() {
             padding    :Number(parameters['Window Padding'] || 0),
             lineHeight :Number(parameters['Window Line Height'] || 36),
             opacity    :Number(parameters['Window Opacity'] || 0),
-            hideFrame  :Boolean(parameters['Hide Frame'] || false),
+            hideFrame  :paramParse(parameters['Hide Frame'] || false),
         },
-        backgrounds   :JSON.parse(parameters['Window Background Image Name']) || [],
+        backgrounds   :paramParse(parameters['Window Background Image Name']) || [],
         original:{
             bgimage   :String(parameters['Scene Background Image Name'] || ''),
         },
@@ -873,6 +874,14 @@ function Scene_OSW() {
             {text:'JS計算式(数値表示)',     value:'eval(%1)' },
             {text:'JS計算式(文字列表示)',   value:'streval(%1)' },
             {text:'横線',                   value:'line' },
+            {text:'アイテム名',              value:'iname' },
+            {text:'アイテムアイコン',          value:'iicon' },
+            {text:'アイテムタイプ',            value:'itype' },
+            {text:'アイテム装備タイプ',        value:'ietype' },
+            {text:'アイテム説明',              value:'idesc' },
+            {text:'アイテム範囲',              value:'iscope' },
+            {text:'アイテム属性',              value:'ielement' },
+            {text:'アイテム設定詳細',          value:'iparam(%1)' },
         ];
 
         TextManager.paramNames = function() {
@@ -913,7 +922,15 @@ function Scene_OSW() {
                 {type:'string',         options:{}},//text()
                 {type:'string',         options:{}},//eval()
                 {type:'string',         options:{}},//streval()
-                {type:'none'}
+                {type:'none'},
+                {type:'none'},
+                {type:'none'},
+                {type:'none'},
+                {type:'none'},
+                {type:'none'},
+                {type:'none'},
+                {type:'none'},
+                {type:'string',         options:{}}//iparam()
             ];
         };
 
