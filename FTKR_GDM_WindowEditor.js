@@ -5,7 +5,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2018/07/15
 // 最終更新日 : 2018/09/15
-// バージョン : v0.9.16
+// バージョン : v0.9.17
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -23,7 +23,7 @@ FTKR.GDM = FTKR.GDM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v0.9.16 トリアコンタンさんのGUI画面デザインプラグインの機能追加
+ * @plugindesc v0.9.17 トリアコンタンさんのGUI画面デザインプラグインの機能追加
  * @author フトコロ
  *
  * @param autoCreate
@@ -266,6 +266,7 @@ FTKR.GDM = FTKR.GDM || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v0.9.17 - 表示エリアのパラメータの初期設定を見直し。
  * v0.9.16 - アイテム(スキルや武器防具なども含む)用の表示パラメータをリストに追加。
  * v0.9.15 - カーソル高さおよび、表示列数を編集しても正しく反映されない不具合を修正。
  *           一部の処理を FTKR_CustomSimpleActorStatus に移動。
@@ -845,44 +846,43 @@ function Scene_OSW() {
             {type:'selectwindow', options:{select:['ウィンドウ残す', 'ウィンドウ非表示化']}}
         ];
 
-        var FTKR_CSS_CODES = [
-            {text:'直接入力'},
-            {text:'名前',               value:'name' },
-            {text:'二つ名',             value:'nickname' },
-            {text:'職業',           value:'class' },
-            {text:'レベル',         value:'level' },
-            {text:'HP',             value:'hp' },
-            {text:'MP',             value:'mp' },
-            {text:'TP',             value:'tp' },
-            {text:'顔画像',             value:'face(%1)' },
-            {text:'歩行キャラ画像',     value:'chara' },
-            {text:'SV戦闘キャラ画像',   value:'sv' },
-            {text:'ステート(横)',       value:'state' },
-            {text:'ステート(縦)',       value:'state2(%1)' },
-            {text:'プロフィール',       value:'profile' },
-            {text:'通常能力値',         value:'param(%1)' },
-            {text:'装備',               value:'equip(%1)' },
-            {text:'装備パラメータ',         value:'eparam(%1)' },
-            {text:'AOP装備パラメータ',      value:'eaop(%1)' },
-            {text:'カスタムパラメータ',     value:'custom(%1)' },
-            {text:'カスタムゲージ',         value:'gauge(%1)' },
-            {text:'アクター別カスタムゲージ', value:'agauge(%1)' },
-            {text:'職業別カスタムゲージ',   value:'cgauge(%1)' },
-            {text:'カスタム画像',           value:'image(%1)' },
-            {text:'メッセージ',             value:'message' },
-            {text:'テキスト表示',           value:'text(%1)' },
-            {text:'JS計算式(数値表示)',     value:'eval(%1)' },
-            {text:'JS計算式(文字列表示)',   value:'streval(%1)' },
-            {text:'横線',                   value:'line' },
-            {text:'アイテム名',              value:'iname' },
-            {text:'アイテムアイコン',          value:'iicon' },
-            {text:'アイテムタイプ',            value:'itype' },
-            {text:'アイテム装備タイプ',        value:'ietype' },
-            {text:'アイテム説明',              value:'idesc' },
-            {text:'アイテム範囲',              value:'iscope' },
-            {text:'アイテム属性',              value:'ielement' },
-            {text:'アイテム設定詳細',          value:'iparam(%1)' },
-        ];
+        FTKR_CSS = {
+            NAME    :'名前',
+            NICKNAME:'二つ名',
+            CLASS   :'職業',
+            LEVEL   :'レベル',
+            HP      :'HP',
+            MP      :'MP',
+            TP      :'TP',
+            FACE    :'顔画像',
+            CHARA   :'歩行キャラ画像',
+            SV      :'SV戦闘キャラ画像',
+            STATE   :'ステート(横)', 
+            STATE2  :'ステート(縦)',
+            PROFILE :'プロフィール',
+            PARAM   :'通常能力値',
+            EQUIP   :'装備', 
+            EPARAM  :'装備パラメータ', 
+            EAOP    :'AOP装備パラメータ', 
+            CUSTOM  :'カスタムパラメータ',
+            GAUGE   :'カスタムゲージ', 
+            AGAUGE  :'アクター別カスタムゲージ', 
+            CGAUGE  :'職業別カスタムゲージ', 
+            IMAGE   :'カスタム画像', 
+            MESSAGE :'メッセージ', 
+            TEXT    :'テキスト表示',
+            EVAL    :'JS計算式(数値表示)',
+            STREVAL :'JS計算式(文字列表示)', 
+            LINE    :'横線', 
+            INAME   :'アイテム名', 
+            IICON   :'アイテムアイコン', 
+            ITYPE   :'アイテムタイプ',
+            IETYPE  :'アイテム装備タイプ',
+            IDESC   :'アイテム説明', 
+            ISCOPE  :'アイテム範囲', 
+            IELEMENT:'アイテム属性', 
+            IPARAM  :'アイテム設定詳細', 
+        };
 
         TextManager.paramNames = function() {
             return $dataSystem ? $dataSystem.terms.params.slice(0, 8) : [];
@@ -892,45 +892,44 @@ function Scene_OSW() {
             return $dataSystem ? $dataSystem.equipTypes.slice(1, $dataSystem.equipTypes.length) : [];
         };
 
-
-        var FTKR_CSS_CODES_VALUE = function() {
+        var FTKR_CSS_CODES = function() {
             return [
-                {type:'none'},
-                {type:'none'},
-                {type:'none'},
-                {type:'none'},
-                {type:'none'},
-                {type:'none'},
-                {type:'none'},
-                {type:'none'},
-                {type:'string',         options:{}},//face(%1)
-                {type:'none'},
-                {type:'none'},
-                {type:'none'},
-                {type:'string',         options:{}},//state2(%1)
-                {type:'none'},
-                {type:'selectwindow',   options:{select:TextManager.paramNames()}},//param(%1)
-                {type:'selectwindow',   options:{select:TextManager.equipTypes()}},//equip(%1)
-                {type:'selectwindow',   options:{select:TextManager.paramNames()}},//eparam(%1)
-                {type:'string',         options:{}},//eaop(%1)
-                {type:'datawindow',     options:{data:FTKR.CSS.cssStatus.customs, property:'name'}},//custom(%1)
-                {type:'datawindow',     options:{data:FTKR.CSS.cssStatus.gauges, property:'name'}},//gauge(%1)
-                {type:'string',         options:{}},//agauge(%1)
-                {type:'string',         options:{}},//cgauge(%1)
-                {type:'string',         options:{}},//image(%1)
-                {type:'none'},
-                {type:'string',         options:{}},//text()
-                {type:'string',         options:{}},//eval()
-                {type:'string',         options:{}},//streval()
-                {type:'none'},
-                {type:'none'},
-                {type:'none'},
-                {type:'none'},
-                {type:'none'},
-                {type:'none'},
-                {type:'none'},
-                {type:'none'},
-                {type:'string',         options:{}}//iparam()
+                {text:'直接入力'},
+                {text:FTKR_CSS.NAME,    value:'name',       type:'none'},
+                {text:FTKR_CSS.NICKNAME,value:'nickname',   type:'none'},
+                {text:FTKR_CSS.CLASS,   value:'class',      type:'none'},
+                {text:FTKR_CSS.LEVEL,   value:'level',      type:'none'},
+                {text:FTKR_CSS.HP,      value:'hp',         type:'none'},
+                {text:FTKR_CSS.MP,      value:'mp',         type:'none'},
+                {text:FTKR_CSS.TP,      value:'tp',         type:'none'},
+                {text:FTKR_CSS.FACE,    value:'face(%1)',   type:'string',         options:{}},
+                {text:FTKR_CSS.CHARA,   value:'chara',      type:'none'},
+                {text:FTKR_CSS.SV,      value:'sv',         type:'none'},
+                {text:FTKR_CSS.STATE,   value:'state',      type:'none'},
+                {text:FTKR_CSS.STATE2,  value:'state2(%1)', type:'string',         options:{}},
+                {text:FTKR_CSS.PROFILE, value:'profile',    type:'none'},
+                {text:FTKR_CSS.PARAM,   value:'param(%1)',  type:'selectwindow',   options:{select:TextManager.paramNames()}},
+                {text:FTKR_CSS.EQUIP,   value:'equip(%1)',  type:'selectwindow',   options:{select:TextManager.equipTypes()}},
+                {text:FTKR_CSS.EPARAM,  value:'eparam(%1)', type:'selectwindow',   options:{select:TextManager.paramNames()}},
+                {text:FTKR_CSS.EAOP,    value:'eaop(%1)',   type:'string',         options:{}},
+                {text:FTKR_CSS.CUSTOM,  value:'custom(%1)', type:'datawindow',     options:{data:FTKR.CSS.cssStatus.customs, property:'name'}},
+                {text:FTKR_CSS.GAUGE,   value:'gauge(%1)',  type:'datawindow',     options:{data:FTKR.CSS.cssStatus.gauges, property:'name'}},
+                {text:FTKR_CSS.AGAUGE,  value:'agauge(%1)', type:'string',         options:{}},
+                {text:FTKR_CSS.CGAUGE,  value:'cgauge(%1)', type:'string',         options:{}},
+                {text:FTKR_CSS.IMAGE,   value:'image(%1)',  type:'string',         options:{}},
+                {text:FTKR_CSS.MESSAGE, value:'message',    type:'none'},
+                {text:FTKR_CSS.TEXT,    value:'text(%1)',   type:'string',         options:{}},
+                {text:FTKR_CSS.EVAL,    value:'eval(%1)',   type:'string',         options:{}},
+                {text:FTKR_CSS.STREVAL, value:'streval(%1)',type:'string',         options:{}},
+                {text:FTKR_CSS.LINE,    value:'line',       type:'none'},
+                {text:FTKR_CSS.INAME,   value:'iname',      type:'none'},
+                {text:FTKR_CSS.IICON,   value:'iicon',      type:'none'},
+                {text:FTKR_CSS.ITYPE,   value:'itype',      type:'none'},
+                {text:FTKR_CSS.IETYPE,  value:'ietype',     type:'none'},
+                {text:FTKR_CSS.IDESC,   value:'idesc',      type:'none'},
+                {text:FTKR_CSS.ISCOPE,  value:'iscope',     type:'none'},
+                {text:FTKR_CSS.IELEMENT,value:'ielement',   type:'none'},
+                {text:FTKR_CSS.IPARAM,  value:'iparam(%1)', type:'string',         options:{}},
             ];
         };
 
@@ -1149,7 +1148,7 @@ function Scene_OSW() {
 
         //コマンドウィンドウの個別編集メニューを表示
         Scene_Base.prototype.setupCommandConfigWindow = function() {
-            var command = this.currentListCommand()
+            var command = this.currentListCommand();
             if (this._touchWindowIndex < 0 || !command) {
                 return false;
             }
@@ -1922,9 +1921,9 @@ function Scene_OSW() {
                     {type: 'window', name: 'パラメータリスト',  symbol: '_customCssStatus', enabled: true, options: {subConfigs: [
                         {type: 'subConfig', name: 'パラメータ編集', symbol: 'editStatus', enabled: true, options: {subConfigs: [
                             {type: 'subConfig', name: 'パラメータ設定', symbol: 'customCssStatus', enabled: 'this.hasCssStatus()', options: {subConfigs: [
-                                {type: 'selectwindow',  name: 'パラメータ名',   symbol: '_customCssStatus[index].text',  enabled: true, options: {setArray: true, select:FTKR_CSS_CODES, property:'text', value: true, prompt: true}},
+                                {type: 'selectwindow',  name: 'パラメータ名',   symbol: '_customCssStatus[index].text',  enabled: true, options: {setArray: true, select:FTKR_CSS_CODES(), property:'text', value: true, prompt: true}},
 //                                {type: 'string',        name: 'パラメータ詳細', symbol: '_customCssStatus[index].value', enabled: true, options: {setArray: true}},
-                                {type: 'refer',         name: 'パラメータ詳細', symbol: '_customCssStatus[index].value', enabled: true, options: {refSymbol:['_customCssStatus[index].text'], refIndex: FTKR_CSS_CODES, property: 'value', refData:FTKR_CSS_CODES_VALUE()}},
+                                {type: 'refer',         name: 'パラメータ詳細', symbol: '_customCssStatus[index].value', enabled: true, options: {refSymbol:['_customCssStatus[index].text'], refIndex: FTKR_CSS_CODES(), property: 'value', refData:FTKR_CSS_CODES()}},
                                 {type: 'string',        name: 'X座標',         symbol: '_customCssStatus[index].x',     enabled: true, options: {setArray: true}},
                                 {type: 'string',        name: 'Y座標',         symbol: '_customCssStatus[index].y',     enabled: true, options: {setArray: true}},
                                 {type: 'string',        name: '幅',            symbol: '_customCssStatus[index].width', enabled: true, options: {setArray: true}},
@@ -2127,11 +2126,11 @@ function Scene_OSW() {
         Scene_Base.prototype.addCustomCssStatusAt = function(index, parent) {
             var i = this._touchWindow._customCssStatus.length;
             if (index >= i) {
-                this._touchWindow._customCssStatus.push({text: 'name', x: 0, y: 0, width:0});
+                this._touchWindow._customCssStatus.push({text: 'null', x: 0, y: 0, width:0});
             } else if (index <= 0){
-                this._touchWindow._customCssStatus.unshift({text: 'name', x: 0, y: 0, width:0});
+                this._touchWindow._customCssStatus.unshift({text: 'null', x: 0, y: 0, width:0});
             } else {
-                this._touchWindow._customCssStatus.splice(index, 0, {text: 'name', x: 0, y: 0, width:0});
+                this._touchWindow._customCssStatus.splice(index, 0, {text: 'null', x: 0, y: 0, width:0});
             }
             consoleLogWIndex('パラメータ追加', index, this._touchWindow._customCssStatus);
             this.csspSetCmdListOrder(parent);
@@ -4435,7 +4434,7 @@ function Scene_OSW() {
     Window_Base.prototype.initialize = function(x, y, width, height) {
         _CSS_Window_Base_initialize.apply(this, arguments);
         var lss = this._lssStatus ? this.standardCssStatus() : {};
-        this._customCssStatus    = lss.statusList ? copyArray(lss.statusList) : [];
+        this._customCssStatus    = lss.statusList ? copyArray(lss.statusList) : [{text: 'null', x: 0, y: 0, width:0}];
         this._customCssSpaceIn   = lss.spaceIn;
         this._customCssText1     = lss.text1;
         this._customCssText2     = lss.text2;
