@@ -4,8 +4,8 @@
 // プラグインNo : 46
 // 作成者     : フトコロ
 // 作成日     : 2017/06/17
-// 最終更新日 : 2018/07/31
-// バージョン : v1.5.6
+// 最終更新日 : 2018/09/17
+// バージョン : v1.5.7
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.OSW = FTKR.OSW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.5.6 オリジナルのシーンやウィンドウを作成する
+ * @plugindesc v1.5.7 オリジナルのシーンやウィンドウを作成する
  * @author フトコロ
  *
  * @param --ウィンドウの共通設定--
@@ -662,6 +662,10 @@ FTKR.OSW = FTKR.OSW || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.5.7 - 2018/09/17 : 不具合修正
+ *    1. 一度作成したウィンドウのコマンド内容を変更しても、「更新」後に反映されない
+ *       不具合を修正。
+ * 
  * v1.5.6 - 2018/07/31 : 不具合修正
  *    1. セレクトウィンドウで、リストにアクターを設定した場合に、アクターの
  *       ゲームデータが正常に反映されない不具合を修正。
@@ -1192,7 +1196,7 @@ function Game_OswScene() {
                 var deselect = Boolean(eval(newwindow[3]));
                 var varId = Number(newwindow[4]) || 0;
                 var action = windowType + ',' + windowId + ',' + hide + ',' + deselect+ ',' + varId;
-                return 'this.changeActivateWindow.bind(this, window,' + action + ')';
+                return 'SceneManager._scene.changeActivateWindow.bind(SceneManager._scene, window,' + action + ')';
             case 'シーン変更':
             case 'CHANGE_SCENE':
                 return 'SceneManager.push.bind(SceneManager,' + match[2] + ')';
@@ -1203,7 +1207,7 @@ function Game_OswScene() {
                 switch ((text + '').toUpperCase()) {
                     case 'シーン終了':
                     case 'END_SCENE':
-                        return 'this.popScene.bind(this)';
+                        return 'SceneManager._scene.popScene.bind(SceneManager._scene)';
                     default:
                         return text;
                 }
@@ -1929,11 +1933,7 @@ function Game_OswScene() {
     Scene_Base.prototype.createCommandWindow = function(windowId, gameWindow) {
         this._oswCommandWindows[windowId] = new Window_OswCommand(gameWindow);
         var window = this._oswCommandWindows[windowId];
-        gameWindow._list.forEach(function(cmd) {
-            var method = eval(cmd.method);
-            window.setHandler(cmd.symbol, method);
-        },this);
-        if (gameWindow._cancel.method) window.setHandler('cancel', eval(gameWindow._cancel.method));
+        window.setMethodHandler(gameWindow);
         this.addOswWindow(window);
     };
 
@@ -1955,8 +1955,7 @@ function Game_OswScene() {
     Scene_Base.prototype.createSelectWindow = function(windowId, gameWindow) {
         this._oswSelectWindows[windowId] = new Window_OswSelect(gameWindow);
         var window = this._oswSelectWindows[windowId];
-        window.setHandler('ok', eval(gameWindow._ok.method));
-        window.setHandler('cancel', eval(gameWindow._cancel.method));
+        window.setMethodHandler(gameWindow);
         this.addOswWindow(window);
     };
 
@@ -2107,6 +2106,7 @@ function Game_OswScene() {
         if (this._window.requestRefresh()) {
             this.updateOswPlacement();
             this.refresh();
+            console.log(this);
             this._window.clearRequestRefresh();
         }
     };
@@ -2255,6 +2255,22 @@ function Game_OswScene() {
         this.updateOswSelect();
         this.updateOswRefresh();
         Window_Command.prototype.update.call(this);
+    };
+
+    Window_OswCommand.prototype.refresh = function() {
+        Window_Command.prototype.refresh.call(this);
+        this.setMethodHandler(this._window);
+    };
+
+    Window_OswCommand.prototype.setMethodHandler = function(gameWindow) {
+        for (var prop in this._handlers) {
+            delete this._handlers[prop];
+        }
+        gameWindow._list.forEach(function(cmd) {
+            var method = eval(cmd.method);
+            this.setHandler(cmd.symbol, method);
+        },this);
+        if (gameWindow._cancel.method) this.setHandler('cancel', eval(gameWindow._cancel.method));
     };
 
     //=============================================================================
@@ -2447,10 +2463,19 @@ function Game_OswScene() {
         return [];
     };
 
+    Window_OswSelect.prototype.setMethodHandler = function(gameWindow) {
+        for (var prop in this._handlers) {
+            delete this._handlers[prop];
+        }
+        this.setHandler('ok', eval(gameWindow._ok.method));
+        this.setHandler('cancel', eval(gameWindow._cancel.method));
+    };
+
     Window_OswSelect.prototype.refresh = function() {
         this.makeItemList();
         this.createContents();
         this.drawAllItems();
+        this.setMethodHandler(this._window);
     };
 
     Window_OswSelect.prototype.isEnabledChangePaintOpacity = function(actor) {
