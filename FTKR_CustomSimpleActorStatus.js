@@ -4,8 +4,8 @@
 // プラグインNo : 9
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2018/09/15
-// バージョン : v3.3.0
+// 最終更新日 : 2018/09/19
+// バージョン : v3.3.1
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v3.3.0 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v3.3.1 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -993,6 +993,9 @@ FTKR.CSS = FTKR.CSS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v3.3.1 - 2018/09/19 : 不具合修正
+ *    1. 戦闘不能時に、ステートアイコンを表示しない不具合を修正。
  * 
  * v3.3.0 - 2018/09/15 : 機能追加
  *    1. ステータスコードに、アイテム用のコードを追加。
@@ -2474,7 +2477,6 @@ FTKR.CSS = FTKR.CSS || {};
         if(css.autoScale) {
             var scale = this.iconScale(width);
             iw = iw * scale;
-            console.log(scale);
         }
         var maxlen = line ? this.lineHeight() * line : width;
         var offset = css.overlap ? this.getOverlapValue(actor, iw, maxlen, css) : iw;
@@ -3152,8 +3154,9 @@ Sprite_CssStateIcon.prototype.setup = function(battler, showNum) {
 
 Sprite_CssStateIcon.prototype.updateIcon = function() {
     var icons = [];
-    if (this._battler && this._battler.isAlive()) {
-        icons = this._battler.allIcons();
+//    if (this._battler && this._battler.isAlive()) {
+    if (this._battler) {
+            icons = this._battler.allIcons();
     }
     if (icons.length > 0) {
         this._animationIndex++;
