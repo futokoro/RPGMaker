@@ -45,7 +45,7 @@
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
-| [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) | [あり](FTKR_CustomSimpleActorStatus.ja.md) | [v3.3.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CustomSimpleActorStatus.js) | 2018/09/19 | ステータス表示を変更する 本体プラグイン |
+| [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) | [あり](FTKR_CustomSimpleActorStatus.ja.md) | [v3.3.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CustomSimpleActorStatus.js) | 2018/09/19 | ステータス表示を変更する 本体プラグイン |
 | [FTKR_CSS_MenuStatus](FTKR_CSS_MenuStatus.js) | [あり](FTKR_CSS_MenuStatus.ja.md) | [v2.1.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_MenuStatus.js) | 2018/09/12 | メニュー画面のステータス表示を変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) |
 | [FTKR_CSS_BattleStatus](FTKR_CSS_BattleStatus.js) | [あり](FTKR_CSS_BattleStatus.ja.md) | [v2.1.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_BattleStatus.js) | 2018/09/12 | バトル画面のステータス表示を変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) |
 | [FTKR_CSS_DetailedStatus](FTKR_CSS_DetailedStatus.js) | [あり](FTKR_CSS_DetailedStatus.ja.md) | [v2.1.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_DetailedStatus.js) | 2018/09/12 | ステータス画面のステータス表示を変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) |
@@ -307,7 +307,7 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 2018/09の更新情報
 
 ### 2018/09/19
-* [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md) v3.3.1
+* [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md) v3.3.1 v3.3.2
 * [FTKR_CSS_ShopStatus](FTKR_CSS_ShopStatus.ja.md) v2.1.1
 
 ### 2018/09/17

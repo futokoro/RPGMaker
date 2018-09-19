@@ -5,7 +5,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
 // 最終更新日 : 2018/09/19
-// バージョン : v3.3.1
+// バージョン : v3.3.2
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v3.3.1 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v3.3.2 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -994,6 +994,9 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v3.3.2 - 2018/09/19 : 機能追加
+ *    1. ステータスコードに、アイテム用のコードを追加。
+ * 
  * v3.3.1 - 2018/09/19 : 不具合修正
  *    1. 戦闘不能時に、ステートアイコンを表示しない不具合を修正。
  * 
@@ -1230,6 +1233,109 @@ FTKR.CSS = FTKR.CSS || {};
  *-----------------------------------------------------------------------------
  */
 //=============================================================================
+/*~struct~status:
+ * @param text
+ * @desc 表示するステータスを選択
+ * リストにない場合は、直接テキストで記述
+ * @default 
+ * @type select
+ * @option 名前
+ * @value name
+ * @option 二つ名
+ * @value nickname
+ * @option 職業
+ * @value class
+ * @option レベル
+ * @value level
+ * @option HP
+ * @value hp
+ * @option MP
+ * @value mp
+ * @option TP
+ * @value tp
+ * @option 顔画像
+ * @value face
+ * @option 顔画像(サイズ指定)
+ * @value face(%1)
+ * @option 歩行キャラ画像
+ * @value chara
+ * @option SV戦闘キャラ画像
+ * @value sv
+ * @option ステート(横)
+ * @value state
+ * @option ステート(縦)
+ * @value state2(%1)
+ * @option プロフィール
+ * @value profile
+ * @option 通常能力値
+ * @value param(%1)
+ * @option 装備
+ * @value equip(%1)
+ * @option 装備パラメータ
+ * @value eparam(%1)
+ * @option AOP装備パラメータ
+ * @value eaop(%1)
+ * @option カスタムパラメータ
+ * @value custom(%1)
+ * @option カスタムゲージ
+ * @value gauge(%1)
+ * @option アクター別カスタムゲージ
+ * @value agauge(%1)
+ * @option クラス別カスタムゲージ
+ * @value cgauge(%1)
+ * @option カスタム画像
+ * @value image
+ * @option カスタム画像(登録ID)
+ * @value image(%1)
+ * @option メッセージ
+ * @value message
+ * @option テキスト
+ * @value text(%1)
+ * @option JS計算式(数値表示)
+ * @value eval(%1)
+ * @option JS計算式(文字列表示)
+ * @value streval(%1)
+ * @option 横線
+ * @value line
+ * @option アイテム名
+ * @value iname
+ * @option アイテムアイコン
+ * @value iicon
+ * @option アイテム説明
+ * @value idesc
+ * @option アイテムタイプ
+ * @value itype
+ * @option アイテム装備タイプ
+ * @value ietype
+ * @option アイテム範囲
+ * @value iscope
+ * @option アイテム属性
+ * @value ielement
+ * @option アイテム設定詳細
+ * @value iparam(%1)
+ * @option アイテムカスタム画像
+ * @value iimage(%1)
+ * @option マップ名
+ * @value mapname
+ *
+ * @param value
+ * @desc code(%1)の形式で設定するステータスの%1の内容を入力
+ * @default 
+ * 
+ * @param x
+ * @desc 表示するX座標
+ * @default 0
+ *
+ * @param y
+ * @desc 表示するY座標
+ * @default 0
+ *
+ * @param width
+ * @desc 表示する幅
+ * @default 0
+ *
+ */
+
 
 (function() {
 
@@ -2066,6 +2172,8 @@ FTKR.CSS = FTKR.CSS || {};
     // 括弧で表示する内容を指定する表示コード(括弧内をevalで計算させる場合)
     Window_Base.prototype.drawCssActorStatusBase_A1 = function(index, actor, x, y, width, match, lss, css) {
         switch(match[1].toUpperCase()) {
+            case 'IIMAGE':
+                return this.drawCssItemImage(actor, x, y, width, match[2], lss);
             case 'EPARAM':
                 return this.drawCssActorEquipParam(actor, x, y, width, match[2], lss);
             case 'EAOP':
@@ -2110,6 +2218,8 @@ FTKR.CSS = FTKR.CSS || {};
                 return this.drawCssItemScope(actor, x, y, width, lss);
             case 'IELEMENT':
                 return this.drawCssItemElement(actor, x, y, width, lss);
+            case 'MAPNAME':
+                return this.drawCssMapName(actor, x, y, width, lss);
             case 'FACE':
                 return this.drawCssActorFace(actor, x, y, width, lss);
             case 'ECHARA':
@@ -2256,6 +2366,36 @@ FTKR.CSS = FTKR.CSS || {};
         return 1;
     };
 
+    //------------------------------------------------------------------------
+    //アイテムのカスタム画像の表示
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssItemImage = function(actor, dx, dy, width, id, lss) {
+        var item = lss.item;
+        if (!item) return 1;
+        id = id || 0;
+        var bgi = item.cssbgi[id];
+        var bitmap = ImageManager.loadPicture(bgi.name);
+        if (!bitmap) return 1;
+        var sw = bgi.width || bitmap.width;
+        var sh = bgi.height || bitmap.height;
+        var sx = bgi.offsetX || 0;
+        var sy = bgi.offsetY || 0;
+
+        var dh = sh * bgi.scale / 100;
+        var dw = sw * bgi.scale / 100;
+        var offsetX = FTKR.CSS.cssStatus.image.posiX * (width - dw) / 2;
+        dx = Math.floor(dx + offsetX);
+        this.contents.blt(bitmap, sx, sy, sw, sh, dx, dy, dw, dh);
+        return Math.ceil(dh / this.lineHeight()) || 1;
+    };
+
+    //------------------------------------------------------------------------
+    //マップ名の表示
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssMapName = function(actor, x, y, width, lss) {
+        this.drawText($gameMap.displayName(), x, y, width);
+        return 1;
+    };
 
     //------------------------------------------------------------------------
     //アクターの顔画像の表示関数
