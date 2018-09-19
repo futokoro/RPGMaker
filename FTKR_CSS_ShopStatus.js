@@ -4,8 +4,8 @@
 // プラグインNo : 52
 // 作成者     : フトコロ
 // 作成日     : 2017/07/23
-// 最終更新日 : 2018/08/30
-// バージョン : v2.1.0
+// 最終更新日 : 2018/09/19
+// バージョン : v2.1.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -17,7 +17,7 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.1.0 ショップ画面のステータスレイアウトを変更する
+ * @plugindesc v2.1.1 ショップ画面のステータスレイアウトを変更する
  * @author フトコロ
  *
  * @param --共通レイアウト設定--
@@ -276,6 +276,10 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.1.1 - 2018/09/19 : 不具合修正
+ *    1. 武器防具以外のパラメータ表示コードの一部が正しく反映されない不具合を修正。
+ *    2. プラグインパラメータのステータスリスト項目を追加。
+ * 
  * v2.1.0 - 2018/08/30 : 機能追加
  *    1. プラグインパラメータで表示するステータスをリストで選択できる機能を追加。
  * 
@@ -366,6 +370,28 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
  * @value streval(%1)
  * @option 横線
  * @value line
+ * @option アイテム名
+ * @value iname
+ * @option アイテムアイコン
+ * @value iicon
+ * @option アイテム説明
+ * @value idesc
+ * @option アイテムタイプ
+ * @value itype
+ * @option アイテム装備タイプ
+ * @value ietype
+ * @option アイテム範囲
+ * @value iscope
+ * @option アイテム属性
+ * @value ielement
+ * @option アイテム設定詳細
+ * @value iparam(%1)
+ * @option 装備パラメータ差分
+ * @value ediff(%1)
+ * @option AOP装備パラメータ差分
+ * @value ediffaop(%1)
+ * @option アイテムカスタム画像
+ * @value itemimage(%1)
  *
  * @param value
  * @desc code(%1)の形式で設定するステータスの%1の内容を入力
@@ -488,7 +514,7 @@ if (Imported.FTKR_CSS) (function() {
             case 'EDIFFAOP':
                 return this.drawCssActorEquipAopDiff(actor, x, y, width, match[2], lss);
             case 'ITEMIMAGE':
-                return this.drawCssItemImage(actor, x, y, width, match[2]);
+                return this.drawCssItemImage(actor, x, y, width, match[2], lss);
         }
         return _SpS_Window_Base_drawCssActorStatusBase_A1.call(this, index, actor, x, y, width, match, lss, css);
     };
@@ -520,8 +546,8 @@ if (Imported.FTKR_CSS) (function() {
         }
     };
     
-    Window_Base.prototype.drawCssItemImage = function(actor, dx, dy, width, id) {
-        var item = FTKR.gameData.item;
+    Window_Base.prototype.drawCssItemImage = function(actor, dx, dy, width, id, lss) {
+        var item = FTKR.gameData.item || lss.item;
         if (!item) return 1;
         id = id || 0;
         var bgi = item.cssbgi[id];
@@ -752,7 +778,9 @@ if (Imported.FTKR_CSS) (function() {
             var h = this.height - this.padding * 2;
             if (!this.isEquipItem()) {
                 var lss = this._lssStatus;
-                this.drawCssActorStatus(0, null, 0, 0, w, h, lss);
+                lss.item = this._item;
+                var actor = $gameParty.members()[0];
+                this.drawCssActorStatus(0, actor, 0, 0, w, h, lss);
             }
         }
     };

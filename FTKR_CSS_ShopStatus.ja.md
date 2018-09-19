@@ -182,7 +182,8 @@ x はオリジナルパラメータIDを指定してください。
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver2.1.0](FTKR_CSS_ShopStatus.js) | 2018/08/30 | FTKR_CustomSimpleActorStatus.js の v3.1.0に対応 |
+| [ver2.1.1](FTKR_CSS_ShopStatus.js) | 2018/09/19 | 武器防具以外のパラメータ表示コードの一部が正しく反映されない不具合を修正<br>プラグインパラメータのステータスリスト項目を追加 |
+| ver2.1.0 | 2018/08/30 | FTKR_CustomSimpleActorStatus.js の v3.1.0に対応 |
 | ver2.0.0 | 2018/08/19 | FTKR_CustomSimpleActorStatus.js の v3.0.0に対応 |
 | [ver1.2.2](/archive/FTKR_CSS_ShopStatus_1.2.2.js) | 2017/12/02 | GraphicalDesignMode.jsがないとエラーで立ち上がらない不具合を修正 |
 | ver1.2.1 | 2017/11/18 | GraphicalDesignMode.jsのレイアウト変更が一部反映されない不具合を修正 |
