@@ -136,7 +136,8 @@ EIB_SET_CAPACITY WEAPON 5 SUBTRACT
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.0.0](FTKR_ItemBoxCapacity.js) | 2017/06/09 | 初版公開 |
+| [ver1.0.1](FTKR_ItemBoxCapacity.js) | 2018/09/22 | スクリプトが正常に動作しない不具合を修正 |
+| ver1.0.0 | 2017/06/09 | 初版公開 |
 
 # ライセンス
 

@@ -4,8 +4,8 @@
 // プラグインNo : 45
 // 作成者     : フトコロ
 // 作成日     : 2017/06/09
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2018/09/22
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ var FTKR = FTKR || {};
 FTKR.IBC = FTKR.IBC || {};
 
 /*:
- * @plugindesc v1.0.0 アイテムボックスに所持容量を追加する
+ * @plugindesc v1.0.1 アイテムボックスに所持容量を追加する
  * @author フトコロ
  *
  * @param --アイテムボックス容量設定--
@@ -187,7 +187,7 @@ FTKR.IBC = FTKR.IBC || {};
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
- * Copyright (c) 2017 Futokoro
+ * Copyright (c) 2017,2018 Futokoro
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
@@ -195,6 +195,7 @@ FTKR.IBC = FTKR.IBC || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.1 - 2018/09/22 : スクリプトが正常に動作しない不具合を修正。
  * v1.0.0 - 2017/06/09 : 初版作成
  * 
  *-----------------------------------------------------------------------------
@@ -423,16 +424,15 @@ FTKR.IBC = FTKR.IBC || {};
         return FTKR.IBC.stack.dup ? false : this.numItems(item) >= this.maxItems(item);
     };
 
-    Game_Party.prototype.isEmptyStack = function(item) {
-        if (!this.hasItem(item)) return false;
-        var diff = this.maxItems(item) * this.dupItems(item).length - this.numItems(item);
-        if (!FTKR.IBC.stack.dup) return diff;
-        var rem = this.numItems(item) % this.maxItems(item);
-        return diff ? this.maxItems(item) - rem : 0;
-    };
-
+    /*-------------------------------------------------------------
+      アイテムの容量
+    -------------------------------------------------------------*/
     Game_Party.prototype.itemsCapacityPlus = function() {
         return this._itemsCapacityPlus || 0;
+    };
+
+    Game_Party.prototype.setItemsCapacityPlus = function(value) {
+        this._itemsCapacityPlus = value;
     };
 
     Game_Party.prototype.maxItemsCapacity = function() {
@@ -443,12 +443,19 @@ FTKR.IBC = FTKR.IBC || {};
         return this.maxItemsCapacity() - this._items.length;
     };
 
-    Game_Party.prototype.setItemsCapacityPlus = function(value) {
-        this._itemsCapacityPlus = value;
+    Game_Party.prototype.isItemsCapacityOk = function() {
+        return this.isItemsCapacity() > 0;
     };
 
+    /*-------------------------------------------------------------
+      武器の容量
+    -------------------------------------------------------------*/
     Game_Party.prototype.weaponsCapacityPlus = function() {
         return this._weaponsCapacityPlus || 0;
+    };
+
+    Game_Party.prototype.setWeaponsCapacityPlus = function(value) {
+        this._weaponsCapacityPlus = value;
     };
 
     Game_Party.prototype.maxWeaponsCapacity = function() {
@@ -459,28 +466,36 @@ FTKR.IBC = FTKR.IBC || {};
         return this.maxWeaponsCapacity() - this._weapons.length;
     };
 
-    Game_Party.prototype.setWeaponsCapacityPlus = function(value) {
-        this._weaponsCapacityPlus = value;
+    Game_Party.prototype.isWeaponsCapacityOk = function() {
+        return this.isWeaponsCapacity() > 0;
     };
+
+    /*-------------------------------------------------------------
+      防具の容量
+    -------------------------------------------------------------*/
     Game_Party.prototype.armorsCapacityPlus = function() {
         return this._armorsCapacityPlus || 0;
+    };
+
+    Game_Party.prototype.setArmorsCapacityPlus = function(value) {
+        this._armorsCapacityPlus = value;
     };
 
     Game_Party.prototype.maxArmorsCapacity = function() {
         return FTKR.IBC.capacity.armor + this.armorsCapacityPlus();
     };
 
-    Game_Party.prototype.isArmorsCapacityOk = function() {
+    Game_Party.prototype.isArmorsCapacity = function() {
         return this.maxArmorsCapacity() - this._armors.length;
     };
 
-    Game_Party.prototype.setArmorsCapacityPlus = function(value) {
-        this._armorsCapacityPlus = value;
-    };
-    Game_Party.prototype.isItemCapacityOk = function(item) {
-        return this.isItemCapacity(item) > 0;
-    };
+    Game_Party.prototype.isArmorsCapacityOk = function() {
+        return this.isArmorsCapacity() > 0;
+    }
 
+    /*-------------------------------------------------------------
+      全体の容量
+    -------------------------------------------------------------*/
     Game_Party.prototype.isItemCapacity = function(item) {
         var cap = FTKR.IBC.capacity;
         if (!item) {
@@ -496,8 +511,20 @@ FTKR.IBC = FTKR.IBC || {};
         }
     };
 
+    Game_Party.prototype.isItemCapacityOk = function(item) {
+        return this.isItemCapacity(item) > 0;
+    };
+
     Game_Party.prototype.emptyNumber = function(item) {
         return this.isEmptyStack(item) + this.isItemCapacity(item) * this.maxItems(item);
+    };
+
+    Game_Party.prototype.isEmptyStack = function(item) {
+        if (!this.hasItem(item)) return false;
+        var diff = this.maxItems(item) * this.dupItems(item).length - this.numItems(item);
+        if (!FTKR.IBC.stack.dup) return diff;
+        var rem = this.numItems(item) % this.maxItems(item);
+        return diff ? this.maxItems(item) - rem : 0;
     };
 
     //------------------------------------------------------------------------
