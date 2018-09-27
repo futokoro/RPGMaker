@@ -293,7 +293,8 @@ CBR_SHOW_BATTLE_RESULT
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver2.1.0](FTKR_CSS_CustomizeBattleResults.js) | 2018/08/30 | FTKR_CustomSimpleActorStatus.js の v3.1.0に対応 |
+| [ver2.1.1](FTKR_CSS_CustomizeBattleResults.js) | 2018/09/28 | 経験獲得率の値によっては、獲得経験値が正しく計算されない不具合を修正 |
+| ver2.1.0 | 2018/08/30 | FTKR_CustomSimpleActorStatus.js の v3.1.0に対応 |
 | ver2.0.0 | 2018/08/19 | FTKR_CustomSimpleActorStatus.js の v3.0.0に対応 |
 | [ver1.5.0](/archive/FTKR_CSS_CustomizeBattleResults_1.5.0.js) | 2018/08/04 | バトルメンバー以外も画面に表示する機能を追加 |
 | ver1.4.3 | 2018/01/12 | FTKR_ExBattleEventと組み合わせたときに、戦闘終了時イベント中に正しく戦績画面の処理が実行できない不具合を修正<br>経験値のゲージが上昇している間に戦績画面を閉じると、ゲージが止まった時点までの経験値しか入手していなかった不具合を修正。<br>戦績画面で終了コマンドを実行するまで、戦闘終了時イベントの処理を止めるプラグインコマンドを追加。 |

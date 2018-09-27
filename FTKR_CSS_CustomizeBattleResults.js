@@ -4,8 +4,8 @@
 // プラグインNo : 44
 // 作成者     : フトコロ
 // 作成日     : 2017/06/07
-// 最終更新日 : 2018/08/30
-// バージョン : v2.1.0
+// 最終更新日 : 2018/09/28
+// バージョン : v2.1.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.CBR = FTKR.CBR || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.1.0 カスタム可能な戦闘結果画面を表示する
+ * @plugindesc v2.1.1 カスタム可能な戦闘結果画面を表示する
  * @author フトコロ
  *
  * @param --タイトル設定--
@@ -347,6 +347,9 @@ FTKR.CBR = FTKR.CBR || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v2.1.1 - 2018/09/28 : 不具合修正
+ *    1. 経験獲得率の値によっては、獲得経験値が正しく計算されない不具合を修正。
  * 
  * v2.1.0 - 2018/08/30 : 機能追加
  *    1. プラグインパラメータで表示するステータスをリストで選択できる機能を追加。
@@ -719,6 +722,10 @@ if (Imported.FTKR_CSS) (function() {
     BattleManager.initMembers = function() {
         _CBR_BattleManager_initMembers.call(this);
         this._showBattleResultOk = false;
+        this._cbrGainExps = [];
+        this._cbrExps = [];
+        this._cbrModExps = [];
+        this._cbrSplitExps = [];
     }
 
     //書き換え
@@ -737,17 +744,55 @@ if (Imported.FTKR_CSS) (function() {
     //書き換え
     BattleManager.gainExp = function() {
         this._cbrGainExp = this._rewards.exp;
-        SceneManager._scene.setGainExp(this._cbrGainExp);
+        this._cbrCount = Scene_Battle.CBR_COUNT_MAX;
+        var splitNum = Scene_Battle.CBR_SPLIT_NUMBER;
+        $gameParty.allMembers().forEach(function(actor, i) {
+            this._cbrExps[i] = 0;
+            var gainExp = Math.round(this._cbrGainExp * actor.finalExpRate());
+            this._cbrGainExps[i] = gainExp
+            this._cbrSplitExps[i] = Math.floor(gainExp / splitNum);
+            this._cbrModExps[i] = gainExp % splitNum;
+        },this);
         this._rewards.exp = 0;
     };
 
     var _CBR_BattleManager_updateEvent = BattleManager.updateEvent;
     BattleManager.updateEvent = function() {
         if (BattleManager.isCbrBattleResult()) {
-            SceneManager._scene.updateExp(this._cbrGainExp);
+            this.updateExp(this._cbrGainExp);
             return true;
         }
         return _CBR_BattleManager_updateEvent.call(this);
+    };
+
+    BattleManager.updateExp = function(gainExp) {
+        if (!gainExp) return;
+        if (this._cbrCount < Scene_Battle.CBR_COUNT_MAX) {
+            this._cbrCount += 1;
+        } else {
+            this._cbrCount = 0;
+            $gameParty.allMembers().forEach(function(actor, i) {
+                if (this._cbrExps[i] >= this._cbrGainExps[i]) return;
+                var modexp = this._cbrModExps[i] ? 1 : 0;
+                var exp = this._cbrSplitExps[i] + modexp;
+                if (modexp) this._cbrModExps[i] -= 1;
+                this._cbrExps[i] += exp;
+                actor.gainExp(exp);
+            },this);
+            SceneManager._scene._battleResultActorWindow.refresh();
+        }
+    };
+
+    BattleManager.cbrFinish = function() {
+        this._showBattleResultOk = false;
+        $gameParty.allMembers().forEach(function(actor, i) {
+            var difExp = this._cbrGainExps[i] - this._cbrExps[i];
+            if (difExp) {
+                actor.gainExp(difExp);
+            }
+        },this);
+        this._cbrGainExp = 0;
+        this._cbrGainExps.length = 0;
     };
 
     BattleManager.showCBR = function() {
@@ -773,16 +818,23 @@ if (Imported.FTKR_CSS) (function() {
     };
 
     //=============================================================================
-    // 戦闘中のレベルアップメッセージを無効
     //Game_Actor
     //=============================================================================
 
+    // 戦闘中のレベルアップメッセージを無効
+    //書き換え
     var _CBR_Game_Actor_displayLevelUp = Game_Actor.prototype.displayLevelUp;
     Game_Actor.prototype.displayLevelUp = function(newSkills) {
         if ($gameParty.inBattle()) return;
         _CBR_Game_Actor_displayLevelUp.call(this, newSkills);
     };
 
+    //書き換え
+    Game_Actor.prototype.gainExp = function(exp) {
+        var newExp = this.currentExp() + Math.round(exp);
+        this.changeExp(newExp, this.shouldDisplayLevelUp());
+    };
+    
     //=============================================================================
     // 戦績ウィンドウの追加
     //Scene_Battle
@@ -869,33 +921,6 @@ if (Imported.FTKR_CSS) (function() {
         this.addWindow(this._battleResultItemWindow);
     };
 
-    Scene_Battle.prototype.setGainExp = function(gainExp) {
-        this._cbrExp = 0;
-        this._cbrGainExp = gainExp;
-        var splitNum = Scene_Battle.CBR_SPLIT_NUMBER;
-        this._cbrSplitExp = Math.floor(gainExp / splitNum);
-        this._cbrModExp = gainExp % splitNum;
-        this._cbrCount = Scene_Battle.CBR_COUNT_MAX;
-    };
-
-    Scene_Battle.prototype.updateExp = function(gainExp) {
-        if (!gainExp) return;
-        if (this._cbrExp >= gainExp) return;
-        if (this._cbrCount < Scene_Battle.CBR_COUNT_MAX) {
-            this._cbrCount += 1;
-        } else {
-            this._cbrCount = 0;
-            var modexp = this._cbrModExp ? 1 : 0;
-            var exp = this._cbrSplitExp + modexp;
-            if (modexp) this._cbrModExp -= 1;
-            this._cbrExp += exp;
-            $gameParty.allMembers().forEach(function(actor) {
-                actor.gainExp(exp);
-            },this);
-            this._battleResultActorWindow.refresh();
-        }
-    };
-
     Scene_Battle.prototype.showBattleResult = function(rewards) {
         this._statusWindow.hide();
         this._battleResultTitleWindow.show();
@@ -929,13 +954,7 @@ if (Imported.FTKR_CSS) (function() {
     
     Scene_Battle.prototype.cbrFinish = function() {
         this.hideBattleResult();
-        BattleManager._showBattleResultOk = false;
-        var difExp = this._cbrGainExp - this._cbrExp;
-        if (difExp) {
-            $gameParty.allMembers().forEach(function(actor) {
-                actor.gainExp(difExp);
-            },this);
-        }
+        BattleManager.cbrFinish();
     };
 
     Scene_Battle.prototype.onCBRActorCancel = function() {
