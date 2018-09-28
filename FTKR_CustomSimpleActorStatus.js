@@ -4,8 +4,8 @@
 // プラグインNo : 9
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2018/09/19
-// バージョン : v3.3.2
+// 最終更新日 : 2018/09/28
+// バージョン : v3.3.3
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v3.3.2 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v3.3.3 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -136,6 +136,19 @@ FTKR.CSS = FTKR.CSS || {};
  * @desc 行の高さまたは表示幅に合わせてアイコンサイズを調整するか
  * 1 - 有効にする, 0 - 無効にする
  * @default 0
+ * 
+ * @param --通常能力値(差分)の設定--
+ * @default
+ * 
+ * @param Format PDIFF Plus
+ * @desc 増加の場合の表示を設定します。
+ * %1 - 増加値
+ * @default \c[24]+ %1
+ * 
+ * @param Format PDIFF Minus
+ * @desc 減少の場合の表示を設定します。
+ * %1 - 減少値
+ * @default \c[25]- %1
  * 
  * @param --装備パラメータの設定--
  * @default
@@ -994,6 +1007,9 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v3.3.3 - 2018/09/28 : 機能追加
+ *    1. ステータスコードに、パラメータ表示用のコードを追加。
+ * 
  * v3.3.2 - 2018/09/19 : 機能追加
  *    1. ステータスコードに、アイテム用のコードを追加。
  * 
@@ -1269,6 +1285,10 @@ FTKR.CSS = FTKR.CSS || {};
  * @value profile
  * @option 通常能力値
  * @value param(%1)
+ * @option 通常能力値(素)
+ * @value pbase(%1)
+ * @option 通常能力値(増加分)
+ * @value pdiff(%1)
  * @option 装備
  * @value equip(%1)
  * @option 装備パラメータ
@@ -1384,6 +1404,10 @@ FTKR.CSS = FTKR.CSS || {};
             autoScale   :Number(parameters['Enable Auto Scale'] || 0),
             rate        :Number(parameters['Overlap Rate'] || 0),
             iconPadding :Number(parameters['State Icon Padding'] || 0),
+        },
+        pdiff:{
+            plus  :paramParse(parameters['Format PDIFF Plus']),
+            minus :paramParse(parameters['Format PDIFF Minus']),
         },
         equip:{
             arrow:String(parameters['Equip Right Arrow'] || ''),
@@ -2172,6 +2196,10 @@ FTKR.CSS = FTKR.CSS || {};
     // 括弧で表示する内容を指定する表示コード(括弧内をevalで計算させる場合)
     Window_Base.prototype.drawCssActorStatusBase_A1 = function(index, actor, x, y, width, match, lss, css) {
         switch(match[1].toUpperCase()) {
+            case 'PDIFF':
+                return this.drawCssActorParamDiff(actor, x, y, width, match[2], lss);
+            case 'PBASE':
+                return this.drawCssActorParamBase(actor, x, y, width, match[2], lss);
             case 'IIMAGE':
                 return this.drawCssItemImage(actor, x, y, width, match[2], lss);
             case 'EPARAM':
@@ -2713,6 +2741,37 @@ FTKR.CSS = FTKR.CSS || {};
         this.drawText(TextManager.param(paramId), x, y, width);
         this.resetTextColor();
         this.drawText(actor.param(paramId), x, y, width, 'right');
+        return 1;
+    };
+
+    //------------------------------------------------------------------------
+    //素のパラメータの表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorParamBase = function(actor, x, y, width, paramId, lss) {
+        if (paramId < 0 && paramId > 7) return 0;
+        this.changeTextColor(this.systemColor());
+        this.drawText(TextManager.param(paramId), x, y, width);
+        this.resetTextColor();
+        this.drawText(actor.paramBase(paramId), x, y, width, 'right');
+        return 1;
+    };
+
+    //------------------------------------------------------------------------
+    //パラメータ差分の表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorParamDiff = function(actor, x, y, width, paramId, lss) {
+        if (paramId < 0 && paramId > 7) return 1;
+        var param = actor.param(paramId);
+        var base = actor.paramBase(paramId);
+        var diff = param - base;
+        var text = '';
+        if (diff > 0) {
+            text = FTKR.CSS.cssStatus.pdiff.plus.format(diff);
+        } else if (diff < 0) {
+            text = FTKR.CSS.cssStatus.pdiff.minus.format(-diff);
+        }
+        this.drawTextEx(text, x, y);
+        this.resetTextColor();
         return 1;
     };
 
