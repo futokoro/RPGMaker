@@ -4,8 +4,8 @@
 // プラグインNo : 3
 // 作成者     : フトコロ
 // 作成日     : 2017/02/16
-// 最終更新日 : 2017/11/05
-// バージョン : v1.1.6
+// 最終更新日 : 2018/09/29
+// バージョン : v1.2.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.AOP = FTKR.AOP || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.6 オリジナルのパラメータを追加するプラグイン
+ * @plugindesc v1.2.0 オリジナルのパラメータを追加するプラグイン
  * @author フトコロ
  *
  * @param Use Param Num
@@ -35,6 +35,10 @@ FTKR.AOP = FTKR.AOP || {};
  * @param ---Parameter 0---
  * @default
  * 
+ * @param Parameter 0 Text
+ * @desc コードの表示名を設定
+ * @default 
+ *
  * @param Parameter 0 Code
  * @desc 計算式等で使用するコード名を設定
  * @default str
@@ -55,6 +59,10 @@ FTKR.AOP = FTKR.AOP || {};
  * @param ---Parameter 1---
  * @default
  * 
+ * @param Parameter 1 Text
+ * @desc コードの表示名を設定
+ * @default 
+ *
  * @param Parameter 1 Code
  * @desc 計算式等で使用するコード名を設定
  * @default vit
@@ -75,6 +83,10 @@ FTKR.AOP = FTKR.AOP || {};
  * @param ---Parameter 2---
  * @default
  * 
+ * @param Parameter 2 Text
+ * @desc コードの表示名を設定
+ * @default 
+ *
  * @param Parameter 2 Code
  * @desc 計算式等で使用するコード名を設定
  * @default int
@@ -95,6 +107,10 @@ FTKR.AOP = FTKR.AOP || {};
  * @param ---Parameter 3---
  * @default
  * 
+ * @param Parameter 3 Text
+ * @desc コードの表示名を設定
+ * @default 
+ *
  * @param Parameter 3 Code
  * @desc 計算式等で使用するコード名を設定
  * @default men
@@ -115,6 +131,10 @@ FTKR.AOP = FTKR.AOP || {};
  * @param ---Parameter 4---
  * @default
  * 
+ * @param Parameter 4 Text
+ * @desc コードの表示名を設定
+ * @default 
+ *
  * @param Parameter 4 Code
  * @desc 計算式等で使用するコード名を設定
  * @default 
@@ -135,6 +155,10 @@ FTKR.AOP = FTKR.AOP || {};
  * @param ---Parameter 5---
  * @default
  * 
+ * @param Parameter 5 Text
+ * @desc コードの表示名を設定
+ * @default 
+ *
  * @param Parameter 5 Code
  * @desc 計算式等で使用するコード名を設定
  * @default 
@@ -155,6 +179,10 @@ FTKR.AOP = FTKR.AOP || {};
  * @param ---Parameter 6---
  * @default
  * 
+ * @param Parameter 6 Text
+ * @desc コードの表示名を設定
+ * @default 
+ *
  * @param Parameter 6 Code
  * @desc 計算式等で使用するコード名を設定
  * @default 
@@ -175,6 +203,10 @@ FTKR.AOP = FTKR.AOP || {};
  * @param ---Parameter 7---
  * @default
  * 
+ * @param Parameter 7 Text
+ * @desc コードの表示名を設定
+ * @default 
+ *
  * @param Parameter 7 Code
  * @desc 計算式等で使用するコード名を設定
  * @default 
@@ -195,6 +227,10 @@ FTKR.AOP = FTKR.AOP || {};
  * @param ---Parameter 8---
  * @default
  * 
+ * @param Parameter 8 Text
+ * @desc コードの表示名を設定
+ * @default 
+ *
  * @param Parameter 8 Code
  * @desc 計算式等で使用するコード名を設定
  * @default 
@@ -215,6 +251,10 @@ FTKR.AOP = FTKR.AOP || {};
  * @param ---Parameter 9---
  * @default
  * 
+ * @param Parameter 9 Text
+ * @desc コードの表示名を設定
+ * @default 
+ *
  * @param Parameter 9 Code
  * @desc 計算式等で使用するコード名を設定
  * @default 
@@ -257,6 +297,10 @@ FTKR.AOP = FTKR.AOP || {};
  * (*1) プラグインパラメータ<Use Param Num>の値を変更することで
  *      使用する数を設定できます。
  * 
+ * <Parameter x Text>
+ *    :コード名を設定します。
+ *    :FTKR_CustomSimpleActorStatus とその拡張プラグインで表示する際の名称です。
+ *
  * <Parameter x Code>
  *    :計算式等で使用するコード名を設定します。
  *
@@ -450,13 +494,20 @@ FTKR.AOP = FTKR.AOP || {};
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
- * Copyright (c) 2017 Futokoro
+ * Copyright (c) 2017,2018 Futokoro
  * http://opensource.org/licenses/mit-license.php
+ * 
+ * 
+ * プラグイン公開元
+ * https://github.com/futokoro/RPGMaker/blob/master/README.md
  * 
  * 
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.2.0 - 2018/09/29 : 機能追加
+ *    1. 各コードの表示名を設定する機能を追加。
  * 
  * v1.1.6 - 2017/11/05 : 不具合修正
  *    1. アイテム等に設定した現在値の減少効果が発生しない不具合を修正。
@@ -495,677 +546,691 @@ FTKR.AOP = FTKR.AOP || {};
 */
 //=============================================================================
 
-//=============================================================================
-// プラグイン パラメータ
-//=============================================================================
-FTKR.AOP.parameters = PluginManager.parameters('FTKR_AddOriginalParameters');
+(function() {
 
-FTKR.AOP.useParamNum = Number(FTKR.AOP.parameters['Use Param Num'] || 0);
-FTKR.AOP.maxLevel = Number(FTKR.AOP.parameters['Max Level'] || 0);
-FTKR.AOP.maxParam = Number(FTKR.AOP.parameters['Max Param'] || 0);
+    //=============================================================================
+    // プラグイン パラメータ
+    //=============================================================================
+    var parameters = PluginManager.parameters('FTKR_AddOriginalParameters');
 
-FTKR.AOP.params = [
-    { code:String(FTKR.AOP.parameters['Parameter 0 Code'] || ''),
-      current:String(FTKR.AOP.parameters['Parameter 0 Current'] || ''),
-      max:Number(FTKR.AOP.parameters['Parameter 0 Max'] || 0),
-      min:Number(FTKR.AOP.parameters['Parameter 0 Min'] || 0),},
-    { code:String(FTKR.AOP.parameters['Parameter 1 Code'] || ''),
-      current:String(FTKR.AOP.parameters['Parameter 1 Current'] || ''),
-      max:Number(FTKR.AOP.parameters['Parameter 1 Max'] || 0),
-      min:Number(FTKR.AOP.parameters['Parameter 1 Min'] || 0),},
-    { code:String(FTKR.AOP.parameters['Parameter 2 Code'] || ''),
-      current:String(FTKR.AOP.parameters['Parameter 2 Current'] || ''),
-      max:Number(FTKR.AOP.parameters['Parameter 2 Max'] || 0),
-      min:Number(FTKR.AOP.parameters['Parameter 2 Min'] || 0),},
-    { code:String(FTKR.AOP.parameters['Parameter 3 Code'] || ''),
-      current:String(FTKR.AOP.parameters['Parameter 3 Current'] || ''),
-      max:Number(FTKR.AOP.parameters['Parameter 3 Max'] || 0),
-      min:Number(FTKR.AOP.parameters['Parameter 3 Min'] || 0),},
-    { code:String(FTKR.AOP.parameters['Parameter 4 Code'] || ''),
-      current:String(FTKR.AOP.parameters['Parameter 4 Current'] || ''),
-      max:Number(FTKR.AOP.parameters['Parameter 4 Max'] || 0),
-      min:Number(FTKR.AOP.parameters['Parameter 4 Min'] || 0),},
-    { code:String(FTKR.AOP.parameters['Parameter 5 Code'] || ''),
-      current:String(FTKR.AOP.parameters['Parameter 5 Current'] || ''),
-      max:Number(FTKR.AOP.parameters['Parameter 5 Max'] || 0),
-      min:Number(FTKR.AOP.parameters['Parameter 5 Min'] || 0),},
-    { code:String(FTKR.AOP.parameters['Parameter 6 Code'] || ''),
-      current:String(FTKR.AOP.parameters['Parameter 6 Current'] || ''),
-      max:Number(FTKR.AOP.parameters['Parameter 6 Max'] || 0),
-      min:Number(FTKR.AOP.parameters['Parameter 6 Min'] || 0),},
-    { code:String(FTKR.AOP.parameters['Parameter 7 Code'] || ''),
-      current:String(FTKR.AOP.parameters['Parameter 7 Current'] || ''),
-      max:Number(FTKR.AOP.parameters['Parameter 7 Max'] || 0),
-      min:Number(FTKR.AOP.parameters['Parameter 7 Min'] || 0),},
-    { code:String(FTKR.AOP.parameters['Parameter 8 Code'] || ''),
-      current:String(FTKR.AOP.parameters['Parameter 8 Current'] || ''),
-      max:Number(FTKR.AOP.parameters['Parameter 8 Max'] || 0),
-      min:Number(FTKR.AOP.parameters['Parameter 8 Min'] || 0),},
-    { code:String(FTKR.AOP.parameters['Parameter 9 Code'] || ''),
-      current:String(FTKR.AOP.parameters['Parameter 9 Current'] || ''),
-      max:Number(FTKR.AOP.parameters['Parameter 9 Max'] || 0),
-      min:Number(FTKR.AOP.parameters['Parameter 9 Min'] || 0),},
-];
+    FTKR.AOP.useParamNum = Number(parameters['Use Param Num'] || 0);
+    FTKR.AOP.maxLevel = Number(parameters['Max Level'] || 0);
+    FTKR.AOP.maxParam = Number(parameters['Max Param'] || 0);
 
-Game_BattlerBase.MAX_AOP_PARAMS = 10;
-Game_BattlerBase.TRAIT_AOPPARAM = 99;
-Game_Action.EFFECT_GET_AOP = 990;
+    FTKR.AOP.params = [
+        {   text: String(parameters['Parameter 0 Text'] || ''),
+            code:String(parameters['Parameter 0 Code'] || ''),
+            current:String(parameters['Parameter 0 Current'] || ''),
+            max:Number(parameters['Parameter 0 Max'] || 0),
+            min:Number(parameters['Parameter 0 Min'] || 0),},
+        {   text: String(parameters['Parameter 1 Text'] || ''),
+            code:String(parameters['Parameter 1 Code'] || ''),
+            current:String(parameters['Parameter 1 Current'] || ''),
+            max:Number(parameters['Parameter 1 Max'] || 0),
+            min:Number(parameters['Parameter 1 Min'] || 0),},
+        {   text: String(parameters['Parameter 2 Text'] || ''),
+            code:String(parameters['Parameter 2 Code'] || ''),
+            current:String(parameters['Parameter 2 Current'] || ''),
+            max:Number(parameters['Parameter 2 Max'] || 0),
+            min:Number(parameters['Parameter 2 Min'] || 0),},
+        {   text: String(parameters['Parameter 3 Text'] || ''),
+            code:String(parameters['Parameter 3 Code'] || ''),
+            current:String(parameters['Parameter 3 Current'] || ''),
+            max:Number(parameters['Parameter 3 Max'] || 0),
+            min:Number(parameters['Parameter 3 Min'] || 0),},
+        {   text: String(parameters['Parameter 4 Text'] || ''),
+            code:String(parameters['Parameter 4 Code'] || ''),
+            current:String(parameters['Parameter 4 Current'] || ''),
+            max:Number(parameters['Parameter 4 Max'] || 0),
+            min:Number(parameters['Parameter 4 Min'] || 0),},
+        {   text: String(parameters['Parameter 5 Text'] || ''),
+            code:String(parameters['Parameter 5 Code'] || ''),
+            current:String(parameters['Parameter 5 Current'] || ''),
+            max:Number(parameters['Parameter 5 Max'] || 0),
+            min:Number(parameters['Parameter 5 Min'] || 0),},
+        {   text: String(parameters['Parameter 6 Text'] || ''),
+            code:String(parameters['Parameter 6 Code'] || ''),
+            current:String(parameters['Parameter 6 Current'] || ''),
+            max:Number(parameters['Parameter 6 Max'] || 0),
+            min:Number(parameters['Parameter 6 Min'] || 0),},
+        {   text: String(parameters['Parameter 7 Text'] || ''),
+            code:String(parameters['Parameter 7 Code'] || ''),
+            current:String(parameters['Parameter 7 Current'] || ''),
+            max:Number(parameters['Parameter 7 Max'] || 0),
+            min:Number(parameters['Parameter 7 Min'] || 0),},
+        {   text: String(parameters['Parameter 8 Text'] || ''),
+            code:String(parameters['Parameter 8 Code'] || ''),
+            current:String(parameters['Parameter 8 Current'] || ''),
+            max:Number(parameters['Parameter 8 Max'] || 0),
+            min:Number(parameters['Parameter 8 Min'] || 0),},
+        {   text: String(parameters['Parameter 9 Text'] || ''),
+            code:String(parameters['Parameter 9 Code'] || ''),
+            current:String(parameters['Parameter 9 Current'] || ''),
+            max:Number(parameters['Parameter 9 Max'] || 0),
+            min:Number(parameters['Parameter 9 Min'] || 0),},
+    ];
 
-if (FTKR.AOP.useParamNum > Game_BattlerBase.MAX_AOP_PARAMS) {
-    FTKR.AOP.useParamNum = Game_BattlerBase.MAX_AOP_PARAMS;
-}
+    Game_BattlerBase.MAX_AOP_PARAMS = 10;
+    Game_BattlerBase.TRAIT_AOPPARAM = 99;
+    Game_Action.EFFECT_GET_AOP = 990;
 
-//=============================================================================
-// DataManager
-//=============================================================================
-
-FTKR.AOP.DatabaseLoaded = false;
-FTKR.AOP.DataManager_isDatabaseLoaded = DataManager.isDatabaseLoaded;
-DataManager.isDatabaseLoaded = function() {
-    if (!FTKR.AOP.DataManager_isDatabaseLoaded.call(this)) return false;
-    if (!FTKR.AOP.DatabaseLoaded) {
-        DataManager.aopParamNotetags($dataActors);
-        DataManager.aopParamNotetags($dataClasses);
-        DataManager.aopParamPlusNotetags($dataWeapons);
-        DataManager.aopParamPlusNotetags($dataArmors);
-        DataManager.aopParamPlusNotetags($dataStates);
-        DataManager.aopParamEquipNotetags($dataWeapons);
-        DataManager.aopParamEquipNotetags($dataArmors);
-        DataManager.aopParamEnemyNotetags($dataEnemies);
-        DataManager.aopGetNotetags($dataItems);
-        DataManager.aopGetNotetags($dataSkills);
-        FTKR.AOP.DatabaseLoaded = true;
+    if (FTKR.AOP.useParamNum > Game_BattlerBase.MAX_AOP_PARAMS) {
+        FTKR.AOP.useParamNum = Game_BattlerBase.MAX_AOP_PARAMS;
     }
-    return true;
-};
 
-DataManager.aopParamNotetags = function(group) {
-    var note1 = /<(?:AOP)[ ](.+)[ ](?:LEVEL)[ ](\d+)[ ](?:VALUE):[ ]*(\d+)>/i;
-    var note2 = /<(?:AOP)[ ](.+)[ ](?:LEVEL)[ ](\d+)[ ](?:TO)[ ](\d+)[ ](?:VALUE):[ ]*(\d+)>/i;
-    var note3 = /<(?:AOP)[ ](.+)[ ](?:LEVEL)[ ](\d+)[ ](?:VALUE):[ ]*(\d+)[ ](?:RAND)[ ](\d+)>/i;
-    var note4 = /<(?:AOP)[ ](.+)[ ](?:LEVEL)[ ](\d+)[ ](?:TO)[ ](\d+)[ ](?:VALUE):[ ]*(\d+)[ ](?:RAND)[ ](\d+)>/i;
+    //=============================================================================
+    // DataManager
+    //=============================================================================
 
-    for (var n = 1; n < group.length; n++) {
-        var obj = group[n];
-        var notedata = obj.note.split(/[\r\n]+/);
-
-        obj.aopParams = [];
-        obj.aopParamValues = [];
-
-        for (var id = 0; id < FTKR.AOP.useParamNum + 1; id++) {
-            obj.aopParamValues[id] = [];
-            for (var lv = 0; lv < FTKR.AOP.maxLevel + 1; lv++) {
-                obj.aopParams[id] = 0;
-                obj.aopParamValues[id][lv] = 0;
-            }
+    FTKR.AOP.DatabaseLoaded = false;
+    FTKR.AOP.DataManager_isDatabaseLoaded = DataManager.isDatabaseLoaded;
+    DataManager.isDatabaseLoaded = function() {
+        if (!FTKR.AOP.DataManager_isDatabaseLoaded.call(this)) return false;
+        if (!FTKR.AOP.DatabaseLoaded) {
+            DataManager.aopParamNotetags($dataActors);
+            DataManager.aopParamNotetags($dataClasses);
+            DataManager.aopParamPlusNotetags($dataWeapons);
+            DataManager.aopParamPlusNotetags($dataArmors);
+            DataManager.aopParamPlusNotetags($dataStates);
+            DataManager.aopParamEquipNotetags($dataWeapons);
+            DataManager.aopParamEquipNotetags($dataArmors);
+            DataManager.aopParamEnemyNotetags($dataEnemies);
+            DataManager.aopGetNotetags($dataItems);
+            DataManager.aopGetNotetags($dataSkills);
+            FTKR.AOP.DatabaseLoaded = true;
         }
-        for (var i = 0; i < notedata.length; i++) {
-            var line = notedata[i];
-            if (line.match(note1)) {
-                var level  = Number(RegExp.$2);
-                var value = Number(RegExp.$3);
-                var paramId =this.getParamId(RegExp.$1);
-                obj.aopParamValues[paramId][level] = value;
-            } else if (line.match(note2)) {
-                var minlevel  = Number(RegExp.$2);
-                var maxlevel  = Number(RegExp.$3);
-                var value = Number(RegExp.$4);
-                var paramId =this.getParamId(RegExp.$1);
-                for (var t = minlevel; t < maxlevel + 1; t++) {
-                    obj.aopParamValues[paramId][t] = value;
+        return true;
+    };
+
+    DataManager.aopParamNotetags = function(group) {
+        var note1 = /<(?:AOP)[ ](.+)[ ](?:LEVEL)[ ](\d+)[ ](?:VALUE):[ ]*(\d+)>/i;
+        var note2 = /<(?:AOP)[ ](.+)[ ](?:LEVEL)[ ](\d+)[ ](?:TO)[ ](\d+)[ ](?:VALUE):[ ]*(\d+)>/i;
+        var note3 = /<(?:AOP)[ ](.+)[ ](?:LEVEL)[ ](\d+)[ ](?:VALUE):[ ]*(\d+)[ ](?:RAND)[ ](\d+)>/i;
+        var note4 = /<(?:AOP)[ ](.+)[ ](?:LEVEL)[ ](\d+)[ ](?:TO)[ ](\d+)[ ](?:VALUE):[ ]*(\d+)[ ](?:RAND)[ ](\d+)>/i;
+
+        for (var n = 1; n < group.length; n++) {
+            var obj = group[n];
+            var notedata = obj.note.split(/[\r\n]+/);
+
+            obj.aopParams = [];
+            obj.aopParamValues = [];
+
+            for (var id = 0; id < FTKR.AOP.useParamNum + 1; id++) {
+                obj.aopParamValues[id] = [];
+                for (var lv = 0; lv < FTKR.AOP.maxLevel + 1; lv++) {
+                    obj.aopParams[id] = 0;
+                    obj.aopParamValues[id][lv] = 0;
                 }
-            } else if (line.match(note3)) {
-                var level  = Number(RegExp.$2);
-                var value = Number(RegExp.$3);
-                var rand = Number(RegExp.$4);
-                var paramId =this.getParamId(RegExp.$1);
-                var radvalue = value + Math.floor(Math.random()* rand * 2) - rand;
-                obj.aopParamValues[paramId][level] = radvalue > 0 ? radvalue : 0;
-            } else if (line.match(note4)) {
-                var minlevel  = Number(RegExp.$2);
-                var maxlevel  = Number(RegExp.$3);
-                var value = Number(RegExp.$4);
-                var rand = Number(RegExp.$5);
-                var paramId =this.getParamId(RegExp.$1);
-                for (var t = minlevel; t < maxlevel + 1; t++) {
+            }
+            for (var i = 0; i < notedata.length; i++) {
+                var line = notedata[i];
+                if (line.match(note1)) {
+                    var level  = Number(RegExp.$2);
+                    var value = Number(RegExp.$3);
+                    var paramId =this.getParamId(RegExp.$1);
+                    obj.aopParamValues[paramId][level] = value;
+                } else if (line.match(note2)) {
+                    var minlevel  = Number(RegExp.$2);
+                    var maxlevel  = Number(RegExp.$3);
+                    var value = Number(RegExp.$4);
+                    var paramId =this.getParamId(RegExp.$1);
+                    for (var t = minlevel; t < maxlevel + 1; t++) {
+                        obj.aopParamValues[paramId][t] = value;
+                    }
+                } else if (line.match(note3)) {
+                    var level  = Number(RegExp.$2);
+                    var value = Number(RegExp.$3);
+                    var rand = Number(RegExp.$4);
+                    var paramId =this.getParamId(RegExp.$1);
                     var radvalue = value + Math.floor(Math.random()* rand * 2) - rand;
-                    obj.aopParamValues[paramId][t] = radvalue > 0 ? radvalue : 0;
+                    obj.aopParamValues[paramId][level] = radvalue > 0 ? radvalue : 0;
+                } else if (line.match(note4)) {
+                    var minlevel  = Number(RegExp.$2);
+                    var maxlevel  = Number(RegExp.$3);
+                    var value = Number(RegExp.$4);
+                    var rand = Number(RegExp.$5);
+                    var paramId =this.getParamId(RegExp.$1);
+                    for (var t = minlevel; t < maxlevel + 1; t++) {
+                        var radvalue = value + Math.floor(Math.random()* rand * 2) - rand;
+                        obj.aopParamValues[paramId][t] = radvalue > 0 ? radvalue : 0;
+                    }
                 }
             }
         }
-    }
-};
+    };
 
-DataManager.aopParamPlusNotetags = function(group) {
-    var note1 = /<(?:AOP)[ ](.+)[ ](?:PLUS):[ ]*(\d+)>/i;
-    var note1a = /<(?:AOP)[ ](.+)[ ](?:PLUS):[ ]*(?:-)(\d+)>/i;
-    var note2 = /<(?:AOP)[ ](.+)[ ](?:RATE):[ ]*(\d+)>/i;
+    DataManager.aopParamPlusNotetags = function(group) {
+        var note1 = /<(?:AOP)[ ](.+)[ ](?:PLUS):[ ]*(\d+)>/i;
+        var note1a = /<(?:AOP)[ ](.+)[ ](?:PLUS):[ ]*(?:-)(\d+)>/i;
+        var note2 = /<(?:AOP)[ ](.+)[ ](?:RATE):[ ]*(\d+)>/i;
 
-    for (var n = 1; n < group.length; n++) {
-        var obj = group[n];
-        var notedata = obj.note.split(/[\r\n]+/);
+        for (var n = 1; n < group.length; n++) {
+            var obj = group[n];
+            var notedata = obj.note.split(/[\r\n]+/);
 
-        obj.aopParams = [];
-        obj.aopParamRates = [];
-        for (var id = 0; id < Game_BattlerBase.MAX_AOP_PARAMS + 1; id++) {
-            obj.aopParams[id] = 0;
-            obj.aopParamRates[id] = 100;
-        }
+            obj.aopParams = [];
+            obj.aopParamRates = [];
+            for (var id = 0; id < Game_BattlerBase.MAX_AOP_PARAMS + 1; id++) {
+                obj.aopParams[id] = 0;
+                obj.aopParamRates[id] = 100;
+            }
 
-        for (var i = 0; i < notedata.length; i++) {
-            var line = notedata[i];
-            if (line.match(note1)) {
-                var value = Number(RegExp.$2);
-                var paramId =this.getParamId(RegExp.$1);
-                obj.aopParams[paramId] = value;
-            } else if (line.match(note1a)) {
-                var value = Number(RegExp.$2);
-                var paramId =this.getParamId(RegExp.$1);
-                obj.aopParams[paramId] = -value;
-            } else if (line.match(note2)) {
-                var value = Number(RegExp.$2);
-                var paramId =this.getParamId(RegExp.$1);
-                obj.aopParamRates[paramId] = value;
+            for (var i = 0; i < notedata.length; i++) {
+                var line = notedata[i];
+                if (line.match(note1)) {
+                    var value = Number(RegExp.$2);
+                    var paramId =this.getParamId(RegExp.$1);
+                    obj.aopParams[paramId] = value;
+                } else if (line.match(note1a)) {
+                    var value = Number(RegExp.$2);
+                    var paramId =this.getParamId(RegExp.$1);
+                    obj.aopParams[paramId] = -value;
+                } else if (line.match(note2)) {
+                    var value = Number(RegExp.$2);
+                    var paramId =this.getParamId(RegExp.$1);
+                    obj.aopParamRates[paramId] = value;
+                }
             }
         }
-    }
-};
+    };
 
-DataManager.aopParamEquipNotetags = function(group) {
-    var note1 = /<(?:AOP)[ ](.+)[ ](?:REQUIRE):[ ]*(\d+)>/i;
-    var note2 = /<(?:AOP)[ ](.+)[ ](?:GROW):[ ]*(\d+)>/i;
+    DataManager.aopParamEquipNotetags = function(group) {
+        var note1 = /<(?:AOP)[ ](.+)[ ](?:REQUIRE):[ ]*(\d+)>/i;
+        var note2 = /<(?:AOP)[ ](.+)[ ](?:GROW):[ ]*(\d+)>/i;
 
-    for (var n = 1; n < group.length; n++) {
-        var obj = group[n];
-        var notedata = obj.note.split(/[\r\n]+/);
+        for (var n = 1; n < group.length; n++) {
+            var obj = group[n];
+            var notedata = obj.note.split(/[\r\n]+/);
 
-        obj.aopParamReqs = [];
-        obj.aopParamGrows = [];
-        for (var id = 0; id < Game_BattlerBase.MAX_AOP_PARAMS + 1; id++) {
-            obj.aopParamReqs[id] = 0;
-            obj.aopParamGrows[id] = 0;
-        }
+            obj.aopParamReqs = [];
+            obj.aopParamGrows = [];
+            for (var id = 0; id < Game_BattlerBase.MAX_AOP_PARAMS + 1; id++) {
+                obj.aopParamReqs[id] = 0;
+                obj.aopParamGrows[id] = 0;
+            }
 
-        for (var i = 0; i < notedata.length; i++) {
-            var line = notedata[i];
-            if (line.match(note1)) {
-                var value = Number(RegExp.$2);
-                var paramId =this.getParamId(RegExp.$1);
-                obj.aopParamReqs[paramId] = value;
-            } else if (line.match(note2)) {
-                var value = Number(RegExp.$2);
-                var paramId =this.getParamId(RegExp.$1);
-                obj.aopParamGrows[paramId] = value;
+            for (var i = 0; i < notedata.length; i++) {
+                var line = notedata[i];
+                if (line.match(note1)) {
+                    var value = Number(RegExp.$2);
+                    var paramId =this.getParamId(RegExp.$1);
+                    obj.aopParamReqs[paramId] = value;
+                } else if (line.match(note2)) {
+                    var value = Number(RegExp.$2);
+                    var paramId =this.getParamId(RegExp.$1);
+                    obj.aopParamGrows[paramId] = value;
+                }
             }
         }
-    }
-};
+    };
 
-DataManager.aopParamEnemyNotetags = function(group) {
-    var note1 = /<(?:AOP)[ ](.+)[ ](?:VALUE):[ ]*(\d+)>/i;
+    DataManager.aopParamEnemyNotetags = function(group) {
+        var note1 = /<(?:AOP)[ ](.+)[ ](?:VALUE):[ ]*(\d+)>/i;
 
-    for (var n = 1; n < group.length; n++) {
-        var obj = group[n];
-        var notedata = obj.note.split(/[\r\n]+/);
+        for (var n = 1; n < group.length; n++) {
+            var obj = group[n];
+            var notedata = obj.note.split(/[\r\n]+/);
 
-        var paramflag = false;
-        obj.aopParams = [];
+            var paramflag = false;
+            obj.aopParams = [];
 
+            for (var id = 0; id < FTKR.AOP.useParamNum + 1; id++) {
+                obj.aopParams[id] = 0;
+            }
+
+            for (var i = 0; i < notedata.length; i++) {
+                var line = notedata[i];
+                if (line.match(note1)) {
+                    var value = Number(RegExp.$2);
+                    var paramId =this.getParamId(RegExp.$1);
+                    obj.aopParams[paramId] = value;
+                }
+            }
+        }
+    };
+
+    DataManager.aopGetNotetags = function(group) {
+        var note1 = /<(?:AOP)[ ](.+)[ ](?:GET):[ ]*(\d+)(?:%)>/i;
+        var note2 = /<(?:AOP)[ ](.+)[ ](?:GET):[ ]*(\d+)>/i;
+        var note3 = /<(?:AOP)[ ](.+)[ ](?:GET):[ ]*(?:-)(\d+)>/i;
+        
+        for (var n = 1; n < group.length; n++) {
+            var obj = group[n];
+            var notedata = obj.note.split(/[\r\n]+/);
+
+            for (var i = 0; i < notedata.length; i++) {
+                var line = notedata[i];
+                if (line.match(note1)) {
+                    var value = Number(RegExp.$2) * 0.01;
+                    var paramId =this.getParamId(RegExp.$1);
+                    obj.effects.push(this.setGetAopEffect(paramId, value, 0));
+                } else if (line.match(note2)) {
+                    var value = Number(RegExp.$2);
+                    var paramId =this.getParamId(RegExp.$1);
+                    obj.effects.push(this.setGetAopEffect(paramId, 0, value));
+                } else if (line.match(note3)) {
+                    var value = Number(RegExp.$2);
+                    var paramId =this.getParamId(RegExp.$1);
+                    obj.effects.push(this.setGetAopEffect(paramId, 0, -value));
+                }
+            }
+        }
+    };
+
+    DataManager.getParamId = function(text) {
+        var paramId = -1;
+        FTKR.AOP.params.forEach( function(param, i) {
+            if (param.current === text || param.code === text) {
+                paramId = i;
+            } else if (text.match(/(?:param)[ ](\d+)/i) || text.match(/(\d+)/i)) {
+                paramId = Number(RegExp.$1);
+            }
+        });
+        return paramId;
+    };
+
+    DataManager.setGetAopEffect = function(paramId, value1, value2) {
+        return this.setEffect(Game_Action.EFFECT_GET_AOP, value1, value2, paramId);
+    };
+
+    DataManager.setEffect = function(code, value1, value2, dataId) {
+        return {code:code, value1:value1, value2:value2, dataId:dataId};
+    };
+
+    //=============================================================================
+    // Game_Actor
+    //=============================================================================
+
+    FTKR.AOP.Game_Actor_setup = Game_Actor.prototype.setup;
+    Game_Actor.prototype.setup = function(actorId) {
+        FTKR.AOP.Game_Actor_setup.call(this, actorId);
+        this.clearAopParamPlus();
+        this.setupAopParams(actorId);
+    };
+
+    Game_Actor.prototype.setupAopParams = function(actorId) {
+        var actor = $dataActors[actorId];
         for (var id = 0; id < FTKR.AOP.useParamNum + 1; id++) {
-            obj.aopParams[id] = 0;
-        }
-
-        for (var i = 0; i < notedata.length; i++) {
-            var line = notedata[i];
-            if (line.match(note1)) {
-                var value = Number(RegExp.$2);
-                var paramId =this.getParamId(RegExp.$1);
-                obj.aopParams[paramId] = value;
+            actor.aopParams[id] = actor.aopParamValues[id][1];
+            for (var lv = 2; lv < this._level + 1; lv++) {
+                actor.aopParams[id] += actor.aopParamValues[id][lv];
             }
         }
-    }
-};
+    };
 
-DataManager.aopGetNotetags = function(group) {
-    var note1 = /<(?:AOP)[ ](.+)[ ](?:GET):[ ]*(\d+)(?:%)>/i;
-    var note2 = /<(?:AOP)[ ](.+)[ ](?:GET):[ ]*(\d+)>/i;
-    var note3 = /<(?:AOP)[ ](.+)[ ](?:GET):[ ]*(?:-)(\d+)>/i;
-    
-    for (var n = 1; n < group.length; n++) {
-        var obj = group[n];
-        var notedata = obj.note.split(/[\r\n]+/);
+    FTKR.AOP.Game_Actor_levelUp = Game_Actor.prototype.levelUp;
+    Game_Actor.prototype.levelUp = function() {
+        FTKR.AOP.Game_Actor_levelUp.call(this);
+        this.aopParamGrows();
+    };
 
-        for (var i = 0; i < notedata.length; i++) {
-            var line = notedata[i];
-            if (line.match(note1)) {
-                var value = Number(RegExp.$2) * 0.01;
-                var paramId =this.getParamId(RegExp.$1);
-                obj.effects.push(this.setGetAopEffect(paramId, value, 0));
-            } else if (line.match(note2)) {
-                var value = Number(RegExp.$2);
-                var paramId =this.getParamId(RegExp.$1);
-                obj.effects.push(this.setGetAopEffect(paramId, 0, value));
-            } else if (line.match(note3)) {
-                var value = Number(RegExp.$2);
-                var paramId =this.getParamId(RegExp.$1);
-                obj.effects.push(this.setGetAopEffect(paramId, 0, -value));
+    Game_Actor.prototype.aopParamGrows = function() {
+        if (!this._aopParamPlus) this._aopParamPlus = [];
+        for (var i = 0; i < FTKR.AOP.useParamNum; i++) {
+            this._aopParamPlus[i] += this.aopParamGrow(i);
+        }
+    };
+
+    Game_Actor.prototype.aopParamGrow = function(paramId) {
+        return this.aopParamItemGrow(paramId);
+    };
+
+    Game_Actor.prototype.aopParamItemGrow = function(paramId) {
+        var value = 0;
+        this.equips().forEach(function(equip) {
+            if (equip) value += equip.aopParamGrows[paramId];
+        });
+        return value;
+    };
+
+    Game_Actor.prototype.aopParamBase = function(paramId) {
+        return this.aopActorParamBase(paramId) + this.aopClassParamBase(paramId);
+    };
+
+    Game_Actor.prototype.aopActorParamBase = function(paramId) {
+        var value = 0;
+        for(var i = 1; i <= this._level; i++){
+            value += this.actor().aopParamValues[paramId][i];
+        }
+        return value;
+    };
+
+    Game_Actor.prototype.aopClassParamBase = function(paramId) {
+        var value = 0;
+        for(var i = 1; i <= this._level; i++){
+            value += this.currentClass().aopParamValues[paramId][i];
+        }
+        return value;
+    };
+
+    Game_Actor.prototype.aopParamPlus = function(paramId) {
+        var value = Game_Battler.prototype.aopParamPlus.call(this, paramId);
+        return value + this.aopParamPlusEquips(paramId);
+    };
+
+    Game_Actor.prototype.aopParamPlusEquips = function(paramId) {
+        var value = 0;
+        this.equips().forEach(function(equip) {
+            if (equip) value += equip.aopParams[paramId];
+        });
+        return value;
+    };
+
+    Game_Actor.prototype.aopParamRate = function(paramId) {
+        var value = Game_Battler.prototype.aopParamRate.call(this, paramId);
+        return value * this.aopParamRateEquips(paramId);
+    };
+
+    Game_Actor.prototype.aopParamRateEquips = function(paramId) {
+        var value = 1;
+        this.equips().forEach(function(equip) {
+            if (equip) {
+                value *= Math.abs(equip.aopParamRates[paramId]) / 100;
             }
+        });
+        return value;
+    };
+
+    //=============================================================================
+    // Game_Action
+    //=============================================================================
+
+    FTKR.AOP.Game_Action_applyItemEffect = Game_Action.prototype.applyItemEffect;
+    Game_Action.prototype.applyItemEffect = function(target, effect) {
+        switch (effect.code) {
+            case Game_Action.EFFECT_GET_AOP:
+                this.itemEffectGetAop(target, effect);
+                break;
         }
-    }
-};
+        FTKR.AOP.Game_Action_applyItemEffect.call(this, target, effect);
+    };
 
-DataManager.getParamId = function(text) {
-    var paramId = -1;
-    FTKR.AOP.params.forEach( function(param, i) {
-        if (param.current === text || param.code === text) {
-            paramId = i;
-        } else if (text.match(/(?:param)[ ](\d+)/i) || text.match(/(\d+)/i)) {
-            paramId = Number(RegExp.$1);
+    Game_Action.prototype.itemEffectGetAop = function(target, effect) {
+        var value = (target.aopParam(effect.dataId) * effect.value1 + effect.value2) * target.rec;
+        if (this.isItem()) {
+            value *= this.subject().pha;
         }
-    });
-    return paramId;
-};
-
-DataManager.setGetAopEffect = function(paramId, value1, value2) {
-    return this.setEffect(Game_Action.EFFECT_GET_AOP, value1, value2, paramId);
-};
-
-DataManager.setEffect = function(code, value1, value2, dataId) {
-    return {code:code, value1:value1, value2:value2, dataId:dataId};
-};
-
-//=============================================================================
-// Game_Actor
-//=============================================================================
-
-FTKR.AOP.Game_Actor_setup = Game_Actor.prototype.setup;
-Game_Actor.prototype.setup = function(actorId) {
-    FTKR.AOP.Game_Actor_setup.call(this, actorId);
-    this.clearAopParamPlus();
-    this.setupAopParams(actorId);
-};
-
-Game_Actor.prototype.setupAopParams = function(actorId) {
-    var actor = $dataActors[actorId];
-    for (var id = 0; id < FTKR.AOP.useParamNum + 1; id++) {
-        actor.aopParams[id] = actor.aopParamValues[id][1];
-        for (var lv = 2; lv < this._level + 1; lv++) {
-            actor.aopParams[id] += actor.aopParamValues[id][lv];
+        value = Math.floor(value);
+        if (value !== 0) {
+            target.gainCAop(effect.dataId, value);
+            this.makeSuccess(target);
         }
-    }
-};
+    };
 
-FTKR.AOP.Game_Actor_levelUp = Game_Actor.prototype.levelUp;
-Game_Actor.prototype.levelUp = function() {
-    FTKR.AOP.Game_Actor_levelUp.call(this);
-    this.aopParamGrows();
-};
-
-Game_Actor.prototype.aopParamGrows = function() {
-    if (!this._aopParamPlus) this._aopParamPlus = [];
-    for (var i = 0; i < FTKR.AOP.useParamNum; i++) {
-        this._aopParamPlus[i] += this.aopParamGrow(i);
-    }
-};
-
-Game_Actor.prototype.aopParamGrow = function(paramId) {
-    return this.aopParamItemGrow(paramId);
-};
-
-Game_Actor.prototype.aopParamItemGrow = function(paramId) {
-    var value = 0;
-    this.equips().forEach(function(equip) {
-        if (equip) value += equip.aopParamGrows[paramId];
-    });
-    return value;
-};
-
-Game_Actor.prototype.aopParamBase = function(paramId) {
-    return this.aopActorParamBase(paramId) + this.aopClassParamBase(paramId);
-};
-
-Game_Actor.prototype.aopActorParamBase = function(paramId) {
-    var value = 0;
-    for(var i = 1; i <= this._level; i++){
-        value += this.actor().aopParamValues[paramId][i];
-    }
-    return value;
-};
-
-Game_Actor.prototype.aopClassParamBase = function(paramId) {
-    var value = 0;
-    for(var i = 1; i <= this._level; i++){
-        value += this.currentClass().aopParamValues[paramId][i];
-    }
-    return value;
-};
-
-Game_Actor.prototype.aopParamPlus = function(paramId) {
-    var value = Game_Battler.prototype.aopParamPlus.call(this, paramId);
-    return value + this.aopParamPlusEquips(paramId);
-};
-
-Game_Actor.prototype.aopParamPlusEquips = function(paramId) {
-    var value = 0;
-    this.equips().forEach(function(equip) {
-        if (equip) value += equip.aopParams[paramId];
-    });
-    return value;
-};
-
-Game_Actor.prototype.aopParamRate = function(paramId) {
-    var value = Game_Battler.prototype.aopParamRate.call(this, paramId);
-    return value * this.aopParamRateEquips(paramId);
-};
-
-Game_Actor.prototype.aopParamRateEquips = function(paramId) {
-    var value = 1;
-    this.equips().forEach(function(equip) {
-        if (equip) {
-            value *= Math.abs(equip.aopParamRates[paramId]) / 100;
-        }
-    });
-    return value;
-};
-
-//=============================================================================
-// Game_Action
-//=============================================================================
-
-FTKR.AOP.Game_Action_applyItemEffect = Game_Action.prototype.applyItemEffect;
-Game_Action.prototype.applyItemEffect = function(target, effect) {
-    switch (effect.code) {
+    FTKR.AOP.Game_Action_testItemEffect = Game_Action.prototype.testItemEffect;
+    Game_Action.prototype.testItemEffect = function(target, effect) {
+        switch (effect.code) {
         case Game_Action.EFFECT_GET_AOP:
-            this.itemEffectGetAop(target, effect);
-            break;
-    }
-    FTKR.AOP.Game_Action_applyItemEffect.call(this, target, effect);
-};
-
-Game_Action.prototype.itemEffectGetAop = function(target, effect) {
-    var value = (target.aopParam(effect.dataId) * effect.value1 + effect.value2) * target.rec;
-    if (this.isItem()) {
-        value *= this.subject().pha;
-    }
-    value = Math.floor(value);
-    if (value !== 0) {
-        target.gainCAop(effect.dataId, value);
-        this.makeSuccess(target);
-    }
-};
-
-FTKR.AOP.Game_Action_testItemEffect = Game_Action.prototype.testItemEffect;
-Game_Action.prototype.testItemEffect = function(target, effect) {
-    switch (effect.code) {
-    case Game_Action.EFFECT_GET_AOP:
-        var paramId = effect.dataId;
-        return target._aop[paramId] < target.aopParam(paramId) || effect.value1 < 0 || effect.value2 < 0;
-    default:
-        return FTKR.AOP.Game_Action_testItemEffect.call(this, target, effect);
-    }
-};
-
-//=============================================================================
-// Game_Enemy
-//=============================================================================
-
-Game_Enemy.prototype.aopParamBase = function(paramId) {
-    return this.enemy().aopParams[paramId];
-};
-
-Game_Enemy.prototype.aopParamPlus = function(paramId) {
-    return Game_Battler.prototype.aopParamPlus.call(this, paramId);
-};
-
-Game_Enemy.prototype.aopParamRate = function(paramId) {
-    return Game_Battler.prototype.aopParamRate.call(this, paramId);
-};
-
-//=============================================================================
-// Game_BattlerBase
-//=============================================================================
-var prop = {};
-prop[FTKR.AOP.params[0].code] = { get: function() { return this.aopParam(0); }, configurable: true };
-prop[FTKR.AOP.params[1].code] = { get: function() { return this.aopParam(1); }, configurable: true };
-prop[FTKR.AOP.params[2].code] = { get: function() { return this.aopParam(2); }, configurable: true };
-prop[FTKR.AOP.params[3].code] = { get: function() { return this.aopParam(3); }, configurable: true };
-prop[FTKR.AOP.params[4].code] = { get: function() { return this.aopParam(4); }, configurable: true };
-prop[FTKR.AOP.params[5].code] = { get: function() { return this.aopParam(5); }, configurable: true };
-prop[FTKR.AOP.params[6].code] = { get: function() { return this.aopParam(6); }, configurable: true };
-prop[FTKR.AOP.params[7].code] = { get: function() { return this.aopParam(7); }, configurable: true };
-prop[FTKR.AOP.params[8].code] = { get: function() { return this.aopParam(8); }, configurable: true };
-prop[FTKR.AOP.params[9].code] = { get: function() { return this.aopParam(9); }, configurable: true };
-
-prop[FTKR.AOP.params[0].current] = { get: function() { return this._aop[0]; }, configurable: true };
-prop[FTKR.AOP.params[1].current] = { get: function() { return this._aop[1]; }, configurable: true };
-prop[FTKR.AOP.params[2].current] = { get: function() { return this._aop[2]; }, configurable: true };
-prop[FTKR.AOP.params[3].current] = { get: function() { return this._aop[3]; }, configurable: true };
-prop[FTKR.AOP.params[4].current] = { get: function() { return this._aop[4]; }, configurable: true };
-prop[FTKR.AOP.params[5].current] = { get: function() { return this._aop[5]; }, configurable: true };
-prop[FTKR.AOP.params[6].current] = { get: function() { return this._aop[6]; }, configurable: true };
-prop[FTKR.AOP.params[7].current] = { get: function() { return this._aop[7]; }, configurable: true };
-prop[FTKR.AOP.params[8].current] = { get: function() { return this._aop[8]; }, configurable: true };
-prop[FTKR.AOP.params[9].current] = { get: function() { return this._aop[9]; }, configurable: true };
-
-Object.defineProperties(Game_BattlerBase.prototype, prop);
-
-FTKR.AOP.Game_BattlerBase_initMembers = Game_BattlerBase.prototype.initMembers;
-Game_BattlerBase.prototype.initMembers = function() {
-    FTKR.AOP.Game_BattlerBase_initMembers.call(this);
-    this.initCurrentAopParams();
-    this.clearAopParamPlus();
-    this.clearAopBuffs();
-};
-
-Game_BattlerBase.prototype.initCurrentAopParams = function() {
-    this._aop = [];
-    for (var i = 0; i < FTKR.AOP.useParamNum; i++) {
-        this._aop[i] = this.aopParamMax(i);
-    };
-};
-
-FTKR.AOP.Game_BattlerBase_canEquip = Game_BattlerBase.prototype.canEquip;
-Game_BattlerBase.prototype.canEquip = function(item){
-    if (!FTKR.AOP.Game_BattlerBase_canEquip.call(this, item)) return false;
-    for (var i = 0; i < FTKR.AOP.useParamNum; i++) {
-        if (this.aopParam(i) < item.aopParamReqs[i]) return false;
-    }
-    return true;
-};
-
-Game_BattlerBase.prototype.clearAopParamPlus = function() {
-    this._aopParamPlus = [0,0,0,0,0,0,0,0,0,0];
-};
-
-Game_BattlerBase.prototype.clearAopBuffs = function() {
-    this._aopBuffs = [0,0,0,0,0,0,0,0,0,0];
-    this._aopBuffTurns = [0,0,0,0,0,0,0,0,0,0];
-};
-
-Game_BattlerBase.prototype.setAopParamPlus = function(paramId, value) {
-    this._aopParamPlus[paramId] = value || 0;
-    this.refresh();
-};
-
-/*-----------------------------------
-aopParamBase()     :レベルアップ、装備等による固定値
-aopParamPlus()     :特徴による成長、プラグインコマンドによる増減値
-aopParamRate()     :装備等の特徴による積算値
-aopParamBuffRate() :強化による積算値
-
-$gameActor
-_aop              :現在値
-_maop             :最大値
-_aopParamPlus     :増減値
-
-$dataActors,$dataClasses
-aopParamValues    :各レベルでの増加値
-
-$dataItems,他
-aopParams         :初期値(固定値)
-
------------------------------------*/
-Game_BattlerBase.prototype.aopParam = function(paramId) {
-    if (paramId >= FTKR.AOP.useParamNum) return 0;
-    var value = this.aopParamBase(paramId) + this.aopParamPlus(paramId);
-    value *= this.aopParamRate(paramId) * this.aopParamBuffRate(paramId);
-    var maxValue = this.aopParamMax(paramId);
-    var minValue = this.aopParamMin(paramId); //this.paramMin(2);
-    var value = Math.round(Math.floor(value).clamp(minValue, maxValue));
-    return value;
-};
-
-Game_BattlerBase.prototype.getAopParamBase = function(paramId) {
-    if (paramId >= FTKR.AOP.useParamNum) return 0;
-    var value = this.aopParamBase(paramId);
-    var maxValue = this.aopParamMax(paramId);
-    var minValue = this.aopParamMin(paramId); //this.paramMin(2);
-    return Math.round(value.clamp(minValue, maxValue));
-}
-
-Game_BattlerBase.prototype.aopParamMax = function(paramId) {
-    return Math.max(FTKR.AOP.maxParam, FTKR.AOP.params[paramId].max);
-};
-
-Game_BattlerBase.prototype.aopParamMin = function(paramId) {
-    return Math.max(0, FTKR.AOP.params[paramId].min);
-};
-
-Game_BattlerBase.prototype.aopParamPlus = function(paramId) {
-    return this._aopParamPlus[paramId] + this.aopParamPlusStates(paramId);
-};
-
-Game_BattlerBase.prototype.aopParamPlusStates = function(paramId) {
-    var value = 0;
-    this.states().forEach(function(state){
-        if (state) value += state.aopParams[paramId];
-    });
-    return value;
-};
-
-Game_BattlerBase.prototype.aopParamRate = function(paramId) {
-    return this.traitsPi(Game_BattlerBase.TRAIT_AOPPARAM, paramId) * this.aopParamRateStates(paramId);
-};
-
-Game_BattlerBase.prototype.aopParamRateStates = function(paramId) {
-    var value = 1;
-    this.states().forEach(function(state){
-        if (state) {
-            value *= Math.abs(state.aopParamRates[paramId]) / 100;
+            var paramId = effect.dataId;
+            return target._aop[paramId] < target.aopParam(paramId) || effect.value1 < 0 || effect.value2 < 0;
+        default:
+            return FTKR.AOP.Game_Action_testItemEffect.call(this, target, effect);
         }
-    });
-    return value;
-};
-
-Game_BattlerBase.prototype.aopParamBuffRate = function(paramId) {
-    return this._aopBuffs[paramId] * 0.25 + 1.0;
-};
-
-Game_BattlerBase.prototype.setCAop = function(paramId, aop) {
-    this._aop[paramId] = aop;
-    this.refresh();
-};
-
-Game_BattlerBase.prototype.gainCAop = function(paramId, value) {
-    this.setCAop(paramId, this._aop[paramId] + value);
-};
-
-FTKR.AOP.Game_BattlerBase_refresh = Game_BattlerBase.prototype.refresh;
-Game_BattlerBase.prototype.refresh = function() {
-    FTKR.AOP.Game_BattlerBase_refresh.call(this);
-    for (var i = 0; i < FTKR.AOP.useParamNum; i++) {
-        this._aop[i] = this._aop[i].clamp(0, this.aopParam(i));
     };
-};
 
-//=============================================================================
-// Game_Interpreter
-//=============================================================================
+    //=============================================================================
+    // Game_Enemy
+    //=============================================================================
 
-var _AOP_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
-    _AOP_Game_Interpreter_pluginCommand.call(this, command, args);
-    if (/AOP_/i.test(command)) {
-        command = command.replace(/AOP_/i, '');
-        switch (true) {
-            case /パラメータ変更/i.test(command):
-            case /set_Parameters/i.test(command):
-                this.setAopParams(command, args);
-                break;
-            case /パラメータ取得/i.test(command):
-            case /get_Parameters/i.test(command):
-                this.getAopParams(command, args);
-                break;
+    Game_Enemy.prototype.aopParamBase = function(paramId) {
+        return this.enemy().aopParams[paramId];
+    };
+
+    Game_Enemy.prototype.aopParamPlus = function(paramId) {
+        return Game_Battler.prototype.aopParamPlus.call(this, paramId);
+    };
+
+    Game_Enemy.prototype.aopParamRate = function(paramId) {
+        return Game_Battler.prototype.aopParamRate.call(this, paramId);
+    };
+
+    //=============================================================================
+    // Game_BattlerBase
+    //=============================================================================
+    var prop = {};
+    prop[FTKR.AOP.params[0].code] = { get: function() { return this.aopParam(0); }, configurable: true };
+    prop[FTKR.AOP.params[1].code] = { get: function() { return this.aopParam(1); }, configurable: true };
+    prop[FTKR.AOP.params[2].code] = { get: function() { return this.aopParam(2); }, configurable: true };
+    prop[FTKR.AOP.params[3].code] = { get: function() { return this.aopParam(3); }, configurable: true };
+    prop[FTKR.AOP.params[4].code] = { get: function() { return this.aopParam(4); }, configurable: true };
+    prop[FTKR.AOP.params[5].code] = { get: function() { return this.aopParam(5); }, configurable: true };
+    prop[FTKR.AOP.params[6].code] = { get: function() { return this.aopParam(6); }, configurable: true };
+    prop[FTKR.AOP.params[7].code] = { get: function() { return this.aopParam(7); }, configurable: true };
+    prop[FTKR.AOP.params[8].code] = { get: function() { return this.aopParam(8); }, configurable: true };
+    prop[FTKR.AOP.params[9].code] = { get: function() { return this.aopParam(9); }, configurable: true };
+
+    prop[FTKR.AOP.params[0].current] = { get: function() { return this._aop[0]; }, configurable: true };
+    prop[FTKR.AOP.params[1].current] = { get: function() { return this._aop[1]; }, configurable: true };
+    prop[FTKR.AOP.params[2].current] = { get: function() { return this._aop[2]; }, configurable: true };
+    prop[FTKR.AOP.params[3].current] = { get: function() { return this._aop[3]; }, configurable: true };
+    prop[FTKR.AOP.params[4].current] = { get: function() { return this._aop[4]; }, configurable: true };
+    prop[FTKR.AOP.params[5].current] = { get: function() { return this._aop[5]; }, configurable: true };
+    prop[FTKR.AOP.params[6].current] = { get: function() { return this._aop[6]; }, configurable: true };
+    prop[FTKR.AOP.params[7].current] = { get: function() { return this._aop[7]; }, configurable: true };
+    prop[FTKR.AOP.params[8].current] = { get: function() { return this._aop[8]; }, configurable: true };
+    prop[FTKR.AOP.params[9].current] = { get: function() { return this._aop[9]; }, configurable: true };
+
+    Object.defineProperties(Game_BattlerBase.prototype, prop);
+
+    FTKR.AOP.Game_BattlerBase_initMembers = Game_BattlerBase.prototype.initMembers;
+    Game_BattlerBase.prototype.initMembers = function() {
+        FTKR.AOP.Game_BattlerBase_initMembers.call(this);
+        this.initCurrentAopParams();
+        this.clearAopParamPlus();
+        this.clearAopBuffs();
+    };
+
+    Game_BattlerBase.prototype.initCurrentAopParams = function() {
+        this._aop = [];
+        for (var i = 0; i < FTKR.AOP.useParamNum; i++) {
+            this._aop[i] = this.aopParamMax(i);
+        };
+    };
+
+    FTKR.AOP.Game_BattlerBase_canEquip = Game_BattlerBase.prototype.canEquip;
+    Game_BattlerBase.prototype.canEquip = function(item){
+        if (!FTKR.AOP.Game_BattlerBase_canEquip.call(this, item)) return false;
+        for (var i = 0; i < FTKR.AOP.useParamNum; i++) {
+            if (this.aopParam(i) < item.aopParamReqs[i]) return false;
         }
+        return true;
+    };
+
+    Game_BattlerBase.prototype.clearAopParamPlus = function() {
+        this._aopParamPlus = [0,0,0,0,0,0,0,0,0,0];
+    };
+
+    Game_BattlerBase.prototype.clearAopBuffs = function() {
+        this._aopBuffs = [0,0,0,0,0,0,0,0,0,0];
+        this._aopBuffTurns = [0,0,0,0,0,0,0,0,0,0];
+    };
+
+    Game_BattlerBase.prototype.setAopParamPlus = function(paramId, value) {
+        this._aopParamPlus[paramId] = value || 0;
+        this.refresh();
+    };
+
+    /*-----------------------------------
+    aopParamBase()     :レベルアップ、装備等による固定値
+    aopParamPlus()     :特徴による成長、プラグインコマンドによる増減値
+    aopParamRate()     :装備等の特徴による積算値
+    aopParamBuffRate() :強化による積算値
+
+    $gameActor
+    _aop              :現在値
+    _maop             :最大値
+    _aopParamPlus     :増減値
+
+    $dataActors,$dataClasses
+    aopParamValues    :各レベルでの増加値
+
+    $dataItems,他
+    aopParams         :初期値(固定値)
+
+    -----------------------------------*/
+    Game_BattlerBase.prototype.aopParam = function(paramId) {
+        if (paramId >= FTKR.AOP.useParamNum) return 0;
+        var value = this.aopParamBase(paramId) + this.aopParamPlus(paramId);
+        value *= this.aopParamRate(paramId) * this.aopParamBuffRate(paramId);
+        var maxValue = this.aopParamMax(paramId);
+        var minValue = this.aopParamMin(paramId); //this.paramMin(2);
+        var value = Math.round(Math.floor(value).clamp(minValue, maxValue));
+        return value;
+    };
+
+    Game_BattlerBase.prototype.getAopParamBase = function(paramId) {
+        if (paramId >= FTKR.AOP.useParamNum) return 0;
+        var value = this.aopParamBase(paramId);
+        var maxValue = this.aopParamMax(paramId);
+        var minValue = this.aopParamMin(paramId); //this.paramMin(2);
+        return Math.round(value.clamp(minValue, maxValue));
     }
-};
 
-Game_Interpreter.prototype.setAopParams = function(command, args) {
-    var actor = this.setActor(args[0]);
-    if(!actor) return;
-    var paramId = DataManager.getParamId(args[1]);
-    var base = actor._aopParamPlus[paramId];
-    var value = this.calcValue(base, this.setNum(args[3]), args[2]);
-    actor.setAopParamPlus(paramId, value);
-};
+    Game_BattlerBase.prototype.aopParamMax = function(paramId) {
+        return Math.max(FTKR.AOP.maxParam, FTKR.AOP.params[paramId].max);
+    };
 
-Game_Interpreter.prototype.getAopParams = function(command, args) {
-    var varId = this.setNum(args[0]);
-    var actor = this.setActor(args[1]);
-    if(!varId || !actor) return;
-    $gameVariables.setValue(varId, actor.aopParam(DataManager.getParamId(args[2])));
-};
+    Game_BattlerBase.prototype.aopParamMin = function(paramId) {
+        return Math.max(0, FTKR.AOP.params[paramId].min);
+    };
 
-Game_Interpreter.prototype.setActor = function(arg) {
-    var case1 = /ACTOR\((.+)\)/i;
-    var case1j = /アクター\((.+)\)/i;
-    var case2 = /PARTY\((.+)\)/i;
-    var case2j = /パーティー\((.+)\)/i;
-    if (arg.match(case1) || arg.match(case1j)) {
-        return $gameActors.actor(this.setNum(RegExp.$1));
-    } else if (arg.match(case2) || arg.match(case2j)) {
-        return $gameParty.members()[this.setNum(RegExp.$1)];
-    } else {
-        return null;
-    }
-};
+    Game_BattlerBase.prototype.aopParamPlus = function(paramId) {
+        return this._aopParamPlus[paramId] + this.aopParamPlusStates(paramId);
+    };
 
-Game_Interpreter.prototype.calcValue = function(value1, value2, code) {
-    switch (code) {
-    case '加算':
-    case '+':
-        return value1 + value2;
-    case '減算':
-    case '-':
-        return value1 - value2;
-    case '積算':
-    case '×':
-    case '*':
-        return value1 * value2;
-    case '除算':
-    case '／':
-    case '/':
-        return value1 / value2;
-    case '剰余':
-    case '％':
-    case '%':
-        return value1 % value2;
-    case '代入':
-    case '＝':
-    case '=':
-    default:
-        return value2;
-    }
-};
+    Game_BattlerBase.prototype.aopParamPlusStates = function(paramId) {
+        var value = 0;
+        this.states().forEach(function(state){
+            if (state) value += state.aopParams[paramId];
+        });
+        return value;
+    };
 
-Game_Interpreter.prototype.setNum = function(data) {
-    var data1 = /v\[(\d+)\]/i;
-    var data2 = /(\d+)/i;
-    if (data.match(data1)) {
-        return $gameVariables.value(Number(RegExp.$1));
-    } else if (data.match(data2)) {
-        return Number(RegExp.$1);
-    } else {
-        return 0;
-    }
-};
+    Game_BattlerBase.prototype.aopParamRate = function(paramId) {
+        return this.traitsPi(Game_BattlerBase.TRAIT_AOPPARAM, paramId) * this.aopParamRateStates(paramId);
+    };
+
+    Game_BattlerBase.prototype.aopParamRateStates = function(paramId) {
+        var value = 1;
+        this.states().forEach(function(state){
+            if (state) {
+                value *= Math.abs(state.aopParamRates[paramId]) / 100;
+            }
+        });
+        return value;
+    };
+
+    Game_BattlerBase.prototype.aopParamBuffRate = function(paramId) {
+        return this._aopBuffs[paramId] * 0.25 + 1.0;
+    };
+
+    Game_BattlerBase.prototype.setCAop = function(paramId, aop) {
+        this._aop[paramId] = aop;
+        this.refresh();
+    };
+
+    Game_BattlerBase.prototype.gainCAop = function(paramId, value) {
+        this.setCAop(paramId, this._aop[paramId] + value);
+    };
+
+    FTKR.AOP.Game_BattlerBase_refresh = Game_BattlerBase.prototype.refresh;
+    Game_BattlerBase.prototype.refresh = function() {
+        FTKR.AOP.Game_BattlerBase_refresh.call(this);
+        for (var i = 0; i < FTKR.AOP.useParamNum; i++) {
+            this._aop[i] = this._aop[i].clamp(0, this.aopParam(i));
+        };
+    };
+
+    //=============================================================================
+    // Game_Interpreter
+    //=============================================================================
+
+    var _AOP_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+    Game_Interpreter.prototype.pluginCommand = function(command, args) {
+        _AOP_Game_Interpreter_pluginCommand.call(this, command, args);
+        if (/AOP_/i.test(command)) {
+            command = command.replace(/AOP_/i, '');
+            switch (true) {
+                case /パラメータ変更/i.test(command):
+                case /set_Parameters/i.test(command):
+                    this.setAopParams(command, args);
+                    break;
+                case /パラメータ取得/i.test(command):
+                case /get_Parameters/i.test(command):
+                    this.getAopParams(command, args);
+                    break;
+            }
+        }
+    };
+
+    Game_Interpreter.prototype.setAopParams = function(command, args) {
+        var actor = this.setActor(args[0]);
+        if(!actor) return;
+        var paramId = DataManager.getParamId(args[1]);
+        var base = actor._aopParamPlus[paramId];
+        var value = this.calcValue(base, this.setNum(args[3]), args[2]);
+        actor.setAopParamPlus(paramId, value);
+    };
+
+    Game_Interpreter.prototype.getAopParams = function(command, args) {
+        var varId = this.setNum(args[0]);
+        var actor = this.setActor(args[1]);
+        if(!varId || !actor) return;
+        $gameVariables.setValue(varId, actor.aopParam(DataManager.getParamId(args[2])));
+    };
+
+    Game_Interpreter.prototype.setActor = function(arg) {
+        var case1 = /ACTOR\((.+)\)/i;
+        var case1j = /アクター\((.+)\)/i;
+        var case2 = /PARTY\((.+)\)/i;
+        var case2j = /パーティー\((.+)\)/i;
+        if (arg.match(case1) || arg.match(case1j)) {
+            return $gameActors.actor(this.setNum(RegExp.$1));
+        } else if (arg.match(case2) || arg.match(case2j)) {
+            return $gameParty.members()[this.setNum(RegExp.$1)];
+        } else {
+            return null;
+        }
+    };
+
+    Game_Interpreter.prototype.calcValue = function(value1, value2, code) {
+        switch (code) {
+        case '加算':
+        case '+':
+            return value1 + value2;
+        case '減算':
+        case '-':
+            return value1 - value2;
+        case '積算':
+        case '×':
+        case '*':
+            return value1 * value2;
+        case '除算':
+        case '／':
+        case '/':
+            return value1 / value2;
+        case '剰余':
+        case '％':
+        case '%':
+            return value1 % value2;
+        case '代入':
+        case '＝':
+        case '=':
+        default:
+            return value2;
+        }
+    };
+
+    Game_Interpreter.prototype.setNum = function(data) {
+        var data1 = /v\[(\d+)\]/i;
+        var data2 = /(\d+)/i;
+        if (data.match(data1)) {
+            return $gameVariables.value(Number(RegExp.$1));
+        } else if (data.match(data2)) {
+            return Number(RegExp.$1);
+        } else {
+            return 0;
+        }
+    };
+
+}());//EOF

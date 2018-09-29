@@ -4,8 +4,8 @@
 // プラグインNo : 9
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2018/09/28
-// バージョン : v3.3.3
+// 最終更新日 : 2018/09/29
+// バージョン : v3.3.4
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v3.3.3 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v3.3.4 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -1007,6 +1007,9 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v3.3.4 - 2018/09/28 : 機能追加
+ *    1. ステータスコードに、AOPパラメータ表示用のコードを追加。
+ * 
  * v3.3.3 - 2018/09/28 : 機能追加
  *    1. ステータスコードに、パラメータ表示用のコードを追加。
  * 
@@ -1293,6 +1296,12 @@ FTKR.CSS = FTKR.CSS || {};
  * @value equip(%1)
  * @option 装備パラメータ
  * @value eparam(%1)
+ * @option AOP能力値
+ * @value aop(%1)
+ * @option AOP能力値(素)
+ * @value aopbase(%1)
+ * @option AOP能力値(増加分)
+ * @value aopdiff(%1)
  * @option AOP装備パラメータ
  * @value eaop(%1)
  * @option カスタムパラメータ
@@ -2196,6 +2205,10 @@ FTKR.CSS = FTKR.CSS || {};
     // 括弧で表示する内容を指定する表示コード(括弧内をevalで計算させる場合)
     Window_Base.prototype.drawCssActorStatusBase_A1 = function(index, actor, x, y, width, match, lss, css) {
         switch(match[1].toUpperCase()) {
+            case 'AOPDIFF':
+                return this.drawCssActorAopParamDiff(actor, x, y, width, match[2], lss);
+            case 'AOPBASE':
+                return this.drawCssActorAopParamBase(actor, x, y, width, match[2], lss);
             case 'PDIFF':
                 return this.drawCssActorParamDiff(actor, x, y, width, match[2], lss);
             case 'PBASE':
@@ -2206,6 +2219,8 @@ FTKR.CSS = FTKR.CSS || {};
                 return this.drawCssActorEquipParam(actor, x, y, width, match[2], lss);
             case 'EAOP':
                 return this.drawCssActorEquipAopParam(actor, x, y, width, match[2], lss);
+            case 'AOP':
+                return this.drawCssActorAopParam(actor, x, y, width, match[2], lss);
             case 'AGAUGE':
                 return this.drawCssActorCustomGauge(actor, x, y, width, match[2]);
             case 'CGAUGE':
@@ -2776,6 +2791,52 @@ FTKR.CSS = FTKR.CSS || {};
     };
 
     //------------------------------------------------------------------------
+    //AOP能力値の表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorAopParam = function(actor, x, y, width, paramId, lss) {
+        if (!Imported.FTKR_AOP) return 1;
+        if (paramId < 0 && FTKR.AOP.useParamNum > 9) return 1;
+        this.changeTextColor(this.systemColor());
+        this.drawText(FTKR.AOP.params[paramId].text, x, y, width);
+        this.resetTextColor();
+        this.drawText(actor.aopParam(paramId), x, y, width, 'right');
+        return 1;
+    };
+
+    //------------------------------------------------------------------------
+    //素のAOP能力値の表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorAopParamBase = function(actor, x, y, width, paramId, lss) {
+        if (!Imported.FTKR_AOP) return 1;
+        if (paramId < 0 && FTKR.AOP.useParamNum > 9) return 1;
+        this.changeTextColor(this.systemColor());
+        this.drawText(FTKR.AOP.params[paramId].text, x, y, width);
+        this.resetTextColor();
+        this.drawText(actor.aopParamBase(paramId), x, y, width, 'right');
+        return 1;
+    };
+
+    //------------------------------------------------------------------------
+    //AOP能力値差分の表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorAopParamDiff = function(actor, x, y, width, paramId, lss) {
+        if (!Imported.FTKR_AOP) return 1;
+        if (paramId < 0 && FTKR.AOP.useParamNum > 9) return 1;
+        var param = actor.aopParam(paramId);
+        var base = actor.aopParamBase(paramId);
+        var diff = param - base;
+        var text = '';
+        if (diff > 0) {
+            text = FTKR.CSS.cssStatus.pdiff.plus.format(diff);
+        } else if (diff < 0) {
+            text = FTKR.CSS.cssStatus.pdiff.minus.format(-diff);
+        }
+        this.drawTextEx(text, x, y);
+        this.resetTextColor();
+        return 1;
+    };
+
+    //------------------------------------------------------------------------
     //カスタムパラメータの表示関数
     //------------------------------------------------------------------------
     Window_Base.prototype.drawCssActorCustom = function(actor, x, y, width, custom) {
@@ -2949,7 +3010,7 @@ FTKR.CSS = FTKR.CSS || {};
     //------------------------------------------------------------------------
     Window_Base.prototype.drawCssActorEquipAopParam = function(actor, x, y, width, paramId, lss) {
         if (!Imported.FTKR_AOP) return 1;
-        if (paramId < 0 && FTKR.AOP.useParamNum > 7) return 1;
+        if (paramId < 0 && FTKR.AOP.useParamNum > 9) return 1;
         this.drawTextEx(FTKR.CSS.cssStatus.equip.arrow, x, y);
         var target = lss.target;
         if(this.checkShowEquipParam(actor, target)) {
