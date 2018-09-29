@@ -5,7 +5,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2017/06/07
 // 最終更新日 : 2018/09/29
-// バージョン : v2.1.2
+// バージョン : v2.1.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.CBR = FTKR.CBR || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.1.2 カスタム可能な戦闘結果画面を表示する
+ * @plugindesc v2.1.3 カスタム可能な戦闘結果画面を表示する
  * @author フトコロ
  *
  * @param --タイトル設定--
@@ -105,6 +105,17 @@ FTKR.CBR = FTKR.CBR || {};
  * @param --戦績コマンド設定--
  * @default
  *
+ * @param Command Cursor Position
+ * @desc カーソルの初期位置を設定します。
+ * @type select
+ * @option ステータス
+ * @value 0
+ * @option アイテム
+ * @value 1
+ * @option 終了
+ * @value 2
+ * @default 0
+ * 
  * @param Enable Select Command
  * @desc 終了コマンド以外を選択できるようにするか設定します。
  * @type select
@@ -348,6 +359,9 @@ FTKR.CBR = FTKR.CBR || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v3.1.3 - 2018/09/29 : 機能追加
+ *    1. 戦績コマンドのカーソル初期値を設定する機能を追加。
+ * 
  * v2.1.2 - 2018/09/29 : 機能追加
  *    1. プラグインパラメータのリストで選択できる項目を追加。
  * 
@@ -567,6 +581,7 @@ if (Imported.FTKR_CSS) (function() {
             spaceIn     :Number(parameters['Party Status Space In Text'] || 0),
         },
         command:{
+            cursorPosi  :Number(paramParse(parameters['Command Cursor Position']) || 0),
             status      :String(parameters['Command Display Status'] || ''),
             item        :String(parameters['Command Display Item'] || ''),
             finish      :String(parameters['Command Finish'] || ''),
@@ -962,6 +977,7 @@ if (Imported.FTKR_CSS) (function() {
         this._battleResultCommandWindow.setDropItem(rewards.items);
         this._battleResultCommandWindow.show();
         this._battleResultCommandWindow.activate();
+        this._battleResultCommandWindow.select(FTKR.CBR.command.cursorPosi);
         this._battleResultActorWindow.show();
         this._battleResultActorWindow.refresh();
         this._battleResultItemWindow.setDropItem(rewards.items);
