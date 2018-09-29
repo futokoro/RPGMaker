@@ -111,7 +111,6 @@ FTKR_CSS_CustomizeBattleResults.js
 | 入手アイテムリスト(配列) | BattleManager._rewards.items |
 | 戦闘終了時のターン数 | $gameTroop._turnCount |
 
-
 その他のプラグインパラメータは、[共通設定](#共通設定)を参照してください。
 
 ![画像](image/FTKR_CSS_CustomizeBattleResults/n04_001.png)
@@ -120,7 +119,11 @@ FTKR_CSS_CustomizeBattleResults.js
 
 ## コマンドウィンドウの設定
 
-以下のプラグインパラメータで、タイトルウィンドウで表示する内容を設定します。
+以下のプラグインパラメータで、コマンドウィンドウで表示する内容を設定します。
+
+`Command Cursor Position`
+
+コマンドウィンドウのカーソル初期位置を設定します。
 
 ### コマンド名
 
@@ -293,7 +296,9 @@ CBR_SHOW_BATTLE_RESULT
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver2.1.1](FTKR_CSS_CustomizeBattleResults.js) | 2018/09/28 | 経験獲得率の値によっては、獲得経験値が正しく計算されない不具合を修正 |
+| [ver2.1.3](FTKR_CSS_CustomizeBattleResults.js) | 2018/09/29 | 戦績コマンドのカーソル初期値を設定する機能を追加 |
+| ver2.1.2 | 2018/09/29 | プラグインパラメータのリストで選択できる項目を追加 |
+| ver2.1.1 | 2018/09/28 | 経験獲得率の値によっては、獲得経験値が正しく計算されない不具合を修正 |
 | ver2.1.0 | 2018/08/30 | FTKR_CustomSimpleActorStatus.js の v3.1.0に対応 |
 | ver2.0.0 | 2018/08/19 | FTKR_CustomSimpleActorStatus.js の v3.0.0に対応 |
 | [ver1.5.0](/archive/FTKR_CSS_CustomizeBattleResults_1.5.0.js) | 2018/08/04 | バトルメンバー以外も画面に表示する機能を追加 |
