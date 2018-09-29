@@ -4,8 +4,8 @@
 // プラグインNo : 16
 // 作成者     : フトコロ
 // 作成日     : 2017/04/11
-// 最終更新日 : 2018/09/12
-// バージョン : v2.1.1
+// 最終更新日 : 2018/09/29
+// バージョン : v2.1.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -17,7 +17,7 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.1.1 バトル画面のステータス表示を変更するプラグイン
+ * @plugindesc v2.1.2 バトル画面のステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @param --バトルパーティー設定--
@@ -260,6 +260,9 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.1.2 - 2018/09/29 : 機能追加
+ *    1. プラグインパラメータのリストで選択できる項目を追加。
+ * 
  * v2.1.1 - 2018/09/12 : 不具合修正
  *    1. プラグインパラメータ Number Visible Rows が反映されない不具合を修正。
  * 
@@ -332,12 +335,14 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  * @value profile
  * @option 通常能力値
  * @value param(%1)
+ * @option 通常能力値(素)
+ * @value pbase(%1)
+ * @option 通常能力値(増加分)
+ * @value pdiff(%1)
  * @option 装備
  * @value equip(%1)
  * @option 装備パラメータ
  * @value eparam(%1)
- * @option AOP装備パラメータ
- * @value eaop(%1)
  * @option カスタムパラメータ
  * @value custom(%1)
  * @option カスタムゲージ
@@ -360,6 +365,34 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  * @value streval(%1)
  * @option 横線
  * @value line
+ * @option AOP能力値
+ * @value aop(%1)
+ * @option AOP能力値(素)
+ * @value aopbase(%1)
+ * @option AOP能力値(増加分)
+ * @value aopdiff(%1)
+ * @option AOP装備パラメータ
+ * @value eaop(%1)
+ * @option アイテム名
+ * @value iname
+ * @option アイテムアイコン
+ * @value iicon
+ * @option アイテム説明
+ * @value idesc
+ * @option アイテムタイプ
+ * @value itype
+ * @option アイテム装備タイプ
+ * @value ietype
+ * @option アイテム範囲
+ * @value iscope
+ * @option アイテム属性
+ * @value ielement
+ * @option アイテム設定詳細
+ * @value iparam(%1)
+ * @option アイテムカスタム画像
+ * @value iimage(%1)
+ * @option マップ名
+ * @value mapname
  *
  * @param value
  * @desc code(%1)の形式で設定するステータスの%1の内容を入力

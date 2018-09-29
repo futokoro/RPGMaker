@@ -4,8 +4,8 @@
 // プラグインNo : 44
 // 作成者     : フトコロ
 // 作成日     : 2017/06/07
-// 最終更新日 : 2018/09/28
-// バージョン : v2.1.1
+// 最終更新日 : 2018/09/29
+// バージョン : v2.1.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.CBR = FTKR.CBR || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.1.1 カスタム可能な戦闘結果画面を表示する
+ * @plugindesc v2.1.2 カスタム可能な戦闘結果画面を表示する
  * @author フトコロ
  *
  * @param --タイトル設定--
@@ -348,6 +348,9 @@ FTKR.CBR = FTKR.CBR || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.1.2 - 2018/09/29 : 機能追加
+ *    1. プラグインパラメータのリストで選択できる項目を追加。
+ * 
  * v2.1.1 - 2018/09/28 : 不具合修正
  *    1. 経験獲得率の値によっては、獲得経験値が正しく計算されない不具合を修正。
  * 
@@ -439,12 +442,14 @@ FTKR.CBR = FTKR.CBR || {};
  * @value profile
  * @option 通常能力値
  * @value param(%1)
+ * @option 通常能力値(素)
+ * @value pbase(%1)
+ * @option 通常能力値(増加分)
+ * @value pdiff(%1)
  * @option 装備
  * @value equip(%1)
  * @option 装備パラメータ
  * @value eparam(%1)
- * @option AOP装備パラメータ
- * @value eaop(%1)
  * @option カスタムパラメータ
  * @value custom(%1)
  * @option カスタムゲージ
@@ -467,6 +472,34 @@ FTKR.CBR = FTKR.CBR || {};
  * @value streval(%1)
  * @option 横線
  * @value line
+ * @option AOP能力値
+ * @value aop(%1)
+ * @option AOP能力値(素)
+ * @value aopbase(%1)
+ * @option AOP能力値(増加分)
+ * @value aopdiff(%1)
+ * @option AOP装備パラメータ
+ * @value eaop(%1)
+ * @option アイテム名
+ * @value iname
+ * @option アイテムアイコン
+ * @value iicon
+ * @option アイテム説明
+ * @value idesc
+ * @option アイテムタイプ
+ * @value itype
+ * @option アイテム装備タイプ
+ * @value ietype
+ * @option アイテム範囲
+ * @value iscope
+ * @option アイテム属性
+ * @value ielement
+ * @option アイテム設定詳細
+ * @value iparam(%1)
+ * @option アイテムカスタム画像
+ * @value iimage(%1)
+ * @option マップ名
+ * @value mapname
  *
  * @param value
  * @desc code(%1)の形式で設定するステータスの%1の内容を入力
