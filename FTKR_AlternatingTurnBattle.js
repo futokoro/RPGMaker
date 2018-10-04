@@ -4,8 +4,8 @@
 // プラグインNo : 75
 // 作成者     : フトコロ
 // 作成日     : 2018/04/08
-// 最終更新日 : 2018/09/15
-// バージョン : v1.4.4
+// 最終更新日 : 2018/10/04
+// バージョン : v1.4.5
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.AltTB = FTKR.AltTB || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.4.4 敵味方交互にターンが進むターン制戦闘システム
+ * @plugindesc v1.4.5 敵味方交互にターンが進むターン制戦闘システム
  * @author フトコロ
  *
  * @param TurnEnd Command
@@ -46,6 +46,17 @@ FTKR.AltTB = FTKR.AltTB || {};
  * @off 無効
  * @default false
  *
+ * @param Confused Action Timing
+ * @desc 行動制約ステートによるアクターの行動タイミングを設定する。
+ * @type select
+ * @option プレイヤーターン開始時
+ * @value 1
+ * @option プレイヤーターン終了時
+ * @value 0
+ * @default 0
+ *
+ * @param --- 行動回数 ---
+ * 
  * @param Disable AC
  * @desc アクターの行動回数による行動制限を無効にする
  * @type boolean
@@ -444,11 +455,16 @@ FTKR.AltTB = FTKR.AltTB || {};
  * 6. キャンセルキーで、パーティーコマンドを表示できます。
  * 7. 誰かが行動したターンでは、パーティーコマンドの「逃げる」は
  *    実行できなくなります。
- * 
+ * 8. 行動制約のあるステートを受けると、そのキャラは行動選択できず
+ *    プレイヤーターンの開始時または終了時に行動制約に合わせた自動行動を行います。(*2)
+ *    この自動行動はAPや行動回数の消費を無視します。
  * 
  * (*1)プラグインパラメータ Change Player でキー操作方法は変更できます。
  *     また、マウスでステータスウィンドウ上をクリックすることで
  *     クリックした位置のアクターに選択を変えることもできます。
+ * 
+ * (*2)プラグインパラメータ Confused Action Timing で実行タイミングを
+ *     設定できます。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -765,6 +781,10 @@ FTKR.AltTB = FTKR.AltTB || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.4.5 - 2018/10/04 : 不具合修正、機能追加
+ *    1. パーティーが行動制約のあるステートを受けても効果が発生しない不具合を修正。
+ *    2. 行動制約による強制行動の実行タイミングを設定する機能を追加。
+ * 
  * v1.4.4 - 2018/09/15 : 不具合修正
  *    1. イベントコマンド「戦闘行動の強制」を使用した場合に、行動選択時にエラーになる
  *       不具合を修正。
@@ -880,6 +900,10 @@ FTKR.AltTB = FTKR.AltTB || {};
  * @default 0
  *
 */
+
+function Window_BattleActionPoint() {
+    this.initialize.apply(this, arguments);
+}
 
 (function() {
 
@@ -1054,6 +1078,7 @@ FTKR.AltTB = FTKR.AltTB || {};
         changePlayer    : (paramParse(parameters['Change Player']) || 0),
         startActorCmd   : (paramParse(parameters['Start Actor Command']) || false),
         enableAutoTurnEnd : (paramParse(parameters['Enable Auto Player Turn End']) || false),
+        confusedActionTiming : +(paramParse(parameters['Confused Action Timing']) || 0),
         disableAC       : (paramParse(parameters['Disable AC']) || false),
         showAC          : (paramParse(parameters['Show Action Count']) || false),
         dispACFormat    : (paramParse(parameters['Display AC Format']) || '[%1]'),
@@ -1352,6 +1377,9 @@ FTKR.AltTB = FTKR.AltTB || {};
             case 'actionEnd':
                 this.updateActionEnd();
                 break;
+            case 'confusedActionTurn':
+                this.updateConfusedPartyAction();
+                break;
             case 'turnEnd':
                 this.updateTurnEnd();
                 break;
@@ -1370,6 +1398,8 @@ FTKR.AltTB = FTKR.AltTB || {};
 
     BattleManager.updateTurnStart = function() {
         this._phase = 'turn';
+        this._playerTurnStart = false;
+        this._enemyTurnStart = false;
         $gameParty.makeActions();
         $gameTroop.makeActions();
         $gameParty.resetActionCount();
@@ -1380,6 +1410,11 @@ FTKR.AltTB = FTKR.AltTB || {};
         this.makeActionOrders();
         $gameParty.requestMotionRefresh();
         $gameParty.resetActionState();
+        $gameParty.members().forEach(function(member){
+            if (member.isConfused()) {
+                member.clearActionCount();
+            }
+        });
         this._logWindow.startTurn();
         this._statusWindow.refresh();
         if (FTKR.AltTB.enableAP) this._partyApWindow.refresh();
@@ -1396,11 +1431,30 @@ FTKR.AltTB = FTKR.AltTB || {};
     BattleManager.updateTurn = function() {
         $gameParty.requestMotionRefresh();
         if (this.isPlayerTurn()) {
-            this.resetPlayerActions();
-            this.updatePlayerTurn();
+            if (!this._playerTurnStart) {
+                this.updatePlayerTurnStart();
+                this._playerTurnStart = true;
+            } else {
+                this.resetPlayerActions();
+                this.updatePlayerTurn();
+            }
         } else {
-            this.updateEnemyTurn();
+            if (!this._enemyTurnStart) {
+                this.updateEnemyTurnStart();
+                this._enemyTurnStart = true;
+            } else {
+                this.updateEnemyTurn();
+            }
         }
+    };
+
+    BattleManager.updatePlayerTurnStart = function() {
+        if (FTKR.AltTB.confusedActionTiming) {
+            this._phase = 'confusedActionTurn';
+        }
+    };
+
+    BattleManager.updateEnemyTurnStart = function() {
     };
 
     BattleManager.resetPlayerActions = function() {
@@ -1416,8 +1470,42 @@ FTKR.AltTB = FTKR.AltTB || {};
             this._phase = 'input';
             this.autoSelectNextActor();
         } else {
+            this.updatePlayerTurnEnd();
+        }
+    };
+
+    BattleManager.updateConfusedPartyAction = function() {
+        this._isConfusedPartyAction = true;
+        this._subject = this.setConfusedPartyMember();
+        if (this._subject) {
+            this.processTurn();
+        } else {
+            if (FTKR.AltTB.confusedActionTiming) {
+                this._phase = 'turn';
+            } else {
+                this.changeTrunSide();
+            }
+            this._isConfusedPartyAction = false;
+        }
+    };
+
+    BattleManager.updatePlayerTurnEnd = function() {
+        if (!FTKR.AltTB.confusedActionTiming) {
+            this._phase = 'confusedActionTurn';
+        } else {
             this.changeTrunSide();
         }
+    };
+
+    BattleManager.setConfusedPartyMember = function() {
+        var subject = null;
+        $gameParty.members().some(function(member){
+            if (member.isConfused() && member.currentAction()) {
+                subject = member;
+                return true;
+            };
+        });
+        return subject;
     };
 
     BattleManager.autoSelectNextActor = function() {
@@ -1437,8 +1525,12 @@ FTKR.AltTB = FTKR.AltTB || {};
         if (this._subject) {
             this.processTurn();
         } else {
-            this._phase = 'turnEnd';
+            this.updateEnemyTurnEnd();
         }
+    };
+
+    BattleManager.updateEnemyTurnEnd = function() {
+        this._phase = 'turnEnd';
     };
 
     //書き換え
@@ -1469,7 +1561,11 @@ FTKR.AltTB = FTKR.AltTB || {};
     };
 
     BattleManager.updateActionEnd = function() {
-        this._phase = 'turn';
+        if (this._isConfusedPartyAction) {
+            this._phase = 'confusedActionTurn';
+        } else {
+            this._phase = 'turn';
+        }
         var subject = this._subject;
         subject.onAllActionsEnd();
         this.refreshStatus();
@@ -1670,6 +1766,10 @@ FTKR.AltTB = FTKR.AltTB || {};
         return $gameParty.inBattle() ? this._actionCount : this.baseActionCount();
     };
 
+    Game_Battler.prototype.clearActionCount = function() {
+        this._actionCount = 0;
+    };
+
     Game_Battler.prototype.baseActionCount = function() {
         var mac = this.maxActionCount();
         var bac = this.makeActionTimes();
@@ -1751,7 +1851,7 @@ FTKR.AltTB = FTKR.AltTB || {};
     var _AltTB_Game_Actor_canUse = Game_Actor.prototype.canUse;
     Game_Actor.prototype.canUse = function(item) {
         var result = _AltTB_Game_Actor_canUse.call(this, item);
-        if ($gameParty.inBattle()) {
+        if ($gameParty.inBattle() && !this.isConfused()) {
             return result && this.canPayAP(item) && this.canPayAC(item);
         } else {
             return result;
@@ -1947,7 +2047,7 @@ FTKR.AltTB = FTKR.AltTB || {};
     //書き換え
     Scene_Battle.prototype.commandTurnEnd = function() {
         this.endCommandSelection();
-        BattleManager.changeTrunSide();
+        BattleManager.updatePlayerTurnEnd();
     };
 
     //書き換え
@@ -2420,10 +2520,6 @@ FTKR.AltTB = FTKR.AltTB || {};
     //=============================================================================
     // Window_BattleActionPoint
     //=============================================================================
-
-    function Window_BattleActionPoint() {
-        this.initialize.apply(this, arguments);
-    }
 
     Window_BattleActionPoint.prototype = Object.create(Window_Base.prototype);
     Window_BattleActionPoint.prototype.constructor = Window_BattleActionPoint;
