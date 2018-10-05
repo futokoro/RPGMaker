@@ -4,8 +4,8 @@
 // 作成者     : フトコロ
 // プラグインNo : 59
 // 作成日     : 2017/11/27
-// 最終更新日 : 2018/02/20
-// バージョン : v1.0.3
+// 最終更新日 : 2018/10/05
+// バージョン : v1.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.ME = FTKR.ME || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.3 メニュー画面上でコモンイベントを実行できるようにする
+ * @plugindesc v1.1.0 メニュー画面上でコモンイベントを実行できるようにする
  * @author フトコロ
  *
  * @param Enable Item Event
@@ -54,8 +54,15 @@ FTKR.ME = FTKR.ME || {};
  * @off 自動更新OFF
  * @default false
  *
+ * @param Enabled Message Window Setting
+ * @desc メニュー画面で表示するメッセージウィンドウの設定を有効にします。
+ * @type boolean
+ * @on 有効
+ * @off 無効
+ * @default false
+ *
  * @param Menu Message Window
- * @desc メニュー画面で表示するウィンドウを設定します。
+ * @desc メニュー画面で表示するメッセージウィンドウを設定します。
  * ※メッセージウィンドウ前面設定の時のみ有効
  * @type struct<menu>
  * @default {"Window_Skin":"Window","Font_Size":"28","Window_Padding":"18","Window_Line_Height":"36","Window_Opacity":"192","Hide_Window_Frame":"false"}
@@ -78,6 +85,10 @@ FTKR.ME = FTKR.ME || {};
  * 
  * 2. FTKR_ItemSubCommand.jsと組み合わせる場合は、本プラグインが
  *    下になるように配置してください。
+ * 
+ * 3. メッセージウィンドウに関するプラグインと組み合わせて使用する場合には
+ *    プラグインパラメータ Enabled Message Window Setting を無効にして
+ *    使ってください。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -216,6 +227,9 @@ FTKR.ME = FTKR.ME || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.0 - 2018/10/05 : 機能追加
+ *    1. メッセージウィンドウの設定を無効にする機能を追加。
+ * 
  * v1.0.3 - 2018/02/20 : 不具合修正
  *    1. 範囲が「なし」のアイテムのコモンイベントで、メッセージウィンドウを
  *       表示させたときに、イベントを正しく実行できない不具合を修正。
@@ -317,8 +331,8 @@ function Game_Menu() {
         priority : JSON.parse(parameters['Display Priority'] || false),
         refresh  : JSON.parse(parameters['Auto Refresh Item Window'] || false),
         message  : paramParse(parameters['Menu Message Window']),
+        enabledSetting : paramParse(parameters['Enabled Message Window Setting']) || false,
     };
-    FTKR.ME.enable = !!FTKR.ME.message;
         
     //=============================================================================
     // DataManager
@@ -537,7 +551,7 @@ function Game_Menu() {
     };
 
     Scene_ItemBase.prototype.createMessageWindow2 = function() {
-        this._messageWindow = FTKR.ME.enable ?
+        this._messageWindow = FTKR.ME.enabledSetting ?
             new Window_MenuMessage() : new Window_Message();
         this.addMessage(this._messageWindow);
         this._messageWindow.subWindows().forEach(function(window) {
@@ -546,7 +560,7 @@ function Game_Menu() {
     };
 
     Scene_ItemBase.prototype.createScrollTextWindow2 = function() {
-        this._scrollTextWindow = FTKR.ME.enable ?
+        this._scrollTextWindow = FTKR.ME.enabledSetting ?
             new Window_MenuScrollText() : new Window_ScrollText();
         this.addMessage(this._scrollTextWindow);
     };
@@ -649,7 +663,7 @@ function Game_Menu() {
     function Window_MenuMessage() {
         this.initialize.apply(this, arguments);
     }
-
+    
     Window_MenuMessage.prototype = Object.create(Window_Message.prototype);
     Window_MenuMessage.prototype.constructor = Window_MenuMessage;
 
