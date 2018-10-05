@@ -1,11 +1,10 @@
 //=============================================================================
 // アクターのバトルコマンドの表示を変更するプラグイン
 // FTKR_ExBattleCommand.js
-// プラグインNo : 58
 // 作成者     : フトコロ
 // 作成日     : 2017/11/25
-// 最終更新日 : 2018/04/09
-// バージョン : v1.1.0
+// 最終更新日 : 2018/10/05
+// バージョン : v1.2.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +15,7 @@ FTKR.EBC = FTKR.EBC || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.0 アクターのバトルコマンドの表示を変更する
+ * @plugindesc v1.2.0 アクターのバトルコマンドの表示を変更する
  * @author フトコロ
  *
  * @param --パーティーコマンド--
@@ -42,6 +41,13 @@ FTKR.EBC = FTKR.EBC || {};
  *
  * @param Show Custom Cmd Cost
  * @desc カスタムコマンドのコストを表示するか指定します。
+ * @type boolean
+ * @on 有効
+ * @off 無効
+ * @default false
+ * 
+ * @param Show Command Description
+ * @desc カスタムコマンド選択時にスキルに設定した説明文を表示します。
  * @type boolean
  * @on 有効
  * @off 無効
@@ -216,6 +222,9 @@ FTKR.EBC = FTKR.EBC || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.2.0 - 2018/10/05 : 機能追加
+ *    1. カスタムコマンド選択時にスキルに設定した説明文を表示する機能を追加。
+ * 
  * v1.1.0 - 2018/04/09 : 機能追加
  *    1. FTKR_AlternatingTurnBattle.jsの v1.1.0 に対応。
  *    2. パーティーコマンドの表示順番を設定する機能を追加。
@@ -351,6 +360,7 @@ FTKR.EBC = FTKR.EBC || {};
             actor : paramParse(parameters['Actor Command Icons']),
         },
         showCustomCost : paramParse(parameters['Show Custom Cmd Cost']) || false,
+        showCommandDesc : paramParse(parameters['Show Command Description']) || false,
     };
     FTKR.EBC.icons.actor.skill = (',' + FTKR.EBC.icons.actor.skills).split(',').num();
 
@@ -691,6 +701,21 @@ FTKR.EBC = FTKR.EBC || {};
         this.drawBattleItem(index);
     };
 
+    Window_ActorCommand.prototype.isCustomCommand = function() {
+        return this.currentData() ? this.currentSymbol() === 'custom' : null;
+    };
+
+    Window_ActorCommand.prototype.updateHelp = function() {
+        var id = this.isCustomCommand() ? this.currentExt() : -1;
+        var item = id >= 0 ? $dataSkills[id] : null;
+        this.setHelpWindowItem(item);
+        if (item) {
+            this.showHelpWindow();
+        } else {
+            this.hideHelpWindow();
+        }
+    };
+    
     var _EBC_Window_ActorCommand_makeCommandList = Window_ActorCommand.prototype.makeCommandList;
     Window_ActorCommand.prototype.makeCommandList = function() {
         if (this._actor) {
@@ -752,6 +777,15 @@ FTKR.EBC = FTKR.EBC || {};
     Scene_Battle.prototype.createActorCommandWindow = function() {
         _EBC_Scene_Battle_createActorCommandWindow.call(this);
         this._actorCommandWindow.setHandler('custom', this.commandCustom.bind(this));
+    };
+
+    var _EBC_Scene_Battle_createHelpWindow = Scene_Battle.prototype.createHelpWindow;
+    Scene_Battle.prototype.createHelpWindow = function() {
+        _EBC_Scene_Battle_createHelpWindow.call(this);
+        if (FTKR.EBC.showCommandDesc) {
+            this._actorCommandWindow.setHelpWindow(this._helpWindow);
+            console.log(this._actorCommandWindow);
+        }
     };
 
     Scene_Battle.prototype.commandCustom = function() {
