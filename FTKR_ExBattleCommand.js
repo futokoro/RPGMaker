@@ -3,8 +3,8 @@
 // FTKR_ExBattleCommand.js
 // 作成者     : フトコロ
 // 作成日     : 2017/11/25
-// 最終更新日 : 2018/10/05
-// バージョン : v1.2.1
+// 最終更新日 : 2018/10/09
+// バージョン : v1.2.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EBC = FTKR.EBC || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.1 アクターのバトルコマンドの表示を変更する
+ * @plugindesc v1.2.2 アクターのバトルコマンドの表示を変更する
  * @author フトコロ
  *
  * @param --パーティーコマンド--
@@ -221,6 +221,10 @@ FTKR.EBC = FTKR.EBC || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.2.2 - 2018/10/09 : 不具合修正
+ *    1. 説明文を表示した状態でパーティーコマンドを表示させた場合に、説明文が
+ *       そのまま残ってしまう不具合を修正。
  * 
  * v1.2.1 - 2018/10/05 : 不具合修正
  *    1. カスタムコマンドのコストを非表示にしていても、コマンド名が左右につぶれて
@@ -667,6 +671,10 @@ FTKR.EBC = FTKR.EBC || {};
         this.drawBattleItem(index);
     };
 
+    Window_PartyCommand.prototype.updateHelp = function() {
+        this.hideHelpWindow();
+    };
+
     //=============================================================================
     // Window_ActorCommand
     //=============================================================================
@@ -787,8 +795,8 @@ FTKR.EBC = FTKR.EBC || {};
     Scene_Battle.prototype.createHelpWindow = function() {
         _EBC_Scene_Battle_createHelpWindow.call(this);
         if (FTKR.EBC.showCommandDesc) {
+            this._partyCommandWindow.setHelpWindow(this._helpWindow);
             this._actorCommandWindow.setHelpWindow(this._helpWindow);
-            console.log(this._actorCommandWindow);
         }
     };
 
