@@ -122,7 +122,9 @@ FTKR_CSS_EquipStatus.js
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver2.1.1](FTKR_CSS_EquipStatus.js) | 2018/09/12 | プラグインパラメータ Number Visible Rows が反映されない不具合を修正 |
+| [ver2.1.3](FTKR_CSS_EquipStatus.js) | 2018/10/10 | 装備シーンのステータスウィンドウ上で選択中の装備のパラメータを参照できる機能追加 |
+| ver2.1.2 | 2018/09/29 | プラグインパラメータのリストで選択できる項目を追加 |
+| ver2.1.1 | 2018/09/12 | プラグインパラメータ Number Visible Rows が反映されない不具合を修正 |
 | ver2.1.0 | 2018/08/30 | FTKR_CustomSimpleActorStatus.js の v3.1.0に対応 |
 | ver2.0.0 | 2018/08/19 | FTKR_CustomSimpleActorStatus.js の v3.0.0に対応 |
 | [ver1.1.0](/archive/FTKR_CSS_EquipStatus‗1.1.0.js) | 2017/11/18 | FTKR_CustomSimpleActorStatus.js の v2.6.0に対応 |

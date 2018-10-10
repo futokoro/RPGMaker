@@ -133,7 +133,8 @@ FTKR_FacialImageDifference.js
 
 #### アクター用特殊2
 
-以下のコードを使用するためには、[FTKR_CSS_ShopStatusプラグイン](FTKR_CSS_ShopStatus.ja.md)が必要です。
+以下のコードを使用するためには、[FTKR_CSS_ShopStatusプラグイン](FTKR_CSS_ShopStatus.ja.md)が必要です。<br>
+FTKR_CustomSimpleActorStatus の v3.4.0 以降から標準実装。
 
 | ステータス名 | コード | 制御文字 |説明 |
 | ----------- | ----- | ---- | ---- |
@@ -850,7 +851,8 @@ a.hit.parcent()
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver3.3.4](FTKR_CustomSimpleActorStatus.js) | 2018/09/29 | ステータスコードに、AOPパラメータ表示用のコードを追加 |
+| [ver3.4.0](FTKR_CustomSimpleActorStatus.js) | 2018/10/10 | ediff(x)およびediffaop(x)のコードをFTKR_CSS_ShopStatusから移動 |
+| ver3.3.4 | 2018/09/29 | ステータスコードに、AOPパラメータ表示用のコードを追加 |
 | ver3.3.3 | 2018/09/28 | ステータスコードに、パラメータ表示用のコードを追加 |
 | ver3.3.2 | 2018/09/19 | ステータスコードに、アイテム用のコードを追加 |
 | ver3.3.1 | 2018/09/19 | 戦闘不能時に、ステートアイコンを表示しない不具合を修正 |

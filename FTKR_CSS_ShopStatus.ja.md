@@ -52,7 +52,8 @@ FTKR_CSS_ShopStatus.js
 共通レイアウトはどのカテゴリーでも共通して表示するステータスです。
 
 ## CSS表示コードの追加
-本プラグインにより以下の表示コードを使用できます。
+本プラグインにより以下の表示コードを使用できます。<br>
+※FTKR_CSS_ShopStatus v2.2.0 以降は FTKR_CustomSimpleActorStatus の標準コード。
 
 ### カーソルで選択中の装備をしたときのパラメータ差分
 `ediff(x)`
@@ -182,7 +183,9 @@ x はオリジナルパラメータIDを指定してください。
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver2.1.1](FTKR_CSS_ShopStatus.js) | 2018/09/19 | 武器防具以外のパラメータ表示コードの一部が正しく反映されない不具合を修正<br>プラグインパラメータのステータスリスト項目を追加 |
+| [ver2.2.0](FTKR_CSS_ShopStatus.js) | 2018/10/10 | ediff(x)およびediffaop(x)のコードをFTKR_CustomSimpleActorStatusに移動 |
+| ver2.1.2 | 2018/09/29 | プラグインパラメータのリストで選択できる項目を追加 |
+| ver2.1.1 | 2018/09/19 | 武器防具以外のパラメータ表示コードの一部が正しく反映されない不具合を修正<br>プラグインパラメータのステータスリスト項目を追加 |
 | ver2.1.0 | 2018/08/30 | FTKR_CustomSimpleActorStatus.js の v3.1.0に対応 |
 | ver2.0.0 | 2018/08/19 | FTKR_CustomSimpleActorStatus.js の v3.0.0に対応 |
 | [ver1.2.2](/archive/FTKR_CSS_ShopStatus_1.2.2.js) | 2017/12/02 | GraphicalDesignMode.jsがないとエラーで立ち上がらない不具合を修正 |

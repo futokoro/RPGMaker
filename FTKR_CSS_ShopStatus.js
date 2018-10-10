@@ -4,8 +4,8 @@
 // プラグインNo : 52
 // 作成者     : フトコロ
 // 作成日     : 2017/07/23
-// 最終更新日 : 2018/09/29
-// バージョン : v2.1.2
+// 最終更新日 : 2018/10/10
+// バージョン : v2.2.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -17,7 +17,7 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.1.2 ショップ画面のステータスレイアウトを変更する
+ * @plugindesc v2.2.0 ショップ画面のステータスレイアウトを変更する
  * @author フトコロ
  *
  * @param --共通レイアウト設定--
@@ -268,13 +268,16 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
- * Copyright (c) 2017 Futokoro
+ * Copyright (c) 2017,2018 Futokoro
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v2.2.0 - 2018/10/10 : 仕様変更
+ *    1. ediff(x)およびediffaop(x)のコードをFTKR_CustomSimpleActorStatusに移動。
  * 
  * v2.1.2 - 2018/09/29 : 機能追加
  *    1. プラグインパラメータのリストで選択できる項目を追加。
@@ -523,43 +526,12 @@ if (Imported.FTKR_CSS) (function() {
     var _SpS_Window_Base_drawCssActorStatusBase_A1 = Window_Base.prototype.drawCssActorStatusBase_A1;
     Window_Base.prototype.drawCssActorStatusBase_A1 = function(index, actor, x, y, width, match, lss, css) {
         switch(match[1].toUpperCase()) {
-            case 'EDIFF':
-                return this.drawCssActorEquipDiff(actor, x, y, width, match[2], lss);
-            case 'EDIFFAOP':
-                return this.drawCssActorEquipAopDiff(actor, x, y, width, match[2], lss);
             case 'ITEMIMAGE':
                 return this.drawCssItemImage(actor, x, y, width, match[2], lss);
         }
         return _SpS_Window_Base_drawCssActorStatusBase_A1.call(this, index, actor, x, y, width, match, lss, css);
     };
 
-    Window_Base.prototype.drawCssActorEquipDiff = function(actor, x, y, width, paramId, lss) {
-        if (paramId < 0 && paramId > 7) return 0;
-        var target = lss.target;
-        var item = FTKR.gameData.item;
-        if(target && item && actor.canEquip(item)) {
-            var newValue = target.param(paramId);
-            var diffvalue = newValue - actor.param(paramId);
-            this.changeTextColor(this.paramchangeTextColor(diffvalue));
-            if (diffvalue > 0) diffvalue = '+' + diffvalue;
-            this.drawText(diffvalue, x, y, width, 'right');
-        }
-    };
-    
-    Window_Base.prototype.drawCssActorEquipAopDiff = function(actor, x, y, width, paramId, lss) {
-        if (!Imported.FTKR_AOP) return 1;
-        if (paramId < 0 && FTKR.AOP.useParamNum > 7) return 1;
-        var target = lss.target;
-        var item = FTKR.gameData.item;
-        if(target && item && actor.canEquip(item)) {
-            var newValue = target.aopParam(paramId);
-            var diffvalue = newValue - actor.aopParam(paramId);
-            this.changeTextColor(this.paramchangeTextColor(diffvalue));
-            if (diffvalue > 0) diffvalue = '+' + diffvalue;
-            this.drawText(diffvalue, x, y, width, 'right');
-        }
-    };
-    
     Window_Base.prototype.drawCssItemImage = function(actor, dx, dy, width, id, lss) {
         var item = FTKR.gameData.item || lss.item;
         if (!item) return 1;

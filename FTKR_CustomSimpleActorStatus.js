@@ -4,8 +4,8 @@
 // プラグインNo : 9
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2018/09/29
-// バージョン : v3.3.4
+// 最終更新日 : 2018/10/10
+// バージョン : v3.4.0
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v3.3.4 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v3.4.0 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -1007,6 +1007,9 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v3.4.0 - 2018/10/10 : 機能追加
+ *    1. ediff(x)およびediffaop(x)のコードをFTKR_CSS_ShopStatusから移動。
+ * 
  * v3.3.4 - 2018/09/28 : 機能追加
  *    1. ステータスコードに、AOPパラメータ表示用のコードを追加。
  * 
@@ -1296,14 +1299,8 @@ FTKR.CSS = FTKR.CSS || {};
  * @value equip(%1)
  * @option 装備パラメータ
  * @value eparam(%1)
- * @option AOP能力値
- * @value aop(%1)
- * @option AOP能力値(素)
- * @value aopbase(%1)
- * @option AOP能力値(増加分)
- * @value aopdiff(%1)
- * @option AOP装備パラメータ
- * @value eaop(%1)
+ * @option 装備パラメータ差分
+ * @value ediff(%1)
  * @option カスタムパラメータ
  * @value custom(%1)
  * @option カスタムゲージ
@@ -1326,6 +1323,16 @@ FTKR.CSS = FTKR.CSS || {};
  * @value streval(%1)
  * @option 横線
  * @value line
+ * @option AOP能力値
+ * @value aop(%1)
+ * @option AOP能力値(素)
+ * @value aopbase(%1)
+ * @option AOP能力値(増加分)
+ * @value aopdiff(%1)
+ * @option AOP装備パラメータ
+ * @value eaop(%1)
+ * @option AOP装備パラメータ差分
+ * @value ediffaop(%1)
  * @option アイテム名
  * @value iname
  * @option アイテムアイコン
@@ -2205,6 +2212,10 @@ FTKR.CSS = FTKR.CSS || {};
     // 括弧で表示する内容を指定する表示コード(括弧内をevalで計算させる場合)
     Window_Base.prototype.drawCssActorStatusBase_A1 = function(index, actor, x, y, width, match, lss, css) {
         switch(match[1].toUpperCase()) {
+            case 'EDIFFAOP':
+                return this.drawCssActorEquipAopDiff(actor, x, y, width, match[2], lss);
+            case 'EDIFF':
+                return this.drawCssActorEquipDiff(actor, x, y, width, match[2], lss);
             case 'AOPDIFF':
                 return this.drawCssActorAopParamDiff(actor, x, y, width, match[2], lss);
             case 'AOPBASE':
@@ -2791,6 +2802,46 @@ FTKR.CSS = FTKR.CSS || {};
     };
 
     //------------------------------------------------------------------------
+    //指定したアイテムを装備した時のパラメータの表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorEquipParam = function(actor, x, y, width, paramId, lss) {
+        if (paramId < 0 && paramId > 7) return 0;
+        this.drawTextEx(FTKR.CSS.cssStatus.equip.arrow, x, y);
+        var target = lss.target;
+        var item = FTKR.gameData.item;
+        if (item && !actor.canEquip(item)) return 1;
+        if (this.checkShowEquipParam(actor, target)) {
+            var newValue = target.param(paramId);
+            var diffvalue = newValue - actor.param(paramId);
+            this.changeTextColor(this.paramchangeTextColor(diffvalue));
+            this.drawText(newValue, x, y, width, 'right');
+        }
+        return 1;
+    };
+
+    Window_Base.prototype.checkShowEquipParam = function(actor, target) {
+        return !!actor && !!target;
+    };
+
+    //------------------------------------------------------------------------
+    //装備パラメータ差分の表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorEquipDiff = function(actor, x, y, width, paramId, lss) {
+        if (paramId < 0 && paramId > 7) return 1;
+        var target = lss.target;
+        var item = FTKR.gameData.item;
+        if (item && !actor.canEquip(item)) return 1;
+        if (target) {
+            var newValue = target.param(paramId);
+            var diffvalue = newValue - actor.param(paramId);
+            this.changeTextColor(this.paramchangeTextColor(diffvalue));
+            if (diffvalue > 0) diffvalue = '+' + diffvalue;
+            this.drawText(diffvalue, x, y, width, 'right');
+        }
+        return 1;
+    };
+
+    //------------------------------------------------------------------------
     //AOP能力値の表示関数
     //------------------------------------------------------------------------
     Window_Base.prototype.drawCssActorAopParam = function(actor, x, y, width, paramId, lss) {
@@ -2835,6 +2886,45 @@ FTKR.CSS = FTKR.CSS || {};
         this.resetTextColor();
         return 1;
     };
+
+    //------------------------------------------------------------------------
+    //指定したアイテムを装備した時のAOPパラメータの表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorEquipAopParam = function(actor, x, y, width, paramId, lss) {
+        if (!Imported.FTKR_AOP) return 1;
+        if (paramId < 0 && FTKR.AOP.useParamNum > 9) return 1;
+        this.drawTextEx(FTKR.CSS.cssStatus.equip.arrow, x, y);
+        var target = lss.target;
+        var item = FTKR.gameData.item;
+        if (item && !actor.canEquip(item)) return 1;
+        if (this.checkShowEquipParam(actor, target)) {
+            var newValue = target.aopParam(paramId);
+            var diffvalue = newValue - actor.aopParam(paramId);
+            this.changeTextColor(this.paramchangeTextColor(diffvalue));
+            this.drawText(newValue, x, y, width, 'right');
+        }
+        return 1;
+    };
+
+    //------------------------------------------------------------------------
+    //AOP装備パラメータ差分の表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorEquipAopDiff = function(actor, x, y, width, paramId, lss) {
+        if (!Imported.FTKR_AOP) return 1;
+        if (paramId < 0 && FTKR.AOP.useParamNum > 7) return 1;
+        var target = lss.target;
+        var item = FTKR.gameData.item;
+        if (item && !actor.canEquip(item)) return 1;
+        if (target) {
+            var newValue = target.aopParam(paramId);
+            var diffvalue = newValue - actor.aopParam(paramId);
+            this.changeTextColor(this.paramchangeTextColor(diffvalue));
+            if (diffvalue > 0) diffvalue = '+' + diffvalue;
+            this.drawText(diffvalue, x, y, width, 'right');
+        }
+        return 1;
+    };
+    
 
     //------------------------------------------------------------------------
     //カスタムパラメータの表示関数
@@ -2983,43 +3073,6 @@ FTKR.CSS = FTKR.CSS || {};
         dx = Math.floor(dx + offsetX);
         this.contents.blt(bitmap, sx, sy, sw, sh, dx, dy, dw, dh);
         return Math.ceil(dh / this.lineHeight()) || 1;
-    };
-
-    //------------------------------------------------------------------------
-    //指定したアイテムを装備した時のパラメータの表示関数
-    //------------------------------------------------------------------------
-    Window_Base.prototype.drawCssActorEquipParam = function(actor, x, y, width, paramId, lss) {
-        if (paramId < 0 && paramId > 7) return 0;
-        this.drawTextEx(FTKR.CSS.cssStatus.equip.arrow, x, y);
-        var target = lss.target;
-        if(this.checkShowEquipParam(actor, target)) {
-            var newValue = target.param(paramId);
-            var diffvalue = newValue - actor.param(paramId);
-            this.changeTextColor(this.paramchangeTextColor(diffvalue));
-            this.drawText(newValue, x, y, width, 'right');
-        }
-        return 1;
-    };
-
-    Window_Base.prototype.checkShowEquipParam = function(actor, target) {
-        return !!actor && !!target;
-    };
-
-    //------------------------------------------------------------------------
-    //指定したアイテムを装備した時のAOPパラメータの表示関数
-    //------------------------------------------------------------------------
-    Window_Base.prototype.drawCssActorEquipAopParam = function(actor, x, y, width, paramId, lss) {
-        if (!Imported.FTKR_AOP) return 1;
-        if (paramId < 0 && FTKR.AOP.useParamNum > 9) return 1;
-        this.drawTextEx(FTKR.CSS.cssStatus.equip.arrow, x, y);
-        var target = lss.target;
-        if(this.checkShowEquipParam(actor, target)) {
-            var newValue = target.aopParam(paramId);
-            var diffvalue = newValue - actor.aopParam(paramId);
-            this.changeTextColor(this.paramchangeTextColor(diffvalue));
-            this.drawText(newValue, x, y, width, 'right');
-        }
-        return 1;
     };
 
     //------------------------------------------------------------------------

@@ -4,8 +4,8 @@
 // プラグインNo : 38
 // 作成者     : フトコロ
 // 作成日     : 2017/05/13
-// 最終更新日 : 2018/09/29
-// バージョン : v2.1.2
+// 最終更新日 : 2018/10/10
+// バージョン : v2.1.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -17,7 +17,7 @@ FTKR.CSS.ES = FTKR.CSS.ES || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.1.2 装備画面のステータスレイアウトを変更する
+ * @plugindesc v2.1.3 装備画面のステータスレイアウトを変更する
  * @author フトコロ
  *
  * @param --レイアウト設定--
@@ -129,6 +129,8 @@ FTKR.CSS.ES = FTKR.CSS.ES || {};
  * よって、以下のコードで攻撃力の差分を取得できます。
  *   b.atk - a.atk
  * 
+ * ※装備パラメータ差分(ediff(x))でも同じ表示が可能
+ * 
  * 
  *-----------------------------------------------------------------------------
  * ステータスウィンドウの設定
@@ -201,6 +203,10 @@ FTKR.CSS.ES = FTKR.CSS.ES || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.1.3 - 2018/10/10 : 機能追加
+ *    1. 装備シーンのステータスウィンドウ上で選択中の装備のパラメータを参照できる
+ *       機能追加。
+ * 
  * v2.1.2 - 2018/09/29 : 機能追加
  *    1. プラグインパラメータのリストで選択できる項目を追加。
  * 
@@ -270,6 +276,8 @@ FTKR.CSS.ES = FTKR.CSS.ES || {};
  * @value equip(%1)
  * @option 装備パラメータ
  * @value eparam(%1)
+ * @option 装備パラメータ差分
+ * @value ediff(%1)
  * @option カスタムパラメータ
  * @value custom(%1)
  * @option カスタムゲージ
@@ -300,6 +308,8 @@ FTKR.CSS.ES = FTKR.CSS.ES || {};
  * @value aopdiff(%1)
  * @option AOP装備パラメータ
  * @value eaop(%1)
+ * @option AOP装備パラメータ差分
+ * @value ediffaop(%1)
  * @option アイテム名
  * @value iname
  * @option アイテムアイコン
@@ -388,9 +398,16 @@ if (Imported.FTKR_CSS) (function() {
     };
 
     //書き換え
+    Window_EquipStatus.prototype.evalCssStrFormula = function(actor, formula) {
+        if (!formula) return '';
+        FTKR.setGameData(actor, this._tempActor, this._item);
+        return FTKR.evalStrFormula(formula);
+    };
+
+    //書き換え
     Window_EquipStatus.prototype.evalCssCustomFormula = function(actor, formula) {
         if (!formula) return '';
-        FTKR.setGameData(actor, this._tempActor);
+        FTKR.setGameData(actor, this._tempActor, this._item);
         return FTKR.evalFormula(formula);
     };
 
@@ -412,5 +429,17 @@ if (Imported.FTKR_CSS) (function() {
         return FTKR.CSS.ES.window.enabled ? FTKR.CSS.ES.window.numVisibleRows :
         _DS_Window_EquipStatus_numVisibleRows.call(this);
     };
-    
+
+    Window_EquipStatus.prototype.setItem = function(item) {
+        this._item = item;
+    };
+
+    var _DS_Window_EquipItem_updateHelp = Window_EquipItem.prototype.updateHelp;
+    Window_EquipItem.prototype.updateHelp = function() {
+        if (this._actor && this._statusWindow) {
+            this._statusWindow.setItem(this.item());
+        }
+        _DS_Window_EquipItem_updateHelp.call(this);
+    };
+
 }());//FTKR_CustomSimpleActorStatus.jsが必要
