@@ -4,8 +4,8 @@
 // プラグインNo : 9
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2018/10/10
-// バージョン : v3.4.0
+// 最終更新日 : 2018/10/11
+// バージョン : v3.4.1
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v3.4.0 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v3.4.1 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -139,6 +139,13 @@ FTKR.CSS = FTKR.CSS || {};
  * 
  * @param --通常能力値(差分)の設定--
  * @default
+ * 
+ * @param Enabled Escapecharacters By PDIFF
+ * @desc 差分表示に制御文字使えるようにする
+ * @type boolean
+ * @on 有効
+ * @off 無効
+ * @default true
  * 
  * @param Format PDIFF Plus
  * @desc 増加の場合の表示を設定します。
@@ -1007,6 +1014,10 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v3.4.1 - 2018/10/11 : 機能追加、仕様変更
+ *    1. パラメータの差分表示に制御文字を無効にする機能を追加。
+ *    2. パラメータの差分表示で 0 の場合に表示しないように変更。
+ * 
  * v3.4.0 - 2018/10/10 : 機能追加
  *    1. ediff(x)およびediffaop(x)のコードをFTKR_CSS_ShopStatusから移動。
  * 
@@ -1422,8 +1433,9 @@ FTKR.CSS = FTKR.CSS || {};
             iconPadding :Number(parameters['State Icon Padding'] || 0),
         },
         pdiff:{
-            plus  :paramParse(parameters['Format PDIFF Plus']),
-            minus :paramParse(parameters['Format PDIFF Minus']),
+            plus        :paramParse(parameters['Format PDIFF Plus']),
+            minus       :paramParse(parameters['Format PDIFF Minus']),
+            enabledEc   :paramParse(parameters['Enabled Escapecharacters By PDIFF']),
         },
         equip:{
             arrow:String(parameters['Equip Right Arrow'] || ''),
@@ -2790,15 +2802,24 @@ FTKR.CSS = FTKR.CSS || {};
         var param = actor.param(paramId);
         var base = actor.paramBase(paramId);
         var diff = param - base;
-        var text = '';
-        if (diff > 0) {
-            text = FTKR.CSS.cssStatus.pdiff.plus.format(diff);
-        } else if (diff < 0) {
-            text = FTKR.CSS.cssStatus.pdiff.minus.format(-diff);
-        }
-        this.drawTextEx(text, x, y);
-        this.resetTextColor();
+        this.drawParamDiffValue(diff, x, y, width);
         return 1;
+    };
+
+    Window_Base.prototype.drawParamDiffValue = function(value, x, y, width) {
+        this.changeTextColor(this.paramchangeTextColor(value));
+        var text = '';
+        if (value > 0) {
+            text = FTKR.CSS.cssStatus.pdiff.plus.format(value);
+        } else if (value < 0) {
+            text = FTKR.CSS.cssStatus.pdiff.minus.format(-value);
+        }
+        if (FTKR.CSS.cssStatus.pdiff.enabledEc) {
+            this.drawTextEx(text, x, y);
+        } else {
+            this.drawText(text, x, y, width, 'right');
+        }
+        this.resetTextColor();
     };
 
     //------------------------------------------------------------------------
@@ -2834,9 +2855,7 @@ FTKR.CSS = FTKR.CSS || {};
         if (target) {
             var newValue = target.param(paramId);
             var diffvalue = newValue - actor.param(paramId);
-            this.changeTextColor(this.paramchangeTextColor(diffvalue));
-            if (diffvalue > 0) diffvalue = '+' + diffvalue;
-            this.drawText(diffvalue, x, y, width, 'right');
+            this.drawParamDiffValue(diffvalue, x, y, width);
         }
         return 1;
     };
@@ -2876,14 +2895,7 @@ FTKR.CSS = FTKR.CSS || {};
         var param = actor.aopParam(paramId);
         var base = actor.aopParamBase(paramId);
         var diff = param - base;
-        var text = '';
-        if (diff > 0) {
-            text = FTKR.CSS.cssStatus.pdiff.plus.format(diff);
-        } else if (diff < 0) {
-            text = FTKR.CSS.cssStatus.pdiff.minus.format(-diff);
-        }
-        this.drawTextEx(text, x, y);
-        this.resetTextColor();
+        this.drawParamDiffValue(diff, x, y, width);
         return 1;
     };
 
@@ -2918,9 +2930,7 @@ FTKR.CSS = FTKR.CSS || {};
         if (target) {
             var newValue = target.aopParam(paramId);
             var diffvalue = newValue - actor.aopParam(paramId);
-            this.changeTextColor(this.paramchangeTextColor(diffvalue));
-            if (diffvalue > 0) diffvalue = '+' + diffvalue;
-            this.drawText(diffvalue, x, y, width, 'right');
+            this.drawParamDiffValue(diffvalue, x, y, width);
         }
         return 1;
     };
