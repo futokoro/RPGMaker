@@ -4,8 +4,8 @@
 // プラグインNo : 14
 // 作成者     : フトコロ
 // 作成日     : 2017/04/08
-// 最終更新日 : 2018/10/09
-// バージョン : v1.6.0
+// 最終更新日 : 2018/10/14
+// バージョン : v1.7.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.ICS = FTKR.ICS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.6.0 アイテム合成システム
+ * @plugindesc v1.7.0 アイテム合成システム
  * @author フトコロ
  *
  * @param --基本設定--
@@ -29,13 +29,21 @@ FTKR.ICS = FTKR.ICS || {};
  * 
  * @param Enable Confirmation
  * @desc アイテム合成実行時に確認画面で実行確認するか。
- *  1 - 確認する, 0 - 確認しない
  * @default 1
+ * @type select
+ * @option 確認する
+ * @value 1
+ * @option 確認しない
+ * @value 0
  *
  * @param Enable End Confirmation
  * @desc アイテム合成終了時に確認画面で実行確認するか。
- *  1 - 確認する, 0 - 確認しない
  * @default 0
+ * @type select
+ * @option 確認する
+ * @value 1
+ * @option 確認しない
+ * @value 0
  *
  * @param Category Type ID
  * @desc カテゴリータイプを設定した武器タイプIDを設定します。
@@ -50,11 +58,35 @@ FTKR.ICS = FTKR.ICS || {};
  * @desc レシピが無い組み合わせの場合の結果を設定します。
  * lost - 消失, reset - 復元
  * @default lost
+ * @type select
+ * @option 消失(lost)
+ * @value lost
+ * @option 復元(reset)
+ * @value reset
+ *
+ * @param Recipe Materials Treatment
+ * @desc 合成に使用した素材アイテムの扱いを設定します。
+ * lost - 消失, reset - 復元
+ * @default lost
+ * @type select
+ * @option 消失(lost)
+ * @value lost
+ * @option 復元(reset)
+ * @value reset
  *
  * @param Recipe Matching Pattern
- * @desc レシピに対してセットした素材がどの程度合致すると合成成功するか設定します。1 - レシピと同一, 0 - レシピを含む
+ * @desc レシピに対してセットした素材がどの程度合致すると合成成功するか設定します。
  * @default 0
+ * @type select
+ * @option レシピと一致
+ * @value 1
+ * @option レシピを含む
+ * @value 0
  *
+ * @param Item Number Delimiters
+ * @desc アイテム名とアイテム数の間の区切り文字を設定します。
+ * @default :
+ * 
  * @param --合成成功率の設定--
  * @default
  * 
@@ -92,6 +124,17 @@ FTKR.ICS = FTKR.ICS || {};
  * @desc 合成画面のタイトルの表示内容を設定します。
  * @type string[]
  * @default ["\\c[16]合成"]
+ * 
+ * @param Composit Title Align
+ * @desc 表示内容の表示位置を設定します。
+ * @default 0
+ * @type select
+ * @option 左寄せ
+ * @value 0
+ * @option 中央
+ * @value 1
+ * @option 右寄せ
+ * @value 2
  * 
  * @param Comp Title Opacity
  * @desc 合成タイトルウィンドウの透明率を指定します。
@@ -156,6 +199,17 @@ FTKR.ICS = FTKR.ICS || {};
  * @type string[]
  * @default ["防具"]
  * 
+ * @param Composit Command Align
+ * @desc 表示内容の表示位置を設定します。
+ * @default 0
+ * @type select
+ * @option 左寄せ
+ * @value 0
+ * @option 中央
+ * @value 1
+ * @option 右寄せ
+ * @value 2
+ * 
  * @param Comp Cmd Opacity
  * @desc 合成コマンドウィンドウの透明率を指定します。
  * @default 192
@@ -216,6 +270,17 @@ FTKR.ICS = FTKR.ICS || {};
  * @type string[]
  * @default ["\\c[16]合成素材"]
  * 
+ * @param Slot Title Align
+ * @desc 表示内容の表示位置を設定します。
+ * @default 0
+ * @type select
+ * @option 左寄せ
+ * @value 0
+ * @option 中央
+ * @value 1
+ * @option 右寄せ
+ * @value 2
+ * 
  * @param Slot Title Opacity
  * @desc スロットタイトルウィンドウの透明率を指定します。
  * @default 192
@@ -264,6 +329,17 @@ FTKR.ICS = FTKR.ICS || {};
  * @desc 合成情報ウィンドウのタイトル表示内容を設定します。
  * @type string[]
  * @default ["\\c[16]合成情報"]
+ * 
+ * @param Status Title Align
+ * @desc 表示内容の表示位置を設定します。
+ * @default 0
+ * @type select
+ * @option 左寄せ
+ * @value 0
+ * @option 中央
+ * @value 1
+ * @option 右寄せ
+ * @value 2
  * 
  * @param Status Title Opacity
  * @desc 合成情報タイトルウィンドウの透明率を指定します。
@@ -331,6 +407,17 @@ FTKR.ICS = FTKR.ICS || {};
  * @type string[]
  * @default ["\\c[16]合成実行の確認"]
  * 
+ * @param Conf Title Align
+ * @desc 確認内容の表示位置を設定します。
+ * @default 0
+ * @type select
+ * @option 左寄せ
+ * @value 0
+ * @option 中央
+ * @value 1
+ * @option 右寄せ
+ * @value 2
+ * 
  * @param Confirmation Ok Format
  * @desc 確認コマンドの「実行する」の表示内容を記述します。
  * @type string[]
@@ -341,6 +428,17 @@ FTKR.ICS = FTKR.ICS || {};
  * @type string[]
  * @default ["実行しない"]
  *
+ * @param Conf Command Align
+ * @desc 確認コマンドの表示位置を設定します。
+ * @default 1
+ * @type select
+ * @option 左寄せ
+ * @value 0
+ * @option 中央
+ * @value 1
+ * @option 右寄せ
+ * @value 2
+ * 
  * @param Confirmation Opacity
  * @desc 確認ウィンドウの透明率を指定します。
  * @default 192
@@ -360,6 +458,17 @@ FTKR.ICS = FTKR.ICS || {};
  * @desc 合成結果ウィンドウのタイトル表示内容を記述します。
  * @type string[]
  * @default ["\\c[16]合成結果"]
+ * 
+ * @param Result Title Align
+ * @desc 表示内容の表示位置を設定します。
+ * @default 0
+ * @type select
+ * @option 左寄せ
+ * @value 0
+ * @option 中央
+ * @value 1
+ * @option 右寄せ
+ * @value 2
  * 
  * @param Result Great Success
  * @desc 大成功時の表示内容を記述します。
@@ -411,6 +520,17 @@ FTKR.ICS = FTKR.ICS || {};
  * @type string[]
  * @default ["\\c[16]合成を終了しますか？"]
  * 
+ * @param End Title Align
+ * @desc 終了確認内容の表示位置を設定します。
+ * @default 0
+ * @type select
+ * @option 左寄せ
+ * @value 0
+ * @option 中央
+ * @value 1
+ * @option 右寄せ
+ * @value 2
+ * 
  * @param End Ok Format
  * @desc 終了確認コマンドの「終了する」の表示内容を記述します。
  * @type string[]
@@ -421,6 +541,17 @@ FTKR.ICS = FTKR.ICS || {};
  * @type string[]
  * @default ["終了しない"]
  *
+ * @param End Command Align
+ * @desc 終了確認コマンドの表示位置を設定します。
+ * @default 1
+ * @type select
+ * @option 左寄せ
+ * @value 0
+ * @option 中央
+ * @value 1
+ * @option 右寄せ
+ * @value 2
+ * 
  * @param End Opacity
  * @desc 終了確認ウィンドウの透明率を指定します。
  * @default 192
@@ -604,6 +735,12 @@ FTKR.ICS = FTKR.ICS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.7.0 - 2018/10/14 : 機能追加
+ *    1. 合成に使用した素材を合成成功時でも復元する機能を追加。
+ *    2. コマンドとタイトル文字列の表示位置を調整する機能を追加。
+ *    3. 合成時に複数のアイテムを入手できる詳細合成を追加。
+ *    4. アイテム名とアイテム数の間に区切り文字を設定する機能を追加。
+ * 
  * v1.6.0 - 2018/10/09 : 機能追加、ヘルプ削減
  *    1. 成功時のボーナスを設定する機能を追加。
  * 
@@ -763,6 +900,10 @@ function Game_IcsRecipe() {
     this.initialize.apply(this, arguments);
 }
 
+function Game_IcsResults() {
+    this.initialize.apply(this, arguments);
+}
+
 function Game_Material() {
     this.initialize.apply(this, arguments);
 }
@@ -800,9 +941,11 @@ function Game_IcsRecipeBook() {
             itemId    :Number(parameters['Variables Get ItemId'] || 0),
             itemClass :Number(parameters['Variables Get ItemClass'] || 0),
         },
-        notApp        :String(parameters['Not Applicable to Recipe'] || 'lost'),
+        notApp        :paramParse(parameters['Not Applicable to Recipe'] || 'lost'),
         category      :String(parameters['Category Format'] || 'カテゴリー %1'),
-        match         :Number(parameters['Recipe Matching Pattern'] || 0),
+        match         :+paramParse(parameters['Recipe Matching Pattern'] || 0),
+        treatMaterial :paramParse(parameters['Recipe Materials Treatment'] || 'lost'),
+        delimiters    :String(parameters['Item Number Delimiters'] || ''),
     };
 
     //合成成功率の設定
@@ -823,6 +966,7 @@ function Game_IcsRecipeBook() {
     //合成タイトルウィンドウ設定
     FTKR.ICS.compositTitle = {
         format        :JSON.parse(parameters['Composit Title Format'] || '[]'),
+        align         :+paramParse(parameters['Composit Title Align'] || 0),
         opacity       :Number(parameters['Comp Title Opacity'] || 192),
         frame         :String(parameters['Comp Title Frame Hide'] || '表示する(show)'),
     };
@@ -841,6 +985,7 @@ function Game_IcsRecipeBook() {
             weapon    :JSON.parse(parameters['Weapon Cmd Name'] || '[]'),
             armor     :JSON.parse(parameters['Armor Cmd Name'] || '[]'),
         },
+        align         :+paramParse(parameters['Composit Command Align'] || 0),
         opacity       :Number(parameters['Comp Cmd Opacity'] || 192),
         frame         :String(parameters['Comp Cmd Frame Hide'] || '表示する(show)'),
         custom:[
@@ -875,6 +1020,7 @@ function Game_IcsRecipeBook() {
     //素材スロットタイトルウィンドウ設定
     FTKR.ICS.slotTitle = {
         format        :JSON.parse(parameters['Slot Title Format'] || '[]'),
+        align         :+paramParse(parameters['Slot Title Align'] || 0),
         opacity       :Number(parameters['Slot Title Opacity'] || 192),
         frame         :String(parameters['Slot Title Frame Hide'] || '表示する(show)'),
     };
@@ -883,7 +1029,9 @@ function Game_IcsRecipeBook() {
     FTKR.ICS.slot = {
         emptyIcon     :String(parameters['Empty Icon'] || ''),
         emptyFormat   :JSON.parse(parameters['Empty Format'] || '[]'),
+        slotAlign     :+paramParse(parameters['Slot Text Align'] || 0),
         return        :JSON.parse(parameters['Return All Slot'] || '[]'),
+        returnAlign   :+paramParse(parameters['Return Command Align'] || 0),
         opacity       :Number(parameters['Slot Opacity'] || 192),
         frame         :String(parameters['Slot Frame Hide'] || '表示する(show)'),
     };
@@ -891,6 +1039,7 @@ function Game_IcsRecipeBook() {
     //合成情報タイトルウィンドウ設定
     FTKR.ICS.statusTitle = {
         format        :JSON.parse(parameters['Status Title Format'] || '[]'),
+        align         :+paramParse(parameters['Status Title Align'] || 0),
         opacity       :Number(parameters['Status Title Opacity'] || 192),
         frame         :String(parameters['Status Title Frame Hide'] || '表示する(show)'),
     };
@@ -910,10 +1059,12 @@ function Game_IcsRecipeBook() {
     //確認ウィンドウ設定
     FTKR.ICS.confTitle = {
         format        :JSON.parse(parameters['Conf Title Format'] || '[]'),
+        align         :+paramParse(parameters['Conf Title Align'] || 0),
     };
     FTKR.ICS.conf = {
         okFormat      :JSON.parse(parameters['Confirmation Ok Format'] || '[]'),
         cancelFormat  :JSON.parse(parameters['Confirmation Cancel Format'] || '[]'),
+        align         :+paramParse(parameters['Conf Command Align'] || 0),
         opacity       :Number(parameters['Confirmation Opacity'] || 192),
         frame         :String(parameters['Confirmation Frame Hide'] || '表示する(show)'),
     };
@@ -921,6 +1072,7 @@ function Game_IcsRecipeBook() {
     //合成結果ウィンドウ設定
     FTKR.ICS.result = {
         format        :JSON.parse(parameters['Result Title Format'] || '[]'),
+        align         :+paramParse(parameters['Result Title Align'] || 0),
         great         :JSON.parse(parameters['Result Great Success'] || '[]'),
         success       :JSON.parse(parameters['Result Success'] || '[]'),
         failure       :JSON.parse(parameters['Result Failure'] || '[]'),
@@ -934,8 +1086,10 @@ function Game_IcsRecipeBook() {
     //確認ウィンドウ設定
     FTKR.ICS.endConf = {
         format        :JSON.parse(parameters['End Title Format'] || '[]'),
+        titleAlign    :+paramParse(parameters['End Title Align'] || 0),
         okFormat      :JSON.parse(parameters['End Ok Format'] || '[]'),
         cancelFormat  :JSON.parse(parameters['End Cancel Format'] || '[]'),
+        cmdAlign      :+paramParse(parameters['End Command Align'] || 0),
         opacity       :Number(parameters['End Opacity'] || 192),
         frame         :String(parameters['End Frame Hide'] || '表示する(show)'),
     };
@@ -998,8 +1152,8 @@ function Game_IcsRecipeBook() {
         return newObj;
     };
 
-    var readEntrapmentCodeToTextEx = function(obj, codeTitles) {
-        var regs = convertEntrapmentRegArrayEx(codeTitles);
+    var readEntrapmentCodeToText = function(obj, codeTitles) {
+        var regs = convertEntrapmentRegArray(codeTitles);
         var notedata = obj.note.split(/[\r\n]+/);
         var setMode = 'none';
         var results = [];
@@ -1021,10 +1175,43 @@ function Game_IcsRecipeBook() {
         return results;
     };
 
-    var convertEntrapmentRegArrayEx = function(codeTitles) {
+    var convertEntrapmentRegArray = function(codeTitles) {
         return codeTitles.map(function(codeTitle) {
             return {
                 start:new RegExp('<' + codeTitle + '>', 'i'),
+                end  :new RegExp('<\/' + codeTitle + '>', 'i')
+            };
+        });
+    };
+
+    var readEntrapmentCodeToTextEx = function(obj, codeTitles) {
+        var regs = convertEntrapmentRegArrayEx(codeTitles);
+        var notedata = obj.note.split(/[\r\n]+/);
+        var setMode = 'none';
+        var results = [];
+
+        for (var i = 0; i < notedata.length; i++) {
+            var line = notedata[i];
+            if (matchRegs(line, regs, 'start')) {
+                var data = {
+                    id:RegExp.$1,
+                    text:''
+                };
+                setMode = 'read';
+            } else if (matchRegs(line, regs, 'end')) {
+                setMode = 'none';
+                results.push(data);
+            } else if (setMode === 'read') {
+                data.text += line + ';';
+            }
+        }
+        return results;
+    };
+
+    var convertEntrapmentRegArrayEx = function(codeTitles) {
+        return codeTitles.map(function(codeTitle) {
+            return {
+                start:new RegExp('<' + codeTitle + ':[ ]*(.+)>', 'i'),
                 end  :new RegExp('<\/' + codeTitle + '>', 'i')
             };
         });
@@ -1061,6 +1248,48 @@ function Game_IcsRecipeBook() {
         if (text == null) text = '';
         var window = SceneManager._scene._windowLayer.children[0];
         return window ? window.convertEscapeCharacters(text) : text;
+    };
+
+    var convertAlign = function(align) {
+        switch (align) {
+            case 0:
+                return 'left';
+            case 1:
+                return 'center';
+            case 2:
+                return 'right';
+        }
+        return undefined;
+    };
+
+    var textWidth = function(text) {
+        if (text == null) text = '';
+        var window = SceneManager._scene._windowLayer.children[0];
+        return window ? window.textWidth(text) : 0;
+    };
+
+    var convertTextWidth = function(text) {
+        var tw = 0;
+        text = convertEscapeCharacters(text);
+        if (/\x1bi\[(\d+)\]/i.test(text)) {
+            tw += Window_Base._iconWidth;
+            text = (text.toUpperCase()).replace(/\x1bi\[(\d+)\]/ig, '');
+        }
+        if (/\x1bc\[(\d+)\]/i.test(text)) {
+            text = (text.toUpperCase()).replace(/\x1bc\[(\d+)\]/ig, '');
+        }
+        if (/\x1b{/i.test(text)) {
+            text = (text.toUpperCase()).replace(/\x1b{/ig, '');
+        }
+        if (/\x1b}/i.test(text)) {
+            text = (text.toUpperCase()).replace(/\x1b}/ig, '');
+        }
+        if (text.match(/\x1blw\[(\d+),?([^\]]+)\]/i)) {
+            tw += RegExp.$1;
+            text = (text.toUpperCase()).replace(/\x1blw\[(\d+),?([^\]]+)\]/ig, '');
+        }
+        tw += textWidth(text);
+        return tw;
     };
 
     var setArgStr = function(arg) {
@@ -1298,8 +1527,11 @@ function Game_IcsRecipeBook() {
                     var category = readObjectMeta(obj, ['ICS CATEGORY','ICS カテゴリー']);
                     if (category) obj.ics.setDataClass(category);
                 }
-                var datas = readEntrapmentCodeToTextEx(obj, ['ICS RECIPES', 'ICS レシピ']);
+                var datas = readEntrapmentCodeToText(obj, ['ICS RECIPES', 'ICS レシピ']);
                 this.setIcsRecipes(obj, datas);
+
+                var datas = readEntrapmentCodeToTextEx(obj, ['ICS RESULTS', 'ICS 合成結果']);
+                this.setIcsResults(obj, datas);
             }
         }
     };
@@ -1313,85 +1545,128 @@ function Game_IcsRecipeBook() {
                 obj.ics.setCategory(readObjectMeta(obj, ['ICS CATEGORY','ICS カテゴリー']));
                 obj.ics.setRank(Number(readObjectMeta(obj, ['ICS RANK','ICS ランク'])));
 
-                var datas = readEntrapmentCodeToTextEx(obj, ['ICS RECIPES', 'ICS レシピ']);
+                var datas = readEntrapmentCodeToText(obj, ['ICS RECIPES', 'ICS レシピ']);
                 this.setIcsRecipes(obj, datas);
             }
         }
     };
 
     DataManager.setIcsRecipes = function(obj, metaDatas) {
-      for (var t = 0; t < metaDatas.length; t++) {
-        var datas = metaDatas[t].text.split(';');
-        var recipe = new Game_IcsRecipe();
-        for (var i = 0; i < datas.length; i++) {
-            var match = /(.+):[ ]*(.+)/.exec(datas[i]);
-            if (!match) continue;
-            var code = /(.+)\[(.+)\]/.exec(match[1]);
-            if (code) {
-                switch (code[1].toUpperCase()) {
-                    case 'ITEM':
-                    case 'アイテム':
-                        var material = new Game_Material(0, 'item', Number(code[2]), Number(match[2]));
-                        recipe.addMaterial(material);
-                        break;
-                    case 'WEAPON':
-                    case '武器':
-                        var material = new Game_Material(0, 'weapon', Number(code[2]), Number(match[2]));
-                        recipe.addMaterial(material);
-                        break;
-                    case 'ARMOR':
-                    case '防具':
-                        var material = new Game_Material(0, 'armor', Number(code[2]), Number(match[2]));
-                        recipe.addMaterial(material);
-                        break;
-                    case 'CATEGORY':
-                    case 'カテゴリー':
-                        var material = new Game_Material(code[2], '', 0, Number(match[2]));
-                        recipe.addMaterial(material);
-                        break;
-                }
-            } else {
-                switch (match[1].toUpperCase()) {
-                    case 'NUMBER':
-                    case '生成数':
-                        recipe._number = Number(match[2]);
-                        break;
-                    case 'GREAT SUCCESS':
-                    case '大成功':
-                        recipe._great = match[2];
-                        break;
-                    case 'FAILURE':
-                    case '失敗':
-                        recipe._failure = match[2];
-                        break;
-                    case 'REQUIRED':
-                    case '必要条件':
-                        recipe._required = match[2];
-                        break;
-                    case 'DIFFICULTY':
-                    case '難易度':
-                        recipe.setDifficulty((match[2].replace(/\s/g, '')).split(',').num());
-                        break;
-                    case '成功ボーナス':
-                    case 'SUCCESS_BONUS':
-                        recipe._successBonus.success = match[2];
-                        break;
-                    case '大成功ボーナス':
-                    case 'GREAT_BONUS':
-                        recipe._successBonus.great = match[2];
-                        break;
-                    default:
-                        var item = this.searchItemName(match[1]);
-                        if (item) {
-                            var material = new Game_Material(0, this.itemDataClass(item), item.id, Number(match[2]));
+        for (var t = 0; t < metaDatas.length; t++) {
+            var datas = metaDatas[t].text.split(';');
+            var recipe = new Game_IcsRecipe();
+            for (var i = 0; i < datas.length; i++) {
+                var match = /(.+):[ ]*(.+)/.exec(datas[i]);
+                if (!match) continue;
+                var code = /(.+)\[(.+)\]/.exec(match[1]);
+                if (code) {
+                    switch (code[1].toUpperCase()) {
+                        case 'ITEM':
+                        case 'アイテム':
+                            var material = new Game_Material(0, 'item', Number(code[2]), Number(match[2]));
                             recipe.addMaterial(material);
-                        }
-                        break;
+                            break;
+                        case 'WEAPON':
+                        case '武器':
+                            var material = new Game_Material(0, 'weapon', Number(code[2]), Number(match[2]));
+                            recipe.addMaterial(material);
+                            break;
+                        case 'ARMOR':
+                        case '防具':
+                            var material = new Game_Material(0, 'armor', Number(code[2]), Number(match[2]));
+                            recipe.addMaterial(material);
+                            break;
+                        case 'CATEGORY':
+                        case 'カテゴリー':
+                            var material = new Game_Material(code[2], '', 0, Number(match[2]));
+                            recipe.addMaterial(material);
+                            break;
+                    }
+                } else {
+                    switch (match[1].toUpperCase()) {
+                        case 'NUMBER':
+                        case '生成数':
+                            recipe._number = Number(match[2]);
+                            break;
+                        case 'GREAT SUCCESS':
+                        case '大成功':
+                            recipe._great = match[2];
+                            break;
+                        case 'FAILURE':
+                        case '失敗':
+                            recipe._failure = match[2];
+                            break;
+                        case 'REQUIRED':
+                        case '必要条件':
+                            recipe._required = match[2];
+                            break;
+                        case 'DIFFICULTY':
+                        case '難易度':
+                            recipe.setDifficulty((match[2].replace(/\s/g, '')).split(',').num());
+                            break;
+                        case '成功ボーナス':
+                        case 'SUCCESS_BONUS':
+                            recipe._successBonus.success = match[2];
+                            break;
+                        case '大成功ボーナス':
+                        case 'GREAT_BONUS':
+                            recipe._successBonus.great = match[2];
+                            break;
+                        default:
+                            var item = this.searchItemName(match[1]);
+                            if (item) {
+                                var material = new Game_Material(0, this.itemDataClass(item), item.id, Number(match[2]));
+                                recipe.addMaterial(material);
+                            }
+                            break;
+                    }
                 }
             }
+            obj.ics.addRecipe(recipe);
         }
-        obj.ics.addRecipe(recipe);
-      }
+    };
+
+    DataManager.setIcsResults = function(obj, metaDatas) {
+        for (var t = 0; t < metaDatas.length; t++) {
+            var datas = metaDatas[t].text.split(';');
+            var results = new Game_IcsResults(metaDatas[t].id);
+            for (var i = 0; i < datas.length; i++) {
+                var match = /(.+):[ ]*(.+)/.exec(datas[i]);
+                if (!match) continue;
+                var code = /(.+)\[(.+)\]/.exec(match[1]);
+                if (code) {
+                    switch (code[1].toUpperCase()) {
+                        case 'ITEM':
+                        case 'アイテム':
+                            var material = new Game_Material(0, 'item', Number(code[2]), Number(match[2]));
+                            results.addMaterial(material);
+                            break;
+                        case 'WEAPON':
+                        case '武器':
+                            var material = new Game_Material(0, 'weapon', Number(code[2]), Number(match[2]));
+                            results.addMaterial(material);
+                            break;
+                        case 'ARMOR':
+                        case '防具':
+                            var material = new Game_Material(0, 'armor', Number(code[2]), Number(match[2]));
+                            results.addMaterial(material);
+                            break;
+                        case 'CATEGORY':
+                        case 'カテゴリー':
+                            var material = new Game_Material(code[2], '', 0, Number(match[2]));
+                            results.addMaterial(material);
+                            break;
+                    }
+                } else {
+                    var item = this.searchItemName(match[1]);
+                    if (item) {
+                        var material = new Game_Material(0, this.itemDataClass(item), item.id, Number(match[2]));
+                        results.addMaterial(material);
+                    }
+                }
+            }
+            obj.ics.addResultItems(results);
+        }
     };
 
     FTKR.ICS.DataManager_makeSaveContents = DataManager.makeSaveContents;
@@ -1538,6 +1813,7 @@ function Game_IcsRecipeBook() {
         this._rank = 0;
         this._dataClass = '';
         this._recipes = [];
+        this._resultItems = [];
     };
 
     Game_Composit.prototype.category = function() {
@@ -1560,6 +1836,14 @@ function Game_IcsRecipeBook() {
         return this._recipes[index];
     };
 
+    Game_Composit.prototype.resultItems = function() {
+        return this._resultItems;
+    };
+
+    Game_Composit.prototype.resultItem = function(index) {
+        return this._resultItems[index];
+    };
+
     Game_Composit.prototype.setCategory = function(category) {
         this._category = category;
     };
@@ -1576,9 +1860,35 @@ function Game_IcsRecipeBook() {
         this._recipes.push(recipe);
     };
 
+    Game_Composit.prototype.addResultItems = function(results) {
+        this._resultItems.push(results);
+    };
+
     Game_Composit.prototype.hasRecipe = function() {
         return this.recipe(0) && this.recipe(0).materials().length;
     };
+
+    Game_Composit.prototype.hasResultItem = function() {
+        return this.resultItem(0) && this.resultItem(0).materials().length;
+    };
+
+    Game_Composit.prototype.hasResultItemGreat = function() {
+        return this.resultItems().some(function(item){
+            return item.result() === 'great';
+        });
+    }
+
+    Game_Composit.prototype.hasResultItemSuccess = function() {
+        return this.resultItems().some(function(item){
+            return item.result() === 'success';
+        });
+    }
+
+    Game_Composit.prototype.hasResultItemFailure = function() {
+        return this.resultItems().some(function(item){
+            return item.result() === 'failure';
+        });
+    }
 
     //=============================================================================
     // Game_IcsRecipe
@@ -1643,6 +1953,45 @@ function Game_IcsRecipeBook() {
             return this._successBonus.success;
         }
         return '';
+    };
+
+    //=============================================================================
+    // Game_IcsResults
+    //=============================================================================
+
+    Game_IcsResults.prototype.initialize = function(result) {
+        this._materials = [];
+        this.setResult(result);
+    };
+
+    Game_IcsResults.prototype.setResult = function(result) {
+        switch((result + '').toUpperCase()) {
+            case '大成功':
+            case 'GREAT':
+                this._result = 'great';
+                break;
+            case '失敗':
+            case 'FAILURE':
+                this._result = 'failure';
+                break;
+            case '成功':
+            case 'SUCCESS':
+            default:
+                this._result = 'success';
+                break;
+        }
+    };
+
+    Game_IcsResults.prototype.addMaterial = function(material) {
+        this._materials.push(material);
+    };
+
+    Game_IcsResults.prototype.result = function() {
+        return this._result;
+    };
+
+    Game_IcsResults.prototype.materials = function() {
+        return this._materials;
     };
 
     //=============================================================================
@@ -1842,6 +2191,12 @@ function Game_IcsRecipeBook() {
     // Window_Base
     //=============================================================================
 
+    Window_Base.prototype.drawTextExAlignIndex = function(text, x, y, alignIndex) {
+        var textWidth = convertTextWidth(text);
+        var diff = alignIndex * (this.contentsWidth() - textWidth) / 2;
+        this.drawTextEx(text, x + diff, y);
+    };
+
     Window_Selectable.prototype.actSelect = function(index) {
         if (index === -1) index = this.index();
         this.activate();
@@ -1888,7 +2243,9 @@ function Game_IcsRecipeBook() {
     Window_IcsCompsiTitle.prototype.refresh = function() {
         this.contents.clear();
         var text = FTKR.ICS.windowText.title || FTKR.ICS.compositTitle.format.icsType();
-        this.drawTextEx(text, 0, 0);
+        var alignIndex = FTKR.ICS.compositTitle.align;
+        this.drawTextExAlignIndex(text, 0, 0, alignIndex);
+//        this.drawTextEx(text, 0, 0);
     };
 
     Window_IcsCompsiTitle.prototype.standardBackOpacity = function() {
@@ -1933,6 +2290,10 @@ function Game_IcsRecipeBook() {
 
     Window_IcsCommand.prototype.standardBackOpacity = function() {
         return FTKR.ICS.command.opacity;
+    };
+
+    Window_IcsCommand.prototype.itemTextAlign = function() {
+        return convertAlign(FTKR.ICS.command.align);
     };
 
     Window_IcsCommand.prototype._refreshFrame = function() {
@@ -2176,7 +2537,7 @@ function Game_IcsRecipeBook() {
 
     Window_IcsItemList.prototype.drawItemNumber = function(item, x, y, width) {
         if (this.needsNumber()) {
-            this.drawText(':', x, y, width - this.textWidth('00'), 'right');
+            this.drawText(FTKR.ICS.basic.delimiters, x, y, width - this.textWidth('00'), 'right');
             this.drawText($gameParty.numItems(item), x, y, width, 'right');
         }
     };
@@ -2219,7 +2580,8 @@ function Game_IcsRecipeBook() {
     Window_IcsCompsiSlotTitle.prototype.refresh = function() {
         this.contents.clear();
         var text = FTKR.ICS.windowText.slotTitle || FTKR.ICS.slotTitle.format.icsType();
-        this.drawTextEx(text, 0, 0);
+        var alignIndex = FTKR.ICS.slotTitle.align;
+        this.drawTextExAlignIndex(text, 0, 0, alignIndex);
     };
 
     Window_IcsCompsiSlotTitle.prototype.standardBackOpacity = function() {
@@ -2301,12 +2663,18 @@ function Game_IcsRecipeBook() {
     Window_IcsCompsiSlot.prototype.drawItem = function(index) {
         var rect = this.itemRect(index);
         var iw = Window_Base._iconWidth + 4;
+        var tw = this.textWidth('0');
         var item = this.item(index);
+        var nw = item.number ? tw*3 : 0;
         this.changeTextColor(this.textColor(0));
         this.changePaintOpacity(true);
         this.drawIcon(item.icon, rect.x + 2, rect.y + 2);
-        this.drawText(item.name, rect.x + iw, rect.y, rect.width - iw);
-        if (item.number) this.drawText(item.number, rect.x + iw, rect.y, rect.width - iw, 'right');
+        this.drawText(item.name, rect.x + iw, rect.y, rect.width - iw - nw);
+        if (item.number) {
+            this.drawText(FTKR.ICS.basic.delimiters, rect.x + rect.width - nw, rect.y, tw, 'right');
+            this.drawText(item.number, rect.x + rect.width - tw*2, rect.y, tw*2, 'right');
+//            this.drawText(item.number, rect.x + iw, rect.y, rect.width - iw, 'right');
+        }
         this.changePaintOpacity(true);
     };
 
@@ -2370,14 +2738,16 @@ function Game_IcsRecipeBook() {
         var materials = item.ics.recipe(typeId).materials();
         materials.forEach( function(material, i) {
             var dy = y + this.lineHeight() * i;
+            var width = this.width - this.padding * 2;
+            var tw = this.textWidth('0');
             if (material.category()) {
                 var text = FTKR.ICS.basic.category.format(material.category());
-                this.drawText(text, x, dy);
+                this.drawText(text, x, dy, width - tw*3);
             } else {
-                this.drawItemName(material.item(), x, dy);
+                this.drawItemName(material.item(), x, dy, width - tw*3);
             }
-            var width = this.width - this.padding * 2;
-            this.drawText(material.number(), x, dy, width, 'right');
+            this.drawText(':', x + width - tw*3, dy, tw);
+            this.drawText(material.number(), x + width - tw*2, dy, tw*2, 'right');
         },this);
     };
 
@@ -2419,7 +2789,8 @@ function Game_IcsRecipeBook() {
     Window_IcsCompsiStateTitle.prototype.refresh = function() {
         this.contents.clear();
         var text = FTKR.ICS.windowText.statusTitle || FTKR.ICS.statusTitle.format.icsType();
-        this.drawTextEx(text, 0, 0);
+        var alignIndex = FTKR.ICS.statusTitle.align;
+        this.drawTextExAlignIndex(text, 0, 0, alignIndex);
     };
 
     Window_IcsCompsiStateTitle.prototype.standardBackOpacity = function() {
@@ -2491,6 +2862,13 @@ function Game_IcsRecipeBook() {
         this.drawTextEx(text, x, y);
     };
 
+    Window_Base.prototype.drawItemNameNumber = function(item, number, x, y, width) {
+        var tw = this.textWidth('0');
+        this.drawItemName(item, x, y, width - tw*3);
+        this.drawText(FTKR.ICS.basic.delimiters, x + width - tw*3, y, tw);
+        this.drawText(number, x + width - tw*2, y, tw*2, 'right');
+    };
+
     Window_IcsCompsiState.prototype.refresh = function() {
         this.contents.clear();
         var y = this.lineHeight();
@@ -2500,27 +2878,32 @@ function Game_IcsRecipeBook() {
             var number = this.compositionNumber(comp);
             var has = $gameParty.hasRecipe(DataManager.itemDataClass(comp.item), comp.item.id, comp.typeId);
             if (has > 0 && number) {
-                var recipe = comp.item.ics.recipe(comp.typeId);
-                var difficulty = recipe.difficulty();
-                this.drawText(FTKR.ICS.result.success.icsType(), 0, 0, w/2);
-                var success = difficulty.success;
-                if (!recipe.great()) success += difficulty.great;
-                this.drawDifficulty(success, w/2, 0);
-                this.drawText(comp.item.name, 0, y, w);
-                this.drawText(number, 0, y, w, 'right');
-                var dy = 0;
-                if (recipe.great()) {
-                    this.drawText(FTKR.ICS.result.great.icsType(), 0, y*(2 + dy), w/2);
-                    this.drawDifficulty(difficulty.great, w/2, y*(2 + dy));
-                    dy += 1;
-                    this.drawText(recipe.great(), 0, y*(2 + dy), w/2);
-                    dy += 1;
-                }
-                if (recipe.failure()) {
-                    this.drawText(FTKR.ICS.result.failure.icsType(), 0, y*(2 + dy), w/2);
-                    this.drawDifficulty(difficulty.failure, w/2, y*(2 + dy));
-                    dy += 1;
-                    this.drawText(recipe.failure(), 0, y*(2 + dy), w/2);
+                if (comp.item.ics.hasResultItem()) {
+                    this.drawItemNameNumber(comp.item, number, 0, 0, w);
+                } else {
+                    var recipe = comp.item.ics.recipe(comp.typeId);
+                    var difficulty = recipe.difficulty();
+                    this.drawText(FTKR.ICS.result.success.icsType(), 0, 0, w/2);
+                    var success = difficulty.success;
+                    if (!recipe.great()) success += difficulty.great;
+                    this.drawDifficulty(success, w/2, 0);
+//                    this.drawText(comp.item.name, 0, y, w);
+ //                   this.drawText(number, 0, y, w, 'right');
+                    this.drawItemNameNumber(comp.item, number, 0, y, w);
+                    var dy = 0;
+                    if (recipe.great()) {
+                        this.drawText(FTKR.ICS.result.great.icsType(), 0, y*(2 + dy), w/2);
+                        this.drawDifficulty(difficulty.great, w/2, y*(2 + dy));
+                        dy += 1;
+                        this.drawText(recipe.great(), 0, y*(2 + dy), w/2);
+                        dy += 1;
+                    }
+                    if (recipe.failure()) {
+                        this.drawText(FTKR.ICS.result.failure.icsType(), 0, y*(2 + dy), w/2);
+                        this.drawDifficulty(difficulty.failure, w/2, y*(2 + dy));
+                        dy += 1;
+                        this.drawText(recipe.failure(), 0, y*(2 + dy), w/2);
+                    }
                 }
             } else {
                 this.drawTextEx(FTKR.ICS.status.unkouwn.icsType(), 0, 0);
@@ -2678,7 +3061,10 @@ function Game_IcsRecipeBook() {
 
     Window_IcsConfTitle.prototype.refresh = function () {
         this.contents.clear();
-        this.drawTextEx(FTKR.ICS.confTitle.format.icsType(), 0, 0);
+        var text = FTKR.ICS.confTitle.format.icsType();
+        var alignIndex = FTKR.ICS.confTitle.align;
+        this.drawTextExAlignIndex(text, 0, 0, alignIndex);
+//        this.drawTextEx(FTKR.ICS.confTitle.format.icsType(), 0, 0);
     };
 
     Window_IcsConfTitle.prototype.standardBackOpacity = function() {
@@ -2752,7 +3138,8 @@ function Game_IcsRecipeBook() {
     Window_IcsConf.prototype.drawItem = function(index) {
         var rect = this.itemRect(index);
         this.changePaintOpacity(this.isEnabled(index));
-        this.drawText(this._data[index].disp, rect.x, rect.y, rect.width, 'center');
+        var align = convertAlign(FTKR.ICS.conf.align);
+        this.drawText(this._data[index].disp, rect.x, rect.y, rect.width, align);
         this.changePaintOpacity(1);
     };
 
@@ -2780,7 +3167,10 @@ function Game_IcsRecipeBook() {
 
     Window_IcsEndConfTitle.prototype.refresh = function () {
         this.contents.clear();
-        this.drawTextEx(FTKR.ICS.endConf.format.icsType(), 0, 0);
+        var text = FTKR.ICS.endConf.format.icsType();
+        var alignIndex = FTKR.ICS.endConf.titleAlign;
+        this.drawTextExAlignIndex(text, 0, 0, alignIndex);
+//        this.drawTextEx(FTKR.ICS.endConf.format.icsType(), 0, 0);
     };
 
     Window_IcsEndConfTitle.prototype.standardBackOpacity = function() {
@@ -2854,7 +3244,8 @@ function Game_IcsRecipeBook() {
     Window_IcsEndConf.prototype.drawItem = function(index) {
         var rect = this.itemRect(index);
         this.changePaintOpacity(this.isEnabled());
-        this.drawText(this._data[index].disp, rect.x, rect.y, rect.width, 'center');
+        var align = convertAlign(FTKR.ICS.endConf.cmdAlign);
+        this.drawText(this._data[index].disp, rect.x, rect.y, rect.width, align);
         this.changePaintOpacity(1);
     };
 
@@ -2874,6 +3265,10 @@ function Game_IcsRecipeBook() {
         this.clearWindow();
     };
 
+    Window_IcsResult.prototype.setConfWindow = function(confWindow) {
+        this._confWindow = confWindow;
+    }
+
     Window_IcsResult.prototype.standardBackOpacity = function() {
         return FTKR.ICS.result.opacity;
     };
@@ -2884,6 +3279,7 @@ function Game_IcsRecipeBook() {
   
     Window_IcsResult.prototype.clearWindow = function () {
         this._item = null;
+        this._resultItems = null;
         this._number = 0;
         this._result = '';
         this.refresh();
@@ -2893,11 +3289,22 @@ function Game_IcsRecipeBook() {
         this.contents.clear();
         var y = this.lineHeight();
         var w = this.width - this.padding * 2;
-        this.drawTextEx(FTKR.ICS.result.format.icsType(), 0, 0);
+        var text = FTKR.ICS.result.format.icsType();
+        var alignIndex = FTKR.ICS.result.align;
+        this.drawTextExAlignIndex(text, 0, 0, alignIndex);
+//        this.drawTextEx(FTKR.ICS.result.format.icsType(), 0, 0);
         this.drawTextEx(this.resultText(), 0, y);
         if (this._item && this._number) {
-            this.drawText(this._item.name, 0, y*2, w);
-            this.drawText(this._number, 0, y*2, w, 'right');
+//            this.drawText(this._item.name, 0, y*2, w);
+//            this.drawText(this._number, 0, y*2, w, 'right');
+            this.drawItemNameNumber(this._item, this._number, 0, y*2, w);
+        }
+        if (this._resultItems) {
+            this._resultItems.forEach(function(item, i){
+//                this.drawText(item.item.name, 0, y*(2 + i), w);
+//                this.drawText(item.number, 0, y*(2 + i), w, 'right');
+                this.drawItemNameNumber(item.item, item.number, 0, y*(2 + i), w);
+            },this);
         }
     };
 
@@ -2921,9 +3328,31 @@ function Game_IcsRecipeBook() {
         this._result = result;
         this._item = item;
         this._number = number;
+        this._resultItems = null;
+        if (this.height !== this.fittingHeight(3)) {
+            this.height = this.fittingHeight(3);
+            this.createContents();
+            if (this._confWindow) {
+                this._confWindow.y = this.y + this.height;
+            }
+        }
         this.refresh();
     };
 
+    Window_IcsResult.prototype.setResults = function (result, resultItems) {
+        this._result = result;
+        this._resultItems = resultItems;
+        this._item = null;
+        this._number = 0;
+        if (this.height !== this.fittingHeight(2 + resultItems.length)) {
+            this.height = this.fittingHeight(2 + resultItems.length);
+            this.createContents();
+            if (this._confWindow) {
+                this._confWindow.y = this.y + this.height;
+            }
+        }
+        this.refresh();
+    };
 
     //=============================================================================
     // Window_IcsResultConf
@@ -2999,10 +3428,7 @@ function Game_IcsRecipeBook() {
         FTKR.ICS.Scene_Menu_createCommandWindow.call(this);
         if (this.isIcsShowCommand()){
             this._commandWindow.setHandler('composition', this.commandIcs.bind(this));
-        };/*
-        if (FTKR.ICS.basic.showCmd === 1) {
-            this._commandWindow.setHandler('composition', this.commandIcs.bind(this));
-        }*/
+        };
     };
 
     Scene_Menu.prototype.isIcsShowCommand = function() {
@@ -3203,6 +3629,7 @@ function Game_IcsRecipeBook() {
         window.setHandler('ok', this.onResultOk.bind(this));
         window.setHandler('cancel', this.onResultOk.bind(this));
         this.addWindow(window);
+        this._resultWindow.setConfWindow(window);
         window.hide();
     };
 
@@ -3364,7 +3791,7 @@ function Game_IcsRecipeBook() {
         $gameParty.loseItem(item, number);
         this._categoryWindow._setMaterials = true;
         this._categoryWindow.refresh();
-      };
+    };
 
     Scene_ICS.prototype.onNumberCancel = function() {
         SoundManager.playCancel();
@@ -3467,14 +3894,39 @@ function Game_IcsRecipeBook() {
                 getItem.item = null;
                 getItem.number = 0;
             }
-            $gameParty.gainItem(getItem.item, getItem.number);
-            this._resultWindow.setResult(judg, getItem.item, getItem.number);
+            if (FTKR.ICS.basic.treatMaterial === 'reset') {
+                this.resetItems();
+            }
+            //合成アイテム入手
+            if (comp.item.ics.hasResultItem()) {
+                var results = [];
+                comp.item.ics.resultItems().some(function(resultItem){
+                    if (resultItem && resultItem.result() === judg) {
+                        resultItem.materials().forEach(function(material){
+                            if (material) {
+                                var item = material.item();
+                                var number = material.number() * composit._number;
+                                results.push({item:item, number:number});
+                                $gameParty.gainItem(item, number);
+                            }
+                        });
+                        return true;
+                    }
+                });
+                this._resultWindow.setResults(judg, results);
+            } else {
+                $gameParty.gainItem(getItem.item, getItem.number);
+                this._resultWindow.setResult(judg, getItem.item, getItem.number);
+            }
         } else {
             AudioManager.playStaticSe(sound.lost.icsSoundType());
             if (FTKR.ICS.basic.notApp === 'reset') {
                 this.resetItems();
                 this._resultWindow.setResult('reset', null, 0);
             } else {
+                if (FTKR.ICS.basic.treatMaterial === 'reset') {
+                    this.resetItems();
+                }
                 this._resultWindow.setResult('lost', null, 0);
             }
         }
@@ -3608,11 +4060,11 @@ function Game_IcsRecipeBook() {
             great = 0;
             success = 0;
         }
-        if (!recipe.great()) {
+        if (!recipe.great() && !item.ics.hasResultItemGreat()){
             success += great;
             great = 0;
         }
-        var failure = recipe.failure() ? 
+        var failure = recipe.failure() || item.ics.hasResultItemFailure() ? 
             rate.failure.clamp(0, max - great - success) : 0;
         var lost = Math.max(max - great - success - failure, 0);
         var rand = Math.random() * max + 1;
