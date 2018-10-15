@@ -4,8 +4,8 @@
 // プラグインNo : 3
 // 作成者     : フトコロ
 // 作成日     : 2017/02/16
-// 最終更新日 : 2018/09/29
-// バージョン : v1.2.0
+// 最終更新日 : 2018/10/16
+// バージョン : v1.2.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.AOP = FTKR.AOP || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.0 オリジナルのパラメータを追加するプラグイン
+ * @plugindesc v1.2.1 オリジナルのパラメータを追加するプラグイン
  * @author フトコロ
  *
  * @param Use Param Num
@@ -506,6 +506,9 @@ FTKR.AOP = FTKR.AOP || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.2.1 - 2018/10/16 : 機能追加
+ *    1. オリジナルパラメータの入力ミス時のエラー表示機能を追加。(F12)
+ * 
  * v1.2.0 - 2018/09/29 : 機能追加
  *    1. 各コードの表示名を設定する機能を追加。
  * 
@@ -667,13 +670,15 @@ FTKR.AOP = FTKR.AOP || {};
                 if (line.match(note1)) {
                     var level  = Number(RegExp.$2);
                     var value = Number(RegExp.$3);
-                    var paramId =this.getParamId(RegExp.$1);
+                    var paramId = this.getParamId(RegExp.$1, obj);
+                    
                     obj.aopParamValues[paramId][level] = value;
                 } else if (line.match(note2)) {
                     var minlevel  = Number(RegExp.$2);
                     var maxlevel  = Number(RegExp.$3);
                     var value = Number(RegExp.$4);
-                    var paramId =this.getParamId(RegExp.$1);
+                    var paramId = this.getParamId(RegExp.$1, obj);
+                    
                     for (var t = minlevel; t < maxlevel + 1; t++) {
                         obj.aopParamValues[paramId][t] = value;
                     }
@@ -681,7 +686,8 @@ FTKR.AOP = FTKR.AOP || {};
                     var level  = Number(RegExp.$2);
                     var value = Number(RegExp.$3);
                     var rand = Number(RegExp.$4);
-                    var paramId =this.getParamId(RegExp.$1);
+                    var paramId = this.getParamId(RegExp.$1, obj);
+                    
                     var radvalue = value + Math.floor(Math.random()* rand * 2) - rand;
                     obj.aopParamValues[paramId][level] = radvalue > 0 ? radvalue : 0;
                 } else if (line.match(note4)) {
@@ -689,7 +695,8 @@ FTKR.AOP = FTKR.AOP || {};
                     var maxlevel  = Number(RegExp.$3);
                     var value = Number(RegExp.$4);
                     var rand = Number(RegExp.$5);
-                    var paramId =this.getParamId(RegExp.$1);
+                    var paramId = this.getParamId(RegExp.$1, obj);
+                    
                     for (var t = minlevel; t < maxlevel + 1; t++) {
                         var radvalue = value + Math.floor(Math.random()* rand * 2) - rand;
                         obj.aopParamValues[paramId][t] = radvalue > 0 ? radvalue : 0;
@@ -719,15 +726,18 @@ FTKR.AOP = FTKR.AOP || {};
                 var line = notedata[i];
                 if (line.match(note1)) {
                     var value = Number(RegExp.$2);
-                    var paramId =this.getParamId(RegExp.$1);
+                    var paramId = this.getParamId(RegExp.$1, obj);
+                    
                     obj.aopParams[paramId] = value;
                 } else if (line.match(note1a)) {
                     var value = Number(RegExp.$2);
-                    var paramId =this.getParamId(RegExp.$1);
+                    var paramId = this.getParamId(RegExp.$1, obj);
+                    
                     obj.aopParams[paramId] = -value;
                 } else if (line.match(note2)) {
                     var value = Number(RegExp.$2);
-                    var paramId =this.getParamId(RegExp.$1);
+                    var paramId = this.getParamId(RegExp.$1, obj);
+                    
                     obj.aopParamRates[paramId] = value;
                 }
             }
@@ -753,11 +763,13 @@ FTKR.AOP = FTKR.AOP || {};
                 var line = notedata[i];
                 if (line.match(note1)) {
                     var value = Number(RegExp.$2);
-                    var paramId =this.getParamId(RegExp.$1);
+                    var paramId = this.getParamId(RegExp.$1, obj);
+                    
                     obj.aopParamReqs[paramId] = value;
                 } else if (line.match(note2)) {
                     var value = Number(RegExp.$2);
-                    var paramId =this.getParamId(RegExp.$1);
+                    var paramId = this.getParamId(RegExp.$1, obj);
+                    
                     obj.aopParamGrows[paramId] = value;
                 }
             }
@@ -782,7 +794,8 @@ FTKR.AOP = FTKR.AOP || {};
                 var line = notedata[i];
                 if (line.match(note1)) {
                     var value = Number(RegExp.$2);
-                    var paramId =this.getParamId(RegExp.$1);
+                    var paramId = this.getParamId(RegExp.$1, obj);
+                    
                     obj.aopParams[paramId] = value;
                 }
             }
@@ -802,22 +815,24 @@ FTKR.AOP = FTKR.AOP || {};
                 var line = notedata[i];
                 if (line.match(note1)) {
                     var value = Number(RegExp.$2) * 0.01;
-                    var paramId =this.getParamId(RegExp.$1);
+                    var paramId =this.getParamId(RegExp.$1, obj);
                     obj.effects.push(this.setGetAopEffect(paramId, value, 0));
                 } else if (line.match(note2)) {
                     var value = Number(RegExp.$2);
-                    var paramId =this.getParamId(RegExp.$1);
+                    var paramId = this.getParamId(RegExp.$1, obj);
+                    
                     obj.effects.push(this.setGetAopEffect(paramId, 0, value));
                 } else if (line.match(note3)) {
                     var value = Number(RegExp.$2);
-                    var paramId =this.getParamId(RegExp.$1);
+                    var paramId = this.getParamId(RegExp.$1, obj);
+                    
                     obj.effects.push(this.setGetAopEffect(paramId, 0, -value));
                 }
             }
         }
     };
 
-    DataManager.getParamId = function(text) {
+    DataManager.getParamId = function(text, obj) {
         var paramId = -1;
         FTKR.AOP.params.forEach( function(param, i) {
             if (param.current === text || param.code === text) {
@@ -826,6 +841,13 @@ FTKR.AOP = FTKR.AOP || {};
                 paramId = Number(RegExp.$1);
             }
         });
+        if (paramId === -1) {
+            console.error(
+                '入力したパラメータは登録されていません。プラグインパラメータを見直してください\n',
+                '入力内容：', text,'\n',
+                '入力先　：', obj,
+            );
+        }
         return paramId;
     };
 
@@ -1166,7 +1188,7 @@ FTKR.AOP = FTKR.AOP || {};
     Game_Interpreter.prototype.setAopParams = function(command, args) {
         var actor = this.setActor(args[0]);
         if(!actor) return;
-        var paramId = DataManager.getParamId(args[1]);
+        var paramId = DataManager.getParamId(args[1], actor);
         var base = actor._aopParamPlus[paramId];
         var value = this.calcValue(base, this.setNum(args[3]), args[2]);
         actor.setAopParamPlus(paramId, value);
@@ -1176,7 +1198,8 @@ FTKR.AOP = FTKR.AOP || {};
         var varId = this.setNum(args[0]);
         var actor = this.setActor(args[1]);
         if(!varId || !actor) return;
-        $gameVariables.setValue(varId, actor.aopParam(DataManager.getParamId(args[2])));
+        var paramId = DataManager.getParamId(args[2], actor);
+        $gameVariables.setValue(varId, actor.aopParam(paramId));
     };
 
     Game_Interpreter.prototype.setActor = function(arg) {
