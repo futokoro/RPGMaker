@@ -209,7 +209,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 | [FTKR_BattleAbortConditions](FTKR_BattleAbortConditions.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_BattleAbortConditions.js) | 2018/02/12 | 設定した条件を満たすと、バトルを中断して勝利または敗北する |
 | [FTKR_MaxBattleMembers](FTKR_MaxBattleMembers.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_MaxBattleMembers.js) | 2018/02/25 | バトルメンバーの最大人数を変数で管理する |
 | [FTKR_ChangeBattleSpeed](FTKR_ChangeBattleSpeed.js) | なし | [v1.0.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ChangeBattleSpeed.js) | 2018/02/27 | バトル中の各種速度を変数で管理する |
-| [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.js) | [仮版](FTKR_AlternatingTurnBattle.ja.md) | [v1.4.5](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AlternatingTurnBattle.js) | 2018/10/04 | 敵味方交互にターンが進むターン制戦闘システム |
+| [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.js) | [仮版](FTKR_AlternatingTurnBattle.ja.md) | [v1.4.6](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AlternatingTurnBattle.js) | 2018/10/16 | 敵味方交互にターンが進むターン制戦闘システム |
 | [FTKR_BattleWindowLayout](FTKR_BattleWindowLayout.js) | [あり](FTKR_BattleWindowLayout.ja.md) | [v1.2.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_BattleWindowLayout.js) | 2018/08/19 | 戦闘時のウィンドウ配置を変更する |
 | [FTKR_ExForceAction](FTKR_ExForceAction.js) | [あり](FTKR_ExForceAction.ja.md) | [v1.1.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExForceAction.js) | 2018/08/06 | 戦闘行動の強制コマンドの機能を拡張する |
 | [FTKR_ExGuardEffect](FTKR_ExGuardEffect.js) | [あり](FTKR_ExGuardEffect.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExGuardEffect.js) | 2018/04/15 | 防御の効果を拡張する |
@@ -311,6 +311,7 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 ### 2018/10/16
 * [FTKR_AddOriginalParameters](FTKR_AddOriginalParameters.js) v1.2.1
+* [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v1.4.6
 
 ### 2018/10/14
 * [FTKR_ItemCompositionSystem](FTKR_ItemCompositionSystem.ja.md) v1.7.0
