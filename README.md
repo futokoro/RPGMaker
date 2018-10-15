@@ -310,7 +310,7 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 2018/10の更新情報
 
 ### 2018/10/16
-* [FTKR_AddOriginalParameters](FTKR_AddOriginalParameters.js) v1.2.1
+* [FTKR_AddOriginalParameters](FTKR_AddOriginalParameters.ja.md) v1.2.1
 * [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v1.4.6
 
 ### 2018/10/14
