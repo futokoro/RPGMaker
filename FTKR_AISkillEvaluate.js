@@ -4,8 +4,8 @@
 // プラグインNo : 64
 // 作成者     : フトコロ
 // 作成日     : 2018/01/06
-// 最終更新日 : 2018/03/10
-// バージョン : v1.2.4
+// 最終更新日 : 2018/10/20
+// バージョン : v1.2.5
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.ASE = FTKR.ASE || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.4 自動戦闘時に使用するスキルの評価値を変更するプラグイン
+ * @plugindesc v1.2.5 自動戦闘時に使用するスキルの評価値を変更するプラグイン
  * @author フトコロ
  *
  * @param Skill Evaluate Log
@@ -320,6 +320,10 @@ FTKR.ASE = FTKR.ASE || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.2.5 - 2018/10/20 : 競合回避
+ *    1. 作戦画面のレイアウトが、メニュー画面の表示レイアウトに影響されないように
+ *       修正。
  * 
  * v1.2.4 - 2018/03/10 : 不具合修正
  *    1. アクターの特徴で自動戦闘を追加していないと、作戦画面で作戦を変更しても
@@ -1054,7 +1058,7 @@ FTKR.ASE = FTKR.ASE || {};
         this.initialize.apply(this, arguments);
     }
 
-    Window_PartyTactics.prototype = Object.create(Window_MenuStatus.prototype);
+    Window_PartyTactics.prototype = Object.create(Window_Selectable.prototype);
     Window_PartyTactics.prototype.constructor = Window_PartyTactics;
 
     Window_PartyTactics.prototype.initialize = function(x, y, width, height) {
@@ -1080,6 +1084,16 @@ FTKR.ASE = FTKR.ASE || {};
         this.drawItemStatus(index);
     };
 
+    Window_PartyTactics.prototype.drawItemBackground = function(index) {
+        if (index === this._pendingIndex) {
+            var rect = this.itemRect(index);
+            var color = this.pendingColor();
+            this.changePaintOpacity(false);
+            this.contents.fillRect(rect.x, rect.y, rect.width, rect.height, color);
+            this.changePaintOpacity(true);
+        }
+    };
+
     Window_PartyTactics.prototype.drawItemStatus = function(index) {
         var actor = $gameParty.members()[index];
         var rect = this.itemRect(index);
@@ -1098,6 +1112,14 @@ FTKR.ASE = FTKR.ASE || {};
 
     Window_PartyTactics.prototype.processOk = function() {
         Window_Selectable.prototype.processOk.call(this);
+    };
+
+    Window_PartyTactics.prototype.isCurrentItemEnabled = function() {
+        return true;
+    };
+
+    Window_PartyTactics.prototype.selectLast = function() {
+        this.select($gameParty.menuActor().index() || 0);
     };
 
     //=============================================================================
@@ -1131,7 +1153,7 @@ FTKR.ASE = FTKR.ASE || {};
         this.initialize.apply(this, arguments);
     }
 
-    Window_TacticsList.prototype = Object.create(Window_MenuStatus.prototype);
+    Window_TacticsList.prototype = Object.create(Window_Selectable.prototype);
     Window_TacticsList.prototype.constructor = Window_TacticsList;
 
     Window_TacticsList.prototype.initialize = function(x, y, width, height) {
@@ -1177,6 +1199,16 @@ FTKR.ASE = FTKR.ASE || {};
         this.drawItemStatus(index);
     };
 
+    Window_TacticsList.prototype.drawItemBackground = function(index) {
+        if (index === this._pendingIndex) {
+            var rect = this.itemRect(index);
+            var color = this.pendingColor();
+            this.changePaintOpacity(false);
+            this.contents.fillRect(rect.x, rect.y, rect.width, rect.height, color);
+            this.changePaintOpacity(true);
+        }
+    };
+
     Window_TacticsList.prototype.drawItemStatus = function(index) {
         var list = this._data[index];
         var rect = this.itemRect(index);
@@ -1211,6 +1243,14 @@ FTKR.ASE = FTKR.ASE || {};
 
     Window_TacticsList.prototype.processOk = function() {
         Window_Selectable.prototype.processOk.call(this);
+    };
+
+    Window_PartyTactics.prototype.isCurrentItemEnabled = function() {
+        return true;
+    };
+
+    Window_PartyTactics.prototype.selectLast = function() {
+        this.select($gameParty.menuActor().index() || 0);
     };
 
 }());//EOF
