@@ -4,8 +4,8 @@
 // プラグインNo : 27
 // 作成者     : フトコロ
 // 作成日     : 2017/04/21
-// 最終更新日 : 2018/09/29
-// バージョン : v2.1.2
+// 最終更新日 : 2018/10/20
+// バージョン : v2.1.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.CSS.DS = FTKR.CSS.DS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.1.2 詳細ステータス画面の表示内容を変更するプラグイン
+ * @plugindesc v2.1.3 詳細ステータス画面の表示内容を変更するプラグイン
  * @author フトコロ
  *
  * @param --詳細ステータスの表示設定--
@@ -174,6 +174,9 @@ FTKR.CSS.DS = FTKR.CSS.DS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v2.1.3 - 2018/10/20 : 競合回避
+ *    1. dsWeaponMasteryプラグインの熟練度表示に対応
  * 
  * v2.1.2 - 2018/09/29 : 機能追加
  *    1. プラグインパラメータのリストで選択できる項目を追加。
@@ -371,12 +374,17 @@ if (Imported.FTKR_CSS) (function(){
     //=============================================================================
 
     //書き換え
+    var _DS_Window_Status_refresh = Window_Status.prototype.refresh;
     Window_Status.prototype.refresh = function() {
         this.contents.clear();
-        if (this._actor) {
-            var w = this.width - this.padding * 2;
-            var h = this.height - this.padding * 2;
-            this.drawCssActorStatus(0, this._actor, 0, 0, w, h, FTKR.CSS.DS.detailedStatus);
+        if (Imported.dsWeaponMastery && this._switchWM) {
+            _DS_Window_Status_refresh.call(this);
+        } else {
+            if (this._actor) {
+                var w = this.width - this.padding * 2;
+                var h = this.height - this.padding * 2;
+                this.drawCssActorStatus(0, this._actor, 0, 0, w, h, FTKR.CSS.DS.detailedStatus);
+            }
         }
     };
 
