@@ -4,8 +4,8 @@
 // プラグインNo : 75
 // 作成者     : フトコロ
 // 作成日     : 2018/04/08
-// 最終更新日 : 2018/10/16
-// バージョン : v1.4.6
+// 最終更新日 : 2018/10/20
+// バージョン : v1.4.7
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.AltTB = FTKR.AltTB || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.4.6 敵味方交互にターンが進むターン制戦闘システム
+ * @plugindesc v1.4.7 敵味方交互にターンが進むターン制戦闘システム
  * @author フトコロ
  *
  * @param TurnEnd Command
@@ -781,6 +781,9 @@ FTKR.AltTB = FTKR.AltTB || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.4.7 - 2018/10/20 : 不具合修正
+ *    1. エネミーの行動回数を増加をさせても反映されない不具合を修正。
+ * 
  * v1.4.6 - 2018/10/16 : 競合回避
  *    1. ｖ1.4.5の修正内容によるYEP_BattleEngineCoreとの競合部分の回避処理を追加。
  * 
@@ -1010,6 +1013,15 @@ function Window_BattleActionPoint() {
             return 0;
         }
     };
+
+    var setArgBool = function(arg) {
+        switch((setArgStr(arg)).toUpperCase()) {
+            case 'TRUE':
+                return true;
+            default :
+                return false;
+        }
+    }
 
     var clearObj = function(obj) {
         for(var key in obj){
@@ -1406,6 +1418,7 @@ function Window_BattleActionPoint() {
         $gameParty.makeActions();
         $gameTroop.makeActions();
         $gameParty.resetActionCount();
+        $gameTroop.resetActionCount();
         this.resetLastActorIndex();
         if (FTKR.AltTB.enableAP) $gameParty.turnRefreshAP();
         this.clearActor();
@@ -1414,6 +1427,11 @@ function Window_BattleActionPoint() {
         $gameParty.requestMotionRefresh();
         $gameParty.resetActionState();
         $gameParty.members().forEach(function(member){
+            if (member.isConfused()) {
+                member.clearActionCount();
+            }
+        });
+        $gameTroop.members().forEach(function(member){
             if (member.isConfused()) {
                 member.clearActionCount();
             }
@@ -1575,7 +1593,7 @@ function Window_BattleActionPoint() {
         this._logWindow.displayAutoAffectedStatus(subject);
         this._logWindow.displayCurrentState(subject);
         this._logWindow.displayRegeneration(subject);
-        this._subject = null;
+        if (!this._subject.actionCount()) this._subject = null;
     };
 
     //書き換え
@@ -1724,6 +1742,7 @@ function Window_BattleActionPoint() {
         }
         if (target) {
             target.getActionCount(setArgNum(args[2]));
+            target.remakeActions();
         }
     };
 
@@ -1967,9 +1986,58 @@ function Window_BattleActionPoint() {
     //=============================================================================
     // Game_Enemy
     //=============================================================================
-    
+    Game_Actor.prototype.remakeActions = function() {
+        Game_Actor.prototype.makeActions.call(this);
+    };
+
+    Game_Enemy.prototype.reselectAllActions = function(actionList) {
+        var ratingMax = Math.max.apply(null, actionList.map(function(a) {
+            return a.rating;
+        }));
+        var ratingZero = ratingMax - 3;
+        actionList = actionList.filter(function(a) {
+            return a.rating > ratingZero;
+        });
+        for (var i = 0; i < this.actionCount(); i++) {
+            this.action(i).setEnemyAction(this.selectAction(actionList, ratingZero));
+        }
+    };
+
+    Game_Enemy.prototype.remakeActions = function() {
+        this.clearActions();
+        if (this.canMove()) {
+            var actionTimes = this.actionCount();
+            this._actions = [];
+            for (var i = 0; i < actionTimes; i++) {
+                this._actions.push(new Game_Action(this));
+            }
+        }
+        if (this.actionCount() > 0) {
+            var actionList = this.enemy().actions.filter(function(a) {
+                return this.isActionValid(a);
+            }, this);
+            if (actionList.length > 0) {
+                this.reselectAllActions(actionList);
+            }
+        }
+        this.setActionState('waiting');
+    };
+
     Game_Enemy.prototype.maxActionCount = function() {
         return +readObjectMeta(this.enemy(), ['ALTTB_MAX_AC']) || Game_Battler.prototype.maxActionCount.call(this);
+    };
+/*
+    Game_Enemy.prototype.removeCurrentAction = function() {
+    };
+*/
+    //=============================================================================
+    // Game_Troop
+    //=============================================================================
+    
+    Game_Troop.prototype.resetActionCount = function() {
+        this.members().forEach( function(member){
+            member.resetActionCount();
+        });
     };
 
     //=============================================================================
