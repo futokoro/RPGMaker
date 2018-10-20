@@ -5,7 +5,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2018/04/08
 // 最終更新日 : 2018/10/20
-// バージョン : v1.4.7
+// バージョン : v1.4.8
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.AltTB = FTKR.AltTB || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.4.7 敵味方交互にターンが進むターン制戦闘システム
+ * @plugindesc v1.4.8 敵味方交互にターンが進むターン制戦闘システム
  * @author フトコロ
  *
  * @param TurnEnd Command
@@ -780,6 +780,11 @@ FTKR.AltTB = FTKR.AltTB || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.4.8 - 2018/10/20 : 不具合修正
+ *    1. v1.4.7の修正内容による、行動選択時にエラーになる不具合を修正。
+ *    2. 行動回数の増加のプラグインコマンドの入力内容で、パーティーと敵グループの
+ *       番号指定がずれている不具合を修正。
  * 
  * v1.4.7 - 2018/10/20 : 不具合修正
  *    1. エネミーの行動回数を増加をさせても反映されない不具合を修正。
@@ -1733,16 +1738,18 @@ function Window_BattleActionPoint() {
                 break;
             case 'パーティー':
             case 'PARTY':
+                var targetId = Math.max(targetId - 1, 0);
                 target = $gameParty.members()[targetId];
                 break;
             case '敵グループ':
             case 'TROOP':
+                var targetId = Math.max(targetId - 1, 0);
                 target = $gameTroop.members()[targetId];
                 break;
         }
         if (target) {
             target.getActionCount(setArgNum(args[2]));
-            target.remakeActions();
+            if (!target.isActor()) target.remakeActions();
         }
     };
 
@@ -1895,6 +1902,9 @@ function Window_BattleActionPoint() {
         return +readObjectMeta(this.actor(), ['ALTTB_MAX_AC']) || Game_Battler.prototype.maxActionCount.call(this);
     };
 
+    Game_Actor.prototype.remakeActions = function() {
+    };
+
     //=============================================================================
     // Game_Party
     //=============================================================================
@@ -1986,10 +1996,6 @@ function Window_BattleActionPoint() {
     //=============================================================================
     // Game_Enemy
     //=============================================================================
-    Game_Actor.prototype.remakeActions = function() {
-        Game_Actor.prototype.makeActions.call(this);
-    };
-
     Game_Enemy.prototype.reselectAllActions = function(actionList) {
         var ratingMax = Math.max.apply(null, actionList.map(function(a) {
             return a.rating;
