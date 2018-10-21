@@ -197,9 +197,59 @@ Scene_Map.prototype.updateEncounterEffect = function() {
 
 [上に戻る](#RPGツクールMVの戦闘システムの解析)
 
+# 戦闘シーンの構成
+
+RPGツクールMVの戦闘シーンに係るクラスは以下の通り。
+
+## 戦闘シーンの流れに係るクラス
+
+* `rpg_managers.js`
+    * `BattleManager`クラス
+* `rpg_scenes.js`
+    * `Scene_Battle`クラス
+
+## 戦闘シーンの表示に係るクラス
+
+* `rpg_sprites.js`
+    * `Spriteset_Battle`クラス …以下のSprite_***の全体をまとめているクラスで、戦闘背景もここで表示させている
+    * `Sprite_Actor`クラス  …主にアクターのSVキャラを表示するクラスだが、フロントビューでも使用する
+    * `Sprite_Enemy`クラス
+    * `Sprite_Animation`クラス  …戦闘アニメーションを表示する
+    * `Sprite_Damage`クラス …ダメージポップアップを表示する
+    * `Sprite_StateOverlay`クラス　…アクターのSVキャラにステートの重ね合わせアニメを表示する
+    * `Sprite_StateIcon`クラス …エネミーにステートアイコン表示する
+    * `Sprite_Weapon`クラス
+* `rpg_windows.js`
+    * `Window_BattleLog`クラス  …戦闘ログを表示させるクラスだが、戦闘アニメーションやダメージポップアップのタイミングなども制御する
+    * `Window_PartyCommand`クラス
+    * `Window_ActorCommand`クラス
+    * `Window_BattleStatus`クラス
+    * `Window_BattleActor`クラス
+    * `Window_BattleEnemy`クラス
+    * `Window_BattleSkill`クラス
+    * `Window_BattleItem`クラス
+
+## 戦闘シーンで扱うデータ類およびその処理に係るクラス
+
+* `rpg_objects.js`
+    * `Game_Temp`クラス　…コモンイベントを予約する際の格納先
+    * `Game_System`クラス
+    * `Game_Switches`クラス
+    * `Game_Variables`クラス
+    * `Game_Screen`クラス   …画面効果（フラッシュや揺れなど）を制御するほか、イベントでピクチャを表示する場合にも係る
+    * `Game_Item`クラス
+    * `Game_Action`クラス   …スキルやアイテムを使用した時の効果(成功失敗、命中回避、ダメージ量など)を制御する
+    * `Game_ActionResult`クラス …スキルやアイテムを使用した時の結果を管理する
+    * `Game_Actor`クラス
+    * `Game_Enemy`クラス
+    * `Game_Party`クラス
+    * `Game_Troop`クラス    …敵グループをまとめているクラスで、敵グループに設定したバトルイベントを制御するクラスでもある
+    * `Game_Interpreter`クラス  …コモンイベントやバトルイベントの中のイベントコマンドの実行内容を制御する
+
+
 # 戦闘シーンの基本
 
-RPGツクールMVでは、戦闘シーンの流れを大まかに７つのプロセスに分けて、それぞれ別のメソッドを実行している。
+さらに戦闘シーンの流れを大まかに７つのプロセスに分けている。
 このそれぞれのプロセスを、ここではフェーズ(※1)と呼ぶこととする。
 
 ※1 戦闘中の現在フェーズは`BattleManager._phase`で取得できる。
@@ -208,13 +258,13 @@ RPGツクールMVでは、戦闘シーンの流れを大まかに７つのプロ
 
 | # | フェーズ名 | `BattleManager._phase`の中身 |
 |:-----------|:-----------:|:-------------|
-|1 |[戦闘初期化フェーズ](#戦闘初期化フェーズ) |`init`|
-|2 |[戦闘開始フェーズ](#戦闘開始フェーズ) |`start`|
-|3 |[コマンド入力フェーズ](#コマンド入力フェーズ) |`input`|
-|4 |[ターンフェーズ](#ターンフェーズ) |`turn`|
-|5 |[行動フェーズ](#行動フェーズ) |`action`|
-|6 |[ターン終了フェーズ](#ターン終了フェーズ) |`turnEnd`|
-|7 |[戦闘終了フェーズ](#戦闘終了フェーズ) |`battleEnd`|
+| 1 | [戦闘初期化フェーズ](#戦闘初期化フェーズ) |`init`|
+| 2 | [戦闘開始フェーズ](#戦闘開始フェーズ) |`start`|
+| 3 | [コマンド入力フェーズ](#コマンド入力フェーズ) |`input`|
+| 4 | [ターンフェーズ](#ターンフェーズ) |`turn`|
+| 5 | [行動フェーズ](#行動フェーズ) |`action`|
+| 6 | [ターン終了フェーズ](#ターン終了フェーズ) |`turnEnd`|
+| 7 | [戦闘終了フェーズ](#戦闘終了フェーズ) |`battleEnd`|
 
 フェーズの中で、「戦闘初期化」「戦闘開始」「戦闘終了」フェーズは、１戦闘でそれぞれ１回ずつ実行するが、「コマンド入力」「ターン」「行動」「ターン終了」フェーズは、戦闘が続くかぎり何度も実行する。
 
@@ -234,7 +284,7 @@ RPGツクールMVでは、戦闘シーンの流れを大まかに７つのプロ
 
 フェーズそれぞれの処理内容については、以降で説明する。
 
-[上に戻る](#RPGツクールMVの戦闘システムの解析)
+[戦闘シーンの基本に戻る](#戦闘シーンの基本) [上に戻る](#RPGツクールMVの戦闘システムの解析)
 
 # 戦闘初期化フェーズ
 
@@ -253,7 +303,9 @@ Scene_Battle.prototype.start = function() {
 };
 ```
 
-## 戦闘の開始
+[戦闘シーンの基本に戻る](#戦闘シーンの基本) [上に戻る](#RPGツクールMVの戦闘システムの解析)
+
+# 戦闘開始フェーズ
 
 `BattleManager.startBattle()`を実行する。
 ```
@@ -325,9 +377,9 @@ Scene_Battle.prototype.changeInputWindow = function() {
 };
 ```
 
-[上に戻る](#RPGツクールMVの戦闘システムの解析)
+[戦闘シーンの基本に戻る](#戦闘シーンの基本) [上に戻る](#RPGツクールMVの戦闘システムの解析)
 
-## コマンド選択
+# コマンド入力フェーズ
 
 戦闘フェーズがstartの時、`BattleManager.update()`で以下を実行する。
 
@@ -418,9 +470,9 @@ Game_Action.prototype.speed = function() {
 };
 ```
 
-[上に戻る](#RPGツクールMVの戦闘システムの解析)
+[戦闘シーンの基本に戻る](#戦闘シーンの基本) [上に戻る](#RPGツクールMVの戦闘システムの解析)
 
-## ターン処理
+# ターンフェーズ
 戦闘フェーズが turn の時、`BattleManager.updateTurn()`を実行する。
 turnフェーズでは、`BattleManager.makeActionOrders()`で決定した行動順に従い、１キャラずつ行動を実行させる。
 
@@ -516,9 +568,9 @@ Game_Battler.prototype.onTurnEnd = function() {
 };
 ```
 
-[上に戻る](#RPGツクールMVの戦闘システムの解析)
+[戦闘シーンの基本に戻る](#戦闘シーンの基本) [上に戻る](#RPGツクールMVの戦闘システムの解析)
 
-## ターン終了
+# ターン終了フェーズ
 戦闘フェーズが turnEnd の時、`BattleManager.updateTurnEnd()`を実行する。
 ただし、内容は`BattleManager.startInput()`を実行するだけ。
 ```
@@ -581,10 +633,9 @@ BattleManager.endBattle = function(result) {
     }
 };
 ```
+[戦闘シーンの基本に戻る](#戦闘シーンの基本) [上に戻る](#RPGツクールMVの戦闘システムの解析)
 
-[上に戻る](#RPGツクールMVの戦闘システムの解析)
-
-## 戦闘終了
+# 戦闘終了フェーズ
 戦闘フェーズが battleEnd の時、`BattleManager.updateTurnEnd()`を実行する。
 
 ```
@@ -606,6 +657,6 @@ BattleManager.updateBattleEnd = function() {
 };
 ```
 
-[上に戻る](#RPGツクールMVの戦闘システムの解析)
+[戦闘シーンの基本に戻る](#戦闘シーンの基本) [上に戻る](#RPGツクールMVの戦闘システムの解析)
 
 [トップページに戻る](README.md)
