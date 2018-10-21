@@ -4,8 +4,8 @@
 // プラグインNo : 75
 // 作成者     : フトコロ
 // 作成日     : 2018/04/08
-// 最終更新日 : 2018/10/20
-// バージョン : v1.4.8
+// 最終更新日 : 2018/10/21
+// バージョン : v1.4.9
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.AltTB = FTKR.AltTB || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.4.8 敵味方交互にターンが進むターン制戦闘システム
+ * @plugindesc v1.4.9 敵味方交互にターンが進むターン制戦闘システム
  * @author フトコロ
  *
  * @param TurnEnd Command
@@ -781,6 +781,10 @@ FTKR.AltTB = FTKR.AltTB || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.4.9 - 2018/10/21 : 不具合修正
+ *    1. エネミーが行動制約のあるステートを受けた場合に、ターンが進行しなくなる
+ *       不具合を修正。
+ * 
  * v1.4.8 - 2018/10/20 : 不具合修正
  *    1. v1.4.7の修正内容による、行動選択時にエラーになる不具合を修正。
  *    2. 行動回数の増加のプラグインコマンドの入力内容で、パーティーと敵グループの
@@ -1139,6 +1143,8 @@ function Window_BattleActionPoint() {
         notSelectActivatedActor: (paramParse(parameters['Cannot Select Activated Actor']) || false),
     };
 
+    FTKR.test = false;
+
     //=============================================================================
     // BattleManager
     //=============================================================================
@@ -1411,12 +1417,14 @@ function Window_BattleActionPoint() {
     };
 
     BattleManager.updateStart = function() {
+        if (FTKR.test) console.log('updateStart');
         this._phase = 'turnStart';
         this.clearActor();
         if (this._surprise) this.setEnemyTurn();
     };
 
     BattleManager.updateTurnStart = function() {
+        if (FTKR.test) console.log('updateTurnStart');
         this._phase = 'turn';
         this._playerTurnStart = false;
         this._enemyTurnStart = false;
@@ -1432,12 +1440,7 @@ function Window_BattleActionPoint() {
         $gameParty.requestMotionRefresh();
         $gameParty.resetActionState();
         $gameParty.members().forEach(function(member){
-            if (member.isConfused()) {
-                member.clearActionCount();
-            }
-        });
-        $gameTroop.members().forEach(function(member){
-            if (member.isConfused()) {
+            if (member.isConfused() || !member.canMove()) {
                 member.clearActionCount();
             }
         });
@@ -1455,6 +1458,7 @@ function Window_BattleActionPoint() {
 
     //書き換え
     BattleManager.updateTurn = function() {
+        if (FTKR.test) console.log('updateTurn');
         $gameParty.requestMotionRefresh();
         if (this.isPlayerTurn()) {
             if (!this._playerTurnStart) {
@@ -1544,6 +1548,7 @@ function Window_BattleActionPoint() {
     };
 
     BattleManager.updateEnemyTurn = function() {
+        if (FTKR.test) console.log('updateEnemyTurn', this._subject.name());
         if (this._subject && this._subject.isActor()) this._subject = null;
         if (!this._subject) {
             this._subject = this.getNextSubject();
@@ -1556,13 +1561,16 @@ function Window_BattleActionPoint() {
     };
 
     BattleManager.updateEnemyTurnEnd = function() {
+        if (FTKR.test) console.log('updateEnemyTurnEnd', this._subject.name());
         this._phase = 'turnEnd';
     };
 
     //書き換え
     BattleManager.processTurn = function() {
+        if (FTKR.test) console.log('processTurn', this._subject.name());
         var subject = this._subject;
         var action = subject.currentAction();
+        if (FTKR.test) console.log(action, subject._actions);
         if (action) {
             this.processBeforeAction(subject, action);
         } else {
@@ -1571,6 +1579,7 @@ function Window_BattleActionPoint() {
     };
 
     BattleManager.processBeforeAction = function(subject, action) {
+        if (FTKR.test) console.log('processBeforAction', subject, action);
         action.prepare();
         if (action.isValid()) {
             subject.payActionCount();
@@ -1582,11 +1591,13 @@ function Window_BattleActionPoint() {
 
     //書き換え
     BattleManager.endAction = function() {
+        if (FTKR.test) console.log('endAction', this._subject.name());
         this._phase = 'actionEnd';
         this._logWindow.endAction(this._subject);
     };
 
     BattleManager.updateActionEnd = function() {
+        if (FTKR.test) console.log('updateActionEnd', this._subject.name());
         if (this._isConfusedPartyAction) {
             this._phase = 'confusedActionTurn';
         } else {
@@ -1598,6 +1609,10 @@ function Window_BattleActionPoint() {
         this._logWindow.displayAutoAffectedStatus(subject);
         this._logWindow.displayCurrentState(subject);
         this._logWindow.displayRegeneration(subject);
+        if (FTKR.test) console.log(subject.isConfused(), subject.isAppeared(), subject.restriction());
+        if (!this._subject.canMove()) {
+            this._subject.clearActionCount();
+        }
         if (!this._subject.actionCount()) this._subject = null;
     };
 
@@ -1612,6 +1627,7 @@ function Window_BattleActionPoint() {
 
     //書き換え
     BattleManager.updateTurnEnd = function() {
+        if (FTKR.test) console.log('updateTurnEnd');
         this._phase = 'turnStart';
         this._preemptive = false;
         this._surprise = false;
@@ -1749,7 +1765,10 @@ function Window_BattleActionPoint() {
         }
         if (target) {
             target.getActionCount(setArgNum(args[2]));
-            if (!target.isActor()) target.remakeActions();
+            if (!target.isActor()) {
+                target.remakeActions();
+                if (FTKR.test) console.log(target.name(), target._actions);
+            }
         }
     };
 
