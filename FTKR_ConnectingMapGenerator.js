@@ -4,8 +4,8 @@
 // プラグインNo : 83
 // 作成者　　   : フトコロ
 // 作成日　　   : 2018/04/22
-// 最終更新日   : 2018/04/28
-// バージョン   : v1.2.0
+// 最終更新日   : 2018/10/21
+// バージョン   : v1.2.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.CMG = FTKR.CMG || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.0 複数のマップを繋げて１つの大きなマップにするプラグイン
+ * @plugindesc v1.2.1 複数のマップを繋げて１つの大きなマップにするプラグイン
  * @author フトコロ
  *
  * @param 連結マップの横サイズ
@@ -311,6 +311,10 @@ FTKR.CMG = FTKR.CMG || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.2.1 - 218/10/21 : 不具合修正
+ *    1. 縦2*横1のように縦長の連結マップを作成した時に、イベントの配置が
+ *       正しく反映されない不具合を修正。
+ * 
  * v1.2.0 - 2018/04/28 : 不具合修正、機能追加
  *    1. 場所移動先によって、アクターが表示されずゲームが動かなくなる不具合を修正。
  *    2. 連結マップが正しく生成できない場合がある不具合を修正。
@@ -589,7 +593,7 @@ function Game_CmgEvent() {
     };
 
     //=============================================================================
-    // Game_Player
+    // Game_Character
     //=============================================================================
 
     Game_Character.prototype.getCmgMapX = function(cmgMapId, mapX) {
@@ -600,11 +604,9 @@ function Game_CmgEvent() {
     };
 
     Game_Character.prototype.getCmgMapY = function(cmgMapId, mapY) {
-        var m = 0;
         if (cmgMapId >= DataManager.cmgMapW()){
-            for (var i = 0; i < Math.floor(cmgMapId / DataManager.cmgMapH()); i++) {
-                mapY += DataManager.dataMap(m).height;
-                m += DataManager.cmgMapW();
+            for (var i = 0; i < Math.floor(cmgMapId / DataManager.cmgMapW()); i++) {
+                mapY += DataManager.dataMap(i * DataManager.cmgMapW()).height;
             }
         }
         return mapY;

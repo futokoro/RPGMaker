@@ -241,7 +241,7 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_ExTileSettingForRegion](FTKR_ExTileSettingForRegion.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExTileSettingForRegion.js) | 2017/08/27 | 指定したリージョンの通行設定を一時的に変更する |
-| [FTKR_ConnectingMapGenerator](FTKR_ConnectingMapGenerator.js) | [あり](FTKR_ConnectingMapGenerator.ja.md) | [v1.2.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ConnectingMapGenerator.js) | 2018/04/28 | 複数のマップを繋げて１つの大きなマップにする |
+| [FTKR_ConnectingMapGenerator](FTKR_ConnectingMapGenerator.js) | [あり](FTKR_ConnectingMapGenerator.ja.md) | [v1.2.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ConnectingMapGenerator.js) | 2018/10/21 | 複数のマップを繋げて１つの大きなマップにする |
 
 [目次に戻る](#目次)
 
@@ -311,6 +311,7 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 ### 2018/10/21
 * [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v1.4.9
+* [FTKR_ConnectingMapGenerator](FTKR_ConnectingMapGenerator.ja.md) v1.2.1
 
 ### 2018/10/20
 * [FTKR_CSS_DetailedStatus](FTKR_CSS_DetailedStatus.ja.md) v2.1.3
