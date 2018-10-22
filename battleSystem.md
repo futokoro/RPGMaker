@@ -203,10 +203,14 @@ RPGツクールMVの戦闘シーンに係るクラスは以下の通り。
 
 ## 戦闘シーンの流れに係るクラス
 
-* `rpg_managers.js`
-    * `BattleManager`クラス
 * `rpg_scenes.js`
     * `Scene_Battle`クラス
+* `rpg_managers.js`
+    * `BattleManager`クラス
+
+これらのクラスの処理は、[戦闘シーンの流れの基本](#戦闘シーンの流れの基本)で説明する。
+なお、それぞれのクラスの主従関係は、`Scene_Battle`が主で、`BattleManager`では従である。
+まず、`Scene_Battle`が処理を行い、その中で`BattleManager`が動く。
 
 ## 戦闘シーンの表示に係るクラス
 
@@ -218,7 +222,7 @@ RPGツクールMVの戦闘シーンに係るクラスは以下の通り。
     * `Sprite_Damage`クラス …ダメージポップアップを表示する
     * `Sprite_StateOverlay`クラス　…アクターのSVキャラにステートの重ね合わせアニメを表示する
     * `Sprite_StateIcon`クラス …エネミーにステートアイコン表示する
-    * `Sprite_Weapon`クラス
+    * `Sprite_Weapon`クラス　…アクターのSVキャラのモーションに、武器画像を重ねて表示する
 * `rpg_windows.js`
     * `Window_BattleLog`クラス  …戦闘ログを表示させるクラスだが、戦闘アニメーションやダメージポップアップのタイミングなども制御する
     * `Window_PartyCommand`クラス
@@ -237,7 +241,7 @@ RPGツクールMVの戦闘シーンに係るクラスは以下の通り。
     * `Game_Switches`クラス
     * `Game_Variables`クラス
     * `Game_Screen`クラス   …画面効果（フラッシュや揺れなど）を制御するほか、イベントでピクチャを表示する場合にも係る
-    * `Game_Item`クラス
+    * `Game_Item`クラス …スキルやアイテムのデータを管理する
     * `Game_Action`クラス   …スキルやアイテムを使用した時の効果(成功失敗、命中回避、ダメージ量など)を制御する
     * `Game_ActionResult`クラス …スキルやアイテムを使用した時の結果を管理する
     * `Game_Actor`クラス
@@ -247,9 +251,9 @@ RPGツクールMVの戦闘シーンに係るクラスは以下の通り。
     * `Game_Interpreter`クラス  …コモンイベントやバトルイベントの中のイベントコマンドの実行内容を制御する
 
 
-# 戦闘シーンの基本
+# 戦闘シーンの流れの基本
 
-さらに戦闘シーンの流れを大まかに７つのプロセスに分けている。
+PRGツクールMVでは、戦闘シーンの流れを大まかに７つのプロセスに分けている。
 このそれぞれのプロセスを、ここではフェーズ(※1)と呼ぶこととする。
 
 ※1 戦闘中の現在フェーズは`BattleManager._phase`で取得できる。
@@ -288,18 +292,94 @@ RPGツクールMVの戦闘シーンに係るクラスは以下の通り。
 
 # 戦闘初期化フェーズ
 
-戦闘シーンに切り替わると以下の順で、シーンの初期化を行う。
+戦闘初期化フェーズでは、まず戦闘シーンの立ち上げ処理が走る。
 
-`Scene_Battle.prototype.create()`<br>
-戦闘背景や、各種ウィンドウ、アクターやエネミー等のキャラクターを生成する。
+1. まず戦闘シーンデータを作成し `Scene_Battle.prototype.create()`
+2. 次に戦闘シーンの開始処理を実行し `Scene_Battle.prototype.start()`
+3. その後は戦闘シーンが終了するまで、更新処理を繰り返し実行する `Scene_Battle.prototype.update()`
 
-`Scene_Battle.prototype.start()`
+## create
+```
+Scene_Battle.prototype.create = function() {
+    Scene_Base.prototype.create.call(this);
+    this.createDisplayObjects();
+};
+```
+コアスクリプト上では、`Scene_Base.prototype.create`は空(何も実行しない)である。
+
+```
+Scene_Battle.prototype.createDisplayObjects = function() {
+    this.createSpriteset();
+    this.createWindowLayer();
+    this.createAllWindows();
+    BattleManager.setLogWindow(this._logWindow);
+    BattleManager.setStatusWindow(this._statusWindow);
+    BattleManager.setSpriteset(this._spriteset);
+    this._logWindow.setSpriteset(this._spriteset);
+};
+```
+ここで、戦闘画面を構成するキャラクタ画像や、背景、ウィンドウなどのオブジェクトを生成する。
+
+### オブジェクトの生成順番
+
+生成の順番は以下の通り。
+
+1. `Spriteset_Battle`
+    1. 戦闘背景の下地
+    2. マップで設定した戦闘背景
+    3. エネミーキャラクター
+    4. アクターキャラクター(フロントビューの場合は透明なキャラを生成する)
+1. 戦闘ログウィンドウ `Window_BattleLog`
+1. ステータスウィンドウ `Window_BattleStatus`
+1. パーティーコマンドウィンドウ
+1. アクターコマンドウィンドウ
+1. 説明文ウィンドウ
+1. スキル選択ウィンドウ
+1. アイテム選択ウィンドウ
+1. アクター選択ウィンドウ
+1. エネミー選択ウィンドウ
+1. メッセージウィンドウ
+1. 文章スクロールウィンドウ
+
+### オブジェクトの紐づけ
+
+以下のオブジェクトは`BattleManager`に紐づけされる。
+* `Spriteset_Battle`
+* `Window_BattleLog`
+* `Window_BattleStatus`
+
+これは、`BattleManager`の中で、各種スプライトや、戦闘ログ、ステータス表示を制御するため。
+
+また、`Spriteset_Battle`は、`Window_BattleLog`にも紐づけされる。
+これは、戦闘ログの表示タイミングと、スキルのモーションやアニメーションの表示タイミングを合わせるため、`Window_BattleLog`側でスプライトを制御しているから。
+
+### レイヤー
+
+なお、`Spriteset_Battle`と、戦闘シーンウィンドウは別のレイヤーに紐づいて表示しているため、スプライトとウィンドウが重なっても透過して表示できる。
+ただし、スプライト同士や、ウィンドウ同士などの同じレイヤーに表示しているものが重なった場合は、透過できずに後に生成したオブジェクトのみ表示される。
+
+## start
 ```
 Scene_Battle.prototype.start = function() {
     Scene_Base.prototype.start.call(this);
     this.startFadeIn(this.fadeSpeed(), false);  //フェードイン実行
     BattleManager.playBattleBgm();              //戦闘BGMの再生
     BattleManager.startBattle();
+};
+```
+
+### update
+```
+Scene_Battle.prototype.update = function() {
+    var active = this.isActive();
+    $gameTimer.update(active);
+    $gameScreen.update();
+    this.updateStatusWindow();
+    this.updateWindowPositions();
+    if (active && !this.isBusy()) {
+        this.updateBattleProcess();
+    }
+    Scene_Base.prototype.update.call(this);
 };
 ```
 
