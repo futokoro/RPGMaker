@@ -4,8 +4,8 @@
 // プラグインNo : 14
 // 作成者     : フトコロ
 // 作成日     : 2017/04/08
-// 最終更新日 : 2018/10/14
-// バージョン : v1.7.0
+// 最終更新日 : 2018/10/22
+// バージョン : v1.7.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.ICS = FTKR.ICS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.7.0 アイテム合成システム
+ * @plugindesc v1.7.1 アイテム合成システム
  * @author フトコロ
  *
  * @param --基本設定--
@@ -44,6 +44,15 @@ FTKR.ICS = FTKR.ICS || {};
  * @value 1
  * @option 確認しない
  * @value 0
+ *
+ * @param Disable Material Number Input
+ * @desc 素材アイテム選択時に数値入力を無効にするか。
+ * @default 0
+ * @type select
+ * @option 数値入力する
+ * @value 0
+ * @option 数値入力しない
+ * @value 1
  *
  * @param Category Type ID
  * @desc カテゴリータイプを設定した武器タイプIDを設定します。
@@ -735,6 +744,9 @@ FTKR.ICS = FTKR.ICS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.7.1 - 2018/10/22 : 機能追加
+ *    1. 素材選択時の数値入力を無効にする機能を追加。
+ * 
  * v1.7.0 - 2018/10/14 : 機能追加
  *    1. 合成に使用した素材を合成成功時でも復元する機能を追加。
  *    2. コマンドとタイトル文字列の表示位置を調整する機能を追加。
@@ -933,19 +945,20 @@ function Game_IcsRecipeBook() {
 
     //基本設定
     FTKR.ICS.basic = {
-        menuCmd       :paramParse(parameters['Menu Command']),
-        categoryId    :Number(parameters['Category Type ID'] || 0),
-        enableConf    :Number(parameters['Enable Confirmation'] || 0),
-        enableEndConf :Number(parameters['Enable End Confirmation'] || 0),
+        menuCmd         :paramParse(parameters['Menu Command']),
+        categoryId      :Number(parameters['Category Type ID'] || 0),
+        enableConf      :+paramParse(parameters['Enable Confirmation'] || 0),
+        enableEndConf   :+paramParse(parameters['Enable End Confirmation'] || 0),
+        disableNumInput :+paramParse(parameters['Disable Material Number Input'] || 0),
         varId:{
-            itemId    :Number(parameters['Variables Get ItemId'] || 0),
-            itemClass :Number(parameters['Variables Get ItemClass'] || 0),
+            itemId      :Number(parameters['Variables Get ItemId'] || 0),
+            itemClass   :Number(parameters['Variables Get ItemClass'] || 0),
         },
-        notApp        :paramParse(parameters['Not Applicable to Recipe'] || 'lost'),
-        category      :String(parameters['Category Format'] || 'カテゴリー %1'),
-        match         :+paramParse(parameters['Recipe Matching Pattern'] || 0),
-        treatMaterial :paramParse(parameters['Recipe Materials Treatment'] || 'lost'),
-        delimiters    :String(parameters['Item Number Delimiters'] || ''),
+        notApp          :paramParse(parameters['Not Applicable to Recipe'] || 'lost'),
+        category        :String(parameters['Category Format'] || 'カテゴリー %1'),
+        match           :+paramParse(parameters['Recipe Matching Pattern'] || 0),
+        treatMaterial   :paramParse(parameters['Recipe Materials Treatment'] || 'lost'),
+        delimiters      :String(parameters['Item Number Delimiters'] || ''),
     };
 
     //合成成功率の設定
@@ -2213,15 +2226,15 @@ function Game_IcsRecipeBook() {
     Window_MenuCommand.prototype.addOriginalCommands = function() {
         FTKR.ICS.Window_MenuCommand_addOriginalCommands.call(this);
         FTKR.ICS.basic.menuCmd.forEach(function(cmd, i){
-            if (cmd.enabled === 1) {
-                if (cmd.switchId === 0) {
-                    this.addCommand(cmd.name, 'composition', true, i);
-                } else if (cmd.switchId > 0 &&
-                    $gameSwitches.value(cmd.switchId)) {
-                    this.addCommand(cmd.name, 'composition', true, i);
-                }
+            if (this.isEnabledCompositionCmd(i)) {
+                this.addCommand(cmd.name, 'composition', true, i);
             }
         },this);
+    };
+
+    Window_MenuCommand.prototype.isEnabledCompositionCmd = function(ext) {
+        var cmd = FTKR.ICS.basic.menuCmd[ext];
+        return cmd.enabled === 1 && cmd.switchId === 0 || cmd.switchId > 0 && $gameSwitches.value(cmd.switchId);
     };
 
     //=============================================================================
@@ -3748,9 +3761,14 @@ function Game_IcsRecipeBook() {
                 var max = $gameParty.numItems(this.item());
                 this._numberWindow._showResipe = false;
             }
-            this._numberWindow.setup(this.item(), max, 0);
-            this._numberWindow.show();
-            this._numberWindow.activate();
+            if (FTKR.ICS.basic.disableNumInput) {
+                this._numberWindow.setup(this.item(), max, 0);
+                this.onNumberOk();
+            } else {
+                this._numberWindow.setup(this.item(), max, 0);
+                this._numberWindow.show();
+                this._numberWindow.activate();
+            }
         } else {
             this.onItemCancel();
         }
