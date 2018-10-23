@@ -233,6 +233,8 @@ RPGツクールMVの戦闘シーンに係るクラスは以下の通り。
     * `Window_BattleSkill`クラス
     * `Window_BattleItem`クラス
 
+これらのクラスの処理は、[戦闘シーンの表示の基本](#戦闘シーンの表示の基本)で説明する。
+
 ## 戦闘シーンで扱うデータ類およびその処理に係るクラス
 
 * `rpg_objects.js`
@@ -249,7 +251,6 @@ RPGツクールMVの戦闘シーンに係るクラスは以下の通り。
     * `Game_Party`クラス
     * `Game_Troop`クラス    …敵グループをまとめているクラスで、敵グループに設定したバトルイベントを制御するクラスでもある
     * `Game_Interpreter`クラス  …コモンイベントやバトルイベントの中のイベントコマンドの実行内容を制御する
-
 
 # 戦闘シーンの流れの基本
 
@@ -278,9 +279,9 @@ PRGツクールMVでは、戦闘シーンの流れを大まかに７つのプロ
 例えば、アクター１とアクター２、エネミー１が戦闘に参加していた場合に、
 ```
 コマンド入力フェーズ ⇒
-　アクター１のターンフェーズ ⇒ アクター１の行動フェーズ ⇒
-　　アクター２のターンフェーズ ⇒ アクター２の行動フェーズ ⇒
-　　　エネミー１のターンフェーズ ⇒ エネミー１の行動フェーズ ⇒
+　アクター１のターンフェーズ（開始） ⇒ アクター１の行動フェーズ ⇒ アクター１のターンフェーズ（終了） ⇒
+　　アクター２のターンフェーズ（開始） ⇒ アクター２の行動フェーズ ⇒ アクター２のターンフェーズ（終了） ⇒
+　　　エネミー１のターンフェーズ（開始） ⇒ エネミー１の行動フェーズ ⇒ エネミー１のターンフェーズ（終了） ⇒
 　　　　ターン終了フェーズ ⇒
 　　　　　次のターンのコマンド入力フェーズ ⇒...
 ```
@@ -359,6 +360,7 @@ Scene_Battle.prototype.createDisplayObjects = function() {
 ただし、スプライト同士や、ウィンドウ同士などの同じレイヤーに表示しているものが重なった場合は、透過できずに後に生成したオブジェクトのみ表示される。
 
 ## start
+`Scene_Battle.prototype.start()`を実行。この中で、`BattleManager.startBattle()`を実行する。
 ```
 Scene_Battle.prototype.start = function() {
     Scene_Base.prototype.start.call(this);
@@ -368,26 +370,7 @@ Scene_Battle.prototype.start = function() {
 };
 ```
 
-### update
-```
-Scene_Battle.prototype.update = function() {
-    var active = this.isActive();
-    $gameTimer.update(active);
-    $gameScreen.update();
-    this.updateStatusWindow();
-    this.updateWindowPositions();
-    if (active && !this.isBusy()) {
-        this.updateBattleProcess();
-    }
-    Scene_Base.prototype.update.call(this);
-};
-```
-
-[戦闘シーンの基本に戻る](#戦闘シーンの基本) [上に戻る](#RPGツクールMVの戦闘システムの解析)
-
-# 戦闘開始フェーズ
-
-`BattleManager.startBattle()`を実行する。
+`BattleManager.startBattle()`の中で、戦闘フェーズを`start`に変更する。
 ```
 BattleManager.startBattle = function() {
     this._phase = 'start';        //戦闘フェーズをstartにセット
@@ -402,10 +385,41 @@ BattleManager.startBattle = function() {
 undecided(未定),inputting(コマンド入力中),waitting(待機中),acting(行動中)のいずれかの文字列を格納する。<br>
 戦闘開始時では`undecided`状態になる。
 
-初期化の処理がすべて完了したら、以下のupdate処理が動作。<br>
-`Scene_Battle.prototype.update()`
 
-この中で、`Scene_Battle.prototype.updateBattleProcess()`を実行。
+## update
+`Scene_Battle.prototype.update`の処理内容は以下の通り。
+```
+Scene_Battle.prototype.update = function() {
+    var active = this.isActive();
+    $gameTimer.update(active);
+    $gameScreen.update();
+    this.updateStatusWindow();
+    this.updateWindowPositions();
+    if (active && !this.isBusy()) {
+        this.updateBattleProcess();
+    }
+    Scene_Base.prototype.update.call(this);
+};
+```
+
+#### `$gameTimer.update(active)`
+タイマー処理を更新。
+
+#### `$gameScreen.update()`
+画面効果処理を更新。
+
+#### `Scene_Battle.prototype.updateStatusWindow()`
+この処理は、ステータスウィンドウの表示非表示を制御する。具体的には
+* メッセージを表示している時には、ステータスウィンドウとコマンドウィンドウを隠す
+* メッセージを表示していない時には、ステータスウィンドウを表示する
+
+#### `Scene_Battle.prototype.updateWindowPositions()`
+この処理は、ステータスウィンドウの表示位置を制御する。具体的には
+* コマンドウィンドウを表示している間は、画面右寄せで表示
+* コマンドウィンドウを表示していない間は、画面中央に表示
+
+#### `Scene_Battle.prototype.updateBattleProcess()`
+この中で、`BattleManager.update()`と`Scene_Battle.prototype.changeInputWindow()`を実行して、戦闘シーンの処理を行う。
 ```
 Scene_Battle.prototype.updateBattleProcess = function() {
     if (!this.isAnyInputWindowActive() || BattleManager.isAborting() ||
@@ -415,9 +429,29 @@ Scene_Battle.prototype.updateBattleProcess = function() {
     }
 };
 ```
-`BattleManager.update()`と`Scene_Battle.prototype.changeInputWindow()`を実行して、戦闘シーンの処理を行う。
 
-`BattleManager.update()`は以下の内容になっており、戦闘フェーズ(`BattleManager._phase`の内容)に従って、戦闘のプロセスが進行する。
+#### `Scene_Base.prototype.update`
+```
+Scene_Base.prototype.update = function() {
+    this.updateFade();      //画面のフェード効果を更新する
+    this.updateChildren();  //Scene_Battleのchildrenを更新する
+};
+```
+
+#### `Scene_Base.prototype.updateChildren`
+addChild()でScene_Battleのchildrenにしたオブジェクトを更新する。
+```
+Scene_Base.prototype.updateChildren = function() {
+    this.children.forEach(function(child) {
+        if (child.update) {
+            child.update();
+        }
+    });
+};
+```
+
+### BattleManager.update
+`BattleManager.update()`は以下の内容になっており、戦闘フェーズに従って、戦闘のプロセスが進行する。
 ```
 BattleManager.update = function() {
     if (!this.isBusy() && !this.updateEvent()) {
@@ -437,7 +471,7 @@ BattleManager.update = function() {
         case 'battleEnd':
             this.updateBattleEnd();
             break;
-        }//inputフェーズの場合は、何も実行しない
+        }
     }
 };
 ```
@@ -445,7 +479,7 @@ BattleManager.update = function() {
 また、`Scene_Battle.prototype.changeInputWindow()`は以下の内容になっており、戦闘フェーズが`input`の時に、アクターのコマンド選択を行う処理を実行する。
 ```
 Scene_Battle.prototype.changeInputWindow = function() {
-    if (BattleManager.isInputting()) {//BattleManager._phase === 'input'のこと
+    if (BattleManager.isInputting()) {
         if (BattleManager.actor()) {
             this.startActorCommandSelection();//アクターごとのコマンドの表示と選択処理
         } else {
@@ -457,11 +491,18 @@ Scene_Battle.prototype.changeInputWindow = function() {
 };
 ```
 
+`BattleManager.isInputting`は、戦闘フェーズが`input`かどうかを判定する。
+```
+BattleManager.isInputting = function() {
+    return this._phase === 'input';
+};
+```
+
 [戦闘シーンの基本に戻る](#戦闘シーンの基本) [上に戻る](#RPGツクールMVの戦闘システムの解析)
 
-# コマンド入力フェーズ
+# 戦闘開始フェーズ
 
-戦闘フェーズがstartの時、`BattleManager.update()`で以下を実行する。
+戦闘フェーズが`start`の時、`BattleManager.update()`で以下を実行する。
 
 `BattleManager.startInput()`
 ```
@@ -477,7 +518,7 @@ BattleManager.startInput = function() {
 ```
 処理が終わると、inputフェーズに移行する。
 
-補足
+### 補足
 
 `$gameParty.makeActions()`<br>
 アクターの行動について初期設定する。ここでは、各アクターの行動回数を特徴から読み取り、コマンド入力可能な回数を設定する。
@@ -500,9 +541,11 @@ BattleManager.startInput = function() {
 のいずれかである。<br>
 アクターには隠れる設定はないが、これはcanInput()メソッドは、アクターとエネミー共通の処理だからである。
 
-[上に戻る](#RPGツクールMVの戦闘システムの解析)
+[戦闘シーンの基本に戻る](#戦闘シーンの基本) [上に戻る](#RPGツクールMVの戦闘システムの解析)
 
-戦闘フェーズがinputの時、`Scene_Battle.prototype.changeInputWindow()`で、コマンドを呼び出す処理を実行する。
+# コマンド入力フェーズ
+
+戦闘フェーズが`input`の時、`Scene_Battle.prototype.changeInputWindow()`で、コマンドを呼び出す処理を実行する。
 
 アクターが誰も選択されていない状態で始まるため、まず`Scene_Battle.prototype.startPartyCommandSelection()`でパーティーコマンドを表示する。
 
@@ -740,3 +783,336 @@ BattleManager.updateBattleEnd = function() {
 [戦闘シーンの基本に戻る](#戦闘シーンの基本) [上に戻る](#RPGツクールMVの戦闘システムの解析)
 
 [トップページに戻る](README.md)
+
+# 戦闘シーンの表示の基本
+
+# 戦闘シーンのスプライトの表示
+
+戦闘シーンのスプライトは、`Spriteset_Battle`クラスでまとめて管理している。このクラスで生成するスプライトは
+
+1. 戦闘背景の下地
+2. マップで設定した戦闘背景
+3. エネミーキャラクター
+4. アクターキャラクター(フロントビューの場合は透明なキャラを生成する)
+
+### 戦闘シーンスプライトの生成
+```
+Spriteset_Base.prototype.initialize = function() {
+    Sprite.prototype.initialize.call(this);
+    this.setFrame(0, 0, Graphics.width, Graphics.height);
+    this._tone = [0, 0, 0, 0];
+    this.opaque = true;
+    this.createLowerLayer();
+    this.createToneChanger();
+    this.createUpperLayer();
+    this.update();
+};
+```
+
+```
+Spriteset_Battle.prototype.createLowerLayer = function() {
+    Spriteset_Base.prototype.createLowerLayer.call(this);
+    this.createBackground();
+    this.createBattleField();
+    this.createBattleback();
+    this.createEnemies();
+    this.createActors();
+};
+```
+
+```
+Spriteset_Base.prototype.createToneChanger = function() {
+    if (Graphics.isWebGL()) {
+        this.createWebGLToneChanger();
+    } else {
+        this.createCanvasToneChanger();
+    }
+};
+```
+
+```
+Spriteset_Base.prototype.createUpperLayer = function() {
+    this.createPictures();
+    this.createTimer();
+    this.createScreenSprites();
+};
+```
+
+### 戦闘シーンスプライトの更新
+```
+Spriteset_Battle.prototype.update = function() {
+    Spriteset_Base.prototype.update.call(this);
+    this.updateActors();
+    this.updateBattleback();
+};
+```
+
+## 戦闘背景の下地
+
+## 戦闘背景
+
+## エネミーキャラクター
+
+## アクターキャラクター
+
+### アクタースプライトの生成
+
+アクターキャラクターは`Spriteset_Battle.prototype.createActors`で生成される。
+```
+Spriteset_Battle.prototype.createActors = function() {
+    this._actorSprites = [];
+    for (var i = 0; i < $gameParty.maxBattleMembers(); i++) {
+        this._actorSprites[i] = new Sprite_Actor();
+        this._battleField.addChild(this._actorSprites[i]);
+    }
+};
+```
+生成したスプライトオブジェクトは`Spriteset_Battle._actorSprites[n]`に格納される。
+また、`Spriteset_Battle._battleFirld`のchildrenとして登録される。
+
+ただし、この時点では生成したスプライトオブジェクトは、アクターデータと紐づいていない。
+
+`new Sprite_Actor()`でアクタースプライトが生成されるが、この時に実行するメソッドは、以下の通り。
+
+* `initialize()`
+    * `initMembers()`
+        * `createShadowSprite()`    影画像用のスプライトを生成
+        * `createWeaponSprite()`    武器画像用のスプライトを生成
+        * `createMainSprite()`      ここでキャラクタ画像用のスプライトを生成
+        * `createStateSprite()`     ステート重ね合わせ用スプライトを生成
+    * `setBattler(battler)`     アクターデータと紐づけ、ただしスプライト生成時には空データ
+    * `moveToStartPosition()`   初期位置を設定
+
+#### moveToStartPosition()
+アクタースプライトを初期位置に移動させる。
+```
+Sprite_Actor.prototype.moveToStartPosition = function() {
+    this.startMove(300, 0, 0);
+};
+```
+数値の意味は、左からX座標を+300、Y座標を+0、移動時間を0である。
+
+アクタースプライトの位置や移動については、[アクタースプライトの移動](#アクタースプライトの移動)で説明する。
+
+### アクターデータとの紐づけ
+
+アクターデータと紐づけられるのは、`Spriteset_Battle.prototype.updateActors`を実行した時になる。
+```
+Spriteset_Battle.prototype.updateActors = function() {
+    var members = $gameParty.battleMembers();
+    for (var i = 0; i < this._actorSprites.length; i++) {
+        this._actorSprites[i].setBattler(members[i]);
+    }
+};
+```
+
+`setBattler()`で、パーティーの並び順に合わせて、アクタースプライトにアクターデータを紐づける。
+
+#### setBattler(battler)
+```
+Sprite_Actor.prototype.setBattler = function(battler) {
+    Sprite_Battler.prototype.setBattler.call(this, battler);
+    var changed = (battler !== this._actor);
+    if (changed) {
+        this._actor = battler;
+        if (battler) {
+            this.setActorHome(battler.index());
+        }
+        this.startEntryMotion();
+        this._stateSprite.setup(battler);
+    }
+};
+```
+空の状態から、アクターデータがセットされることで、以下の処理を実行する。
+
+#### setActorHome(index)
+ここで、アクターの並び順に合わせた基準立ち位置を設定する。（現在位置とは別）
+
+```
+Sprite_Actor.prototype.setActorHome = function(index) {
+    this.setHome(600 + index * 32, 280 + index * 48);
+};
+```
+先頭キャラの座標(600,280)を基準に、Xに+32、Yに+48ずつずれて表示させる。
+なお、画面の左上が(0,0)である。
+
+この処理の前に、`moveToStartPosition`でX座標を+300に設定しているため、戦闘開始時の初期位置は画面外になる。
+
+アクタースプライトの位置や移動については、[アクタースプライトの移動](#アクタースプライトの移動)で説明する。
+
+#### startEntryMotion()
+ここで、戦闘開始時のアクタースプライトの初期モーションを設定する。
+```
+Sprite_Actor.prototype.startEntryMotion = function() {
+    if (this._actor && this._actor.canMove()) {
+        this.startMotion('walk');
+        this.startMove(0, 0, 30);
+    } else if (!this.isMoving()) {
+        this.refreshMotion();
+        this.startMove(0, 0, 0);
+    }
+};
+```
+行動可能(`this._actor.canMove()`で判定)なら前進モーション(`walk`)、行動不可（行動できないステート付与中など）ならその時のアクターの状態に合わせたモーションを設定する。
+
+更に、`startMove(0, 0, 30)`で戦闘開始位置(画面外)から基準立ち位置に移動させることで、戦闘開始時に画面外から移動してくる動作を行う。
+
+アクタースプライトのモーションについては、[アクタースプライトのモーション](#アクタースプライトのモーション)で説明する。
+
+### アクタースプライトの更新
+
+アクタースプライトの更新は、`Sprite_Actor.prototype.update`で実行される。
+アクタースプライトの更新内容とその順番は以下の通り。
+
+* アニメーションスプライトの更新
+* キャラクタ画像スプライトの更新
+* アニメーションの更新
+* ダメージポップアップの更新
+* キャラクタ選択効果の更新
+* 影スプライトの更新
+* モーションの更新
+
+```
+Sprite_Actor.prototype.update = function() {
+    Sprite_Battler.prototype.update.call(this);
+    this.updateShadow();
+    if (this._actor) {
+        this.updateMotion();
+    }
+};
+
+Sprite_Battler.prototype.update = function() {
+    Sprite_Base.prototype.update.call(this);
+    if (this._battler) {
+        this.updateMain();
+        this.updateAnimation();
+        this.updateDamagePopup();
+        this.updateSelectionEffect();
+    } else {
+        this.bitmap = null;
+    }
+};
+```
+
+#### キャラクタ画像スプライトの更新
+```
+Sprite_Actor.prototype.updateMain = function() {
+    Sprite_Battler.prototype.updateMain.call(this);
+    if (this._actor.isSpriteVisible() && !this.isMoving()) {
+        this.updateTargetPosition();
+    }
+};
+
+Sprite_Battler.prototype.updateMain = function() {
+    if (this._battler.isSpriteVisible()) {
+        this.updateBitmap();
+        this.updateFrame();
+    }
+    this.updateMove();
+    this.updatePosition();
+};
+```
+
+#### アニメーションの更新
+
+### アクタースプライトの移動
+アクタースプライトを移動させるためには、基本的に`startMove()`を使用する。
+
+#### startMove(x, y, direction)
+`startMove()`は、基準立ち位置からの相対座標で移動先を指示するメソッド。
+```
+Sprite_Battler.prototype.startMove = function(x, y, duration) {
+    if (this._targetOffsetX !== x || this._targetOffsetY !== y) {
+        this._targetOffsetX = x;
+        this._targetOffsetY = y;
+        this._movementDuration = duration;
+        if (duration === 0) {
+            this._offsetX = x;
+            this._offsetY = y;
+        }
+    }
+};
+```
+移動先を設定するメソッドであり、実際に移動させる処理は`updateMove()`メソッドと`updatePosition()`メソッドで行う。
+どちらのメソッドも`updateMain()`メソッドの中で実行される。
+
+なお、`startMove(0, 0, 任意)`を実行した場合には、基準立ち位置に戻る、という動作になる。
+
+#### updateMove()
+ここでは、`startMove`で指定した移動時間に合わせたフレーム単位の移動距離を算出し、それを`_offsetX`と`_offsetY`に設定する。
+```
+Sprite_Actor.prototype.updateMove = function() {
+    var bitmap = this._mainSprite.bitmap;
+    if (!bitmap || bitmap.isReady()) {
+        Sprite_Battler.prototype.updateMove.call(this);
+    }
+};
+
+Sprite_Battler.prototype.updateMove = function() {
+    if (this._movementDuration > 0) {
+        var d = this._movementDuration;
+        this._offsetX = (this._offsetX * (d - 1) + this._targetOffsetX) / d;
+        this._offsetY = (this._offsetY * (d - 1) + this._targetOffsetY) / d;
+        this._movementDuration--;
+        if (this._movementDuration === 0) {
+            this.onMoveEnd();
+        }
+    }
+};
+```
+
+#### updatePosition()
+`updateMove`で設定した`_offsetX`と`_offsetY`を基準立ち位置(`_homeX`,`_homeY`)に足すことで、現在位置を更新する。
+```
+Sprite_Battler.prototype.updatePosition = function() {
+    this.x = this._homeX + this._offsetX;
+    this.y = this._homeY + this._offsetY;
+};
+```
+
+なお、ここでの`x`と`y`は、アクタースプライトの表示位置であって、アクターのキャラクタ画像の表示位置とは別であることに注意。
+
+メソッドとして設定されている移動動作は、以下の通り。
+
+* 一歩前進
+* 一歩後退
+* 退却
+
+#### 一歩前進
+48pixel分、基準立位置から画面左側に12フレーム使って移動する。
+```
+Sprite_Actor.prototype.stepForward = function() {
+    this.startMove(-48, 0, 12);
+};
+```
+
+#### 一歩後退(基準位置に戻る)
+```
+Sprite_Actor.prototype.stepBack = function() {
+    this.startMove(0, 0, 12);
+};
+```
+
+#### 退却
+基準立位置から画面右側に300pixel分、30フレーム使って移動する。
+```
+Sprite_Actor.prototype.retreat = function() {
+    this.startMove(300, 0, 30);
+};
+```
+通常ツクールMVでは画面幅は816pixelで、パーティーの先頭キャラの基準立ち位置は600pixelの位置になる。
+ここから右側に300pixel移動した場合、900pixelになるため、アクタースプライトは画面外に移動することになる。
+
+これが、「逃げる」時に画面外に移動する仕組み。
+
+### アクタースプライトのモーション
+
+#### refreshMotion()
+
+### アクタースプライトへのアニメーション
+
+### アクタースプライトへのダメージポップアップ
+
+### アクタースプライトのステート重ね合わせ
+
+# 戦闘シーンのウィンドウの表示
