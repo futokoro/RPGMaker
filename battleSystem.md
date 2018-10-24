@@ -380,7 +380,8 @@ BattleManager.startBattle = function() {
     this.displayStartMessages();  //戦闘開始時のメッセージを表示
 };
 ```
-※行動ステート(ActionState)：<br>
+
+#### 行動ステート(ActionState)
 そのキャラが現在どういう状態かを設定するパラメータ。(造語)<br>
 undecided(未定),inputting(コマンド入力中),waitting(待機中),acting(行動中)のいずれかの文字列を格納する。<br>
 戦闘開始時では`undecided`状態になる。
@@ -1072,29 +1073,109 @@ Sprite_Battler.prototype.updatePosition = function() {
 
 なお、ここでの`x`と`y`は、アクタースプライトの表示位置であって、アクターのキャラクタ画像の表示位置とは別であることに注意。
 
-メソッドとして設定されている移動動作は、以下の通り。
+#### updateTargetPosition()
+戦闘中にアクタースプライトが前後に移動する処理は、`updateTargetPosition()`で制御している。
+アクターのゲームデータ(`$gameActor`)、アクタースプライトの立ち位置、戦闘シーンの状態から判定し、どのように動くか決めている。
+```
+Sprite_Actor.prototype.updateTargetPosition = function() {
+    if (this._actor.isInputting() || this._actor.isActing()) {
+        this.stepForward();
+    } else if (this._actor.canMove() && BattleManager.isEscaped()) {
+        this.retreat();
+    } else if (!this.inHomePosition()) {
+        this.stepBack();
+    }
+};
+```
 
-* 一歩前進
-* 一歩後退
-* 退却
+`updateTargetPosition()`は`updateMain()`で呼ばれている。
+```
+Sprite_Actor.prototype.updateMain = function() {
+    Sprite_Battler.prototype.updateMain.call(this);
+    if (this._actor.isSpriteVisible() && !this.isMoving()) {
+        this.updateTargetPosition();
+    }
+};
+```
+###### this._actor.isSpriteVisible()
+アクターデータを参照し、アクターのスプライトを表示しているか判定する。
+実際には、アクターの場合はサイドビューモードかどうかで判定している。
+```
+Game_Actor.prototype.isSpriteVisible = function() {
+    return $gameSystem.isSideView();
+};
+```
 
-#### 一歩前進
-48pixel分、基準立位置から画面左側に12フレーム使って移動する。
+###### this.isMoving()
+アクターのスプライトデータを参照し、移動中かどうか判定する。
+```
+Sprite_Battler.prototype.isMoving = function() {
+    return this._movementDuration > 0;
+};
+```
+移動中とは、スプライトデータの`_movementDuration`が0よりも大きい状態のこと。
+この値は、`startMove()`メソッドで移動時間を設定すると変動する。
+
+##### 一歩前進
+アクターデータを参照し、アクターの[行動ステート](#行動ステート(actionstate))が`inputting`か`acting`なら、48pixel分、基準立位置から画面左側に12フレーム使って移動する。
 ```
 Sprite_Actor.prototype.stepForward = function() {
     this.startMove(-48, 0, 12);
 };
 ```
 
-#### 一歩後退(基準位置に戻る)
-```
-Sprite_Actor.prototype.stepBack = function() {
-    this.startMove(0, 0, 12);
-};
-```
+行動ステート`inputting`は、`BattleManager`クラスの`changeActor(newActorIndex, lastActorActionState)`メソッドで、`newActorIndex`で指定されたアクターがなる状態。
+このメソッドは、コマンド入力フェーズでアクターを切り替える時に実行している。
+このメソッドが実行される構成は、以下の通り。
 
-#### 退却
-基準立位置から画面右側に300pixel分、30フレーム使って移動する。
+* `Scene_Battle`クラスの`selectNextCommand()`メソッド
+    * `BattleManager`クラスの`selectNextCommand()`メソッド
+        * `BattleManager`クラスの`changeActor(newActorIndex, lastActorActionState)`メソッド
+            * `Game_Actor`クラスの`setActionState(actionState)`メソッド ← `actionState`=`inputting`
+
+`Scene_Battle`クラスの`selectNextCommand()`メソッドが実行される構成は、以下の通り。
+
+* `Scene_Battle`クラスの`changeInputWindow()`(コマンド入力フェーズ)
+    * `Scene_Battle`クラスの`startPartyCommandSelection()`
+        * `Scene_Battle`クラスの`commandFight()` 
+            * `Scene_Battle`クラスの`selectNextCommand()` → パーティーコマンドで「戦う」選択した場合
+    * `Scene_Battle`クラスの`startActorCommandSelection()`
+        * `Scene_Battle`クラスの`commandAttack()`
+            * `Scene_Battle`クラスの`selectEnemySelection()`
+                * `Scene_Battle`クラスの`onEnemyOk()`
+                    * `Scene_Battle`クラスの`selectNextCommand()` → アクターコマンドで「攻撃」を選択し、その対象エネミーを選択した場合
+        * `Scene_Battle`クラスの`commandGuard()`
+            * `Scene_Battle`クラスの`selectNextCommand()` → アクターコマンドで「防御」選択した場合
+        * `Scene_Battle`クラスの`onSkillOk()`
+            * `Scene_Battle`クラスの`onSelectAction()`
+                * `Scene_Battle`クラスの`selectNextCommand()` → アクターコマンドで「スキル」を選択し、そのスキルの対象選択が不要な場合
+            * `Scene_Battle`クラスの`selectActorSelection()`
+                * `Scene_Battle`クラスの`onActorOk()`
+                    * `Scene_Battle`クラスの`selectNextCommand()` → アクターコマンドで「スキル」を選択し、その対象アクターを選択した場合
+            * `Scene_Battle`クラスの`selectEnemySelection()`
+                * `Scene_Battle`クラスの`onEnemyOk()`
+                    * `Scene_Battle`クラスの`selectNextCommand()` → アクターコマンドで「スキル」を選択し、その対象エネミーを選択した場合
+        * `Scene_Battle`クラスの`onItemOk()`
+            * `Scene_Battle`クラスの`onSelectAction()`
+                * `Scene_Battle`クラスの`selectNextCommand()` → アクターコマンドで「アイテム」を選択し、そのスアイテムの対象選択が不要な場合
+            * `Scene_Battle`クラスの`selectActorSelection()`
+                * `Scene_Battle`クラスの`onActorOk()`
+                    * `Scene_Battle`クラスの`selectNextCommand()` → アクターコマンドで「アイテム」を選択し、その対象アクターを選択した場合
+            * `Scene_Battle`クラスの`selectEnemySelection()`
+                * `Scene_Battle`クラスの`onEnemyOk()`
+                    * `Scene_Battle`クラスの`selectNextCommand()` → アクターコマンドで「アイテム」を選択し、その対象エネミーを選択した場合
+
+行動ステート`acting`は、`Game_Actor`クラスの`performActionStart(action)`メソッドを実行したアクターが、`action`に指定した行動が防御以外の時になる状態。このメソッドが実行される構成は、以下の通り。
+
+* `BattleManager`クラスの`updateTurn()`メソッド(ターンフェーズ)
+    * `BattleManager`クラスの`processTurn()`メソッド
+        * `BattleManager`クラスの`startAction()`メソッド
+            * `Window_BattleLog`クラスの`startAction(subject, action, targets)`メソッド
+                * `Window_BattleLog`クラスの`performActionStart(subject, action)`メソッド
+                    * `Game_Actor`クラスの`performActionStart(action)`メソッド
+                        * `Game_Actor`クラスの`setActionState(actionState)`メソッド ← `actionState`=`acting`
+##### 退却
+アクターが行動可能(`chanMove()`)で、逃走フラグが立つ(`BattleManager.isEscaped()`)と、基準立位置から画面右側に300pixel分、30フレーム使って移動する。
 ```
 Sprite_Actor.prototype.retreat = function() {
     this.startMove(300, 0, 30);
@@ -1104,6 +1185,14 @@ Sprite_Actor.prototype.retreat = function() {
 ここから右側に300pixel移動した場合、900pixelになるため、アクタースプライトは画面外に移動することになる。
 
 これが、「逃げる」時に画面外に移動する仕組み。
+
+##### 一歩後退(基準位置に戻る)
+一歩前進でも退却でもなく基準立ち位置に居ない場合は、基準立ち位置に戻るように移動する。
+```
+Sprite_Actor.prototype.stepBack = function() {
+    this.startMove(0, 0, 12);
+};
+```
 
 ### アクタースプライトのモーション
 
