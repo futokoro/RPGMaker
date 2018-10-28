@@ -4,8 +4,8 @@
 // プラグインNo : 75
 // 作成者     : フトコロ
 // 作成日     : 2018/04/08
-// 最終更新日 : 2018/10/21
-// バージョン : v1.4.9
+// 最終更新日 : 2018/10/28
+// バージョン : v1.5.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.AltTB = FTKR.AltTB || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.4.9 敵味方交互にターンが進むターン制戦闘システム
+ * @plugindesc v1.5.0 敵味方交互にターンが進むターン制戦闘システム
  * @author フトコロ
  *
  * @param TurnEnd Command
@@ -41,6 +41,13 @@ FTKR.AltTB = FTKR.AltTB || {};
  * 
  * @param Enable Auto Player Turn End
  * @desc パーティーが行動できなくなった時に、自動でターン終了する。
+ * @type boolean
+ * @on 有効
+ * @off 無効
+ * @default false
+ *
+ * @param Disable Change When Party Cannot Act
+ * @desc パーティーが行動できなくなった時に、アクターを変更する操作を禁止して、パーティーコマンドに戻す。
  * @type boolean
  * @on 有効
  * @off 無効
@@ -232,6 +239,13 @@ FTKR.AltTB = FTKR.AltTB || {};
  * @option アイコン(現在値のみ)
  * @value 3
  * @default 0
+ * 
+ * @param Enable Use AP0Skills Regardless Of AP
+ * @desc パーティーの残りAPが0でも、AP0スキルは使用可能にする。
+ * @type boolean
+ * @on 有効
+ * @off 無効
+ * @default false
  * 
  * @param apGauge
  * @text ゲージ設定
@@ -781,6 +795,14 @@ FTKR.AltTB = FTKR.AltTB || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.5.0 - 2018/10/28 : 機能追加
+ *    1. パーティーが行動できなくなった場合に、自動でパーティーコマンドに
+ *       戻す機能を追加。
+ *    2. AP0スキルを覚えていれば、パーティーのAPが0でも行動可能にする機能を追加。
+ *    3. パーティーが行動できなくなった場合に、パーティーコマンドの戦うを選択でき
+ *       ないように変更。
+ *    4. パーティーが行動できなくなった場合に、アクター変更操作を禁止する機能を追加。
+ * 
  * v1.4.9 - 2018/10/21 : 不具合修正
  *    1. エネミーが行動制約のあるステートを受けた場合に、ターンが進行しなくなる
  *       不具合を修正。
@@ -810,7 +832,7 @@ FTKR.AltTB = FTKR.AltTB || {};
  *    1. v1.4.2の修正箇所の不具合(プラグインコマンドで行動回数が増加しない)修正。
  * 
  * v1.4.2 - 2018/08/25 : 不具合修正
- *    1. 戦闘中にプラグインコマンドで行動回数を増加させても、行動選択時にエラーになる
+ *    1. プラグインコマンドで行動回数を増加させても、行動選択時にエラーになる
  *       不具合を修正。
  *    2. 戦闘中にプラグインコマンドで行動回数が増減した場合に、ステータスウィンドウに
  *       反映されない不具合を修正。
@@ -1140,7 +1162,9 @@ function Window_BattleActionPoint() {
         enableFAAC      : (paramParse(parameters['Enable Force Action AC']) || false),
         enableFAAP      : (paramParse(parameters['Enable Force Action AP']) || false),
         showApWindow    : (paramParse(parameters['Show AP Window']) || 0),
-        notSelectActivatedActor: (paramParse(parameters['Cannot Select Activated Actor']) || false),
+        notSelectActivatedActor : (paramParse(parameters['Cannot Select Activated Actor']) || false),
+        disableChangeActorWPCA  : (paramParse(parameters['Disable Change When Party Cannot Act']) || false),
+        enableAP0SkillsRegardlessAP : (paramParse(parameters['Enable Use AP0Skills Regardless Of AP']) || false),
     };
 
     FTKR.test = false;
@@ -1267,6 +1291,14 @@ function Window_BattleActionPoint() {
     BattleManager.inputCount = function() {
         return this._inputCount;
     };
+
+    BattleManager.subject = function() {
+        if (this.isPlayerTurn()) {
+            return this.actor();
+        } else {
+            return this._subject;
+        }
+    }
 
     BattleManager.actionBattlers = function() {
         if (this.isPlayerTurn()) {
@@ -1540,10 +1572,14 @@ function Window_BattleActionPoint() {
 
     BattleManager.autoSelectNextActor = function() {
         if (!FTKR.AltTB.notSelectActivatedActor || !this.actor()) return;
-        if (!this.actor().canSelectInput()){
-            this.selectNextCommand();
+        if (!$gameParty.canInputAction() && FTKR.AltTB.disableChangeActorWPCA) {
+            this.changeActorAltTB(-1);
         } else {
-            this.actor().setActionState('inputting');
+            if (!this.actor().canSelectInput()) {
+                this.selectNextCommand();
+            } else {
+                this.actor().setActionState('inputting');
+            }
         }
     };
 
@@ -1658,7 +1694,7 @@ function Window_BattleActionPoint() {
     //書き換え
     BattleManager.selectNextCommand = function() {
         do {
-            if ($gameParty.canInputAction()) {
+            if ($gameParty.canInputAction() || !FTKR.AltTB.disableChangeActorWPCA) {
                 if (this._actorIndex + 1 >= $gameParty.size()) {
                     this.changeActorAltTB(0);
                 } else {
@@ -1673,7 +1709,7 @@ function Window_BattleActionPoint() {
     //書き換え
     BattleManager.selectPreviousCommand = function() {
         do {
-            if ($gameParty.canInputAction()) {
+            if ($gameParty.canInputAction() || !FTKR.AltTB.disableChangeActorWPCA) {
                 if (this._actorIndex - 1 < 0) {
                     this.changeActorAltTB($gameParty.size() - 1);
                 } else {
@@ -1924,6 +1960,14 @@ function Window_BattleActionPoint() {
     Game_Actor.prototype.remakeActions = function() {
     };
 
+    Game_Actor.prototype.hasAP0Skill = function() {
+        var skills = [$dataSkills[1], $dataSkills[2]];
+        skills = skills.concat(this.skills());
+        return skills.some(function(skill){
+            return !skill.actionPoint;
+        });
+    };
+
     //=============================================================================
     // Game_Party
     //=============================================================================
@@ -1994,11 +2038,18 @@ function Window_BattleActionPoint() {
     };
 
     Game_Party.prototype.canInputAction = function() {
-        return this.hasActionPoint() && 
-            this.battleMembers().some( function(battler){
-                return battler.canInputAction();
-            });
+        return FTKR.AltTB.enableAP0SkillsRegardlessAP ? this.hasAP0Skill() :
+            this.hasActionPoint() && 
+                this.battleMembers().some( function(battler){
+                    return battler.canInputAction();
+                });
     };
+
+    Game_Party.prototype.hasAP0Skill = function() {
+        return this.battleMembers().some( function(battler){
+            return battler.hasAP0Skill() && battler.canInputAction();
+        });
+    }
 
     Game_Party.prototype.resetActionCount = function() {
         this.battleMembers().forEach( function(member){
@@ -2380,7 +2431,7 @@ function Window_BattleActionPoint() {
 
     //書き換え
     Window_PartyCommand.prototype.makeCommandList = function() {
-        this.addCommand(TextManager.fight,  'fight');
+        this.addCommand(TextManager.fight,  'fight', $gameParty.canInputAction());
         this.addCommand(TextManager.escape, 'escape', this.isEscapeEnabled());
         this.addCommand(FTKR.AltTB.textTurnEnd, 'turnEnd');
     };
@@ -2473,9 +2524,13 @@ function Window_BattleActionPoint() {
 
     Window_ActorCommand.prototype.cursorRight = function(wrap) {
         if (FTKR.AltTB.changePlayer === 1) {
-            BattleManager.selectNextCommand();
-            this.changeInputWindow();
-            SoundManager.playCursor();
+            if ($gameParty.canInputAction() || !FTKR.AltTB.disableChangeActorWPCA) {
+                BattleManager.selectNextCommand();
+                this.changeInputWindow();
+                SoundManager.playCursor();
+            } else {
+                SoundManager.playBuzzer();
+            }
         } else {
             Window_Selectable.prototype.cursorRight.call(this, wrap);
         }
@@ -2483,9 +2538,13 @@ function Window_BattleActionPoint() {
 
     Window_ActorCommand.prototype.cursorLeft = function(wrap) {
         if (FTKR.AltTB.changePlayer === 1) {
-            BattleManager.selectPreviousCommand();
-            this.changeInputWindow();
-            SoundManager.playCursor();
+            if ($gameParty.canInputAction() || !FTKR.AltTB.disableChangeActorWPCA) {
+                BattleManager.selectPreviousCommand();
+                this.changeInputWindow();
+                SoundManager.playCursor();
+            } else {
+                SoundManager.playBuzzer();
+            }
         } else {
             Window_Selectable.prototype.cursorLeft.call(this, wrap);
         }
@@ -2572,7 +2631,12 @@ function Window_BattleActionPoint() {
         if (this.isTouchedInsideDeactive()) {
             var index = this.isCursorIndexOnMouse();
             if (index >= 0 && BattleManager.isTouchedOutsideActorCommandWindow()) {
-                this.changeActorOnMouse(index);
+                if ($gameParty.canInputAction() || !FTKR.AltTB.disableChangeActorWPCA) {
+                    this.changeActorOnMouse(index);
+                } else {
+                    SoundManager.playBuzzer();
+                    TouchInput.clear();
+                }
             }
         } else {
             Window_Selectable.prototype.processTouch.call(this);
