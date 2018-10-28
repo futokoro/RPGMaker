@@ -1073,7 +1073,7 @@ Sprite_Battler.prototype.updatePosition = function() {
 
 なお、ここでの`x`と`y`は、アクタースプライトの表示位置であって、アクターのキャラクタ画像の表示位置とは別であることに注意。
 
-#### updateTargetPosition()
+#### Sprite_Actor.prototype.updateTargetPosition()
 戦闘中にアクタースプライトが前後に移動する処理は、`updateTargetPosition()`で制御している。
 アクターのゲームデータ(`$gameActor`)、アクタースプライトの立ち位置、戦闘シーンの状態から判定し、どのように動くか決めている。
 ```
@@ -1088,7 +1088,13 @@ Sprite_Actor.prototype.updateTargetPosition = function() {
 };
 ```
 
-`updateTargetPosition()`は`updateMain()`で呼ばれている。
+このメソッドが実行される構成は、以下の通り。
+* `Scene_Battle`クラスの`update()`
+    * `Spriteset_Battle`クラスの`update()`
+        * `Sprite_Actor`クラスの`update()`
+            * `Sprite_Actor`クラスの`updateMain()`
+                * `Sprite_Actor`クラスの`updateTargetPosition()`
+
 ```
 Sprite_Actor.prototype.updateMain = function() {
     Sprite_Battler.prototype.updateMain.call(this);
@@ -1123,7 +1129,6 @@ Sprite_Actor.prototype.stepForward = function() {
     this.startMove(-48, 0, 12);
 };
 ```
-
 行動ステート`inputting`は、`BattleManager`クラスの`changeActor(newActorIndex, lastActorActionState)`メソッドで、`newActorIndex`で指定されたアクターがなる状態。
 このメソッドは、コマンド入力フェーズでアクターを切り替える時に実行している。
 このメソッドが実行される構成は、以下の通り。
@@ -1174,6 +1179,10 @@ Sprite_Actor.prototype.stepForward = function() {
                 * `Window_BattleLog`クラスの`performActionStart(subject, action)`メソッド
                     * `Game_Actor`クラスの`performActionStart(action)`メソッド
                         * `Game_Actor`クラスの`setActionState(actionState)`メソッド ← `actionState`=`acting`
+
+なお、正確には、このメソッドは一歩前進ではなく、基準立ち位置からX座標方向で-48pixelの位置に立つ、というもの。
+そのため、何らかの方法で更に前進(画面左側に移動)していた場合にこのメソッドが呼ばれると、後退してしまうので注意。
+
 ##### 退却
 アクターが行動可能(`chanMove()`)で、逃走フラグが立つ(`BattleManager.isEscaped()`)と、基準立位置から画面右側に300pixel分、30フレーム使って移動する。
 ```

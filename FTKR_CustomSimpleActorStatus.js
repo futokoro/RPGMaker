@@ -4,8 +4,8 @@
 // プラグインNo : 9
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2018/10/11
-// バージョン : v3.4.1
+// 最終更新日 : 2018/10/28
+// バージョン : v3.4.2
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v3.4.1 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v3.4.2 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -1014,6 +1014,10 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v3.4.2 - 2018/10/28 : 不具合修正
+ *    1. オリジナルパラメータおよびオリジナルゲージの数値が、一部のシーンで正常に
+ *       表示できない不具合を修正。
+ * 
  * v3.4.1 - 2018/10/11 : 機能追加、仕様変更
  *    1. パラメータの差分表示に制御文字を無効にする機能を追加。
  *    2. パラメータの差分表示で 0 の場合に表示しないように変更。
@@ -1683,9 +1687,9 @@ FTKR.CSS = FTKR.CSS || {};
         });
     };
 
-    var convertTextWidth = function(text) {
+    var convertTextWidth = function(text, window) {
         var tw = 0;
-        var window = SceneManager._scene._windowLayer.children[0];
+        window = window || SceneManager._scene._windowLayer.children[0];
         if (!window) return tw;
         var conv = window.convertEscapeCharacters(text);
         var reg = /i\[(\d+)\]/i
@@ -2944,10 +2948,10 @@ FTKR.CSS = FTKR.CSS || {};
         var name = custom.name || '';
         var formula = custom.formula || '';
         var unit = custom.unit || '';
-        var tux = convertTextWidth(unit);
+        var tux = convertTextWidth(unit, this);
         var value = this.evalCssCustomFormula(actor, formula);
         this.changeTextColor(this.systemColor());
-        var tx = convertTextWidth(name, x, y);
+        var tx = convertTextWidth(name, this);
         this.drawTextEx(name, x, y);
         this.resetTextColor();
         this.drawText(value, x + tx, y, width - tx - tux, 'right');
@@ -2969,8 +2973,9 @@ FTKR.CSS = FTKR.CSS || {};
             this.drawGauge(x, y, width, rate, color1, color2);
         }
         this.changeTextColor(this.systemColor());
-        var tx = convertTextWidth(gauge.name, x, y);
+        var tx = convertTextWidth(gauge.name, this);
         this.drawTextEx(gauge.name, x, y);
+        console.log('gauge', gauge, 'ref', gauge.ref, 'tx', tx, 'name', gauge.name, 'x', x, 'y', y);
         if (gauge.ref) {
             var ref = this.evalCssStrFormula(actor, gauge.ref);
             this.resetTextColor();
