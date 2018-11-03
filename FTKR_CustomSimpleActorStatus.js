@@ -4,8 +4,8 @@
 // プラグインNo : 9
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2018/10/28
-// バージョン : v3.4.2
+// 最終更新日 : 2018/11/03
+// バージョン : v3.4.3
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v3.4.2 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v3.4.3 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -31,113 +31,137 @@ FTKR.CSS = FTKR.CSS || {};
  * @noteType file
  * @noteData actors
  * 
- * @param --顔画像の設定--
+ * @param face
+ * @text --顔画像の設定--
  * @default
  * 
  * @param Face Image Width
  * @desc アクターの顔画像幅を設定します
  * デフォルトは144
  * @default 144
+ * @parent face
  * 
  * @param Face Image Height
  * @desc アクターの顔画像高さを設定します
  * デフォルトは144
  * @default 144
+ * @parent face
  * 
  * @param Face Position X
  * @desc 顔画像を描画エリア内のどこに表示するか。
  * 0 - 左寄せ, 1 - 中央, 2 - 右寄せ
  * @default 1
+ * @parent face
  * 
- * @param --歩行キャラの設定--
+ * @param chara
+ * @text --歩行キャラの設定--
  * @default
  * 
  * @param Chara Image Width
  * @desc アクターの歩行キャラの画像幅を設定します
  * デフォルトは48
  * @default 48
+ * @parent chara
  * 
  * @param Chara Image Height
  * @desc アクターの歩行キャラの画像高さを設定します
  * デフォルトは48
  * @default 48
+ * @parent chara
  * 
  * @param Chara Position X
  * @desc アクターの歩行キャラを描画エリア内のどこに表示するか。
  * 0 - 左寄せ, 1 - 中央, 2 - 右寄せ
  * @default 1
+ * @parent chara
  * 
  * @param Chara Direction
  * @desc アクターの歩行キャラの向きを設定します。
  * 0 - 正面固定, 1 - マップ上の先頭プレイヤーの向き
  * @default 0
+ * @parent chara
  * 
- * @param --SVキャラの設定--
+ * @param sv
+ * @text --SVキャラの設定--
  * @default
  * 
  * @param Sv Image Width
  * @desc アクターのSVキャラの画像幅を設定します
  * デフォルトは64
  * @default 64
+ * @parent sv
  * 
  * @param Sv Image Height
  * @desc アクターのSvキャラの画像高さを設定します
  * デフォルトは64
  * @default 64
+ * @parent sv
  * 
  * @param Sv Position X
  * @desc アクターのSvキャラを描画エリア内のどこに表示するか。
  * 0 - 左寄せ, 1 - 中央, 2 - 右寄せ
  * @default 1
+ * @parent sv
  * 
  * @param Enabled Sv Motion
  * @desc Svキャラのモーションを有効にするか設定します
  * 0 - 無効にする, 1 - 常に有効にする, 2 - 戦闘時以外有効
  * @default 1
+ * @parent sv
  * 
  * @param Sv Image Motion
  * @desc Svキャラの標準モーションを設定します
  * @default wait
+ * @parent sv
  * 
  * @param Enabled State Motion
  * @desc ステートモーションを有効にするか設定します
  * 1 - 有効にする, 0 - 無効にする
  * @default 1
+ * @parent sv
  * 
- * @param --ステートの設定--
+ * @param state
+ * @text --ステートの設定--
  * @default
  * 
  * @param Enable CSS States
  * @desc ステートアイコンの表示を専用の描画処理に変えるか。
  * 1 - 有効にする, 0 - 無効にする
  * @default 1
+ * @parent state
  * 
  * @param Animation Wait
  * @desc ステートアイコンの切り替え時間を指定します
  * デフォルトは40
  * @default 40
+ * @parent state
  * 
  * @param Enable Overlap
  * @desc ステートアイコンの重なり表示を有効にする
  * 1 - 有効にする, 0 - 無効にする
  * @default 0
+ * @parent state
  * 
  * @param Overlap Rate
  * @desc アイコンの重なりを許容する比率を設定します。
  * @default 0.5
+ * @parent state
  * 
  * @param State Icon Padding
  * @desc アイコン表示に必要な余白を指定します。
  * @default 4
  * @type number
  * @min 0
+ * @parent state
  * 
  * @param Enable Auto Scale
  * @desc 行の高さまたは表示幅に合わせてアイコンサイズを調整するか
  * 1 - 有効にする, 0 - 無効にする
  * @default 0
+ * @parent state
  * 
- * @param --通常能力値(差分)の設定--
+ * @param pdiff
+ * @text --通常能力値(差分)の設定--
  * @default
  * 
  * @param Enabled Escapecharacters By PDIFF
@@ -146,39 +170,120 @@ FTKR.CSS = FTKR.CSS || {};
  * @on 有効
  * @off 無効
  * @default true
+ * @parent pdiff
  * 
  * @param Format PDIFF Plus
  * @desc 増加の場合の表示を設定します。
  * %1 - 増加値
  * @default \c[24]+ %1
+ * @parent pdiff
  * 
  * @param Format PDIFF Minus
  * @desc 減少の場合の表示を設定します。
  * %1 - 減少値
  * @default \c[25]- %1
+ * @parent pdiff
  * 
- * @param --装備パラメータの設定--
+ * @param equip
+ * @text --装備パラメータの設定--
  * @default
  * 
  * @param Equip Right Arrow
  * @desc 装備を変える時に表示する右矢印記号を指定します。
  * @default \c[16]→
+ * @parent equip
  * 
- * @param --カスタム画像の設定--
+ * @param ediff
+ * @text --装備パラメータ(差分)の設定--
+ * @default
+ * 
+ * @param Enabled Escapecharacters By EDIFF
+ * @desc 差分表示に制御文字使えるようにする
+ * @type boolean
+ * @on 有効
+ * @off 無効
+ * @default true
+ * @parent ediff
+ * 
+ * @param Format EDIFF Plus
+ * @desc 増加の場合の表示を設定します。
+ * %1 - 増加値
+ * @default \c[24]+ %1
+ * @parent ediff
+ * 
+ * @param Format EDIFF Minus
+ * @desc 減少の場合の表示を設定します。
+ * %1 - 減少値
+ * @default \c[25]- %1
+ * @parent ediff
+ * 
+ * @param aopdiff
+ * @text --AOP能力値(差分)の設定--
+ * @default
+ * 
+ * @param Enabled Escapecharacters By AOPDIFF
+ * @desc 差分表示に制御文字使えるようにする
+ * @type boolean
+ * @on 有効
+ * @off 無効
+ * @default true
+ * @parent aopdiff
+ * 
+ * @param Format AOPDIFF Plus
+ * @desc 増加の場合の表示を設定します。
+ * %1 - 増加値
+ * @default \c[24]+ %1
+ * @parent aopdiff
+ * 
+ * @param Format AOPDIFF Minus
+ * @desc 減少の場合の表示を設定します。
+ * %1 - 減少値
+ * @default \c[25]- %1
+ * @parent aopdiff
+ * 
+ * @param ediffaop
+ * @text --AOP装備パラメータ(差分)の設定--
+ * @default
+ * 
+ * @param Enabled Escapecharacters By EDIFFAOP
+ * @desc 差分表示に制御文字使えるようにする
+ * @type boolean
+ * @on 有効
+ * @off 無効
+ * @default true
+ * @parent ediffaop
+ * 
+ * @param Format EDIFFAOP Plus
+ * @desc 増加の場合の表示を設定します。
+ * %1 - 増加値
+ * @default \c[24]+ %1
+ * @parent ediffaop
+ * 
+ * @param Format EDIFFAOP Minus
+ * @desc 減少の場合の表示を設定します。
+ * %1 - 減少値
+ * @default \c[25]- %1
+ * @parent ediffaop
+ * 
+ * @param image
+ * @text --カスタム画像の設定--
  * @default
  * 
  * @param Image Position X
  * @desc カスタム画像を描画エリア内のどこに表示するか。
  * 0 - 左寄せ, 1 - 中央, 2 - 右寄せ
  * @default 1
+ * @parent image
  * 
- * @param --メッセージの設定--
+ * @param message
+ * @text --メッセージの設定--
  * @default
  * 
  * @param Display LevelUp Message
  * @desc レベルアップ時のメッセージを設定します。
  * %1 - アクター名, %2 - 現在レベル, %3 - 上昇したレベル
  * @default \C[17]%3 Level Up!
+ * @parent message
  * 
  * @param customParam
  * @text --カスタムパラメータの設定--
@@ -972,8 +1077,8 @@ FTKR.CSS = FTKR.CSS || {};
  * メニュー画面や、バトル画面などさまざまなステータス画面を設定できるように
  * なります。
  * 
- * v3.0.0から採用するステータスごとの表示位置指定方式については、拡張プラグインの
- * v2.0.0以降を使用してください。
+ * このプラグインの v3.0.0 から採用するステータスごとの表示位置指定方式については、
+ * 拡張プラグインの v2.0.0 以降を使用してください。
  * ※従来の方式についても、v1の拡張プラグインで使用可能
  * 
  * 
@@ -1013,6 +1118,9 @@ FTKR.CSS = FTKR.CSS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v3.4.3 - 2018/11/03 : 仕様変更
+ *    1. ediff(x)、aopdiff(x)、ediffaop(x)の表示内容の設定を、pdiff(x)から独立。
  * 
  * v3.4.2 - 2018/10/28 : 不具合修正
  *    1. オリジナルパラメータおよびオリジナルゲージの数値が、一部のシーンで正常に
@@ -1443,6 +1551,21 @@ FTKR.CSS = FTKR.CSS || {};
         },
         equip:{
             arrow:String(parameters['Equip Right Arrow'] || ''),
+        },
+        ediff:{
+            plus        :paramParse(parameters['Format EDIFF Plus']),
+            minus       :paramParse(parameters['Format EDIFF Minus']),
+            enabledEc   :paramParse(parameters['Enabled Escapecharacters By EDIFF']),
+        },
+        aopdiff:{
+            plus        :paramParse(parameters['Format AOPDIFF Plus']),
+            minus       :paramParse(parameters['Format AOPDIFF Minus']),
+            enabledEc   :paramParse(parameters['Enabled Escapecharacters By AOPDIFF']),
+        },
+        ediffaop:{
+            plus        :paramParse(parameters['Format EDIFFAOP Plus']),
+            minus       :paramParse(parameters['Format EDIFFAOP Minus']),
+            enabledEc   :paramParse(parameters['Enabled Escapecharacters By EDIFFAOP']),
         },
         gauge:{
             digit :Number(parameters['Gauge Param Digit'] || 0),
@@ -2806,19 +2929,19 @@ FTKR.CSS = FTKR.CSS || {};
         var param = actor.param(paramId);
         var base = actor.paramBase(paramId);
         var diff = param - base;
-        this.drawParamDiffValue(diff, x, y, width);
+        this.drawParamDiffValue(diff, x, y, width, FTKR.CSS.cssStatus.pdiff);
         return 1;
     };
 
-    Window_Base.prototype.drawParamDiffValue = function(value, x, y, width) {
+    Window_Base.prototype.drawParamDiffValue = function(value, x, y, width, formatParams) {
         this.changeTextColor(this.paramchangeTextColor(value));
         var text = '';
         if (value > 0) {
-            text = FTKR.CSS.cssStatus.pdiff.plus.format(value);
+            text = formatParams.plus.format(value);
         } else if (value < 0) {
-            text = FTKR.CSS.cssStatus.pdiff.minus.format(-value);
+            text = formatParams.minus.format(-value);
         }
-        if (FTKR.CSS.cssStatus.pdiff.enabledEc) {
+        if (formatParams.enabledEc) {
             this.drawTextEx(text, x, y);
         } else {
             this.drawText(text, x, y, width, 'right');
@@ -2859,7 +2982,7 @@ FTKR.CSS = FTKR.CSS || {};
         if (target) {
             var newValue = target.param(paramId);
             var diffvalue = newValue - actor.param(paramId);
-            this.drawParamDiffValue(diffvalue, x, y, width);
+            this.drawParamDiffValue(diffvalue, x, y, width, FTKR.CSS.cssStatus.ediff);
         }
         return 1;
     };
@@ -2899,7 +3022,7 @@ FTKR.CSS = FTKR.CSS || {};
         var param = actor.aopParam(paramId);
         var base = actor.aopParamBase(paramId);
         var diff = param - base;
-        this.drawParamDiffValue(diff, x, y, width);
+        this.drawParamDiffValue(diff, x, y, width, FTKR.CSS.cssStatus.aopdiff);
         return 1;
     };
 
@@ -2934,7 +3057,7 @@ FTKR.CSS = FTKR.CSS || {};
         if (target) {
             var newValue = target.aopParam(paramId);
             var diffvalue = newValue - actor.aopParam(paramId);
-            this.drawParamDiffValue(diffvalue, x, y, width);
+            this.drawParamDiffValue(diffvalue, x, y, width, FTKR.CSS.cssStatus.ediffaop);
         }
         return 1;
     };
@@ -3528,6 +3651,9 @@ Sprite_CssStateIcon.prototype.updateOpacity = function() {
     }
 };
 
+//=============================================================================
+// YEP_BuffsStatesCoreの修正
+//=============================================================================
 if (Imported.YEP_BuffsStatesCore) {
 
 Sprite_CssStateIcon.prototype.updateTurnAndCounter = function() {

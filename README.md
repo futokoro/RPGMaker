@@ -48,7 +48,7 @@
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
-| [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) | [あり](FTKR_CustomSimpleActorStatus.ja.md) | [v3.4.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CustomSimpleActorStatus.js) | 2018/10/28 | ステータス表示を変更する 本体プラグイン |
+| [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) | [あり](FTKR_CustomSimpleActorStatus.ja.md) | [v3.4.3](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CustomSimpleActorStatus.js) | 2018/11/03 | ステータス表示を変更する 本体プラグイン |
 | [FTKR_CSS_MenuStatus](FTKR_CSS_MenuStatus.js) | [あり](FTKR_CSS_MenuStatus.ja.md) | [v2.1.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_MenuStatus.js) | 2018/09/29 | メニュー画面のステータス表示を変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) |
 | [FTKR_CSS_BattleStatus](FTKR_CSS_BattleStatus.js) | [あり](FTKR_CSS_BattleStatus.ja.md) | [v2.1.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_BattleStatus.js) | 2018/09/29 | バトル画面のステータス表示を変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) |
 | [FTKR_CSS_DetailedStatus](FTKR_CSS_DetailedStatus.js) | [あり](FTKR_CSS_DetailedStatus.ja.md) | [v2.1.3](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_DetailedStatus.js) | 2018/10/20 | ステータス画面のステータス表示を変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) |
@@ -307,52 +307,10 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 # 更新情報
 
-2018/10の更新情報
+2018/11の更新情報
 
-### 2018/10/28
-* [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md) v3.4.2
-* [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v1.5.0
-
-### 2018/10/22
-* [FTKR_ItemCompositionSystem](FTKR_ItemCompositionSystem.ja.md) v1.7.1
-
-### 2018/10/21
-* [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v1.4.9
-* [FTKR_ConnectingMapGenerator](FTKR_ConnectingMapGenerator.ja.md) v1.2.1
-
-### 2018/10/20
-* [FTKR_CSS_DetailedStatus](FTKR_CSS_DetailedStatus.ja.md) v2.1.3
-* [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v1.4.7 v1.4.8
-* [FTKR_AISkillEvaluate](FTKR_AISkillEvaluate.js) v1.2.5
-
-### 2018/10/16
-* [FTKR_AddOriginalParameters](FTKR_AddOriginalParameters.ja.md) v1.2.1
-* [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v1.4.6
-
-### 2018/10/14
-* [FTKR_ItemCompositionSystem](FTKR_ItemCompositionSystem.ja.md) v1.7.0
-
-### 2018/10/11
-* [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md) v3.4.1
-
-### 2018/10/10
-* [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md) v3.4.0
-* [FTKR_CSS_EquipStatus](FTKR_CSS_EquipStatus.ja.md) v2.1.3
-* [FTKR_CSS_ShopStatus](FTKR_CSS_ShopStatus.ja.md) v2.2.0
-
-### 2018/10/09
-* [FTKR_ItemCompositionSystem](FTKR_ItemCompositionSystem.ja.md) v1.6.0
-* [FTKR_ExBattleCommand](FTKR_ExBattleCommand.js) v1.2.2
-
-### 2018/10/08
-* [FTKR_OriginalSceneWindow](FTKR_OriginalSceneWindow.ja.md) v1.6.0
-
-### 2018/10/05
-* [FTKR_ExBattleCommand](FTKR_ExBattleCommand.js) v1.2.0 v1.2.1
-* [FTKR_MenuEvent](FTKR_MenuEvent.js) v1.1.0
-
-### 2018/10/04
-* [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v1.4.5
+### 2018/11/03
+* [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md) v3.4.3
 
 [過去の更新情報](note.md)
 
