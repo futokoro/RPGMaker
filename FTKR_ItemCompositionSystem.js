@@ -4,8 +4,8 @@
 // プラグインNo : 14
 // 作成者     : フトコロ
 // 作成日     : 2017/04/08
-// 最終更新日 : 2018/10/22
-// バージョン : v1.7.1
+// 最終更新日 : 2018/11/07
+// バージョン : v1.7.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.ICS = FTKR.ICS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.7.1 アイテム合成システム
+ * @plugindesc v1.7.2 アイテム合成システム
  * @author フトコロ
  *
  * @param --基本設定--
@@ -743,6 +743,10 @@ FTKR.ICS = FTKR.ICS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.7.2 - 2018/11/07 : 不具合修正
+ *    1. 一つのアイテムに対して複数のレシピを覚えていた場合に、いずれか１つのレシピの
+ *       素材をもっていれば、ほかのレシピで作れてしまう不具合を修正。
  * 
  * v1.7.1 - 2018/10/22 : 機能追加
  *    1. 素材選択時の数値入力を無効にする機能を追加。
@@ -2191,10 +2195,27 @@ function Game_IcsRecipeBook() {
         },this);
     };
 
+    //指定したレシピIDで、アイテムと製作員数に必要なアイテムを持っているか
+    Game_Party.prototype.hasRequiredRecipeIDMaterials = function(item, typeId, number) {
+        number = number || 1;
+        typeId = typeId || 0;
+        return item && this.hasAllMaterials(item.ics.recipes()[typeId], number);
+    };
+
     //指定したアイテムを最大で何個まで製作できるか
     Game_Party.prototype.hasMaxRequiredRecipeMaterials = function(item) {
         var number = 1;
         while(this.hasRequiredRecipeMaterials(item, number)) {
+            number++;
+        }
+        return number - 1;
+    };
+
+    //指定したレシピIDで、アイテムを最大で何個まで製作できるか
+    Game_Party.prototype.hasMaxRequiredRecipeIDMaterials = function(item, typeId) {
+        var number = 1;
+        typeId = typeId || 0;
+        while(this.hasRequiredRecipeIDMaterials(item, typeId, number)) {
             number++;
         }
         return number - 1;
@@ -2434,7 +2455,7 @@ function Game_IcsRecipeBook() {
     };
 
     Window_IcsItemList.prototype.isCurrentItemEnabled = function() {
-        return this.isEnabled(this.item());
+        return this.isEnabled(this.item(), this._typeId[this.index()]);
     };
 
     Window_IcsItemList.prototype.standardBackOpacity = function() {
@@ -2445,8 +2466,9 @@ function Game_IcsRecipeBook() {
         if (FTKR.ICS.itemList.frame === '表示する(show)') Window.prototype._refreshFrame.call(this);
     };
   
-    Window_IcsItemList.prototype.isEnabled = function(item) {
-        return this._showResipe ? $gameParty.hasRequiredRecipeMaterials(item) : item;
+    Window_IcsItemList.prototype.isEnabled = function(item, typeId) {
+//        return this._showResipe ? $gameParty.hasRequiredRecipeMaterials(item, typeId) : item;
+        return this._showResipe ? $gameParty.hasRequiredRecipeIDMaterials(item, typeId) : item;
     };
 
     Window_IcsItemList.prototype.typeId = function() {
@@ -2526,8 +2548,9 @@ function Game_IcsRecipeBook() {
         if (item) {
             var rect = this.itemRect(index);
             rect.width -= this.textPadding();
-            this.changePaintOpacity(this.isEnabled(item));
+//            this.changePaintOpacity(this.isEnabled(item));
             var typeId = this._showResipe && item.ics.recipes().length > 1 ? this._typeId[index] + 1 : '';
+            this.changePaintOpacity(this.isEnabled(item,this._typeId[index]));
             this.drawItemName(item, rect.x, rect.y, rect.width - this.numberWidth(), typeId);
             if (!this._showResipe) this.drawItemNumber(item, rect.x, rect.y, rect.width);
             this.changePaintOpacity(1);
@@ -3754,7 +3777,8 @@ function Game_IcsRecipeBook() {
     Scene_ICS.prototype.onItemOk = function() {
         if(this._compositionSlotWindow._itemCount < 5) {
             if (this._itemWindow._showResipe) {
-                var max = $gameParty.hasMaxRequiredRecipeMaterials(this.item());
+//                var max = $gameParty.hasMaxRequiredRecipeMaterials(this.item());
+                var max = $gameParty.hasMaxRequiredRecipeIDMaterials(this.item(), this._itemWindow.typeId());
                 this._numberWindow._showResipe = this._itemWindow._showResipe;
                 this._numberWindow._typeId = this._itemWindow.typeId();
             } else {
