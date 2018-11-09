@@ -4,8 +4,8 @@
 // プラグインNo : 75
 // 作成者     : フトコロ
 // 作成日     : 2018/04/08
-// 最終更新日 : 2018/10/28
-// バージョン : v1.5.0
+// 最終更新日 : 2018/11/09
+// バージョン : v1.6.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.AltTB = FTKR.AltTB || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.5.0 敵味方交互にターンが進むターン制戦闘システム
+ * @plugindesc v1.6.0 敵味方交互にターンが進むターン制戦闘システム
  * @author フトコロ
  *
  * @param TurnEnd Command
@@ -346,15 +346,17 @@ FTKR.AltTB = FTKR.AltTB || {};
  *
  * @param Display AP Width Cmd
  * @parent apCost
- * @desc コマンド欄のアクションポイントコストの表示幅を設定します。(半角文字数)
+ * @desc コマンド欄のアクションポイントコストの表示幅を設定します。(半角文字数、0で非表示)
  * @default 3
  * @type number
+ * @min 0
  *
  * @param Display AP Width Item
  * @parent apCost
- * @desc スキルやアイテム欄のアクションポイントコストの表示幅を設定します。(半角文字数)
+ * @desc スキルやアイテム欄のアクションポイントコストの表示幅を設定します。(半角文字数、0で非表示)
  * @default 4
  * @type number
+ * @min 0
  *
  * @param AP Window Layout
  * @desc APウィンドウのレイアウト設定
@@ -795,8 +797,12 @@ FTKR.AltTB = FTKR.AltTB || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.6.0 - 2018/11/09 : 機能追加
+ *    1. アクターコマンドおおびアイテム・スキルウィンドウのアクションポイントを
+ *       非表示にする機能を追加。
+ * 
  * v1.5.0 - 2018/10/28 : 機能追加
- *    1. パーティーが行動できなくなった場合に、クター変更操作を禁止して自動で
+ *    1. パーティーが行動できなくなった場合に、アクター変更操作を禁止して自動で
  *       パーティーコマンドに戻す機能を追加。
  *    2. AP0スキルを覚えていれば、パーティーのAPが0でも行動可能にする機能を追加。
  *    3. パーティーが行動できなくなった場合に、パーティーコマンドの戦うを選択でき
@@ -1153,9 +1159,9 @@ function Window_BattleActionPoint() {
         itemAp          : (paramParse(parameters['Item AP']) || 0),
         apCostPos       : (paramParse(parameters['AP Cost Position']) || 0),
         apCostColor     : (paramParse(parameters['AP Cost Color']) || 0),
-        dispApWidthCmd  : (paramParse(parameters['Display AP Width Cmd']) || 3),
-        dispApWidthItem : (paramParse(parameters['Display AP Width Item']) || 4),
-        turnRefreshAP   : (paramParse(parameters['Turn Refresh AP']) || -1),
+        dispApWidthCmd  : (paramParse(parameters['Display AP Width Cmd']) || 0),
+        dispApWidthItem : (paramParse(parameters['Display AP Width Item']) || 0),
+        turnRefreshAP   : (paramParse(parameters['Turn Refresh AP']) || 0),
         enableResetAP   : (paramParse(parameters['Enable Reset AP Every Battle']) || true),
         layoutAPWindow  : (paramParse(parameters['AP Window Layout']) || null),
         enableFAAC      : (paramParse(parameters['Enable Force Action AC']) || false),
@@ -2424,6 +2430,10 @@ function Window_BattleActionPoint() {
         this.resetTextColor();
     };
 
+    Window_Selectable.prototype.isEnabledDispItemAp = function() {
+        return FTKR.AltTB.enableAP && FTKR.AltTB.dispApWidthItem > 0;
+    };
+
     //=============================================================================
     // Window_PartyCommand
     //=============================================================================
@@ -2497,7 +2507,7 @@ function Window_BattleActionPoint() {
     };
 
     Window_ActorCommand.prototype.hasCost = function(index) {
-        return FTKR.AltTB.enableAP && this.commandAP(index) >= 0;
+        return FTKR.AltTB.enableAP && this.commandAP(index) >= 0 && FTKR.AltTB.dispApWidthCmd > 0;
     };
 
     Window_ActorCommand.prototype.drawItem = function(index) {
@@ -2658,7 +2668,7 @@ function Window_BattleActionPoint() {
         var tw = this.apCostWidth();
         var nw = FTKR.AltTB.enableAP ? width - tw : width;
         Window_ItemList.prototype.drawItemNumber.call(this, item, x, y, nw);
-        if (FTKR.AltTB.enableAP) {
+        if (this.isEnabledDispItemAp()) {
             this.drawItemCost(item, x + nw, y);
         }
     };
@@ -2671,7 +2681,7 @@ function Window_BattleActionPoint() {
         var tw = this.apCostWidth();
         var nw = FTKR.AltTB.enableAP ? width - tw : width;
         Window_SkillList.prototype.drawSkillCost.call(this, skill, x, y, nw);
-        if (FTKR.AltTB.enableAP) {
+        if (this.isEnabledDispItemAp()) {
             this.drawItemCost(skill, x + nw, y);
         }
     };
