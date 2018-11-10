@@ -4,8 +4,8 @@
 // プラグインNo : 75
 // 作成者     : フトコロ
 // 作成日     : 2018/04/08
-// 最終更新日 : 2018/11/09
-// バージョン : v1.6.0
+// 最終更新日 : 2018/11/11
+// バージョン : v1.6.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.AltTB = FTKR.AltTB || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.6.0 敵味方交互にターンが進むターン制戦闘システム
+ * @plugindesc v1.6.1 敵味方交互にターンが進むターン制戦闘システム
  * @author フトコロ
  *
  * @param TurnEnd Command
@@ -796,6 +796,12 @@ FTKR.AltTB = FTKR.AltTB || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.6.1 - 2018/11/11 : 不具合修正
+ *    1. ACを無効にした場合に、エネミーターンが終了しない不具合を修正。
+ *    2. 「逃げる」コマンドに失敗した時に、１ターン余計に進んでしまう不具合を修正。
+ *    3. 「逃げる」コマンドを実行し戦闘終了させた時に、画面外に逃げたSVアクターが
+ *        画面内に戻ってきてしまう不具合を修正。
  * 
  * v1.6.0 - 2018/11/09 : 機能追加
  *    1. アクターコマンドおおびアイテム・スキルウィンドウのアクションポイントを
@@ -1589,7 +1595,10 @@ function Window_BattleActionPoint() {
     };
 
     BattleManager.updateEnemyTurn = function() {
-        if (FTKR.test) console.log('updateEnemyTurn', this._subject.name());
+        if (FTKR.test) {
+            var name = this._subject ? this._subject.name() : 'なし';
+            console.log('updateEnemyTurn', name, this.actionBattlers());
+        }
         if (this._subject && this._subject.isActor()) this._subject = null;
         if (!this._subject) {
             this._subject = this.getNextSubject();
@@ -1602,7 +1611,10 @@ function Window_BattleActionPoint() {
     };
 
     BattleManager.updateEnemyTurnEnd = function() {
-        if (FTKR.test) console.log('updateEnemyTurnEnd', this._subject.name());
+        if (FTKR.test) {
+            var name = this._subject ? this._subject.name() : 'なし';
+            console.log('updateEnemyTurnEnd', name, this.actionBattlers());
+        }
         this._phase = 'turnEnd';
     };
 
@@ -1638,7 +1650,7 @@ function Window_BattleActionPoint() {
     };
 
     BattleManager.updateActionEnd = function() {
-        if (FTKR.test) console.log('updateActionEnd', this._subject.name());
+        if (FTKR.test) console.log('updateActionEnd', this._subject.name(), this._subject.actionCount());
         if (this._isConfusedPartyAction) {
             this._phase = 'confusedActionTurn';
         } else {
@@ -1651,6 +1663,10 @@ function Window_BattleActionPoint() {
         this._logWindow.displayCurrentState(subject);
         this._logWindow.displayRegeneration(subject);
         if (FTKR.test) console.log(subject.isConfused(), subject.isAppeared(), subject.restriction());
+        if (subject && !subject.isActor() && FTKR.AltTB.disableAC) {
+            subject.getActionCount(-1);
+            console.log(subject.actionCount());
+        }
         if (!this._subject.canMove()) {
             this._subject.clearActionCount();
         }
@@ -1697,6 +1713,24 @@ function Window_BattleActionPoint() {
     };
 
     //書き換え
+    BattleManager.processEscape = function() {
+        $gameParty.performEscape();
+        SoundManager.playEscape();
+        var success = this._preemptive ? true : (Math.random() < this._escapeRatio);
+        if (success) {
+            this.displayEscapeSuccessMessage();
+            this._escaped = true;
+            this.processAbort();
+        } else {
+            this.displayEscapeFailureMessage();
+            this._escapeRatio += 0.1;
+            $gameParty.clearActions();
+//            this.startTurn();
+        }
+        return success;
+    };
+
+    //書き換え
     BattleManager.selectNextCommand = function() {
         do {
             if ($gameParty.canInputAction() || !FTKR.AltTB.disableChangeActorWPCA) {
@@ -1725,13 +1759,13 @@ function Window_BattleActionPoint() {
             }
         } while (!this.actor().canSelectInput());
     };
-
+/*
     var _AltTB_BattleManager_updateBattleEnd = BattleManager.updateBattleEnd;
     BattleManager.updateBattleEnd = function() {
         _AltTB_BattleManager_updateBattleEnd.call(this);
         this.clear();
     };
-
+*/
     //=============================================================================
     // DataManager
     //=============================================================================
