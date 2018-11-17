@@ -4,8 +4,8 @@
 // プラグインNo : 75
 // 作成者     : フトコロ
 // 作成日     : 2018/04/08
-// 最終更新日 : 2018/11/11
-// バージョン : v1.6.1
+// 最終更新日 : 2018/11/17
+// バージョン : v1.6.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.AltTB = FTKR.AltTB || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.6.1 敵味方交互にターンが進むターン制戦闘システム
+ * @plugindesc v1.6.2 敵味方交互にターンが進むターン制戦闘システム
  * @author フトコロ
  *
  * @param TurnEnd Command
@@ -796,6 +796,10 @@ FTKR.AltTB = FTKR.AltTB || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.6.2 - 2018/11/17 : 不具合修正
+ *    1. 行動制限付きステートを付与したターンに解除した場合に、戦闘が止まってしまう
+ *       不具合を修正。この場合は、行動できずにターンを終了するようにしました。
  * 
  * v1.6.1 - 2018/11/11 : 不具合修正
  *    1. ACを無効にした場合に、エネミーターンが終了しない不具合を修正。
@@ -1627,6 +1631,8 @@ function Window_BattleActionPoint() {
         if (action) {
             this.processBeforeAction(subject, action);
         } else {
+            if (FTKR.test) console.log('clearActionCount', this._subject.name())
+            subject.clearActionCount();
             this.endAction();
         }
     };
@@ -1713,23 +1719,9 @@ function Window_BattleActionPoint() {
     };
 
     //書き換え
-    BattleManager.processEscape = function() {
-        $gameParty.performEscape();
-        SoundManager.playEscape();
-        var success = this._preemptive ? true : (Math.random() < this._escapeRatio);
-        if (success) {
-            this.displayEscapeSuccessMessage();
-            this._escaped = true;
-            this.processAbort();
-        } else {
-            this.displayEscapeFailureMessage();
-            this._escapeRatio += 0.1;
-            $gameParty.clearActions();
-//            this.startTurn();
-        }
-        return success;
+    BattleManager.startTurn = function() {
     };
-
+    
     //書き換え
     BattleManager.selectNextCommand = function() {
         do {
