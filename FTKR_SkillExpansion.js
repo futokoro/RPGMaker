@@ -4,8 +4,8 @@
 // プラグインNo : 4
 // 作成者     : フトコロ
 // 作成日     : 2017/02/18
-// 最終更新日 : 2018/08/13
-// バージョン : v1.4.1
+// 最終更新日 : 2018/11/18
+// バージョン : v1.4.2
 //=======↑本プラグインを改変した場合でも、この欄は消さないでください↑===============
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.SEP = FTKR.SEP || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.4.1 スキル拡張プラグイン
+ * @plugindesc v1.4.2 スキル拡張プラグイン
  * @author フトコロ
  *
  * @param Elements Damage Calc
@@ -646,6 +646,10 @@ FTKR.SEP = FTKR.SEP || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.4.2 - 2018/11/18 : 不具合修正
+ *    1. プラグインパラメータ Make Sep For Each を 1 に設定すると、コマンド記憶が
+ *       無効になる不具合を修正。
  * 
  * v1.4.1 - 2018/08/13 : 競合回避
  *    1. YEP_SkillCore.js側のHPコスト消費処理の競合を回避。
@@ -2091,6 +2095,24 @@ Window_SkillList.prototype.drawSkillCost = function(skill, x, y, width) {
     } else {
         FTKR.SEP.Window_SkillList_drawSkillCost.call(this, skill, x, y, width);
     }
+};
+
+//書き換え
+Window_SkillList.prototype.selectLast = function() {
+    var skill;
+    if ($gameParty.inBattle()) {
+        skill = this._actor.lastBattleSkill();
+    } else {
+        skill = this._actor.lastMenuSkill();
+    }
+    var index = 0;
+    this._data.some(function(data, i){
+        if (data && skill && data.id === skill.id) {
+            index = i;
+            return true;
+        }
+    });
+    this.select(index >= 0 ? index : 0);
 };
 
 //=============================================================================
