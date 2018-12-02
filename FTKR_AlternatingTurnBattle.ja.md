@@ -24,9 +24,9 @@
 この戦闘システムは、基本的にプレイヤー側が有利に戦闘を進めることができます。
 
 ## 機能の分割
-* 行動回数に関する機能は、[FTKR_BattleActionPoints](FTKR_BattleActionPoints.js)プラグインに分割しました。
-* アクションポイントに関する
-
+* 行動回数に関する機能は、[FTKR_BattleActionTimes](FTKR_BattleActionTimes.js)プラグインに分割しました。
+* アクションポイントに関する機能は、[FTKR_BattleActionPoints](FTKR_BattleActionPoints.js)プラグインに分割しました。
+* ステータスウィンドウをタッチ・クリックしてアクターを切り替える機能は、[FTKR_AltTB_SelectTouchedActor](FTKR_AltTB_SelectTouchedActor.js)プラグインに分割しました。
 
 [目次に戻る](#目次)
 

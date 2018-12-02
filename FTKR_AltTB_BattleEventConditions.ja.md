@@ -19,7 +19,7 @@
 
 このプラグインを導入すると、敵グループに設定したバトルイベントの実行条件に、 FTKR_AlternatingTurnBattle 専用のターン条件を設定できます。
 
-このプラグインは、[FTKR_AlternatingTurnBattleプラグイン](FTKR_AlternatingTurnBattle.ja.md)が必要です。
+このプラグインは、[FTKR_AlternatingTurnBattleプラグイン※v2.0.0以降](FTKR_AlternatingTurnBattle.ja.md)が必要です。
 
 [目次に戻る](#目次)
 

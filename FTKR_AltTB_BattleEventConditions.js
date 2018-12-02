@@ -27,7 +27,7 @@ FTKR.AltTB.BEC = FTKR.AltTB.BEC || {};
  * 敵グループに設定したバトルイベントの実行条件に
  * FTKR_AlternatingTurnBattle専用のターン条件を設定できます。
  * 
- * このプラグインには、FTKR_AlternatingTurnBattle.js が必要です。
+ * このプラグインには、FTKR_AlternatingTurnBattle.js (v2.0.0以降)が必要です。
  * 
  * プラグインの使い方は、下のオンラインマニュアルページを見てください。
  * https://github.com/futokoro/RPGMaker/blob/master/FTKR_AltTB_BattleEventConditions.ja.md
