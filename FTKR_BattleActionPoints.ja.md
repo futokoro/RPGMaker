@@ -32,7 +32,7 @@
 * スキルやアイテムに、「アクションポイント(AP)」の現在値を増減させる使用効果を設定できる
 * アクターや職業などに、「アクションポイント(AP)」の最大値を増減させる特徴や、消費量を変化させる特徴を設定できる
 
-このプラグインは、[FTKR_AlternatingTurnBattleプラグイン](FTKR_AlternatingTurnBattle.ja.md)と組み合わせて使用することを想定して作成しています。
+このプラグインは、[FTKR_AlternatingTurnBattleプラグイン※v2.0.0以降](FTKR_AlternatingTurnBattle.ja.md)と組み合わせて使用することを想定して作成しています。
 
 [目次に戻る](#目次)
 

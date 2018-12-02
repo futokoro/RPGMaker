@@ -29,7 +29,7 @@
 * スキル・アイテムに、行動回数の一時増減させる効果の設定
 * スキル・アイテム使用時の行動回数を消費しない効果の設定
 
-このプラグインは、[FTKR_AlternatingTurnBattleプラグイン](FTKR_AlternatingTurnBattle.ja.md)と組み合わせて使用することを想定して作成しています。
+このプラグインは、[FTKR_AlternatingTurnBattleプラグイン※v2.0.0以降](FTKR_AlternatingTurnBattle.ja.md)と組み合わせて使用することを想定して作成しています。
 
 [目次に戻る](#目次)
 

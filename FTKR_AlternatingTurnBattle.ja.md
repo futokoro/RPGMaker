@@ -11,6 +11,7 @@
 以下の項目の順でプラグインの使い方を説明します。
 1. [概要](#概要)
 2. [プラグインの登録](#プラグインの登録)
+1. [機能の分割](#機能の分割)
 1. [ターンの進行](#ターンの進行)
 1. [プレイヤーのターン](#プレイヤーのターン)
 1. [エネミーのターン](#エネミーのターン)
@@ -24,6 +25,9 @@
 この戦闘システムは、基本的にプレイヤー側が有利に戦闘を進めることができます。
 
 ## 機能の分割
+
+このプラグインの v2.0.0 から、以下の機能を別のプラグインに分割しました。
+
 * 行動回数に関する機能は、[FTKR_BattleActionTimes](FTKR_BattleActionTimes.ja.md)プラグインに分割しました。
 * アクションポイントに関する機能は、[FTKR_BattleActionPoints](FTKR_BattleActionPoints.ja.md)プラグインに分割しました。
 * ステータスウィンドウをタッチ・クリックしてアクターを切り替える機能は、[FTKR_AltTB_SelectTouchedActor](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AltTB_SelectTouchedActor.js)プラグインに分割しました。
