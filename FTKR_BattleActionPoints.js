@@ -3,9 +3,9 @@
 // FTKR_BattleActionPoints.js
 // プラグインNo : 91
 // 作成者     : フトコロ
-// 作成日     : 2018/12/01
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 作成日     : 2018/12/02
+// 最終更新日 : 2018/12/03
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.BAP = FTKR.BAP || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 消費コスト用のパラメータ「アクションポイント(AP)」を導入するプラグイン
+ * @plugindesc v1.0.1 消費コスト用のパラメータ「アクションポイント(AP)」を導入するプラグイン
  * @author フトコロ
  *
  * @param Init Start AP
@@ -249,7 +249,10 @@ FTKR.BAP = FTKR.BAP || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
- * v1.0.0 - 2018/12/01 : 初版作成
+ * v1.0.1 - 2018/12/03 : 不具合修正
+ *  1. プラグインコマンドの誤記修正。
+ * 
+ * v1.0.0 - 2018/12/02 : 初版作成
  * 
  *-----------------------------------------------------------------------------
 */
@@ -823,30 +826,31 @@ function Window_BattleActionPoint() {
 
     var _BAP_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
     Game_Interpreter.prototype.pluginCommand = function(command, args) {
-        if (!command.match(/BAP_(.+)/i)) _BAP_Game_Interpreter_pluginCommand.call(this, command, args);
-        command = (RegExp.$1 + '').toUpperCase();
-        switch (command) {
-            case 'アクションポイント増加':
-            case 'ADD_AP':
+        switch (command.toUpperCase()) {
+            case 'AltTB_アクションポイント増加':
+            case 'AltTB_ADD_AP':
                 if (this.addPartyAP(args) && $gameParty.inBattle()) {
                     BattleManager._partyApWindow.refresh();
                 };
                 break;
-            case '最大AP増加':
-            case 'ADD_MAX_AP':
+            case 'FTKR_最大AP増加':
+            case 'FTKR_ADD_MAX_AP':
                 var ap = setArgNum(args[0]);
                 if (ap && $gameParty.inBattle()) {
                     $gameParty.growActionPoint(ap);
                     BattleManager._partyApWindow.refresh();
                 };
                 break;
-            case '現在AP増加':
-            case 'ADD_CURRENT_AP':
+            case 'FTKR_現在AP増加':
+            case 'FTKR_ADD_CURRENT_AP':
                 var ap = setArgNum(args[0]);
                 if (ap && $gameParty.inBattle()) {
                     $gameParty.gainActionPoint(ap);
                     BattleManager._partyApWindow.refresh();
                 };
+                break;
+            default:
+                _BAP_Game_Interpreter_pluginCommand.call(this, command, args);
                 break;
         }
     };

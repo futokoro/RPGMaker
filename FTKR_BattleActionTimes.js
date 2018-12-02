@@ -3,9 +3,9 @@
 // FTKR_BattleActionTimes.js
 // プラグインNo : 90
 // 作成者     : フトコロ
-// 作成日     : 2018/12/01
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 作成日     : 2018/12/02
+// 最終更新日 : 2018/12/03
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.BAT = FTKR.BAT || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 戦闘中の行動回数を表示・操作するプラグイン
+ * @plugindesc v1.0.1 戦闘中の行動回数を表示・操作するプラグイン
  * @author フトコロ
  *
  * @param Default Max AT
@@ -211,7 +211,10 @@ FTKR.BAT = FTKR.BAT || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
- * v1.0.0 - 2018/12/01 : 初版作成
+ * v1.0.1 - 2018/12/03 : 不具合修正
+ *  1. プラグインコマンドの誤記修正。
+ * 
+ * v1.0.0 - 2018/12/02 : 初版作成
  * 
  *-----------------------------------------------------------------------------
 */
@@ -557,16 +560,19 @@ FTKR.BAT = FTKR.BAT || {};
 
     var _Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
     Game_Interpreter.prototype.pluginCommand = function(command, args) {
-        if (!command.match(/BAT_(.+)/i)) _Game_Interpreter_pluginCommand.call(this, command, args);
-        command = (RegExp.$1 + '').toUpperCase();
-        switch (command) {
-            case '行動回数増加':
-            case 'ACTION_PLUS':
+        switch (command.toUpperCase()) {
+            case 'FTKR_行動回数増加':
+            case 'AltTB_行動回数増加':
+            case 'FTKR_ACTION_PLUS':
+            case 'AltTB_ACTION_PLUS':
                 this.addActionTimes(args);
                 break;
-            case '行動再設定':
-            case 'RESET_ACTIONS':
+            case 'FTKR_行動再設定':
+            case 'FTKR_RESET_ACTIONS':
                 this.catResetActions(args);
+                break;
+            default:
+                _Game_Interpreter_pluginCommand.call(this, command, args);
                 break;
         }
     };
