@@ -97,12 +97,12 @@ FTKR_BattleActionTimes.js
 
 ### 入力例
 ```
-<FTKR_ACTION_MINUS 100: 1>
+<BAT_ACTION_MINUS 100: 1>
 ```
 100% の確率で、行動回数が 1 減少する。
 
 ```
-<FTKR_ACTION_MINUS 50: 2>
+<BAT_ACTION_MINUS 50: 2>
 ```
 50% の確率で、行動回数が 2 減少する。
 
@@ -121,7 +121,7 @@ FTKR_BattleActionTimes.js
 メモ欄に次のタグを記入することで、個別に設定できます。
 
 ### タグ
-`<FTKR_MAX_AT: x>`
+`<BAT_MAX_AT: x>`
 * x : 行動回数の最大値
 
 または
@@ -142,7 +142,7 @@ FTKR_BattleActionTimes.js
 メモ欄に次のタグを記入することで、行動回数を一時的に増減させる効果を付与できます。
 
 ### タグ
-`<FTKR_ADD_ACTION_TIMES x: y>`
+`<BAT_ADD_ACTION_TIMES x: y>`
 * x : この効果が発生する確率(50% なら 50 と入力)
 * y : 変化させる行動回数(正の数なら増加、負の数なら減少)
 
@@ -156,7 +156,7 @@ FTKR_BattleActionTimes.js
 
 ### 入力例
 ```
-<FTKR_ADD_ACTION_TIMES 100: 1>
+<BAT_ADD_ACTION_TIMES 100: 1>
 ```
 100%の確率で、行動の対象者の行動回数を 1 増加させる。
 
@@ -166,8 +166,8 @@ FTKR_BattleActionTimes.js
 
 ### プラグインコマンド
 ```
-FTKR_行動回数増加 [対象分類] [対象ID] [増加量]
-FTKR_ADD_ACTION_TIMES [targetType] [targetId] [value]
+BAT_行動回数増加 [対象分類] [対象ID] [増加量]
+BAT_ADD_ACTION_TIMES [targetType] [targetId] [value]
 ```
 または
 ```
@@ -199,20 +199,20 @@ AltTB_ADD_AC [targetType] [targetId] [value]
 
 ### 入力例
 ```
-FTKR_行動回数増加 アクター 1 1
-FTKR_ADD_ACTION_TIMES Actor 1 1
+BAT_行動回数増加 アクター 1 1
+BAT_ADD_ACTION_TIMES Actor 1 1
 ```
 アクターID 1 の行動回数を 1 増加します。
 
 ```
-FTKR_行動回数増加 パーティー 2 \v[5]
-FTKR_ADD_ACTION_TIMES Party 2 \v[5]
+BAT_行動回数増加 パーティー 2 \v[5]
+BAT_ADD_ACTION_TIMES Party 2 \v[5]
 ```
 パーティーの 2 番目のキャラの行動回数を 変数ID 5 の値分、増加します。
 
 ```
-FTKR_行動回数増加 敵グループ 0 -1
-FTKR_ADD_ACTION_TIMES Troop 0 -1
+BAT_行動回数増加 敵グループ 0 -1
+BAT_ADD_ACTION_TIMES Troop 0 -1
 ```
 敵グループ全体の行動回数を 1 減らします。
 
@@ -222,14 +222,14 @@ FTKR_ADD_ACTION_TIMES Troop 0 -1
 
 敵キャラに、増加した行動回数分の追加行動をさせるためには、次のプラグインコマンドを使い、行動を再設定してください。
 ```
-FTKR_行動再設定 [対象分類] [対象ID]
-FTKR_RESET_ACTIONS [targetType] [targetId]
+BAT_行動再設定 [対象分類] [対象ID]
+BAT_RESET_ACTIONS [targetType] [targetId]
 ```
 
 ### 入力例
 ```
-FTKR_行動再設定 敵グループ 1
-FTKR_RESET_ACTIONS Troop 1
+BAT_行動再設定 敵グループ 1
+BAT_RESET_ACTIONS Troop 1
 ```
 敵グループの 1 番目の行動を再設定します。
 
@@ -239,7 +239,7 @@ FTKR_RESET_ACTIONS Troop 1
 メモ欄に次のタグを記入することで、行動回数を消費せずにスキルやアイテムを使用できます。
 
 ### タグ
-`<FTKR_NoAT>`
+`<BAT_NoAT>`
 
 または
 `<AltTB_noAC>`

@@ -92,8 +92,8 @@ APには、HPのように現在値と最大値を持っています。
 
 ### プラグインコマンド
 ```
-FTKR_最大AP増加 [増加量]
-FTKR_ADD_MAX_AP [value]
+BAP_最大AP増加 [増加量]
+BAP_ADD_MAX_AP [value]
 ```
 
 または
@@ -110,8 +110,8 @@ AltTB_ADD_AP [value] MAX
 
 ### 入力例
 ```
-FTKR_最大AP増加 1
-FTKR_ADD_MAX_AP 1
+BAP_最大AP増加 1
+BAP_ADD_MAX_AP 1
 ```
 最大APの基準値を 1 増やします。
 
@@ -121,7 +121,7 @@ FTKR_ADD_MAX_AP 1
 加算分は、データベースのメモ欄に入力した特徴で設定します。
 
 ### タグ
-`<FTKR_MAX_AP_PLUS: x>`
+`<BAP_MAX_AP_PLUS: x>`
 * x : この特徴によって増加させる値。負の値を設定した場合は減少します。
 
 ### データベースでの対象
@@ -133,7 +133,7 @@ FTKR_ADD_MAX_AP 1
 
 ### 入力例
 ```
-<FTKR_MAX_AP_PLUS: 1>
+<BAP_MAX_AP_PLUS: 1>
 ```
 APの最大値を 1 増やします。
 
@@ -143,7 +143,7 @@ APの最大値を 1 増やします。
 変化率は、データベースのメモ欄に入力した特徴で設定します。
 
 ### タグ
-`<FTKR_MAX_AP_RATE: x>`
+`<BAP_MAX_AP_RATE: x>`
 * x : APの最大値の変化率。％で設定します。
 
 ### データベースでの対象
@@ -158,7 +158,7 @@ APの最大値が、設定した倍率で変化します。
 
 ### 入力例
 ```
-<FTKR_MAX_AP_RATE: 150>
+<BAP_MAX_AP_RATE: 150>
 ```
 APの最大値を 150% に変化させます。
 
@@ -176,7 +176,7 @@ APの最大値を 150% に変化させます。
 2. スキルやアイテムのメモ欄に個別で設定。
 
 ### タグ
-`<FTKR_AP_COST: x>`
+`<BAP_AP_COST: x>`
 * x : 使用時の消費AP
 
 または
@@ -192,7 +192,7 @@ APの最大値を 150% に変化させます。
 
 ### 入力例
 ```
-<FTKR_AP_COST: 1>
+<BAP_AP_COST: 1>
 ```
 消費APを 1 に設定します。
 
@@ -201,11 +201,11 @@ APの最大値を 150% に変化させます。
 ## 加算分の設定
 
 ### タグ
-`<FTKR_AP_COST_PLUS: x>`
+`<BAP_AP_COST_PLUS: x>`
 * x : 消費APの加算値。負の値の場合は減少します。この設定はすべてのスキル・アイテムに効果があります。
 
 または
-`<FTKR_AP_COST_PLUS: x type y>`
+`<BAP_AP_COST_PLUS: x type y>`
 * x : 消費APの加算値。負の値の場合は減少します。この設定は次の`type y`の指定により効果対象となるスキル・アイテムを制限できます。
 * type : 加算する条件を文字列で指定する
     * skillId : スキルIDで指定
@@ -223,17 +223,17 @@ APの最大値を 150% に変化させます。
 
 ### 入力例
 ```
-<FTKR_AP_COST_PLUS: 1>
+<BAP_AP_COST_PLUS: 1>
 ```
 すべての行動の消費APを 1 増加します。
 
 ```
-<FTKR_AP_COST_PLUS: 2 skillId 10>
+<BAP_AP_COST_PLUS: 2 skillId 10>
 ```
 スキルID10 の消費APを 2 増加します。
 
 ```
-<FTKR_AP_COST_PLUS: -1 elementId 2>
+<BAP_AP_COST_PLUS: -1 elementId 2>
 ```
 属性ID2 の消費APを 1 減らします。
 
@@ -242,11 +242,11 @@ APの最大値を 150% に変化させます。
 ## 変化率の設定
 
 ### タグ
-`<FTKR_AP_COST_RATE: x>`
+`<BAP_AP_COST_RATE: x>`
 * x : 消費APの変化率。％で設定します。この設定はすべてのスキル・アイテムに効果があります。
 
 または
-`<FTKR_AP_COST_RATE: x type y>`
+`<BAP_AP_COST_RATE: x type y>`
 * x : 消費APの変化率。％で設定します。この設定は次の`type y`の指定により効果対象となるスキル・アイテムを制限できます。
 * type : 加算する条件を文字列で指定する
     * skillId : スキルIDで指定
@@ -265,12 +265,12 @@ APの最大値を 150% に変化させます。
 
 ### 入力例
 ```
-<FTKR_AP_COST_RATE: 50>
+<BAP_AP_COST_RATE: 50>
 ```
 すべての行動の消費APを 50% に変えます。
 
 ```
-<FTKR_AP_COST_RATE: 200 skillId 10>
+<BAP_AP_COST_RATE: 200 skillId 10>
 ```
 スキルID10 の消費APを 2倍にします。
 
@@ -281,7 +281,7 @@ APの最大値を 150% に変化させます。
 
 ## 取得APの値の設定
 ### タグ
-`<FTKR_GAIN_AP: x>`
+`<BAP_GAIN_AP: x>`
 * x : 取得APを設定します。負の値の場合は、減少します。
 
 または
@@ -296,7 +296,7 @@ APの最大値を 150% に変化させます。
 
 ### 入力例
 ```
-<FTKR_GAIN_AP: 1>
+<BAP_GAIN_AP: 1>
 ```
 命中時に、APを１取得します。
 
@@ -306,11 +306,11 @@ APの最大値を 150% に変化させます。
 以下のタグを追加すると、その取得APに発動条件を設定できます。
 ### タグ
 ```
-<FTKR_GAINAP_CONDITIONS>
+<BAP_GAINAP_CONDITIONS>
 condition1
 condition2
 ...
-</FTKR_GAINAP_CONDITIONS>
+</BAP_GAINAP_CONDITIONS>
 ```
 * condition* : 条件式。設定方法は後述。
 
@@ -344,11 +344,11 @@ condition2
 ### 入力例）
 スイッチID1 が ON の時かつ使用者がアクターID1の場合にAPを1取得。
 ```
-<FTKR_GAIN_AP: 1>
-<FTKR_GAINAP_CONDITIONS>
+<BAP_GAIN_AP: 1>
+<BAP_GAINAP_CONDITIONS>
 !!s[1]
 a.actorId() === 1
-</FTKR_GAINAP_CONDITIONS>
+</BAP_GAINAP_CONDITIONS>
 ```
 
 ### 複数の条件を設定する場合
@@ -356,24 +356,24 @@ a.actorId() === 1
 
 1. 縦に複数の条件式を並べる
 ```
-<FTKR_GAINAP_CONDITIONS>
+<BAP_GAINAP_CONDITIONS>
 condition1
 condition2
-</FTKR_GAINAP_CONDITIONS>
+</BAP_GAINAP_CONDITIONS>
 ```
 
 2. '&&'を使用して横に複数の条件式を並べる
 ```
-<FTKR_GAINAP_CONDITIONS>
+<BAP_GAINAP_CONDITIONS>
 condition1 && condition2
-</FTKR_GAINAP_CONDITIONS>
+</BAP_GAINAP_CONDITIONS>
 ```
 
 複数の条件の中から、いずれか一つを満たした場合の条件を設定する場合は、以下の様に'||'を使用して記述します。
 ```
-<FTKR_GAINAP_CONDITIONS>
+<BAP_GAINAP_CONDITIONS>
 condition1 || condition2
-</FTKR_GAINAP_CONDITIONS>
+</BAP_GAINAP_CONDITIONS>
 ```
 
 [目次に戻る](#目次)
@@ -393,7 +393,7 @@ condition1 || condition2
 加算分は、データベースのメモ欄に入力した特徴で設定します。
 
 ### タグ
-`<FTKR_START_AP_PLUS: x>`
+`<BAP_START_AP_PLUS: x>`
 * x : この特徴によって増加させる値。負の値を設定した場合は減少します。
 
 ### データベースでの対象
@@ -405,7 +405,7 @@ condition1 || condition2
 
 ### 入力例
 ```
-<FTKR_START_AP_PLUS: 1>
+<BAP_START_AP_PLUS: 1>
 ```
 APの初期値を 1 増やします。
 
@@ -415,7 +415,7 @@ APの初期値を 1 増やします。
 変化率は、データベースのメモ欄に入力した特徴で設定します。
 
 ### タグ
-`<FTKR_START_AP_RATE: x>`
+`<BAP_START_AP_RATE: x>`
 * x : APの初期値の変化率。％で設定します。
 
 ### データベースでの対象
@@ -430,7 +430,7 @@ APの初期値が、設定した倍率で変化します。
 
 ### 入力例
 ```
-<FTKR_START_AP_RATE: 150>
+<BAP_START_AP_RATE: 150>
 ```
 APの初期値を 150% に変化させます。
 
@@ -456,7 +456,7 @@ APの初期値を 150% に変化させます。
 加算分は、データベースのメモ欄に入力した特徴で設定します。
 
 ### タグ
-`<FTKR_REFRESH_AP_PLUS: x>`
+`<BAP_REFRESH_AP_PLUS: x>`
 * x : この特徴によって増加させる値。負の値を設定した場合は減少します。
 
 ### データベースでの対象
@@ -468,7 +468,7 @@ APの初期値を 150% に変化させます。
 
 ### 入力例
 ```
-<FTKR_REFRESH_AP_PLUS: 1>
+<BAP_REFRESH_AP_PLUS: 1>
 ```
 APのターンごとの回復量を 1 増やします。
 
@@ -478,7 +478,7 @@ APのターンごとの回復量を 1 増やします。
 変化率は、データベースのメモ欄に入力した特徴で設定します。
 
 ### タグ
-`<FTKR_REFRESH_AP_RATE: x>`
+`<BAP_REFRESH_AP_RATE: x>`
 * x : APのターンごとの回復量の変化率。％で設定します。
 
 ### データベースでの対象
@@ -493,7 +493,7 @@ APのターンごとの回復量が、設定した倍率で変化します。
 
 ### 入力例
 ```
-<FTKR_REFRESH_AP_RATE: 150>
+<BAP_REFRESH_AP_RATE: 150>
 ```
 APのターンごとの回復量を 150% に変化させます。
 
@@ -506,8 +506,8 @@ APのターンごとの回復量を 150% に変化させます。
 
 ## プラグインコマンド
 ```
-FTKR_現在AP増加 [増加量]
-FTKR_ADD_CURRENT_AP [value]
+BAP_現在AP増加 [増加量]
+BAP_ADD_CURRENT_AP [value]
 ```
 
 または
@@ -523,8 +523,8 @@ AltTB_ADD_AP [value]
 
 ### 入力例
 ```
-FTKR_現在AP増加 1
-FTKR_ADD_CURRENT_AP 1
+BAP_現在AP増加 1
+BAP_ADD_CURRENT_AP 1
 ```
 現在APを 1 増やします。
 

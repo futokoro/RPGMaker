@@ -513,7 +513,6 @@ FTKR.BAT = FTKR.BAT || {};
             if (actionList.length > 0) {
                 this.selectAllActions(actionList);
             }
-            console.log('行動再設定', this.name());
         }
         this.setActionState('waiting');
     };
@@ -563,12 +562,10 @@ FTKR.BAT = FTKR.BAT || {};
         switch (command) {
             case '行動回数増加':
             case 'ACTION_PLUS':
-                console.log('プラグインコマンド', '行動回数増加');
                 this.addActionTimes(args);
                 break;
             case '行動再設定':
             case 'RESET_ACTIONS':
-                console.log('プラグインコマンド', '行動再設定');
                 this.catResetActions(args);
                 break;
         }
@@ -594,7 +591,6 @@ FTKR.BAT = FTKR.BAT || {};
                 break;
         }
         if (target && target.isAlive()) {
-            console.log('addActionTimes', target.name());
             target.addActionTimes(setArgNum(args[2]));
             BattleManager._statusWindow.refresh();
         }
@@ -620,7 +616,6 @@ FTKR.BAT = FTKR.BAT || {};
                 break;
         }
         if (target && target.isAlive()) {
-            console.log('catResetActions', target.name());
             target.catResetActions();
         }
     };
