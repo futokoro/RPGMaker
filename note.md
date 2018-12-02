@@ -2,6 +2,26 @@
 
 # 過去の更新情報
 
+## 2018/11の更新情報
+
+### 2018/11/18
+* [FTKR_SkillExpansion](FTKR_SkillExpansion.ja.md) v1.4.2
+
+### 2018/11/17
+* [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v1.6.2
+
+### 2018/11/11
+* [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v1.6.1
+
+### 2018/11/09
+* [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v1.6.0
+
+### 2018/11/07
+* [FTKR_ItemCompositionSystem](FTKR_ItemCompositionSystem.ja.md) v1.7.2
+
+### 2018/11/03
+* [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md) v3.4.3
+
 ## 2018/10の更新情報
 
 ### 2018/10/28

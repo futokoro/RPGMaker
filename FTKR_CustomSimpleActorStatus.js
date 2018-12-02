@@ -4,8 +4,8 @@
 // プラグインNo : 9
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2018/11/03
-// バージョン : v3.4.3
+// 最終更新日 : 2018/12/02
+// バージョン : v3.4.4
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v3.4.3 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v3.4.4 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -1118,6 +1118,9 @@ FTKR.CSS = FTKR.CSS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v3.4.4 - 2018/12/02 : 不具合修正
+ *    1. カスタム画像で、存在しない画像IDを指定した場合にエラーになる不具合を修正。
  * 
  * v3.4.3 - 2018/11/03 : 仕様変更
  *    1. ediff(x)、aopdiff(x)、ediffaop(x)の表示内容の設定を、pdiff(x)から独立。
@@ -2343,6 +2346,7 @@ FTKR.CSS = FTKR.CSS || {};
                 return this.drawCssText(actor, x, y, width, match[2]);
             default:
                 if (!actor) return 1;
+                console.log(match[2]);
                 match[2] = this.evalCssCustomFormula(actor, match[2]);
                 return this.drawCssActorStatusBase_A1(index, actor, x, y, width, match, lss, css);
         }
@@ -3199,6 +3203,7 @@ FTKR.CSS = FTKR.CSS || {};
 
     Window_Base.prototype.drawCssImage = function(actor, dx, dy, width, id) {
         var bgi = actor.cssbgi(id) ? actor.cssbgi(id) : actor.actor().cssbgi[id];
+        if (!bgi) return 1;
         var bitmap = ImageManager.loadPicture(bgi.name);
         if (!bitmap) return 1;
         var sw = bgi.width || bitmap.width;

@@ -1,7 +1,7 @@
 # RPGツクールMV プラグイン
 
 プラグインは逐次追加更新を行っています。最新情報は、[更新情報](#更新情報)を確認してください。<br>
-公開中のプラグインの数：89 (19年度中に 100 にしたいなぁ)
+公開中のプラグインの数：93 (19年度中に 100 にしたいなぁ)
 
 # 目次
 
@@ -18,6 +18,7 @@
 1. [ステート](#ステート)
 1. [敵グループ](#敵グループ)
 1. [バトル](#バトル)
+    1. [FTKR_AlternatingTurnBattle](#ftkr_alternatingturnbattle)
 1. [イベント](#イベント)
 1. [マップ](#マップ)
 1. [ピクチャ](#ピクチャ)
@@ -48,7 +49,7 @@
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
-| [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) | [あり](FTKR_CustomSimpleActorStatus.ja.md) | [v3.4.3](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CustomSimpleActorStatus.js) | 2018/11/03 | ステータス表示を変更する 本体プラグイン |
+| [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) | [あり](FTKR_CustomSimpleActorStatus.ja.md) | [v3.4.4](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CustomSimpleActorStatus.js) | 2018/12/02 | ステータス表示を変更する 本体プラグイン |
 | [FTKR_CSS_MenuStatus](FTKR_CSS_MenuStatus.js) | [あり](FTKR_CSS_MenuStatus.ja.md) | [v2.1.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_MenuStatus.js) | 2018/09/29 | メニュー画面のステータス表示を変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) |
 | [FTKR_CSS_BattleStatus](FTKR_CSS_BattleStatus.js) | [あり](FTKR_CSS_BattleStatus.ja.md) | [v2.1.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_BattleStatus.js) | 2018/09/29 | バトル画面のステータス表示を変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) |
 | [FTKR_CSS_DetailedStatus](FTKR_CSS_DetailedStatus.js) | [あり](FTKR_CSS_DetailedStatus.ja.md) | [v2.1.3](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_DetailedStatus.js) | 2018/10/20 | ステータス画面のステータス表示を変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) |
@@ -198,7 +199,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 
 # バトル
 
-プラグイン数:12
+プラグイン数:13
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
@@ -209,13 +210,24 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 | [FTKR_BattleAbortConditions](FTKR_BattleAbortConditions.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_BattleAbortConditions.js) | 2018/02/12 | 設定した条件を満たすと、バトルを中断して勝利または敗北する |
 | [FTKR_MaxBattleMembers](FTKR_MaxBattleMembers.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_MaxBattleMembers.js) | 2018/02/25 | バトルメンバーの最大人数を変数で管理する |
 | [FTKR_ChangeBattleSpeed](FTKR_ChangeBattleSpeed.js) | なし | [v1.0.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ChangeBattleSpeed.js) | 2018/02/27 | バトル中の各種速度を変数で管理する |
-| [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.js) | [仮版](FTKR_AlternatingTurnBattle.ja.md) | [v1.6.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AlternatingTurnBattle.js) | 2018/11/17 | 敵味方交互にターンが進むターン制戦闘システム |
 | [FTKR_BattleWindowLayout](FTKR_BattleWindowLayout.js) | [あり](FTKR_BattleWindowLayout.ja.md) | [v1.2.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_BattleWindowLayout.js) | 2018/08/19 | 戦闘時のウィンドウ配置を変更する |
 | [FTKR_ExForceAction](FTKR_ExForceAction.js) | [あり](FTKR_ExForceAction.ja.md) | [v1.1.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExForceAction.js) | 2018/08/06 | 戦闘行動の強制コマンドの機能を拡張する |
 | [FTKR_ExGuardEffect](FTKR_ExGuardEffect.js) | [あり](FTKR_ExGuardEffect.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExGuardEffect.js) | 2018/04/15 | 防御の効果を拡張する |
 | [FTKR_DisplayEnemyParameters](FTKR_DisplayEnemyParameters.js) | [あり](FTKR_DisplayEnemyParameters.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_DisplayEnemyParameters.js) | 2018/04/17 | 戦闘画面にエネミーのパラメータを表示する |
+| [FTKR_BattleActionTimes](FTKR_BattleActionTimes.js) | [あり](FTKR_BattleActionTimes.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_BattleActionTimes.js) | 2018/12/02 | 戦闘中の行動回数を表示・操作する |
+| [FTKR_BattleActionPoints](FTKR_BattleActionPoints.js) | [あり](FTKR_BattleActionPoints.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_BattleActionPoints.js) | 2018/12/02 | 消費コスト用のパラメータ「アクションポイント(AP)」を導入する |
 
 FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
+
+# FTKR_AlternatingTurnBattle
+
+プラグイン数:3
+
+| プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
+|:-----------|:-----------:|:-------------|:-------------|:-------------|
+| [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.js) | [仮版](FTKR_AlternatingTurnBattle.ja.md) | [v2.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AlternatingTurnBattle.js) | 2018/12/02 | 敵味方交互にターンが進むターン制戦闘システム |
+| [FTKR_AltTB_SelectTouchedActor](FTKR_AltTB_SelectTouchedActor.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_BattleAcFTKR_AltTB_SelectTouchedActortionPoints.js) | 2018/12/02 | ステータスウィンドウ内をクリックして、その行または列のアクターを選択する<br> ＜以下のプラグインが必要＞ <br> [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.js) |
+| [FTKR_AltTB_BattleEventConditions](FTKR_AltTB_BattleEventConditions.js) | [あり](FTKR_AltTB_BattleEventConditions.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AltTB_BattleEventConditions.js) | 2018/12/02 | バトルイベントにFTKR_AltTB専用のターン条件を設定できる<br> ＜以下のプラグインが必要＞ <br> [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.js) |
 
 [目次に戻る](#目次)
 
@@ -307,25 +319,15 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 # 更新情報
 
-2018/11の更新情報
+2018/12の更新情報
 
-### 2018/11/18
-* [FTKR_SkillExpansion](FTKR_SkillExpansion.ja.md) v1.4.2
-
-### 2018/11/17
-* [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v1.6.2
-
-### 2018/11/11
-* [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v1.6.1
-
-### 2018/11/09
-* [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v1.6.0
-
-### 2018/11/07
-* [FTKR_ItemCompositionSystem](FTKR_ItemCompositionSystem.ja.md) v1.7.2
-
-### 2018/11/03
-* [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md) v3.4.3
+### 2018/12/02
+* [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v2.0.0
+* [FTKR_BattleActionTimes](FTKR_BattleActionTimes.ja.md) v1.0.0(新規)
+* [FTKR_BattleActionPoints](FTKR_BattleActionPoints.ja.md) v1.0.0(新規)
+* [FTKR_AltTB_SelectTouchedActor](FTKR_AltTB_SelectTouchedActor.js) v1.0.0(新規)
+* [FTKR_AltTB_BattleEventConditions](FTKR_AltTB_BattleEventConditions.ja.md) v1.0.0(新規)
+* [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md) v3.4.4
 
 [過去の更新情報](note.md)
 
