@@ -4,8 +4,8 @@
 // プラグインNo : 93
 // 作成者　　   : フトコロ
 // 作成日　　   : 2018/12/02
-// 最終更新日   : 
-// バージョン   : v1.0.0
+// 最終更新日   : 2018/12/04
+// バージョン   : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -17,7 +17,7 @@ FTKR.AltTB.BEC = FTKR.AltTB.BEC || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 バトルイベントにFTKR_AltTB専用のターン条件を設定できる
+ * @plugindesc v1.0.1 バトルイベントにFTKR_AltTB専用のターン条件を設定できる
  * @author フトコロ
  *
  * @help 
@@ -63,6 +63,9 @@ FTKR.AltTB.BEC = FTKR.AltTB.BEC || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.1 - 2018/12/04 : 不具合修正
+ *    1. バトルイベントの条件が一部反映されない不具合を修正。
  * 
  * v1.0.0 - 2018/12/02 : 初版作成
  * 
@@ -138,10 +141,8 @@ if(Imported.FTKR_AltTB) (function() {
     var _Game_Troop_meetsConditions = Game_Troop.prototype.meetsConditions;
     Game_Troop.prototype.meetsConditions = function(page) {
         var c = page.conditions;
-        var result = _Game_Troop_meetsConditions.call(this, page);
-        if (!c.turnStarting && !c.playerTurnStarting && !c.playerTurnEnding &&
-                !c.enemyTurnStarting &&  !c.enemyTurnEnding && !result) {
-            return false;  // Conditions not set
+        if (!_Game_Troop_meetsConditions.call(this, page)) {
+            return false;
         }
         if (c.turnStarting) {
             if (!BattleManager.isTurnStart()) {

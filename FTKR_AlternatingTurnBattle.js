@@ -4,8 +4,8 @@
 // プラグインNo : 75
 // 作成者     : フトコロ
 // 作成日     : 2018/04/08
-// 最終更新日 : 2018/12/02
-// バージョン : v2.0.0
+// 最終更新日 : 2018/12/04
+// バージョン : v2.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.AltTB = FTKR.AltTB || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.0.0 敵味方交互にターンが進むターン制戦闘システム
+ * @plugindesc v2.0.1 敵味方交互にターンが進むターン制戦闘システム
  * @author フトコロ
  *
  * @param TurnEnd Command
@@ -33,7 +33,7 @@ FTKR.AltTB = FTKR.AltTB || {};
  * @default 0
  *
  * @param Start Actor Command
- * @desc プレイヤーターンでアクターのコマンドから始める
+ * @desc プレイヤーターンで先頭のアクターを選択した状態から始める
  * @type boolean
  * @on 有効
  * @off 無効
@@ -46,13 +46,13 @@ FTKR.AltTB = FTKR.AltTB || {};
  * @off 無効
  * @default false
  *
- * @param Disable Change When Party Cannot Act
- * @desc パーティーが行動できなくなった時に、アクターを変更する操作を禁止して、パーティーコマンドに戻す。
+ * @param Enabled Auto Select TurnEnd Command
+ * @desc パーティーが行動できなくなった時に、パーティーコマンドの「ターン終了」に自動でカーソルを合わせる。
  * @type boolean
  * @on 有効
  * @off 無効
  * @default false
- *
+ * 
  * @param Confused Action Timing
  * @desc 行動制約ステートによるアクターの行動タイミングを設定する。
  * @type select
@@ -129,8 +129,8 @@ FTKR.AltTB = FTKR.AltTB || {};
  *    FTKR_AlternatingTurnBattle.js
  * 
  *    ↓このプラグインよりも下に登録↓
- *    FTKR_BattleActionTimes.js       (バトル画面に行動回数を表示)
  *    FTKR_BattleActionPoints.js      (消費コストにアクションポイントを追加)
+ *    FTKR_BattleActionTimes.js       (バトル画面に行動回数を表示)
  *    FTKR_BattleWindowLayout.js      (バトル画面のコマンドの位置を変更)
  *    FTKR_CSS_BattleStatus.js        (バトル画面のステータス表示を変更)
  *    FTKR_DisplayCommandFrame.js     (カーソルの変わりに枠や画像を表示)
@@ -153,6 +153,12 @@ FTKR.AltTB = FTKR.AltTB || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v2.0.1 - 2018/12/04 : 不具合修正
+ *    1. プラグインパラメータ Disable Change When Party Cannot Act を削除し
+ *       パーティーが行動できなくなった時に、自動でパーティーコマンドに戻すように変更。
+ *    2. パーティーが行動できなくなった時に、ターン終了コマンドに自動でカーソルを
+ *       合わせる機能を追加。
  * 
  * v2.0.0 - 2018/12/02 : 全面仕様変更、ヘルプを削除
  *    1. 行動回数に関する処理を見直し、別プラグインに独立。
@@ -194,7 +200,7 @@ FTKR.AltTB = FTKR.AltTB || {};
         changePlayer            : (paramParse(parameters['Change Player']) || 0),
         startActorCmd           : (paramParse(parameters['Start Actor Command']) || false),
         enableAutoTurnEnd       : (paramParse(parameters['Enable Auto Player Turn End']) || false),
-        disableChangeActorWPCA  : (paramParse(parameters['Disable Change When Party Cannot Act']) || false),
+        enabledAutoTurnEndCmd   : (paramParse(parameters['Enabled Auto Select TurnEnd Command']) || false),
         confusedActionTiming    : +(paramParse(parameters['Confused Action Timing']) || 0),
         disableAC               : (paramParse(parameters['Disable AC']) || false),
         activatedSv             : (paramParse(parameters['Activated Sv Actor Sign']) || 0),
@@ -202,7 +208,7 @@ FTKR.AltTB = FTKR.AltTB || {};
         notSelectActivatedActor : (paramParse(parameters['Cannot Select Activated Actor']) || false),
     };
 
-    FTKR.test = false;
+    FTKR.test = true;
 
     //=============================================================================
     // BattleManager
@@ -278,16 +284,14 @@ FTKR.AltTB = FTKR.AltTB || {};
     };
 
     /*----------------------------------------------------------------------
-     isPartyTurn
+     _isPlayerTurn
     -----------------------------------------------------------------------*/
     BattleManager.changeTrunSide = function() {
         if (FTKR.AltTB.notActivatedSv && this._isPlayerTurn) {
             $gameParty.setActionState('');
         }
         this._isPlayerTurn = !this._isPlayerTurn;
-        this._isGroupTurnStart = true;
         this.clearInputCount();
-        if (FTKR.AltTB.enableAP) this.changeAPWindow();
     };
 
     /*----------------------------------------------------------------------
@@ -317,7 +321,7 @@ FTKR.AltTB = FTKR.AltTB || {};
     //書き換え
     BattleManager.selectNextCommand = function() {
         do {
-            if ($gameParty.canInput() || !FTKR.AltTB.disableChangeActorWPCA) {
+            if ($gameParty.canInput()) {
                 if (this._actorIndex + 1 >= $gameParty.size()) {
                     this.changeActorAltTB(0);
                 } else {
@@ -332,7 +336,7 @@ FTKR.AltTB = FTKR.AltTB || {};
     //書き換え
     BattleManager.selectPreviousCommand = function() {
         do {
-            if ($gameParty.canInput() || !FTKR.AltTB.disableChangeActorWPCA) {
+            if ($gameParty.canInput()) {
                 if (this._actorIndex - 1 < 0) {
                     this.changeActorAltTB($gameParty.size() - 1);
                 } else {
@@ -421,19 +425,16 @@ FTKR.AltTB = FTKR.AltTB || {};
         if (!this.isBusy() && !this.updateEvent()) {
             switch (this._phase) {
             case 'start':
-                this.updateStart();
+                this.updateStart();//変更
                 break;
             case 'turnStart':
-                this.updateTurnStart();
+                this.updateTurnStart();//追加
                 break;
             case 'turn':
                 this.updateTurn();
                 break;
             case 'action':
                 this.updateAction();
-                break;
-            case 'actionEnd':
-                this.updateActionEnd();
                 break;
             case 'turnEnd':
                 this.updateTurnEnd();
@@ -445,6 +446,23 @@ FTKR.AltTB = FTKR.AltTB || {};
         }
     };
 
+    //書き換え
+    BattleManager.updateEvent = function() {
+        switch (this._phase) {
+            case 'start':
+            case 'turnStart':
+            case 'turn':
+            case 'turnEnd':
+                if (this.isActionForced()) {
+                    this.processForcedAction();
+                    return true;
+                } else {
+                    return this.updateEventMain();
+                }
+        }
+        return this.checkAbort();
+    };
+    
     //書き換え
     BattleManager.checkAbort = function() {
         if ($gameParty.isEmpty() || this.isAborting()) {
@@ -532,37 +550,50 @@ FTKR.AltTB = FTKR.AltTB || {};
     -----------------------------------------------------------------------*/
     //書き換え
     BattleManager.updateTurn = function() {
+        if (FTKR.test) console.log('updateTurn');
         $gameParty.requestMotionRefresh();
         if (!this.checkGroupTurnEnd()) {
             if (this._isGroupTurnStart) {
                 this.updateGroupTurnStart();
                 this._isGroupTurnStart = false;
-            } else if (!this.checkChangePartyMode()){
-                this.updateGroupDuringTurn();
+            } else if (!this.checkChangePlayerMode()){
+                this.updateDuringGroupTurn();
             }
         }
     };
 
+    //group turn end
     BattleManager.checkGroupTurnEnd = function() {
         if (this.isPlayerTurnEnd()) {
-            this._phase = 'turn';
-            this.changeTrunSide();
-            this._isGroupTurnStart = true;
+            this.updatePlayerTurnEnd();
             return true;
         } else if (this.isEnemyTurnEnd()) {
-            this._phase = 'turnEnd';
+            this.updateEnemyTurnEnd();
             return true;
         }
         return false;
     };
 
+    BattleManager.updatePlayerTurnEnd = function() {
+        this._phase = 'turn';
+        this.changeTrunSide();
+        this._isGroupTurnStart = true;
+    };
+
+    BattleManager.updateEnemyTurnEnd = function() {
+        this._phase = 'turnEnd';
+    };
+
+    //group turn start
     BattleManager.updateGroupTurnStart = function() {
+        if (FTKR.test) console.log('updateGroupTurnStart');
         if (FTKR.AltTB.startActorCmd && this.isPlayerInputTurn()) {
             this.selectNextCommand();
         }
     };
 
-    BattleManager.checkChangePartyMode = function() {
+    //during group turn
+    BattleManager.checkChangePlayerMode = function() {
         if (this._isPlayerTurn) {
             if (this.isPlayerInputTurnEnd()) {
                 this._isGroupTurnStart = true;
@@ -577,15 +608,16 @@ FTKR.AltTB = FTKR.AltTB || {};
         return false;
     };
 
-    BattleManager.updateGroupDuringTurn = function() {
+    BattleManager.updateDuringGroupTurn = function() {
         if (this.isPlayerInputTurn()) {
             this.updatePlayerInputTurn();
         } else {
-            this.updateNormalDuringTurn();
+            this.updateDuringNormalTurn();
         }
     };
 
     BattleManager.updatePlayerInputTurn = function() {
+        if (FTKR.test) console.log('updatePlayerInputTurn');
         if (this.checkAutoTurnChange()) {
             this.commandTurnEnd();
         } else {
@@ -605,7 +637,7 @@ FTKR.AltTB = FTKR.AltTB || {};
 
     BattleManager.autoSelectNextActor = function() {
         if (!FTKR.AltTB.notSelectActivatedActor || !this.actor()) return;
-        if (!$gameParty.canInput() && FTKR.AltTB.disableChangeActorWPCA) {
+        if (!$gameParty.canInput()) {
             this.clearActorAltTB();
         } else {
             if (!this.actor().canInput()) {
@@ -616,7 +648,11 @@ FTKR.AltTB = FTKR.AltTB || {};
         }
     };
 
-    BattleManager.updateNormalDuringTurn = function() {
+    BattleManager.updateDuringNormalTurn = function() {
+        if (FTKR.test) {
+            var name = this._subject ? this._subject.name() : '';
+            console.log('updateDuringNormalTurn', name);
+        }
         if (!this._subject) {
             this._subject = this.getNextSubject();
         }
@@ -649,18 +685,19 @@ FTKR.AltTB = FTKR.AltTB || {};
         subject.removeCurrentAction();
     };
 
+    /*----------------------------------------------------------------------
+     action フェーズ
+    -----------------------------------------------------------------------*/
     //書き換え
     BattleManager.endAction = function() {
-        if (FTKR.test) console.log('endAction', this._subject.name());
-        this._phase = 'actionEnd';
+        if (FTKR.test) console.log('endAction', this._subject.name(), this._subject.numActions());
+//        this._phase = 'actionEnd';
         this._logWindow.endAction(this._subject);
+        this.updateActionEnd();
     };
 
-    /*----------------------------------------------------------------------
-     actionEnd フェーズ
-    -----------------------------------------------------------------------*/
     BattleManager.updateActionEnd = function() {
-        if (FTKR.test) console.log('updateActionEnd', this._subject.name(), this._subject.numActions());
+//        if (FTKR.test) console.log('updateActionEnd', this._subject.name(), this._subject.numActions());
         this._phase = 'turn';
         var subject = this._subject;
         subject.onAllActionsEnd();
@@ -707,7 +744,7 @@ FTKR.AltTB = FTKR.AltTB || {};
     Game_Battler.prototype.removeCurrentAction = function() {
         if (!FTKR.AltTB.disableAC) {
             this._actions.shift();
-            console.log('removeCurrentAction', this.name(), this.numActions());
+            if (FTKR.test) console.log('removeCurrentAction', this.name(), this.numActions());
         }
     };
 
@@ -756,7 +793,7 @@ FTKR.AltTB = FTKR.AltTB || {};
         this._partyCommandWindow = new Window_PartyCommand();
         this._partyCommandWindow.setHandler('fight',  this.commandFight.bind(this));
         this._partyCommandWindow.setHandler('escape', this.commandEscape.bind(this));
-        this._partyCommandWindow.setHandler('turnEnd', this.commandTurnEnd.bind(this));
+        this._partyCommandWindow.setHandler('turnEnd', this.commandTurnEnd.bind(this));//追加
         this._partyCommandWindow.deselect();
         this.addWindow(this._partyCommandWindow);
     };
@@ -779,6 +816,14 @@ FTKR.AltTB = FTKR.AltTB || {};
         BattleManager.commandTurnEnd();
     };
 
+    var _Scene_Battle_startPartyCommandSelection = Scene_Battle.prototype.startPartyCommandSelection;
+    Scene_Battle.prototype.startPartyCommandSelection = function() {
+        _Scene_Battle_startPartyCommandSelection.call(this);
+        if (!$gameParty.canInput() && FTKR.AltTB.enabledAutoTurnEndCmd) {
+            this._partyCommandWindow.selectSymbol('turnEnd');
+        }
+    };
+    
     //書き換え
     Scene_Battle.prototype.createActorCommandWindow = function() {
         this._actorCommandWindow = new Window_ActorCommand();
@@ -786,10 +831,10 @@ FTKR.AltTB = FTKR.AltTB || {};
         this._actorCommandWindow.setHandler('skill',   this.commandSkill.bind(this));
         this._actorCommandWindow.setHandler('guard',   this.commandGuard.bind(this));
         this._actorCommandWindow.setHandler('item',    this.commandItem.bind(this));
-        this._actorCommandWindow.setHandler('pageup',  this.commandPageup.bind(this));
-        this._actorCommandWindow.setHandler('pagedown',this.commandPagedown.bind(this));
-        this._actorCommandWindow.setHandler('cancel',  this.commandCancel.bind(this));
-        this._actorCommandWindow.setStatusWindow(this._statusWindow);
+        this._actorCommandWindow.setHandler('pageup',  this.commandPageup.bind(this));//追加
+        this._actorCommandWindow.setHandler('pagedown',this.commandPagedown.bind(this));//追加
+        this._actorCommandWindow.setHandler('cancel',  this.commandCancel.bind(this));//変更
+        this._actorCommandWindow.setStatusWindow(this._statusWindow);//追加
         this.addWindow(this._actorCommandWindow);
     };
 
@@ -848,15 +893,29 @@ FTKR.AltTB = FTKR.AltTB || {};
         this.setup(BattleManager.actor());
     };
 
+    Window_ActorCommand.prototype.selectNextActor = function() {
+        if ($gameParty.canInput()) {
+            BattleManager.selectNextCommand();
+            this.changeInputWindow();
+            SoundManager.playCursor();
+        } else {
+            SoundManager.playBuzzer();
+        }
+    };
+
+    Window_ActorCommand.prototype.selectPreviousActor = function() {
+        if ($gameParty.canInput()) {
+            BattleManager.selectPreviousCommand();
+            this.changeInputWindow();
+            SoundManager.playCursor();
+        } else {
+            SoundManager.playBuzzer();
+        }
+    };
+
     Window_ActorCommand.prototype.cursorRight = function(wrap) {
         if (FTKR.AltTB.changePlayer === 1) {
-            if ($gameParty.canInput() || !FTKR.AltTB.disableChangeActorWPCA) {
-                BattleManager.selectNextCommand();
-                this.changeInputWindow();
-                SoundManager.playCursor();
-            } else {
-                SoundManager.playBuzzer();
-            }
+            this.selectNextActor();
         } else {
             Window_Selectable.prototype.cursorRight.call(this, wrap);
         }
@@ -864,13 +923,7 @@ FTKR.AltTB = FTKR.AltTB || {};
 
     Window_ActorCommand.prototype.cursorLeft = function(wrap) {
         if (FTKR.AltTB.changePlayer === 1) {
-            if ($gameParty.canInput() || !FTKR.AltTB.disableChangeActorWPCA) {
-                BattleManager.selectPreviousCommand();
-                this.changeInputWindow();
-                SoundManager.playCursor();
-            } else {
-                SoundManager.playBuzzer();
-            }
+            this.selectPreviousActor();
         } else {
             Window_Selectable.prototype.cursorLeft.call(this, wrap);
         }
@@ -921,9 +974,6 @@ FTKR.AltTB = FTKR.AltTB || {};
             case 'actionTargetList':
                 this.updateActionTargetList()
                 break;
-            case 'actionEnd':
-                this.updateActionEnd();
-                break;
             case 'turnEnd':
                 this.updateTurnEnd();
                 break;
@@ -934,6 +984,25 @@ FTKR.AltTB = FTKR.AltTB || {};
         }
     };
 
+    BattleManager.updateEvent = function() {
+        if (this._processingForcedAction) return false;
+        switch (this._phase) {
+        case 'start':
+        case 'turnStart':
+        case 'turn':
+        case 'turnEnd':
+        case 'actionList':
+        case 'actionTargetList':
+          if (this.isActionForced()) {
+            this.processForcedAction();
+            return true;
+          } else {
+            return this.updateEventMain();
+          }
+        }
+        return this.checkAbort();
+    };
+    
     var _YPE_BEC_BattleManager_forceAction = BattleManager.forceAction;
     BattleManager.forceAction = function(battler) {
         if (this._subject) this._subject.clearResult();

@@ -4,8 +4,8 @@
 // プラグインNo : 91
 // 作成者     : フトコロ
 // 作成日     : 2018/12/02
-// 最終更新日 : 2018/12/03
-// バージョン : v1.0.1
+// 最終更新日 : 2018/12/04
+// バージョン : v1.0.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.BAP = FTKR.BAP || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.1 消費コスト用のパラメータ「アクションポイント(AP)」を導入するプラグイン
+ * @plugindesc v1.0.2 消費コスト用のパラメータ「アクションポイント(AP)」を導入するプラグイン
  * @author フトコロ
  *
  * @param Init Start AP
@@ -225,7 +225,6 @@ FTKR.BAP = FTKR.BAP || {};
  * 2. 以下のプラグインと組み合わせる場合は、プラグイン管理の順番に注意してください。
  * 
  *    FTKR_CustomSimpleActorStatus.js (ステータス表示を変更)
- *    FTKR_FVActorAnimation.js        (フロントビューでアクター画像にアニメーション)
  *    FTKR_AlternatingTurnBattle.js
  *    ↑このプラグインよりも上に登録↑
  *    FTKR_BattleActionPoints.js
@@ -249,8 +248,11 @@ FTKR.BAP = FTKR.BAP || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.2 - 2018/12/04 : 不具合修正
+ *    1. プラグインパラメータ Show AP Window が正しく反映されない不具合を修正。
+ * 
  * v1.0.1 - 2018/12/03 : 不具合修正
- *  1. プラグインコマンドの誤記修正。
+ *    1. プラグインコマンドの誤記修正。
  * 
  * v1.0.0 - 2018/12/02 : 初版作成
  * 
@@ -550,6 +552,7 @@ function Window_BattleActionPoint() {
 
     var _BattleManager_startInput = BattleManager.startInput;
     BattleManager.startInput = function() {
+        if (FTKR.BAP.showApWindow) this._partyApWindow.open();
         this.turnRefreshAP();
         _BattleManager_startInput.call(this);
     };
@@ -562,10 +565,24 @@ function Window_BattleActionPoint() {
         }
     };
 
+    var _BattleManager_startTurn = BattleManager.startTurn;
+    BattleManager.startTurn = function() {
+        if (!Imported.FTKR_AltTB && FTKR.BAP.showApWindow !== 2) this._partyApWindow.close();
+        _BattleManager_startTurn.call(this);
+    };
+
+    if (Imported.FTKR_AltTB) {
+    var _BattleManager_updatePlayerTurnEnd = BattleManager.updatePlayerTurnEnd;
+    BattleManager.updatePlayerTurnEnd = function() {
+        _BattleManager_updatePlayerTurnEnd.call(this);
+        if (FTKR.BAP.showApWindow !== 2) this._partyApWindow.close();
+    };
+    }
+    
     BattleManager.payItemApCost = function(battler) {
         if (battler && battler.isActor()) {
             var action = battler.inputtingAction();
-            this._usedActionPoints.push($gameParty.payApCost(battler, action.item()));
+            this._usedActionPoints.push(battler.payApCost(action.item()));
             this._partyApWindow.refresh();
         }
     };
@@ -669,7 +686,7 @@ function Window_BattleActionPoint() {
         if (FTKR.BAP.enabledForceActionApCost && !this.canPayAP(skill)) return;
         _Game_Battler_forceAction.call(this, skillId, targetIndex);
         if (FTKR.BAP.enabledForceActionApCost) {
-            $gameParty.payApCost(this, skill);
+            this.payApCost(skill);
             BattleManager._partyApWindow.refresh();
         }
     };
@@ -695,6 +712,12 @@ function Window_BattleActionPoint() {
         return skills.some(function(skill){ 
                 return this.canPayAP(skill);
             },this);
+    };
+
+    Game_Actor.prototype.payApCost = function(item) {
+        var cost = this.itemApCost(item);
+        $gameParty.gainActionPoint(-cost);
+        return cost;
     };
 
     //=============================================================================
@@ -779,12 +802,6 @@ function Window_BattleActionPoint() {
     Game_Party.prototype.gainActionPoint = function(value) {
         this._actionPoint += value;
         this.refreshActionPoint();
-    };
-
-    Game_Party.prototype.payApCost = function(actor, item) {
-        var cost = actor.itemApCost(item);
-        this._actionPoint -= cost;
-        return cost;
     };
 
     Game_Party.prototype.growActionPoint = function(value) {

@@ -586,7 +586,8 @@ FTKR_ADD_CURRENT_AP 1
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.0.1](FTKR_BattleActionPoints.js) | 2018/12/03 | プラグインコマンドの誤記修正 |
+| [ver1.0.2](FTKR_BattleActionPoints.js) | 2018/12/04 | プラグインパラメータ Show AP Window が正しく反映されない不具合を修正 |
+| ver1.0.1 | 2018/12/03 | プラグインコマンドの誤記修正 |
 | ver1.0.0 | 2018/12/02 | FTKR_BattleActionPoints v1.6.2 の、悪アクションポイントに関する処理を独立。処理を見直して別プラグインとして作成 |
 
 # ライセンス

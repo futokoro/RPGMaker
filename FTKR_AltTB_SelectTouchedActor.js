@@ -3,9 +3,9 @@
 // FTKR_AltTB_SelectTouchedActor.js
 // プラグインNo : 92
 // 作成者     : フトコロ
-// 作成日     : 2018/12/01
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 作成日     : 2018/12/02
+// 最終更新日 : 2018/12/04
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -17,7 +17,7 @@ FTKR.AltTB.STA = FTKR.AltTB.STA || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 ステータスウィンドウ内をクリックして、その行または列のアクターを選択する
+ * @plugindesc v1.0.1 ステータスウィンドウ内をクリックして、その行または列のアクターを選択する
  * @author フトコロ
  *
  * @help 
@@ -61,7 +61,10 @@ FTKR.AltTB.STA = FTKR.AltTB.STA || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
- * v1.0.0 - 2018/12/01 : 初版作成
+ * v1.0.1 - 2018/12/04 : 不具合修正
+ *    1. アクターを選択するとエラーになる不具合を修正。
+ * 
+ * v1.0.0 - 2018/12/02 : 初版作成
  * 
  *-----------------------------------------------------------------------------
 */
@@ -129,7 +132,7 @@ if(Imported.FTKR_AltTB) (function() {
         if (this.isTouchedInsideDeactive()) {
             var index = this.isCursorIndexOnMouse();
             if (index >= 0 && BattleManager.isTouchedOutsideActorCommandWindow()) {
-                if ($gameParty.members()[index].canInput() || !FTKR.AltTB.disableChangeActorWPCA) {
+                if ($gameParty.members()[index].canInput()) {
                     this.changeActorOnMouse(index);
                 } else {
                     SoundManager.playBuzzer();
@@ -142,7 +145,7 @@ if(Imported.FTKR_AltTB) (function() {
     };
 
     Window_BattleStatus.prototype.changeActorOnMouse = function(index) {
-        BattleManager.setNextCommand(index);
+        BattleManager.changeActorAltTB(index);
         this.select(BattleManager.actor().index());
         BattleManager._actorCommandWindow.setup(BattleManager.actor());
         SoundManager.playCursor();

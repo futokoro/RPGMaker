@@ -102,7 +102,8 @@ FTKR_AltTB_BattleEventConditions.js
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.0.0](FTKR_AltTB_BattleEventConditions.js) | 2018/12/02 | 新規作成 |
+| [ver1.0.1](FTKR_AltTB_BattleEventConditions.js) | 2018/12/04 | バトルイベントの条件が一部反映されない不具合を修正 |
+| ver1.0.0 | 2018/12/02 | 新規作成 |
 
 # ライセンス
 
