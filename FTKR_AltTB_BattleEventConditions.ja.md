@@ -45,7 +45,7 @@ FTKR_AltTB_BattleEventConditions.js
 ### タグ
 ```
 <ターン開始>
-<TURN_STAETINS>
+<TURN_STARTING>
 ```
 
 ### 内容
@@ -56,7 +56,7 @@ FTKR_AltTB_BattleEventConditions.js
 ### タグ
 ```
 <プレイヤーターン開始>
-<PLAYER_TURN_STAETINS>
+<PLAYER_TURN_STARTING>
 ```
 
 ### 内容
@@ -67,7 +67,7 @@ FTKR_AltTB_BattleEventConditions.js
 ### タグ
 ```
 <プレイヤーターン終了>
-<PLAYER_TURN_ENDINS>
+<PLAYER_TURN_ENDING>
 ```
 
 ### 内容
@@ -78,7 +78,7 @@ FTKR_AltTB_BattleEventConditions.js
 ### タグ
 ```
 <エネミーターン開始>
-<ENEMY_TURN_STAETINS>
+<ENEMY_TURN_STARTING>
 ```
 
 ### 内容
@@ -89,7 +89,7 @@ FTKR_AltTB_BattleEventConditions.js
 ### タグ
 ```
 <エネミーターン終了>
-<ENEMY_TURN_ENDINS>
+<ENEMY_TURN_ENDING>
 ```
 
 ### 内容
