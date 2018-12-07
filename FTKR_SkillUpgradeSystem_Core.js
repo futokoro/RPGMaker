@@ -4,8 +4,8 @@
 // プラグインNo : 1
 // 作成者     : フトコロ
 // 作成日     : 2017/02/06
-// 最終更新日 : 2017/10/21
-// バージョン : v1.5.2
+// 最終更新日 : 2018/12/07
+// バージョン : v1.5.3
 //=======↑本プラグインを改変した場合でも、この欄は消さないでください↑===============
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.SUS = FTKR.SUS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.5.2 スキル強化システム 本体プラグイン
+ * @plugindesc v1.5.3 スキル強化システム 本体プラグイン
  * @author フトコロ
  *
  * @param ---Skill Name Format---
@@ -1026,6 +1026,9 @@ FTKR.SUS = FTKR.SUS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.5.3 - 2018/12/07 : 不具合修正
+ *    1. 一部のプラグインコマンドが正しく実行できない不具合を修正。
+ * 
  * v1.5.2 - 2017/10/21 : 不具合修正
  *    1. 強化コストが設定されていない場合にエラーになる現象を回避。
  * 
@@ -2019,13 +2022,13 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
   }
 };
 
-Game_Interpreter.prototype.getSusUdata = function(Actor, SkillId, TypeId, Effect, dataId) {
-  var actor = $gameActors.actor(Number(Actor));
+Game_Interpreter.prototype.getSusUdata = function(actorId, skillId, typeId, Effect, dataId) {
+  var actor = $gameActors.actor(Number(actorId));
   if (!actor) return false;
-  var skillId = Number(SkillId);
-  var typeId = Number(TypeId);
-  if (!actor.sepSkill(SkillId)) return false;
-  var dataId = Effect === 'dataId' ? Number(dataId) : 0;
+  skillId = Number(skillId);
+  typeId = Number(typeId);
+  if (!actor.sepSkill(skillId)) return false;
+  dataId = Effect === 'dataId' ? Number(dataId) : 0;
   var udata = actor.getSusUdata(skillId, typeId, dataId);
   return udata ? udata : false;
 };

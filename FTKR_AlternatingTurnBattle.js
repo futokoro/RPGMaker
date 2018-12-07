@@ -479,6 +479,7 @@ FTKR.AltTB = FTKR.AltTB || {};
         if (FTKR.test) console.log('updateStart');
         this._phase = 'turnStart';
         this.clearActorAltTB();
+        $gameTroop.increaseTurn();
         if (this._surprise) this._isPlayerTurn = false;
     };
 
@@ -502,7 +503,6 @@ FTKR.AltTB = FTKR.AltTB || {};
         this._isPlayerInputTurn = !FTKR.AltTB.confusedActionTiming;
         this._isPlayerTurnEnd = false;
         this.resetLastActorIndex();
-        $gameTroop.increaseTurn();
         this.makeActionOrders();
         $gameParty.requestMotionRefresh();
         $gameParty.resetActionState();
