@@ -42,6 +42,7 @@
 ```
 FTKR_CustomSimpleActorStatus.js (ステータス表示を変更)
 FTKR_AlternatingTurnBattle.js   (味方交互にターンが進むターン制戦闘システム)
+FTKR_ExBattleCommand.js
 ↑このプラグインよりも上に登録↑
 FTKR_BattleActionPoints.js
 ```
@@ -588,7 +589,8 @@ FTKR_ADD_CURRENT_AP 1
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.0.3](FTKR_BattleActionPoints.js) | 2018/12/08 | FTKR_AlternatingTurnBattle のv2.0.2の修正に伴い、ターン回復の処理を修正 |
+| [ver1.1.0](FTKR_BattleActionPoints.js) | 2018/12/10 | FTKR_ExBattleCommand v2.0.0 に対応 |
+| ver1.0.3 | 2018/12/08 | FTKR_AlternatingTurnBattle のv2.0.2の修正に伴い、ターン回復の処理を修正 |
 | ver1.0.2 | 2018/12/04 | プラグインパラメータ Show AP Window が正しく反映されない不具合を修正 |
 | ver1.0.1 | 2018/12/03 | プラグインコマンドの誤記修正 |
 | ver1.0.0 | 2018/12/02 | FTKR_BattleActionPoints v1.6.2 の、悪アクションポイントに関する処理を独立。処理を見直して別プラグインとして作成 |

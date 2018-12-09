@@ -205,7 +205,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_ExBattleEvent](FTKR_ExBattleEvent.js) | [あり](FTKR_ExBattleEvent.ja.md) | [v1.3.3](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExBattleEvent.js) | 2018/02/19 | バトルイベントを拡張する |
 | [FTKR_DisplayRegenerateMessage](FTKR_DisplayRegenerateMessage.js) | [あり](FTKR_DisplayRegenerateMessage.ja.md) | [v1.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_DisplayRegenerateMessage.js) | 2017/05/27 | HP再生量をバトルログに表示する |
-| [FTKR_ExBattleCommand](FTKR_ExBattleCommand.js) | なし | [v1.2.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExBattleCommand.js) | 2018/10/09 | バトルコマンドを変更する |
+| [FTKR_ExBattleCommand](FTKR_ExBattleCommand.js) | [あり](FTKR_ExBattleCommand.ja.md) | [v2.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExBattleCommand.js) | 2018/12/10 | バトルコマンドを変更する |
 | [FTKR_FVActorAnimation](FTKR_FVActorAnimation.js) | なし | [v1.1.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_FVActorAnimation.js) | 2018/08/25 | フロントビューモードでアクター画像にアニメーションを表示する<br>別途アクター画像表示用のプラグインが必要 |
 | [FTKR_BattleAbortConditions](FTKR_BattleAbortConditions.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_BattleAbortConditions.js) | 2018/02/12 | 設定した条件を満たすと、バトルを中断して勝利または敗北する |
 | [FTKR_MaxBattleMembers](FTKR_MaxBattleMembers.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_MaxBattleMembers.js) | 2018/02/25 | バトルメンバーの最大人数を変数で管理する |
@@ -215,7 +215,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 | [FTKR_ExGuardEffect](FTKR_ExGuardEffect.js) | [あり](FTKR_ExGuardEffect.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExGuardEffect.js) | 2018/04/15 | 防御の効果を拡張する |
 | [FTKR_DisplayEnemyParameters](FTKR_DisplayEnemyParameters.js) | [あり](FTKR_DisplayEnemyParameters.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_DisplayEnemyParameters.js) | 2018/04/17 | 戦闘画面にエネミーのパラメータを表示する |
 | [FTKR_BattleActionTimes](FTKR_BattleActionTimes.js) | [あり](FTKR_BattleActionTimes.ja.md) | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_BattleActionTimes.js) | 2018/12/03 | 戦闘中の行動回数を表示・操作する |
-| [FTKR_BattleActionPoints](FTKR_BattleActionPoints.js) | [あり](FTKR_BattleActionPoints.ja.md) | [v1.0.3](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_BattleActionPoints.js) | 2018/12/08 | 消費コスト用のパラメータ「アクションポイント(AP)」を導入する |
+| [FTKR_BattleActionPoints](FTKR_BattleActionPoints.js) | [あり](FTKR_BattleActionPoints.ja.md) | [v1.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_BattleActionPoints.js) | 2018/12/10 | 消費コスト用のパラメータ「アクションポイント(AP)」を導入する |
 
 FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
@@ -320,6 +320,10 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 # 更新情報
 
 2018/12の更新情報
+
+### 2018/12/10
+* [FTKR_ExBattleCommand](FTKR_ExBattleCommand.ja.md) v2.0.0
+* [FTKR_BattleActionPoints](FTKR_BattleActionPoints.ja.md) v1.1.0
 
 ### 2018/12/08
 * [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v2.0.2

@@ -4,8 +4,8 @@
 // プラグインNo : 91
 // 作成者     : フトコロ
 // 作成日     : 2018/12/02
-// 最終更新日 : 2018/12/08
-// バージョン : v1.0.3
+// 最終更新日 : 2018/12/10
+// バージョン : v1.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.BAP = FTKR.BAP || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.3 消費コスト用のパラメータ「アクションポイント(AP)」を導入するプラグイン
+ * @plugindesc v1.1.0 消費コスト用のパラメータ「アクションポイント(AP)」を導入するプラグイン
  * @author フトコロ
  *
  * @param Init Start AP
@@ -226,6 +226,7 @@ FTKR.BAP = FTKR.BAP || {};
  * 
  *    FTKR_CustomSimpleActorStatus.js (ステータス表示を変更)
  *    FTKR_AlternatingTurnBattle.js
+ *    FTKR_ExBattleCommand.js
  *    ↑このプラグインよりも上に登録↑
  *    FTKR_BattleActionPoints.js
  * 
@@ -247,6 +248,8 @@ FTKR.BAP = FTKR.BAP || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.1.0 - 2018/12/10 : FTKR_ExBattleCommand v2.0.0 に対応。
  * 
  * v1.0.3 - 2018/12/08 : 不具合修正
  *    1. FTKR_AlternatingTurnBattle のv2.0.2の修正に伴い、ターン回復の処理を修正。
@@ -1057,9 +1060,9 @@ function Window_BattleActionPoint() {
         this.drawText(FTKR.BAP.dispAP + cost, x, y, width, 'right');
     };
 
-    Window_Selectable.prototype.drawItemCost = function(cost, x, y) {
+    Window_Selectable.prototype.drawItemCost = function(cost, x, y, width) {
         this.changeTextColor(this.textColor(FTKR.BAP.apCostColor));
-        this.drawApCost(cost, x, y, this.apCostWidth());
+        this.drawApCost(cost, x, y, width);
         this.resetTextColor();
     };
 
@@ -1071,13 +1074,15 @@ function Window_BattleActionPoint() {
     // Window_ActorCommand
     //=============================================================================
 
+    var _Window_ActorCommand_isCommandEnabled = Window_ActorCommand.prototype.isCommandEnabled;
     Window_ActorCommand.prototype.isCommandEnabled = function(index) {
-        var result = Window_Command.prototype.isCommandEnabled.call(this, index);
+        var result = _Window_ActorCommand_isCommandEnabled.call(this, index);
         return result && this.canPayAP(index);
     };
 
+    var _Window_ActorCommand_isCurrentItemEnabled = Window_ActorCommand.prototype.isCurrentItemEnabled;
     Window_ActorCommand.prototype.isCurrentItemEnabled = function() {
-        var result = Window_Command.prototype.isCurrentItemEnabled.call(this);
+        var result = _Window_ActorCommand_isCurrentItemEnabled.call(this);
         return result && this.canPayAP(this.index());
     };
 
@@ -1087,59 +1092,56 @@ function Window_BattleActionPoint() {
                 $gameParty.actionPoint() && this.commandAP(index) <= $gameParty.actionPoint();
     };
 
-    Window_ActorCommand.prototype.iconWidth = function(index) {
-        return 0;
-    };
-
-    Window_ActorCommand.prototype.drawCmdIcon = function(index, x, y) {
-        return x + this.iconWidth(index);
-    };
-
-    Window_ActorCommand.prototype.nameWidth = function(index, width) {
-        width = width || this.contentsWidth();
-        return Math.max(width - this.iconWidth(index) - this.costWidth(index), 0);
-    };
-
-    Window_ActorCommand.prototype.drawCmdName = function(index, x, y, width) {
-        var nw = this.nameWidth(index, width);
-        var align = !this.costWidth(index) && !this.iconWidth(index) ? this.itemTextAlign() : 'left';
-        this.drawText(this.commandName(index), x, y, nw, align);
-        return x + nw;
-    };
-
-    Window_ActorCommand.prototype.costWidth = function(index) {
-        return this.hasCost(index) ? this.textWidth('0') * FTKR.BAP.dispApWidthCmd : 0;
-    };
-
-    Window_ActorCommand.prototype.drawCmdCost = function(index, x, y) {
-        this.changeTextColor(this.textColor(FTKR.BAP.apCostColor));
-        this.drawApCost(this.commandAP(index), x, y, this.costWidth(index));
+    //FTKR_ExBattleCommand----------------------------------
+    if (!Imported.FTKR_EBC) {
+    //書き換え
+    Window_ActorCommand.prototype.drawItem = function(index) {
+        var rect = this.itemRectForText(index);
+        var align = this.itemTextAlign();
         this.resetTextColor();
+        this.changePaintOpacity(this.isCommandEnabled(index));
+        this.drawBattleCommandName(index, rect.x, rect.y, rect.width, align);
+    };
+
+    Window_ActorCommand.prototype.drawBattleCommandName = function(index, x, y, width, align) {
+        this.drawText(this.commandName(index), x, y, width, align);
+    };
+
+    Window_ActorCommand.prototype.commandEbcSkill = function(index) {
+        if (this.commandSymbol(index) === 'attack') {
+            return $dataSkills[this._actor.attackSkillId()];
+        } else if (this.commandSymbol(index) === 'guard') {
+            return $dataSkills[this._actor.guardSkillId()];
+        } else {
+            return null;
+        }
+    };
+
+    Window_Command.prototype.isActionSkillCommand = function(index) {
+        return ['attack', 'guard'].contains(this.commandSymbol(index));
+    };
+
+    }//FTKR_ExBattleCommand----------------------------------
+
+    var _Window_ActorCommand_drawBattleCommandName = Window_ActorCommand.prototype.drawBattleCommandName;
+    Window_ActorCommand.prototype.drawBattleCommandName = function(index, x, y, width, align) {
+        var cw = this.costWidth(index);
+        _Window_ActorCommand_drawBattleCommandName.call(this, index, x, y, width - cw, align);
+        if (cw) this.drawItemCost(this.commandAP(index), x + width - cw, y, cw);
     };
 
     Window_ActorCommand.prototype.hasCost = function(index) {
         return this.commandAP(index) >= 0 && FTKR.BAP.dispApWidthCmd > 0;
     };
 
-    Window_ActorCommand.prototype.drawItem = function(index) {
-        var rect = this.itemRectForText(index);
-        this.resetTextColor();
-        this.changePaintOpacity(this.isCommandEnabled(index));
-        var x1 = this.drawCmdIcon(index, rect.x, rect.y);
-        var x2 = this.drawCmdName(index, x1, rect.y, rect.width);
-        if (this.hasCost(index)) {
-            this.drawCmdCost(index, x2, rect.y);
-        }
+    Window_ActorCommand.prototype.costWidth = function(index) {
+        return this.hasCost(index) ? this.apCostWidth() : 0;
     };
 
     Window_ActorCommand.prototype.commandAP = function(index) {
-        if (this.commandSymbol(index) === 'attack') {
-            return this._actor.itemApCost($dataSkills[this._actor.attackSkillId()]);
-        } else if (this.commandSymbol(index) === 'guard') {
-            return this._actor.itemApCost($dataSkills[this._actor.guardSkillId()]);
-        } else {
-            return -1;
-        }
+        if (!this.isActionSkillCommand(index)) return -1;
+        var skill = this.commandEbcSkill(index);
+        return skill ? this._actor.itemApCost(skill) : -1;
     };
 
     //=============================================================================
@@ -1147,10 +1149,11 @@ function Window_BattleActionPoint() {
     //=============================================================================
 
     Window_BattleItem.prototype.drawItemNumber = function(item, x, y, width) {
-        var nw = width - this.apCostWidth();
+        var cw = this.apCostWidth();
+        var nw = width - cw;
         Window_ItemList.prototype.drawItemNumber.call(this, item, x, y, nw);
         if (this.isEnabledDispItemAp()) {
-            this.drawItemCost(BattleManager.actor().itemApCost(item), x + nw, y);
+            this.drawItemCost(BattleManager.actor().itemApCost(item), x + nw, y, cw);
         }
     };
 
@@ -1163,10 +1166,11 @@ function Window_BattleActionPoint() {
     //=============================================================================
 
     Window_BattleSkill.prototype.drawSkillCost = function(skill, x, y, width) {
+        var cw = this.apCostWidth();
         var nw = width - this.apCostWidth();
         Window_SkillList.prototype.drawSkillCost.call(this, skill, x, y, nw);
         if (this.isEnabledDispItemAp()) {
-            this.drawItemCost(BattleManager.actor().itemApCost(skill), x + nw, y);
+            this.drawItemCost(BattleManager.actor().itemApCost(skill), x + nw, y, cw);
         }
     };
 
