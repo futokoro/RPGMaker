@@ -136,26 +136,6 @@ FTKR_DisplayCommandFrame.js
 * skillId
     * アイコンや説明文を表示させたい場合に、参照先のスキルIDを設定してください。
 
-### 入力例
-
-FTKR_AlternatingTurnBattle.jsの場合は、以下のように設定します。
-
-* fight
-    * enabled : $gameParty.canInput()
-    * ext : 空欄
-    * skillId : 任意
-* escape
-    * enabled : BattleManager.canEscape()
-    * ext : 空欄
-    * skillId : 任意
-* customs
-    * custom1
-        * name : ターン終了
-        * symbol : turnEnd
-        * enabled : 空欄
-        * ext : 空欄
-        * skillId : 任意
-
 [目次に戻る](#目次)
 
 ## パーティーコマンドの並び

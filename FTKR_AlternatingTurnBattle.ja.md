@@ -127,8 +127,16 @@ AttackChain.js
 
 # FTKR_ExBattleCommandの追加コマンド設定
 
-FTKR_ExBattleCommandプラグインでターン終了コマンドを追加するためには、プラグインパラメータ`Party Commands`の`customs`に以下の内容を追加してください。
+FTKR_ExBattleCommandプラグインで本プラグインのコマンド設定にするためには、プラグインパラメータ`Party Commands`を以下の内容に変更してください。
 
+### fightを変更
+| パラメータ | 値 | 備考 |
+| --- | --- | --- |
+| enabled | $gameParty.canInput() |  |
+| ext | 空欄 | |
+| skillId | 任意 | |
+
+### customsに追加
 | パラメータ | 値 | 備考 |
 | --- | --- | --- |
 | name | ターン終了 | 任意のコマンド名にしても問題ありません。 |
