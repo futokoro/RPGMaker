@@ -4,8 +4,8 @@
 // プラグインNo : 75
 // 作成者     : フトコロ
 // 作成日     : 2018/04/08
-// 最終更新日 : 2018/12/08
-// バージョン : v2.0.2
+// 最終更新日 : 2018/12/11
+// バージョン : v2.0.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.AltTB = FTKR.AltTB || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.0.2 敵味方交互にターンが進むターン制戦闘システム
+ * @plugindesc v2.0.3 敵味方交互にターンが進むターン制戦闘システム
  * @author フトコロ
  *
  * @param TurnEnd Command
@@ -153,6 +153,11 @@ FTKR.AltTB = FTKR.AltTB || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v2.0.3 - 2018/12/11 : 競合回避、不具合修正
+ *    1. FTKR_AISkillEvaluateとの競合回避。
+ *    2. FTKR_BattleActionTimesと組み合わせた時に、行動回数の修正がターン終了時に
+ *       リセットされない不具合を修正。
  * 
  * v2.0.2 - 2018/12/08 : 不具合修正
  *    1. ターンが進むタイミングがずれていたのを修正。
@@ -757,6 +762,12 @@ FTKR.AltTB = FTKR.AltTB || {};
         this._phase = 'turnStart';
         this._preemptive = false;
         this._surprise = false;
+        this.allBattleMembers().forEach(function(battler) {
+            battler.onTurnEnd();
+            this.refreshStatus();
+            this._logWindow.displayAutoAffectedStatus(battler);
+            this._logWindow.displayRegeneration(battler);
+        }, this);
         $gameTroop.increaseTurn();
         this.changeTrunSide();
     };
@@ -855,14 +866,10 @@ FTKR.AltTB = FTKR.AltTB || {};
     //  パーティーコマンドとアクターコマンドの処理見直し
     //=============================================================================
 
-    //書き換え
+    var _Scene_Battle_createPartyCommandWindow = Scene_Battle.prototype.createPartyCommandWindow;
     Scene_Battle.prototype.createPartyCommandWindow = function() {
-        this._partyCommandWindow = new Window_PartyCommand();
-        this._partyCommandWindow.setHandler('fight',  this.commandFight.bind(this));
-        this._partyCommandWindow.setHandler('escape', this.commandEscape.bind(this));
+        _Scene_Battle_createPartyCommandWindow.call(this);
         this._partyCommandWindow.setHandler('turnEnd', this.commandTurnEnd.bind(this));//追加
-        this._partyCommandWindow.deselect();
-        this.addWindow(this._partyCommandWindow);
     };
 
     //書き換え
@@ -891,18 +898,12 @@ FTKR.AltTB = FTKR.AltTB || {};
         }
     };
     
-    //書き換え
+    var _Scene_Battle_createActorCommandWindow = Scene_Battle.prototype.createActorCommandWindow;
     Scene_Battle.prototype.createActorCommandWindow = function() {
-        this._actorCommandWindow = new Window_ActorCommand();
-        this._actorCommandWindow.setHandler('attack',  this.commandAttack.bind(this));
-        this._actorCommandWindow.setHandler('skill',   this.commandSkill.bind(this));
-        this._actorCommandWindow.setHandler('guard',   this.commandGuard.bind(this));
-        this._actorCommandWindow.setHandler('item',    this.commandItem.bind(this));
+        _Scene_Battle_createActorCommandWindow.call(this);
         this._actorCommandWindow.setHandler('pageup',  this.commandPageup.bind(this));//追加
         this._actorCommandWindow.setHandler('pagedown',this.commandPagedown.bind(this));//追加
         this._actorCommandWindow.setHandler('cancel',  this.commandCancel.bind(this));//変更
-        this._actorCommandWindow.setStatusWindow(this._statusWindow);//追加
-        this.addWindow(this._actorCommandWindow);
     };
 
     //書き換え

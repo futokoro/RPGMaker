@@ -4,8 +4,8 @@
 // プラグインNo : 64
 // 作成者     : フトコロ
 // 作成日     : 2018/01/06
-// 最終更新日 : 2018/10/20
-// バージョン : v1.2.5
+// 最終更新日 : 2018/12/11
+// バージョン : v1.2.6
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.ASE = FTKR.ASE || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.5 自動戦闘時に使用するスキルの評価値を変更するプラグイン
+ * @plugindesc v1.2.6 自動戦闘時に使用するスキルの評価値を変更するプラグイン
  * @author フトコロ
  *
  * @param Skill Evaluate Log
@@ -79,11 +79,21 @@ FTKR.ASE = FTKR.ASE || {};
  * プラグインパラメータ Menu Command および Party Command で設定してください。
  * 
  * 
+ * プラグインの使い方は、下のオンラインマニュアルページを見てください。
+ * https://github.com/futokoro/RPGMaker/blob/master/FTKR_AISkillEvaluate.ja.md
+ * 
+ * 
  *-----------------------------------------------------------------------------
  * 設定方法
  *-----------------------------------------------------------------------------
  * 1.「プラグインマネージャー(プラグイン管理)」に、本プラグインを追加して
  *    ください。
+ * 
+ * 2. 以下のプラグインと組み合わせる場合は、プラグイン管理の順番に注意してください。
+ * 
+ *    FTKR_AISkillEvaluate.js
+ *    ↓このプラグインよりも下に登録↓
+ *    FTKR_ExBattleCommand.js
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -309,7 +319,7 @@ FTKR.ASE = FTKR.ASE || {};
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
- * Copyright (c) 2017 Futokoro
+ * Copyright (c) 2017,2018 Futokoro
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
@@ -320,6 +330,10 @@ FTKR.ASE = FTKR.ASE || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.2.6 - 2018/12/11 : 競合回避、不具合修正。
+ *    1. FTKR_AlternatingTurnBattleとの競合回避。
+ *    2. デフォルトの自動戦闘に変更できない不具合を修正。
  * 
  * v1.2.5 - 2018/10/20 : 競合回避
  *    1. 作戦画面のレイアウトが、メニュー画面の表示レイアウトに影響されないように
@@ -479,7 +493,6 @@ FTKR.ASE = FTKR.ASE || {};
     FTKR.ASE.models.forEach( function(model, i) {
         if (model) model.id = i;
     });
-    console.log(FTKR.ASE.models);
 
     //objのメモ欄から <metacode: x> の値を読み取って返す
     var readObjectMeta = function(obj, metacodes) {
@@ -669,7 +682,7 @@ FTKR.ASE = FTKR.ASE || {};
 
     var _ASE_Game_BattlerBase_isAutoBattle = Game_BattlerBase.prototype.isAutoBattle;
     Game_BattlerBase.prototype.isAutoBattle = function() {
-        return this._evalModelId ? this._evalModelId >= 0 : _ASE_Game_BattlerBase_isAutoBattle.call(this);
+        return this._evalModelId !== undefined ? this._evalModelId >= 0 : _ASE_Game_BattlerBase_isAutoBattle.call(this);
     };
 
     //=============================================================================
@@ -987,16 +1000,12 @@ FTKR.ASE = FTKR.ASE || {};
         this.createTacticsListWindow();
     };
 
-    //書き換え
+    var _Scene_Battle_createPartyCommandWindow = Scene_Battle.prototype.createPartyCommandWindow;
     Scene_Battle.prototype.createPartyCommandWindow = function() {
-        this._partyCommandWindow = new Window_PartyCommand();
-        this._partyCommandWindow.setHandler('fight',  this.commandFight.bind(this));
+        _Scene_Battle_createPartyCommandWindow.call(this);
         if (FTKR.ASE.command.party && FTKR.ASE.command.party.enable) {
             this._partyCommandWindow.setHandler('ase',  this.commandAse.bind(this));
         }
-        this._partyCommandWindow.setHandler('escape', this.commandEscape.bind(this));
-        this._partyCommandWindow.deselect();
-        this.addWindow(this._partyCommandWindow);
     };
 
     var _ASE_Scene_Battle_changeInputWindow = Scene_Battle.prototype.changeInputWindow;
@@ -1019,6 +1028,7 @@ FTKR.ASE = FTKR.ASE || {};
         this._tacticsTitleWindow.close();
         this._tacticsListWindow.close();
         $gameParty.makeActions();
+        BattleManager.makeActionOrders();
         BattleManager._tacticsMode = false;
     };
 
