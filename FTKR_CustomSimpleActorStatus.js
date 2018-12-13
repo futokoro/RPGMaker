@@ -4,8 +4,8 @@
 // プラグインNo : 9
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2018/12/02
-// バージョン : v3.4.4
+// 最終更新日 : 2018/12/13
+// バージョン : v3.4.5
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v3.4.4 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v3.4.5 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -1119,6 +1119,9 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v3.4.5 - 2018/12/13 : 不具合修正(軽量化)
+ *    1. code(x)の形のパラメータの判定時に必ずeval()で評価していた処理を見直し。
+ * 
  * v3.4.4 - 2018/12/02 : 不具合修正
  *    1. カスタム画像で、存在しない画像IDを指定した場合にエラーになる不具合を修正。
  * 
@@ -1852,41 +1855,14 @@ FTKR.CSS = FTKR.CSS || {};
         }
     };
 
-    //配列を複製する
-    var copyArray = function(arr) {
-        var newArr = [];
-        arr.forEach(function(data, prop) {
-            if (data instanceof Object) {
-                if (data instanceof Array) {
-                    newArr[prop] = copyArray(data);
-                } else {
-                    newArr[prop] = copyObject(data);
-                }
-            } else {
-                newArr[prop] = data;
-            }
-        });
-        return newArr;
+    var convertCssNumber = function(value) {
+        if (!value) return 0;
+        if (!isNaN(value)) {
+            return Number(value);
+        }
+        return Number(FTKR.evalFormula(value));
     };
 
-    //オブジェクトを複製する
-    var copyObject = function(obj) {
-        var newObj = {};
-        Object.getOwnPropertyNames(obj).forEach(function(prop) {
-            var data = obj[prop];
-            if (data instanceof Object) {
-                if (data instanceof Array) {
-                    newObj[prop] = copyArray(data);
-                } else {
-                    newObj[prop] = copyObject(data);
-                }
-            } else {
-                newObj[prop] = data;
-            }
-        });
-        return newObj;
-    };
-    
     // 配列の要素の合計
     Math.sam = function(arr) {
         return arr.reduce( function(prev, current, i, arr) {
@@ -2346,8 +2322,8 @@ FTKR.CSS = FTKR.CSS || {};
                 return this.drawCssText(actor, x, y, width, match[2]);
             default:
                 if (!actor) return 1;
-                console.log(match[2]);
-                match[2] = this.evalCssCustomFormula(actor, match[2]);
+                FTKR.setGameData(actor);
+                match[2] = convertCssNumber(match[2]);
                 return this.drawCssActorStatusBase_A1(index, actor, x, y, width, match, lss, css);
         }
     };
@@ -3102,7 +3078,6 @@ FTKR.CSS = FTKR.CSS || {};
         this.changeTextColor(this.systemColor());
         var tx = convertTextWidth(gauge.name, this);
         this.drawTextEx(gauge.name, x, y);
-        console.log('gauge', gauge, 'ref', gauge.ref, 'tx', tx, 'name', gauge.name, 'x', x, 'y', y);
         if (gauge.ref) {
             var ref = this.evalCssStrFormula(actor, gauge.ref);
             this.resetTextColor();
