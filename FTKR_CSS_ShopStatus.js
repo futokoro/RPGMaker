@@ -4,8 +4,8 @@
 // プラグインNo : 52
 // 作成者     : フトコロ
 // 作成日     : 2017/07/23
-// 最終更新日 : 2018/10/10
-// バージョン : v2.2.0
+// 最終更新日 : 2018/12/13
+// バージョン : v2.2.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -17,7 +17,7 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.2.0 ショップ画面のステータスレイアウトを変更する
+ * @plugindesc v2.2.1 ショップ画面のステータスレイアウトを変更する
  * @author フトコロ
  *
  * @param --共通レイアウト設定--
@@ -26,7 +26,7 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
  * @param commonStatusList
  * @desc 表示するステータスとその位置を設定します。
  * @type struct<status>[]
- * @default ["{\"text\":\"text(%1)\",\"value\":\"\\\\c[16]持っている数\",\"x\":\"0\",\"y\":\"0\",\"width\":\"width/2\"}","{\"text\":\"eval(%1)\",\"value\":\"$gameParty.numItems(item)\",\"x\":\"width/2\",\"y\":\"0\",\"width\":\"width/2\"}"]
+ * @default ["{\"text\":\"text(%1)\",\"value\":\"\\\\c[16]持っている数\",\"x\":\"0\",\"y\":\"0\",\"width\":\"162\"}","{\"text\":\"eval(%1)\",\"value\":\"$gameParty.numItems(item)\",\"x\":\"162\",\"y\":\"0\",\"width\":\"162\"}"]
  * 
  * @param Common Status Space In Text
  * @desc Text内で複数表示する場合の間隔を指定します。
@@ -38,7 +38,7 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
  * @param weaponStatusList
  * @desc 表示するステータスとその位置を設定します。
  * @type struct<status>[]
- * @default ["{\"text\":\"name\",\"x\":\"0\",\"y\":\"0\",\"width\":\"width/2\"}","{\"text\":\"eparam(%1)\",\"value\":\"2\",\"x\":\"width/2\",\"y\":\"0\",\"width\":\"width/2\"}","{\"text\":\"equip(%1)\",\"value\":\"item.etypeId-1\",\"x\":\"0\",\"y\":\"line\",\"width\":\"width\"}"]
+ * @default ["{\"text\":\"name\",\"value\":\"\",\"x\":\"0\",\"y\":\"0\",\"width\":\"162\"}","{\"text\":\"eparam(%1)\",\"value\":\"2\",\"x\":\"162\",\"y\":\"0\",\"width\":\"162\"}","{\"text\":\"equip(%1)\",\"value\":\"item.etypeId-1\",\"x\":\"0\",\"y\":\"36\",\"width\":\"324\"}"]
  * 
  * @param Weapon Status Space In Text
  * @desc Text内で複数表示する場合の間隔を指定します。
@@ -50,8 +50,8 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
  * @param armorStatusList
  * @desc 表示するステータスとその位置を設定します。
  * @type struct<status>[]
- * @default ["{\"text\":\"name\",\"x\":\"0\",\"y\":\"0\",\"width\":\"width/2\"}","{\"text\":\"eparam(%1)\",\"value\":\"3\",\"x\":\"width/2\",\"y\":\"0\",\"width\":\"width/2\"}","{\"text\":\"equip(%1)\",\"value\":\"item.etypeId-1\",\"x\":\"0\",\"y\":\"line\",\"width\":\"width\"}"]
- *  
+ * @default ["{\"text\":\"name\",\"value\":\"\",\"x\":\"0\",\"y\":\"0\",\"width\":\"162\"}","{\"text\":\"eparam(%1)\",\"value\":\"3\",\"x\":\"162\",\"y\":\"0\",\"width\":\"162\"}","{\"text\":\"equip(%1)\",\"value\":\"item.etypeId-1\",\"x\":\"0\",\"y\":\"36\",\"width\":\"324\"}"]
+ * 
  * @param Armor Status Space In Text
  * @desc Text内で複数表示する場合の間隔を指定します。
  * @default 5
@@ -143,7 +143,10 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
  * 本プラグインを実装することで、ショップ画面で表示するアクターの
  * ステータス表示のレイアウトを変更できます。
  * 
- * また、ショップ画面のステータスウィンドウの設定を変更できます。
+ * このプラグインには、FTKR_CustomSimpleActorStatus.js (v3.0.0以降)が必要です。
+ * 
+ * プラグインの使い方は、下のオンラインマニュアルページを見てください。
+ * https://github.com/futokoro/RPGMaker/blob/master/FTKR_CSS_ShopStatus.ja.md
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -152,15 +155,11 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
  * 1.「プラグインマネージャー(プラグイン管理)」に、本プラグインを追加して
  *    ください。
  * 
- * 2. 本プラグインを動作させるためには、
- *    FTKR_CustomSimpleActorStatus.jsが必要です。
- *    本プラグインは、FTKR_CustomSimpleActorStatus.jsよりも下の位置に
- *    なるように追加してください。
+ * 2. 以下のプラグインと組み合わせる場合は、プラグイン管理の順番に注意してください。
  * 
- * 3. ゲーム画面でレイアウトを変更する場合は、以下のプラグインが必要です。
- * 
- *    GraphicalDesignMode.js
- *    FTKR_CSS_GDM.js
+ *    FTKR_CustomSimpleActorStatus.js (ステータス表示を変更)
+ *    ↑このプラグインよりも上に登録↑
+ *    FTKR_CSS_ShopStatus.js
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -275,6 +274,8 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v2.2.1 - 2018/12/13 : プラグインパラメータstatusListの初期値変更
  * 
  * v2.2.0 - 2018/10/10 : 仕様変更
  *    1. ediff(x)およびediffaop(x)のコードをFTKR_CustomSimpleActorStatusに移動。
