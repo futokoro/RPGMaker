@@ -55,7 +55,7 @@
 | [FTKR_CSS_BattleStatus](FTKR_CSS_BattleStatus.js) | [あり](FTKR_CSS_BattleStatus.ja.md) | [v2.1.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_BattleStatus.js) | 2018/09/29 | バトル画面のステータス表示を変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) |
 | [FTKR_CSS_DetailedStatus](FTKR_CSS_DetailedStatus.js) | [あり](FTKR_CSS_DetailedStatus.ja.md) | [v2.1.3](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_DetailedStatus.js) | 2018/10/20 | ステータス画面のステータス表示を変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) |
 | [FTKR_CSS_SkillStatus](FTKR_CSS_SkillStatus.js) | [あり](FTKR_CSS_SkillStatus.ja.md) | [v2.1.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_SkillStatus.js) | 2018/09/29 | スキル画面のステータス表示を変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) |
-| [FTKR_CSS_EquipStatus](FTKR_CSS_EquipStatus.js) | [仮版](FTKR_CSS_EquipStatus.ja.md) | [v2.1.3](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_EquipStatus.js) | 2018/10/10 | 装備画面のステータス表示を変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) |
+| [FTKR_CSS_EquipStatus](FTKR_CSS_EquipStatus.js) | [仮版](FTKR_CSS_EquipStatus.ja.md) | [v2.1.4](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_EquipStatus.js) | 2018/12/13 | 装備画面のステータス表示を変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) |
 | [FTKR_CSS_ShopStatus](FTKR_CSS_ShopStatus.js) | [仮版](FTKR_CSS_ShopStatus.ja.md) | [v2.2.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_ShopStatus.js) | 2018/10/10 | ショップ画面のステータス表示を変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) |
 | [FTKR_CSS_CustomizeBattleResults](FTKR_CSS_CustomizeBattleResults.js) | [仮版](FTKR_CSS_CustomizeBattleResults.ja.md) | [v2.1.3](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_CSS_CustomizeBattleResults.js) | 2018/09/29 | バトル終了時に戦闘結果を表示する <br> ＜以下のプラグインが必要＞ <br> [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) |
 
@@ -317,6 +317,9 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 # 更新情報
 
 2018/12の更新情報
+
+### 2018/12/13
+* [FTKR_CSS_EquipStatus](FTKR_CSS_EquipStatus.ja.md) v2.1.4
 
 ### 2018/12/11
 * [FTKR_AISkillEvaluate](FTKR_AISkillEvaluate.ja.md) v1.2.6
