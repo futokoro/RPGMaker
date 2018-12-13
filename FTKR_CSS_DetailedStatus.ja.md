@@ -221,7 +221,8 @@ face;level,state,hp,mp;custom(0),custom(1),custom(2),custom(3)
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver2.1.3](FTKR_CSS_DetailedStatus.js) | 2018/10/20 | dsWeaponMasteryプラグインの熟練度表示に対応 |
+| [ver2.1.4](FTKR_CSS_DetailedStatus.js) | 2018/12/13 | プラグインパラメータ初期値変更 |
+| ver2.1.3 | 2018/10/20 | dsWeaponMasteryプラグインの熟練度表示に対応 |
 | ver2.1.2 | 2018/09/29 | プラグインパラメータのリストで選択できる項目を追加 |
 | ver2.1.1 | 2018/09/12 | 不要なプラグインパラメータ を削除 |
 | ver2.1.0 | 2018/08/30 | FTKR_CustomSimpleActorStatus.js の v3.1.0に対応<br>ウィンドウの表示内容を自動更新する機能を追加 |

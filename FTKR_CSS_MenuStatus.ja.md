@@ -300,7 +300,8 @@ FTKR_CustomSimpleActorStatus.js
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver2.1.1](FTKR_CSS_MenuStatus.js) | 2018/09/12 | 不要なプラグインパラメータ を削除 |
+| [ver2.1.2](FTKR_CSS_MenuStatus.js) | 2018/12/13 | プラグインパラメータ初期値変更 |
+| ver2.1.1 | 2018/09/12 | 不要なプラグインパラメータ を削除 |
 | ver2.1.0 | 2018/08/30 | FTKR_CustomSimpleActorStatus.js の v3.1.0に対応 |
 | ver2.0.0 | 2018/08/19 | FTKR_CustomSimpleActorStatus.js の v3.0.0に対応 |
 | [ver1.1.0](/archive/FTKR_CSS_MenuStatus_1.1.0.js) | 2017/11/18 | FTKR_CustomSimpleActorStatus.js の v2.6.0に対応 |

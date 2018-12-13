@@ -183,7 +183,8 @@ x はオリジナルパラメータIDを指定してください。
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver2.2.0](FTKR_CSS_ShopStatus.js) | 2018/10/10 | ediff(x)およびediffaop(x)のコードをFTKR_CustomSimpleActorStatusに移動 |
+| [ver2.2.1](FTKR_CSS_ShopStatus.js) | 2018/12/13 | プラグインパラメータ初期値変更 |
+| ver2.2.0 | 2018/10/10 | ediff(x)およびediffaop(x)のコードをFTKR_CustomSimpleActorStatusに移動 |
 | ver2.1.2 | 2018/09/29 | プラグインパラメータのリストで選択できる項目を追加 |
 | ver2.1.1 | 2018/09/19 | 武器防具以外のパラメータ表示コードの一部が正しく反映されない不具合を修正<br>プラグインパラメータのステータスリスト項目を追加 |
 | ver2.1.0 | 2018/08/30 | FTKR_CustomSimpleActorStatus.js の v3.1.0に対応 |
