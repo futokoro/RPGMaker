@@ -8,6 +8,7 @@
 * スキルツリープラグインのスキルツリー作成がもう少し簡単にできないか検討
 * FTKR_FacialImageDifference2で非戦闘時に顔画像を切り替える機能
 * FTKR_CSS_EquipStatusを使うと処理が重くなる？
+    * 対応：[検討中](FTKR_CSS_memo.md)
 * FTKR_CustomSimpleActorStatusのマニュアルページを v3.0.0 に合わせて修正
 
 [トップページに戻る](README.md)
