@@ -4,8 +4,8 @@
 // プラグインNo : 9
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2018/12/13
-// バージョン : v3.4.5
+// 最終更新日 : 2018/12/15
+// バージョン : v3.4.6
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v3.4.5 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v3.4.6 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -1119,6 +1119,10 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v3.4.6 - 2018/12/15 : 不具合修正(軽量化)
+ *    1. カスタムパラメータとカスタムゲージの表示処理を見直し。
+ *    2. プラグインコマンドの判定処理を見直し。
+ * 
  * v3.4.5 - 2018/12/13 : 不具合修正(軽量化)
  *    1. code(x)の形のパラメータの判定時に必ずeval()で評価していた処理を見直し。
  * 
@@ -1777,6 +1781,7 @@ FTKR.CSS = FTKR.CSS || {};
     // 自作処理
     //=============================================================================
 
+    // <codeTitle:id>text</codeTitle>の形式のメタデータを読み取って{id,text}を返す
     var readEntrapmentCodeToTextEx = function(obj, codeTitles) {
         var regs = convertEntrapmentRegArrayEx(codeTitles);
         var notedata = obj.note.split(/[\r\n]+/);
@@ -1814,27 +1819,6 @@ FTKR.CSS = FTKR.CSS || {};
         return regs.some(function(reg){
             return prop ? data.match(reg[prop]) : data.match(reg);
         });
-    };
-
-    var convertTextWidth = function(text, window) {
-        var tw = 0;
-        window = window || SceneManager._scene._windowLayer.children[0];
-        if (!window) return tw;
-        var conv = window.convertEscapeCharacters(text);
-        var reg = /i\[(\d+)\]/i
-        while (reg.test(conv)) {
-            conv = (conv.toUpperCase()).replace(reg, '');
-            tw += Window_Base._iconWidth + 4;
-        }
-        if (/c\[(\d+)\]/i.test(conv)) {
-            conv = (conv.toUpperCase()).replace(/c\[(\d+)\]/ig, '');
-        }
-        if (conv.match(/lw\[(\d+),?([^\]]+)\]/i)) {
-            tw += RegExp.$1;
-            conv = (conv.toUpperCase()).replace(/lw\[(\d+),?([^\]]+)\]/ig, '');
-        }
-        tw += window.textWidth(conv);
-        return tw;
     };
 
     var convertEscapeCharacters = function(text) {
@@ -1908,9 +1892,9 @@ FTKR.CSS = FTKR.CSS || {};
     // バトル終了後に、逃走フラグを削除
     //=============================================================================
 
-    FTKR.CSS.Scene_Map_start = Scene_Map.prototype.start;
+    var _Scene_Map_start = Scene_Map.prototype.start;
     Scene_Map.prototype.start = function() {
-        FTKR.CSS.Scene_Map_start.call(this);
+        _Scene_Map_start.call(this);
         BattleManager._escaped = false;
     };
 
@@ -1918,15 +1902,15 @@ FTKR.CSS = FTKR.CSS || {};
     // DataManager
     //=============================================================================
 
-    FTKR.CSS.DatabaseLoaded = false;
-    FTKR.CSS.DataManager_isDatabaseLoaded = DataManager.isDatabaseLoaded;
+    var _DatabaseLoaded = false;
+    var _DataManager_isDatabaseLoaded = DataManager.isDatabaseLoaded;
     DataManager.isDatabaseLoaded = function() {
-        if (!FTKR.CSS.DataManager_isDatabaseLoaded.call(this)) return false;
-        if (!FTKR.CSS.DatabaseLoaded) {
+        if (!_DataManager_isDatabaseLoaded.call(this)) return false;
+        if (!_DatabaseLoaded) {
             this.cssActorImageNotetags($dataActors);
             this.cssCustomParamNotetags($dataActors);
             this.cssCustomParamNotetags($dataClasses);
-            FTKR.CSS.DatabaseLoaded = true;
+            _DatabaseLoaded = true;
         }
         return true;
     };
@@ -2033,52 +2017,56 @@ FTKR.CSS = FTKR.CSS || {};
 
     var _CSS_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
     Game_Interpreter.prototype.pluginCommand = function(command, args) {
-        _CSS_Game_Interpreter_pluginCommand.call(this, command, args);
-        if (!command.match(/CSS_(.+)/i)) return;
-        command = (RegExp.$1 + '').toUpperCase();
-        switch (command) {
-            case 'カスタム画像変更':
-            case 'CHANGE_CUSTOM_IMAGE':
-                switch (setArgStr(args[0]).toUpperCase()) {
-                    case 'アクター':
-                    case 'ACTOR':
-                        var actor = $gameActors.actor(setArgNum(args[1]));
-                        break;
-                    case 'パーティー':
-                    case 'PARTY':
-                        var actor = $gameParty.members()[setArgNum(args[1])];
-                        break;
-                    default : 
-                        return;
-                }
-                if (!actor) break;
-                actor.setupCssbgi(
-                    setArgNum(args[2]),
-                    setArgStr(args[3]),
-                    setArgNum(args[4]),
-                    setArgNum(args[5]),
-                    setArgNum(args[6]),
-                    setArgNum(args[7]),
-                    setArgNum(args[8])
-                );
+        switch (command.toUpperCase()) {
+            case 'CSS_カスタム画像変更':
+            case 'CSS_CHANGE_CUSTOM_IMAGE':
+                this.cssChangeCustomImage(args);
+                break;
+            default:
+                _CSS_Game_Interpreter_pluginCommand.call(this, command, args);
                 break;
         }
+    };
+
+    Game_Interpreter.prototype.cssChangeCustomImage = function(args) {
+        switch (setArgStr(args[0]).toUpperCase()) {
+            case 'アクター':
+            case 'ACTOR':
+                var actor = $gameActors.actor(setArgNum(args[1]));
+                break;
+            case 'パーティー':
+            case 'PARTY':
+                var actor = $gameParty.members()[setArgNum(args[1])];
+                break;
+            default : 
+                return;
+        }
+        if (!actor) return;
+        actor.setupCssbgi(
+            setArgNum(args[2]),
+            setArgStr(args[3]),
+            setArgNum(args[4]),
+            setArgNum(args[5]),
+            setArgNum(args[6]),
+            setArgNum(args[7]),
+            setArgNum(args[8])
+        );
     };
 
     //=============================================================================
     // Game_Actor
     //=============================================================================
 
-    FTKR.CSS.Game_Actor_levelUp = Game_Actor.prototype.levelUp;
+    var _Game_Actor_levelUp = Game_Actor.prototype.levelUp;
     Game_Actor.prototype.levelUp = function() {
-        FTKR.CSS.Game_Actor_levelUp.call(this);
+        _Game_Actor_levelUp.call(this);
         if (!this._levelUpCount) this._levelUpCount = 0;
         this._levelUpCount += 1;
     };
 
-    FTKR.CSS.Game_Actor_setup = Game_Actor.prototype.setup;
+    var _Game_Actor_setup = Game_Actor.prototype.setup;
     Game_Actor.prototype.setup = function(actorId) {
-        FTKR.CSS.Game_Actor_setup.call(this, actorId);
+        _Game_Actor_setup.call(this, actorId);
         ImageManager.loadFace(this.faceName());
         this.actor().cssbgi.forEach( function(bgi){
             if (bgi) ImageManager.loadPicture(bgi.name);
@@ -2124,9 +2112,9 @@ FTKR.CSS = FTKR.CSS || {};
     // Window_Base
     //=============================================================================
 
-    FTKR.CSS.Window_Base_initialize = Window_Base.prototype.initialize;
+    var _Window_Base_initialize = Window_Base.prototype.initialize;
     Window_Base.prototype.initialize = function(x, y, width, height) {
-        FTKR.CSS.Window_Base_initialize.call(this, x, y, width, height);
+        _Window_Base_initialize.call(this, x, y, width, height);
         this.sprite = [];
         this._stateIconSprite = [];
         this._faceSprite = [];
@@ -2171,6 +2159,34 @@ FTKR.CSS = FTKR.CSS || {};
 
     Window_Base.prototype.isEnabledChangePaintOpacity = function(actor) {
         return actor && actor.isBattleMember();
+    };
+
+    //制御文字を考慮して入力したテキスト長を求める
+    Window_Base.prototype.convertTextWidth = function(text) {
+        var textObj = { text : text, width : 0 };
+        textObj.text = this.convertEscapeCharacters(textObj.text);
+        this.convertEscapeCharactersTextWidth(textObj);
+        textObj.width += this.textWidth(textObj.text);
+        return textObj.width;
+    };
+
+    Window_Base.prototype.convertEscapeCharactersTextWidth = function(obj) {
+        var reg = /i\[(\d+)\]/i;
+        while (reg.test(obj.text)) {
+            obj.text = (conv.toUpperCase()).replace(reg, '');
+            obj.width += Window_Base._iconWidth + 4;
+        }
+        reg = /c\[(\d+)\]/i;
+        while (reg.test(obj.text)) {
+            obj.text = (obj.text.toUpperCase()).replace(reg, '');
+        }
+        reg = /lw\[(\d+),?([^\]]+)\]/i;
+        var result;
+        while (result = reg.exec(obj.text)) {
+            obj.width += Number(result[1]);
+            obj.text = (obj.text.toUpperCase()).replace(reg, '');
+        }
+        return obj;
     };
 
     /*-------------------------------------------------------------
@@ -2240,7 +2256,7 @@ FTKR.CSS = FTKR.CSS || {};
     };
 
     Window_Base.prototype.parseIntCssStatus = function(value, x, y, width, height) {
-        if (parseInt(value)) {
+        if (!isNaN(value)) {
             return parseInt(value);
         } else {
             var line = this.lineHeight();
@@ -2258,7 +2274,8 @@ FTKR.CSS = FTKR.CSS || {};
 
     Window_Base.prototype.drawCssActorStatusBases = function(index, actor, x, y, width, status, lss) {
         if (lss && lss.statusList) {
-            var statuses = status.match(/^\[(.+)\]$/i) ? RegExp.$1.split('/') : [status];
+            var match = status.match(/^\[(.+)\]$/);
+            var statuses = !match ? [status] : match[1].split('/');
             var len = statuses.length;
             var sIn = Number(lss.spaceIn);
             if (len > 1) width = (width - sIn * (len - 1))/ len;
@@ -2272,11 +2289,13 @@ FTKR.CSS = FTKR.CSS || {};
     };
 
     Window_Base.prototype.drawCssActorStatusBases_v2 = function(index, actor, x, y, width, status, lss) {
-        if (status.match(/^\{(.+)\}$/i)) {
-            status = RegExp.$1;
+        var matchA = status.match(/^\{(.+)\}$/);
+        if (matchA) {
+            status = matchA[1];
             width = this._dispWidth;
         }
-        var statuses = status.match(/^\[(.+)\]$/i) ? RegExp.$1.split('/') : [status];
+        var matchB = status.match(/^\[(.+)\]$/);
+        var statuses = !matchB ? [status] : matchB[1].split('/');
         var line = 0;
         var len = statuses.length;
         var sIn = Number(lss.spaceIn);
@@ -2301,7 +2320,7 @@ FTKR.CSS = FTKR.CSS || {};
     -------------------------------------------------------------*/
     Window_Base.prototype.drawCssActorStatusBase = function(index, actor, x, y, width, status, lss) {
         var css = FTKR.CSS.cssStatus;
-        var match = /([^\(]+)\((.+)\)/.exec(status);
+        var match = status.match(/([^\(]+)\((.+)\)/);
         if (match) {
             return this.drawCssActorStatusBase_A(index, actor, x, y, width, match, lss, css);
         } else {
@@ -3051,10 +3070,10 @@ FTKR.CSS = FTKR.CSS || {};
         var name = custom.name || '';
         var formula = custom.formula || '';
         var unit = custom.unit || '';
-        var tux = convertTextWidth(unit, this);
+        var tux = this.convertTextWidth(unit);
         var value = this.evalCssCustomFormula(actor, formula);
         this.changeTextColor(this.systemColor());
-        var tx = convertTextWidth(name, this);
+        var tx = this.convertTextWidth(name);
         this.drawTextEx(name, x, y);
         this.resetTextColor();
         this.drawText(value, x + tx, y, width - tx - tux, 'right');
@@ -3076,7 +3095,7 @@ FTKR.CSS = FTKR.CSS || {};
             this.drawGauge(x, y, width, rate, color1, color2);
         }
         this.changeTextColor(this.systemColor());
-        var tx = convertTextWidth(gauge.name, this);
+        var tx = this.convertTextWidth(gauge.name);
         this.drawTextEx(gauge.name, x, y);
         if (gauge.ref) {
             var ref = this.evalCssStrFormula(actor, gauge.ref);
@@ -3222,9 +3241,9 @@ FTKR.CSS = FTKR.CSS || {};
         return 1;
     };
 
-    FTKR.CSS.Scene_Base_start = Scene_Base.prototype.start;
+    var _Scene_Base_start = Scene_Base.prototype.start;
     Scene_Base.prototype.start = function() {
-        FTKR.CSS.Scene_Base_start.call(this);
+        _Scene_Base_start.call(this);
         if ($gameParty) {
             $gameParty.members().forEach( function(actor){
                 if (actor && actor._levelUpMessage) {

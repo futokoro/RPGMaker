@@ -1,7 +1,7 @@
 # RPGツクールMV プラグイン
 
 プラグインは逐次追加更新を行っています。最新情報は、[更新情報](#更新情報)を確認してください。<br>
-公開中のプラグインの数：93 (19年度中に 100 にしたいなぁ)<br>
+公開中のプラグインの数：94 (19年度中に 100 にしたいなぁ)<br>
 [対応するかもしれないプラグインのメモ](memo.md)
 
 # 目次
@@ -77,7 +77,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 
 # ウィンドウ
 
-プラグイン数:5
+プラグイン数:6
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
@@ -86,6 +86,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 | [FTKR_SceneBackImages](FTKR_SceneBackImages.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SceneBackImages.js) | 2018/02/24 | メニュー画面やショップ画面などに変数で切替可能な背景画像を設定する |
 | [FTKR_InterlockMouseAndWindow](FTKR_InterlockMouseAndWindow.js) | なし | [v1.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_InterlockMouseAndWindow.js) | 2018/04/30 | マウスポインタとウィンドウのカーソルを連動させる |
 | [FTKR_TitleScene](FTKR_TitleScene.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_TitleScene.js) | 2018/05/06 | タイトル画面のコマンドの表示変更や、クレジット画面を追加する。 |
+| [FTKR_RestrictRefreshWindows](FTKR_RestrictRefreshWindows.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_RestrictRefreshWindows.js) | 2018/12/15 | ウィンドウのリフレッシュ回数を制限して負荷を抑える |
 
 [目次に戻る](#目次)
 
@@ -317,6 +318,10 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 # 更新情報
 
 2018/12の更新情報
+
+### 2018/12/15
+* [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md) v3.4.5
+* [FTKR_RestrictRefreshWindows](FTKR_RestrictRefreshWindows.js) v1.0.0(新規)
 
 ### 2018/12/13
 * [FTKR_CSS_EquipStatus](FTKR_CSS_EquipStatus.ja.md) v2.1.4
