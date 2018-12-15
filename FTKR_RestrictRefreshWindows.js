@@ -4,8 +4,8 @@
 // プラグインNo : 94
 // 作成者　　   : フトコロ
 // 作成日　　   : 2018/12/15
-// 最終更新日   : 
-// バージョン   : v1.0.0
+// 最終更新日   : 2018/12/15
+// バージョン   : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -13,7 +13,7 @@ Imported.FTKR_RRW = true;
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 ウィンドウのリフレッシュ回数を制限して負荷を抑える
+ * @plugindesc v1.0.1 ウィンドウのリフレッシュ回数を制限して負荷を抑える
  * @author フトコロ
  *
  * @help 
@@ -57,6 +57,8 @@ Imported.FTKR_RRW = true;
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.1 - 2018/12/15 : 不具合修正。
+ *    1. アイテムウィンドウのリフレッシュの挙動を修正。
  * v1.0.0 - 2018/12/15 : 初版作成
  * 
  *-----------------------------------------------------------------------------
@@ -90,7 +92,8 @@ Imported.FTKR_RRW = true;
     //=============================================================================
     // 装備画面のリフレッシュ制限
     //=============================================================================
-    //アイテムウィンドウは、updateで自動的にリフレッシュが実行されるのでここでは無効化
+    //アイテムウィンドウは、updateで自動的にリフレッシュが実行されるため
+    //装備画面遷移時のリフレッシュは無効にする
     var _Scene_Equip_refreshActor = Scene_Equip.prototype.refreshActor;
     Scene_Equip.prototype.refreshActor = function() {
         this._itemWindow.onDisabledRefresh();
@@ -99,7 +102,7 @@ Imported.FTKR_RRW = true;
     };
 
     //装備スロットを決定して、装備アイテムウィンドウにカーソルが移る時に
-    //ステータスウィンドウとヘルプウィンドウが2回リフレッシュされているので
+    //ステータスウィンドウとヘルプウィンドウが2回リフレッシュされているため
     //それらを無効化して、別に実行させる
     var _Scene_Equip_onSlotOk = Scene_Equip.prototype.onSlotOk;
     Scene_Equip.prototype.onSlotOk = function() {
@@ -111,7 +114,7 @@ Imported.FTKR_RRW = true;
     };
 
     //装備アイテムを決定して、装備スロットウィンドウにカーソルが移る時に
-    //ステータスウィンドウとヘルプウィンドウが2回リフレッシュされているので
+    //ステータスウィンドウとヘルプウィンドウが2回リフレッシュされているため
     //それらを無効化して、別に実行させる
     var _Scene_Equip_onItemOk = Scene_Equip.prototype.onItemOk;
     Scene_Equip.prototype.onItemOk = function() {
@@ -123,8 +126,7 @@ Imported.FTKR_RRW = true;
     };
 
     //装備アイテムウィンドウでキャンセルして、装備スロットウィンドウにカーソルが移る時に
-    //ヘルプウィンドウが2回リフレッシュされているので
-    //それらを無効化して、別に実行させる
+    //ヘルプウィンドウが2回リフレッシュされているため、それらを無効化して、別に実行させる
     var _Scene_Equip_onItemCancel = Scene_Equip.prototype.onItemCancel;
     Scene_Equip.prototype.onItemCancel = function() {
         this._helpWindow.onDisabledRefresh();
@@ -160,6 +162,17 @@ Imported.FTKR_RRW = true;
         }
     };
     
+    //v1.0.1の修正。
+    //初期値を -1 にしておくことで、装備画面開始時には空欄の
+    //アイテムウィンドウの余計なリフレッシュを抑制できるほか
+    //コマンドウィンドウを経由せずに、直接スロットウィンドウを
+    //アクティブにした場合でも、正しくリフレッシュが可能になる。
+    var _Window_EquipItem_initialize = Window_EquipItem.prototype.initialize;
+    Window_EquipItem.prototype.initialize = function(x, y, width, height) {
+        _Window_EquipItem_initialize.call(this, x, y, width, height);
+        this._slotId = -1;
+    };
+
     //-----------------------------------------------------------
     // 装備スロットウィンドウ
     //-----------------------------------------------------------

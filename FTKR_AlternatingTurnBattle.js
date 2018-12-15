@@ -4,8 +4,8 @@
 // プラグインNo : 75
 // 作成者     : フトコロ
 // 作成日     : 2018/04/08
-// 最終更新日 : 2018/12/11
-// バージョン : v2.0.3
+// 最終更新日 : 2018/12/15
+// バージョン : v2.0.4
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.AltTB = FTKR.AltTB || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.0.3 敵味方交互にターンが進むターン制戦闘システム
+ * @plugindesc v2.0.4 敵味方交互にターンが進むターン制戦闘システム
  * @author フトコロ
  *
  * @param TurnEnd Command
@@ -154,6 +154,10 @@ FTKR.AltTB = FTKR.AltTB || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.0.4 - 2018/12/15 : 不具合修正
+ *    1. プラグインパラメータ Change Player を左右キーに設定して、アクター変更を
+ *       行うとエラーになる不具合を修正。(v2.0.3のバグ)
+ * 
  * v2.0.3 - 2018/12/11 : 競合回避、不具合修正
  *    1. FTKR_AISkillEvaluateとの競合回避。
  *    2. FTKR_BattleActionTimesと組み合わせた時に、行動回数の修正がターン終了時に
@@ -200,15 +204,6 @@ FTKR.AltTB = FTKR.AltTB || {};
         }
     };
 
-    //objのメモ欄から <metacode> があるか真偽を返す
-    var testObjectMeta = function(obj, metacodes) {
-        if (!obj) return false;
-        return metacodes.some(function(metacode){
-            var metaReg = new RegExp('<' + metacode + '>', 'i');
-            return metaReg.test(obj.note);
-        }); 
-    };
-    
     //=============================================================================
     // プラグイン パラメータ
     //=============================================================================
@@ -226,8 +221,6 @@ FTKR.AltTB = FTKR.AltTB || {};
         notActivatedSv          : (paramParse(parameters['Not Activated Sv Actor Sign']) || 0),
         notSelectActivatedActor : (paramParse(parameters['Cannot Select Activated Actor']) || false),
     };
-
-    FTKR.test = false;
 
     //=============================================================================
     // BattleManager
@@ -497,7 +490,6 @@ FTKR.AltTB = FTKR.AltTB || {};
         ０ターン目のバトルイベント実行
     -----------------------------------------------------------------------*/
     BattleManager.updateStart = function() {
-        if (FTKR.test) console.log('updateStart');
         this._phase = 'turnStart';
         $gameTroop.increaseTurn();
         if (this._surprise) this._isPlayerTurn = false;
@@ -509,7 +501,6 @@ FTKR.AltTB = FTKR.AltTB || {};
     -----------------------------------------------------------------------*/
 
     BattleManager.updateTurnStart = function() {
-        if (FTKR.test) console.log('updateTurnStart');
         this.startInput();
         this.AltTB_StartTurn();
     };
@@ -571,7 +562,6 @@ FTKR.AltTB = FTKR.AltTB || {};
     -----------------------------------------------------------------------*/
     //書き換え
     BattleManager.updateTurn = function() {
-        if (FTKR.test) console.log('updateTurn');
         $gameParty.requestMotionRefresh();
         if (!this.checkGroupTurnEnd()) {
             if (this._isGroupTurnStart) {
@@ -596,7 +586,6 @@ FTKR.AltTB = FTKR.AltTB || {};
     };
 
     BattleManager.updatePlayerTurnEnd = function() {
-        if (FTKR.test) console.log('updatePlayerTurnEnd');
         this._phase = 'turn';
         this._isGroupTurnStart = true;
         this.allBattleMembers().forEach(function(battler) {
@@ -609,7 +598,6 @@ FTKR.AltTB = FTKR.AltTB || {};
     };
 
     BattleManager.updateEnemyTurnEnd = function() {
-        if (FTKR.test) console.log('updateEnemyTurnEnd');
         this._phase = 'turnEnd';
         this.allBattleMembers().forEach(function(battler) {
             battler.onEnemyTurnEnd();
@@ -621,7 +609,6 @@ FTKR.AltTB = FTKR.AltTB || {};
 
     //group turn start
     BattleManager.updateGroupTurnStart = function() {
-        if (FTKR.test) console.log('updateGroupTurnStart');
         if (FTKR.AltTB.startActorCmd && this.isPlayerInputTurn()) {
             this.selectNextCommand();
         }
@@ -652,7 +639,6 @@ FTKR.AltTB = FTKR.AltTB || {};
     };
 
     BattleManager.updatePlayerInputTurn = function() {
-        if (FTKR.test) console.log('updatePlayerInputTurn');
         if (this.checkAutoTurnChange()) {
             this.commandTurnEnd();
         } else {
@@ -684,10 +670,6 @@ FTKR.AltTB = FTKR.AltTB || {};
     };
 
     BattleManager.updateDuringNormalTurn = function() {
-        if (FTKR.test) {
-            var name = this._subject ? this._subject.name() : '';
-            console.log('updateDuringNormalTurn', name);
-        }
         if (!this._subject) {
             this._subject = this.getNextSubject();
         }
@@ -698,21 +680,17 @@ FTKR.AltTB = FTKR.AltTB || {};
 
     //書き換え
     BattleManager.processTurn = function() {
-        if (FTKR.test) console.log('processTurn', this._subject.name(), this._subject.numActions());
         var subject = this._subject;
         var action = subject.currentAction();
-        if (FTKR.test) console.log(action, subject._actions);
         if (action) {
             this.processBeforeAction(subject, action);
         } else {
-            if (FTKR.test) console.log('clearActionCount', this._subject.name())
             subject.clearActions();
             this.endAction();
         }
     };
 
     BattleManager.processBeforeAction = function(subject, action) {
-        if (FTKR.test) console.log('processBeforAction', subject, action);
         action.prepare();
         if (action.isValid()) {
             this.startAction();
@@ -725,7 +703,6 @@ FTKR.AltTB = FTKR.AltTB || {};
     -----------------------------------------------------------------------*/
     //書き換え
     BattleManager.endAction = function() {
-        if (FTKR.test) console.log('endAction', this._subject.name(), this._subject.numActions());
         this._logWindow.endAction(this._subject);
         this.updateActionEnd();
     };
@@ -738,7 +715,6 @@ FTKR.AltTB = FTKR.AltTB || {};
         this._logWindow.displayAutoAffectedStatus(subject);
         this._logWindow.displayCurrentState(subject);
         this._logWindow.displayRegeneration(subject);
-        if (FTKR.test) console.log(subject.isConfused(), subject.isAppeared(), subject.restriction());
         if (!subject.canMove()) {
             subject.clearActions();
         }
@@ -758,7 +734,6 @@ FTKR.AltTB = FTKR.AltTB || {};
     -----------------------------------------------------------------------*/
     //書き換え
     BattleManager.updateTurnEnd = function() {
-        if (FTKR.test) console.log('updateTurnEnd');
         this._phase = 'turnStart';
         this._preemptive = false;
         this._surprise = false;
@@ -780,7 +755,6 @@ FTKR.AltTB = FTKR.AltTB || {};
     Game_Battler.prototype.removeCurrentAction = function() {
         if (!FTKR.AltTB.disableAC) {
             this._actions.shift();
-            if (FTKR.test) console.log('removeCurrentAction', this.name(), this.numActions());
         }
     };
 
@@ -869,7 +843,7 @@ FTKR.AltTB = FTKR.AltTB || {};
     var _Scene_Battle_createPartyCommandWindow = Scene_Battle.prototype.createPartyCommandWindow;
     Scene_Battle.prototype.createPartyCommandWindow = function() {
         _Scene_Battle_createPartyCommandWindow.call(this);
-        this._partyCommandWindow.setHandler('turnEnd', this.commandTurnEnd.bind(this));//追加
+        this._partyCommandWindow.setHandler('turnEnd', this.commandTurnEnd.bind(this));
     };
 
     //書き換え
@@ -901,9 +875,10 @@ FTKR.AltTB = FTKR.AltTB || {};
     var _Scene_Battle_createActorCommandWindow = Scene_Battle.prototype.createActorCommandWindow;
     Scene_Battle.prototype.createActorCommandWindow = function() {
         _Scene_Battle_createActorCommandWindow.call(this);
-        this._actorCommandWindow.setHandler('pageup',  this.commandPageup.bind(this));//追加
-        this._actorCommandWindow.setHandler('pagedown',this.commandPagedown.bind(this));//追加
-        this._actorCommandWindow.setHandler('cancel',  this.commandCancel.bind(this));//変更
+        this._actorCommandWindow.setHandler('pageup',  this.commandPageup.bind(this));
+        this._actorCommandWindow.setHandler('pagedown',this.commandPagedown.bind(this));
+        this._actorCommandWindow.setHandler('cancel',  this.commandCancel.bind(this));
+        this._actorCommandWindow.setStatusWindow(this._statusWindow);
     };
 
     //書き換え
