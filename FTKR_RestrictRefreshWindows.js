@@ -22,12 +22,10 @@ Imported.FTKR_RRW = true;
  *-----------------------------------------------------------------------------
  * 各画面におけるウィンドウのリフレッシュ回数を制限して負荷を抑えます。
  * 
- * 制限対象の画面
- *  ・装備画面
- *      ・装備ステータスウィンドウ
- *      ・装備スロットウィンドウ
- *      ・装備アイテムウィンドウ
- *      ・装備画面のヘルプウィンドウ
+ * 制限対象の画面：装備画面
+ * 
+ * プラグインの使い方は、下のオンラインマニュアルページを見てください。
+ * https://github.com/futokoro/RPGMaker/blob/master/FTKR_RestrictRefreshWindows.ja.md
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -67,13 +65,10 @@ Imported.FTKR_RRW = true;
 
 (function() {
 
-    //ウィンドウのリフレッシュを禁止する
     Window_Base.prototype.onDisabledRefresh = function() {
         this._disabledRefresh = true;
     };
 
-    //ウィンドウのリフレッシュ禁止を解除する
-    //引数に 1 をセットするとリフレッシュも行う
     Window_Base.prototype.offDisabledRefresh = function(arg) {
         this._disabledRefresh = false;
         if (arg) this.refresh();
@@ -92,8 +87,6 @@ Imported.FTKR_RRW = true;
     //=============================================================================
     // 装備画面のリフレッシュ制限
     //=============================================================================
-    //アイテムウィンドウは、updateで自動的にリフレッシュが実行されるため
-    //装備画面遷移時のリフレッシュは無効にする
     var _Scene_Equip_refreshActor = Scene_Equip.prototype.refreshActor;
     Scene_Equip.prototype.refreshActor = function() {
         this._itemWindow.onDisabledRefresh();
@@ -101,9 +94,6 @@ Imported.FTKR_RRW = true;
         this._itemWindow.offDisabledRefresh(0);
     };
 
-    //装備スロットを決定して、装備アイテムウィンドウにカーソルが移る時に
-    //ステータスウィンドウとヘルプウィンドウが2回リフレッシュされているため
-    //それらを無効化して、別に実行させる
     var _Scene_Equip_onSlotOk = Scene_Equip.prototype.onSlotOk;
     Scene_Equip.prototype.onSlotOk = function() {
         this._statusWindow.onDisabledRefresh();
@@ -113,9 +103,6 @@ Imported.FTKR_RRW = true;
         this._helpWindow.offDisabledRefresh(1);
     };
 
-    //装備アイテムを決定して、装備スロットウィンドウにカーソルが移る時に
-    //ステータスウィンドウとヘルプウィンドウが2回リフレッシュされているため
-    //それらを無効化して、別に実行させる
     var _Scene_Equip_onItemOk = Scene_Equip.prototype.onItemOk;
     Scene_Equip.prototype.onItemOk = function() {
         this._statusWindow.onDisabledRefresh();
@@ -125,8 +112,6 @@ Imported.FTKR_RRW = true;
         this._helpWindow.offDisabledRefresh(1);
     };
 
-    //装備アイテムウィンドウでキャンセルして、装備スロットウィンドウにカーソルが移る時に
-    //ヘルプウィンドウが2回リフレッシュされているため、それらを無効化して、別に実行させる
     var _Scene_Equip_onItemCancel = Scene_Equip.prototype.onItemCancel;
     Scene_Equip.prototype.onItemCancel = function() {
         this._helpWindow.onDisabledRefresh();
@@ -144,7 +129,6 @@ Imported.FTKR_RRW = true;
         }
     };
     
-    //すぐあとのsetActor()でリフレッシュが必要になるため、initialize時にはリフレッシュ不要
     var _Window_EquipStatus_initialize = Window_EquipStatus.prototype.initialize;
     Window_EquipStatus.prototype.initialize = function(x, y) {
         this.onDisabledRefresh();
@@ -162,11 +146,6 @@ Imported.FTKR_RRW = true;
         }
     };
     
-    //v1.0.1の修正。
-    //初期値を -1 にしておくことで、装備画面開始時には空欄の
-    //アイテムウィンドウの余計なリフレッシュを抑制できるほか
-    //コマンドウィンドウを経由せずに、直接スロットウィンドウを
-    //アクティブにした場合でも、正しくリフレッシュが可能になる。
     var _Window_EquipItem_initialize = Window_EquipItem.prototype.initialize;
     Window_EquipItem.prototype.initialize = function(x, y, width, height) {
         _Window_EquipItem_initialize.call(this, x, y, width, height);
@@ -183,7 +162,6 @@ Imported.FTKR_RRW = true;
         }
     };
 
-    //すぐあとのsetActor()でリフレッシュが必要になるため、initialize時にはリフレッシュ不要
     var _Window_EquipSlot_initialize = Window_EquipSlot.prototype.initialize;
     Window_EquipSlot.prototype.initialize = function(x, y, width, height) {
         this.onDisabledRefresh();
@@ -191,5 +169,4 @@ Imported.FTKR_RRW = true;
         this.offDisabledRefresh(0);
     };
     
-        
 }());//EOF

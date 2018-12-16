@@ -321,7 +321,7 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 ### 2018/12/15
 * [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md) v3.4.5
-* [FTKR_RestrictRefreshWindows](FTKR_RestrictRefreshWindows.js) v1.0.0(新規) v1.0.1
+* [FTKR_RestrictRefreshWindows](FTKR_RestrictRefreshWindows.ja.md) v1.0.0(新規) v1.0.1
 * [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v2.0.4
 
 ### 2018/12/13
