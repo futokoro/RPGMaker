@@ -24,17 +24,14 @@ Imported.FTKR_RRW = true;
  * 
  * 制限対象の画面：装備画面
  * 
- * プラグインの使い方は、下のオンラインマニュアルページを見てください。
+ * このプラグインによる修正点の解説は、下のオンラインマニュアルページを見てください。
  * https://github.com/futokoro/RPGMaker/blob/master/FTKR_RestrictRefreshWindows.ja.md
  * 
  * 
  *-----------------------------------------------------------------------------
  * 設定方法
  *-----------------------------------------------------------------------------
- * 1.「プラグインマネージャー(プラグイン管理)」に、本プラグインを追加して
- *    ください。
- * 
- * 2. このプラグインはできる限り、プラグイン管理の一番下に登録してください。
+ * 1. このプラグインはできる限り、プラグイン管理の一番下に登録してください。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -74,9 +71,7 @@ Imported.FTKR_RRW = true;
         if (arg) this.refresh();
     };
 
-    //-----------------------------------------------------------
     // ヘルプウィンドウ
-    //-----------------------------------------------------------
     var _Window_Help_refresh = Window_Help.prototype.refresh;
     Window_Help.prototype.refresh = function() {
         if (!this._disabledRefresh) {
@@ -84,9 +79,7 @@ Imported.FTKR_RRW = true;
         }
     };
     
-    //=============================================================================
     // 装備画面のリフレッシュ制限
-    //=============================================================================
     var _Scene_Equip_refreshActor = Scene_Equip.prototype.refreshActor;
     Scene_Equip.prototype.refreshActor = function() {
         this._itemWindow.onDisabledRefresh();
@@ -119,9 +112,7 @@ Imported.FTKR_RRW = true;
         this._helpWindow.offDisabledRefresh(1);
     };
 
-    //-----------------------------------------------------------
     // 装備ステータスウィンドウ
-    //-----------------------------------------------------------
     var _Window_EquipStatus_refresh = Window_EquipStatus.prototype.refresh;
     Window_EquipStatus.prototype.refresh = function() {
         if (!this._disabledRefresh) {
@@ -136,9 +127,7 @@ Imported.FTKR_RRW = true;
         this.offDisabledRefresh(0);
     };
     
-    //-----------------------------------------------------------
     // 装備アイテムウィンドウ
-    //-----------------------------------------------------------
     var _Window_EquipItem_refresh = Window_EquipItem.prototype.refresh;
     Window_EquipItem.prototype.refresh = function() {
         if (!this._disabledRefresh) {
@@ -152,9 +141,7 @@ Imported.FTKR_RRW = true;
         this._slotId = -1;
     };
 
-    //-----------------------------------------------------------
     // 装備スロットウィンドウ
-    //-----------------------------------------------------------
     var _Window_EquipSlot_refresh = Window_EquipSlot.prototype.refresh;
     Window_EquipSlot.prototype.refresh = function() {
         if (!this._disabledRefresh) {
