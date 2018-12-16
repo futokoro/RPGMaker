@@ -845,8 +845,7 @@ FTKR.AOP = FTKR.AOP || {};
             console.error(
                 '入力したパラメータは登録されていません。プラグインパラメータを見直してください\n',
                 '入力内容：', text,'\n',
-                '入力先　：', obj,
-            );
+                '入力先　：', obj);
         }
         return paramId;
     };
