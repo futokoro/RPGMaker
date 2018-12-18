@@ -4,8 +4,8 @@
 // プラグインNo : 75
 // 作成者     : フトコロ
 // 作成日     : 2018/04/08
-// 最終更新日 : 2018/12/15
-// バージョン : v2.0.4
+// 最終更新日 : 2018/12/18
+// バージョン : v2.0.5
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.AltTB = FTKR.AltTB || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.0.4 敵味方交互にターンが進むターン制戦闘システム
+ * @plugindesc v2.0.5 敵味方交互にターンが進むターン制戦闘システム
  * @author フトコロ
  *
  * @param TurnEnd Command
@@ -112,6 +112,7 @@ FTKR.AltTB = FTKR.AltTB || {};
  * https://github.com/futokoro/RPGMaker/blob/master/FTKR_AlternatingTurnBattle.ja.md
  * 
  * 
+ * 
  *-----------------------------------------------------------------------------
  * 設定方法
  *-----------------------------------------------------------------------------
@@ -122,8 +123,6 @@ FTKR.AltTB = FTKR.AltTB || {};
  * 
  *    FTKR_CustomSimpleActorStatus.js (ステータス表示を変更)
  *    FTKR_FVActorAnimation.js        (フロントビューでアクター画像にアニメーション)
- *    YEP_BattleEngineCore.js
- *    YEP_X_ActSeqPack*.js
  *    ↑このプラグインよりも上に登録↑
  * 
  *    FTKR_AlternatingTurnBattle.js
@@ -153,6 +152,10 @@ FTKR.AltTB = FTKR.AltTB || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v2.0.5 - 2018/12/18 : 競合回避
+ *    1. 他プラグインとの競合回避処理追加。
+ *       今後このプラグインにおいては他作者の戦闘プラグインとの競合対策は行いません。
  * 
  * v2.0.4 - 2018/12/15 : 不具合修正
  *    1. プラグインパラメータ Change Player を左右キーに設定して、アクター変更を
@@ -976,6 +979,9 @@ FTKR.AltTB = FTKR.AltTB || {};
     // Yanfly YEP_BattleEngineCore.js の対応
     //=============================================================================
     if (Imported.YEP_BattleEngineCore) {
+    
+    BattleManager.createActions = function() {
+    };
     
     var _YPE_BEC_BattleManager_processTurn = BattleManager.processTurn;
     BattleManager.processTurn = function() {
