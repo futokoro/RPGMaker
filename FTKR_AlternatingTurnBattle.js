@@ -4,8 +4,8 @@
 // プラグインNo : 75
 // 作成者     : フトコロ
 // 作成日     : 2018/04/08
-// 最終更新日 : 2018/12/18
-// バージョン : v2.0.5
+// 最終更新日 : 2018/12/19
+// バージョン : v2.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.AltTB = FTKR.AltTB || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.0.5 敵味方交互にターンが進むターン制戦闘システム
+ * @plugindesc v2.1.0 敵味方交互にターンが進むターン制戦闘システム
  * @author フトコロ
  *
  * @param TurnEnd Command
@@ -30,6 +30,17 @@ FTKR.AltTB = FTKR.AltTB || {};
  * @value 0
  * @option Rightキー + Leftキー
  * @value 1
+ * @option 禁止
+ * @value -1
+ * @default 0
+ *
+ * @param Call Party Command
+ * @desc パーティーコマンドを表示する操作方法を指定します。
+ * @type select
+ * @option キャンセルボタン
+ * @value 0
+ * @option 禁止
+ * @value -1
  * @default 0
  *
  * @param Start Actor Command
@@ -153,6 +164,10 @@ FTKR.AltTB = FTKR.AltTB || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.1.0 - 2018/12/19 : 機能追加
+ *    1. プレイヤーターンでアクターを変更する操作を禁止する機能を追加。
+ *    2. パーティーコマンドを表示する操作を禁止する機能を追加。
+ * 
  * v2.0.5 - 2018/12/18 : 競合回避
  *    1. 他プラグインとの競合回避処理追加。
  *       今後このプラグインにおいては他作者の戦闘プラグインとの競合対策は行いません。
@@ -215,6 +230,7 @@ FTKR.AltTB = FTKR.AltTB || {};
     FTKR.AltTB = {
         textTurnEnd             : (parameters['TurnEnd Command'] || 'ターン終了'),
         changePlayer            : (paramParse(parameters['Change Player']) || 0),
+        callPartyCommand        : (paramParse(parameters['Call Party Command']) || 0),
         startActorCmd           : (paramParse(parameters['Start Actor Command']) || false),
         enableAutoTurnEnd       : (paramParse(parameters['Enable Auto Player Turn End']) || false),
         enabledAutoTurnEndCmd   : (paramParse(parameters['Enabled Auto Select TurnEnd Command']) || false),
@@ -886,9 +902,11 @@ FTKR.AltTB = FTKR.AltTB || {};
 
     //書き換え
     Scene_Battle.prototype.commandCancel = function() {
-        BattleManager.reserveLastActorIndex()
-        BattleManager.clearActorAltTB();
-        this.changeInputWindow();
+        if (!FTKR.AltTB.callPartyCommand) {
+            BattleManager.reserveLastActorIndex()
+            BattleManager.clearActorAltTB();
+            this.changeInputWindow();
+        }
     };
 
     Scene_Battle.prototype.commandPageup = function() {

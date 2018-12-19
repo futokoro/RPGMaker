@@ -216,7 +216,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 | [FTKR_ExForceAction](FTKR_ExForceAction.js) | [あり](FTKR_ExForceAction.ja.md) | [v1.1.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExForceAction.js) | 2018/08/06 | 戦闘行動の強制コマンドの機能を拡張する |
 | [FTKR_ExGuardEffect](FTKR_ExGuardEffect.js) | [あり](FTKR_ExGuardEffect.ja.md) | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExGuardEffect.js) | 2018/04/15 | 防御の効果を拡張する |
 | [FTKR_DisplayEnemyParameters](FTKR_DisplayEnemyParameters.js) | [あり](FTKR_DisplayEnemyParameters.ja.md) | [v1.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_DisplayEnemyParameters.js) | 2018/12/19 | 戦闘画面にエネミーのパラメータを表示する |
-| [FTKR_BattleActionTimes](FTKR_BattleActionTimes.js) | [あり](FTKR_BattleActionTimes.ja.md) | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_BattleActionTimes.js) | 2018/12/03 | 戦闘中の行動回数を表示・操作する |
+| [FTKR_BattleActionTimes](FTKR_BattleActionTimes.js) | [あり](FTKR_BattleActionTimes.ja.md) | [v1.0.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_BattleActionTimes.js) | 2018/12/19 | 戦闘中の行動回数を表示・操作する |
 | [FTKR_BattleActionPoints](FTKR_BattleActionPoints.js) | [あり](FTKR_BattleActionPoints.ja.md) | [v1.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_BattleActionPoints.js) | 2018/12/10 | 消費コスト用のパラメータ「アクションポイント(AP)」を導入する |
 
 FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
@@ -227,7 +227,7 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
-| [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.js) | [仮版](FTKR_AlternatingTurnBattle.ja.md) | [v2.0.5](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AlternatingTurnBattle.js) | 2018/12/18 | 敵味方交互にターンが進むターン制戦闘システム |
+| [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.js) | [仮版](FTKR_AlternatingTurnBattle.ja.md) | [v2.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AlternatingTurnBattle.js) | 2018/12/19 | 敵味方交互にターンが進むターン制戦闘システム |
 | [FTKR_AltTB_SelectTouchedActor](FTKR_AltTB_SelectTouchedActor.js) | なし | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AltTB_SelectTouchedActor.js) | 2018/12/04 | ステータスウィンドウ内をクリックして、その行または列のアクターを選択する<br> ＜以下のプラグインが必要＞ <br> [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.js) |
 | [FTKR_AltTB_BattleEventConditions](FTKR_AltTB_BattleEventConditions.js) | [あり](FTKR_AltTB_BattleEventConditions.ja.md) | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AltTB_BattleEventConditions.js) | 2018/12/04 | バトルイベントにFTKR_AltTB専用のターン条件を設定できる<br> ＜以下のプラグインが必要＞ <br> [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.js) |
 
@@ -321,6 +321,8 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 ### 2018/12/19
 * [FTKR_DisplayEnemyParameters](FTKR_DisplayEnemyParameters.ja.md) v1.1.0
+* [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v2.1.0
+* [FTKR_BattleActionTimes](FTKR_BattleActionTimes.ja.md) v1.0.2
 
 ### 2018/12/18
 * [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v2.0.5

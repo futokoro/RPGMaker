@@ -4,8 +4,8 @@
 // プラグインNo : 90
 // 作成者     : フトコロ
 // 作成日     : 2018/12/02
-// 最終更新日 : 2018/12/03
-// バージョン : v1.0.1
+// 最終更新日 : 2018/12/19
+// バージョン : v1.0.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.BAT = FTKR.BAT || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.1 戦闘中の行動回数を表示・操作するプラグイン
+ * @plugindesc v1.0.2 戦闘中の行動回数を表示・操作するプラグイン
  * @author フトコロ
  *
  * @param Default Max AT
@@ -211,8 +211,11 @@ FTKR.BAT = FTKR.BAT || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.2 - 2018/12/19 : 不具合修正
+ *    1. 戦闘行動の強制を実行するとエラーになる不具合を修正。
+ * 
  * v1.0.1 - 2018/12/03 : 不具合修正
- *  1. プラグインコマンドの誤記修正。
+ *    1. プラグインコマンドの誤記修正。
  * 
  * v1.0.0 - 2018/12/02 : 初版作成
  * 
@@ -463,7 +466,7 @@ FTKR.BAT = FTKR.BAT || {};
     };
 
     Game_Battler.prototype.canPayActionTimes = function(item) {
-        return !this.numActions() && item.noAC && FTKR.enabledNoATSkillsRegardlessAT || this.numActions();
+        return !this.numActions() && item.noAC || this.numActions();
     };
 
     var _Game_Battler_removeCurrentAction = Game_Battler.prototype.removeCurrentAction;
@@ -475,7 +478,7 @@ FTKR.BAT = FTKR.BAT || {};
 
     var _Game_Battler_forceAction = Game_Battler.prototype.forceAction;
     Game_Battler.prototype.forceAction = function(skillId, targetIndex) {
-        if (FTKR.BAP.enabledForceActionAT && !$dataSkills[skillId].noAC && !this.numActions()) return;
+        if (FTKR.BAT.enabledForceActionAT && !$dataSkills[skillId].noAC && !this.numActions()) return;
         _Game_Battler_forceAction.call(this, skillId, targetIndex);
     };
     

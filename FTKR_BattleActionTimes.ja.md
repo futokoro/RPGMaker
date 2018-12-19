@@ -300,7 +300,8 @@ FTKR_RESET_ACTIONS Troop 1
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.0.1](FTKR_BattleActionTimes.js) | 2018/12/03 | プラグインコマンドの誤記修正 |
+| [ver1.0.2](FTKR_BattleActionTimes.js) | 2018/12/19 | 戦闘行動の強制を実行するとエラーになる不具合を修正 |
+| ver1.0.1 | 2018/12/03 | プラグインコマンドの誤記修正 |
 | ver1.0.0 | 2018/12/02 | FTKR_AlternatingTurnBattle v1.6.2 の、行動回数に関する処理を独立。処理を見直して別プラグインとして作成 |
 
 # ライセンス
