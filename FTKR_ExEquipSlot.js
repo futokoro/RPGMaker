@@ -4,8 +4,8 @@
 // プラグインNo : 49
 // 作成者     : フトコロ
 // 作成日     : 2017/06/30
-// 最終更新日 : 2017/12/17
-// バージョン : v1.1.0
+// 最終更新日 : 2018/12/20
+// バージョン : v1.2.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.EES = FTKR.EES || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.0 同じ装備タイプの装備を２つ以上装備できるようにする
+ * @plugindesc v1.2.0 同じ装備タイプの装備を２つ以上装備できるようにする
  * @author フトコロ
  *
  * @param Enable Equip Same Items
@@ -25,6 +25,14 @@ FTKR.EES = FTKR.EES || {};
  * @on 装備できる
  * @off 装備できない
  * @default true
+ * 
+ * @param Disabled Equip Same WtypeIds
+ * @desc ここに設定した武器タイプIDは１つしか装備できません。
+ * @default 
+ * 
+ * @param Disabled Equip Same AtypeIds
+ * @desc ここに設定した防具タイプIDは１つしか装備できません。
+ * @default 
  * 
  * @help 
  *-----------------------------------------------------------------------------
@@ -49,7 +57,7 @@ FTKR.EES = FTKR.EES || {};
  * プラグインパラメータ<Enable Equip Same Items>で
  * 同じ武器・防具を複数装備できるか設定できます。
  * 
- * 「装備できる」に設定下場合は、同じ装備を２つ以上装備できます。
+ * 「装備できる」に設定した場合は、同じ装備を２つ以上装備できます。
  * 「装備できない」に設定した場合は、同じ装備は１つしか装備できません。
  * 
  * ただし、以下のタグをメモ欄に記載すると、プラグインパラメータの設定を
@@ -62,6 +70,29 @@ FTKR.EES = FTKR.EES || {};
  * <EES_複数装備不可>
  *    :このタグがある装備は、<Enable Equip Same Items>を
  *    :「装備できる」に設定していても、１つしか装備できません。
+ * 
+ * 
+ * ＜同じ武器タイプ、防具タイプを複数装備させない場合＞
+ * 基本的に同じ武器タイプ・防具タイプは、何個でも装備可能になります。
+ * 
+ * ただし、 * 以下のプラグインパラメータに数値を入力すると
+ * そのIDの武器タイプや防具タイプは、１つしか装備できません。
+ * 
+ * <Disabled Equip Same Wtypes>
+ *      :このパラメータに入力した武器タイプIDは、１つしか装備できません。
+ *      :複数のIDを入力する場合は、カンマ(,)で分けてください。
+ *      :また、二つのID同士をハイフン(-)で繋げた場合は、その間のすべての
+ *      :IDを登録します。
+ * 
+ * <Disabled Equip Same Atypes>
+ *      :このパラメータに入力した防具タイプIDは、１つしか装備できません。
+ *      :複数のIDを入力する場合は、カンマ(,)で分けてください。
+ *      :また、二つのID同士をハイフン(-)で繋げた場合は、その間のすべての
+ *      :IDを登録します。
+ * 
+ * 入力例)
+ * 　1, 4, 5, 10-15
+ * この場合、ID 1, 4, 10, 11, 12, 13, 14, 15が該当します。
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -77,7 +108,7 @@ FTKR.EES = FTKR.EES || {};
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
- * Copyright (c) 2017 Futokoro
+ * Copyright (c) 2017,2018 Futokoro
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
@@ -88,6 +119,9 @@ FTKR.EES = FTKR.EES || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.2.0 - 2018/12/20 : 機能追加
+ *    1. 同じ武器タイプ防具タイプを複数装備させない機能を追加。
  * 
  * v1.1.0 - 2017/12/17 : 機能追加
  *    1. 同じ装備を２つ以上装備できるか設定する機能を追加。
@@ -100,12 +134,31 @@ FTKR.EES = FTKR.EES || {};
 
 (function() {
 
+    var splitConvertNumber = function(param) {
+        var results = [];
+        (param + '').split(',').forEach( function(split){
+            match = /[ ]*(\d+)[ ]*-[ ]*(\d+)/.exec(split);
+            if (match) {
+                for (var i = Number(match[1]); i <= Number(match[2]); i++) {
+                    results.push(i);
+                }
+            } else {
+                if(!isNaN(split)) results.push(Number(split));
+            }
+        });
+        return results;
+    };
+
     //=============================================================================
     // プラグイン パラメータ
     //=============================================================================
     var parameters = PluginManager.parameters('FTKR_ExEquipSlot');
 
-    FTKR.EES.enable = JSON.parse(parameters['Enable Equip Same Items'] || 'true');
+    FTKR.EES = {
+        enable : JSON.parse(parameters['Enable Equip Same Items'] || 'true'),
+        disabledWtpeIds : splitConvertNumber(parameters['Disabled Equip Same WtypeIds'] || ''),
+        disabledAtpeIds : splitConvertNumber(parameters['Disabled Equip Same AtypeIds'] || ''),
+    };
 
     var sameEquipIds = function(etypeId) {
         var equipIds = [];
@@ -146,6 +199,22 @@ FTKR.EES = FTKR.EES || {};
         return matchEquipIds(etypeId, this._actor.equipSlots()[this._slotId]);
     };
 
+    Window_EquipItem.prototype.checkEnabledMultiEquip = function(item) {
+        return !FTKR.EES.enable && this._actor.isEquipped(item) && !enableMultipleEquipment(item);
+    };
+
+    Window_EquipItem.prototype.checkDisabledMultiEquip = function(item) {
+        return FTKR.EES.enable && this._actor.isEquipped(item) && disableMultipleEquipment(item);
+    };
+
+    Window_EquipItem.prototype.checkEquippedSameWtypeIds = function(item) {
+        return DataManager.isWeapon(item) && FTKR.EES.disabledWtpeIds.contains(item.wtypeId) && this._actor.isEquippedSameWtypeIds(item.wtypeId);
+    };
+
+    Window_EquipItem.prototype.checkEquippedSameAtypeIds = function(item) {
+        return ataManager.isArmor(item) && FTKR.EES.disabledAtpeIds.contains(item.atypeId) && this._actor.isEquippedSameAtypeIds(item.atypeId);
+    };
+
     //書き換え
     Window_EquipItem.prototype.includes = function(item) {
         if (item === null) {
@@ -154,10 +223,16 @@ FTKR.EES = FTKR.EES || {};
         if (this._slotId < 0 || !this.checkSameEquipIds(item.etypeId)) {
             return false;
         }
-        if (!FTKR.EES.enable && this._actor.isEquipped(item) && !enableMultipleEquipment(item)) {
+        if (this.checkEnabledMultiEquip(item)) {
             return false;
         }
-        if (FTKR.EES.enable && this._actor.isEquipped(item) && disableMultipleEquipment(item)) {
+        if (this.checkDisabledMultiEquip(item)) {
+            return false;
+        }
+        if (this.checkEquippedSameWtypeIds(item)) {
+            return false;
+        }
+        if (this.checkEquippedSameAtypeIds(item)) {
             return false;
         }
         return this._actor.canEquip(item);
@@ -213,6 +288,18 @@ FTKR.EES = FTKR.EES || {};
             this._equips[slotId].setObject(item);
             this.refresh();
         }
+    };
+
+    Game_Actor.prototype.isEquippedSameWtypeIds = function(wtypeId) {
+        return this.weapons().some(function(weapon){
+            return weapon && weapon.wtypeId === wtypeId;
+        });
+    };
+
+    Game_Actor.prototype.isEquippedSameAtypeIds = function(atypeId) {
+        return this.armors().some(function(armor){
+            return armor && armor.atypeId === atypeId;
+        });
     };
 
 }());//EOF
