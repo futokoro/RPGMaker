@@ -18,6 +18,8 @@
 
 表示するパラメータや、表示位置やサイズはプラグインパラメータで設定可能です。
 
+![画像](image/FTKR_DisplayEnemyParameters/n01_001.png)
+
 表示位置とサイズは、エネミーのメモ欄で個別に設定可能です。
 
 `<FTKR_STATUS_POS_X: x>`
@@ -28,8 +30,6 @@
 
 `<FTKR_STATUS_WIDTH: w>`
 * w : ステータスの表示幅
-
-![画像](image/FTKR_DisplayEnemyParameters/n01_001.png)
 
 また、HP・MP・TPは、プラグインパラメータでラベル(HPやMPなどの文字)、数値、ゲージの表示を個別にON/OFFすることができます。
 
