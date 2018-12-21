@@ -4,8 +4,8 @@
 // プラグインNo : 49
 // 作成者     : フトコロ
 // 作成日     : 2017/06/30
-// 最終更新日 : 2018/12/20
-// バージョン : v1.2.0
+// 最終更新日 : 2018/12/21
+// バージョン : v1.2.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.EES = FTKR.EES || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.0 同じ装備タイプの装備を２つ以上装備できるようにする
+ * @plugindesc v1.2.1 同じ装備タイプの装備を２つ以上装備できるようにする
  * @author フトコロ
  *
  * @param Enable Equip Same Items
@@ -32,6 +32,10 @@ FTKR.EES = FTKR.EES || {};
  * 
  * @param Disabled Equip Same AtypeIds
  * @desc ここに設定した防具タイプIDは１つしか装備できません。
+ * @default 
+ * 
+ * @param Disabled Slot Name
+ * @desc ここに設定した装備タイプIDの装備タイプ名は表示されません。
  * @default 
  * 
  * @help 
@@ -70,6 +74,10 @@ FTKR.EES = FTKR.EES || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.2.1 - 2018/12/21 : 不具合修正、機能追加
+ *    1. v1.2.0の修正部の不具合修正。
+ *    2. 指定した装備タイプの名前を表示させない機能を追加。
+ * 
  * v1.2.0 - 2018/12/20 : 機能追加
  *    1. 同じ武器タイプ防具タイプを複数装備させない機能を追加。
  * 
@@ -106,8 +114,9 @@ FTKR.EES = FTKR.EES || {};
 
     FTKR.EES = {
         enable : JSON.parse(parameters['Enable Equip Same Items'] || 'true'),
-        disabledWtpeIds : splitConvertNumber(parameters['Disabled Equip Same WtypeIds'] || ''),
-        disabledAtpeIds : splitConvertNumber(parameters['Disabled Equip Same AtypeIds'] || ''),
+        disabledWtpeIds  : splitConvertNumber(parameters['Disabled Equip Same WtypeIds'] || ''),
+        disabledAtpeIds  : splitConvertNumber(parameters['Disabled Equip Same AtypeIds'] || ''),
+        disabledSlotName : splitConvertNumber(parameters['Disabled Slot Name'] || ''),
     };
 
     var sameEquipIds = function(etypeId) {
@@ -142,6 +151,15 @@ FTKR.EES = FTKR.EES || {};
     };
 
     //=============================================================================
+    // Window_EquipSlot
+    //=============================================================================
+
+    var _Window_EquipSlot_slotName = Window_EquipSlot.prototype.slotName;
+    Window_EquipSlot.prototype.slotName = function(index) {
+        return !FTKR.EES.disabledSlotName.contains(index + 1) ? _Window_EquipSlot_slotName.call(this, index) : '';
+    };
+
+    //=============================================================================
     // Window_EquipItem
     //=============================================================================
 
@@ -162,7 +180,7 @@ FTKR.EES = FTKR.EES || {};
     };
 
     Window_EquipItem.prototype.checkEquippedSameAtypeIds = function(item) {
-        return ataManager.isArmor(item) && FTKR.EES.disabledAtpeIds.contains(item.atypeId) && this._actor.isEquippedSameAtypeIds(item.atypeId);
+        return DataManager.isArmor(item) && FTKR.EES.disabledAtpeIds.contains(item.atypeId) && this._actor.isEquippedSameAtypeIds(item.atypeId);
     };
 
     //書き換え
