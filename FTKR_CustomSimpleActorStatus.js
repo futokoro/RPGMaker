@@ -31,6 +31,24 @@ FTKR.CSS = FTKR.CSS || {};
  * @noteType file
  * @noteData actors
  * 
+ * @noteParam CSS_画像
+ * @noteRequire 1
+ * @noteDir img/pictures/
+ * @noteType file
+ * @noteData items
+ * 
+ * @noteParam CSS_画像
+ * @noteRequire 1
+ * @noteDir img/pictures/
+ * @noteType file
+ * @noteData weapons
+ * 
+ * @noteParam CSS_画像
+ * @noteRequire 1
+ * @noteDir img/pictures/
+ * @noteType file
+ * @noteData armors
+ * 
  * @param face
  * @text --顔画像の設定--
  * @default
