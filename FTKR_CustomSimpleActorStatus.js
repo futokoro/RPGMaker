@@ -4,8 +4,8 @@
 // プラグインNo : 9
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2018/12/15
-// バージョン : v3.4.6
+// 最終更新日 : 2018/12/27
+// バージョン : v3.4.7
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v3.4.6 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v3.4.7 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -1119,6 +1119,10 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v3.4.7 - 2018/12/27 : 不具合修正
+ *    1. FTKR_CSS_ShopStatus v2.2.2 の不具合修正対応。
+ *    2. FTKR_OriginalSceneWindow でアイテムデータ画像が表示できない不具合対応。
+ * 
  * v3.4.6 - 2018/12/15 : 不具合修正(軽量化)
  *    1. カスタムパラメータとカスタムゲージの表示処理を見直し。
  *    2. プラグインコマンドの判定処理を見直し。
@@ -1839,14 +1843,6 @@ FTKR.CSS = FTKR.CSS || {};
         }
     };
 
-    var convertCssNumber = function(value) {
-        if (!value) return 0;
-        if (!isNaN(value)) {
-            return Number(value);
-        }
-        return Number(FTKR.evalFormula(value));
-    };
-
     // 配列の要素の合計
     Math.sam = function(arr) {
         return arr.reduce( function(prev, current, i, arr) {
@@ -1908,6 +1904,9 @@ FTKR.CSS = FTKR.CSS || {};
         if (!_DataManager_isDatabaseLoaded.call(this)) return false;
         if (!_DatabaseLoaded) {
             this.cssActorImageNotetags($dataActors);
+            this.cssActorImageNotetags($dataItems);
+            this.cssActorImageNotetags($dataWeapons);
+            this.cssActorImageNotetags($dataArmors);
             this.cssCustomParamNotetags($dataActors);
             this.cssCustomParamNotetags($dataClasses);
             _DatabaseLoaded = true;
@@ -1920,7 +1919,7 @@ FTKR.CSS = FTKR.CSS || {};
             var obj = group[n];
             obj.cssbgi = [];
             var datas = readEntrapmentCodeToTextEx(obj, ['CSS_画像', 'CSS_IMAGE']);
-            this.readCssBgiMetaDatas(obj, datas);
+            if (datas.length) this.readCssBgiMetaDatas(obj, datas);
         }
     };
 
@@ -2145,6 +2144,14 @@ FTKR.CSS = FTKR.CSS || {};
         return this.maxPageItems ? this.maxPageItems() : 1;
     };
 
+    Window_Base.prototype.convertCssNumber = function(value) {
+        if (!value) return 0;
+        if (!isNaN(value)) {
+            return Number(value);
+        }
+        return Number(this.evalCssCustomFormula(value));
+    };
+
     Window_Base.prototype.evalCssCustomFormula = function(actor, formula) {
         if (!formula) return '';
         FTKR.setGameData(actor);
@@ -2340,9 +2347,9 @@ FTKR.CSS = FTKR.CSS || {};
             case 'TEXT':
                 return this.drawCssText(actor, x, y, width, match[2]);
             default:
-                if (!actor) return 1;
+//                if (!actor) return 1;
                 FTKR.setGameData(actor);
-                match[2] = convertCssNumber(match[2]);
+                match[2] = this.convertCssNumber(match[2]);
                 return this.drawCssActorStatusBase_A1(index, actor, x, y, width, match, lss, css);
         }
     };
@@ -2563,9 +2570,10 @@ FTKR.CSS = FTKR.CSS || {};
     //------------------------------------------------------------------------
     Window_Base.prototype.drawCssItemImage = function(actor, dx, dy, width, id, lss) {
         var item = lss.item;
-        if (!item) return 1;
+        if (!item || !item.cssbgi) return 1;
         id = id || 0;
         var bgi = item.cssbgi[id];
+        if (!bgi) return 1;
         var bitmap = ImageManager.loadPicture(bgi.name);
         if (!bitmap) return 1;
         var sw = bgi.width || bitmap.width;

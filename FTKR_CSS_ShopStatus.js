@@ -4,8 +4,8 @@
 // プラグインNo : 52
 // 作成者     : フトコロ
 // 作成日     : 2017/07/23
-// 最終更新日 : 2018/12/13
-// バージョン : v2.2.1
+// 最終更新日 : 2018/12/27
+// バージョン : v2.2.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -17,7 +17,7 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.2.1 ショップ画面のステータスレイアウトを変更する
+ * @plugindesc v2.2.2 ショップ画面のステータスレイアウトを変更する
  * @author フトコロ
  *
  * @param --共通レイアウト設定--
@@ -275,6 +275,9 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.2.2 - 2018/12/27 : 不具合修正
+ *    1. 武器防具のアイテム用パラメータのコードが正しく反映されない不具合を修正。
+ * 
  * v2.2.1 - 2018/12/13 : プラグインパラメータstatusListの初期値変更
  * 
  * v2.2.0 - 2018/10/10 : 仕様変更
@@ -511,19 +514,6 @@ if (Imported.FTKR_CSS) (function() {
     // CSS表示コードを追加
     //=============================================================================
 
-    var _SpS_DatabaseLoaded = false;
-    var _SpS_DataManager_isDatabaseLoaded = DataManager.isDatabaseLoaded;
-    DataManager.isDatabaseLoaded = function() {
-        if (!_SpS_DataManager_isDatabaseLoaded.call(this)) return false;
-        if (!_SpS_DatabaseLoaded) {
-            this.cssActorImageNotetags($dataItems);
-            this.cssActorImageNotetags($dataWeapons);
-            this.cssActorImageNotetags($dataArmors);
-            _SpS_DatabaseLoaded = true;
-        }
-        return true;
-    };
-
     var _SpS_Window_Base_drawCssActorStatusBase_A1 = Window_Base.prototype.drawCssActorStatusBase_A1;
     Window_Base.prototype.drawCssActorStatusBase_A1 = function(index, actor, x, y, width, match, lss, css) {
         switch(match[1].toUpperCase()) {
@@ -535,9 +525,10 @@ if (Imported.FTKR_CSS) (function() {
 
     Window_Base.prototype.drawCssItemImage = function(actor, dx, dy, width, id, lss) {
         var item = FTKR.gameData.item || lss.item;
-        if (!item) return 1;
+        if (!item || !item.cssbgi) return 1;
         id = id || 0;
         var bgi = item.cssbgi[id];
+        if (!bgi) return 1;
         var bitmap = ImageManager.loadPicture(bgi.name);
         if (!bitmap) return 1;
         var sw = bgi.width || bitmap.width;
@@ -739,6 +730,7 @@ if (Imported.FTKR_CSS) (function() {
         var lineHeight = this.lineHeight() + this.heightSpace();
         var y = lineHeight * this.actorRows() * (index % this.pageSize());
         lss.target = this._tempActor;
+        lss.item = this._item;
         this.drawCssActorStatus(index, actor, 0, y, w, h, lss);
     };
 

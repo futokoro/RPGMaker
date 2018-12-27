@@ -212,7 +212,8 @@ FTKR_CustomSimpleActorStatus の v3.4.0 以降から標準実装。
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver3.4.6](FTKR_CustomSimpleActorStatus.js) | 2018/12/15 | カスタムパラメータとカスタムゲージの表示処理を見直し<br>プラグインコマンドの判定処理を見直し |
+| [ver3.4.7](FTKR_CustomSimpleActorStatus.js) | 2018/12/27 | FTKR_CSS_ShopStatus v2.2.2 の不具合修正対応<br>FTKR_OriginalSceneWindow でアイテムデータ画像が表示できない不具合対応 |
+| ver3.4.6 | 2018/12/15 | カスタムパラメータとカスタムゲージの表示処理を見直し<br>プラグインコマンドの判定処理を見直し |
 | ver3.4.5 | 2018/12/13 | code(x)の形のパラメータの判定時に必ずeval()で評価していた処理を見直し |
 | ver3.4.4 | 2018/12/02 | カスタム画像で、存在しない画像IDを指定した場合にエラーになる不具合を修正 |
 | ver3.4.3 | 2018/11/03 | ediff(x)、aopdiff(x)、ediffaop(x)の表示内容の設定を、pdiff(x)から独立 |
