@@ -20,6 +20,7 @@
     1. [アクターの縦の表示人数を変える場合](#アクターの縦の表示人数を変える場合)
     1. [アクターを横に並べる場合](#アクターを横に並べる場合)
 5. [バトルフィールド上のアクターの初期位置設定](#バトルフィールド上のアクターの初期位置設定)
+6. [ウィンドウ設定のセーブと変更](#ウィンドウ設定のセーブと変更)
 * [プラグインの更新履歴](#プラグインの更新履歴)
 * [拡張プラグイン](#拡張プラグイン)
 * [ライセンス](#ライセンス)
@@ -266,11 +267,48 @@ name,state,hp,mp
 
 [目次に戻る](#目次)
 
+## ウィンドウ設定のセーブと変更
+
+プラグインパラメータ`Enabled Save WindowLayout`を有効にすることで、ウィンドウ設定のプラグインパラメータで設定した内容が、ゲーム内データとして保存、セーブされます。
+
+この保存されたデータは、以下のプラグインコマンドでゲーム中に変更することができます。
+
+```
+CSS_ウィンドウ設定変更 バトル [対象データ] [値]
+CSS_CHANGE_WINDOW_SETTING BATTLE [data] [value]
+```
+
+### 対象データと値
+変更したいデータに合わせて、以下の文字列を指定します。
+
+| 対象データ(プラグインパラメータ) | 対象データ(data)に入力する内容 | 値(value)に入力する内容 | 備考 |
+| --- | --- | --- | --- |
+| Enabled Custom Window | カスタム機能 or enabled | true or false | falseにすることでデフォルト表示に戻します |
+| Number Visible Rows | 表示行数 or NUMVISIBLEROUS | 数字 |  |
+| Number Max Cols | 表示列数 or MAXCOLS | 数字 |  |
+| Cursor Line Number | カーソル行数 or CURSORHEIGHT | 数字 |  |
+| Cursor Height Space | 表示行間隔 or HSPACE | 数字 |  |
+| Font Size | フォントサイズ | 数字 or FONTSIZE |  |
+| Window Padding | 余白 or PADDING | 数字 |  |
+| Window Line Height | 行高さ or LINEHEIGHT | 数字 |  |
+| Window Opacity | 背景透明度 or OPACITY | 数字 |  |
+| Hide Window Frame | 枠非表示 or HIDEFRAME | true or false | true で枠を非表示にします |
+
+### 入力例
+```
+CSS_ウィンドウ設定変更 バトル 表示列数 4
+CSS_ウィンドウ設定変更 バトル 枠非表示 true
+```
+
+[目次に戻る](#目次)
+
 ## プラグインの更新履歴
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver2.1.2](FTKR_CSS_BattleStatus.js) | 2018/12/13 | プラグインパラメータ初期値変更 |
+| [ver2.2.0](FTKR_CSS_BattleStatus.js) | 2018/12/29 | ウィンドウ設定をセーブできる機能を追加 |
+| ver2.1.3 | 2018/12/13 | プラグインパラメータ初期値変更 |
+| ver2.1.2 | 2018/09/29 | プラグインパラメータのリストで選択できる項目を追加 |
 | ver2.1.1 | 2018/09/12 | プラグインパラメータ Number Visible Rows が反映されない不具合を修正 |
 | ver2.1.0 | 2018/08/30 | FTKR_CustomSimpleActorStatus.js の v3.1.0に対応 |
 | ver2.0.0 | 2018/08/19 | FTKR_CustomSimpleActorStatus.js の v3.0.0に対応 |

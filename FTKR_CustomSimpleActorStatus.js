@@ -4,8 +4,8 @@
 // プラグインNo : 9
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2018/12/27
-// バージョン : v3.4.7
+// 最終更新日 : 2018/12/29
+// バージョン : v3.5.0
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v3.4.7 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v3.5.0 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -1137,6 +1137,9 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v3.5.0 - 2018/12/29 : 機能追加
+ *    1. セーブしたウィンドウ設定を変更するプラグインコマンドを追加。
+ * 
  * v3.4.7 - 2018/12/27 : 不具合修正
  *    1. FTKR_CSS_ShopStatus v2.2.2 の不具合修正対応。
  *    2. FTKR_OriginalSceneWindow でアイテムデータ画像が表示できない不具合対応。
@@ -2039,6 +2042,10 @@ FTKR.CSS = FTKR.CSS || {};
             case 'CSS_CHANGE_CUSTOM_IMAGE':
                 this.cssChangeCustomImage(args);
                 break;
+            case 'CSS_ウィンドウ設定変更':
+            case 'CSS_CHANGE_WINDOW_SETTING':
+                this.cssChangeWindowSetting(args);
+                break;
             default:
                 _CSS_Game_Interpreter_pluginCommand.call(this, command, args);
                 break;
@@ -2068,6 +2075,65 @@ FTKR.CSS = FTKR.CSS || {};
             setArgNum(args[7]),
             setArgNum(args[8])
         );
+    };
+
+    Game_Interpreter.prototype.cssChangeWindowSetting = function(args) {
+        switch(setArgStr(args[0].toUpperCase())) {
+            case 'バトル':
+            case 'BATTLE':
+                this.cssChangeWindowSettingParam($gameSystem._cssBattleWindow, args);
+                return;
+            default:
+                return;
+        }
+    };
+
+    Game_Interpreter.prototype.cssChangeWindowSettingParam = function(param, args) {
+        if (!param) return;
+        switch(setArgStr(args[1].toUpperCase())) {
+            case 'ENABLED':
+            case 'カスタム機能':
+                param.enabled = Boolean(setArgStr(args[2]));
+                break;
+            case 'NUMVISIBLEROUS':
+            case '表示行数':
+                param.numVisibleRows = setArgNum(args[2]);
+                break;
+            case 'FONTSIZE':
+            case 'フォントサイズ':
+                param.fontSize = setArgNum(args[2]);
+                break;
+            case 'PADDING':
+            case '余白':
+                param.padding = setArgNum(args[2]);
+                break;
+            case 'LINEHEIGHT':
+            case '行高さ':
+                param.lineHeight = setArgNum(args[2]);
+                break;
+            case 'OPACITY':
+            case '背景透明度':
+                param.opacity = setArgNum(args[2]);
+                break;
+            case 'HIDEFRAME':
+            case '枠非表示':
+                param.hideFrame = Boolean(setArgStr(args[2]));
+                break;
+            case 'MAXCOLS':
+            case '表示列数':
+                param.maxCols = setArgNum(args[2]);
+                break;
+            case 'CURSORHEIGHT':
+            case 'カーソル行数':
+                param.cursorHeight = setArgNum(args[2]);
+                break;
+            case 'HSPACE':
+            case '表示行間隔':
+                param.hspace = setArgNum(args[2]);
+                break;
+            default:
+                break;
+        }
     };
 
     //=============================================================================

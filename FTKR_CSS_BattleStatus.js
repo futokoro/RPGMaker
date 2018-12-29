@@ -4,8 +4,8 @@
 // プラグインNo : 16
 // 作成者     : フトコロ
 // 作成日     : 2017/04/11
-// 最終更新日 : 2018/12/13
-// バージョン : v2.1.3
+// 最終更新日 : 2018/12/29
+// バージョン : v2.2.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -17,9 +17,16 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.1.3 バトル画面のステータス表示を変更するプラグイン
+ * @plugindesc v2.2.0 バトル画面のステータス表示を変更するプラグイン
  * @author フトコロ
- *
+ * 
+ * @param Enabled Save WindowLayout
+ * @desc ウィンドウ設定データをセーブできるようにする。
+ * @default false
+ * @type boolean
+ * @on 有効
+ * @off 無効
+ * 
  * @param --バトルパーティー設定--
  * @desc 
  * 
@@ -264,6 +271,9 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.2.0 - 2018/12/29 : 機能追加
+ *    1. ウィンドウ設定をセーブできる機能を追加。
+ * 
  * v2.1.3 - 2018/12/13 : プラグインパラメータstatusListの初期値変更
  * 
  * v2.1.2 - 2018/09/29 : 機能追加
@@ -436,6 +446,8 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
     //=============================================================================
     var parameters = PluginManager.parameters('FTKR_CSS_BattleStatus');
 
+    var saveCssWindow = paramParse(parameters['Enabled Save WindowLayout']) || false;
+
     FTKR.CSS.BS.party = {
         maxMembers    :Number(parameters['Max Battle Members'] || 0),
     };
@@ -471,6 +483,25 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
     };
 
     //=============================================================================
+    // Game_System
+    //=============================================================================
+    var _Game_System_initialize = Game_System.prototype.initialize;
+    Game_System.prototype.initialize = function() {
+        _Game_System_initialize.call(this);
+        if (saveCssWindow) {
+            this.resetCssBattleWindow();
+        }
+    };
+
+    Game_System.prototype.resetCssBattleWindow = function() {
+        this._cssBattleWindow = JsonEx.makeDeepCopy(FTKR.CSS.BS.window);
+    };
+
+    Game_System.prototype.cssBattleWindow = function() {
+        return saveCssWindow ? this._cssBattleWindow : FTKR.CSS.BS.window;
+    };
+
+    //=============================================================================
     // Game_Party
     //=============================================================================
     if (FTKR.CSS.BS.party.maxMembers) {
@@ -488,7 +519,7 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
     if (Imported.FTKR_CSS) {
 
     Window_BattleStatus.prototype.standardCssLayout = function() {
-      return FTKR.CSS.BS.window;
+      return $gameSystem.cssBattleWindow();
     };
 
     Window_BattleStatus.prototype.standardCssStatus = function() {
@@ -504,8 +535,7 @@ FTKR.CSS.BS = FTKR.CSS.BS || {};
     //ウィンドウの行数
     var _DS_Window_BattleStatus_numVisibleRows = Window_BattleStatus.prototype.numVisibleRows;
     Window_BattleStatus.prototype.numVisibleRows = function() {
-        return FTKR.CSS.BS.window.enabled ? FTKR.CSS.BS.window.numVisibleRows :
-        _DS_Window_BattleStatus_numVisibleRows.call(this);
+        return $gameSystem.cssBattleWindow().enabled ? $gameSystem.cssBattleWindow().numVisibleRows : _DS_Window_BattleStatus_numVisibleRows.call(this);
     };
 
     //書き換え
