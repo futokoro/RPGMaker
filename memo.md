@@ -5,10 +5,10 @@
 いつやるかも決めていません。
 
 * スキル強化プラグインのリメイク
-* スキルツリープラグインのスキルツリー作成がもう少し簡単にできないか検討
+* スキルツリープラグインのスキルツリー作成がもう少し簡単にできないか検討⇒リメイク
 * FTKR_FacialImageDifference2で非戦闘時に顔画像を切り替える機能
 * FTKR_CSS_EquipStatusを使うと処理が重くなる？⇒対応済み
-* FTKR_CustomSimpleActorStatusのマニュアルページを v3.0.0 に合わせて修正
+* FTKR_CustomSimpleActorStatusのマニュアルページを v3.0.0 に合わせて修正⇒対応済み
 
 [トップページに戻る](README.md)
 

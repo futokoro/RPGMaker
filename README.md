@@ -321,6 +321,7 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 ### 2018/12/30
 * [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js) v1.17.0
+* [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md) マニュアルページ修正
 
 ### 2018/12/29
 * [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md) v3.5.0
