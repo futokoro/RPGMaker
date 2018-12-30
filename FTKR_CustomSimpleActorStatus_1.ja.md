@@ -2,107 +2,109 @@
 [目次に戻る](FTKR_CustomSimpleActorStatus.ja.md#目次)
 
 # レイアウトの設定
+1. [statusListの操作](#statuslistの操作)
+1. [statusListパラメータの設定](#statuslistパラメータの設定)
+    1. [表示するステータスの設定](#表示するステータスの設定)
+    3. [表示位置と表示幅の設定](#表示位置と表示幅の設定)
+1.  [その他の設定](#その他の設定)
 
-1. [描画エリアサイズの設定](#描画エリアサイズの設定)
-3. [描画エリアの設定](#描画エリアの設定)
-4. [空白エリアの設定](#空白エリアの設定)
+## statusListの操作
 
-## 描画エリアサイズの設定
+### 既存のステータスを編集する
 
-描画エリアのサイズは、プラグインパラメータ`Actor Status Width Rate`で設定します。３つの描画エリアの幅の**比率**を、カンマ(,)で区切って入力してください。
+既存のステータスを編集するためには、編集したい対象のステータスにカーソルを合わせてダブルクリックをします。
 
-下の図の設定の場合は、表示エリアに対して描画エリア(1)~(3)を 2 : 2 : 3 の比率で分けます。
-例えば表示エリアの幅が 350pixel だった場合、各描画エリアの幅は以下になります。(空白エリアのサイズが 0 だった場合)
-* 描画エリア(1)の幅 - 100pixel
-* 描画エリア(2)の幅 - 100pixel
-* 描画エリア(3)の幅 - 150pixel
+![画像](image/FTKR_CustomSimpleActorStatus/n01_statusList.png)
 
-![画像](image/FTKR_CustomSimpleActorStatus/n02_005.png)
+### 既存のステータスを削除する
+
+既存のステータスを削除するためには、削除したい対象のステータスにカーソルを合わせて`Delete`キーを押します。
+
+削除してもプラグインパラメータのウィンドウをキャンセルすれば、元に戻せます。
+
+![画像](image/FTKR_CustomSimpleActorStatus/n02_delete.png)
+
+### 既存のステータスをコピーする
+
+既存のステータスにカーソルを合わせて`Shift`キーを押しながらカーソルを選択することで、一度に複数のステータスを選択することもできます。
+
+![画像](image/FTKR_CustomSimpleActorStatus/n02_copy.png)
+
+選択したステータスは、`Ctrl + c`キーでコピーし、任意の場所にペーストすることができます。
+
+![画像](image/FTKR_CustomSimpleActorStatus/n02_copy2.png)
+
+### ステータスの配置を変える
+
+既存のステータスにカーソルを合わせて選択し、ドラッグ操作をして上下にずらすと、黄色いカーソルが表示します。
+
+![画像](image/FTKR_CustomSimpleActorStatus/n02_exchange.png)
+
+この時、ドラッグ操作をやめると、選択したステータスの配置を変更することができます。
+
+![画像](image/FTKR_CustomSimpleActorStatus/n02_exchange2.png)
+
+### 新しいステータスを追加する
+
+新しいステータスを追加する場合は、リストの一番下の何もない部分をダブルクリックしてください。
+
+![画像](image/FTKR_CustomSimpleActorStatus/n02_addParam.png)
 
 [上に戻る](#レイアウトの設定)　　　[目次に戻る](FTKR_CustomSimpleActorStatus.ja.md#目次)
 
-## 描画エリアの設定
-### 描画エリアの表示方法
+## statusListパラメータの設定
 
-プラグインパラメータ`Actor Status Text*`に設定した[コード](#表示できるステータス)の内容を、各[描画エリア](#描画エリア)に表示します。
-* `Actor Status Text1` - 描画エリア(1)の内容
-* `Actor Status Text2` - 描画エリア(2)の内容
-* `Actor Status Text3` - 描画エリア(3)の内容
+### 表示するステータスの設定
 
-![画像](image/FTKR_CustomSimpleActorStatus/n02_002.png)
+`text`は、プルダウン選択方式になっているため、表示したいステータスを選んで指定してください。
 
-### ステータスの表示方式
+なお、プラグインウィンドウの上部の「テキスト」ボタンを押して、直接文字列を入力することもできます。
+プルダウンリストにない場合や、後述の角括弧を使った表示をする場合に、直接入力を行ってください。
 
-プラグインパラメータに[コード](#表示できるステータス)を入力すると、描画エリア内にステータスを表示します。
+![画像](image/FTKR_CustomSimpleActorStatus/n02_paramtext.png)
 
-描画エリア(2)の設定例
-```
-name,level
-```
-長いアクターの名前など描画エリアの幅よりもテキスト幅が長いステータスの場合でも、横に圧縮して描画エリア内に表示させます。
+選択したステータスが、`code(%1)`の形式だった場合は`value`の入力が必要です。
 
-![画像](image/FTKR_CustomSimpleActorStatus/n02_013.png)
+![画像](image/FTKR_CustomSimpleActorStatus/n02_paramvalue.png)
 
-### カンマを使った入力
-カンマ(,)で区切って入力したコードは、描画エリア内の次(下)の行に表示します。
-複数のカンマで区切ることで縦に何行でも表示できますが、表示エリアを越えても表示できてしまうため、描画させるステータスの行数は表示エリアの高さ内に収めるようにしましょう。
+なお、`value`にはスクリプトを入力することもできます。以下はFTKR_CSS_ShopStatusでの例。
+ただし、スクリプトを使うと処理が重くなります。
 
-描画エリア(3)の設定例
-```
-class,hp,mp
-```
-![画像](image/FTKR_CustomSimpleActorStatus/n02_009.png)
+![画像](image/FTKR_CustomSimpleActorStatus/n02_paramvalue_sprict.png)
 
-カンマ(,)を続けて2個入力すると、下の図のように1行空欄ができます。
+[上に戻る](#レイアウトの設定)　　　[目次に戻る](FTKR_CustomSimpleActorStatus.ja.md#目次)
 
-描画エリア(2)の設定例
-```
-name,,level
-```
-![画像](image/FTKR_CustomSimpleActorStatus/n02_008.png)
+### 表示位置と表示幅の設定
 
-### 波括弧を使った入力
-コードを波括弧( { } )で囲むと、そのステータスを右側の描画エリアも使用して表示します。
+表示位置の座標(x, y)と表示幅をpixel単位で指定します。
+ここでのx座標・y座標は、ウィンドウ内の相対座標です。
 
-長い名前などをフォントサイズを変えずに表示させたい場合に使用できます。
-ただし、右側の描画エリアと表示が重なるため、右側の描画エリアは 1行空けるように設定しましょう。
+![画像](image/FTKR_CustomSimpleActorStatus/n02_paramx.png)
 
-描画エリア(2)の設定例
-```
-{name},level
-```
-描画エリア(3)の設定例
-```
-,,class,hp,mp
-```
-![画像](image/FTKR_CustomSimpleActorStatus/n02_012.png)
+![画像](image/FTKR_CustomSimpleActorStatus/n02_paramwidth.png)
+
+基本的には数字を入力しますが、スクリプトで入力することもできます。
+ただし、スクリプトを使うと処理が重くなります。
+
+スクリプトの場合は、以下の文字定数を使えます。
+* x : ウィンドウのX座標を参照します。
+* y : ウィンドウのY座標を参照します。
+* width : ウィンドウ内の表示可能なエリアの幅を参照します。
+* height : ウィンドウ内の表示可能なエリアの高さを参照します。
+* line : １行の高さを参照します。
+
+[上に戻る](#レイアウトの設定)　　　[目次に戻る](FTKR_CustomSimpleActorStatus.ja.md#目次)
+
+## その他の設定
 
 ### 角括弧を使った入力
 複数のコードを角括弧('[' ']')で囲み、スラッシュ(/)で区切ると、描画エリア内の同じ行に横に並べて表示します。
 角括弧内の片側を空欄にした場合は、描画エリアも片側が非表示になります。
-```
-class,[hp/mp],[tp/]
-```
-![画像](image/FTKR_CustomSimpleActorStatus/n02_014.png)
+
+![画像](image/FTKR_CustomSimpleActorStatus/n02_paramtext_k.png)
 
 横に並べる際の表示間隔は、プラグインパラメータ`Actor Status Space In Text`の設定値(pixel単位)に従います。
 
 ![画像](image/FTKR_CustomSimpleActorStatus/n02_004.png)
-
-[上に戻る](#レイアウトの設定)　　　[目次に戻る](FTKR_CustomSimpleActorStatus.ja.md#目次)
-
-## 空白エリアの設定
-空白エリアのサイズは、プラグインパラメータ`Actor Status Space`で設定します。４つの空白エリアの幅(pixel単位)を、カンマ(,)で区切って入力してください。
-
-下の図の設定の場合は、各[空白エリア](#空白エリア)の幅は以下になります。
-* 空白エリア(4)の幅 - 10pixel
-* 空白エリア(5)の幅 - 20pixel
-* 空白エリア(6)の幅 - 50pixel
-* 空白エリア(7)の幅 - 10pixel
-
-![画像](image/FTKR_CustomSimpleActorStatus/n02_003.png)
-
-なお、描画エリアのサイズは、表示エリアの幅から空白エリアの全幅を引いた値を元に、プラグインパラメータ`Actor Status Width Rate`の比率で分けます。
-空白エリアを取りすぎると、描画エリアが小さくなりすぎてしまうので注意してください。
 
 [上に戻る](#レイアウトの設定)　　　[目次に戻る](FTKR_CustomSimpleActorStatus.ja.md#目次)

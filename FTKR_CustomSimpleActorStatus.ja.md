@@ -123,11 +123,11 @@ FTKR_FacialImageDifference.js
 | 通常能力値(素) | pbase(%1) | x | - | 攻撃力や防御力等の通常能力名と装備や特徴による増減を抜かした素の数値を表示します <br> x に指定する数値は param と同じです|
 | [通常能力値(差分)](FTKR_CustomSimpleActorStatus_2.ja.md#パラメータの差分表示) | pdiff(%1) | x | ○ | 攻撃力や防御力等の通常能力の装備や特徴による増減値を表示します <br> x に指定する数値は param と同じです<br>増加値は緑、減少値は赤で表示します|
 | 装備 | equip(%1) | x | - | 装備の名前とアイコンを表示します <br> x が装備タイプ番号を示します |
-| [装備パラメータ](FTKR_CustomSimpleActorStatus_2.ja.md#装備パラメータの表示) | eparam(%1) | x | - | 装備変更後の攻撃力や防御力等の数値を表示します |
-| [カスタムパラメータ](FTKR_CustomSimpleActorStatus_2.ja.md#カスタムパラメータの表示) | custom(%1) | x | ○ | プラグインパラメータで設定したパラメータを表示します |
-| [カスタムゲージ](FTKR_CustomSimpleActorStatus_2.ja.md#カスタムゲージの表示) | gauge(%1) | x | ○ | プラグインパラメータで設定したゲージを表示します |
-| [アクター別のカスタムゲージ](FTKR_CustomSimpleActorStatus_2.ja.md#アクター別のカスタムゲージの表示) | agauge(%1) | x | ○ | アクターのメモ欄で設定したゲージを表示します |
-| [クラス別のカスタムゲージ](FTKR_CustomSimpleActorStatus_2.ja.md#クラス別のカスタムゲージの表示) | cgauge(%1) | x | ○ | クラスのメモ欄で設定したゲージを表示します |
+| [装備パラメータ](FTKR_CustomSimpleActorStatus_2.ja.md#装備パラメータの表示) | eparam(%1) | x | - | 装備変更後の攻撃力や防御力等の数値を表示します<br> x に指定する数値は param と同じです |
+| [カスタムパラメータ](FTKR_CustomSimpleActorStatus_2.ja.md#カスタムパラメータの表示) | custom(%1) | x | ○ | プラグインパラメータで設定したパラメータを表示します<br> x に指定する数値はカスタムパラメータIDです |
+| [カスタムゲージ](FTKR_CustomSimpleActorStatus_2.ja.md#カスタムゲージの表示) | gauge(%1) | x | ○ | プラグインパラメータで設定したゲージを表示します<br> x に指定する数値はカスタムゲージIDです |
+| [アクター別のカスタムゲージ](FTKR_CustomSimpleActorStatus_2.ja.md#アクター別のカスタムゲージの表示) | agauge(%1) | x | ○ | アクターのメモ欄で設定したゲージを表示します<br> x に指定する数値はカスタムゲージIDです |
+| [クラス別のカスタムゲージ](FTKR_CustomSimpleActorStatus_2.ja.md#クラス別のカスタムゲージの表示) | cgauge(%1) | x | ○ | クラスのメモ欄で設定したゲージを表示します<br> x に指定する数値はカスタムゲージIDです |
 | [カスタム画像](FTKR_CustomSimpleActorStatus_2.ja.md#カスタム画像の表示) | image <br> image(%1) | - <br> 画像ID | - | アクターのメモ欄で設定した画像を表示します |
 | [メッセージ](FTKR_CustomSimpleActorStatus_2.ja.md#メッセージの表示) | message | - | ○ | アクターの状態変化に合わせてメッセージを表示します |
 
@@ -140,7 +140,7 @@ FTKR_FacialImageDifference.js
 | ＡＯＰ能力値 | aop(%1) | x | - | オリジナルパラメータの表示名と数値を表示します <br> x に指定する数値と表示する能力はオリジナルパラメータのIDです。|
 | ＡＯＰ能力値(素) | aopbase(%1) | x | - | オリジナルパラメータの表示名と装備や特徴による増減を抜かした素の数値を表示します <br> x に指定する数値は aop と同じです|
 | [ＡＯＰ能力値(差分)](FTKR_CustomSimpleActorStatus_2.ja.md#パラメータの差分表示) | aopdiff(%1) | x | ○ | 攻オリジナルパラメータの装備や特徴による増減値を表示します <br> x に指定する数値は aop と同じです<br>増加値は緑、減少値は赤で表示します|
-| [ＡＯＰ装備パラメータ](FTKR_CustomSimpleActorStatus_2.ja.md#ＡＯＰ装備パラメータの表示) | eaop(%1) | x | - | 装備変更後のオリジナルパラメータの数値を表示します |
+| [ＡＯＰ装備パラメータ](FTKR_CustomSimpleActorStatus_2.ja.md#ＡＯＰ装備パラメータの表示) | eaop(%1) | x | - | 装備変更後のオリジナルパラメータの数値を表示します <br> x に指定する数値は aop と同じです |
 
 
 #### アクター用特殊2
