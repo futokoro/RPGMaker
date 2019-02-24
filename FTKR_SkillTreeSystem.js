@@ -4,8 +4,8 @@
 // プラグインNo : 7
 // 作成者　　   : フトコロ(futokoro)
 // 作成日　　   : 2017/02/25
-// 最終更新日   : 2018/12/30
-// バージョン   : v1.17.0
+// 最終更新日   : 2019/02/24
+// バージョン   : v1.17.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.17.0 ツリー型スキル習得システム
+ * @plugindesc v1.17.1 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -552,6 +552,9 @@ FTKR.STS = FTKR.STS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.17.1 - 2019/02/24 : 不具合修正
+ *    1. プラグインパラメータ Enable Class Sp を有効にするとエラーになる不具合を修正。
+ * 
  * v1.17.0 - 2018/12/30 : 機能追加
  *    1. 取得可能なSPに最大値を設定する機能を追加。
  * 
@@ -887,7 +890,7 @@ function Scene_STS() {
     //スキルポイント関係
     FTKR.STS.sp = {
         dispName     :String(parameters['SP Display Name'] || 'SP'),
-        defaultMaxSp :Number(parameters['Default Max SP'] || 0),
+        defaultMaxSp :Number(parameters['Default Max Sp'] || 0),
         defaultReq   :String(parameters['Default Required SP'] || ''),
         getLevelUp   :String(parameters['Get Level Up Sp'] || ''),
         icon         :Number(parameters['Cost Sp Icon'] || 0),
@@ -1870,7 +1873,8 @@ function Scene_STS() {
     Game_Actor.prototype.refresh = function() {
         _Game_Actor_refresh.call(this);
         if (FTKR.STS.sp.enableClassSp) {
-            if ( this.maxCsp(classId)) {
+            var classId = this._classId;
+            if (this.maxCsp(classId)) {
                 this._stsCsp[classId] = Math.min(this._stsCsp[classId], this.maxCsp(classId));
             }
         } else {
