@@ -152,7 +152,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
-| [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js) | [あり](FTKR_SkillTreeSystem.ja.md) | [v1.17.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillTreeSystem.js) | 2018/12/30 | ツリー型のスキル習得システム |
+| [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js) | [あり](FTKR_SkillTreeSystem.ja.md) | [v1.17.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SkillTreeSystem.js) | 2019/02/24 | ツリー型のスキル習得システム |
 | [FTKR_STS_CustomWindow](FTKR_STS_CustomWindow.js) | [仮版](FTKR_STS_CustomWindow.ja.md) | [v1.3.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_STS_CustomWindow.js) | 2018/09/08 | スキルツリー習得画面のレイアウトを変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js) |
 | [FTKR_STS_CustomSkillStatus](FTKR_STS_CustomSkillStatus.js) | なし | [v1.0.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_STS_CustomSkillStatus.js) | 2018/09/07 | スキルツリーウィンドウに表示するスキルパラメータを変更する <br> ＜以下のプラグインが必要＞ <br> [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js)<br> [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js) |
 
@@ -317,86 +317,11 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 # 更新情報
 
-2018/12の更新情報
+2019/2の更新情報
 
-### 2018/12/30
-* [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.js) v1.17.0
-* [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md) マニュアルページ修正
+### 2019/02/24
+* [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.ja.md) v1.17.1
 
-### 2018/12/29
-* [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md) v3.5.0
-* [FTKR_CSS_BattleStatus](FTKR_CSS_BattleStatus.ja.md) v2.2.0
-
-### 2018/12/27
-* [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md) v3.4.7
-* [FTKR_CSS_ShopStatus](FTKR_CSS_ShopStatus.ja.md) v2.2.2
-
-### 2018/12/21
-* [FTKR_ExEquipSlot](FTKR_ExEquipSlot.ja.md) v1.2.1
-
-### 2018/12/20
-* [FTKR_DisplayEnemyParameters](FTKR_DisplayEnemyParameters.ja.md) v1.1.1
-* [FTKR_ExEquipSlot](FTKR_ExEquipSlot.ja.md) v1.2.0
-
-### 2018/12/19
-* [FTKR_DisplayEnemyParameters](FTKR_DisplayEnemyParameters.ja.md) v1.1.0
-* [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v2.1.0
-* [FTKR_BattleActionTimes](FTKR_BattleActionTimes.ja.md) v1.0.2
-
-### 2018/12/18
-* [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v2.0.5
-
-### 2018/12/15
-* [FTKR_RestrictRefreshWindows](FTKR_RestrictRefreshWindows.ja.md) v1.0.2
-
-### 2018/12/15
-* [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md) v3.4.5
-* [FTKR_RestrictRefreshWindows](FTKR_RestrictRefreshWindows.ja.md) v1.0.0(新規) v1.0.1
-* [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v2.0.4
-
-### 2018/12/13
-* [FTKR_CSS_EquipStatus](FTKR_CSS_EquipStatus.ja.md) v2.1.4
-* [FTKR_CSS_MenuStatus](FTKR_CSS_MenuStatus.ja.md) v2.1.3
-* [FTKR_CSS_BattleStatus](FTKR_CSS_BattleStatus.ja.md) v2.1.3
-* [FTKR_CSS_DetailedStatus](FTKR_CSS_DetailedStatus.ja.md) v2.1.4
-* [FTKR_CSS_SkillStatus](FTKR_CSS_SkillStatus.ja.md) v2.1.3
-* [FTKR_CSS_CustomizeBattleResults](FTKR_CSS_CustomizeBattleResults.ja.md) v2.1.4
-* [FTKR_CSS_ShopStatus](FTKR_CSS_ShopStatus.ja.md) v2.2.1
-* [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md) v3.4.5
-
-### 2018/12/11
-* [FTKR_AISkillEvaluate](FTKR_AISkillEvaluate.ja.md) v1.2.6
-* [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v2.0.3
-* [FTKR_ExBattleCommand](FTKR_ExBattleCommand.ja.md) v2.0.1
-
-### 2018/12/10
-* [FTKR_ExBattleCommand](FTKR_ExBattleCommand.ja.md) v2.0.0
-* [FTKR_BattleActionPoints](FTKR_BattleActionPoints.ja.md) v1.1.0
-
-### 2018/12/08
-* [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v2.0.2
-* [FTKR_BattleActionPoints](FTKR_BattleActionPoints.ja.md) v1.0.3
-
-### 2018/12/07
-* [FTKR_SkillUpgradeSystem_Core](FTKR_SkillUpgradeSystem_Core.js) v1.5.3
-
-### 2018/12/04
-* [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v2.0.1
-* [FTKR_BattleActionPoints](FTKR_BattleActionPoints.ja.md) v1.0.2
-* [FTKR_AltTB_SelectTouchedActor](FTKR_AltTB_SelectTouchedActor.js) v1.0.1
-* [FTKR_AltTB_BattleEventConditions](FTKR_AltTB_BattleEventConditions.ja.md) v1.0.1
-
-### 2018/12/03
-* [FTKR_BattleActionTimes](FTKR_BattleActionTimes.ja.md) v1.0.1
-* [FTKR_BattleActionPoints](FTKR_BattleActionPoints.ja.md) v1.0.1
-
-### 2018/12/02
-* [FTKR_AlternatingTurnBattle](FTKR_AlternatingTurnBattle.ja.md) v2.0.0
-* [FTKR_BattleActionTimes](FTKR_BattleActionTimes.ja.md) v1.0.0(新規)
-* [FTKR_BattleActionPoints](FTKR_BattleActionPoints.ja.md) v1.0.0(新規)
-* [FTKR_AltTB_SelectTouchedActor](FTKR_AltTB_SelectTouchedActor.js) v1.0.0(新規)
-* [FTKR_AltTB_BattleEventConditions](FTKR_AltTB_BattleEventConditions.ja.md) v1.0.0(新規)
-* [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md) v3.4.4
 
 [過去の更新情報](note.md)
 
