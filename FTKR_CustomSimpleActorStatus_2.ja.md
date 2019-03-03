@@ -275,7 +275,7 @@ x にはパラメータIDを指定してください。
 そのため、以下のように記述して整数に変換するようにします。
 ```
 a.hit * 100
-a.hit.parcent()
+a.hit.percent()
 ```
 
 ![画像](image/FTKR_CustomSimpleActorStatus/n04_003.png)
@@ -331,7 +331,7 @@ a.hit.parcent()
 そのため、以下のように記述して整数に変換するようにします。
 ```
 a.hit * 100
-a.hit.parcent()
+a.hit.percent()
 ```
 
 プラグインには、デフォルトで ゲージ0 に現在EXPと次レベルのEXPからなる経験値ゲージを設定しています。
@@ -529,7 +529,7 @@ COLOR: y1,y2
 そのため、以下のように記述して整数に変換するようにします。
 ```
 a.hit * 100
-a.hit.parcent()
+a.hit.percent()
 ```
 
 ![画像](image/FTKR_CustomSimpleActorStatus/n04_012.png)
