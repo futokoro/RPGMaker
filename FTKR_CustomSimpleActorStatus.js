@@ -4,8 +4,8 @@
 // プラグインNo : 9
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2018/12/29
-// バージョン : v3.5.0
+// 最終更新日 : 2019/03/05
+// バージョン : v3.5.1
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v3.5.0 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v3.5.1 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -1137,6 +1137,10 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v3.5.1 - 2019/03/05 : 不具合修正
+ *    1. 拡張プラグインのパラメータ"statusList"の"value"の値を正しく読み取れない
+ *       不具合を修正。
+ * 
  * v3.5.0 - 2018/12/29 : 機能追加
  *    1. セーブしたウィンドウ設定を変更するプラグインコマンドを追加。
  * 
@@ -2228,12 +2232,12 @@ FTKR.CSS = FTKR.CSS || {};
         return this.maxPageItems ? this.maxPageItems() : 1;
     };
 
-    Window_Base.prototype.convertCssNumber = function(value) {
+    Window_Base.prototype.convertCssNumber = function(actor, value) {
         if (!value) return 0;
         if (!isNaN(value)) {
             return Number(value);
         }
-        return Number(this.evalCssCustomFormula(value));
+        return Number(this.evalCssCustomFormula(actor, value));
     };
 
     Window_Base.prototype.evalCssCustomFormula = function(actor, formula) {
@@ -2432,8 +2436,8 @@ FTKR.CSS = FTKR.CSS || {};
                 return this.drawCssText(actor, x, y, width, match[2]);
             default:
 //                if (!actor) return 1;
-                FTKR.setGameData(actor);
-                match[2] = this.convertCssNumber(match[2]);
+                FTKR.setGameData(actor, lss.target, lss.item);
+                match[2] = this.convertCssNumber(actor, match[2]);
                 return this.drawCssActorStatusBase_A1(index, actor, x, y, width, match, lss, css);
         }
     };

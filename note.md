@@ -2,6 +2,11 @@
 
 # 過去の更新情報
 
+## 2019/2の更新情報
+
+### 2019/02/24
+* [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.ja.md) v1.17.1
+
 ## 2018/12の更新情報
 
 ### 2018/12/30

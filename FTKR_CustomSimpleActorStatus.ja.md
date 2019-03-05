@@ -224,7 +224,8 @@ FTKR_CustomSimpleActorStatus の v3.4.0 以降から標準実装。
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver3.5.0](FTKR_CustomSimpleActorStatus.js) | 2018/12/29 | セーブしたウィンドウ設定を変更するプラグインコマンドを追加(FTKR_CSS_BattleStatus) |
+| [ver3.5.1](FTKR_CustomSimpleActorStatus.js) | 2019/03/05 | 拡張プラグインのパラメータ"statusList"の"value"の値を正しく読み取れない不具合を修正 |
+| ver3.5.0 | 2018/12/29 | セーブしたウィンドウ設定を変更するプラグインコマンドを追加(FTKR_CSS_BattleStatus) |
 | ver3.4.7 | 2018/12/27 | FTKR_CSS_ShopStatus v2.2.2 の不具合修正対応<br>FTKR_OriginalSceneWindow でアイテムデータ画像が表示できない不具合対応 |
 | ver3.4.6 | 2018/12/15 | カスタムパラメータとカスタムゲージの表示処理を見直し<br>プラグインコマンドの判定処理を見直し |
 | ver3.4.5 | 2018/12/13 | code(x)の形のパラメータの判定時に必ずeval()で評価していた処理を見直し |
