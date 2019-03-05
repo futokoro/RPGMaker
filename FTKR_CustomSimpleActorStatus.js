@@ -1137,9 +1137,11 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
- * v3.5.1 - 2019/03/05 : 不具合修正
+ * v3.5.1 - 2019/03/05 : 不具合修正、機能追加
  *    1. 拡張プラグインのパラメータ"statusList"の"value"の値を正しく読み取れない
  *       不具合を修正。
+ *    2. 選択中の装備品を装備できない時に特定も文字を表示させるパラメータ notequip を
+ *       追加。※装備画面とショップ画面で使用可能
  * 
  * v3.5.0 - 2018/12/29 : 機能追加
  *    1. セーブしたウィンドウ設定を変更するプラグインコマンドを追加。
@@ -1463,6 +1465,8 @@ FTKR.CSS = FTKR.CSS || {};
  * @value eparam(%1)
  * @option 装備パラメータ差分
  * @value ediff(%1)
+ * @option 装備不可表示
+ * @value notequip(%1)
  * @option カスタムパラメータ
  * @value custom(%1)
  * @option カスタムゲージ
@@ -2434,6 +2438,8 @@ FTKR.CSS = FTKR.CSS || {};
                 return this.drawCssEval(actor, x, y, width, match[2], true);
             case 'TEXT':
                 return this.drawCssText(actor, x, y, width, match[2]);
+            case 'NOTEQUIP':
+                return this.drawCssCannotEquip(actor, x, y, width, match[2], lss);
             default:
 //                if (!actor) return 1;
                 FTKR.setGameData(actor, lss.target, lss.item);
@@ -3234,6 +3240,19 @@ FTKR.CSS = FTKR.CSS || {};
             var iw = Window_Base._iconWidth + 4;
             this.resetTextColor();
             this.drawText(equip.name, x + iw, y, width - iw);
+        }
+        return 1;
+    };
+
+    //------------------------------------------------------------------------
+    //装備可否の表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssCannotEquip = function(actor, x, y, width, text, lss) {
+        var item = FTKR.gameData.item || lss.item;
+        if (!item) return 1;
+        if (!actor.canEquip(item)) {
+            text = text == 'null' ? '装備不可' : text;
+            this.drawTextEx(text, x, y);
         }
         return 1;
     };

@@ -124,6 +124,7 @@ FTKR_FacialImageDifference.js
 | [通常能力値(差分)](FTKR_CustomSimpleActorStatus_2.ja.md#パラメータの差分表示) | pdiff(%1) | x | ○ | 攻撃力や防御力等の通常能力の装備や特徴による増減値を表示します <br> x に指定する数値は param と同じです<br>増加値は緑、減少値は赤で表示します|
 | 装備 | equip(%1) | x | - | 装備の名前とアイコンを表示します <br> x が装備タイプ番号を示します |
 | [装備パラメータ](FTKR_CustomSimpleActorStatus_2.ja.md#装備パラメータの表示) | eparam(%1) | x | - | 装備変更後の攻撃力や防御力等の数値を表示します<br> x に指定する数値は param と同じです |
+| 装備不可表示 | notequip(%1) | x | ○ | 選択中の装備アイテムを、アクターが装備できない場合に x で指定した文字を表示します。x が空欄の場合は「装備不可」と表示します。<br>アイテムデータを参照しているウィンドウで使用可能です。(例：ショップ画面) |
 | [カスタムパラメータ](FTKR_CustomSimpleActorStatus_2.ja.md#カスタムパラメータの表示) | custom(%1) | x | ○ | プラグインパラメータで設定したパラメータを表示します<br> x に指定する数値はカスタムパラメータIDです |
 | [カスタムゲージ](FTKR_CustomSimpleActorStatus_2.ja.md#カスタムゲージの表示) | gauge(%1) | x | ○ | プラグインパラメータで設定したゲージを表示します<br> x に指定する数値はカスタムゲージIDです |
 | [アクター別のカスタムゲージ](FTKR_CustomSimpleActorStatus_2.ja.md#アクター別のカスタムゲージの表示) | agauge(%1) | x | ○ | アクターのメモ欄で設定したゲージを表示します<br> x に指定する数値はカスタムゲージIDです |
@@ -224,7 +225,7 @@ FTKR_CustomSimpleActorStatus の v3.4.0 以降から標準実装。
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver3.5.1](FTKR_CustomSimpleActorStatus.js) | 2019/03/05 | 拡張プラグインのパラメータ"statusList"の"value"の値を正しく読み取れない不具合を修正 |
+| [ver3.5.1](FTKR_CustomSimpleActorStatus.js) | 2019/03/05 | 拡張プラグインのパラメータ"statusList"の"value"の値を正しく読み取れない不具合を修正<br>選択中の装備品を装備できない時に特定も文字を表示させるパラメータ notequip を追加。※装備画面とショップ画面で使用可能 |
 | ver3.5.0 | 2018/12/29 | セーブしたウィンドウ設定を変更するプラグインコマンドを追加(FTKR_CSS_BattleStatus) |
 | ver3.4.7 | 2018/12/27 | FTKR_CSS_ShopStatus v2.2.2 の不具合修正対応<br>FTKR_OriginalSceneWindow でアイテムデータ画像が表示できない不具合対応 |
 | ver3.4.6 | 2018/12/15 | カスタムパラメータとカスタムゲージの表示処理を見直し<br>プラグインコマンドの判定処理を見直し |
