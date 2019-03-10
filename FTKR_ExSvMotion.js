@@ -4,8 +4,8 @@
 // プラグインNo : 24
 // 作成者     : フトコロ
 // 作成日     : 2017/04/19
-// 最終更新日 : 2018/05/31
-// バージョン : v1.3.1
+// 最終更新日 : 2019/03/10
+// バージョン : v1.3.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.ESM = FTKR.ESM || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.3.1 SVキャラのモーションを拡張するプラグイン
+ * @plugindesc v1.3.2 SVキャラのモーションを拡張するプラグイン
  * @author フトコロ
  *
  * @noteParam ESM_画像
@@ -609,6 +609,10 @@ FTKR.ESM = FTKR.ESM || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.3.2 - 2019/03/10 : 仕様変更
+ *    1. ループモーション中に同じモーションへの更新があった場合に、モーションの
+ *       再生位置を初期化せずにそのまま継続するように変更。
+ * 
  * v1.3.1 - 2018/05/31 : 不具合修正
  *    1. パーティーの誰かが防御を使用すると、パーティーメンバー全員が防御モーションを
  *       一瞬実行する不具合を修正。
@@ -964,7 +968,6 @@ FTKR.ESM = FTKR.ESM || {};
             case /input/i.test(condition):
                 return this.isInputting() || this.isActing();
             case /guard/i.test(condition):
-                console.log('ok');
                 return this.isGuardMotion();
             case /chant/i.test(condition):
                 return this.isChanting();
@@ -1177,14 +1180,15 @@ FTKR.ESM = FTKR.ESM || {};
                 this.consoleLog_BattlerMotion('pattern')
             // ループしない場合 パターンをリセット
             } else {
-                this.refreshMotion();
+                this.esmUpdateRefreshMotion(battler);
             }
             this._motionCount = 0;
         }
     };
 
-    Sprite_Battler.prototype.esmRefreshMotion = function(battler) {
+    Sprite_Battler.prototype.esmUpdateRefreshMotion = function(battler) {
         if (battler.isFixedMotion()) return;
+        if (BattleManager.isInputting() && !BattleManager.actor()) return;
         var condition = battler.getEsmMotion();
         this.consoleLog_BattlerMotion('refresh', [condition])
         if (this._motionType === condition) {
@@ -1200,9 +1204,22 @@ FTKR.ESM = FTKR.ESM || {};
                 this._pattern = 0;
             }
             this._motion = this.motion();
-            this.consoleLog_BattlerMotion('data')
+            this.consoleLog_BattlerMotion('data');
         //condition の更新
         } else {
+            this._motionIndex = 0;
+            this._index = 0;
+            this.startMotion(condition);
+        }
+    };
+
+    Sprite_Battler.prototype.esmRefreshMotion = function(battler) {
+        if (battler.isFixedMotion()) return;
+        if (BattleManager.isInputting() && !BattleManager.actor()) return;
+        var condition = battler.getEsmMotion();
+        this.consoleLog_BattlerMotion('refresh', [condition])
+        //condition の更新
+        if (this._motionType !== condition) {
             this._motionIndex = 0;
             this._index = 0;
             this.startMotion(condition);
@@ -1341,6 +1358,10 @@ FTKR.ESM = FTKR.ESM || {};
             return;
         }
         _ESM_Game_Battler_requestMotionRefresh.call(this);
+    };
+
+    Sprite_Battler.prototype.checkBattleInputActorUndecided = function(battler) {
+        return battler.isUndecided();
     };
 
     //書き換え
