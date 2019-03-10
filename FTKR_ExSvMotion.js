@@ -386,6 +386,17 @@ FTKR.ESM = FTKR.ESM || {};
  * @desc カスタムコンディション5の条件を設定します。
  * @default 
  * 
+ * @param -- 特殊 設定--
+ * @default
+ * 
+ * @param Enabled Refresh In PartyCmd
+ * @desc パーティーコマンド時にモーションをリフレッシュさせない。
+ * パーティーコマンドをスキップするプラグイン使用時に有効にする
+ * @type boolean
+ * @on 有効
+ * @off 無効
+ * @default false
+ * 
  * @param -- デバッグ 設定--
  * @default
  * 
@@ -609,9 +620,9 @@ FTKR.ESM = FTKR.ESM || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
- * v1.3.2 - 2019/03/10 : 仕様変更
- *    1. ループモーション中に同じモーションへの更新があった場合に、モーションの
- *       再生位置を初期化せずにそのまま継続するように変更。
+ * v1.3.2 - 2019/03/10 : 機能追加
+ *    1. パーティーコマンドをスキップするプラグインに対応するプラグインパラメータ
+ *       Enabled Refresh In PartyCmd を追加。
  * 
  * v1.3.1 - 2018/05/31 : 不具合修正
  *    1. パーティーの誰かが防御を使用すると、パーティーメンバー全員が防御モーションを
@@ -696,11 +707,24 @@ FTKR.ESM = FTKR.ESM || {};
 
 (function() {
 
+    var paramParse = function(obj) {
+        return JSON.parse(JSON.stringify(obj, paramReplace));
+    };
+
+    var paramReplace = function(key, value) {
+        try {
+            return JSON.parse(value || null);
+        } catch (e) {
+            return value;
+        }
+    };
+    
     //=============================================================================
     // プラグイン パラメータ
     //=============================================================================
     var parameters = PluginManager.parameters('FTKR_ExSvMotion');
 
+    FTKR.ESM.skipPartyOn = paramParse(parameters['Enabled Refresh In PartyCmd']) || false;
     FTKR.ESM.motion = {
         debug:{
             enable:Number(parameters['Output Motion Log'] || 0),
@@ -1188,7 +1212,6 @@ FTKR.ESM = FTKR.ESM || {};
 
     Sprite_Battler.prototype.esmUpdateRefreshMotion = function(battler) {
         if (battler.isFixedMotion()) return;
-        if (BattleManager.isInputting() && !BattleManager.actor()) return;
         var condition = battler.getEsmMotion();
         this.consoleLog_BattlerMotion('refresh', [condition])
         if (this._motionType === condition) {
@@ -1215,7 +1238,7 @@ FTKR.ESM = FTKR.ESM || {};
 
     Sprite_Battler.prototype.esmRefreshMotion = function(battler) {
         if (battler.isFixedMotion()) return;
-        if (BattleManager.isInputting() && !BattleManager.actor()) return;
+        if (FTKR.ESM.skipPartyOn && BattleManager.isInputting() && !BattleManager.actor()) return;
         var condition = battler.getEsmMotion();
         this.consoleLog_BattlerMotion('refresh', [condition])
         //condition の更新
