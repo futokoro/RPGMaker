@@ -2,6 +2,14 @@
 
 # 過去の更新情報
 
+## 2019/3の更新情報
+
+### 2019/03/10
+* [FTKR_ExSvMotion](FTKR_ExSvMotion.ja.md) v1.3.2
+
+### 2019/03/05
+* [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md) v3.5.1
+
 ## 2019/2の更新情報
 
 ### 2019/02/24

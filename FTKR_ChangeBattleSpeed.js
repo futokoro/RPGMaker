@@ -4,8 +4,8 @@
 // プラグインNo : 71
 // 作成者     : フトコロ
 // 作成日     : 2018/02/26
-// 最終更新日 : 2018/02/27
-// バージョン : v1.0.2
+// 最終更新日 : 2019/04/07
+// バージョン : v1.0.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.CBS = FTKR.CBS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.2 バトル中の各種速度を変更するプラグイン
+ * @plugindesc v1.0.3 バトル中の各種速度を変更するプラグイン
  * @author フトコロ
  *
  * @param Message Speed
@@ -109,6 +109,9 @@ FTKR.CBS = FTKR.CBS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.3 - 2019/04/07 : 不具合修正
+ *    1. 変数IDを設定せずに初期値を設定する機能が、正しく反映されない不具合を修正。(うたこさんからご提供)
+ * 
  * v1.0.2 - 2018/02/27 : 仕様変更
  *    1. プラグインパラメータで変数IDを設定しない場合に、初期値を設定していれば
  *       その値を固定で使用するように変更。
@@ -174,6 +177,16 @@ FTKR.CBS = FTKR.CBS || {};
             !isNaN(param.initValue) ? param.initValue : base;
     };
 
+    var getParamValue = function(param){
+        if (param.variableId) {
+            return $gameVariables.value(param.variableId);
+        } else if (param.initValue) {
+            return param.initValue;
+        } else {
+            return 0; // or false
+        }
+    };
+
     var setParamVariableValue = function(param) {
         if (param.variableId) $gameVariables.setValue(param.variableId, param.initValue);
     };
@@ -222,26 +235,26 @@ FTKR.CBS = FTKR.CBS || {};
     var _CBS_Sprite_Enemy_startCollapse = Sprite_Enemy.prototype.startCollapse;
     Sprite_Enemy.prototype.startCollapse = function() {
         _CBS_Sprite_Enemy_startCollapse.call(this);
-        var varId = FTKR.CBS.collapseDuration.variableId;
-        if (varId) {
-            this._effectDuration = $gameVariables.value(varId);
+        var paramValue = getParamValue(FTKR.CBS.collapseDuration);
+        if (paramValue) {
+            this._effectDuration = paramValue
         }
     };
 
     var _CBS_Sprite_Animation_initMembers = Sprite_Animation.prototype.initMembers;
     Sprite_Animation.prototype.initMembers = function() {
         _CBS_Sprite_Animation_initMembers.call(this);
-        var varId = FTKR.CBS.animationRate.variableId;
-        if (varId) {
-            this._rate = $gameVariables.value(varId);
+        var paramValue = getParamValue(FTKR.CBS.animationRate);
+        if (paramValue) {
+            this._rate = paramValue;
         }
     };
 
     var _CBS_Sprite_Animation_setupRate = Sprite_Animation.prototype.setupRate;
     Sprite_Animation.prototype.setupRate = function() {
-        var varId = FTKR.CBS.animationRate.variableId;
-        if (varId) {
-            this._rate = $gameVariables.value(varId);
+        var paramValue = getParamValue(FTKR.CBS.animationRate);
+        if (paramValue) {
+            this._rate = paramValue;
         } else {
             _CBS_Sprite_Animation_setupRate.call(this);
         }
@@ -250,9 +263,9 @@ FTKR.CBS = FTKR.CBS || {};
     var _CBS_Sprite_Damage_initialize = Sprite_Damage.prototype.initialize;
     Sprite_Damage.prototype.initialize = function() {
         _CBS_Sprite_Damage_initialize.call(this);
-        var varId = FTKR.CBS.damageDuration.variableId;
-        if (varId) {
-            this._duration = $gameVariables.value(varId);
+        var paramValue = getParamValue(FTKR.CBS.damageDuration);
+        if (paramValue) {
+            this._duration = paramValue;
         }
     };
 
