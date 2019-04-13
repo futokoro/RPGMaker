@@ -11,6 +11,8 @@
     * スキルツリー画面でスキルの配置を自由に設定できないか⇒リメイク要
 * FTKR_ConnectingMapGenerator
     * 各マップの遠景画像をそのまま使用できないか
+* FTKR_AutoStateConditions
+    * 不具合)マップ移動中にFPSが下がる？
 * FTKR_OriginalSceneWindow
     * ウィンドウスキンの変更機能をすべてのウィンドウに適用できないか
 * FTKR_FacialImageDifference
@@ -36,6 +38,8 @@
 * FTKR_SkillTreeSystem
     * 習得回数ごとに別のスキルを習得させる機能
     * スキルツリー画面でスキル間の線を非表示にする機能
+* FTKR_TitleScene
+    * 不具合)クレジットを設定しないとエラーになる
 
 [トップページに戻る](README.md)
 

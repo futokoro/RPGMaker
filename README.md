@@ -85,7 +85,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 | [FTKR_OriginalSceneWindow](FTKR_OriginalSceneWindow.js) | [仮版](FTKR_OriginalSceneWindow.ja.md) | [v1.6.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_OriginalSceneWindow.js) | 2018/10/08 | オリジナルのシーンおよびウィンドウを作成する |
 | [FTKR_SceneBackImages](FTKR_SceneBackImages.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SceneBackImages.js) | 2018/02/24 | メニュー画面やショップ画面などに変数で切替可能な背景画像を設定する |
 | [FTKR_InterlockMouseAndWindow](FTKR_InterlockMouseAndWindow.js) | なし | [v1.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_InterlockMouseAndWindow.js) | 2018/04/30 | マウスポインタとウィンドウのカーソルを連動させる |
-| [FTKR_TitleScene](FTKR_TitleScene.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_TitleScene.js) | 2018/05/06 | タイトル画面のコマンドの表示変更や、クレジット画面を追加する。 |
+| [FTKR_TitleScene](FTKR_TitleScene.js) | なし | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_TitleScene.js) | 2019/04/14 | タイトル画面のコマンドの表示変更や、クレジット画面を追加する。 |
 | [FTKR_RestrictRefreshWindows](FTKR_RestrictRefreshWindows.js) | [仮版](FTKR_RestrictRefreshWindows.ja.md) | [v1.0.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_RestrictRefreshWindows.js) | 2018/12/16 | ウィンドウのリフレッシュ回数を制限して負荷を抑える |
 
 [目次に戻る](#目次)
@@ -318,6 +318,9 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 # 更新情報
 
 2019/4の更新情報
+
+### 2019/04/14
+* [FTKR_TitleScene](FTKR_TitleScene.js) v1.0.1
 
 ### 2019/04/13
 * [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.ja.md) v1.18.0

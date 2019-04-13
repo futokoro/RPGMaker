@@ -4,8 +4,8 @@
 // プラグインNo : 85
 // 作成者     : フトコロ
 // 作成日     : 2018/05/06
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2019/04/14
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.TS = FTKR.TS || {};
 
 //=============================================================================
 /*:ja
- * @plugindesc v1.0.0 タイトルシーンを改造するプラグイン
+ * @plugindesc v1.0.1 タイトルシーンを改造するプラグイン
  * @author フトコロ
  *
  * @param コンティニューコマンド
@@ -80,6 +80,9 @@ FTKR.TS = FTKR.TS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.1 - 2019/04/14 : 不具合修正
+ *    1. プラグインパラメータのクレジットコマンドを設定しない場合にエラーになる不具合を修正。
+ * 
  * v1.0.0 - 2018/05/06 : 初版作成
  * 
  *-----------------------------------------------------------------------------
@@ -118,7 +121,7 @@ FTKR.TS = FTKR.TS || {};
  * @text クレジット対象
  * @desc クレジットとして表示する対象を設定します。
  * @type struct<creditItem>[]
- * @default 
+ * @default []
  * 
 */
 /*~struct~creditItem:
@@ -266,6 +269,7 @@ FTKR.TS = FTKR.TS || {};
 
     Scene_Title.prototype.createHelpWindow = function() {
         this._helpWindow = new Window_Help();
+        this._helpWindow._openness = 0;
         this.addWindow(this._helpWindow);
         this._helpWindow.setText(FTKR.TS.credit.helpDesc);
         this._helpWindow.close();
@@ -293,9 +297,9 @@ FTKR.TS = FTKR.TS || {};
 
     var _TS_Scene_Title_isBusy = Scene_Title.prototype.isBusy;
     Scene_Title.prototype.isBusy = function() {
-        var active = this.onCreditType() ?
-            this._creditTypeWindow.active || this._creditListWindow.active :
-            this._creditListWindow.active;
+        var active = this.onCredit() ?
+            this.onCreditType() ? this._creditTypeWindow.active || this._creditListWindow.active : this._creditListWindow.active :
+            false;
         return active || _TS_Scene_Title_isBusy.call(this);
     };
 
@@ -354,17 +358,24 @@ FTKR.TS = FTKR.TS || {};
 
     Window_CreditItemType.prototype.initialize = function(x, y) {
         this._itemTypes = [];
+        if (!FTKR.TS.credit.itemList) FTKR.TS.credit.itemList = [];
         this._listNum = FTKR.TS.credit.itemList.filter( function(item){
-            if (!this._itemTypes.contains(item.itemType)) {
-                this._itemTypes.push(item.itemType);
-                return true;
-            }
-        },this).length;
+                if (!this._itemTypes.contains(item.itemType)) {
+                    this._itemTypes.push(item.itemType);
+                    return true;
+                }
+            },this).length;
         Window_HorzCommand.prototype.initialize.call(this, x, y);
+        this._openness = 0;
         this.close();
         this.deactivate();
     };
-
+/*
+    Window_CreditItemType.prototype.loadWindowskin = function() {
+        Window_HorzCommand.prototype.loadWindowskin.call(this);
+        this._openness = 0;
+    };
+*/
     Window_CreditItemType.prototype.setWindow = function(listWindow) {
         this._listWindow = listWindow;
     };
@@ -405,8 +416,9 @@ FTKR.TS = FTKR.TS || {};
         var width = this.windowWidth();
         var height = Graphics.boxHeight - y;
         Window_Selectable.prototype.initialize.call(this, x, y, width, height);
-        this.refresh();
+        this._openness = 0;
         this.close();
+        this.refresh();
     };
 
     Window_CreditItemList.prototype.lineHeight = function() {
