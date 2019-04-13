@@ -4,8 +4,8 @@
 // プラグインNo : 7
 // 作成者　　   : フトコロ(futokoro)
 // 作成日　　   : 2017/02/25
-// 最終更新日   : 2019/02/24
-// バージョン   : v1.17.1
+// 最終更新日   : 2019/04/13
+// バージョン   : v1.18.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.17.1 ツリー型スキル習得システム
+ * @plugindesc v1.18.0 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -267,7 +267,7 @@ FTKR.STS = FTKR.STS || {};
  * 
  * @param Draw Line Type
  * @desc ツリーのスキル間の線の引き方
- * 0 - 直線, 1 - カギ線(A), 2 - カギ線(B)
+ * 0 - 直線, 1 - カギ線(A), 2 - カギ線(B), 3 - 線なし
  * @default 1
  * @type number
  * 
@@ -551,6 +551,10 @@ FTKR.STS = FTKR.STS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.18.0 - 2019/04/13 : 機能追加
+ *    1. 習得回数ごとに別のスキルを習得させる機能を追加。
+ *    2. プラグインパラメータ Draw Line Type に、スキル間の線を非表示にする機能を追加。
  * 
  * v1.17.1 - 2019/02/24 : 不具合修正
  *    1. プラグインパラメータ Enable Class Sp を有効にするとエラーになる不具合を修正。
@@ -1374,6 +1378,8 @@ function Scene_STS() {
             var case2j = /コスト SP:[ ]*(.+)/i;
             var case2a = /(?:FORGET_SKILLS):[ ]*(\d+(?:\s*,\s*\d+)*)/i;
             var case2aj = /削除スキル:[ ]*(\d+(?:\s*,\s*\d+)*)/i;
+            var case2b = /LEARN_SKILL[ ]*(\d+)[ ]*:[ ]*(\d+)[ ]*(.*)/i;
+            var case2bj = /習得スキル[ ]*(\d+)[ ]*:[ ]*(\d+)[ ]*(.*)/i;
             var case3a = /(?:TREE)[ ](\d+)[ ](?:SKILL):[ ]*(\d+(?:\s*,\s*\d+)*)/i;
             var case3aj = /ツリータイプ (\d+) スキル:[ ]*(\d+(?:\s*,\s*\d+)*)/i;
             var case3b = /(?:SKILL):[ ]*(\d+(?:\s*,\s*\d+)*)/i;
@@ -1410,6 +1416,13 @@ function Scene_STS() {
                     obj.sts.costs[0].value = String(RegExp.$1);
                 } else if (data.match(case2a) || data.match(case2aj)) {
                     obj.sts.forgetSkillIds = JSON.parse('[' + RegExp.$1.match(/\d+/g) + ']');
+                } else if (data.match(case2b) || data.match(case2bj)) {
+                    if (!obj.sts.learnSkillIds) obj.sts.learnSkillIds = [];
+                    var count = Number(RegExp.$1);
+                    var skillId1 = Number(RegExp.$2);
+                    var forget = RegExp.$3;
+                    var skillId2 = forget && forget.match(/-d[ ]*(\d+)/i) ? Number(RegExp.$1) : 0;
+                    obj.sts.learnSkillIds[count] = {learn:skillId1,forget:skillId2};
                 } else if(data.match(case3a) || data.match(case3aj)) {
                     var treeId = RegExp.$1;
                     var tree = this.readTree(obj, RegExp.$1, RegExp.$2);
@@ -1518,6 +1531,22 @@ function Scene_STS() {
         this.getSp(this.evalStsFormula(FTKR.STS.sp.getLevelUp, 0, 0));
     };
 
+    Game_Actor.prototype.learnCountSkill = function(skillId) {
+        if (!this.isLearnedSkill(skillId)) {
+            this._skills.push(skillId);
+            this._skills.sort(function(a, b) {
+                return a - b;
+            });
+        }
+    };
+    
+    Game_Actor.prototype.forgetCountSkill = function(skillId) {
+        var index = this._skills.indexOf(skillId);
+        if (index >= 0) {
+            this._skills.splice(index, 1);
+        }
+    };
+    
     var _STS_Game_Actor_learnSkill = Game_Actor.prototype.learnSkill;
     Game_Actor.prototype.learnSkill = function(skillId) {
         if (!this.isStsLearnedSkill(skillId)) {
@@ -1532,7 +1561,18 @@ function Scene_STS() {
             this._stsLearnSkills[skillId] = true;
             this.checkStsForgetSkills(skillId);
         }
-        if (this._initStsFlag) {
+        if (this.stsSkill(skillId).sts.learnSkillIds) {
+            var count = this.stsCount(skillId);
+            var countSkillId = this.stsSkill(skillId).sts.learnSkillIds[count].learn;
+            var forgetSkillId = this.stsSkill(skillId).sts.learnSkillIds[count].forget;
+            if (countSkillId) {
+                this.learnCountSkill(countSkillId);
+            }
+            if (forgetSkillId) {
+                this.forgetCountSkill(forgetSkillId);
+            }
+        }
+       if (this._initStsFlag) {
             this.stsUsedCost(skillId);
         }
     };
@@ -1557,7 +1597,14 @@ function Scene_STS() {
             this.checkInitSts();
             this.resetStsSkill(skillId);
         }
-        _STS_Game_Actor_forgetSkill.call(this, skillId);
+        if (this.stsSkill(skillId).sts.learnSkillIds) {
+            this.stsSkill(skillId).sts.learnSkillIds.forEach(function(forgetSkillId){
+                if (forgetSkillId && forgetSkillId.learn) {
+                    this.forgetCountSkill(forgetSkillId.learn);
+                }
+            },this);
+        }
+    _STS_Game_Actor_forgetSkill.call(this, skillId);
     };
 
     Game_Actor.prototype.resetStsSkill = function(skillId) {
@@ -2414,6 +2461,24 @@ function Scene_STS() {
     };
 
     //=============================================================================
+    // Window_SkillList
+    //=============================================================================
+
+//    var _STS_Window_SkillList_makeItemList = Window_SkillList.prototype.makeItemList;
+    Window_SkillList.prototype.makeItemList = function() {
+        if (this._actor) {
+            this._data = this._actor.skills().filter(function(item) {
+                if (item.sts.learnSkillIds) {
+                    return false;
+                }
+                return this.includes(item);
+            }, this);
+        } else {
+            this._data = [];
+        }
+    };
+
+    //=============================================================================
     // Window_MenuCommand
     //=============================================================================
 
@@ -2774,6 +2839,8 @@ function Scene_STS() {
                     this.drawTreeLineBase(xm1, ym1, xm2, ym1, color);
                     this.drawTreeLineBase(xm2, ym1, x2, ym2, color);
                     this.drawTreeLineBase(x2, ym2, x2, y2, color);
+                    break;
+                case 3:
                     break;
                 case 0:
                 default:
