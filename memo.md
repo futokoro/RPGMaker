@@ -6,9 +6,6 @@
 ※不具合については、できる限り優先して対応します。
 
 ## 要望
-* FTKR_SkillTreeSystem
-    * スキルツリー画面の負荷軽減⇒リメイク要
-    * スキルツリー画面でスキルの配置を自由に設定できないか⇒リメイク要
 * FTKR_ConnectingMapGenerator
     * 各マップの遠景画像をそのまま使用できないか
 * FTKR_OriginalSceneWindow
@@ -23,6 +20,11 @@
     * スキルツリー作成がもう少し簡単にできないか⇒リメイク要
 * FTKR_FacialImageDifference2
     * 非戦闘時に顔画像を切り替える機能
+
+## 保留
+* FTKR_SkillTreeSystem
+    * スキルツリー画面の負荷軽減⇒リメイク要のため保留
+    * スキルツリー画面でスキルの配置を自由に設定できないか⇒リメイク要のため保留
 
 ## 対応済み
 * FTKR_CSS_EquipStatusを使うと処理が重くなる？
