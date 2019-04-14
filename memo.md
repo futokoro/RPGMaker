@@ -7,11 +7,11 @@
 
 ## 要望
 * FTKR_ConnectingMapGenerator
-    * 各マップの遠景画像をそのまま使用できないか
-* FTKR_OriginalSceneWindow
-    * ウィンドウスキンの変更機能をすべてのウィンドウに適用できないか
+    * 各マップの遠景画像をそのまま使用できないか(遠景画像を複数組み合わせて表示)
 * FTKR_CustomSimpleActorStatus
     * 通常能力値以外の各種能力値を表示する機能を追加
+* FTKR_ExBattleEvent
+    * 他プラグインとの競合回避
 
 ## 要望はないがやりたいと思っていること
 * FTKR_SkillUpgradeSystem
