@@ -13,8 +13,6 @@
     * 各マップの遠景画像をそのまま使用できないか
 * FTKR_OriginalSceneWindow
     * ウィンドウスキンの変更機能をすべてのウィンドウに適用できないか
-* FTKR_FacialImageDifference
-    * サイドビューバトルでも顔画像にダメージポップアップできないか
 * FTKR_CustomSimpleActorStatus
     * 通常能力値以外の各種能力値を表示する機能を追加
 
