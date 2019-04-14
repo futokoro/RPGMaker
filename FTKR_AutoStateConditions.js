@@ -1,11 +1,11 @@
 //=============================================================================
 // ステートの自動付与解除条件を設定するプラグイン
 // FTKR_AutoStateConditions.js
-// プラグインNo : 32s
+// プラグインNo : 32
 // 作成者     : フトコロ
 // 作成日     : 2017/05/02
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2019/04/14
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.ASC = FTKR.ASC || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 ステートの自動付与解除条件を設定するプラグイン
+ * @plugindesc v1.0.1 ステートの自動付与解除条件を設定するプラグイン
  * @author フトコロ
  *
  * @help 
@@ -101,6 +101,9 @@ FTKR.ASC = FTKR.ASC || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.1 - 2019/04/13 : 処理見直し
+ *    1. ステートの自動付与および自動解除判定の一部処理をゲーム起動時実行に変更。
  * 
  * v1.0.0 - 2017/05/02 : 初版作成
  * 
@@ -210,29 +213,45 @@ var convertTextToConditions = function(text) {
     return result;
 };
 
-DataManager.convertRemoveStateConditions = function(obj) {
-    return convertTextToConditions(readEntrapmentCodeToText(obj, ['ASC_解除条件', 'ASC_REMOMVE_CONDITIONS']));
+//=============================================================================
+// DataManager
+//=============================================================================
+
+var _DatabaseLoaded = false;
+var _DataManager_isDatabaseLoaded = DataManager.isDatabaseLoaded;
+DataManager.isDatabaseLoaded = function() {
+    if (!_DataManager_isDatabaseLoaded.call(this)) return false;
+    if (!_DatabaseLoaded) {
+        this.ascStateNotetags($dataStates);
+        _DatabaseLoaded = true;
+    }
+    return true;
+};
+
+DataManager.ascStateNotetags = function(group) {
+    for (var n = 1; n < group.length; n++) {
+        var obj = group[n];
+        obj.asc = {};
+        obj.asc.add = convertTextToConditions(readEntrapmentCodeToText(obj, ['ASC_付与条件', 'ASC_ADD_CONDITIONS']));
+        obj.asc.remove = convertTextToConditions(readEntrapmentCodeToText(obj, ['ASC_解除条件', 'ASC_REMOMVE_CONDITIONS']));
+    }
 };
 
 DataManager.evalRemoveStateConditions = function(obj) {
-    var formula = this.convertRemoveStateConditions(obj);
+    var formula = obj.asc.remove;
     if (!formula) return false;
     return FTKR.evalFormula(formula);
 };
 
-DataManager.convertAddStateConditions = function(obj) {
-    return convertTextToConditions(readEntrapmentCodeToText(obj, ['ASC_付与条件', 'ASC_ADD_CONDITIONS']));
-};
-
 DataManager.evalAddStateConditions = function(obj) {
-    var formula = this.convertAddStateConditions(obj);
+    var formula = obj.asc.add;
     if (!formula) return false;
     return FTKR.evalFormula(formula);
 };
 
 
 //=============================================================================
-// ステートの自動解除
+// ステートの自動付与＆自動解除判定
 //=============================================================================
 
 FTKR.ASC.Game_Battler_refresh = Game_Battler.prototype.refresh;
@@ -253,7 +272,9 @@ Game_Battler.prototype.checkAutoAddState = function() {
     $dataStates.forEach( function(state){
         if (!state) return;
         if (DataManager.evalAddStateConditions(state)) {
-            if (!this.isStateAffected(state.id)) this.addState(state.id);
+            if (!this.isStateAffected(state.id)) {
+                this.addState(state.id);
+            }
         }
     },this);
 };
