@@ -4,8 +4,8 @@
 // プラグインNo : 9
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2019/03/05
-// バージョン : v3.5.1
+// 最終更新日 : 2019/04/14
+// バージョン : v3.5.2
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v3.5.1 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v3.5.2 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -201,6 +201,20 @@ FTKR.CSS = FTKR.CSS || {};
  * %1 - 減少値
  * @default \c[25]- %1
  * @parent pdiff
+ * 
+ * @param xparam
+ * @text --能力値の設定--
+ * @default
+ * 
+ * @param Disp Decimals Param
+ * @desc 能力値が率で表されるパラメータの表示方法を選択します。
+ * @type select
+ * @option 少数で表示
+ * @value 0
+ * @option パーセント(%)で表示
+ * @value 1
+ * @default 0
+ * @parent xparam
  * 
  * @param equip
  * @text --装備パラメータの設定--
@@ -1084,6 +1098,21 @@ FTKR.CSS = FTKR.CSS || {};
  * @default 
  * @parent customGauge
  * 
+ * @param paramName
+ * @text --表示名の設定--
+ * 
+ * @param XPARAM Name
+ * @desc 追加能力値の表示名を設定します。
+ * @type struct<xparam>
+ * @default {"hit":"命中率","eva":"回避率","cri":"会心率","cev":"会心回避率","mev":"魔法回避率","mrf":"魔法反射率","cnt":"反撃率","hrg":"HP再生率","mrg":"MP再生率","trg":"TP再生率"}
+ * @parent paramName
+ * 
+ * @param SPARAM Name
+ * @desc 特殊能力値の表示名を設定します。
+ * @type struct<sparam>
+ * @default {"tgr":"狙われ率","grd":"防御効果率","rec":"回復効果率","pha":"薬の知識","mcr":"MP消費率","tcr":"TPチャージ率","pdr":"物理ダメージ率","mdr":"魔法ダメージ率","fdr":"床ダメージ率","exr":"経験獲得率"}
+ * @parent paramName
+ * 
  * @help
  *-----------------------------------------------------------------------------
  * 概要
@@ -1137,10 +1166,13 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v3.5.2 - 2019/04/14 : 機能追加
+ *    1. 特殊能力値(xparam)と追加能力値(sparam)を表示するコード他を追加。
+ * 
  * v3.5.1 - 2019/03/05 : 不具合修正、機能追加
  *    1. 拡張プラグインのパラメータ"statusList"の"value"の値を正しく読み取れない
  *       不具合を修正。
- *    2. 選択中の装備品を装備できない時に特定も文字を表示させるパラメータ notequip を
+ *    2. 選択中の装備品を装備できない時に特定も文字を表示させるコード notequip を
  *       追加。※装備画面とショップ画面で使用可能
  * 
  * v3.5.0 - 2018/12/29 : 機能追加
@@ -1459,12 +1491,24 @@ FTKR.CSS = FTKR.CSS || {};
  * @value pbase(%1)
  * @option 通常能力値(増加分)
  * @value pdiff(%1)
+ * @option 追加能力値
+ * @value xparam(%1)
+ * @option 特殊能力値
+ * @value sparam(%1)
  * @option 装備
  * @value equip(%1)
- * @option 装備パラメータ
+ * @option 装備通常能力値
  * @value eparam(%1)
- * @option 装備パラメータ差分
+ * @option 装備追加能力値
+ * @value exparam(%1)
+ * @option 装備特殊能力値
+ * @value esparam(%1)
+ * @option 装備通常能力値差分
  * @value ediff(%1)
+ * @option 装備追加能力値差分
+ * @value exdiff(%1)
+ * @option 装備特殊能力値差分
+ * @value esdiff(%1)
  * @option 装備不可表示
  * @value notequip(%1)
  * @option カスタムパラメータ
@@ -1537,7 +1581,92 @@ FTKR.CSS = FTKR.CSS || {};
  * @default 0
  *
  */
-
+/*~struct~xparam:
+ *
+ * @param hit
+ * @desc 命中率の表示名
+ * @default 命中率
+ *
+ * @param eva
+ * @desc 回避率の表示名
+ * @default 回避率
+ *
+ * @param cri
+ * @desc 会心率の表示名
+ * @default 会心率
+ *
+ * @param cev
+ * @desc 会心回避率の表示名
+ * @default 会心回避率
+ *
+ * @param mev
+ * @desc 魔法回避率の表示名
+ * @default 魔法回避率
+ *
+ * @param mrf
+ * @desc 魔法反射率の表示名
+ * @default 魔法反射率
+ *
+ * @param cnt
+ * @desc 反撃率の表示名
+ * @default 反撃率
+ *
+ * @param hrg
+ * @desc HP再生率の表示名
+ * @default HP再生率
+ *
+ * @param mrg
+ * @desc MP再生率の表示名
+ * @default MP再生率
+ *
+ * @param trg
+ * @desc TP再生率の表示名
+ * @default TP再生率
+ *
+ */
+/*~struct~sparam:
+ *
+ * @param tgr
+ * @desc 狙われ率の表示名
+ * @default 狙われ率
+ *
+ * @param grd
+ * @desc 防御効果率の表示名
+ * @default 防御効果率
+ *
+ * @param rec
+ * @desc 回復効果率の表示名
+ * @default 回復効果率
+ *
+ * @param pha
+ * @desc 薬の知識の表示名
+ * @default 薬の知識
+ *
+ * @param mcr
+ * @desc MP消費率の表示名
+ * @default MP消費率
+ *
+ * @param tcr
+ * @desc TPチャージ率の表示名
+ * @default TPチャージ率
+ *
+ * @param pdr
+ * @desc 物理ダメージ率の表示名
+ * @default 物理ダメージ率
+ *
+ * @param mdr
+ * @desc 魔法ダメージ率の表示名
+ * @default 魔法ダメージ率
+ *
+ * @param fdr
+ * @desc 床ダメージ率の表示名
+ * @default 床ダメージ率
+ *
+ * @param exr
+ * @desc 経験獲得率の表示名
+ * @default 経験獲得率
+ *
+ */
 
 (function() {
 
@@ -1586,6 +1715,9 @@ FTKR.CSS = FTKR.CSS || {};
             autoScale   :Number(parameters['Enable Auto Scale'] || 0),
             rate        :Number(parameters['Overlap Rate'] || 0),
             iconPadding :Number(parameters['State Icon Padding'] || 0),
+        },
+        param:{
+            decimals    :paramParse(parameters['Disp Decimals Param']),
         },
         pdiff:{
             plus        :paramParse(parameters['Format PDIFF Plus']),
@@ -1744,6 +1876,21 @@ FTKR.CSS = FTKR.CSS || {};
               color2:Number(parameters['Gauge 9 Color2'] || 0),},
         ],
     };
+
+    var xparamName = paramParse(parameters['XPARAM Name']);
+    if (xparamName) {
+        FTKR.CSS.cssStatus.xparam = Object.entries(xparamName).map(function(obj){return obj[1];});
+    } else {
+        console.error('プラグインパラメータ XPARAM Name が設定されていません。');
+        return;
+    }
+    var sparamName = paramParse(parameters['SPARAM Name']);
+    if (sparamName) {
+        FTKR.CSS.cssStatus.sparam = Object.entries(sparamName).map(function(obj){return obj[1];});
+    } else {
+        console.error('プラグインパラメータ SPARAM Name が設定されていません。');
+        return;
+    }
 
     //SV戦闘キャラ用の影画像の高さ
     Window_Base.SV_SHADOW_HEIGHT = 48;
@@ -2453,6 +2600,10 @@ FTKR.CSS = FTKR.CSS || {};
         switch(match[1].toUpperCase()) {
             case 'EDIFFAOP':
                 return this.drawCssActorEquipAopDiff(actor, x, y, width, match[2], lss);
+            case 'EXDIFF':
+                return this.drawCssActorEquipXPDiff(actor, x, y, width, match[2], lss);
+            case 'ESDIFF':
+                return this.drawCssActorEquipSPDiff(actor, x, y, width, match[2], lss);
             case 'EDIFF':
                 return this.drawCssActorEquipDiff(actor, x, y, width, match[2], lss);
             case 'AOPDIFF':
@@ -2465,6 +2616,10 @@ FTKR.CSS = FTKR.CSS || {};
                 return this.drawCssActorParamBase(actor, x, y, width, match[2], lss);
             case 'IIMAGE':
                 return this.drawCssItemImage(actor, x, y, width, match[2], lss);
+            case 'EXPARAM':
+                return this.drawCssActorEquipXParam(actor, x, y, width, match[2], lss);
+            case 'ESPARAM':
+                return this.drawCssActorEquipSParam(actor, x, y, width, match[2], lss);
             case 'EPARAM':
                 return this.drawCssActorEquipParam(actor, x, y, width, match[2], lss);
             case 'EAOP':
@@ -2475,6 +2630,10 @@ FTKR.CSS = FTKR.CSS || {};
                 return this.drawCssActorCustomGauge(actor, x, y, width, match[2]);
             case 'CGAUGE':
                 return this.drawCssClassCustomGauge(actor, x, y, width, match[2]);
+            case 'XPARAM':
+                return this.drawCssActorXParam(actor, x, y, width, match[2]);
+            case 'SPARAM':
+                return this.drawCssActorSParam(actor, x, y, width, match[2]);
             case 'PARAM':
                 return this.drawCssActorParam(actor, x, y, width, match[2]);
             case 'CUSTOM':
@@ -3051,6 +3210,38 @@ FTKR.CSS = FTKR.CSS || {};
     };
 
     //------------------------------------------------------------------------
+    //追加能力値の表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorXParam = function(actor, x, y, width, paramId) {
+        if (paramId < 0 && paramId > 9) return 0;
+        this.changeTextColor(this.systemColor());
+        this.drawText(FTKR.CSS.cssStatus.xparam[paramId], x, y, width);
+        this.resetTextColor();
+        var text = actor.xparam(paramId);
+        if (FTKR.CSS.cssStatus.param.decimals) {
+            text = text.percent() + '%';
+        }
+        this.drawText(text, x, y, width, 'right');
+        return 1;
+    };
+
+    //------------------------------------------------------------------------
+    //特殊能力値の表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorSParam = function(actor, x, y, width, paramId) {
+        if (paramId < 0 && paramId > 9) return 0;
+        this.changeTextColor(this.systemColor());
+        this.drawText(FTKR.CSS.cssStatus.sparam[paramId], x, y, width);
+        this.resetTextColor();
+        var text = actor.sparam(paramId);
+        if (FTKR.CSS.cssStatus.param.decimals) {
+            text = text.percent() + '%';
+        }
+        this.drawText(text, x, y, width, 'right');
+        return 1;
+    };
+
+    //------------------------------------------------------------------------
     //指定したアイテムを装備した時のパラメータの表示関数
     //------------------------------------------------------------------------
     Window_Base.prototype.drawCssActorEquipParam = function(actor, x, y, width, paramId, lss) {
@@ -3073,6 +3264,48 @@ FTKR.CSS = FTKR.CSS || {};
     };
 
     //------------------------------------------------------------------------
+    //指定したアイテムを装備した時の追加能力値の表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorEquipXParam = function(actor, x, y, width, paramId, lss) {
+        if (paramId < 0 && paramId > 9) return 0;
+        this.drawTextEx(FTKR.CSS.cssStatus.equip.arrow, x, y);
+        var target = lss.target;
+        var item = FTKR.gameData.item;
+        if (item && !actor.canEquip(item)) return 1;
+        if (this.checkShowEquipParam(actor, target)) {
+            var newValue = target.xparam(paramId);
+            var diffvalue = newValue - actor.xparam(paramId);
+            this.changeTextColor(this.paramchangeTextColor(diffvalue));
+            if (FTKR.CSS.cssStatus.param.decimals) {
+                newValue = newValue.percent() + '%';
+            }
+            this.drawText(newValue, x, y, width, 'right');
+        }
+        return 1;
+    };
+
+    //------------------------------------------------------------------------
+    //指定したアイテムを装備した時の特殊能力値の表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorEquipSParam = function(actor, x, y, width, paramId, lss) {
+        if (paramId < 0 && paramId > 9) return 0;
+        this.drawTextEx(FTKR.CSS.cssStatus.equip.arrow, x, y);
+        var target = lss.target;
+        var item = FTKR.gameData.item;
+        if (item && !actor.canEquip(item)) return 1;
+        if (this.checkShowEquipParam(actor, target)) {
+            var newValue = target.sparam(paramId);
+            var diffvalue = newValue - actor.sparam(paramId);
+            this.changeTextColor(this.paramchangeTextColor(diffvalue));
+            if (FTKR.CSS.cssStatus.param.decimals) {
+                newValue = newValue.percent() + '%';
+            }
+            this.drawText(newValue, x, y, width, 'right');
+        }
+        return 1;
+    };
+
+    //------------------------------------------------------------------------
     //装備パラメータ差分の表示関数
     //------------------------------------------------------------------------
     Window_Base.prototype.drawCssActorEquipDiff = function(actor, x, y, width, paramId, lss) {
@@ -3083,6 +3316,44 @@ FTKR.CSS = FTKR.CSS || {};
         if (target) {
             var newValue = target.param(paramId);
             var diffvalue = newValue - actor.param(paramId);
+            this.drawParamDiffValue(diffvalue, x, y, width, FTKR.CSS.cssStatus.ediff);
+        }
+        return 1;
+    };
+
+    //------------------------------------------------------------------------
+    //追加能力値の装備パラメータ差分の表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorEquipXPDiff = function(actor, x, y, width, paramId, lss) {
+        if (paramId < 0 && paramId > 9) return 1;
+        var target = lss.target;
+        var item = FTKR.gameData.item;
+        if (item && !actor.canEquip(item)) return 1;
+        if (target) {
+            var newValue = target.xparam(paramId);
+            var diffvalue = newValue - actor.xparam(paramId);
+            if (FTKR.CSS.cssStatus.param.decimals) {
+                diffvalue = diffvalue.percent() + '%';
+            }
+            this.drawParamDiffValue(diffvalue, x, y, width, FTKR.CSS.cssStatus.ediff);
+        }
+        return 1;
+    };
+
+    //------------------------------------------------------------------------
+    //特殊能力値の装備パラメータ差分の表示関数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssActorEquipSPDiff = function(actor, x, y, width, paramId, lss) {
+        if (paramId < 0 && paramId > 9) return 1;
+        var target = lss.target;
+        var item = FTKR.gameData.item;
+        if (item && !actor.canEquip(item)) return 1;
+        if (target) {
+            var newValue = target.sparam(paramId);
+            var diffvalue = newValue - actor.sparam(paramId);
+            if (FTKR.CSS.cssStatus.param.decimals) {
+                diffvalue = diffvalue.percent() + '%';
+            }
             this.drawParamDiffValue(diffvalue, x, y, width, FTKR.CSS.cssStatus.ediff);
         }
         return 1;
