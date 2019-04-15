@@ -8,8 +8,6 @@
 ## 要望
 * FTKR_ConnectingMapGenerator
     * 各マップの遠景画像をそのまま使用できないか(遠景画像を複数組み合わせて表示)
-* FTKR_CustomSimpleActorStatus
-    * 通常能力値以外の各種能力値を表示する機能を追加
 * FTKR_ExBattleEvent
     * 他プラグインとの競合回避
 
@@ -40,6 +38,8 @@
     * 不具合)クレジットを設定しないとエラーになる
 * FTKR_AutoStateConditions
     * 不具合)マップ移動中にFPSが下がる⇒自動付与処理内容と実行タイミングを見直し
+* FTKR_CustomSimpleActorStatus
+    * 通常能力値以外の各種能力値を表示する機能を追加
 
 [トップページに戻る](README.md)
 
