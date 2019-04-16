@@ -4,8 +4,8 @@
 // プラグインNo : 42
 // 作成者     : フトコロ
 // 作成日     : 2017/06/01
-// 最終更新日 : 2017/06/02
-// バージョン : v1.0.1
+// 最終更新日 : 2019/04/16
+// バージョン : v1.0.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ var FTKR = FTKR || {};
 FTKR.ICF = FTKR.ICF || {};
 
 /*:
- * @plugindesc v1.0.1 アイテムボックスのカテゴリ選択を無くす
+ * @plugindesc v1.0.2 アイテムボックスのカテゴリ選択を無くす
  * @author フトコロ
  *
  * @param Item Category
@@ -58,6 +58,8 @@ FTKR.ICF = FTKR.ICF || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.0.2 - 2019/04/16 : 不具合修正
+ *  アイテム画面を開いた時にヘルプウィンドウ内の文章が表示されない不具合を修正。
  * v1.0.1 - 2017/06/02 : ショップの売却シーンに対応
  * v1.0.0 - 2017/06/01 : 初版作成
  * 
@@ -101,32 +103,21 @@ Window_ItemList.prototype.isAllItems = function(item) {
 // 直接アイテムリストを選択できるようにする
 //=============================================================================
 
-FTKR.ICF.Scene_Item_createCategoryWindow = Scene_Item.prototype.createCategoryWindow;
-Scene_Item.prototype.createCategoryWindow = function() {
-    FTKR.ICF.Scene_Item_createCategoryWindow.call(this);
-    //カテゴリウィンドウを隠す
-    this._categoryWindow.hide();
-    //カテゴリウィンドウからカーソルを無効化
-    this._categoryWindow.deselect();
-    this._categoryWindow.deactivate();
-};
-
-
 FTKR.ICF.Scene_Item_createItemWindow = Scene_Item.prototype.createItemWindow;
 Scene_Item.prototype.createItemWindow = function() {
     FTKR.ICF.Scene_Item_createItemWindow.call(this);
     //アイテムウィンドウのサイズ調整
     this._itemWindow.y = this._helpWindow.height;
     this._itemWindow.height = Graphics.boxHeight - this._itemWindow.y;
-    //アイテムウィンドウにカーソル有効化
-    this._itemWindow.activate();
+    //カテゴリウィンドウを消して、アイテムウィンドウにカーソルを移す
+    this.hideSubWindow(this._categoryWindow);
     this._itemWindow.selectLast();
 };
 
 //アイテムウィンドウでキャンセルするとメニュー画面に戻る
 Scene_Item.prototype.onItemCancel = function() {
     this._itemWindow.deselect();
-    this.popScene();0
+    this.popScene();
 };
 
 //=============================================================================
@@ -152,11 +143,8 @@ Scene_Shop.prototype.activateSellWindow = function() {
 
 //書き換え
 Scene_Shop.prototype.commandSell = function() {
-    this._dummyWindow.hide();
-    this._sellWindow.show();
-    this._sellWindow.activate();
+    this.activateSellWindow();
     this._sellWindow.select(0);
-    this._sellWindow.refresh();
 };
 
 //書き換え
