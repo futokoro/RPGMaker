@@ -39,6 +39,7 @@
 * FTKR_SkillTreeSystem
     * 習得回数ごとに別のスキルを習得させる機能
     * スキルツリー画面でスキル間の線を非表示にする機能
+    * FTKR_CustomSimpleActorStatus との競合(Cursor Line Number)
 * FTKR_TitleScene
     * 不具合)クレジットを設定しないとエラーになる
 * FTKR_AutoStateConditions

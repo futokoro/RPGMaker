@@ -4,8 +4,8 @@
 // プラグインNo : 7
 // 作成者　　   : フトコロ(futokoro)
 // 作成日　　   : 2017/02/25
-// 最終更新日   : 2019/04/13
-// バージョン   : v1.18.0
+// 最終更新日   : 2019/04/22
+// バージョン   : v1.18.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.18.0 ツリー型スキル習得システム
+ * @plugindesc v1.18.1 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -551,6 +551,10 @@ FTKR.STS = FTKR.STS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.18.1 - 2019/04/22 : 不具合修正
+ *    1. FTKR_CustomSimpleActorStatusと組み合わせた時に、Cursor Line Number の設定が
+ *       反映されない不具合を修正。
  * 
  * v1.18.0 - 2019/04/13 : 機能追加
  *    1. 習得回数ごとに別のスキルを習得させる機能を追加。
@@ -1604,7 +1608,7 @@ function Scene_STS() {
                 }
             },this);
         }
-    _STS_Game_Actor_forgetSkill.call(this, skillId);
+        _STS_Game_Actor_forgetSkill.call(this, skillId);
     };
 
     Game_Actor.prototype.resetStsSkill = function(skillId) {
@@ -2448,17 +2452,19 @@ function Scene_STS() {
         this.refresh();
     };
 
-    Window_Selectable.prototype.itemHeightSpace = function() {
-        return 0;
-    };
-
-    Window_Selectable.prototype.unitHeight = function() {
-        return this.itemHeight() + this.itemHeightSpace();
-    };
-
-    Window_Selectable.prototype.unitWidth = function() {
-        return this.itemWidth() + this.spacing();
-    };
+    if (!Imported.FTKR_CSS) {
+        Window_Selectable.prototype.itemHeightSpace = function() {
+            return 0;
+        };
+    
+        Window_Selectable.prototype.unitHeight = function() {
+            return this.itemHeight() + this.itemHeightSpace();
+        };
+    
+        Window_Selectable.prototype.unitWidth = function() {
+            return this.itemWidth() + this.spacing();
+        };
+    }
 
     //=============================================================================
     // Window_SkillList
