@@ -4,12 +4,7 @@
 不具合についてはできる限り優先して対応しますが、それ以外の要望や他プラグインとの競合回避については、余裕がある時に気が向いたら対応します。
 
 ## 要望
-* FTKR_ConnectingMapGenerator
-    * 各マップの遠景画像をそのまま使用できないか(遠景画像を複数組み合わせて表示)⇒実装厳しいです
-* FTKR_ExBattleEvent
-    * 他プラグイン(YEP_X_BattleSysCBT)との競合回避
-* FTKR_ExMessageWindow2
-    * 他プラグイン(YEP_X_MessageBackLog)との競合回避
+
 
 ## 要望はないがやりたいと思っていること
 * FTKR_SkillUpgradeSystem
@@ -28,6 +23,12 @@
 * FTKR_SkillTreeSystem
     * スキルツリー画面の負荷軽減⇒リメイク要のため保留
     * スキルツリー画面でスキルの配置を自由に設定できないか⇒リメイク要のため保留
+* FTKR_ConnectingMapGenerator
+    * 各マップの遠景画像をそのまま使用できないか(遠景画像を複数組み合わせて表示)⇒実装厳しいです
+* FTKR_ExBattleEvent
+    * 他プラグイン(YEP_X_BattleSysCBT)との競合回避⇒厳しいです。
+* FTKR_ExMessageWindow2
+    * 他プラグイン(YEP_X_MessageBackLog)との競合回避⇒リメイク要のため保留
 
 ## 対応済み
 * FTKR_CSS_EquipStatusを使うと処理が重くなる？

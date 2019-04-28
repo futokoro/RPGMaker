@@ -491,6 +491,7 @@ STS 削除 ツリータイプ(x) アクター(y)
 
 * メニュー画面で表示
 * プラグインコマンドで表示
+* その他の方法で表示
 
 ## メニュー画面で表示
 
@@ -520,6 +521,29 @@ STS 削除 ツリータイプ(x) アクター(y)
 ```
 STS Open
 STS スキルツリー画面表示
+```
+
+## その他の方法で表示
+直接コアスクリプトを編集したり、メニューコマンドを編集するプラグインなどで表示させる場合には、以下の設定を使用してください。<br>
+※大文字小文字は合わせてください。
+
+### YEP_MainMenuManagerの場合
+
+| パラメータ | 設定値 | 備考 |
+| --- | --- | --- |
+| Name | FFTKR.STS.commandName |  |
+| Symbol | learn skill |  |
+| Show | true | スイッチで表示させる設定の場合は $gameSwitches.value(FTKR.STS.menuSwitchId) |
+| Enabled | true |  |
+| Ext | 空欄 |  |
+| Main Bind | this.commandPersonal.bind(this) |  |
+| Actor Bind | 空欄 |
+
+### スクリプトで直接呼び出す
+
+以下のスクリプトを実行してください。
+```
+SceneManager.push(Scene_STS)
 ```
 
 [目次に戻る](#目次)
