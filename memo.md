@@ -4,7 +4,10 @@
 不具合についてはできる限り優先して対応しますが、それ以外の要望や他プラグインとの競合回避については、余裕がある時に気が向いたら対応します。
 
 ## 要望
-
+* FTKR_CSS_ShopStatus
+    * ショップ画面で装備品選択時のカーソル操作が鈍くなる、FTKR_AddOriginalParametersと併用有りでさらに遅くなる
+* FTKR_ExItemConfig_Effect
+    * 内容1/内容2 で設定した内容が反映されない？FTKR_ExStateEffectsと併用
 
 ## 要望はないがやりたいと思っていること
 * FTKR_SkillUpgradeSystem
