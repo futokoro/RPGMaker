@@ -2,6 +2,25 @@
 
 # 過去の更新情報
 
+## 2019/4の更新情報
+### 2019/04/22
+* [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.ja.md) v1.18.1
+
+### 2019/04/16
+* [FTKR_ItemCategoryFixed](FTKR_ItemCategoryFixed.ja.md) v1.0.2
+
+### 2019/04/14
+* [FTKR_TitleScene](FTKR_TitleScene.js) v1.0.1
+* [FTKR_AutoStateConditions](FTKR_AutoStateConditions.js) v1.0.1
+* [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md) v3.5.2
+
+### 2019/04/13
+* [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.ja.md) v1.18.0
+* [FTKR_ExSvMotion](FTKR_ExSvMotion.ja.md) v1.4.0
+
+### 2019/04/07
+* [FTKR_ChangeBattleSpeed](FTKR_ChangeBattleSpeed.js) v1.0.3
+
 ## 2019/3の更新情報
 
 ### 2019/03/10

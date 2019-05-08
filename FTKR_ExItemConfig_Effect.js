@@ -4,8 +4,8 @@
 // プラグインNo : 19
 // 作成者     : フトコロ
 // 作成日     : 2017/04/14
-// 最終更新日 : 2017/08/27
-// バージョン : v1.2.0
+// 最終更新日 : 2019/05/08
+// バージョン : v1.2.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.EIE = FTKR.EIE || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.0 アイテムとスキルの使用効果を拡張するプラグイン
+ * @plugindesc v1.2.1 アイテムとスキルの使用効果を拡張するプラグイン
  * @author フトコロ
  *
  * @help
@@ -126,6 +126,9 @@ FTKR.EIE = FTKR.EIE || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.2.1 - 2019/05/08 : 不具合修正
+ *    1. FTKR_ExStateEffectsの機能で追加した特徴の使用効果が正しく発動しない不具合修正。
  * 
  * v1.2.0 - 2017/08/27 : 機能追加
  *    1. コモンイベントに有効条件を設定する機能を追加。
@@ -318,20 +321,20 @@ BattleManager.invokeNormalAction = function(subject, target) {
 // Game_Action
 //=============================================================================
 
-FTKR.EIE.Game_Action_initialize = Game_Action.prototype.initialize;
+var _EIE_Game_Action_initialize = Game_Action.prototype.initialize;
 Game_Action.prototype.initialize = function(subject, forcing) {
-    FTKR.EIE.Game_Action_initialize.call(this, subject, forcing);
+    _EIE_Game_Action_initialize.call(this, subject, forcing);
     this._target = {};
     this._targetSepEffect = null;
 };
 
-FTKR.EIE.Game_Action_applyItemEffect = Game_Action.prototype.applyItemEffect;
+var _EIE_Game_Action_applyItemEffect = Game_Action.prototype.applyItemEffect;
 Game_Action.prototype.applyItemEffect = function(target, effect) {
     if (effect) {
         target = this.changeTargetEffect(target, effect);
         if (this.evalEffectEnabled(effect, target)) {
-            this.setSepEffectValue();
-            FTKR.EIE.Game_Action_applyItemEffect.call(this, target, effect);
+            this.setSepEffectValue(effect);
+            _EIE_Game_Action_applyItemEffect.call(this, target, effect);
         }
     }
 };
@@ -369,13 +372,11 @@ Game_Action.prototype.changeTargetForRandom = function(isEnemy) {
     return isEnemy ? $gameTroop.randomTarget() : $gameParty.randomTarget();
 };
 
-Game_Action.prototype.setSepEffectValue = function() {
-    if(this.item()) {
+Game_Action.prototype.setSepEffectValue = function(effect) {
+    if (this.item()) {
         FTKR.setGameData(this.subject(), this._target, this.item());
-        this.item().effects.forEach(function(effect) {
-            effect.value1 = this.setSepEffectValue1(effect);
-            effect.value2 = this.setSepEffectValue2(effect);
-        }, this);
+        effect.value1 = this.setSepEffectValue1(effect);
+        effect.value2 = this.setSepEffectValue2(effect);
     }
 };
 
