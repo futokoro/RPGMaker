@@ -4,10 +4,6 @@
 不具合についてはできる限り優先して対応しますが、それ以外の要望や他プラグインとの競合回避については、余裕がある時に気が向いたら対応します。
 
 ## 要望
-* FTKR_CSS_ShopStatus
-    * ショップ画面で装備品選択時のカーソル操作が鈍くなる、FTKR_AddOriginalParametersと併用有りでさらに遅くなる
-* FTKR_ExItemConfig_Effect
-    * 内容1/内容2 で設定した内容が反映されない？FTKR_ExStateEffectsと併用
 
 ## 要望はないがやりたいと思っていること
 * FTKR_SkillUpgradeSystem
@@ -36,6 +32,8 @@
 ## 対応済み
 * FTKR_CSS_EquipStatusを使うと処理が重くなる？
 * FTKR_CustomSimpleActorStatusのマニュアルページを v3.0.0 に合わせて修正
+* FTKR_CSS_ShopStatus
+    * ショップ画面で装備品選択時のカーソル操作が鈍くなる、FTKR_AddOriginalParametersと併用有りでさらに遅くなる⇒軽減策導入
 * FTKR_ChangeBattleSpeed
     * 不具合)変数を使わずに固定値に設定する機能が使えない
 * FTKR_ExSvMotion
@@ -50,6 +48,9 @@
     * 不具合)マップ移動中にFPSが下がる⇒自動付与処理内容と実行タイミングを見直し
 * FTKR_CustomSimpleActorStatus
     * 通常能力値以外の各種能力値を表示する機能を追加
+* FTKR_ExItemConfig_Effect
+    * 不具合)内容1/内容2 で設定した内容が反映されない？FTKR_ExStateEffectsと併用
+
 
 [トップページに戻る](README.md)
 
