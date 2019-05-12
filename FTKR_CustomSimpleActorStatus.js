@@ -4,8 +4,8 @@
 // プラグインNo : 9
 // 作成者     : フトコロ
 // 作成日     : 2017/03/09
-// 最終更新日 : 2019/04/14
-// バージョン : v3.5.2
+// 最終更新日 : 2019/05/12
+// バージョン : v3.5.3
 //=============================================================================
 // GraphicalDesignMode.js
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ FTKR.CSS = FTKR.CSS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v3.5.2 アクターのステータス表示を変更するプラグイン
+ * @plugindesc v3.5.3 アクターのステータス表示を変更するプラグイン
  * @author フトコロ
  *
  * @noteParam CSS_画像
@@ -1166,6 +1166,10 @@ FTKR.CSS = FTKR.CSS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v3.5.3 - 2019/05/12 : 機能追加
+ *    1. アイテムの所持数を表示するコード(numItem)を追加。
+ *    2. 装備品の表示コード(equip(%1))に、ショップ画面用の専用処理を追加。
+ * 
  * v3.5.2 - 2019/04/14 : 機能追加
  *    1. 特殊能力値(xparam)と追加能力値(sparam)を表示するコード他を追加。
  * 
@@ -1561,6 +1565,8 @@ FTKR.CSS = FTKR.CSS || {};
  * @value iparam(%1)
  * @option アイテムカスタム画像
  * @value iimage(%1)
+ * @option アイテム所持数
+ * @value inumber
  * @option マップ名
  * @value mapname
  *
@@ -2587,6 +2593,8 @@ FTKR.CSS = FTKR.CSS || {};
                 return this.drawCssText(actor, x, y, width, match[2]);
             case 'NOTEQUIP':
                 return this.drawCssCannotEquip(actor, x, y, width, match[2], lss);
+            case 'EQUIP':
+                return this.drawCssActorEquip(actor, x, y, width, match[2], lss);
             default:
 //                if (!actor) return 1;
                 FTKR.setGameData(actor, lss.target, lss.item);
@@ -2640,8 +2648,6 @@ FTKR.CSS = FTKR.CSS || {};
                 return this.drawCssActorCustom(actor, x, y, width, css.customs[match[2]]);
             case 'GAUGE':
                 return this.drawCssActorGauge(actor, x, y, width, css.gauges[match[2]]);
-            case 'EQUIP':
-                return this.drawCssActorEquip(actor, x, y, width, match[2]);
             case 'STATE2':
                 return this.drawCssActorIcons(index, actor, x, y, width, match[2]);
             case 'FACE':
@@ -2670,6 +2676,8 @@ FTKR.CSS = FTKR.CSS || {};
                 return this.drawCssItemScope(actor, x, y, width, lss);
             case 'IELEMENT':
                 return this.drawCssItemElement(actor, x, y, width, lss);
+            case 'INUMBER':
+                return this.drawCssItemNumber(actor, x, y, width, lss);
             case 'MAPNAME':
                 return this.drawCssMapName(actor, x, y, width, lss);
             case 'FACE':
@@ -2840,6 +2848,17 @@ FTKR.CSS = FTKR.CSS || {};
         dx = Math.floor(dx + offsetX);
         this.contents.blt(bitmap, sx, sy, sw, sh, dx, dy, dw, dh);
         return Math.ceil(dh / this.lineHeight()) || 1;
+    };
+
+    //------------------------------------------------------------------------
+    //アイテムの所持数
+    //------------------------------------------------------------------------
+    Window_Base.prototype.drawCssItemNumber = function(actor, x, y, width, lss) {
+        if (lss.item){
+            var numItems = $gameParty.numItems(lss.item);
+            this.drawText(numItems, x, y, width, 'right');
+        }
+        return 1;
     };
 
     //------------------------------------------------------------------------
@@ -3504,7 +3523,13 @@ FTKR.CSS = FTKR.CSS || {};
     //------------------------------------------------------------------------
     //装備の表示関数
     //------------------------------------------------------------------------
-    Window_Base.prototype.drawCssActorEquip = function(actor, x, y, width, equipId) {
+    Window_Base.prototype.drawCssActorEquip = function(actor, x, y, width, equipId, lss) {
+        if ((equipId +'').toUpperCase() === 'SHOP') {
+            equipId = lss.item.etypeId - 1;
+        } else {
+            FTKR.setGameData(actor, lss.target, lss.item);
+            equipId = this.convertCssNumber(actor, equipId);
+        }
         var equip = actor.equips()[equipId];
         if (equip) {
             this.drawCssIcon(equip.iconIndex, x, y, 1, true);

@@ -4,8 +4,8 @@
 // プラグインNo : 52
 // 作成者     : フトコロ
 // 作成日     : 2017/07/23
-// 最終更新日 : 2018/12/27
-// バージョン : v2.2.2
+// 最終更新日 : 2019/05/12
+// バージョン : v2.3.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -17,7 +17,7 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.2.2 ショップ画面のステータスレイアウトを変更する
+ * @plugindesc v2.3.0 ショップ画面のステータスレイアウトを変更する
  * @author フトコロ
  *
  * @param --共通レイアウト設定--
@@ -26,7 +26,7 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
  * @param commonStatusList
  * @desc 表示するステータスとその位置を設定します。
  * @type struct<status>[]
- * @default ["{\"text\":\"text(%1)\",\"value\":\"\\\\c[16]持っている数\",\"x\":\"0\",\"y\":\"0\",\"width\":\"162\"}","{\"text\":\"eval(%1)\",\"value\":\"$gameParty.numItems(item)\",\"x\":\"162\",\"y\":\"0\",\"width\":\"162\"}"]
+ * @default ["{\"text\":\"text(%1)\",\"value\":\"\\\\c[16]持っている数\",\"x\":\"0\",\"y\":\"0\",\"width\":\"162\"}","{\"text\":\"inumber\",\"value\":\"\",\"x\":\"162\",\"y\":\"0\",\"width\":\"162\"}"]
  * 
  * @param Common Status Space In Text
  * @desc Text内で複数表示する場合の間隔を指定します。
@@ -38,7 +38,7 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
  * @param weaponStatusList
  * @desc 表示するステータスとその位置を設定します。
  * @type struct<status>[]
- * @default ["{\"text\":\"name\",\"value\":\"\",\"x\":\"0\",\"y\":\"0\",\"width\":\"162\"}","{\"text\":\"eparam(%1)\",\"value\":\"2\",\"x\":\"162\",\"y\":\"0\",\"width\":\"162\"}","{\"text\":\"equip(%1)\",\"value\":\"item.etypeId-1\",\"x\":\"0\",\"y\":\"36\",\"width\":\"324\"}"]
+ * @default ["{\"text\":\"name\",\"value\":\"\",\"x\":\"0\",\"y\":\"0\",\"width\":\"162\"}","{\"text\":\"eparam(%1)\",\"value\":\"2\",\"x\":\"162\",\"y\":\"0\",\"width\":\"162\"}","{\"text\":\"equip(%1)\",\"value\":\"shop\",\"x\":\"0\",\"y\":\"36\",\"width\":\"324\"}"]
  * 
  * @param Weapon Status Space In Text
  * @desc Text内で複数表示する場合の間隔を指定します。
@@ -50,7 +50,7 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
  * @param armorStatusList
  * @desc 表示するステータスとその位置を設定します。
  * @type struct<status>[]
- * @default ["{\"text\":\"name\",\"value\":\"\",\"x\":\"0\",\"y\":\"0\",\"width\":\"162\"}","{\"text\":\"eparam(%1)\",\"value\":\"3\",\"x\":\"162\",\"y\":\"0\",\"width\":\"162\"}","{\"text\":\"equip(%1)\",\"value\":\"item.etypeId-1\",\"x\":\"0\",\"y\":\"36\",\"width\":\"324\"}"]
+ * @default ["{\"text\":\"name\",\"value\":\"\",\"x\":\"0\",\"y\":\"0\",\"width\":\"162\"}","{\"text\":\"eparam(%1)\",\"value\":\"3\",\"x\":\"162\",\"y\":\"0\",\"width\":\"162\"}","{\"text\":\"equip(%1)\",\"value\":\"shop\",\"x\":\"0\",\"y\":\"36\",\"width\":\"324\"}"]
  * 
  * @param Armor Status Space In Text
  * @desc Text内で複数表示する場合の間隔を指定します。
@@ -275,6 +275,9 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.3.0 - 2019/05/12 : FTKR_CustomSimpleActorStatus の v3.5.3 に対応
+ *    1. プラグインパラメータの初期値を変更。
+ * 
  * v2.2.2 - 2018/12/27 : 不具合修正
  *    1. 武器防具のアイテム用パラメータのコードが正しく反映されない不具合を修正。
  * 
@@ -355,12 +358,26 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
  * @value pbase(%1)
  * @option 通常能力値(増加分)
  * @value pdiff(%1)
+ * @option 追加能力値
+ * @value xparam(%1)
+ * @option 特殊能力値
+ * @value sparam(%1)
  * @option 装備
  * @value equip(%1)
- * @option 装備パラメータ
+ * @option 装備通常能力値
  * @value eparam(%1)
- * @option 装備パラメータ差分
+ * @option 装備追加能力値
+ * @value exparam(%1)
+ * @option 装備特殊能力値
+ * @value esparam(%1)
+ * @option 装備通常能力値差分
  * @value ediff(%1)
+ * @option 装備追加能力値差分
+ * @value exdiff(%1)
+ * @option 装備特殊能力値差分
+ * @value esdiff(%1)
+ * @option 装備不可表示
+ * @value notequip(%1)
  * @option カスタムパラメータ
  * @value custom(%1)
  * @option カスタムゲージ
@@ -410,7 +427,9 @@ FTKR.CSS.SpS = FTKR.CSS.SpS || {};
  * @option アイテム設定詳細
  * @value iparam(%1)
  * @option アイテムカスタム画像
- * @value itemimage(%1)
+ * @value iimage(%1)
+ * @option アイテム所持数
+ * @value inumber
  * @option マップ名
  * @value mapname
  *
@@ -586,6 +605,7 @@ if (Imported.FTKR_CSS) (function() {
             var lss = this._lssStatus;
             var w = this.width - this.padding * 2;
             var h = this.height - this.padding * 2;
+            lss.item = this._item;
             this.drawCssActorStatus(0, null, 0, 0, w, h, lss);
         }
     };
