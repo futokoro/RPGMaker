@@ -531,8 +531,8 @@ STS スキルツリー画面表示
 
 | パラメータ | 設定値 | 備考 |
 | --- | --- | --- |
-| Name | FFTKR.STS.commandName |  |
-| Symbol | learn skill |  |
+| Name | FTKR.STS.commandName |  |
+| Symbol | learn skill | learn と skill の間は半角スペース |
 | Show | true | スイッチで表示させる設定の場合は $gameSwitches.value(FTKR.STS.menuSwitchId) |
 | Enabled | true |  |
 | Ext | 空欄 |  |
