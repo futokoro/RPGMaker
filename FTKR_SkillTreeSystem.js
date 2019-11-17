@@ -4,8 +4,8 @@
 // プラグインNo : 7
 // 作成者　　   : フトコロ(futokoro)
 // 作成日　　   : 2017/02/25
-// 最終更新日   : 2019/04/22
-// バージョン   : v1.18.1
+// 最終更新日   : 2019/11/17
+// バージョン   : v1.18.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.18.1 ツリー型スキル習得システム
+ * @plugindesc v1.18.2 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -129,6 +129,13 @@ FTKR.STS = FTKR.STS || {};
  * @on 有効
  * @off 無効
  * @default false
+ * 
+ * @param NonBattleMember Sp Rate
+ * @desc パーティー外メンバーの戦闘勝利時に入手するSP量の比率(%)
+ * @default 100
+ * @min 0
+ * @max 100
+ * @type number
  * 
  * @param --スキル枠の設定(Skill Frame)--
  * 
@@ -552,6 +559,10 @@ FTKR.STS = FTKR.STS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.18.2 - 2019/11/17 : 不具合修正、機能追加
+ *    1. canStsLearnedSkillの判定処理が正しく実行されていなかった不具合を修正。
+ *    2. 非戦闘参加メンバーが戦闘勝利時に入手するSP量の比率を変更する機能を追加。
+ * 
  * v1.18.1 - 2019/04/22 : 不具合修正
  *    1. FTKR_CustomSimpleActorStatusと組み合わせた時に、Cursor Line Number の設定が
  *       反映されない不具合を修正。
@@ -905,6 +916,7 @@ function Scene_STS() {
         hideCost0    :Number(parameters['Hide Sp Cost 0'] || 0),
         format       :String(parameters['Display Get Sp'] || ''),
         enableClassSp:(paramParse(parameters['Enable Class Sp']) || false),
+        nonBattleSpRate:Number(parameters['NonBattleMember Sp Rate'] || 0),
     };
 
     //スキル枠
@@ -1188,7 +1200,8 @@ function Scene_STS() {
     BattleManager.gainStsSp = function() {
         var sp = this._rewards.stsSps;
         $gameParty.allMembers().forEach(function(actor) {
-            actor.getSp(sp);
+            var rate = actor.isBattleMember() ? 100 : FTKR.STS.sp.nonBattleSpRate;
+            actor.getSp(sp * rate / 100);
         });
     };
 
@@ -1952,15 +1965,11 @@ function Scene_STS() {
     };
 
     Game_Actor.prototype.canStsLearnedSkill = function(skillId) {
-        var results = [
-            this.getTreeTypes().filter( function(tTypeId) {
-                return this.isReqSkillOk(skillId, tTypeId);
-            },this).length,
-            this.isReqParamOk(skillId),
-            this.isPayCostOk(skillId),
-            this.isStsLearnedOk(skillId),
-        ];
-        return $dataSkills[skillId] && results.filter( function(elm) { return !elm; });
+        if (!$dataSkills[skillId]) return false;
+        var reqSkillOk = this.getTreeTypes().filter( function(tTypeId) {
+            return this.isReqSkillOk(skillId, tTypeId);
+        },this).length;
+        return reqSkillOk && this.isReqParamOk(skillId) && this.isPayCostOk(skillId) && this.isStsLearnedOk(skillId);
     };
 
     Game_Actor.prototype.isStsLearnedOk = function(skillId) {
@@ -3338,7 +3347,9 @@ function Scene_STS() {
 
     Scene_STS.prototype.createStsActorStatusWindow = function() {
       this._stsActorStatusWindow = new Window_StsActorStatus(0, 0, 240, 144);
-      this._stsActorStatusWindow.reserveFaceImages();
+      if (!!this._stsActorStatusWindow.reserveFaceImages) {
+          this._stsActorStatusWindow.reserveFaceImages();
+      }
       this.addWindow(this._stsActorStatusWindow);
     };
 

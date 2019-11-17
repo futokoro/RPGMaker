@@ -629,6 +629,13 @@ STS 加算 Sp(v[1]) アクター(2)
 
 ![画像](image/FTKR_SkillTreeSystem/n01_015.png)
 
+また、戦闘に参加していないパーティーメンバーの獲得SPの比率を、以下のプラグインパラメータで変更できます。
+
+`<NonBattleMember Sp Rate>`
+
+0～100 の範囲で設定してください。単位は％です。
+デフォルトでは100%に設定しています。
+
 ### 職業別SP
 
 プラグインパラメータ`<Enable Class Sp>`を有効に設定することで、
@@ -1779,7 +1786,8 @@ a.isStsLearnedSkill(スキルID) && a.isClass($dataClasses[職業ID])
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.18.1](FTKR_SkillTreeSystem.js) | 2019/04/22 | FTKR_CustomSimpleActorStatus と組み合わせた時に、Cursor Line Number の設定が反映されない不具合を修正 |
+| [ver1.18.2](FTKR_SkillTreeSystem.js) | 2019/11/17 | canStsLearnedSkillの判定処理が正しく実行されていなかった不具合を修正<br>非戦闘参加メンバーが戦闘勝利時に入手するSP量の比率を変更する機能を追加 |
+| ver1.18.1 | 2019/04/22 | FTKR_CustomSimpleActorStatus と組み合わせた時に、Cursor Line Number の設定が反映されない不具合を修正 |
 | ver1.18.0 | 2019/04/13 | 習得回数ごとに別のスキルを習得させる機能を追加<br>プラグインパラメータ Draw Line Type に、スキル間の線を非表示にする機能を追加 |
 | ver1.17.1 | 2019/02/24 | プラグインパラメータ Enable Class Sp を有効にするとエラーになる不具合を修正 |
 | ver1.17.0 | 2018/12/30 | 取得可能なSPに最大値を設定する機能を追加 |

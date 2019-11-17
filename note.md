@@ -2,6 +2,14 @@
 
 # 過去の更新情報
 
+## 2019/5の更新情報
+### 2019/05/12
+* [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md) v3.5.3
+* [FTKR_CSS_ShopStatus](FTKR_CSS_ShopStatus.ja.md) v2.3.0
+
+### 2019/05/08
+* [FTKR_ExItemConfig_Effect](FTKR_ExItemConfig_Effect.ja.md) v1.2.1
+
 ## 2019/4の更新情報
 ### 2019/04/22
 * [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.ja.md) v1.18.1
