@@ -1786,7 +1786,8 @@ a.isStsLearnedSkill(スキルID) && a.isClass($dataClasses[職業ID])
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.18.2](FTKR_SkillTreeSystem.js) | 2019/11/17 | canStsLearnedSkillの判定処理が正しく実行されていなかった不具合を修正<br>非戦闘参加メンバーが戦闘勝利時に入手するSP量の比率を変更する機能を追加 |
+| [ver1.18.3](FTKR_SkillTreeSystem.js) | 2019/11/22 | 戦闘勝利時に入手するSP量が少数の場合、少数以下を切り捨て、整数になるように変更 |
+| ver1.18.2 | 2019/11/17 | canStsLearnedSkillの判定処理が正しく実行されていなかった不具合を修正<br>非戦闘参加メンバーが戦闘勝利時に入手するSP量の比率を変更する機能を追加 |
 | ver1.18.1 | 2019/04/22 | FTKR_CustomSimpleActorStatus と組み合わせた時に、Cursor Line Number の設定が反映されない不具合を修正 |
 | ver1.18.0 | 2019/04/13 | 習得回数ごとに別のスキルを習得させる機能を追加<br>プラグインパラメータ Draw Line Type に、スキル間の線を非表示にする機能を追加 |
 | ver1.17.1 | 2019/02/24 | プラグインパラメータ Enable Class Sp を有効にするとエラーになる不具合を修正 |

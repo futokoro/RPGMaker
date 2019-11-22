@@ -4,8 +4,8 @@
 // プラグインNo : 7
 // 作成者　　   : フトコロ(futokoro)
 // 作成日　　   : 2017/02/25
-// 最終更新日   : 2019/11/17
-// バージョン   : v1.18.2
+// 最終更新日   : 2019/11/22
+// バージョン   : v1.18.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.STS = FTKR.STS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.18.2 ツリー型スキル習得システム
+ * @plugindesc v1.18.3 ツリー型スキル習得システム
  * @author フトコロ
  *
  * @param --必須設定(Required)--
@@ -503,7 +503,7 @@ FTKR.STS = FTKR.STS || {};
  * 2.アクター毎にスキル習得時に使用できるスキルポイント(SP)を実装します。
  * 
  * 
- * プラグインの使い方は、以下のHPを参照してください。
+ * プラグインの使い方は、以下のページを参照してください。
  * https://github.com/futokoro/RPGMaker/blob/master/FTKR_SkillTreeSystem.ja.md
  * 
  * 
@@ -547,7 +547,7 @@ FTKR.STS = FTKR.STS || {};
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
- * Copyright (c) 2017,2018 Futokoro
+ * Copyright (c) 2017-2019 Futokoro
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
@@ -558,6 +558,9 @@ FTKR.STS = FTKR.STS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.18.3 - 2019/11/22 : 不具合修正
+ *    1. 戦闘勝利時に入手するSP量が少数の場合、少数以下を切り捨て、整数になるように変更。
  * 
  * v1.18.2 - 2019/11/17 : 不具合修正、機能追加
  *    1. canStsLearnedSkillの判定処理が正しく実行されていなかった不具合を修正。
@@ -1201,7 +1204,8 @@ function Scene_STS() {
         var sp = this._rewards.stsSps;
         $gameParty.allMembers().forEach(function(actor) {
             var rate = actor.isBattleMember() ? 100 : FTKR.STS.sp.nonBattleSpRate;
-            actor.getSp(sp * rate / 100);
+            var getSp = Math.floor(sp * rate / 100);
+            actor.getSp(getSp);
         });
     };
 
