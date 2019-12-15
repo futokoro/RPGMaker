@@ -2,6 +2,15 @@
 
 # 過去の更新情報
 
+## 2019/11の更新情報
+
+### 2019/11/22
+* [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.ja.md) v1.18.3
+* [FTKR_ItemCategoryFixed](FTKR_ItemCategoryFixed.ja.md) v1.0.3
+
+### 2019/11/17
+* [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.ja.md) v1.18.2
+
 ## 2019/5の更新情報
 ### 2019/05/12
 * [FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md) v3.5.3

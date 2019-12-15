@@ -364,7 +364,29 @@ CLEAR_TEXT
 ```
 設定したテキストをすべて初期化します。
 
-#### FTKR_CustomSimpleActorStatusによる表示設定
+#### FTKR_CustomSimpleActorStatusによる表示設定(その１)
+
+FTKR_CustomSimpleActorStatus.js(v3.0.0以降)と組み合わせている場合に使用可能な記述です。
+statusList方式で表示させたいステータスを設定できます。
+```
+ステータスリスト設定 TEXT [表示させたいステータス] VALUE [] X [x座標の値] Y [Y座標の値] WIDTH [表示幅]
+SET_STATUSLIST TEXT [statusname] VALUE [value] X [value] Y [value] WIDTH [value]
+```
+
+１つのプラグインコマンドにつき、１つのステータスを設定できます。<br>
+複数のステータスを表示させる場合は、プラグインコマンドを追加して設定してください。<br>
+各パラメータの入力方法は`FTKR_CustomSimpleActorStatus.js`と同じです。
+
+なお、先頭の設定コマンド名は以下でも代用可能です。
+```
+ステータスリスト設定 ...
+SL設定 ...
+SET_STATUSLIST ...
+SET_SL ...
+```
+※ ... の部分は省略しているだけです。実際にイベントに入力する際は、TEXT以降のパラメータを正しく記述してください。
+
+#### FTKR_CustomSimpleActorStatusによる表示設定(その２)
 ```
 内容 [表示内容]
 CONTENT [contentSetting]
@@ -889,7 +911,8 @@ ACTIVE [ON or OFF
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.6.0](FTKR_OriginalSceneWindow.js) | 2018/10/08 | ウィンドウスキンを設定するプラグインコマンドを追加 |
+| [ver1.7.0](FTKR_OriginalSceneWindow.js) | 2019/12/16 | コモンウィンドウに対して、FTKR_CustomSimpleActorStatus.jsのstatusList方式で表示内容を設定する機能を追加 |
+| ver1.6.0 | 2018/10/08 | ウィンドウスキンを設定するプラグインコマンドを追加 |
 | ver1.5.7 | 2018/09/17 | 一度作成したウィンドウのコマンド内容を変更しても、「更新」後に反映されない不具合を修正 |
 | ver1.5.6 | 2018/07/31 | セレクトウィンドウで、リストにアクターを設定した場合に、アクターのゲームデータが正常に反映されない不具合を修正<br>コマンドまたはセレクトウィンドウの選択情報を、正しく取得できない不具合を修正 |
 | ver1.5.5 | 2018/06/18 | プラグインパラメータEnable Escape Codeの設定が反映されない不具合を修正 |

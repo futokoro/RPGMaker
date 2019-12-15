@@ -4,8 +4,8 @@
 // プラグインNo : 46
 // 作成者     : フトコロ
 // 作成日     : 2017/06/17
-// 最終更新日 : 2018/10/08
-// バージョン : v1.6.0
+// 最終更新日 : 2019/12/16
+// バージョン : v1.7.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.OSW = FTKR.OSW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.6.0 オリジナルのシーンやウィンドウを作成する
+ * @plugindesc v1.7.0 オリジナルのシーンやウィンドウを作成する
  * @author フトコロ
  *
  * @param --ウィンドウの共通設定--
@@ -225,6 +225,10 @@ FTKR.OSW = FTKR.OSW || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.7.0 - 2019/12/16 : 機能追加
+ *    1. コモンウィンドウに対して、FTKR_CustomSimpleActorStatus.js の
+ *       statusList方式で表示内容を設定する機能を追加。
  * 
  * v1.6.0 - 2018/10/08 : 機能追加、ヘルプを削減
  *    1. ウィンドウスキンを設定するプラグインコマンドを追加。
@@ -642,6 +646,10 @@ function Game_OswScene() {
                 case 'SET_LIST_ACTION':
                     i += this.setOswSelectArgs(window, i + 1, args);
                     break;
+                case 'テキスト初期化':
+                case 'CLEAR_TEXT':
+                    window.clearTexts();
+                    break;
                 case 'テキスト':
                 case 'TEXT':
                     var line = setArgNum(args[i+1]);
@@ -650,9 +658,20 @@ function Game_OswScene() {
                     window._cssContent = false;
                     i += 2;
                     break;
-                case 'テキスト初期化':
-                case 'CLEAR_TEXT':
-                    window.clearTexts();
+                case 'ステータスリスト初期化':
+                case 'SL初期化':
+                case 'CLEAR_STATUSLIST':
+                case 'CLEAR_SL':
+                    window.clearStatusList();
+                    i += 1;
+                    window._cssContent = false;
+                    break;
+                case 'ステータスリスト設定':
+                case 'SL設定':
+                case 'SET_STATUSLIST':
+                case 'SET_SL':
+                    i += this.setOswStatusListContentArgs(window, i + 1, args);
+                    window._cssContent = true;
                     break;
                 case '内容':
                 case 'CONTENT':
@@ -823,6 +842,45 @@ function Game_OswScene() {
         return count;
     };
 
+    Game_Interpreter.prototype.setOswStatusListContentArgs = function(window, index, args) {
+        var count = 0;
+        var statuslist = {};
+        for (var i = index; i < args.length; i++) {
+            var arg = (args[i] + '').toUpperCase();
+            switch (arg) {
+                case 'TEXT':
+                    statuslist.text = setArgStr(args[i+1]);
+                    i += 1;
+                    count += 2;
+                    break;
+                case 'VALUE':
+                    statuslist.value = setArgStr(args[i+1]);
+                    i += 1;
+                    count += 2;
+                    break;
+                case 'X':
+                    statuslist.x = setArgStr(args[i+1]);
+                    i += 1;
+                    count += 2;
+                    break;
+                case 'Y':
+                    statuslist.y = setArgStr(args[i+1]);
+                    i += 1;
+                    count += 2;
+                    break;
+                case 'WIDTH':
+                    statuslist.width = setArgStr(args[i+1]);
+                    i += 1;
+                    count += 2;
+                    break;
+                default:
+                    return count;
+            }
+        }
+        window.addStatusList(statuslist);
+        return count;
+    };
+
     Game_Interpreter.prototype.setOswSelectArgs = function(window, i, args) {
         var method = this.setOswMethod(args[i+1]);
         switch (args[i].toUpperCase()) {
@@ -972,6 +1030,7 @@ function Game_OswScene() {
             spaceIn   : 0,
             widthRate : '1,1,1',
             item      : null,
+            statusList: null,
         }
     };
 
@@ -1117,6 +1176,16 @@ function Game_OswScene() {
 
     Game_OswBase.prototype.setShowSwitch = function(switchId) {
         this._showSwitchId = switchId;
+    };
+
+    Game_OswBase.prototype.addStatusList = function(status) {
+        if (!this._content.statusList) this._content.statusList = [];
+        this._content.statusList.push(status);
+    };
+
+    Game_OswBase.prototype.clearStatusList = function() {
+        this._content.statusList.length = 0;
+        this._content.statusList = null;
     };
 
     //=============================================================================

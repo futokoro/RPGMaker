@@ -82,7 +82,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_DisplayCommandFrame](FTKR_DisplayCommandFrame.js) | [仮版](FTKR_DisplayCommandFrame.ja.md) | [v1.2.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_DisplayCommandFrame.js) | 2017/11/26 | コマンドに枠を付ける |
-| [FTKR_OriginalSceneWindow](FTKR_OriginalSceneWindow.js) | [仮版](FTKR_OriginalSceneWindow.ja.md) | [v1.6.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_OriginalSceneWindow.js) | 2018/10/08 | オリジナルのシーンおよびウィンドウを作成する |
+| [FTKR_OriginalSceneWindow](FTKR_OriginalSceneWindow.js) | [仮版](FTKR_OriginalSceneWindow.ja.md) | [v1.7.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_OriginalSceneWindow.js) | 2019/12/16 | オリジナルのシーンおよびウィンドウを作成する |
 | [FTKR_SceneBackImages](FTKR_SceneBackImages.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SceneBackImages.js) | 2018/02/24 | メニュー画面やショップ画面などに変数で切替可能な背景画像を設定する |
 | [FTKR_InterlockMouseAndWindow](FTKR_InterlockMouseAndWindow.js) | なし | [v1.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_InterlockMouseAndWindow.js) | 2018/04/30 | マウスポインタとウィンドウのカーソルを連動させる |
 | [FTKR_TitleScene](FTKR_TitleScene.js) | なし | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_TitleScene.js) | 2019/04/14 | タイトル画面のコマンドの表示変更や、クレジット画面を追加する。 |
@@ -317,14 +317,10 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 # 更新情報
 
-2019/11の更新情報
+2019/12の更新情報
 
-### 2019/11/22
-* [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.ja.md) v1.18.3
-* [FTKR_ItemCategoryFixed](FTKR_ItemCategoryFixed.ja.md) v1.0.3
-
-### 2019/11/17
-* [FTKR_SkillTreeSystem](FTKR_SkillTreeSystem.ja.md) v1.18.2
+### 2019/12/16
+* [FTKR_OriginalSceneWindow](FTKR_OriginalSceneWindow.ja.md) v1.7.0
 
 [過去の更新情報](note.md)
 
