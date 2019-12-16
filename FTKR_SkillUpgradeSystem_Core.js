@@ -4,8 +4,8 @@
 // プラグインNo : 1
 // 作成者     : フトコロ
 // 作成日     : 2017/02/06
-// 最終更新日 : 2018/12/07
-// バージョン : v1.5.3
+// 最終更新日 : 2019/12/17
+// バージョン : v1.5.4
 //=======↑本プラグインを改変した場合でも、この欄は消さないでください↑===============
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.SUS = FTKR.SUS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.5.3 スキル強化システム 本体プラグイン
+ * @plugindesc v1.5.4 スキル強化システム 本体プラグイン
  * @author フトコロ
  *
  * @param ---Skill Name Format---
@@ -1026,6 +1026,9 @@ FTKR.SUS = FTKR.SUS || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.5.4 - 2019/12/17 : 不具合修正
+ *    1. 各強化項目のコストタイプのプラグインパラメータを正しく読み取れていない不具合を修正。
+ * 
  * v1.5.3 - 2018/12/07 : 不具合修正
  *    1. 一部のプラグインコマンドが正しく実行できない不具合を修正。
  * 
@@ -1126,7 +1129,7 @@ var paramType1 = {
   'value':Number(FTKR.SUS.parameters['Upgrade Type 1 Value'] || 0),
   'cost':String(FTKR.SUS.parameters['Upgrade Type 1 Cost Value'] || 0),
   'icon':Number(FTKR.SUS.parameters['Upgrade Type 1 Icon'] || 0),
-  'ctype':Number(FTKR.SUS.parameters['Upgrade Type 1 Cost type'] || 0),
+  'ctype':Number(FTKR.SUS.parameters['Upgrade Type 1 Cost Type'] || 0),
   'cid':Number(FTKR.SUS.parameters['Upgrade Type 1 Cost Id'] || 0),
   'format':String(FTKR.SUS.parameters['Upgrade Type 1 Format'] || '')
 };
@@ -1139,7 +1142,7 @@ var paramType2 = {
   'value':Number(FTKR.SUS.parameters['Upgrade Type 2 Value'] || -1),
   'cost':String(FTKR.SUS.parameters['Upgrade Type 2 Cost Value'] || 0),
   'icon':Number(FTKR.SUS.parameters['Upgrade Type 2 Icon'] || 0),
-  'ctype':Number(FTKR.SUS.parameters['Upgrade Type 2 Cost type'] || 0),
+  'ctype':Number(FTKR.SUS.parameters['Upgrade Type 2 Cost Type'] || 0),
   'cid':Number(FTKR.SUS.parameters['Upgrade Type 2 Cost Id'] || 0),
   'format':String(FTKR.SUS.parameters['Upgrade Type 2 Format'] || '')
 };
@@ -1152,7 +1155,7 @@ var paramType3 = {
   'value':Number(FTKR.SUS.parameters['Upgrade Type 3 Value'] || -1),
   'cost':String(FTKR.SUS.parameters['Upgrade Type 3 Cost Value'] || 0),
   'icon':Number(FTKR.SUS.parameters['Upgrade Type 3 Icon'] || 0),
-  'ctype':Number(FTKR.SUS.parameters['Upgrade Type 3 Cost type'] || 0),
+  'ctype':Number(FTKR.SUS.parameters['Upgrade Type 3 Cost Type'] || 0),
   'cid':Number(FTKR.SUS.parameters['Upgrade Type 3 Cost Id'] || 0),
   'format':String(FTKR.SUS.parameters['Upgrade Type 3 Format'] || '')
 };
@@ -1165,7 +1168,7 @@ var paramType4 = {
   'value':Number(FTKR.SUS.parameters['Upgrade Type 4 Value'] || 0),
   'cost':String(FTKR.SUS.parameters['Upgrade Type 4 Cost Value'] || 0),
   'icon':Number(FTKR.SUS.parameters['Upgrade Type 4 Icon'] || 0),
-  'ctype':Number(FTKR.SUS.parameters['Upgrade Type 4 Cost type'] || 0),
+  'ctype':Number(FTKR.SUS.parameters['Upgrade Type 4 Cost Type'] || 0),
   'cid':Number(FTKR.SUS.parameters['Upgrade Type 4 Cost Id'] || 0),
   'format':String(FTKR.SUS.parameters['Upgrade Type 4 Format'] || '')
 };
@@ -1178,7 +1181,7 @@ var paramType5 = {
   'value':Number(FTKR.SUS.parameters['Upgrade Type 5 Value'] || 0),
   'cost':String(FTKR.SUS.parameters['Upgrade Type 5 Cost Value'] || 0),
   'icon':Number(FTKR.SUS.parameters['Upgrade Type 5 Icon'] || 0),
-  'ctype':Number(FTKR.SUS.parameters['Upgrade Type 5 Cost type'] || 0),
+  'ctype':Number(FTKR.SUS.parameters['Upgrade Type 5 Cost Type'] || 0),
   'cid':Number(FTKR.SUS.parameters['Upgrade Type 5 Cost Id'] || 0),
   'format':String(FTKR.SUS.parameters['Upgrade Type 5 Format'] || '')
 };
@@ -1191,7 +1194,7 @@ var paramType6 = {
   'value':Number(FTKR.SUS.parameters['Upgrade Type 6 Value'] || 0),
   'cost':String(FTKR.SUS.parameters['Upgrade Type 6 Cost Value'] || 0),
   'icon':Number(FTKR.SUS.parameters['Upgrade Type 6 Icon'] || 0),
-  'ctype':Number(FTKR.SUS.parameters['Upgrade Type 6 Cost type'] || 0),
+  'ctype':Number(FTKR.SUS.parameters['Upgrade Type 6 Cost Type'] || 0),
   'cid':Number(FTKR.SUS.parameters['Upgrade Type 6 Cost Id'] || 0),
   'format':String(FTKR.SUS.parameters['Upgrade Type 6 Format'] || '')
 };
@@ -1204,7 +1207,7 @@ var paramType7 = {
   'value':Number(FTKR.SUS.parameters['Upgrade Type 7 Value'] || 1),
   'cost':String(FTKR.SUS.parameters['Upgrade Type 7 Cost Value'] || 0),
   'icon':Number(FTKR.SUS.parameters['Upgrade Type 7 Icon'] || 0),
-  'ctype':Number(FTKR.SUS.parameters['Upgrade Type 7 Cost type'] || 0),
+  'ctype':Number(FTKR.SUS.parameters['Upgrade Type 7 Cost Type'] || 0),
   'cid':Number(FTKR.SUS.parameters['Upgrade Type 7 Cost Id'] || 0),
   'format':String(FTKR.SUS.parameters['Upgrade Type 7 Format'] || '')
 };
@@ -1217,7 +1220,7 @@ var paramType8 = {
   'value':Number(FTKR.SUS.parameters['Upgrade Type 8 Value'] || 0),
   'cost':String(FTKR.SUS.parameters['Upgrade Type 8 Cost Value'] || 0),
   'icon':Number(FTKR.SUS.parameters['Upgrade Type 8 Icon'] || 0),
-  'ctype':Number(FTKR.SUS.parameters['Upgrade Type 8 Cost type'] || 0),
+  'ctype':Number(FTKR.SUS.parameters['Upgrade Type 8 Cost Type'] || 0),
   'cid':Number(FTKR.SUS.parameters['Upgrade Type 8 Cost Id'] || 0),
   'format':String(FTKR.SUS.parameters['Upgrade Type 8 Format'] || '')
 };
@@ -1230,7 +1233,7 @@ var paramType9 = {
   'value':Number(FTKR.SUS.parameters['Upgrade Type 9 Value'] || 0),
   'cost':String(FTKR.SUS.parameters['Upgrade Type 9 Cost Value'] || 0),
   'icon':Number(FTKR.SUS.parameters['Upgrade Type 9 Icon'] || 0),
-  'ctype':Number(FTKR.SUS.parameters['Upgrade Type 9 Cost type'] || 0),
+  'ctype':Number(FTKR.SUS.parameters['Upgrade Type 9 Cost Type'] || 0),
   'cid':Number(FTKR.SUS.parameters['Upgrade Type 9 Cost Id'] || 0),
   'format':String(FTKR.SUS.parameters['Upgrade Type 9 Format'] || '')
 };
@@ -1243,7 +1246,7 @@ var paramType10 = {
   'value':Number(FTKR.SUS.parameters['Upgrade Type 10 Value'] || 0),
   'cost':String(FTKR.SUS.parameters['Upgrade Type 10 Cost Value'] || 0),
   'icon':Number(FTKR.SUS.parameters['Upgrade Type 10 Icon'] || 0),
-  'ctype':Number(FTKR.SUS.parameters['Upgrade Type 10 Cost type'] || 0),
+  'ctype':Number(FTKR.SUS.parameters['Upgrade Type 10 Cost Type'] || 0),
   'cid':Number(FTKR.SUS.parameters['Upgrade Type 10 Cost Id'] || 0),
   'format':String(FTKR.SUS.parameters['Upgrade Type 10 Format'] || '')
 };
@@ -1882,11 +1885,8 @@ Game_Actor.prototype.upgradeSepSkill = function(skillId, typeId, dataId) {
         var len = this.matchUtype(i, 'damages') || this.matchUtype(i, 'effects') ?
           skill[FTKR.SUS.utypes[i].type].length : 1;
         for (var j = 0; j < len; j++) {
-          console.log(i, j, typeId, len);
           if (this.matchUtype(i, 'damages') && skill.damages[j].type < 1) continue;
-          console.log(skillId, i, j, typeId, len);
           if (this.canSusUpgrade(skillId, i, j)) {
-            console.log(i, j, typeId, len);
             this.susUpgradeSepSkill(skillId, i, j);
           }
         }
