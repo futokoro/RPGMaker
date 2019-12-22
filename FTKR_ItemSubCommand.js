@@ -4,8 +4,8 @@
 // 作成者     : フトコロ
 // プラグインNo : 43
 // 作成日     : 2017/06/04
-// 最終更新日 : 2018/08/30
-// バージョン : v1.6.0
+// 最終更新日 : 2019/12/22
+// バージョン : v1.7.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ var FTKR = FTKR || {};
 FTKR.ISC = FTKR.ISC || {};
 
 /*:
- * @plugindesc v1.6.0 アイテムボックスにサブコマンドを追加する
+ * @plugindesc v1.7.0 アイテムボックスにサブコマンドを追加する
  * @author フトコロ
  *
  * @param --アイテム情報取得--
@@ -33,22 +33,6 @@ FTKR.ISC = FTKR.ISC || {};
  * @desc 実行コマンドの表示する対象と順番を設定します。
  * @default use,discard,cancel
  *
- * @param Command Use Format
- * @desc 実行コマンドの「使う」のコマンド名を設定します。
- * @default 使う
- *
- * @param Command Equip Format
- * @desc 実行コマンドの「装備する」のコマンド名を設定します。
- * @default 装備する
- *
- * @param Command Discard Format
- * @desc 実行コマンドの「捨てる」のコマンド名を設定します。
- * @default 捨てる
- *
- * @param Command Cancel Format
- * @desc 実行コマンドの「やめる」のコマンド名を設定します。
- * @default やめる
- * 
  * @param Command Position X
  * @desc コマンドウィンドウの左上のX座標を指定します。
  * (デフォルト 0)(-1 で、画面右寄せ)
@@ -69,34 +53,6 @@ FTKR.ISC = FTKR.ISC || {};
  * (参考値：1行 = 36、余白 = 18)(-1 :画面下端まで、0 :自動調整)
  * @default -1
  * 
- * @param --数値入力画面--
- * @default
- * 
- * @param Max Number Format
- * @desc 数値入力ウィンドウで最大数を示す表示内容を設定します。
- * %1 - 手持ちのアイテム数
- * @default /MAX %1
- * 
- * @param Number Position X
- * @desc 数値入力ウィンドウの左上のX座標を指定します。
- * (デフォルト 0)(-1 で、画面右寄せ)
- * @default 240
- *
- * @param Number Position Y
- * @desc 数値入力ウィンドウの左上のY座標を指定します。
- * (デフォルト 180)(-1 で、画面下寄せ)
- * @default 180
- *
- * @param Number Width
- * @desc 数値入力ウィンドウの幅を指定します。
- * (デフォルト 456)(参考値：余白 = 18)(-1 で、画面右端まで)
- * @default 456
- *
- * @param Number Height
- * @desc 数値入力ウィンドウの高さを指定します。
- * (参考値：1行 = 36、余白 = 18)(-1 で、画面下端まで)
- * @default -1
- * 
  * @param --アクター選択画面--
  * @default
  * 
@@ -109,10 +65,69 @@ FTKR.ISC = FTKR.ISC || {};
  * @option 表示しない
  * @value 1
  *
+ * @param --使うコマンド--
+ * @default
+ *
+ * @param Command Use Format
+ * @desc 実行コマンドの「使う」のコマンド名を設定します。
+ * @default 使う
+ *
+ * @param --やめるコマンド--
+ * @default
+ *
+ * @param Command Cancel Format
+ * @desc 実行コマンドの「やめる」のコマンド名を設定します。
+ * @default やめる
+ * 
+ * @param discard
+ * @text --捨てるコマンド--
+ * @default
+ *
+ * @param Command Discard Format
+ * @parent discard
+ * @desc 実行コマンドの「捨てる」のコマンド名を設定します。
+ * @default 捨てる
+ *
+ * @param --数値入力画面--
+ * @parent discard
+ * @default
+ * 
+ * @param Max Number Format
+ * @parent discard
+ * @desc 数値入力ウィンドウで最大数を示す表示内容を設定します。
+ * %1 - 手持ちのアイテム数
+ * @default /MAX %1
+ * 
+ * @param Number Position X
+ * @parent discard
+ * @desc 数値入力ウィンドウの左上のX座標を指定します。
+ * (デフォルト 0)(-1 で、画面右寄せ)
+ * @default 240
+ *
+ * @param Number Position Y
+ * @parent discard
+ * @desc 数値入力ウィンドウの左上のY座標を指定します。
+ * (デフォルト 180)(-1 で、画面下寄せ)
+ * @default 180
+ *
+ * @param Number Width
+ * @parent discard
+ * @desc 数値入力ウィンドウの幅を指定します。
+ * (デフォルト 456)(参考値：余白 = 18)(-1 で、画面右端まで)
+ * @default 456
+ *
+ * @param Number Height
+ * @parent discard
+ * @desc 数値入力ウィンドウの高さを指定します。
+ * (参考値：1行 = 36、余白 = 18)(-1 で、画面下端まで)
+ * @default -1
+ * 
  * @param --確認画面--
+ * @parent discard
  * @default
  *
  * @param Enable Confirmation
+ * @parent discard
  * @desc アイテム廃棄実行時に確認画面を表示するか。
  *  1 - 表示する, 0 - 表示しない
  * @default 1
@@ -123,22 +138,27 @@ FTKR.ISC = FTKR.ISC || {};
  * @value 0
  *
  * @param Conf Title Format
+ * @parent discard
  * @desc アイテム廃棄実行時の確認内容を設定します。
  * %1 - アイテム名, %2 - 捨てる数
  * @default [%1]を[%2]個 捨てますか？
  * 
  * @param Confirmation Ok Format
+ * @parent discard
  * @desc 確認コマンドの「実行する」のコマンド名を設定します。
  * @default 実行する
  *
  * @param Confirmation Cancel Format
+ * @parent discard
  * @desc 確認コマンドの「実行しない」のコマンド名を設定します。
  * @default 実行しない
  *
- * @param --サウンド--
+ * @param --捨てるサウンド--
+ * @parent discard
  * @default
  *
  * @param Disposal SE Name
+ * @parent discard
  * @desc アイテムを捨てる時のSEを設定します。
  * @default Decision1
  * @type file
@@ -146,6 +166,7 @@ FTKR.ISC = FTKR.ISC || {};
  * @dir audio/se
  * 
  * @param Disposal SE Pitch
+ * @parent discard
  * @desc アイテムを捨てる時のSEのピッチを設定します。
  * @default 100
  * @min 50
@@ -153,11 +174,77 @@ FTKR.ISC = FTKR.ISC || {};
  * @type number
  * 
  * @param Disposal SE Volume
+ * @parent discard
  * @desc アイテムを捨てる時のSEの音量を設定します。
  * @default 90
  * @min 0
  * @max 100
  * @type number
+ * 
+ * @param equip
+ * @text --装備コマンド--
+ * @default
+ *
+ * @param Command Equip Format
+ * @parent equip
+ * @desc 実行コマンドの「装備する」のコマンド名を設定します。
+ * @default 装備する
+ *
+ * @param display_timing_equipstatus
+ * @parent equip
+ * @text ウィンドウ表示タイミング
+ * @desc ウィンドウを表示するタイミングを指定します。
+ * @default 1
+ * @type select
+ * @option 表示しない(表示機能を無効にする)
+ * @value 0
+ * @option 装備コマンド実行時に表示
+ * @value 1
+ * @option 装備アイテム選択時に表示
+ * @value 2
+ *
+ * @param Status_Window_Layout
+ * @parent equip
+ * @text パラメータレイアウト設定
+ * @desc 装備パラメータウィンドウのサイズや表示位置を設定します。
+ * @type struct<windowLayout>
+ * @default {"posiX":"0","posiY":"180","width":"240","height":"-1"}
+ *
+ * @param Enabled_Window_Param
+ * @parent equip
+ * @desc ウィンドウパラメータ変更機能を使うか。FTKR_CustomSimpleActorStatusが必要。
+ * @type boolean
+ * @on 有効
+ * @off 無効
+ * @default false
+ * 
+ * @param Status_Window_Param
+ * @parent equip
+ * @text ウィンドウパラメータ設定
+ * @desc 装備パラメータウィンドウのサイズや表示位置を設定します。FTKR_CustomSimpleActorStatusが必要。
+ * @type struct<windowParam>
+ * @default 
+ *
+ * @param Enabled_statusList
+ * @parent equip
+ * @desc 表示内容変更機能を使うか。FTKR_CustomSimpleActorStatusが必要。
+ * @type boolean
+ * @on 有効
+ * @off 無効
+ * @default false
+ * 
+ * @param statusList
+ * @parent equip
+ * @text 装備パラメータ表示内容
+ * @desc 表示するステータスとその位置を設定します。FTKR_CustomSimpleActorStatusが必要。
+ * @type struct<status>[]
+ * @default 
+ * 
+ * @param Actor Status Space In Text
+ * @parent equip
+ * @desc Text内で複数表示する場合の間隔を指定します。
+ * @default 5
+ * @number
  * 
  * @param --カスタムコマンド0--
  * @default
@@ -424,6 +511,9 @@ FTKR.ISC = FTKR.ISC || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.7.0 - 2019/12/22 : 機能追加
+ *    1. 装備コマンド実行時に、アクターのパラメータを表示するウィンドウを追加。
+ * 
  * v1.6.0 - 2018/08/30 : 機能追加
  *    1. アクターが１人の場合に、装備コマンドでアクター選択を不要にする機能を追加。
  * 
@@ -462,6 +552,205 @@ FTKR.ISC = FTKR.ISC || {};
  *-----------------------------------------------------------------------------
 */
 //=============================================================================
+/*~struct~windowLayout:
+ * @param posiX
+ * @desc ウィンドウの左上のX座標を指定します。
+ * (-1 で、画面右寄せ)
+ * @type number
+ * @min -1
+ * @default 0
+ *
+ * @param posiY
+ * @desc ウィンドウの左上のY座標を指定します。
+ * (-1 で、画面下寄せ)
+ * @type number
+ * @min -1
+ * @default 180
+ *
+ * @param width
+ * @desc ウィンドウの横幅を指定します。
+ * (参考値：余白 = 18)(-1 で、画面右端まで)
+ * @type number
+ * @min -1
+ * @default 240
+ *
+ * @param height
+ * @desc ウィンドウの立幅を指定します。
+ * (参考値：1行 = 36、余白 = 18)(-1 :画面下端まで、0 :自動調整)
+ * @type number
+ * @min -1
+ * @default -1
+ * 
+*/
+/*~struct~windowParam:
+ * @param fontSize
+ * @desc フォントサイズを指定します。：デフォルト 28
+ * @type number
+ * @default 28
+ * 
+ * @param padding
+ * @desc ウィンドウの周囲の余白を指定します。：デフォルト 18
+ * @type number
+ * @default 18
+ * 
+ * @param lineHeight
+ * @desc ウィンドウ内の1行の高さを指定します。：デフォルト 36
+ * @type number
+ * @default 36
+ * 
+ * @param opacity
+ * @desc ウィンドウ内の背景の透明度を指定します。：デフォルト 192(0で透明, 255で不透明)
+ * @type number
+ * @default 192
+ * @max 255
+ * 
+ * @param hideFrame
+ * @desc ウィンドウ枠を非表示にするかを指定します。
+ * @type boolean
+ * @on 非表示
+ * @off 表示
+ * @default false
+ * 
+ * @param windowSkin
+ * @desc ウィンドウスキン画像を設定してください。
+ * @require 1
+ * @dir img/system/
+ * @type file
+ * @default Window
+ * 
+*/
+/*~struct~status:
+ * @param text
+ * @desc 表示するステータスを選択
+ * リストにない場合は、直接テキストで記述
+ * @default 
+ * @type select
+ * @option 名前
+ * @value name
+ * @option 二つ名
+ * @value nickname
+ * @option 職業
+ * @value class
+ * @option レベル
+ * @value level
+ * @option HP
+ * @value hp
+ * @option MP
+ * @value mp
+ * @option TP
+ * @value tp
+ * @option 顔画像
+ * @value face
+ * @option 顔画像(サイズ指定)
+ * @value face(%1)
+ * @option 歩行キャラ画像
+ * @value chara
+ * @option SV戦闘キャラ画像
+ * @value sv
+ * @option ステート(横)
+ * @value state
+ * @option ステート(縦)
+ * @value state2(%1)
+ * @option プロフィール
+ * @value profile
+ * @option 通常能力値
+ * @value param(%1)
+ * @option 通常能力値(素)
+ * @value pbase(%1)
+ * @option 通常能力値(増加分)
+ * @value pdiff(%1)
+ * @option 追加能力値
+ * @value xparam(%1)
+ * @option 特殊能力値
+ * @value sparam(%1)
+ * @option 装備
+ * @value equip(%1)
+ * @option 装備通常能力値
+ * @value eparam(%1)
+ * @option 装備追加能力値
+ * @value exparam(%1)
+ * @option 装備特殊能力値
+ * @value esparam(%1)
+ * @option 装備通常能力値差分
+ * @value ediff(%1)
+ * @option 装備追加能力値差分
+ * @value exdiff(%1)
+ * @option 装備特殊能力値差分
+ * @value esdiff(%1)
+ * @option 装備不可表示
+ * @value notequip(%1)
+ * @option カスタムパラメータ
+ * @value custom(%1)
+ * @option カスタムゲージ
+ * @value gauge(%1)
+ * @option アクター別カスタムゲージ
+ * @value agauge(%1)
+ * @option クラス別カスタムゲージ
+ * @value cgauge(%1)
+ * @option カスタム画像
+ * @value image
+ * @option カスタム画像(登録ID)
+ * @value image(%1)
+ * @option メッセージ
+ * @value message
+ * @option テキスト
+ * @value text(%1)
+ * @option JS計算式(数値表示)
+ * @value eval(%1)
+ * @option JS計算式(文字列表示)
+ * @value streval(%1)
+ * @option 横線
+ * @value line
+ * @option AOP能力値
+ * @value aop(%1)
+ * @option AOP能力値(素)
+ * @value aopbase(%1)
+ * @option AOP能力値(増加分)
+ * @value aopdiff(%1)
+ * @option AOP装備パラメータ
+ * @value eaop(%1)
+ * @option AOP装備パラメータ差分
+ * @value ediffaop(%1)
+ * @option アイテム名
+ * @value iname
+ * @option アイテムアイコン
+ * @value iicon
+ * @option アイテム説明
+ * @value idesc
+ * @option アイテムタイプ
+ * @value itype
+ * @option アイテム装備タイプ
+ * @value ietype
+ * @option アイテム範囲
+ * @value iscope
+ * @option アイテム属性
+ * @value ielement
+ * @option アイテム設定詳細
+ * @value iparam(%1)
+ * @option アイテムカスタム画像
+ * @value iimage(%1)
+ * @option アイテム所持数
+ * @value inumber
+ * @option マップ名
+ * @value mapname
+ *
+ * @param value
+ * @desc code(%1)の形式で設定するステータスの%1の内容を入力
+ * @default 
+ * 
+ * @param x
+ * @desc 表示するX座標
+ * @default 0
+ *
+ * @param y
+ * @desc 表示するY座標
+ * @default 0
+ *
+ * @param width
+ * @desc 表示する横幅
+ * @default 0
+ *
+ */
 
 function Window_ItemSubCommand() {
     this.initialize.apply(this, arguments);
@@ -486,22 +775,23 @@ function Window_ItemSubCommand() {
     var parameters = PluginManager.parameters('FTKR_ItemSubCommand');
 
     FTKR.ISC = {
-        subcom:{
-            enableConf    :paramParse(parameters['Enable Confirmation'] || 0),
-            disableSelect :paramParse(parameters['Disable Select Single Actor'] || 0),
-            data:{
-                itemId  :Number(parameters['Use Item Id'] || 0),
-            },
-            command:{
-                list    :(parameters['Command List'] || 'use,cancel').split(','),
-                use     :String(parameters['Command Use Format'] || ''),
-                discard :String(parameters['Command Discard Format'] || ''),
-                equip   :String(parameters['Command Equip Format'] || ''),
-                cancel  :String(parameters['Command Cancel Format'] || ''),
+        data:{
+            itemId      :Number(parameters['Use Item Id'] || 0),
+        },
+        disableSelect   :paramParse(parameters['Disable Select Single Actor'] || 0),
+        commandList     :(parameters['Command List'] || 'use,cancel').split(','),
+        subCmdWindow:{
+            layout:{
                 posiX   :Number(parameters['Command Position X'] || 0),
                 posiY   :Number(parameters['Command Position Y'] || 0),
                 width   :Number(parameters['Command Width'] || 0),
                 height  :Number(parameters['Command Height'] || 0),
+            },
+            name:{
+                use     :String(parameters['Command Use Format'] || ''),
+                discard :String(parameters['Command Discard Format'] || ''),
+                equip   :String(parameters['Command Equip Format'] || ''),
+                cancel  :String(parameters['Command Cancel Format'] || ''),
             },
             custom:[
                 {//cmd0
@@ -535,28 +825,45 @@ function Window_ItemSubCommand() {
                 enabled :String(parameters['Custom4 Enabled Condition'] || ''),
                 },
             ],
-            number:{
-                maxFormat:String(parameters['Max Number Format'] || ''),
+        },
+        numberWindow:{
+            maxFormat   :String(parameters['Max Number Format'] || ''),
+            layout:{
                 posiX   :Number(parameters['Number Position X'] || 0),
                 posiY   :Number(parameters['Number Position Y'] || 0),
                 width   :Number(parameters['Number Width'] || 0),
                 height  :Number(parameters['Number Height'] || 0),
             },
-            conf:{
-                title       :String(parameters['Conf Title Format'] || ''),
-                okFormat    :String(parameters['Confirmation Ok Format'] || ''),
-                cancelFormat:String(parameters['Confirmation Cancel Format'] || ''),
+        },
+        statusWindow:{
+            layout      :paramParse(parameters['Status_Window_Layout']),
+            timing      :paramParse(parameters['display_timing_equipstatus']),
+            enabledWp   :paramParse(parameters['Enabled_Window_Param']),
+            wparam      :paramParse(parameters['Status_Window_Param'] || {}),
+            enabledSl   :paramParse(parameters['Enabled_statusList']),
+            simpleStatus :{
+                statusList : paramParse(parameters['statusList']),
+                spaceIn    : Number(parameters['Actor Status Space In Text'] || 0),
+                target     : null,
             },
-            sound:{
-                disposal:{
-                    name    :String(parameters['Disposal SE Name'] || ''),
-                    pitch   :Number(parameters['Disposal SE Pitch'] || 100),
-                    pan     :0,
-                    volume  :Number(parameters['Disposal SE Volume'] || 90),
-                },
+        },
+        confWindow:{
+            enabled     :paramParse(parameters['Enable Confirmation'] || 0),
+            title       :String(parameters['Conf Title Format'] || ''),
+            okFormat    :String(parameters['Confirmation Ok Format'] || ''),
+            cancelFormat:String(parameters['Confirmation Cancel Format'] || ''),
+        },
+        sound:{
+            discard:{
+                name    :String(parameters['Disposal SE Name'] || ''),
+                pitch   :Number(parameters['Disposal SE Pitch'] || 100),
+                pan     :0,
+                volume  :Number(parameters['Disposal SE Volume'] || 90),
             },
         },
     };
+
+    FTKR.ISC.statusWindow.wparam.enabled = FTKR.ISC.statusWindow.enabledWp;
 
     //=============================================================================
     // 自作関数(グローバル)
@@ -720,6 +1027,10 @@ function Window_ItemSubCommand() {
         }
     };
 
+    DataManager.isEquipItem = function(item) {
+        return DataManager.isWeapon(item) || DataManager.isArmor(item);
+    };
+
     //=============================================================================
     // アイテム画面の変更
     //=============================================================================
@@ -730,20 +1041,6 @@ function Window_ItemSubCommand() {
         this.refresh();
     };
 
-    var _ISC_Scene_Item_create = Scene_Item.prototype.create;
-    Scene_Item.prototype.create = function() {
-        _ISC_Scene_Item_create.call(this);
-        this.createSubCommandWindow();
-        this.createNumberWindow();
-        if (FTKR.ISC.subcom.enableConf) {
-            this.createConfTitleWindow();
-            this.createConfWindow();
-        }
-    };
-
-    //------------------------------------------------------------------------
-    //サブコマンドの追加
-    //------------------------------------------------------------------------
     //書き換え
     Window_ItemList.prototype.isEnabled = function(item) {
         return !!item;
@@ -765,8 +1062,21 @@ function Window_ItemSubCommand() {
         return layout.height === -1 ? Graphics.boxHeight - layout.posiY : layout.height;
     };
 
+    //------------------------------------------------------------------------
+    //サブコマンドの追加
+    //------------------------------------------------------------------------
+    var _ISC_Scene_Item_create = Scene_Item.prototype.create;
+    Scene_Item.prototype.create = function() {
+        _ISC_Scene_Item_create.call(this);
+        this.createSubCommandWindows();
+    };
+
+    Scene_Item.prototype.createSubCommandWindows = function() {
+        this.createSubCommandWindow();
+    };
+
     Scene_Item.prototype.createSubCommandWindow = function() {
-        var wnd = FTKR.ISC.subcom.command;
+        var wnd = FTKR.ISC.subCmdWindow.layout;
         var wx = this.convertX(wnd);
         var wy = this.convertY(wnd);
         var ww = this.convertWidth(wnd);
@@ -779,106 +1089,36 @@ function Window_ItemSubCommand() {
         this.addWindow(window);
     };
 
-    var _ISC_Scene_Item_onitemOk = Scene_Item.prototype.onItemOk;
-    Scene_Item.prototype.onItemOk = function() {
-        this._subCommandWindow._item = this._itemWindow.item();
-        if (!FTKR.ISC.subcom.command.height) this._subCommandWindow.refreshHeight();
-        this._subCommandWindow.show();
-        this._subCommandWindow.actSelect(0);
-    };
-
     Scene_Item.prototype.onSubComOk = function() {
         var symbol = this._subCommandWindow.item().symbol;
-        var item = this._subCommandWindow._item;
-        if (FTKR.ISC.subcom.data.itemId) {
-            $gameVariables.setValue(FTKR.ISC.subcom.data.itemId, item.id);
+        if (FTKR.ISC.data.itemId) {
+            $gameVariables.setValue(FTKR.ISC.data.itemId, this.item().id);
         }
+        this.subCommandAct(symbol, this.item());
+    };
+
+    Scene_Item.prototype.subCommandAct = function(symbol, item) {
         switch (symbol) {
             case 'use':
-                this._subCommandWindow.hide();
-                if (FTKR.ISC.subcom.disableSelect && $gameParty.members().length == 1) {
-                    $gameParty.setLastItem(this.item());
-                    this._actorWindow.selectLast();
-                    this.onActorOk();
-                    this.activateItemWindow();
-                } else {
-                    _ISC_Scene_Item_onitemOk.call(this);
-                }
-                break;
+                return this.subCommandActUseItem();
             case 'discard':
-                this._numberWindow.setup(item, $gameParty.numItems(item));
-                this._numberWindow.show();
-                this._numberWindow.activate();
-                break;
+                return this.subCommandActDiscardItem();
             case 'equip':
-                if (FTKR.ISC.subcom.disableSelect && $gameParty.members().length == 1) {
-                    var item = this._subCommandWindow._item;
-                    this.equipTargetActor($gameParty.members()[0], item)
-                } else {
-                    this._isSubComEquip = true;
-                    this._actorWindow.x = Graphics.boxWidth - this._actorWindow.width;
-                    this._actorWindow.show();
-                    this._actorWindow.activate();
-                    this._actorWindow.select(0);
-                }
-                break;
+                return this.subCommandActEquipItem();
             default:
                 var match = /custom(\d+)/i.exec(symbol);
                 if (match) {
                     var cmdId = Number(match[1]);
                     var eventId = item.isc[cmdId] && item.isc[cmdId].eventId ?
                         item.isc[cmdId].eventId :
-                        FTKR.ISC.subcom.custom[cmdId].eventId;
+                        FTKR.ISC.subCmdWindow.custom[cmdId].eventId;
                     $gameParty.setLastItem(item);
                     $gameTemp.reserveCommonEvent(eventId);
                     this.checkCommonEvent();
+                    return;
                 } else {
-                    this.onSubComCancel();
+                    return this.onSubComCancel();
                 }
-                break;
-        }
-    };
-
-    var _ISC_Scene_Item_onActorOk = Scene_Item.prototype.onActorOk;
-    Scene_Item.prototype.onActorOk = function() {
-        if (this._isSubComEquip) {
-            this._isSubComEquip = false;
-            var item = this._subCommandWindow._item;
-            var actor = $gameParty.targetActor();
-            this.equipTargetActor(actor, item);
-            this._actorWindow.deactivate();
-            this._actorWindow.hide();
-        } else {
-            _ISC_Scene_Item_onActorOk.call(this);
-        }
-    };
-
-
-
-    Scene_Item.prototype.equipTargetActor = function(actor, item) {
-        if (actor && actor.canEquip(item)) {
-            SoundManager.playEquip();
-            actor.changeEquip(item.etypeId - 1, item);
-            this._actorWindow.refresh();
-            this._subCommandWindow.hide();
-            this._itemWindow.refresh();
-            this._itemWindow.select(0);
-            this._itemWindow.activate();
-        } else {
-            SoundManager.playBuzzer();
-            this._subCommandWindow.activate();
-        }
-    };
-
-    var _ISC_Scene_Item_onActorCancel = Scene_Item.prototype.onActorCancel;
-    Scene_Item.prototype.onActorCancel = function() {
-        if (this._isSubComEquip) {
-            this._isSubComEquip = false;
-            this._actorWindow.hide();
-            this._actorWindow.deactivate();
-            this._subCommandWindow.activate();
-        } else {
-            _ISC_Scene_Item_onActorCancel.call(this);
         }
     };
 
@@ -889,11 +1129,51 @@ function Window_ItemSubCommand() {
         this._itemWindow.actSelect(this._itemWindow.index());
     };
 
+    var _ISC_Scene_Item_onItemOk = Scene_Item.prototype.onItemOk;
+    Scene_Item.prototype.onItemOk = function() {
+        this._subCommandWindow._item = this._itemWindow.item();
+        if (!FTKR.ISC.subCmdWindow.layout.height) this._subCommandWindow.refreshHeight();
+        this._subCommandWindow.show();
+        this._subCommandWindow.actSelect(0);
+    };
+
+    //------------------------------------------------------------------------
+    //アイテムを使う処理の修正
+    //------------------------------------------------------------------------
+    Scene_Item.prototype.subCommandActUseItem = function() {
+        this._subCommandWindow.hide();
+        if (FTKR.ISC.disableSelect && $gameParty.members().length == 1) {
+            $gameParty.setLastItem(this.item());
+            this._actorWindow.selectLast();
+            this.onActorOk();
+            this.activateItemWindow();
+        } else {
+            _ISC_Scene_Item_onItemOk.call(this);
+        }
+    };
+
     //------------------------------------------------------------------------
     //アイテムを捨てる処理の追加
     //------------------------------------------------------------------------
+    var _ISC_Scene_Item_createSubCommandWindows_discard = Scene_Item.prototype.createSubCommandWindows;
+    Scene_Item.prototype.createSubCommandWindows = function() {
+        _ISC_Scene_Item_createSubCommandWindows_discard.call(this);
+        this.createNumberWindow();
+        if (FTKR.ISC.confWindow.enabled) {
+            this.createConfTitleWindow();
+            this.createConfWindow();
+        }
+    };
+
+    Scene_Item.prototype.subCommandActDiscardItem = function() {
+        this._numberWindow.setup(this.item(), $gameParty.numItems(this.item()));
+        this._numberWindow.show();
+        this._numberWindow.activate();
+    };
+
+    //捨てる数を指定する画面の追加
     Scene_Item.prototype.createNumberWindow = function() {
-        var wnd = FTKR.ISC.subcom.number;
+        var wnd = FTKR.ISC.numberWindow.layout;
         var wx = this.convertX(wnd);
         var wy = this.convertY(wnd);
         var wh = this.convertHeight(wnd);
@@ -905,7 +1185,7 @@ function Window_ItemSubCommand() {
     };
 
     Scene_Item.prototype.onNumberOk = function() {
-        if (FTKR.ISC.subcom.enableConf) {
+        if (FTKR.ISC.confWindow.enabled) {
             SoundManager.playOk();
             this._confTitleWindow.setItem(this._subCommandWindow._item, this._numberWindow.number());
             this._confTitleWindow.show();
@@ -921,15 +1201,14 @@ function Window_ItemSubCommand() {
         this._subCommandWindow.actSelect(this._subCommandWindow.index());
     };
 
+    //捨てる処理
     Scene_Item.prototype.itemDiscard = function() {
-        AudioManager.playSe(FTKR.ISC.subcom.sound.disposal);
+        AudioManager.playSe(FTKR.ISC.sound.disposal);
         $gameParty.gainItem(this._subCommandWindow._item, -this._numberWindow.number());
         this.onSubComCancel();
     };
 
-    //------------------------------------------------------------------------
     //確認画面の追加
-    //------------------------------------------------------------------------
     Scene_Item.prototype.createConfTitleWindow = function() {
         var wx = Graphics.boxWidth / 4;
         var wh = this._helpWindow.fittingHeight(1);
@@ -973,6 +1252,126 @@ function Window_ItemSubCommand() {
         this.onSubComCancel();
     };
 
+    //------------------------------------------------------------------------
+    //アイテムを装備する処理の追加
+    //------------------------------------------------------------------------
+    var _ISC_Scene_Item_createSubCommandWindows_Equip = Scene_Item.prototype.createSubCommandWindows;
+    Scene_Item.prototype.createSubCommandWindows = function() {
+        _ISC_Scene_Item_createSubCommandWindows_Equip.call(this);
+        if (FTKR.ISC.statusWindow.timing) {
+            this.createEquipStatusWindow();
+        }
+    };
+
+    var _ISC_Scene_Item_onItemOk_Equip = Scene_Item.prototype.onItemOk;
+    Scene_Item.prototype.onItemOk = function() {
+        _ISC_Scene_Item_onItemOk_Equip.call(this);
+        if (FTKR.ISC.statusWindow.timing == 2 && DataManager.isEquipItem(this.item())) {
+            var actor = $gameParty.members()[0];
+            this._subEquipStatusWindow.setActorEquipStatus(actor, this.item());
+            this._subEquipStatusWindow.setActor(actor);
+            this._subEquipStatusWindow.show();
+        }
+    };
+
+    Scene_Item.prototype.subCommandActEquipItem = function() {
+        if (FTKR.ISC.disableSelect && $gameParty.members().length == 1) {
+            this.equipTargetActor($gameParty.members()[0], this.item())
+            if (FTKR.ISC.statusWindow.timing) this._subEquipStatusWindow.hide();
+        } else {
+            this._isSubComEquip = true;
+            this._actorWindow.x = Graphics.boxWidth - this._actorWindow.width;
+            this._actorWindow.actSelect(0);
+            this._actorWindow.show();
+            if (FTKR.ISC.statusWindow.timing == 1) {
+                var actor = $gameParty.targetActor();
+                this._subEquipStatusWindow.setActorEquipStatus(actor, this.item());
+                this._subEquipStatusWindow.setActor(actor);
+                this._subEquipStatusWindow.show();
+            }
+        }
+    };
+
+    Scene_Item.prototype.createEquipStatusWindow = function() {
+        var wnd = FTKR.ISC.statusWindow.layout;
+        var wx = this.convertX(wnd);
+        var wy = this.convertY(wnd);
+        this._subEquipStatusWindow = new Window_ICS_EquipStatus(wx, wy);
+        var window = this._subEquipStatusWindow;
+        window.hide();
+        this.addWindow(window);
+        this._actorWindow.setWindow(window);
+    };
+
+    var _ISC_Scene_Item_onSubComCancel = Scene_Item.prototype.onSubComCancel;
+    Scene_Item.prototype.onSubComCancel = function() {
+        _ISC_Scene_Item_onSubComCancel.call(this);
+        if (FTKR.ISC.statusWindow.timing == 2) this._subEquipStatusWindow.hide();
+    };
+
+    var _ISC_Scene_Item_onActorOk = Scene_Item.prototype.onActorOk;
+    Scene_Item.prototype.onActorOk = function() {
+        if (this._isSubComEquip) {
+            this._isSubComEquip = false;
+            this.equipTargetActor($gameParty.targetActor(), this.item());
+            this.hideActorWindows();
+        } else {
+            _ISC_Scene_Item_onActorOk.call(this);
+        }
+    };
+
+    var _ISC_Scene_Item_onActorCancel = Scene_Item.prototype.onActorCancel;
+    Scene_Item.prototype.onActorCancel = function() {
+        if (this._isSubComEquip) {
+            this._isSubComEquip = false;
+            this.hideActorWindows();
+            this._subCommandWindow.activate();
+        } else {
+            _ISC_Scene_Item_onActorCancel.call(this);
+        }
+    };
+
+    Scene_Item.prototype.equipTargetActor = function(actor, item) {
+        if (actor && actor.canEquip(item)) {
+            SoundManager.playEquip();
+            actor.changeEquip(item.etypeId - 1, item);
+            this._actorWindow.refresh();
+            this._subCommandWindow.hide();
+            this._itemWindow.actSelect(0);
+        } else {
+            SoundManager.playBuzzer();
+            this._subCommandWindow.activate();
+        }
+    };
+
+    Scene_Item.prototype.hideActorWindows = function() {
+        this._actorWindow.deactivate();
+        this._actorWindow.hide();
+        if (FTKR.ISC.statusWindow.timing == 1) this._subEquipStatusWindow.hide();
+    };
+
+    // Window_MenuActorの修正
+    //  アクター選択ウィンドウでカーソルを動かした時にステータス画面を更新
+    Window_MenuActor.prototype.select = function(index) {
+        Window_MenuStatus.prototype.select.call(this, index);
+        this.updateTempActor(index);
+    };
+
+    Window_MenuActor.prototype.setWindow = function(window) {
+        this._subEquipStatusWindow = window;
+    };
+
+    Window_MenuActor.prototype.updateTempActor = function(index) {
+        if(this._subEquipStatusWindow) {
+            var actor = $gameParty.members()[index];
+            if (actor) {
+                var item = SceneManager._scene._subCommandWindow._item;
+                this._subEquipStatusWindow.setActorEquipStatus(actor, item);
+                this._subEquipStatusWindow.setActor(actor);
+            }
+        }
+    };
+
     //=============================================================================
     // Window_ItemNumber
     // 数値入力用クラス
@@ -990,7 +1389,7 @@ function Window_ItemSubCommand() {
     };
 
     Window_ItemNumber.prototype.windowWidth = function() {
-        return this.convertWidth(FTKR.ISC.subcom.number);
+        return this.convertWidth(FTKR.ISC.numberWindow.layout);
     };
 
     Window_ItemNumber.prototype.refresh = function() {
@@ -999,7 +1398,7 @@ function Window_ItemSubCommand() {
         this.drawMultiplicationSign();
         this.drawNumber();
         var width = this.width - this.standardPadding() * 2;
-        var text = FTKR.ISC.subcom.number.maxFormat.format(this._max);
+        var text = FTKR.ISC.numberWindow.maxFormat.format(this._max);
         var x = width - this.textWidth(text);
         this.drawTextEx(text, x, this.itemY() + this.lineHeight());
     };
@@ -1035,7 +1434,7 @@ function Window_ItemSubCommand() {
 
     Window_ItemConfTitle.prototype.drawTitle = function() {
         if (this._item) {
-            var text = FTKR.ISC.subcom.conf.title.format(this._item.name, this._number);
+            var text = FTKR.ISC.confWindow.title.format(this._item.name, this._number);
             var width = this.textWidth(text);
             this.resizeWindow(width);
             this._confWindow.resizeWindow(width);
@@ -1092,8 +1491,8 @@ function Window_ItemSubCommand() {
 
     Window_ItemConf.prototype.makeItemList = function() {
         this._data = [
-            {dicision:true, disp:FTKR.ISC.subcom.conf.okFormat},
-            {dicision:false, disp:FTKR.ISC.subcom.conf.cancelFormat}
+            {dicision:true, disp:FTKR.ISC.confWindow.okFormat},
+            {dicision:false, disp:FTKR.ISC.confWindow.cancelFormat}
         ];
     };
 
@@ -1166,59 +1565,52 @@ function Window_ItemSubCommand() {
     Window_ItemSubCommand.prototype.makeItemList = function() {
         this._data = [];
         if (!this._item) return;
-        var sep = FTKR.ISC.subcom.command;
-        var ctm = FTKR.ISC.subcom.custom;
-        sep.list.forEach( function(list){
-            switch (list) {
-                case 'use':
-                    this.addSubCommand(list, this.isUsable(this._item), sep.use);
-//                    this._data.push({symbol:'use', enabled:this.isUsable(this._item), disp:sep.use});
-                    break;
-                case 'discard':
-                    this.addSubCommand(list, this.isDiscardable(), sep.discard);
-//                    this._data.push({symbol:'discard', enabled:this.isDiscardable(), disp:sep.discard});
-                    break;
-                case 'cancel':
-                    this.addSubCommand(list, true, sep.cancel);
-//                    this._data.push({symbol:'cancel',  enabled:true, disp:sep.cancel});
-                    break;
-                case 'equip':
-                    if (!this.isEquipItem(this._item)) break;
-                    this.addSubCommand(list, true, sep.equip);
-//                    this._data.push({symbol:'equip',  enabled:true, disp:sep.equip});
-                    break;
-                default:
-                    var match = /custom(\d+)/i.exec(list);
-                    if (match) {
-                        var cmdId = Number(match[1]);
-                        var cmd = ctm[cmdId];
-                        if (cmd && this.isCustomShow(this._item, cmdId, cmd)) {
-                            this.addSubCommand(list, this.isCustomEnabled(this._item,cmdId,cmd), cmd.format);
-                            /*
-                            this._data.push({
-                                symbol:list,
-                                enabled:this.isCustomEnabled(this._item,cmdId,cmd),
-                                disp:cmd.format,
-                            });*/
-                        }
-                    }
-                    break;
-            }
+        FTKR.ISC.commandList.forEach( function(symbol){
+            this.addSubCommandList(symbol);
         },this);
+    };
+
+    Window_ItemSubCommand.prototype.addSubCommandList = function(symbol) {
+        var name = FTKR.ISC.subCmdWindow.name;
+        switch (symbol) {
+            case 'use':
+                return this.addSubCommand(symbol, this.canUse(this._item), name.use);
+            case 'discard':
+                return this.addSubCommand(symbol, this.canDiscard(), name.discard);
+            case 'cancel':
+                return this.addSubCommand(symbol, true, name.cancel);
+            case 'equip':
+                if (!this.isEquipItem(this._item)) return;
+                return this.addSubCommand(symbol, this.canEquip(this._item), name.equip);
+            default:
+                var match = /custom(\d+)/i.exec(symbol);
+                if (match) {
+                    var cmdId = Number(match[1]);
+                    var cmd = FTKR.ISC.subCmdWindow.custom[cmdId];
+                    if (cmd && this.isCustomShow(this._item, cmdId, cmd)) {
+                        this.addSubCommand(symbol, this.isCustomEnabled(this._item, cmdId, cmd), cmd.format);
+                    }
+                }
+                return;
+        }
+    };
+
+    Window_ItemSubCommand.prototype.canUse = function(item) {
+        return $gameParty.canUse(item);
+    };
+
+    Window_ItemSubCommand.prototype.canDiscard = function() {
+        return this._item.itypeId !== 2 &&
+            !hasObjectMeta(this._item, ['捨てられない','Not_discardable']) &&
+            !this.checkSw();
     };
 
     Window_ItemSubCommand.prototype.isEquipItem = function(item) {
         return DataManager.isWeapon(item) || DataManager.isArmor(item);
     };
 
-    Window_ItemSubCommand.prototype.isUsable = function(item) {
-        return $gameParty.canUse(item);
-    };
-
-    Window_ItemSubCommand.prototype.isDiscardable = function() {
-        return this._item.itypeId !== 2 &&
-            !hasObjectMeta(this._item, ['捨てられない','Not_discardable']) &&
-            !this.checkSw();
+    Window_ItemSubCommand.prototype.canEquip = function(item) {
+        return DataManager.isWeapon(item) || DataManager.isArmor(item);
     };
 
     Window_ItemSubCommand.prototype.isCustomShow = function(item,cmdId,cmd) {
@@ -1271,6 +1663,120 @@ function Window_ItemSubCommand() {
         this.refresh();
     };
 
+    //=============================================================================
+    // Window_ICS_EquipStatus
+    // ステータス画面
+    //=============================================================================
+
+    function Window_ICS_EquipStatus() {
+        this.initialize.apply(this, arguments);
+    }
+
+    Window_ICS_EquipStatus.prototype = Object.create(Window_EquipStatus.prototype);
+    Window_ICS_EquipStatus.prototype.constructor = Window_ICS_EquipStatus;
+
+    Window_ICS_EquipStatus.prototype.convertWidth = function(layout) {
+        return layout.width === -1 ? Graphics.boxWidth - layout.posiX : layout.width;
+    };
+
+    Window_ICS_EquipStatus.prototype.convertHeight = function(layout) {
+        return layout.height === -1 ? Graphics.boxHeight - layout.posiY : layout.height;
+    };
+
+    Window_ICS_EquipStatus.prototype.windowWidth = function() {
+        return this.convertWidth(FTKR.ISC.statusWindow.layout);
+    };
+
+    Window_ICS_EquipStatus.prototype.windowHeight = function() {
+        return this.convertHeight(FTKR.ISC.statusWindow.layout);
+    };
+    
+    Window_ICS_EquipStatus.prototype.setActorEquipStatus = function(actor, item) {
+        if (actor.canEquip(item)) {
+            var tempActor = JsonEx.makeDeepCopy(actor);
+            tempActor.forceChangeEquip(item.etypeId - 1, item);
+        } else {
+            var tempActor = null;
+        }
+        this.setTempActor(tempActor);
+    };
+
+    Window_ICS_EquipStatus.prototype.drawItem = function(x, y, paramId) {
+        var width = this.width - this.padding * 2;
+        var w1 = Math.floor(width * 0.4);
+        var w2 = Math.floor(width * 0.1);
+        var w3 = (width - w1 - w2 - this.textPadding()) * 0.5;
+        this.drawParamName(x + this.textPadding(), y, w1, paramId);
+        if (this._actor) {
+            this.drawCurrentParam(x + this.textPadding() + w1, y, w3, paramId);
+        }
+        this.drawRightArrow(x + this.textPadding() + w1 + w3, y, w2);
+        if (this._tempActor) {
+            this.drawNewParam(x + this.textPadding() + w1 + w2 + w3, y, w3, paramId);
+        }
+    };
+
+    Window_ICS_EquipStatus.prototype.drawParamName = function(x, y, width, paramId) {
+        this.changeTextColor(this.systemColor());
+        width = Math.min(120, width);
+        this.drawText(TextManager.param(paramId), x, y, width);
+    };
+    
+    Window_ICS_EquipStatus.prototype.drawCurrentParam = function(x, y, width, paramId) {
+        this.resetTextColor();
+        this.drawText(this._actor.param(paramId), x, y, width, 'right');
+    };
+    
+    Window_ICS_EquipStatus.prototype.drawRightArrow = function(x, y, width) {
+        this.changeTextColor(this.systemColor());
+        this.drawText('\u2192', x, y, width, 'center');
+    };
+    
+    Window_ICS_EquipStatus.prototype.drawNewParam = function(x, y, width, paramId) {
+        var newValue = this._tempActor.param(paramId);
+        var diffvalue = newValue - this._actor.param(paramId);
+        this.changeTextColor(this.paramchangeTextColor(diffvalue));
+        this.drawText(newValue, x, y, width, 'right');
+    };
+    
+
+    if (Imported.FTKR_CSS && FTKR.ISC.statusWindow.enabledWp) {
+
+    Window_ICS_EquipStatus.prototype.standardCssLayout = function() {
+        return FTKR.ISC.statusWindow.wparam;
+    };
+
+    };
+    if (Imported.FTKR_CSS && FTKR.ISC.statusWindow.enabledSl) {
+
+    Window_ICS_EquipStatus.prototype.standardCssStatus = function() {
+        return FTKR.ISC.statusWindow.simpleStatus;
+    };
+
+    Window_ICS_EquipStatus.prototype.evalCssStrFormula = function(actor, formula) {
+        if (!formula) return '';
+        FTKR.setGameData(actor, this._tempActor, this._item);
+        return FTKR.evalStrFormula(formula);
+    };
+
+    Window_ICS_EquipStatus.prototype.evalCssCustomFormula = function(actor, formula) {
+        if (!formula) return '';
+        FTKR.setGameData(actor, this._tempActor, this._item);
+        return FTKR.evalFormula(formula);
+    };
+
+    Window_ICS_EquipStatus.prototype.refresh = function() {
+        this.contents.clear();
+        if (this._actor) {
+            var lss = this._lssStatus;
+            var w = this.width - this.padding * 2;
+            var h = this.height - this.padding * 2;
+            lss.target = this._tempActor;
+            this.drawCssActorStatus(0, this._actor, 0, 0, w, h, lss);
+        }
+    };
+
+    };
 }());//FTKR_ItemSubCommand.js END
 
 //EOF
