@@ -289,7 +289,6 @@ FTKR_DisplayCommandFrame.js
 空欄コマンドを使うことで、コマンド間に空欄を設けることができます。
 
 ![画像](image/FTKR_ExBattleCommand/n04_004.png)
-
 上の図の入力例
 ```
 <FTKR_ACTOR_COMMAND: attack>

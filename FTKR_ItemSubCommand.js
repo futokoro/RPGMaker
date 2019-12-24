@@ -4,8 +4,8 @@
 // 作成者     : フトコロ
 // プラグインNo : 43
 // 作成日     : 2017/06/04
-// 最終更新日 : 2019/12/22
-// バージョン : v1.7.0
+// 最終更新日 : 2019/12/25
+// バージョン : v1.7.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ var FTKR = FTKR || {};
 FTKR.ISC = FTKR.ISC || {};
 
 /*:
- * @plugindesc v1.7.0 アイテムボックスにサブコマンドを追加する
+ * @plugindesc v1.7.1 アイテムボックスにサブコマンドを追加する
  * @author フトコロ
  *
  * @param --アイテム情報取得--
@@ -209,6 +209,13 @@ FTKR.ISC = FTKR.ISC || {};
  * @desc 装備パラメータウィンドウのサイズや表示位置を設定します。
  * @type struct<windowLayout>
  * @default {"posiX":"0","posiY":"180","width":"240","height":"-1"}
+ *
+ * @param Select_Default_Param
+ * @parent equip
+ * @text 標準パラメータ表示設定
+ * @desc 標準仕様で表示させるパラメータを設定します。
+ * 0:名前, 1~6:攻撃力~運。カンマ(,)で区切ること。
+ * @default 0,1,2,3,4,5,6
  *
  * @param Enabled_Window_Param
  * @parent equip
@@ -510,6 +517,9 @@ FTKR.ISC = FTKR.ISC || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.7.1 - 2019/12/25 : 機能追加
+ *    1. 装備変更用に表示するパラメータの対象や順番を変更する機能を追加。
  * 
  * v1.7.0 - 2019/12/22 : 機能追加
  *    1. 装備コマンド実行時に、アクターのパラメータを表示するウィンドウを追加。
@@ -840,6 +850,7 @@ function Window_ItemSubCommand() {
             timing      :paramParse(parameters['display_timing_equipstatus']),
             enabledWp   :paramParse(parameters['Enabled_Window_Param']),
             wparam      :paramParse(parameters['Status_Window_Param'] || {}),
+            dparams     :(parameters['Select_Default_Param'] || '').split(','),
             enabledSl   :paramParse(parameters['Enabled_statusList']),
             simpleStatus :{
                 statusList : paramParse(parameters['statusList']),
@@ -1699,6 +1710,23 @@ function Window_ItemSubCommand() {
             var tempActor = null;
         }
         this.setTempActor(tempActor);
+    };
+
+    Window_ICS_EquipStatus.prototype.refresh = function() {
+        this.contents.clear();
+        if (this._actor) {
+            FTKR.ISC.statusWindow.dparams.forEach(function(paramId, i){
+                this.drawDefaultParams(i, Number(paramId))
+            },this);
+        }
+    };
+
+    Window_ICS_EquipStatus.prototype.drawDefaultParams = function(index, paramId) {
+        if (!paramId) {
+            return this.drawActorName(this._actor, this.textPadding(), this.lineHeight() * index);
+        } else if (paramId >= 1 && paramId < 7) {
+            return this.drawItem(0, this.lineHeight() * index, 1 + paramId);
+        }
     };
 
     Window_ICS_EquipStatus.prototype.drawItem = function(x, y, paramId) {
