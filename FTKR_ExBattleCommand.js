@@ -3,8 +3,8 @@
 // FTKR_ExBattleCommand.js
 // 作成者     : フトコロ
 // 作成日     : 2017/11/25
-// 最終更新日 : 2018/12/11
-// バージョン : v2.0.1
+// 最終更新日 : 2019/12/24
+// バージョン : v2.1.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EBC = FTKR.EBC || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.0.1 アクターのバトルコマンドの表示を変更する
+ * @plugindesc v2.1.0 アクターのバトルコマンドの表示を変更する
  * @author フトコロ
  *
  * @param --パーティーコマンド--
@@ -100,7 +100,7 @@ FTKR.EBC = FTKR.EBC || {};
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
- * Copyright (c) 2017,2018 Futokoro
+ * Copyright (c) 2019 Futokoro
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
@@ -110,6 +110,9 @@ FTKR.EBC = FTKR.EBC || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v2.1.0 - 2019/12/24 : 機能追加
+ *    1. パーティーコマンドやアクターコマンドに空欄(カーソル選択不可)を空ける機能を追加。
  * 
  * v2.0.1 - 2018/12/11 : 不具合修正、ヘルプ削除
  *    1. パーティーコマンドに追加コマンドを設定するとエラーになる不具合を修正。
@@ -312,6 +315,30 @@ FTKR.EBC = FTKR.EBC || {};
     };
     
     //=============================================================================
+    // Window_Selectable
+    //=============================================================================
+
+    Window_Selectable.prototype.indexDown = function(wrap){
+        var index = this.index();
+        var maxItems = this.maxItems();
+        var maxCols = this.maxCols();
+        if (index < maxItems - maxCols || (wrap && maxCols === 1)) {
+            return ((index + maxCols) % maxItems);
+        }
+        return index;
+    };
+
+    Window_Selectable.prototype.indexUp = function(wrap){
+        var index = this.index();
+        var maxItems = this.maxItems();
+        var maxCols = this.maxCols();
+        if (index >= maxCols || (wrap && maxCols === 1)) {
+            return ((index - maxCols + maxItems) % maxItems);
+        }
+        return index;
+    };
+
+    //=============================================================================
     // Window_Command
     //=============================================================================
 
@@ -389,6 +416,14 @@ FTKR.EBC = FTKR.EBC || {};
         return this.currentData() ? eval(this.currentData().enabled) : false;
     };
 
+    Window_Command.prototype.addEbcBlankCommand = function() {
+        this.addEbcCommand('', 'blank', false, null, null);
+    };
+    
+    Window_Command.prototype.isEbcBlankCommand = function(index) {
+        return this.commandSymbol(index) == 'blank';
+    }
+
     Window_Command.prototype.updateEbcSkillHelp = function() {
         var item = this.currentEbcSkill();
         this.setHelpWindowItem(item);
@@ -429,21 +464,39 @@ FTKR.EBC = FTKR.EBC || {};
     var _EBC_Window_PartyCommand_makeCommandList = Window_PartyCommand.prototype.makeCommandList;
     Window_PartyCommand.prototype.makeCommandList = function() {
         if (FTKR.EBC.partyCmdList) {
-            FTKR.EBC.partyCmdList.split(',').forEach(function(list){
+            FTKR.EBC.partyCmdList.split(',').forEach(function(symbol){
+                this.makeEbcCommand(symbol);
+                /*
                 switch(list.toUpperCase()) {
-                case 'FIGHT':
-                    this.addFightCommand();
-                    break;
-                case 'ESCAPE':
-                    this.addEscapeCommand();
-                    break;
-                default:
-                    this.addCustomCommand(list);
-                    break;
-                }
+                    case 'FIGHT':
+                        this.addFightCommand();
+                        break;
+                    case 'ESCAPE':
+                        this.addEscapeCommand();
+                        break;
+                    case 'BLANK':
+                        this.addEbcBlankCommand();
+                        break;
+                    default:
+                        this.addCustomCommand(list);
+                        break;
+                }*/
             },this);
         }else {
             _EBC_Window_PartyCommand_makeCommandList.call(this);
+        }
+    };
+
+    Window_PartyCommand.prototype.makeEbcCommand = function(symbol) {
+        switch(symbol.toUpperCase()) {
+            case 'FIGHT':
+                return this.addFightCommand();
+            case 'ESCAPE':
+                return this.addEscapeCommand();
+            case 'BLANK':
+                return this.addEbcBlankCommand();
+            default:
+                return this.addCustomCommand(symbol);
         }
     };
 
@@ -471,6 +524,22 @@ FTKR.EBC = FTKR.EBC || {};
         this.drawBattleCommand(index, rect, align);
     };
 
+    var _EBC_Window_PartyCommand_cursorDown = Window_PartyCommand.prototype.cursorDown;
+    Window_PartyCommand.prototype.cursorDown = function(wrap) {
+        while(this.isEbcBlankCommand(this.indexDown(wrap))){
+            this._index = this.indexDown(wrap);
+        }
+        _EBC_Window_PartyCommand_cursorDown.call(this, wrap);
+    };
+    
+    var _EBC_Window_PartyCommand_cursorUp = Window_PartyCommand.prototype.cursorUp;
+    Window_PartyCommand.prototype.cursorUp = function(wrap) {
+        while(this.isEbcBlankCommand(this.indexUp(wrap))) {
+            this._index = this.indexUp(wrap);
+        }
+        _EBC_Window_PartyCommand_cursorUp.call(this, wrap);
+    };
+    
     //=============================================================================
     // Window_ActorCommand
     //=============================================================================
@@ -501,7 +570,7 @@ FTKR.EBC = FTKR.EBC || {};
     Window_ActorCommand.prototype.addEbcItemCommand = function(cmd) {
         this.addEbcCommand(TextManager.item, 'item', cmd.enabled, cmd.ext, cmd.skillId);
     };
-    
+
     //書き換え
     Window_ActorCommand.prototype.isCommandEnabled = function(index) {
         return this.isEbcCommandEnabled(index);
@@ -532,27 +601,28 @@ FTKR.EBC = FTKR.EBC || {};
             var cmds = this._actor.sortBattleCommands();
             if (cmds.length) {
                 cmds.forEach(function(cmd, i){
-                    switch(cmd.dataId.toUpperCase()) {
-                    case 'CUSTOM':
-                        this.addCustomCommand(cmd);
-                        break;
-                    case 'ATTACK':
-                        this.addEbcAttackCommand(cmd);
-                        break;
-                    case 'GUARD':
-                        this.addEbcGuardCommand(cmd);
-                        break;
-                    case 'SKILL':
-                        this.addEbcSkillCommand(cmd);
-                        break;
-                    case 'ITEM':
-                        this.addEbcItemCommand(cmd);
-                        break;
-                    }
+                    this.makeEbcCommand(cmd);
                 },this);
             } else {
                 _EBC_Window_ActorCommand_makeCommandList.call(this);
             }
+        }
+    };
+
+    Window_ActorCommand.prototype.makeEbcCommand = function(cmd) {
+        switch(cmd.dataId.toUpperCase()) {
+            case 'CUSTOM':
+                return this.addCustomCommand(cmd);
+            case 'ATTACK':
+                return this.addEbcAttackCommand(cmd);
+            case 'GUARD':
+                return this.addEbcGuardCommand(cmd);
+            case 'SKILL':
+                return this.addEbcSkillCommand(cmd);
+            case 'ITEM':
+                return this.addEbcItemCommand(cmd);
+            case 'BLANK':
+                return this.addEbcBlankCommand();
         }
     };
 
@@ -576,6 +646,22 @@ FTKR.EBC = FTKR.EBC || {};
         }
     };
 
+    var _EBC_Window_ActorCommand_cursorDown = Window_ActorCommand.prototype.cursorDown;
+    Window_ActorCommand.prototype.cursorDown = function(wrap) {
+        while(this.isEbcBlankCommand(this.indexDown(wrap))){
+            this._index = this.indexDown(wrap);
+        }
+        _EBC_Window_ActorCommand_cursorDown.call(this, wrap);
+    };
+    
+    var _EBC_Window_ActorCommand_cursorUp = Window_ActorCommand.prototype.cursorUp;
+    Window_ActorCommand.prototype.cursorUp = function(wrap) {
+        while(this.isEbcBlankCommand(this.indexUp(wrap))) {
+            this._index = this.indexUp(wrap);
+        }
+        _EBC_Window_ActorCommand_cursorUp.call(this, wrap);
+    };
+    
     //=============================================================================
     // Scene_Battle
     //=============================================================================
