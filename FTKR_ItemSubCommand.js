@@ -214,7 +214,7 @@ FTKR.ISC = FTKR.ISC || {};
  * @parent equip
  * @text 標準パラメータ表示設定
  * @desc 標準仕様で表示させるパラメータを設定します。
- * 2~7:攻撃力~運, 8:名前。カンマ(,)で区切ること。
+ * 0:最大HP,1:最大MP,2~7:攻撃力~運,8:名前。カンマ(,)で区切ること。
  * @default 8,2,3,4,5,6,7
  *
  * @param Enabled_Window_Param
@@ -1725,7 +1725,7 @@ function Window_ItemSubCommand() {
     Window_ICS_EquipStatus.prototype.drawDefaultParams = function(index, paramId) {
         if (paramId == 8) {
             return this.drawActorName(this._actor, this.textPadding(), this.lineHeight() * index);
-        } else if (paramId >= 2 && paramId < 8) {
+        } else if (paramId >= 0 && paramId < 8) {
             return this.drawItem(0, this.lineHeight() * index, paramId);
         }
     };
