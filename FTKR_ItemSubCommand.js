@@ -5,7 +5,7 @@
 // プラグインNo : 43
 // 作成日     : 2017/06/04
 // 最終更新日 : 2019/12/25
-// バージョン : v1.7.1
+// バージョン : v1.7.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ var FTKR = FTKR || {};
 FTKR.ISC = FTKR.ISC || {};
 
 /*:
- * @plugindesc v1.7.1 アイテムボックスにサブコマンドを追加する
+ * @plugindesc v1.7.2 アイテムボックスにサブコマンドを追加する
  * @author フトコロ
  *
  * @param --アイテム情報取得--
@@ -214,8 +214,8 @@ FTKR.ISC = FTKR.ISC || {};
  * @parent equip
  * @text 標準パラメータ表示設定
  * @desc 標準仕様で表示させるパラメータを設定します。
- * 0:名前, 1~6:攻撃力~運。カンマ(,)で区切ること。
- * @default 0,1,2,3,4,5,6
+ * 2~7:攻撃力~運, 8:名前。カンマ(,)で区切ること。
+ * @default 8,2,3,4,5,6,7
  *
  * @param Enabled_Window_Param
  * @parent equip
@@ -518,6 +518,7 @@ FTKR.ISC = FTKR.ISC || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.7.2 - 2019/12/25 :標準パラメータ表示設定の仕様修正
  * v1.7.1 - 2019/12/25 : 機能追加
  *    1. 装備変更用に表示するパラメータの対象や順番を変更する機能を追加。
  * 
@@ -1722,10 +1723,10 @@ function Window_ItemSubCommand() {
     };
 
     Window_ICS_EquipStatus.prototype.drawDefaultParams = function(index, paramId) {
-        if (!paramId) {
+        if (paramId == 8) {
             return this.drawActorName(this._actor, this.textPadding(), this.lineHeight() * index);
-        } else if (paramId >= 1 && paramId < 7) {
-            return this.drawItem(0, this.lineHeight() * index, 1 + paramId);
+        } else if (paramId >= 2 && paramId < 8) {
+            return this.drawItem(0, this.lineHeight() * index, paramId);
         }
     };
 
