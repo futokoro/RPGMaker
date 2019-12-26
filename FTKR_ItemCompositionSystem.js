@@ -4,8 +4,8 @@
 // プラグインNo : 14
 // 作成者     : フトコロ
 // 作成日     : 2017/04/08
-// 最終更新日 : 2018/11/07
-// バージョン : v1.7.2
+// 最終更新日 : 2019/12/27
+// バージョン : v1.7.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.ICS = FTKR.ICS || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.7.2 アイテム合成システム
+ * @plugindesc v1.7.3 アイテム合成システム
  * @author フトコロ
  *
  * @param --基本設定--
@@ -396,6 +396,11 @@ FTKR.ICS = FTKR.ICS || {};
  * @type string[]
  * @default ["必要素材"]
  * 
+ * @param Recipe Material Number Format
+ * @desc 必要素材数の表示形式を設定します。
+ * @type struct<numItem>
+ * @default {"text":"%2/%1","width":"5"}
+ * 
  * @param Status Opacity
  * @desc 合成情報ウィンドウの透明率を指定します。
  * @default 192
@@ -732,7 +737,7 @@ FTKR.ICS = FTKR.ICS || {};
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
- * Copyright (c) 2017,2018 Futokoro
+ * Copyright (c) 2019 Futokoro
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
@@ -743,6 +748,14 @@ FTKR.ICS = FTKR.ICS || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.7.3 - 2019/12/27 : 不具合修正、機能追加
+ *    1. カテゴリー素材を含むレシピで合成する場合に、カテゴリー素材に該当するアイテム
+ *       を所持数以上に素材スロットにセットできてしまう不具合を修正。
+ *    2. カテゴリー素材を含むレシピで合成する場合に、指定のカテゴリーを持つ複数のアイ
+ *       テムを組み合わせて素材スロットに自動セットできるように修正。
+ *    3. レシピ素材を合成情報ウィンドウに表示する内容に、素材の必要数だけでなく
+ *       所持数も表示できる機能を追加。
  * 
  * v1.7.2 - 2018/11/07 : 不具合修正
  *    1. 一つのアイテムに対して複数のレシピを覚えていた場合に、いずれか１つのレシピの
@@ -907,6 +920,18 @@ FTKR.ICS = FTKR.ICS || {};
  * @default 0
  *
 */
+/*~struct~numItem:
+ * @param text
+ * @desc 必要素材数を表示する時の文字列を設定します。
+ * %1:必要数, %2:所持数
+ * @default %1
+ *
+ * @param width
+ * @desc 必要素材数の表示幅(文字数)を設定します。
+ * @type number
+ * @default 2
+ * 
+*/
 
 function Game_Composit() {
     this.initialize.apply(this, arguments);
@@ -1067,6 +1092,7 @@ function Game_IcsRecipeBook() {
         unkouwn       :JSON.parse(parameters['Unkouwn Item Name'] || '[]'),
         number        :JSON.parse(parameters['Composit Number Format'] || '[]'),
         recipeTitle   :JSON.parse(parameters['Recipe Title Format'] || '[]'),
+        recipeMaterial:paramParse(parameters['Recipe Material Number Format'] || {}),
         dispDiff      :Number(parameters['Display Difficulty'] || 0),
         diffFormat    :JSON.parse(parameters['Difficulty Format'] || '[]'),
         opacity       :Number(parameters['Status Opacity'] || 192),
@@ -2177,9 +2203,20 @@ function Game_IcsRecipeBook() {
 
     //カテゴリ指定の素材と製作員数に必要なアイテムを持っているか
     Game_Party.prototype.hasCategoryMaterial = function(material, number) {
+        return material.category() && this.numCategoryItem(material.category()) >= number;
+        /*
         return material.category() && this.someCategoryAllItems(material).some( function(item) {
             return this.numItems(item) >= material.number() * number;
+        },this);*/
+    };
+
+    //指定したカテゴリのアイテムの合計所持数
+    Game_Party.prototype.numCategoryItem = function(category) {
+        var numItem = 0;
+        this.allItems().forEach(function(item){
+            if (item && item.ics.category() == category) numItem += this.numItems(item);
         },this);
+        return numItem;
     };
 
     //カテゴリ指定ではない素材と製作員数に必要なアイテムを持っているか
@@ -2796,6 +2833,11 @@ function Game_IcsRecipeBook() {
         }
         this.drawMultiplicationSign();
         this.drawNumber();
+        if (this._compositionStateWindow) {
+            if (FTKR.ICS.status.dispRecipe && this._compositionStateWindow._showResipe && this._compositionStateWindow._resipeItem) {
+                this._compositionStateWindow.setItemNumber(this._number);
+            }
+        }
     };
 
     Window_IcsNumber.prototype.itemY = function() {
@@ -2804,6 +2846,10 @@ function Game_IcsRecipeBook() {
 
     Window_IcsNumber.prototype.buttonY = function() {
         return Math.round(this.itemY() + this.lineHeight() * 1.5);
+    };
+
+    Window_IcsNumber.prototype.setCompositioStateWindow = function(window) {
+        this._compositionStateWindow = window;
     };
 
     //=============================================================================
@@ -2867,6 +2913,7 @@ function Game_IcsRecipeBook() {
         this._comps = [];
         this._comp = {};
         this._number = null;
+        this._compNum = 1;
         this._learnRecipe = false;
         this._resipeItem = null;
         this._resipeTypeId = null;
@@ -2883,12 +2930,14 @@ function Game_IcsRecipeBook() {
         if (this._resipeItem === item && this._resipeTypeId === typeId) return;
         this._resipeItem = item;
         this._resipeTypeId = typeId;
+        this._compNum = 1;
         this.refresh();
     };
 
     Window_IcsCompsiState.prototype.resetRecipe = function() {
         this._resipeItem = null;
         this._resipeTypeId = null;
+        this._compNum = 1;
         this.refresh();
     };
 
@@ -2970,6 +3019,32 @@ function Game_IcsRecipeBook() {
             this._comp = {};
             this._number = 0;
         }
+    };
+
+    Window_IcsCompsiState.prototype.setItemNumber = function(number) {
+        this._compNum = number;
+        this.refresh();
+    };
+
+    Window_IcsCompsiState.prototype.drawResipeMaterials = function(item, typeId, x, y) {
+        var materials = item.ics.recipe(typeId).materials();
+        materials.forEach( function(material, i) {
+            var dy = y + this.lineHeight() * i;
+            var width = this.width - this.padding * 2;
+            var tw = this.textWidth('0');
+            var wc = FTKR.ICS.status.recipeMaterial.width || 2;
+            if (material.category()) {
+                var text = FTKR.ICS.basic.category.format(material.category());
+                var numItem = $gameParty.numCategoryItem(material.category());
+                this.drawText(text, x, dy, width - tw*3);
+            } else {
+                this.drawItemName(material.item(), x, dy, width - tw*(1+wc));
+                var numItem = $gameParty.numItems(material.item());
+            }
+            this.drawText(':', x + width - tw*(1+wc), dy, tw);
+            var numMat = (FTKR.ICS.status.recipeMaterial.text+'').format(material.number()*this._compNum, numItem);
+            this.drawText(numMat, x + width - tw*wc, dy, tw*wc, 'right');
+        },this);
     };
 
     //投入した材料から合成できるアイテムを取得する
@@ -3617,6 +3692,7 @@ function Game_IcsRecipeBook() {
         this._numberWindow.hide();
         this._numberWindow.setHandler('ok',     this.onNumberOk.bind(this));
         this._numberWindow.setHandler('cancel', this.onNumberCancel.bind(this));
+        this._numberWindow.setCompositioStateWindow(this._compositionStateWindow);
         this.addWindow(this._numberWindow);
     };
 
@@ -3802,16 +3878,36 @@ function Game_IcsRecipeBook() {
         SoundManager.playOk();
         var number = this._numberWindow.number();
         if (this._itemWindow._showResipe) {
+            //レシピから選ぶ
             var recipe = this.item().ics.recipe(this._itemWindow.typeId());
             var numbers = [];
-            var items = recipe.materials().map( function(material,i) {
-                numbers[i] = number * material.number();
-                return material.item();
+            var items = [];
+            recipe.materials().forEach( function(material) {
+                if (material.category()) {
+                    var reqNum = number * material.number();
+                    $gameParty.someCategoryAllItems(material).some(function(item){
+                        var numItem = $gameParty.numItems(item);
+                        if(reqNum > numItem) {
+                            reqNum -= numItem;
+                            numbers.push(numItem);
+                            items.push(item);
+                            return false;
+                        } else {
+                            numbers.push(reqNum);
+                            items.push(item);
+                            return true;
+                        }
+                    });
+                } else {
+                    numbers.push(number * material.number());
+                    items.push(material.item());
+                }
             },this);
             items.forEach( function(item, i) {
                 this.setSlotItem(item, numbers[i]);
             },this);
         } else {
+            //素材から選ぶ
             this.setSlotItem(this.item(), number);
         }
         this._numberWindow.hide();
