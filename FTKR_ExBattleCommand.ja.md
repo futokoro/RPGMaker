@@ -290,6 +290,7 @@ FTKR_DisplayCommandFrame.js
 なお、空欄コマンドは、必ず、空欄以外のコマンドの間に設定してください。
 
 ![画像](image/FTKR_ExBattleCommand/n04_004.png)
+
 上の図の入力例
 ```
 <FTKR_ACTOR_COMMAND: attack>
