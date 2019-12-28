@@ -4,8 +4,8 @@
 // プラグインNo : 40
 // 作成者     : フトコロ
 // 作成日     : 2017/05/25
-// 最終更新日 : 2018/02/19
-// バージョン : v1.3.3
+// 最終更新日 : 2019/12/29
+// バージョン : v1.3.4
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ var FTKR = FTKR || {};
 FTKR.EBE = FTKR.EBE || {};
 
 /*:
- * @plugindesc v1.3.3 バトルイベントを拡張するプラグイン
+ * @plugindesc v1.3.4 バトルイベントを拡張するプラグイン
  * @author フトコロ
  * 
  * @param Battle Event
@@ -89,6 +89,9 @@ FTKR.EBE = FTKR.EBE || {};
  * １と２どちらもある場合は、バトルイベントを実行します。
  * 
  * バトルイベント内では、this._eventId で敵グループIdを取得できます。
+ * 
+ * なお、２のバトルイベントを実行させたい場合でも、１のコモンイベントは必ず設定してください。
+ * 
  * 
  *-----------------------------------------------------------------------------
  * 戦闘勝利時の処理について
@@ -185,6 +188,8 @@ FTKR.EBE = FTKR.EBE || {};
  * １と２どちらもある場合は、バトルイベントを実行します。
  * 
  * バトルイベント内では、this._eventId で敵グループIdを取得できます。
+ * 
+ * なお、２のバトルイベントを実行させたい場合でも、１のコモンイベントは必ず設定してください。
  * 
  *-----------------------------------------------------------------------------
  * 戦闘敗北時の処理について
@@ -436,7 +441,7 @@ FTKR.EBE = FTKR.EBE || {};
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
- * Copyright (c) 2017,2018 Futokoro
+ * Copyright (c) 2019 Futokoro
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
@@ -447,6 +452,9 @@ FTKR.EBE = FTKR.EBE || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.3.4 - 2019/12/29 : 仕様見直し
+ *    1. 戦闘終了時イベントの実行処理を見直し。
  * 
  * v1.3.3 - 2018/02/19 : 不具合修正
  *    1. Custom Victory Eventが0の時に、戦闘勝利イベントを実行すると
@@ -660,7 +668,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
             break;
         case '戦闘再開':
         case 'RESTART_BATTLE':
-            BattleManager._isBattleEndEvent = false;
+//            BattleManager._isBattleEndEvent = false;
             BattleManager._checkEbeBattleEvent = false;
             break;
         case '数字ポップアップ':
@@ -740,13 +748,13 @@ Game_Interpreter.prototype.setupNumberPopup = function(args) {
 // BattleManager
 //=============================================================================
 
-FTKR.EBE.BattleManager_initMembers = BattleManager.initMembers;
+var _EBE_BattleManager_initMembers = BattleManager.initMembers;
 BattleManager.initMembers = function() {
-    FTKR.EBE.BattleManager_initMembers.call(this);
+    _EBE_BattleManager_initMembers.call(this);
     this._checkEbeBattleEvent = false;
     this._battleEndPattern = 0;
     this._numberSprite = [];
-    this._isBattleEndEvent = false;
+//    this._isBattleEndEvent = false;
 };
 
 var _EBE_Game_Party_requestMotionRefresh = Game_Party.prototype.requestMotionRefresh;
@@ -757,52 +765,66 @@ Game_Party.prototype.requestMotionRefresh = function() {
 };
 
 BattleManager.isBattleEndEvent = function() {
-    return $gameParty.inBattle() && this._isBattleEndEvent;
+//    return $gameParty.inBattle() && this._isBattleEndEvent;
+    return $gameParty.inBattle() && this._checkEbeBattleEvent;
 };
 
-FTKR.EBE.BattleManager_checkBattleEnd = BattleManager.checkBattleEnd;
-BattleManager.checkBattleEnd = function() {
-    if (this._phase) {
-        if (this._checkEbeBattleEvent) {
-            switch(this._battleEndPattern) {
-                case 0:
-                    if (FTKR.EBE.battleEnd.customV) break;
-                    FTKR.EBE.BattleManager_processVictory.call(this);
-                    return true;
-                case 2:
-                    if (FTKR.EBE.battleEnd.customD) break;
-                    FTKR.EBE.BattleManager_processDefeat.call(this);
-                    return true;
-            }
-            this.endBattle(this._battleEndPattern);
+var _EBE_BattleManager_updateEvent = BattleManager.updateEvent;
+BattleManager.updateEvent = function() {
+    if (this.isBattleEndEvent()) {
+        if (this.isActionForced()) {
+            this.processForcedAction();
             return true;
+        } else {
+            return this.updateEventMain();
         }
+    } else {
+        return _EBE_BattleManager_updateEvent.call(this);
     }
-    return FTKR.EBE.BattleManager_checkBattleEnd.call(this);
 };
 
-FTKR.EBE.BattleManager_processVictory = BattleManager.processVictory;
+var _EBE_BattleManager_checkBattleEnd = BattleManager.checkBattleEnd;
+BattleManager.checkBattleEnd = function() {
+    if (this.isBattleEndEvent()) {
+        this._checkEbeBattleEvent = false;
+        switch (this._battleEndPattern) {
+            case 0: //勝利
+                if (FTKR.EBE.battleEnd.customV) break;
+                _EBE_BattleManager_processVictory.call(this);
+                return true;
+            case 2: //敗北
+                if (FTKR.EBE.battleEnd.customD) break;
+                _EBE_BattleManager_processDefeat.call(this);
+                return true;
+        }
+        this.endBattle(this._battleEndPattern);
+        return true;
+    }
+    return _EBE_BattleManager_checkBattleEnd.call(this);
+};
+
+var _EBE_BattleManager_processVictory = BattleManager.processVictory;
 BattleManager.processVictory = function() {
-    if (FTKR.EBE.battleEnd.victory && !this._checkEbeBattleEvent) {
+    if (FTKR.EBE.battleEnd.victory && !this.isBattleEndEvent()) {
         if ($gameTroop.setupEbeBattleEvent('victory', ['EBE_戦闘勝利時'])) {
             this._checkEbeBattleEvent = true;
             this._battleEndPattern = 0;
         }
         return true;
     }
-    FTKR.EBE.BattleManager_processVictory.call(this);
+    _EBE_BattleManager_processVictory.call(this);
 };
 
-FTKR.EBE.BattleManager_processDefeat = BattleManager.processDefeat;
+var _EBE_BattleManager_processDefeat = BattleManager.processDefeat;
 BattleManager.processDefeat = function() {
-    if (FTKR.EBE.battleEnd.defeat && !this._checkEbeBattleEvent) {
+    if (FTKR.EBE.battleEnd.defeat && !this.isBattleEndEvent()) {
         if ($gameTroop.setupEbeBattleEvent('defeat', ['EBE_戦闘敗北時'])) {
             this._checkEbeBattleEvent = true;
             this._battleEndPattern = 2;
         }
         return true;
     }
-    FTKR.EBE.BattleManager_processDefeat.call(this);
+    _EBE_BattleManager_processDefeat.call(this);
 };
 
 BattleManager.setupNumberPopup = function(index) {
@@ -903,7 +925,7 @@ Game_Troop.prototype.setupEbeBattleEvent = function(condition, metacodes) {
             }
         }
         var event = $dataCommonEvents[FTKR.EBE.battleEnd[condition]];
-        BattleManager._isBattleEndEvent = true;
+//        BattleManager._isBattleEndEvent = true;
         this._interpreter.setup(event.list, this.troop().id);
         return true;
     }
@@ -1199,3 +1221,17 @@ Sprite_Number.prototype.isPlaying = function() {
     return this._duration > 0;
 };
 
+/*--------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+--------------------------------------*/
