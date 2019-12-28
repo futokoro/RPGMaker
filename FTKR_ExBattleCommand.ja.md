@@ -286,7 +286,8 @@ FTKR_DisplayCommandFrame.js
 
 #### コマンドの間に空欄を設定する場合
 
-空欄コマンドを使うことで、コマンド間に空欄を設けることができます。
+空欄コマンドを使うことで、コマンド間に空欄を設けることができます。<br>
+なお、空欄コマンドは、必ず、空欄以外のコマンドの間に設定してください。
 
 ![画像](image/FTKR_ExBattleCommand/n04_004.png)
 上の図の入力例
@@ -295,6 +296,14 @@ FTKR_DisplayCommandFrame.js
 <FTKR_ACTOR_COMMAND: blank>
 <FTKR_ACTOR_COMMAND: blank>
 <FTKR_ACTOR_COMMAND: item>
+```
+
+空欄コマンドにも表示優先度を設定可能です。
+優先度を設定する場合は、優先度以外のパラメータ(`ext, enabled, skillId`)は`0`に設定してください。
+
+入力例
+```
+<FTKR_ACTOR_COMMAND: blank 0 0 0 20>
 ```
 
 [目次に戻る](#目次)

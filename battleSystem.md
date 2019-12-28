@@ -706,13 +706,47 @@ BattleManager.updateTurnEnd = function() {
 [上に戻る](#RPGツクールMVの戦闘システムの解析)
 
 ## 戦闘中断の判定
-戦闘中、以下の条件を満たすと`BattleManager.endBattle()`が実行され、フェーズが battleEnd に移行する。
+戦闘中、以下１～４の条件を満たすか５を実行すると`BattleManager.endBattle()`が実行され、フェーズが battleEnd に移行する。
 
-1. エネミーが全滅
-2. アクターが全滅
-3. 逃走が成功
+1. スキル効果の「逃げる」でパーティー全員が逃走(`$gameParty.isEmpty()`)
+1. イベントコマンドの「戦闘の中断」を実行(`BattleManager.isAborting()`)
+1. アクターが全滅(`$gameParty.isAllDead()`)
+1. エネミーが全滅(`$gameTroop.isAllDead()`)
+1. パーティーコマンドの「逃げる」が成功
 
-なお、この判定は`BattleManager.checkBattleEnd()`で行っており、このメソッドは`BattleManager.update()`の中で毎回判定している。
+上記１～４の判定は`BattleManager.checkBattleEnd()`で実行している。
+```
+BattleManager.checkBattleEnd = function() {
+    if (this._phase) {
+        if (this.checkAbort()) {
+            return true;
+        } else if ($gameParty.isAllDead()) {
+            this.processDefeat();
+            return true;
+        } else if ($gameTroop.isAllDead()) {
+            this.processVictory();
+            return true;
+        }
+    }
+    return false;
+};
+```
+
+`BattleManager.checkBattleEnd()`は、`BattleManager.updateEventMain()`の中でバトルイベントが実行中でない場合にのみ判定する。
+```
+BattleManager.updateEventMain = function() {
+    $gameTroop.updateInterpreter();
+    $gameParty.requestMotionRefresh();
+    if ($gameTroop.isEventRunning() || this.checkBattleEnd()) {
+        return true;
+    }
+    $gameTroop.setupBattleEvent();
+    if ($gameTroop.isEventRunning() || SceneManager.isSceneChanging()) {
+        return true;
+    }
+    return false;
+};
+```
 
 エネミーが全滅の場合＝戦闘に勝利
 ```
@@ -743,6 +777,52 @@ BattleManager.processDefeat = function() {
 };
 ```
 
+スキル効果の「逃げる」でパーティー全員が逃走状態(`$gameParty.isEmpty()`が真)<br>
+イベントコマンドの「戦闘の中断」を実行(`BattleManager.isAborting()`が真)
+```
+BattleManager.checkAbort = function() {
+    if ($gameParty.isEmpty() || this.isAborting()) {
+        SoundManager.playEscape();
+        this._escaped = true;
+        this.processAbort();
+    }
+    return false;
+};
+
+BattleManager.processAbort = function() {
+    $gameParty.removeBattleStates();
+    this.replayBgmAndBgs();
+    this.endBattle(1);
+};
+```
+`this._escaped = true`の処理により、逃げる実行とイベントコマンド「戦闘の中断」は、逃走判定。
+
+パーティーコマンドの「逃げる」を実行し、成功
+```
+Scene_Battle.prototype.commandEscape = function() {
+    BattleManager.processEscape();
+    this.changeInputWindow();
+};
+
+BattleManager.processEscape = function() {
+    $gameParty.performEscape();
+    SoundManager.playEscape();
+    var success = this._preemptive ? true : (Math.random() < this._escapeRatio);  --->先制攻撃時は、逃げる成功率100%
+    if (success) {
+        this.displayEscapeSuccessMessage();
+        this._escaped = true;
+        this.processAbort();    ---> 成功したらBattleManager.processAbort()を実行
+    } else {
+        this.displayEscapeFailureMessage();
+        this._escapeRatio += 0.1;
+        $gameParty.clearActions();
+        this.startTurn();
+    }
+    return success;
+};
+```
+
+`BattleManager.endBattle()`が実行されると、フェーズが battleEnd に移行する。
 ```
 BattleManager.endBattle = function(result) {
     this._phase = 'battleEnd';    //次のフェーズを battleEnd にする。
@@ -757,6 +837,14 @@ BattleManager.endBattle = function(result) {
     }
 };
 ```
+
+YEP_BattleEngineCoreの場合は、`BattleManager.checkBattleEnd()`内の中断判定は以下の状況では行わない。
+* 戦闘フェーズが`actionList``actionTargetList``action``phaseChange`の場合
+* イベント実行中
+
+また、YEP_X_BattleSysATBの場合は、`BattleManager.checkBattleEnd()`の処理が、`BattleManager.update()`直下に変更されている。
+
+
 [戦闘シーンの基本に戻る](#戦闘シーンの基本) [上に戻る](#RPGツクールMVの戦闘システムの解析)
 
 # 戦闘終了フェーズ
@@ -782,6 +870,141 @@ BattleManager.updateBattleEnd = function() {
 ```
 
 [戦闘シーンの基本に戻る](#戦闘シーンの基本) [上に戻る](#RPGツクールMVの戦闘システムの解析)
+
+[トップページに戻る](README.md)
+
+# 戦闘中のイベント実行
+
+バトルイベントや、スキル・アイテムの効果でイベントを実行できるが、その際の処理の流れを整理。
+
+基本は以下の流れ
+* 実行するイベントをセット
+* セットしたイベントを実行
+
+# バトルイベントの処理
+
+## バトルイベントのセット
+バトルイベントのセットは、`$gameTroop.setupBattleEvent()`で実行。
+
+敵グループに設定したイベントページ`this.troop().pages`を参照し、１ページごとに`this.meetsConditions(page)`で条件判定を行い、
+条件を満たしたページのイベントを`this._interpreter.setup(page.list)`でセットする。
+```
+Game_Troop.prototype.setupBattleEvent = function() {
+    if (!this._interpreter.isRunning()) {
+        if (this._interpreter.setupReservedCommonEvent()) {
+            return;
+        }
+        var pages = this.troop().pages;
+        for (var i = 0; i < pages.length; i++) {
+            var page = pages[i];
+            if (this.meetsConditions(page) && !this._eventFlags[i]) {
+                this._interpreter.setup(page.list);
+                if (page.span <= 1) {
+                    this._eventFlags[i] = true;
+                }
+                break;
+            }
+        }
+    }
+};
+```
+
+`$gameTroop.setupBattleEvent()`は、`BattleManager.updateEventMain()`の中で実行。
+```
+BattleManager.updateEventMain = function() {
+    $gameTroop.updateInterpreter();
+    $gameParty.requestMotionRefresh();
+    if ($gameTroop.isEventRunning() || this.checkBattleEnd()) {
+        return true;
+    }
+    $gameTroop.setupBattleEvent();
+    if ($gameTroop.isEventRunning() || SceneManager.isSceneChanging()) {
+        return true;
+    }
+    return false;
+};
+```
+
+`BattleManager.updateEventMain()`は、`BattleManager.updateEvent()`の中で実行。
+下記の`switch`文の`case`にあるとおりに、バトルイベントは`start`フェーズか、`turn`フェーズ、`turnEnd`フェーズのいずれかでしか実行できない。
+```
+BattleManager.updateEvent = function() {
+    switch (this._phase) {
+        case 'start':
+        case 'turn':
+        case 'turnEnd':
+            if (this.isActionForced()) {
+                this.processForcedAction();
+                return true;
+            } else {
+                return this.updateEventMain();
+            }
+    }
+    return this.checkAbort();
+};
+```
+
+## バトルイベントの実行
+
+セットされたイベントを実行するためには、`$gameTroop.updateInterpreter()`を実行する。
+```
+Game_Troop.prototype.updateInterpreter = function() {
+    this._interpreter.update();
+};
+
+Game_Interpreter.prototype.update = function() {
+    while (this.isRunning()) {
+        if (this.updateChild() || this.updateWait()) {
+            break;
+        }
+        if (SceneManager.isSceneChanging()) {
+            break;
+        }
+        if (!this.executeCommand()) {
+            break;
+        }
+        if (this.checkFreeze()) {
+            break;
+        }
+    }
+};
+```
+
+`$gameTroop.updateInterpreter()`は、`BattleManager.updateEventMain()`の中で実行。
+
+バトルイベントがセットされると、`$gameTroop.isEventRunning()`の判定が真になるため
+`BattleManager.updateEventMain()`の中で`$gameTroop.setupBattleEvent()`が実行されずに、イベント実行処理を繰り返す。
+
+```
+Game_Troop.prototype.isEventRunning = function() {
+    return this._interpreter.isRunning();
+};
+
+Game_Interpreter.prototype.isRunning = function() {
+    return !!this._list;
+};
+```
+
+整理すると、`Scene_Battle.prototype.update`がループする中で、`$gameTroop.updateInterpreter()`を繰り返し実行することで、イベントが進行する。
+* `Scene_Battle.prototype.update`
+    * `Scene_Battle.prototype.updateBattleProcess()`
+        * `BattleManager.update()`
+            * `BattleManager.updateEvent()`
+                * `BattleManager._phase`が`start``turn``turnEnd`のいずれかの時、`BattleManager.updateEventMain()`を実行
+                    * `$gameTroop.updateInterpreter()`により、セットされているイベントを１行ずつ実行。
+                    * `$gameTroop.isEventRunning()`が真のため、`updateEventMain()`の返り値が真になる。
+                * `BattleManager.updateEventMain()`の返り値が真のため、`BattleManager.updateEvent()`の返り値が真になる。
+            * `BattleManager.updateEvent()`の返り値が真のため、`BattleManager._phase`で、各フェーズ処理を行わずに処理が終わる。
+
+※単に`$gameTroop.updateInterpreter()`だけをループ実行させても、イベントは進行しない。
+
+YEP_BattleEngineCoreがある場合は、`BattleManager._phase`が`start``turn``turnEnd``actionList``actionTargetList`のいずれかの時に
+`BattleManager.updateEventMain()`を実行となる。
+
+
+# スキル・アイテム効果イベントの処理
+
+
 
 [トップページに戻る](README.md)
 
