@@ -432,6 +432,8 @@ FTKR_DisplayCommandFrame.js
 
 参照先のスキルでアイコンを設定していない場合や、参照先のスキルIDを指定していない場合は、表示されません。
 
+![画像](image/FTKR_ExBattleCommand/n05_001.png)
+
 [目次に戻る](#目次)
 
 ## コマンドに説明文を追加
