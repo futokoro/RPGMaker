@@ -174,7 +174,7 @@ FTKR_DisplayCommandFrame.js
 
 ### コモンイベントを実行
 
-`customs`のプラグインパラメータを使い、指定したコモンイベントを実行するコマンドを追加できます。
+プラグインパラメータ`Party Commands`の`customs`を使い、指定したコモンイベントを実行するコマンドを追加できます。
 
 #### 設定対象
 `customs`
