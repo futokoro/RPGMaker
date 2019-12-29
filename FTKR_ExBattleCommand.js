@@ -4,7 +4,7 @@
 // 作成者     : フトコロ
 // 作成日     : 2017/11/25
 // 最終更新日 : 2019/12/29
-// バージョン : v2.2.0
+// バージョン : v2.2.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EBC = FTKR.EBC || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.2.0 アクターのバトルコマンドの表示を変更する
+ * @plugindesc v2.2.1 アクターのバトルコマンドの表示を変更する
  * @author フトコロ
  *
  * @param --パーティーコマンド--
@@ -111,9 +111,13 @@ FTKR.EBC = FTKR.EBC || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.2.1 - 2019/12/29 : 機能追加
+ *    1. パーティーコマンドのカスタムコマンドに、指定したコモンイベントを実行する
+ *       機能(実行時にターン進行しない)を追加。
+ * 
  * v2.2.0 - 2019/12/29 : 機能追加
  *    1. パーティーコマンドのカスタムコマンドに、指定したコモンイベントを実行する
- *       機能を追加。
+ *       機能(実行時にターン進行)を追加。
  * 
  * v2.1.0 - 2019/12/24 : 機能追加
  *    1. パーティーコマンドやアクターコマンドに空欄(カーソル選択不可)を空ける機能を追加。
@@ -313,6 +317,11 @@ FTKR.EBC = FTKR.EBC || {};
         $gameTroop.setupEbcBattleEvent(eventId);
         $gameParty.clearActions();
         this.startTurn();
+    };
+
+    BattleManager.processEbcEventB = function(eventId) {
+        $gameTroop.setupEbcBattleEvent(eventId);
+        this._phase = 'start';
     };
 
     //=============================================================================
@@ -682,11 +691,18 @@ FTKR.EBC = FTKR.EBC || {};
     Scene_Battle.prototype.createPartyCommandWindow = function() {
         _EBC_Scene_Battle_createPartyCommandWindow.call(this);
         this._partyCommandWindow.setHandler('event', this.commandEvent.bind(this));
+        this._partyCommandWindow.setHandler('eventB', this.commandEventB.bind(this));
     };
 
     Scene_Battle.prototype.commandEvent = function() {
         var commonEventId = this._partyCommandWindow.currentExt();
         BattleManager.processEbcEvent(commonEventId);
+        this.changeInputWindow();
+    };
+
+    Scene_Battle.prototype.commandEventB = function() {
+        var commonEventId = this._partyCommandWindow.currentExt();
+        BattleManager.processEbcEventB(commonEventId);
         this.changeInputWindow();
     };
 
