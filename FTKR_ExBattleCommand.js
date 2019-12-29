@@ -3,8 +3,8 @@
 // FTKR_ExBattleCommand.js
 // 作成者     : フトコロ
 // 作成日     : 2017/11/25
-// 最終更新日 : 2019/12/24
-// バージョン : v2.1.0
+// 最終更新日 : 2019/12/29
+// バージョン : v2.2.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EBC = FTKR.EBC || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.1.0 アクターのバトルコマンドの表示を変更する
+ * @plugindesc v2.2.0 アクターのバトルコマンドの表示を変更する
  * @author フトコロ
  *
  * @param --パーティーコマンド--
@@ -100,7 +100,7 @@ FTKR.EBC = FTKR.EBC || {};
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
- * Copyright (c) 2019 Futokoro
+ * Copyright (c) 2017,2018 Futokoro
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
@@ -110,6 +110,10 @@ FTKR.EBC = FTKR.EBC || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v2.2.0 - 2019/12/29 : 機能追加
+ *    1. パーティーコマンドのカスタムコマンドに、指定したコモンイベントを実行する
+ *       機能を追加。
  * 
  * v2.1.0 - 2019/12/24 : 機能追加
  *    1. パーティーコマンドやアクターコマンドに空欄(カーソル選択不可)を空ける機能を追加。
@@ -204,11 +208,17 @@ FTKR.EBC = FTKR.EBC || {};
  * @default 
  * 
  * @param skillId
- * @desc コマンドのスキルID
+ * @desc コマンドの説明用スキルID
  * 0 は スキル未指定
  * @type number
  * @min 0
  * @default 
+ * 
+ * @param show
+ * @desc コマンドの表示条件
+ * コマンドの仕様に合わせてください。
+ * @default 
+ * 
 */
 
 (function() {
@@ -293,6 +303,16 @@ FTKR.EBC = FTKR.EBC || {};
             var obj = group[n];
             readObjectMeta(obj, ['FTKR_ACTOR_COMMAND'], 'TRAIT_ACTOR_COMMAND');
         }
+    };
+
+    //=============================================================================
+    // BattleManager
+    //=============================================================================
+
+    BattleManager.processEbcEvent = function(eventId) {
+        $gameTroop.setupEbcBattleEvent(eventId);
+        $gameParty.clearActions();
+        this.startTurn();
     };
 
     //=============================================================================
@@ -444,21 +464,27 @@ FTKR.EBC = FTKR.EBC || {};
         this._windowType = 'party';
     };
 
-    Window_PartyCommand.prototype.addFightCommand = function() {
+    Window_PartyCommand.prototype.addEbcFightCommand = function() {
         var cmd = FTKR.EBC.partyCmds.fight;
         this.addEbcCommand(TextManager.fight, 'fight', cmd.enabled, cmd.ext, cmd.skillId);
     };
     
-    Window_PartyCommand.prototype.addEscapeCommand = function() {
+    Window_PartyCommand.prototype.addEbcEscapeCommand = function() {
         var cmd = FTKR.EBC.partyCmds.escape;
         this.addEbcCommand(TextManager.escape, 'escape', cmd.enabled, cmd.ext, cmd.skillId);
     };
     
-    Window_PartyCommand.prototype.addCustomCommand = function(list) {
+    Window_PartyCommand.prototype.addEbcCustomCommand = function(list) {
         var match = /custom(\d+)/i.exec(list);
         if (!match) return;
         var cmd = FTKR.EBC.partyCmds.customs[Number(match[1])-1];
-        this.addEbcCommand(cmd.name, cmd.symbol, cmd.enabled, cmd.ext, cmd.skillId);
+        if (this.includeEbc(cmd)) {
+            this.addEbcCommand(cmd.name, cmd.symbol, cmd.enabled, cmd.ext, cmd.skillId);
+        }
+    };
+
+    Window_PartyCommand.prototype.includeEbc = function(command) {
+        return command.show && eval(command.show) || !command.show;
     };
     
     var _EBC_Window_PartyCommand_makeCommandList = Window_PartyCommand.prototype.makeCommandList;
@@ -466,21 +492,6 @@ FTKR.EBC = FTKR.EBC || {};
         if (FTKR.EBC.partyCmdList) {
             FTKR.EBC.partyCmdList.split(',').forEach(function(symbol){
                 this.makeEbcCommand(symbol);
-                /*
-                switch(list.toUpperCase()) {
-                    case 'FIGHT':
-                        this.addFightCommand();
-                        break;
-                    case 'ESCAPE':
-                        this.addEscapeCommand();
-                        break;
-                    case 'BLANK':
-                        this.addEbcBlankCommand();
-                        break;
-                    default:
-                        this.addCustomCommand(list);
-                        break;
-                }*/
             },this);
         }else {
             _EBC_Window_PartyCommand_makeCommandList.call(this);
@@ -490,13 +501,13 @@ FTKR.EBC = FTKR.EBC || {};
     Window_PartyCommand.prototype.makeEbcCommand = function(symbol) {
         switch(symbol.toUpperCase()) {
             case 'FIGHT':
-                return this.addFightCommand();
+                return this.addEbcFightCommand();
             case 'ESCAPE':
-                return this.addEscapeCommand();
+                return this.addEbcEscapeCommand();
             case 'BLANK':
                 return this.addEbcBlankCommand();
             default:
-                return this.addCustomCommand(symbol);
+                return this.addEbcCustomCommand(symbol);
         }
     };
 
@@ -666,19 +677,30 @@ FTKR.EBC = FTKR.EBC || {};
     // Scene_Battle
     //=============================================================================
 
+    // パーティーコマンドの修正
+    var _EBC_Scene_Battle_createPartyCommandWindow = Scene_Battle.prototype.createPartyCommandWindow;
+    Scene_Battle.prototype.createPartyCommandWindow = function() {
+        _EBC_Scene_Battle_createPartyCommandWindow.call(this);
+        this._partyCommandWindow.setHandler('event', this.commandEvent.bind(this));
+    };
+
+    Scene_Battle.prototype.commandEvent = function() {
+        var commonEventId = this._partyCommandWindow.currentExt();
+        BattleManager.processEbcEvent(commonEventId);
+        this.changeInputWindow();
+    };
+
+    var _Scene_Battle_endCommandSelection = Scene_Battle.prototype.endCommandSelection;
+    Scene_Battle.prototype.endCommandSelection = function() {
+        _Scene_Battle_endCommandSelection.call(this);
+        this._actorCommandWindow.hideHelpWindow();
+    };
+
+    // アクターコマンドの修正
     var _EBC_Scene_Battle_createActorCommandWindow = Scene_Battle.prototype.createActorCommandWindow;
     Scene_Battle.prototype.createActorCommandWindow = function() {
         _EBC_Scene_Battle_createActorCommandWindow.call(this);
         this._actorCommandWindow.setHandler('custom', this.commandCustom.bind(this));
-    };
-
-    var _EBC_Scene_Battle_createHelpWindow = Scene_Battle.prototype.createHelpWindow;
-    Scene_Battle.prototype.createHelpWindow = function() {
-        _EBC_Scene_Battle_createHelpWindow.call(this);
-        if (FTKR.EBC.showCommandDesc) {
-            this._partyCommandWindow.setHelpWindow(this._helpWindow);
-            this._actorCommandWindow.setHelpWindow(this._helpWindow);
-        }
     };
 
     Scene_Battle.prototype.commandCustom = function() {
@@ -689,20 +711,44 @@ FTKR.EBC = FTKR.EBC || {};
         this.onSelectAction();
     };
     
-    var _Scene_Battle_endCommandSelection = Scene_Battle.prototype.endCommandSelection;
-    Scene_Battle.prototype.endCommandSelection = function() {
-        _Scene_Battle_endCommandSelection.call(this);
-        this._actorCommandWindow.hideHelpWindow();
+    // ヘルプウィンドウの修正
+    var _EBC_Scene_Battle_createHelpWindow = Scene_Battle.prototype.createHelpWindow;
+    Scene_Battle.prototype.createHelpWindow = function() {
+        _EBC_Scene_Battle_createHelpWindow.call(this);
+        if (FTKR.EBC.showCommandDesc) {
+            this._partyCommandWindow.setHelpWindow(this._helpWindow);
+            this._actorCommandWindow.setHelpWindow(this._helpWindow);
+        }
     };
 
     //=============================================================================
-    // スキルタイプ重複表示の不具合修正
+    // Game_BattlerBase
     //=============================================================================
 
+    // スキルタイプ重複表示の不具合修正
     Game_BattlerBase.prototype.addedSkillTypes = function() {
         return this.traitsSet(Game_BattlerBase.TRAIT_STYPE_ADD).filter(function(x, i, self) {
             return self.indexOf(x) === i;
         });
+    };
+
+    //=============================================================================
+    // Game_Troop
+    //=============================================================================
+
+    // 指定したコモンイベントをセット
+    Game_Troop.prototype.setupEbcBattleEvent = function(eventId) {
+        if (!this._interpreter.isRunning()) {
+            if (this._interpreter.setupReservedCommonEvent()) {
+                return false;
+            }
+            var event = $dataCommonEvents[eventId];
+            if (event) {
+                this._interpreter.setup(event.list, this.troop().id);
+                return true;
+            }
+        }
+        return false;
     };
 
 }());//EOF
