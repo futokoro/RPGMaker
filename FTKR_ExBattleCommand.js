@@ -3,8 +3,8 @@
 // FTKR_ExBattleCommand.js
 // 作成者     : フトコロ
 // 作成日     : 2017/11/25
-// 最終更新日 : 2019/12/29
-// バージョン : v2.2.1
+// 最終更新日 : 2020/01/03
+// バージョン : v2.2.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ FTKR.EBC = FTKR.EBC || {};
 
 //=============================================================================
 /*:
- * @plugindesc v2.2.1 アクターのバトルコマンドの表示を変更する
+ * @plugindesc v2.2.2 アクターのバトルコマンドの表示を変更する
  * @author フトコロ
  *
  * @param --パーティーコマンド--
@@ -48,6 +48,16 @@ FTKR.EBC = FTKR.EBC || {};
  * @type boolean
  * @on 有効
  * @off 無効
+ * @default false
+ * 
+ * @param --空欄コマンド--
+ * @default
+ * 
+ * @param Enable Select Blank
+ * @desc 空欄コマンドのカーソル選択を可能にするかどうか設定する。
+ * @type boolean
+ * @on 選択可
+ * @off 選択不可
  * @default false
  * 
  * @param atcode
@@ -111,6 +121,13 @@ FTKR.EBC = FTKR.EBC || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v2.2.2 - 2020/01/03 : 機能追加、不具合修正
+ *    1. 空欄コマンドのカーソル選択をプラグインパラメータで設定する機能を追加。
+ *    2. カーソル選択不可設定の場合でコマンドが２列以上の場合に、カーソル移動で
+ *       空欄部を飛ばす処理が正しく動作しない不具合を修正。
+ *    3. カーソル選択不可設定の場合でタッチ操作の場合に、空欄部をタッチしてカーソルを
+ *       移動できてしまう不具合を修正。
+ * 
  * v2.2.1 - 2019/12/29 : 機能追加
  *    1. パーティーコマンドのカスタムコマンドに、指定したコモンイベントを実行する
  *       機能(実行時にターン進行しない)を追加。
@@ -121,6 +138,7 @@ FTKR.EBC = FTKR.EBC || {};
  * 
  * v2.1.0 - 2019/12/24 : 機能追加
  *    1. パーティーコマンドやアクターコマンドに空欄(カーソル選択不可)を空ける機能を追加。
+ *          ⇒ v2.2.2 にて選択不可かどうかはプラグインパラメータで選択に変更。
  * 
  * v2.0.1 - 2018/12/11 : 不具合修正、ヘルプ削除
  *    1. パーティーコマンドに追加コマンドを設定するとエラーになる不具合を修正。
@@ -269,6 +287,15 @@ FTKR.EBC = FTKR.EBC || {};
         }); 
     };
 
+    var removeEndBlankCommand = function(list) {
+        while(list[0].symbol == "blank"){
+            list.shift();
+        };
+        while(list[list.length-1].symbol == "blank"){
+            list.pop();
+        };
+    };
+
     //=============================================================================
     // プラグイン パラメータ
     //=============================================================================
@@ -279,6 +306,7 @@ FTKR.EBC = FTKR.EBC || {};
         partyCmds       : paramParse(parameters['Party Commands']),
         showCommandIcon : paramParse(parameters['Show Command Icon']) || false,
         showCommandDesc : paramParse(parameters['Show Command Description']) || false,
+        enableSelectBlank : paramParse(parameters['Enable Select Blank']) || false,
     };
 
     Game_BattlerBase.TRAIT_ACTOR_COMMAND = +(paramParse(parameters['TRAIT_ACTOR_COMMAND']));
@@ -343,30 +371,6 @@ FTKR.EBC = FTKR.EBC || {};
         });
     };
     
-    //=============================================================================
-    // Window_Selectable
-    //=============================================================================
-
-    Window_Selectable.prototype.indexDown = function(wrap){
-        var index = this.index();
-        var maxItems = this.maxItems();
-        var maxCols = this.maxCols();
-        if (index < maxItems - maxCols || (wrap && maxCols === 1)) {
-            return ((index + maxCols) % maxItems);
-        }
-        return index;
-    };
-
-    Window_Selectable.prototype.indexUp = function(wrap){
-        var index = this.index();
-        var maxItems = this.maxItems();
-        var maxCols = this.maxCols();
-        if (index >= maxCols || (wrap && maxCols === 1)) {
-            return ((index - maxCols + maxItems) % maxItems);
-        }
-        return index;
-    };
-
     //=============================================================================
     // Window_Command
     //=============================================================================
@@ -463,6 +467,65 @@ FTKR.EBC = FTKR.EBC || {};
         }
     };
 
+    Window_Command.prototype.selectEbc = function(index) {
+        if (!this.isEbcBlankCommand(index)) {
+            this.select(index);
+            return true;
+        }
+        return false;
+    };
+
+    Window_Command.prototype.cursorDownEbc = function(wrap) {
+        var index = this.index();
+        var maxItems = this.maxItems();
+        var maxCols = this.maxCols();
+        var maxRows = Math.ceil(maxItems / maxCols);
+        for (var i = 1; i < maxRows + 1; i++){
+            var newIndex = index + maxCols * i;
+            if (newIndex < maxItems || (wrap && maxCols === 1)){
+                if (this.selectEbc(newIndex % maxItems)) return;
+            }
+        }
+    };
+
+    Window_Command.prototype.cursorUpEbc = function(wrap) {
+        var index = this.index();
+        var maxItems = this.maxItems();
+        var maxCols = this.maxCols();
+        var maxRows = Math.ceil(maxItems / maxCols);
+        for (var i = 1; i < maxRows + 1; i++){
+            var newIndex = index - maxCols * i;
+            if (newIndex >= 0 || (wrap && maxCols === 1)){
+                if (this.selectEbc((newIndex + maxItems) % maxItems)) return;
+            }
+        }
+    };
+
+    Window_Command.prototype.cursorRightEbc = function(wrap) {
+        if (this.maxCols() >= 2) {
+            for (var i = this.index(); i < this.maxItems() - 1;) {
+                i++
+                if (this.selectEbc(i)) return;
+            }
+        }
+    };
+
+    Window_Command.prototype.cursorLeftEbc = function(wrap) {
+        if (this.maxCols() >= 2) {
+            for (var i = this.index(); i > 0;) {
+                i--
+                if (this.selectEbc(i)) return;
+            }
+        }
+    };
+
+    Window_Command.prototype.disableTouchCommand = function(triggered) {
+        var x = this.canvasToLocalX(TouchInput.x);
+        var y = this.canvasToLocalY(TouchInput.y);
+        var hitIndex = this.hitTest(x, y);
+        return hitIndex >= 0 && this.isEbcBlankCommand(hitIndex) && !FTKR.EBC.enableSelectBlank;
+    };
+    
     //=============================================================================
     // Window_PartyCommand
     //=============================================================================
@@ -483,8 +546,9 @@ FTKR.EBC = FTKR.EBC || {};
         this.addEbcCommand(TextManager.escape, 'escape', cmd.enabled, cmd.ext, cmd.skillId);
     };
     
-    Window_PartyCommand.prototype.addEbcCustomCommand = function(list) {
-        var match = /custom(\d+)/i.exec(list);
+    Window_PartyCommand.prototype.addEbcCustomCommand = function(symbol) {
+        if (!symbol) return;
+        var match = /custom(\d+)/i.exec(symbol);
         if (!match) return;
         var cmd = FTKR.EBC.partyCmds.customs[Number(match[1])-1];
         if (this.includeEbc(cmd)) {
@@ -498,13 +562,22 @@ FTKR.EBC = FTKR.EBC || {};
     
     var _EBC_Window_PartyCommand_makeCommandList = Window_PartyCommand.prototype.makeCommandList;
     Window_PartyCommand.prototype.makeCommandList = function() {
-        if (FTKR.EBC.partyCmdList) {
-            FTKR.EBC.partyCmdList.split(',').forEach(function(symbol){
-                this.makeEbcCommand(symbol);
-            },this);
+        if (this.isEbcCommandOk()) {
+            this.makeEbcCommandList();
         }else {
             _EBC_Window_PartyCommand_makeCommandList.call(this);
         }
+    };
+
+    Window_PartyCommand.prototype.isEbcCommandOk = function() {
+        return FTKR.EBC.partyCmdList;
+    };
+
+    Window_PartyCommand.prototype.makeEbcCommandList = function() {
+        FTKR.EBC.partyCmdList.split(',').forEach(function(symbol){
+            this.makeEbcCommand(symbol);
+        },this);
+    //  removeEndBlankCommand(this._list);
     };
 
     Window_PartyCommand.prototype.makeEbcCommand = function(symbol) {
@@ -546,20 +619,46 @@ FTKR.EBC = FTKR.EBC || {};
 
     var _EBC_Window_PartyCommand_cursorDown = Window_PartyCommand.prototype.cursorDown;
     Window_PartyCommand.prototype.cursorDown = function(wrap) {
-        while(this.isEbcBlankCommand(this.indexDown(wrap))){
-            this._index = this.indexDown(wrap);
+        if (!FTKR.EBC.enableSelectBlank) {
+            this.cursorDownEbc(wrap);
+        } else {
+            _EBC_Window_PartyCommand_cursorDown.call(this, wrap);
         }
-        _EBC_Window_PartyCommand_cursorDown.call(this, wrap);
     };
-    
+
     var _EBC_Window_PartyCommand_cursorUp = Window_PartyCommand.prototype.cursorUp;
     Window_PartyCommand.prototype.cursorUp = function(wrap) {
-        while(this.isEbcBlankCommand(this.indexUp(wrap))) {
-            this._index = this.indexUp(wrap);
+        if (!FTKR.EBC.enableSelectBlank) {
+            this.cursorUpEbc(wrap);
+        } else {
+            _EBC_Window_PartyCommand_cursorUp.call(this, wrap);
         }
-        _EBC_Window_PartyCommand_cursorUp.call(this, wrap);
     };
-    
+
+    var _EBC_Window_PartyCommand_cursorRight = Window_PartyCommand.prototype.cursorRight;
+    Window_PartyCommand.prototype.cursorRight = function(wrap) {
+        if (!FTKR.EBC.enableSelectBlank) {
+            this.cursorRightEbc(wrap);
+        } else {
+            _EBC_Window_PartyCommand_cursorRight.call(this, wrap);
+        }
+    };
+
+    var _EBC_Window_PartyCommand_cursorLeft = Window_PartyCommand.prototype.cursorLeft;
+    Window_PartyCommand.prototype.cursorLeft = function(wrap) {
+        if (!FTKR.EBC.enableSelectBlank) {
+            this.cursorLeftEbc(wrap);
+        } else {
+            _EBC_Window_PartyCommand_cursorLeft.call(this, wrap);
+        }
+    };
+
+    var _EBC_Window_PartyCommand_onTouch = Window_PartyCommand.prototype.onTouch;
+    Window_PartyCommand.prototype.onTouch = function(triggered) {
+        if (this.disableTouchCommand(triggered)) return;
+        _EBC_Window_PartyCommand_onTouch.call(this, triggered);
+    };
+
     //=============================================================================
     // Window_ActorCommand
     //=============================================================================
@@ -618,15 +717,23 @@ FTKR.EBC = FTKR.EBC || {};
     var _EBC_Window_ActorCommand_makeCommandList = Window_ActorCommand.prototype.makeCommandList;
     Window_ActorCommand.prototype.makeCommandList = function() {
         if (this._actor) {
-            var cmds = this._actor.sortBattleCommands();
-            if (cmds.length) {
-                cmds.forEach(function(cmd, i){
-                    this.makeEbcCommand(cmd);
-                },this);
+            if (this.isEbcCommandOk()) {
+                this.makeEbcCommandList();
             } else {
                 _EBC_Window_ActorCommand_makeCommandList.call(this);
             }
         }
+    };
+
+    Window_ActorCommand.prototype.isEbcCommandOk = function() {
+        return this._actor && this._actor.sortBattleCommands().length;
+    };
+
+    Window_ActorCommand.prototype.makeEbcCommandList = function() {
+        this._actor.sortBattleCommands().forEach(function(cmd, i){
+            this.makeEbcCommand(cmd);
+        },this);
+//                removeEndBlankCommand(this._list);
     };
 
     Window_ActorCommand.prototype.makeEbcCommand = function(cmd) {
@@ -655,6 +762,10 @@ FTKR.EBC = FTKR.EBC || {};
     var _EBC_Window_ActorCommand_selectLast = Window_ActorCommand.prototype.selectLast;
     Window_ActorCommand.prototype.selectLast = function() {
         _EBC_Window_ActorCommand_selectLast.call(this);
+        this.selectLastEbc();
+    };
+
+    Window_ActorCommand.prototype.selectLastEbc = function() {
         if (this._actor && ConfigManager.commandRemember) {
             var symbol = this._actor.lastCommandSymbol();
             if (symbol === 'custom') {
@@ -667,19 +778,49 @@ FTKR.EBC = FTKR.EBC || {};
     };
 
     var _EBC_Window_ActorCommand_cursorDown = Window_ActorCommand.prototype.cursorDown;
+    //書き換え
     Window_ActorCommand.prototype.cursorDown = function(wrap) {
-        while(this.isEbcBlankCommand(this.indexDown(wrap))){
-            this._index = this.indexDown(wrap);
+        if (!FTKR.EBC.enableSelectBlank) {
+            this.cursorDownEbc(wrap);
+        } else {
+            _EBC_Window_ActorCommand_cursorDown.call(this, wrap);
         }
-        _EBC_Window_ActorCommand_cursorDown.call(this, wrap);
     };
-    
+
     var _EBC_Window_ActorCommand_cursorUp = Window_ActorCommand.prototype.cursorUp;
+    //書き換え
     Window_ActorCommand.prototype.cursorUp = function(wrap) {
-        while(this.isEbcBlankCommand(this.indexUp(wrap))) {
-            this._index = this.indexUp(wrap);
+        if (!FTKR.EBC.enableSelectBlank) {
+            this.cursorUpEbc(wrap);
+        } else {
+            _EBC_Window_ActorCommand_cursorUp.call(this, wrap);
         }
-        _EBC_Window_ActorCommand_cursorUp.call(this, wrap);
+    };
+
+    var _EBC_Window_ActorCommand_cursorRight = Window_ActorCommand.prototype.cursorRight;
+    //書き換え
+    Window_ActorCommand.prototype.cursorRight = function(wrap) {
+        if (!FTKR.EBC.enableSelectBlank) {
+            this.cursorRightEbc(wrap);
+        } else {
+            _EBC_Window_ActorCommand_cursorRight.call(this, wrap);
+        }
+    };
+
+    var _EBC_Window_ActorCommand_cursorLeft = Window_ActorCommand.prototype.cursorLeft;
+    //書き換え
+    Window_ActorCommand.prototype.cursorLeft = function(wrap) {
+        if (!FTKR.EBC.enableSelectBlank) {
+            this.cursorLeftEbc(wrap);
+        } else {
+            _EBC_Window_ActorCommand_cursorLeft.call(this, wrap);
+        }
+    };
+
+    var _EBC_Window_ActorCommand_onTouch = Window_ActorCommand.prototype.onTouch;
+    Window_ActorCommand.prototype.onTouch = function(triggered) {
+        if (this.disableTouchCommand(triggered)) return;
+        _EBC_Window_ActorCommand_onTouch.call(this, triggered);
     };
     
     //=============================================================================

@@ -2,6 +2,31 @@
 
 # 過去の更新情報
 
+## 2019/12の更新情報
+
+### 2019/12/29
+* [FTKR_ExBattleEvent](FTKR_ExBattleEvent.ja.md) v1.3.4
+* [FTKR_ExBattleCommand](FTKR_ExBattleCommand.ja.md) v2.2.0 v2.2.1
+
+### 2019/12/27
+* [FTKR_ItemCompositionSystem](FTKR_ItemCompositionSystem.ja.md) v1.7.3
+
+### 2019/12/25
+* [FTKR_ItemSubCommand](FTKR_ItemSubCommand.ja.md) v1.7.1
+
+### 2019/12/24
+* [FTKR_ExBattleCommand](FTKR_ExBattleCommand.ja.md) v2.1.0
+
+### 2019/12/22
+* [FTKR_ItemSubCommand](FTKR_ItemSubCommand.ja.md) v1.7.0
+
+### 2019/12/17
+* [FTKR_SkillUpgradeSystem_Core](FTKR_SkillUpgradeSystem_Core.js) v1.5.4
+* [FTKR_SUS_plus_SP](FTKR_SUS_plus_SP.js) v1.0.0(新規)
+
+### 2019/12/16
+* [FTKR_OriginalSceneWindow](FTKR_OriginalSceneWindow.ja.md) v1.7.0
+
 ## 2019/11の更新情報
 
 ### 2019/11/22
