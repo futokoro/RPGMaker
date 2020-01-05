@@ -4,8 +4,8 @@
 // 作成者     : フトコロ
 // プラグインNo : 43
 // 作成日     : 2017/06/04
-// 最終更新日 : 2019/12/25
-// バージョン : v1.7.2
+// 最終更新日 : 2020/01/05
+// バージョン : v1.7.3
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ var FTKR = FTKR || {};
 FTKR.ISC = FTKR.ISC || {};
 
 /*:
- * @plugindesc v1.7.2 アイテムボックスにサブコマンドを追加する
+ * @plugindesc v1.7.3 アイテムボックスにサブコマンドを追加する
  * @author フトコロ
  *
  * @param --アイテム情報取得--
@@ -213,8 +213,7 @@ FTKR.ISC = FTKR.ISC || {};
  * @param Select_Default_Param
  * @parent equip
  * @text 標準パラメータ表示設定
- * @desc 標準仕様で表示させるパラメータを設定します。
- * 0:最大HP,1:最大MP,2~7:攻撃力~運,8:名前。カンマ(,)で区切ること。
+ * @desc 標準仕様で表示させるパラメータを設定します。0:最大HP,1:最大MP,2~7:攻撃力~運,8:名前。カンマ(,)で区切ること。
  * @default 8,2,3,4,5,6,7
  *
  * @param Enabled_Window_Param
@@ -506,7 +505,7 @@ FTKR.ISC = FTKR.ISC || {};
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
- * Copyright (c) 2017,2018 Futokoro
+ * Copyright (c) 2019 Futokoro
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
@@ -518,7 +517,11 @@ FTKR.ISC = FTKR.ISC || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
- * v1.7.2 - 2019/12/25 :標準パラメータ表示設定の仕様修正
+ * v1.7.3 - 2020/01/05 : 不具合修正
+ *    1. プラグインパラメータ「捨てるサウンド」の入力値を正しく読み取れず
+ *       アイテムを捨てる時にエラーになる不具合を修正。
+ * 
+ * v1.7.2 - 2019/12/25 : 標準パラメータ表示設定の仕様修正
  * v1.7.1 - 2019/12/25 : 機能追加
  *    1. 装備変更用に表示するパラメータの対象や順番を変更する機能を追加。
  * 
@@ -1215,7 +1218,7 @@ function Window_ItemSubCommand() {
 
     //捨てる処理
     Scene_Item.prototype.itemDiscard = function() {
-        AudioManager.playSe(FTKR.ISC.sound.disposal);
+        AudioManager.playSe(FTKR.ISC.sound.discard);
         $gameParty.gainItem(this._subCommandWindow._item, -this._numberWindow.number());
         this.onSubComCancel();
     };
