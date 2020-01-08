@@ -155,7 +155,7 @@ FTKR_DisplayCommandFrame.js
 設定する内容は、各プラグインのコマンドの仕様に合わせてください。
 
 #### 設定対象
-`customS`
+`customs`
 
 #### プラグインパラメータ Party Command List 入力名
 `custom*`
@@ -181,7 +181,7 @@ FTKR_DisplayCommandFrame.js
 プラグインパラメータ`Party Commands`の`customs`を使い、指定したコモンイベントを実行するコマンドを追加できます。
 
 #### 設定対象
-`customS`
+`customs`
 
 #### プラグインパラメータ Party Command List 入力文字
 `custom*`
@@ -240,6 +240,19 @@ FTKR_DisplayCommandFrame.js
 ※半角スペースは入れない
 
 ![画像](image/FTKR_ExBattleCommand/n03_001.png)
+
+#### カスタムコマンドを入れる場合
+
+カスタムコマンドを入れる場合は、下の画像の`custom1`のように、`custom`+番号を入力します。
+
+![画像](image/FTKR_ExBattleCommand/n03_003.png)
+
+`custom`に付ける番号は、プラグインパラメータ`customs`で作成したコマンドの行番号です。
+下の画像の例では、`custom1`は１行目の"ターン経過無"の名前のコマンドになります。
+
+![画像](image/FTKR_ExBattleCommand/n03_002.png)
+
+#### 空欄を入れる場合
 
 空欄を設ける場合は、下の図のように入力します。この例では、空欄を２行分設けています。
 
