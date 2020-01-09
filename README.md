@@ -320,6 +320,9 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 2020/01の更新情報
 
+### 2020/01/10
+* [FTKR_CardGames](FTKR_CardGames.ja.md) v1.3.0
+
 ### 2020/01/05
 * [FTKR_ItemSubCommand](FTKR_ItemSubCommand.ja.md) v1.7.3
 

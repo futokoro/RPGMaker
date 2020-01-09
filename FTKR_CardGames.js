@@ -4,8 +4,8 @@
 // プラグインNo : 51
 // 作成者     : フトコロ
 // 作成日     : 2017/07/02
-// 最終更新日 : 2018/08/13
-// バージョン : v1.2.4
+// 最終更新日 : 2020/01/10
+// バージョン : v1.3.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.CRD = FTKR.CRD || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.4 トランプカードゲーム
+ * @plugindesc v1.3.0 トランプカードゲーム
  * @author フトコロ
  *
  * @param --カードの設定--
@@ -41,6 +41,12 @@ FTKR.CRD = FTKR.CRD || {};
  * @default 1
  * @min 0
  * @max 2
+ * @type number
+ *
+ * @param Number Of Removed Card
+ * @desc ゲーム開始時に取り除くカード枚数を設定します。
+ * ※ジョーカーは取り除くことはできません。
+ * @default 0
  * @type number
  *
  * @param --ゲームの設定--
@@ -158,53 +164,58 @@ FTKR.CRD = FTKR.CRD || {};
  * @param Game Count ID
  * @desc ゲーム数を設定する変数のIDを指定します。
  * @default 
- * @type number
+ * @type variable
  *
  * @param Draw Speed ID
  * @desc カードを引く早さを設定する変数のIDを指定します。
  * 設定しない場合は、Draw Speedの設定で固定します。
  * @default 
- * @type number
+ * @type variable
+ *
+ * @param Removed Card ID
+ * @desc ゲーム開始時に取り除くカードを直接設定するための変数のIDを指定します。自動設定させる場合は、このIDは指定不要です。
+ * @default 
+ * @type variable
  *
  * @param Player 1 ID
  * @desc プレイヤー１のアクターIDを指定した変数に格納します。
  * @default 
- * @type number
+ * @type variable
  *
  * @param Player 1 Result
  * @desc プレイヤー１の結果を指定した変数に格納します。
  * @default 
- * @type number
+ * @type variable
  *
  * @param Player 2 ID
  * @desc プレイヤー2のアクターIDを指定した変数に格納します。
  * @default 
- * @type number
+ * @type variable
  *
  * @param Player 2 Result
  * @desc プレイヤー２の結果を指定した変数に格納します。
  * @default 
- * @type number
+ * @type variable
  *
  * @param Player 3 ID
  * @desc プレイヤー3のアクターIDを指定した変数に格納します。
  * @default 
- * @type number
+ * @type variable
  *
  * @param Player 3 Result
  * @desc プレイヤー３の結果を指定した変数に格納します。
  * @default 
- * @type number
+ * @type variable
  *
  * @param Player 4 ID
  * @desc プレイヤー4のアクターIDを指定した変数に格納します。
  * @default 
- * @type number
+ * @type variable
  *
  * @param Player 4 Result
  * @desc プレイヤー４の結果を指定した変数に格納します。
  * @default 
- * @type number
+ * @type variable
  * 
  * @param --ゲームスイッチの設定--
  * @default
@@ -212,22 +223,22 @@ FTKR.CRD = FTKR.CRD || {};
  * @param Random Start ID
  * @desc 開始プレイヤーをランダムにする機能の有効無効を設定するスイッチのIDを指定します。
  * @default 
- * @type number
+ * @type switch
  *
  * @param NPC Dialogues ID
  * @desc NPCの台詞の有効無効を設定するスイッチのIDを指定します。
  * @default 
- * @type number
+ * @type switch
  *
  * @param NPC Facial Expressions ID
  * @desc NPCの表情の有効無効を設定するスイッチのIDを指定します。
  * @default 
- * @type number
+ * @type switch
  *
  * @param NPC Characteristics ID
  * @desc NPCの特徴の有効無効を設定するスイッチのIDを指定します。
  * @default 
- * @type number
+ * @type switch
  *
  * @param --勝敗結果の取得--
  * @default
@@ -409,6 +420,17 @@ FTKR.CRD = FTKR.CRD || {};
  * 以下のトランプゲームで遊べます。
  * 
  *    1. ババ抜き(2～4人まで)
+ *          プラグインパラメータ<Number Of Jokers>を"1"に設定してください。
+ *          プラグインパラメータ<Number Of Removed Card>を"0"に設定してください。
+ * 
+ *    2. ジジ抜き(2～4人まで)
+ *          プラグインパラメータ<Number Of Jokers>を"0"に設定してください。
+ *          プラグインパラメータ<Number Of Removed Card>を"1"に設定してください。
+ *            または
+ *          プラグインパラメータ<Removed Card ID>を設定し、指定したゲーム変数に
+ *          取り除くカード情報を代入してください。
+ *             「変数の操作」-「スクリプト」で、「"spade1"」の様に
+ *              スート文字列(spade,heart,club,diamond)＋ランク数(1~13)を入力
  * 
  *-----------------------------------------------------------------------------
  * 設定方法
@@ -728,6 +750,12 @@ FTKR.CRD = FTKR.CRD || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.3.0 - 2020/01/10 : 機能追加、不具合修正
+ *    1. ゲーム開始時にジョーカー以外のカードを取り除く機能を追加。
+ *       ※いわゆるジジ抜きプレイが可能になります。
+ *    2. 初期状態で手持ちのカードがすべてペアになっていた場合に、エラーになる
+ *       不具合を修正。
+ * 
  * v1.2.4 - 2018/08/13 : 不具合修正
  *    1. 二人プレイでゲーム終了時に、点数獲得の前にゲーム終了しまう不具合を修正。
  * 
@@ -850,6 +878,8 @@ function CardGameManager() {
             suit       :String(parameters['Suit Type'] || 'spade,club,heart,diamond'),
             rank       :Number(parameters['Max Rank'] || 13).clamp(1,13),
             jokerNum   :Number(parameters['Number Of Jokers'] || 1).clamp(0,2),
+            rCardNum   :Number(parameters['Number Of Removed Card'] || 0),
+            rCardvID   :Number(parameters['Removed Card ID'] || 0),
         },
         layout:{
             targetPosi :Number(parameters['Target Position'] || 0),
@@ -1220,22 +1250,25 @@ function CardGameManager() {
     CardGameManager.initMembers = function() {
         this._interpreter = new Game_Interpreter();
         this._phase = 'init';
+        this._input = 'init';
         this._type = 0;
         this._turnCount = 0;
         this._mapBgm = null;
         this._mapBgs = null;
-    };
-
-    CardGameManager.clearEventFlags = function() {
+        this._handWindows = [];
         this._commonEventFlags = [];
-        var eventIds = FTKR.CRD.cardEvents;
-        eventIds.forEach( function(id, i) {
-            this._commonEventFlags[i] = false;
-        },this);
     };
 
     CardGameManager.setHandWindows = function(windows) {
         this._handWindows = windows;
+    };
+
+    CardGameManager.handWindows = function() {
+        return this._handWindows;
+    };
+
+    CardGameManager.handWindow = function(index) {
+        return this.handWindows()[index];
     };
 
     CardGameManager.setGameType = function(type){
@@ -1244,6 +1277,30 @@ function CardGameManager() {
     
     CardGameManager.gameType = function() {
         return this._type;
+    };
+
+    CardGameManager.phase = function() {
+        return SceneManager._scene._phase;
+    };
+
+    CardGameManager.drawCard = function() {
+        return SceneManager._scene._hand;
+    };
+
+    CardGameManager.isDrawJoker = function() {
+        return this.drawCard() && this.drawCard().suit === 'joker';
+    };
+
+    CardGameManager.isTurnEnd = function() {
+        return this.phase() === 'turnEnd';
+    };
+
+    CardGameManager.isDrawCard = function() {
+        return this.phase() === 'checkPair';
+    };
+
+    CardGameManager.subjectId = function() {
+        return SceneManager._scene._subjectId;
     };
 
     CardGameManager.saveBgmAndBgs = function() {
@@ -1277,6 +1334,19 @@ function CardGameManager() {
     };
 
     CardGameManager.increaseTurn = function() {
+        this._turnCount++;
+        this.checkCommonEventSpan();
+    };
+
+    CardGameManager.clearEventFlags = function() {
+        if (!this._commonEventFlags) this._commonEventFlags = [];
+        var eventIds = FTKR.CRD.cardEvents;
+        eventIds.forEach( function(id, i) {
+            this._commonEventFlags[i] = false;
+        },this);
+    };
+
+    CardGameManager.checkCommonEventSpan = function() {
         var eventIds = FTKR.CRD.cardEvents;
         for (var i = 0; i < eventIds.length; i++) {
             if (eventIds[i]) {
@@ -1288,7 +1358,7 @@ function CardGameManager() {
         }
     };
 
-    CardGameManager.updateEvent = function(phase) {
+    CardGameManager.updateCommonEvent = function(phase) {
         switch (phase) {
             case 'turnStart':
             case 'select':
@@ -1423,30 +1493,6 @@ function CardGameManager() {
         return page;
     };
 
-    CardGameManager.phase = function() {
-        return SceneManager._scene._phase;
-    };
-
-    CardGameManager.drawCard = function() {
-        return SceneManager._scene._hand;
-    };
-
-    CardGameManager.isDrawJoker = function() {
-        return this.drawCard() && this.drawCard().suit === 'joker';
-    };
-
-    CardGameManager.isTurnEnd = function() {
-        return this.phase() === 'turnEnd';
-    };
-
-    CardGameManager.isDrawCard = function() {
-        return this.phase() === 'checkPair';
-    };
-
-    CardGameManager.subjectId = function() {
-        return SceneManager._scene._subjectId;
-    };
-
     CardGameManager.meetsConditions = function(page) {
         var c = page.conditions;
         if (!c.turnEnding && !c.drawCarding &&
@@ -1524,6 +1570,7 @@ function CardGameManager() {
         this._playerPoints = [0,0,0,0];
         this._cardHeight = 0;
         this._cardWidth = 0;
+        this._removedCards = [];
     };
 
     //プレイヤーの設定
@@ -1598,6 +1645,39 @@ function CardGameManager() {
 
     Game_CardData.prototype.setJoker = function(joker) {
         this._joker = joker;
+    };
+
+    //ゲーム開始時に取り除くカードの設定
+    Game_CardData.prototype.removedCards = function() {
+        return this._removedCards || [];
+    };
+
+    Game_CardData.prototype.gVremovedCards = function() {
+        return FTKR.CRD.card.rCardvID ? ($gameVariables.value(FTKR.CRD.card.rCardvID) + '').split(",") : [];
+    };
+
+    Game_CardData.prototype.setRemovedCards = function() {
+        this.clearRemovedCards();
+        if (FTKR.CRD.card.rCardvID) {
+            this._removedCards = this.gVremovedCards();
+        } else if (FTKR.CRD.card.rCardNum){
+            var cards = [];
+            var i = 0;
+            while(i < FTKR.CRD.card.rCardNum) {
+                if (i) cards += ',';
+                var suit = this.suits()[Math.randomInt(4)];
+                var rank = Math.randomInt(this.maxRank()) + 1;
+                var card = suit + rank + '';
+                if (!cards.contains(card)) cards.push(card);
+                i++;
+            }
+            this._removedCards = cards;
+        }
+    };
+
+    Game_CardData.prototype.clearRemovedCards = function() {
+        if (!this._removedCards) this._removedCards = [];
+        this._removedCards.length = 0;
     };
 
     //勝敗ポイントの設定
@@ -1686,6 +1766,7 @@ function CardGameManager() {
         CardGameManager.initMembers();
         CardGameManager.playGameBgm();
         $gameCardData.resetPlayerPoints();
+        $gameCardData.clearRemovedCards();
         this.setPlayerCharacteristics();
         this._setEnd = false;
         this._gameCount = 1;
@@ -1701,19 +1782,19 @@ function CardGameManager() {
         this._cardNum = 0;
         this._startId = 0;
     };
-
+/*
     Scene_CRD.prototype.clearHands = function() {
         this._handWindows.forEach( function(window){
             window._hand = [];
         });
     };
-
+*//*
     Scene_CRD.prototype.clearRanks = function() {
         this._actorWindows.forEach( function(window){
             window.setRank(0);
         });
     };
-
+*/
     Scene_CRD.prototype.clearVariables = function() {
         if (!FTKR.CRD.result.reset) return;
         FTKR.CRD.result.varId.forEach( function(varId){
@@ -1835,10 +1916,14 @@ function CardGameManager() {
         var suitTypes = $gameCardData.suits();
         var maxRank = $gameCardData.maxRank();
         var jokerNum = $gameCardData.joker();
+        $gameCardData.setRemovedCards();
+        var removedCards = $gameCardData.removedCards();
         this._stock = [];
         suitTypes.forEach( function(suit){
             for (var r = 1; r < maxRank + 1; r++) {
-                this._stock.push({suit:suit, rank:r});
+                if (!removedCards.length || !removedCards.contains(suit + r)) {
+                    this._stock.push({suit:suit, rank:r});
+                }
             }
         },this);
         for (var i = 0; i < jokerNum; i++) {
@@ -2121,7 +2206,7 @@ function CardGameManager() {
     Scene_CRD.prototype.onTurnEnd = function() {
         this._commandBoxWindow.deselect();
         this._commandBoxWindow.hide();
-        CardGameManager._turnCount++;
+//        CardGameManager._turnCount++;
         CardGameManager.increaseTurn();
         this.shiftIndex();
         this.refreshActor();
@@ -2280,7 +2365,7 @@ function CardGameManager() {
                 }
         }
         */
-        return CardGameManager.updateEvent(this._phase);
+        return CardGameManager.updateCommonEvent(this._phase);
     };
 
     Scene_CRD.prototype.updatePhase = function() {
@@ -2407,7 +2492,7 @@ function CardGameManager() {
             this.shiftIndex();
             this.refreshActor();
             this._hand = null;
-            CardGameManager._turnCount++;
+//            CardGameManager._turnCount++;
             CardGameManager.increaseTurn();
             this._phase = 'turnStart';
         }
@@ -2778,7 +2863,7 @@ function CardGameManager() {
         var pair = [];
         var count = this._hand.length, i = 0;
         while (count) {
-            if (!this._hand.length || this._hand.length <= i) break;
+            if (!this._hand.length || this._hand.length <= i || !this._hand[i]) break;
             var rank = this._hand[i].rank;
             if (!this._hand.some( function(hand, n){
                 if (hand && i !== n && hand.rank === rank) {
