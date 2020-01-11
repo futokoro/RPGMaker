@@ -4,8 +4,8 @@
 // プラグインNo : 18
 // 作成者     : フトコロ
 // 作成日     : 2017/04/14
-// 最終更新日 : 2018/08/05
-// バージョン : v1.1.0
+// 最終更新日 : 2020/01/11
+// バージョン : v1.1.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.EID = FTKR.EID || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.0 アイテムとスキルのダメージ処理を拡張するプラグイン
+ * @plugindesc v1.1.1 アイテムとスキルのダメージ処理を拡張するプラグイン
  * @author フトコロ
  *
  * @param ---属性ダメージ計算---
@@ -26,6 +26,15 @@ FTKR.EID = FTKR.EID || {};
  * @desc 複数属性に対するダメージ計算方法
  * 0 - 最大, 1 - 平均, 2 - 累積, 3 - 最小
  * @default 0
+ * @type select
+ * @option 最大
+ * @value 0
+ * @option 平均
+ * @value 1
+ * @option 累積
+ * @value 2
+ * @option 最小
+ * @value 3
  *
  * @param Exclude 100% Elements
  * @desc 最大または平均の場合、ダメージ計算時に100%の属性有効度を除外するか
@@ -48,6 +57,11 @@ FTKR.EID = FTKR.EID || {};
  * @desc ダメージID毎にクリティカル判定を行うか
  * 0 - 判定しない, 1 - 判定する
  * @default 0
+ * @type select
+ * @option 判定しない
+ * @value 0
+ * @option 判定する
+ * @value 1
  *
  * @param Critical Rate
  * @desc デフォルトのクリティカルダメージ倍率(%)
@@ -233,13 +247,16 @@ FTKR.EID = FTKR.EID || {};
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
- * Copyright (c) 2017,2018 Futokoro
+ * Copyright (c) 2020 Futokoro
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.1.1 - 2020/01/11 : 不具合修正
+ *    1. プラグインパラメータの読み取り部の不具合により、プラグインが正常に動作していなかった箇所を修正。
  * 
  * v1.1.0 - 2018/08/05 : 機能追加
  *    1. 属性ダメージ計算時に100%の属性有効度を除外できる機能を追加。
@@ -252,452 +269,496 @@ FTKR.EID = FTKR.EID || {};
  */
 //=============================================================================
 
+(function() {
 
-//=============================================================================
-// プラグイン パラメータ
-//=============================================================================
-FTKR.EID.parameters = PluginManager.parameters('FTKR_ExItemConfig_Damage');
+    //=============================================================================
+    // プラグイン パラメータ
+    //=============================================================================
+    var parameters = PluginManager.parameters('FTKR_ExItemConfig_Damage');
 
-FTKR.EID.elementDamageCalc = Number(FTKR.EID.parameters['Elements Damage Calc'] || 0);
-FTKR.EID.excludeElement    = JSON.parse(parameters['Exclude 100% Elements'] || false);
-FTKR.EID.defDamageRate = String(FTKR.EID.parameters['Damage Rate'] || '0');
-FTKR.EID.defCriticalRate = String(FTKR.EID.parameters['Critical Rate'] || '0');
-FTKR.EID.criticalForEach = Number(FTKR.EID.parameters['Critical For Each'] || 0);
-
-//=============================================================================
-// 自作関数(グローバル)
-//=============================================================================
-
-FTKR.gameData = FTKR.gameData || {
-    user   :null,
-    target :null,
-    item   :null,
-    number :0,
-};
-
-if (!FTKR.setGameData) {
-FTKR.setGameData = function(user, target, item, number) {
-    FTKR.gameData = {
-        user   :user || null,
-        target :target || null,
-        item   :item || null,
-        number :number || 0
+    FTKR.EID = {
+        elementDamageCalc   : Number(parameters['Elements Damage Calc'] || 0),
+        excludeElement      : JSON.parse(parameters['Exclude 100% Elements'] || false),
+        defDamageRate       : String(parameters['Damage Rate'] || '0'),
+        defCriticalRate     : String(parameters['Critical Rate'] || '0'),
+        criticalForEach     : Number(parameters['Critical For Each'] || 0),
     };
-};
-}
 
-if (!FTKR.evalFormula) {
-FTKR.evalFormula = function(formula) {
-    var datas = FTKR.gameData;
-    try {
-        var s = $gameSwitches._data;
-        var v = $gameVariables._data;
-        var a = datas.user;
-        var b = datas.target;
-        var item   = datas.item;
-        var number = datas.number;
-        if (b) var result = b.result();
-        var value = eval(formula);
-        if (isNaN(value)) value = 0;
-        return value;
-    } catch (e) {
-        console.error(e);
-        return 0;
+    //=============================================================================
+    // 自作関数(グローバル)
+    //=============================================================================
+
+    FTKR.gameData = FTKR.gameData || {
+        user   :null,
+        target :null,
+        item   :null,
+        number :0,
+    };
+
+    if (!FTKR.setGameData) {
+    FTKR.setGameData = function(user, target, item, number) {
+        FTKR.gameData = {
+            user   :user || null,
+            target :target || null,
+            item   :item || null,
+            number :number || 0
+        };
+    };
     }
-};
-}
 
-//=============================================================================
-// DataManager
-//=============================================================================
-
-FTKR.EID.DatabaseLoaded = false;
-FTKR.EID.DataManager_isDatabaseLoaded = DataManager.isDatabaseLoaded;
-DataManager.isDatabaseLoaded = function() {
-    if (!FTKR.EID.DataManager_isDatabaseLoaded.call(this)) return false;
-    if (!FTKR.EID.DatabaseLoaded) {
-        this.eidDamageIdNoteTags($dataSkills);
-        this.eidDamageIdNoteTags($dataItems);
-        FTKR.EID.DatabaseLoaded = true;
+    if (!FTKR.evalFormula) {
+    FTKR.evalFormula = function(formula) {
+        var datas = FTKR.gameData;
+        try {
+            var s = $gameSwitches._data;
+            var v = $gameVariables._data;
+            var a = datas.user;
+            var b = datas.target;
+            var item   = datas.item;
+            var number = datas.number;
+            if (b) var result = b.result();
+            var value = eval(formula);
+            if (isNaN(value)) value = 0;
+            return value;
+        } catch (e) {
+            console.error(e);
+            return 0;
+        }
+    };
     }
-    return true;
-};
 
-DataManager.eidDamageIdNoteTags = function(group) {
-    var note1a = /<(?:EIC ダメージID):[ ]*(\d+)>/i;
-    var note1aj = /<(?:EIC DAMAGEID):[ ]*(\d+)>/i;
-    var note1b = /<\/(?:EIC ダメージID)>/i;
-    var note1bj = /<\/(?:EIC DAMAGEID)>/i;
-
-    for (var n = 1; n < group.length; n++) {
-        var obj = group[n];
+    var readEntrapmentCodeToTextEx = function(obj, codeTitles) {
+        var regs = convertEntrapmentRegArrayEx(codeTitles);
         var notedata = obj.note.split(/[\r\n]+/);
-
         var setMode = 'none';
-        obj.sepdamages = [];
+        var results = [];
 
         for (var i = 0; i < notedata.length; i++) {
             var line = notedata[i];
-            if (line.match(note1a) || line.match(note1aj)) {
+            if (matchRegs(line, regs, 'start')) {
                 var data = {
-                  id:Number(RegExp.$1),
-                  text:''
+                    id:RegExp.$1,
+                    text:''
                 };
-                setMode = 'anydata';
-            } else if (note1b.test(line) || note1bj.test(line)) {
+                setMode = 'read';
+            } else if (matchRegs(line, regs, 'end')) {
                 setMode = 'none';
-                obj.sepdamages.push(data);
-            } else if (setMode === 'anydata') {
+                results.push(data);
+            } else if (setMode === 'read') {
                 data.text += line + ';';
             }
         }
-        this.makeEidData(obj);
-        obj.sepdamages = [];
-    }
-};
+        return results;
+    };
 
-// skillの拡張部分(sepdata)を作成する
-DataManager.makeEidData = function(skill) {
-    this.makeEidDamagesBase(skill);
-    this.setEidDamagesNotetags(skill);
-};
+    var convertEntrapmentRegArrayEx = function(codeTitles) {
+        return codeTitles.map(function(codeTitle) {
+            return {
+                start:new RegExp('<' + codeTitle + ':[ ]*(.+)>', 'i'),
+                end  :new RegExp('<\/' + codeTitle + '>', 'i')
+            };
+        });
+    };
 
-DataManager.makeEidDamagesBase = function(skill) {
-    skill.damages = [];
-    skill.damages[0] = this.setEidDamage(skill.id);
-};
+    var matchRegs = function(data, regs, prop) {
+        return regs.some(function(reg){
+            return prop ? data.match(reg[prop]) : data.match(reg);
+        });
+    };
 
-DataManager.setEidDamage = function(skillId) {
-    var damage = {};
-    var setSkill = $dataSkills[skillId]
-    var setDamage = setSkill.damage;
-    for (var list in setDamage) {
-        damage[list] = setDamage[list];
-    }
-    damage.rate = FTKR.EID.defDamageRate;
-    damage.criticalRate = FTKR.EID.defCriticalRate;
-    damage.hitType = setSkill.hitType;
-    damage.itemElements = [];
-    damage.id = setSkill.id;
-    damage.addElmIds = [];
-    damage.enabled = '';
-    return damage;
-};
+    //=============================================================================
+    // DataManager
+    //=============================================================================
 
-DataManager.setEidDamagesNotetags = function(skill) {
-    for (var t = 0; t < skill.sepdamages.length; t++) {
-        var sepdata = skill.sepdamages[t];
-        if (sepdata) {
-            var case1 = /(?:SKILLID):[ ]*(\d+)/i;
-            var case1j = /(?:スキルID):[ ]*(\d+)/i;
-            var case2 = /(?:ELEMENTID):[ ]*(\d+(?:\s*,\s*\d+)*)/i;
-            var case2j = /(?:属性ID):[ ]*(\d+(?:\s*,\s*\d+)*)/i;
-            var case3 = /(?:DAMAGERATE):[ ]*(.+)/i;
-            var case3j = /(?:ダメージ倍率):[ ]*(.+)/i;
-            var case4 = /(?:CRITICALRATE):[ ]*(.+)/i;
-            var case4j = /(?:クリティカル倍率):[ ]*(.+)/i;
-            var case5 = /(?:TRAIT ELEMENTS):[ ]*(.+)/i;
-            var case5j = /(?:特徴の属性追加):[ ]*(.+)/i;
-            var case6 = /(?:ENABLED):[ ]*(.+)/i;
-            var case6j = /(?:有効条件):[ ]*(.+)/i;
+    var _EID_DatabaseLoaded = false;
+    var _EID_DataManager_isDatabaseLoaded = DataManager.isDatabaseLoaded;
+    DataManager.isDatabaseLoaded = function() {
+        if (!_EID_DataManager_isDatabaseLoaded.call(this)) return false;
+        if (!_EID_DatabaseLoaded) {
+            this.eidDamageIdNoteTags($dataSkills);
+            this.eidDamageIdNoteTags($dataItems);
+            _EID_DatabaseLoaded = true;
+        }
+        return true;
+    };
 
-            var datas = sepdata.text.split(';');
-            for (var i = 0; i < datas.length; i++) {
-                var data = datas[i];
-                var dataId = sepdata.id;
-                var item = skill.damages[dataId];
-                if (data.match(case1) || data.match(case1j)) {
-                    var skillId = Number(RegExp.$1);
-                    skill.damages[dataId] = this.setEidDamage(skillId);
-                } else if(data.match(case2) || data.match(case2j)) {
-                    var elmIds = JSON.parse('[' + RegExp.$1.match(/\d+/g) + ']');
-                    skill.damages[dataId].addElmIds = [];
-                    if (item.elementId !== -1) {
-                        elmIds.forEach( function(elmId) {
-                            if (item.elementId !== elmId) {
-                                skill.damages[dataId].addElmIds.push(elmId);
-                            }
+    DataManager.eidDamageIdNoteTags = function(group) {
+        var note1a = /<(?:EIC ダメージID):[ ]*(\d+)>/i;
+        var note1aj = /<(?:EIC DAMAGEID):[ ]*(\d+)>/i;
+        var note1b = /<\/(?:EIC ダメージID)>/i;
+        var note1bj = /<\/(?:EIC DAMAGEID)>/i;
+
+        for (var n = 1; n < group.length; n++) {
+            var obj = group[n];
+            var notedata = obj.note.split(/[\r\n]+/);
+
+            var setMode = 'none';
+            obj.sepdamages = [];
+
+            for (var i = 0; i < notedata.length; i++) {
+                var line = notedata[i];
+                if (line.match(note1a) || line.match(note1aj)) {
+                    var data = {
+                    id:Number(RegExp.$1),
+                    text:''
+                    };
+                    setMode = 'anydata';
+                } else if (note1b.test(line) || note1bj.test(line)) {
+                    setMode = 'none';
+                    obj.sepdamages.push(data);
+                } else if (setMode === 'anydata') {
+                    data.text += line + ';';
+                }
+            }
+            this.makeEidData(obj);
+            obj.sepdamages = [];
+        }
+    };
+
+    // skillの拡張部分(sepdata)を作成する
+    DataManager.makeEidData = function(skill) {
+        this.makeEidDamagesBase(skill);
+        this.setEidDamagesNotetags(skill);
+    };
+
+    DataManager.makeEidDamagesBase = function(skill) {
+        skill.damages = [];
+        skill.damages[0] = this.setEidDamage(skill.id);
+    };
+
+    DataManager.setEidDamage = function(skillId) {
+        var damage = {};
+        var setSkill = $dataSkills[skillId]
+        var setDamage = setSkill.damage;
+        for (var list in setDamage) {
+            damage[list] = setDamage[list];
+        }
+        damage.rate = FTKR.EID.defDamageRate;
+        damage.criticalRate = FTKR.EID.defCriticalRate;
+        damage.hitType = setSkill.hitType;
+        damage.itemElements = [];
+        damage.id = setSkill.id;
+        damage.addElmIds = [];
+        damage.enabled = '';
+        return damage;
+    };
+
+    DataManager.setEidDamagesNotetags = function(skill) {
+        for (var t = 0; t < skill.sepdamages.length; t++) {
+            var sepdata = skill.sepdamages[t];
+            if (sepdata) {
+                var case1 = /(?:SKILLID):[ ]*(\d+)/i;
+                var case1j = /(?:スキルID):[ ]*(\d+)/i;
+                var case2 = /(?:ELEMENTID):[ ]*(\d+(?:\s*,\s*\d+)*)/i;
+                var case2j = /(?:属性ID):[ ]*(\d+(?:\s*,\s*\d+)*)/i;
+                var case3 = /(?:DAMAGERATE):[ ]*(.+)/i;
+                var case3j = /(?:ダメージ倍率):[ ]*(.+)/i;
+                var case4 = /(?:CRITICALRATE):[ ]*(.+)/i;
+                var case4j = /(?:クリティカル倍率):[ ]*(.+)/i;
+                var case5 = /(?:TRAIT ELEMENTS):[ ]*(.+)/i;
+                var case5j = /(?:特徴の属性追加):[ ]*(.+)/i;
+                var case6 = /(?:ENABLED):[ ]*(.+)/i;
+                var case6j = /(?:有効条件):[ ]*(.+)/i;
+
+                var datas = sepdata.text.split(';');
+                for (var i = 0; i < datas.length; i++) {
+                    var data = datas[i];
+                    var dataId = sepdata.id;
+                    var item = skill.damages[dataId];
+                    if (data.match(case1) || data.match(case1j)) {
+                        var skillId = Number(RegExp.$1);
+                        skill.damages[dataId] = this.setEidDamage(skillId);
+                    } else if(data.match(case2) || data.match(case2j)) {
+                        var elmIds = JSON.parse('[' + RegExp.$1.match(/\d+/g) + ']');
+                        skill.damages[dataId].addElmIds = [];
+                        if (item.elementId !== -1) {
+                            elmIds.forEach( function(elmId) {
+                                if (item.elementId !== elmId) {
+                                    skill.damages[dataId].addElmIds.push(elmId);
+                                }
+                            });
+                        }
+                    } else if(data.match(case3) || data.match(case3j)) {
+                        skill.damages[dataId].rate = RegExp.$1;
+                    } else if(data.match(case4) || data.match(case4j)) {
+                        skill.damages[dataId].criticalRate = RegExp.$1;
+                    } else if(data.match(case5) || data.match(case5j)) {
+                        var text = String(RegExp.$1).replace(/\s/g, "");
+                        var types = text.split(',');
+                        types.forEach( function(type) {
+                            skill.damages[dataId].itemElements.push(type);
                         });
+                    } else if(data.match(case6) || data.match(case6j)) {
+                        skill.damages[dataId].enabled = String(RegExp.$1);
                     }
-                } else if(data.match(case3) || data.match(case3j)) {
-                    skill.damages[dataId].rate = RegExp.$1;
-                } else if(data.match(case4) || data.match(case4j)) {
-                    skill.damages[dataId].criticalRate = RegExp.$1;
-                } else if(data.match(case5) || data.match(case5j)) {
-                    var text = String(RegExp.$1).replace(/\s/g, "");
-                    var types = text.split(',');
-                    types.forEach( function(type) {
-                        skill.damages[dataId].itemElements.push(type);
-                    });
-                } else if(data.match(case6) || data.match(case6j)) {
-                    skill.damages[dataId].enabled = String(RegExp.$1);
                 }
             }
         }
-    }
-};
+    };
 
-//=============================================================================
-// Game_Action
-//=============================================================================
+    //=============================================================================
+    // Game_Action
+    //=============================================================================
 
-FTKR.EID.Game_Action_initialize = Game_Action.prototype.initialize;
-Game_Action.prototype.initialize = function(subject, forcing) {
-    FTKR.EID.Game_Action_initialize.call(this, subject, forcing);
-    this._damageId = 0;
-};
+    var _EID_Game_Action_initialize = Game_Action.prototype.initialize;
+    Game_Action.prototype.initialize = function(subject, forcing) {
+        _EID_Game_Action_initialize.call(this, subject, forcing);
+        this._damageId = 0;
+    };
 
-Game_Action.prototype.itemBase = function() {
-    return this._item.object();
-};
+    Game_Action.prototype.itemBase = function() {
+        return this._item.object();
+    };
 
-Game_Action.prototype.itemDamage = function() {
-    return this.itemBase().damages[this._damageId];
-};
+    Game_Action.prototype.itemDamage = function() {
+        return this.itemBase().damages[this._damageId];
+    };
 
-Game_Action.prototype.damageSkill = function() {
-    return $dataSkills[this.itemDamage().id];
-};
+    Game_Action.prototype.damageSkill = function() {
+        return $dataSkills[this.itemDamage().id];
+    };
 
-//書き換え
-Game_Action.prototype.item = function() {
-    return this._damageId ? this.damageSkill() : this.itemBase();
-};
+    //書き換え
+    Game_Action.prototype.item = function() {
+        return this._damageId ? this.damageSkill() : this.itemBase();
+    };
 
-/*-------------------------------------------------------------
-  スキル実行処理の修正
--------------------------------------------------------------*/
-FTKR.EID.Game_Action_apply = Game_Action.prototype.apply;
-Game_Action.prototype.apply = function(target) {
-    this._damageId = 0;
-    FTKR.EID.Game_Action_apply.call(this, target);
-    this.eidDamageIdApply(target);
-};
+    /*-------------------------------------------------------------
+    スキル実行処理の修正
+    -------------------------------------------------------------*/
+    var _EID_Game_Action_apply = Game_Action.prototype.apply;
+    Game_Action.prototype.apply = function(target) {
+        this._damageId = 0;
+        _EID_Game_Action_apply.call(this, target);
+        this.eidDamageIdApply(target);
+    };
 
-Game_Action.prototype.eidDamageIdApply = function(target) {
-    var result = target.result();
-    var len = this.item().damages.length;
-    if (result.isHit() && len > 1) {
-        for (var i = 1; i < len; i++) {
-            this._damageId = i;
-            if (this.item().damage.type > 0 && this.evalDamagesEnabled(this.itemBase())) {
-                var critical = FTKR.EID.criticalForEach ? 
-                    (Math.random() < this.itemCri(target)) :
-                    result.critical;
-                var value = this.makeDamageValue(target, critical);
-                this.executeDamage(target, value);
-                this.item().effects.forEach(function(effect) {
-                    this.applyItemEffect(target, effect);
-                }, this);
-                this.applyItemUserEffect(target);
+    Game_Action.prototype.eidDamageIdApply = function(target) {
+        var result = target.result();
+        var len = this.item().damages.length;
+        if (result.isHit() && len > 1) {
+            for (var i = 1; i < len; i++) {
+                this._damageId = i;
+                if (this.item().damage.type > 0 && this.evalDamagesEnabled(this.itemBase())) {
+                    var critical = FTKR.EID.criticalForEach ? 
+                        (Math.random() < this.itemCri(target)) :
+                        result.critical;
+                    var value = this.makeDamageValue(target, critical);
+                    this.executeDamage(target, value);
+                    this.item().effects.forEach(function(effect) {
+                        this.applyItemEffect(target, effect);
+                    }, this);
+                    this.applyItemUserEffect(target);
+                }
             }
         }
-    }
-    this._damageId = 0;
-};
+        this._damageId = 0;
+    };
 
-/*-------------------------------------------------------------
-  ダメージ計算の修正
--------------------------------------------------------------*/
+    /*-------------------------------------------------------------
+    ダメージ計算の修正
+    -------------------------------------------------------------*/
 
-Game_Action.prototype.evalDamagesEnabled = function(item) {
-    FTKR.setGameData(this.subject(), null, item);
-    var enabled = item.damages[this._damageId].enabled;
-    return !enabled ? true : FTKR.evalFormula(enabled);
-};
+    Game_Action.prototype.evalDamagesEnabled = function(item) {
+        FTKR.setGameData(this.subject(), null, item);
+        var enabled = item.damages[this._damageId].enabled;
+        return !enabled ? true : FTKR.evalFormula(enabled);
+    };
 
-//書き換え
-Game_Action.prototype.evalDamageFormula = function(target) {
-    var item = this.item();
-    FTKR.setGameData(this.subject(), target, item);
-    var value = FTKR.evalFormula(item.damage.formula);
-    if (value) {
-        var sign = ([3, 4].contains(item.damage.type) ? -1 : 1);
-        value = Math.max(value, 0) * sign;
-    }
-    return this.applyDamageRate(value);
-};
-
-Game_Action.prototype.applyDamageRate = function(damage) {
-    return damage * this.itemDamageRate() / 100;
-};
-
-Game_Action.prototype.itemDamageRate = function() {
-    FTKR.gameData.item = this.itemBase();
-    return FTKR.evalFormula(this.itemDamage().rate)
-};
-
-//書き換え
-Game_Action.prototype.applyCritical = function(damage) {
-    return damage * this.itemDamageCriticalRate() / 100;
-};
-
-Game_Action.prototype.itemDamageCriticalRate = function() {
-    FTKR.gameData.item = this.itemBase();
-    return FTKR.evalFormula(this.itemDamage().criticalRate)
-};
-
-/*-------------------------------------------------------------
-  属性有効度の計算の修正
--------------------------------------------------------------*/
-//書き換え
-Game_Action.prototype.calcElementRate = function(target) {
-    var elementIds = this.isElementIds(this.itemDamage());
-    switch (FTKR.EID.elementDamageCalc) {
-        case 1:
-          return this.elementsAverageRate(target, elementIds);
-        case 2:
-          return this.elementsAccumlateRate(target, elementIds);
-        case 3:
-          return this.elementsMinRate(target, elementIds);
-    }
-    return this.elementsMaxRate(target, elementIds);
-};
-
-Game_Action.prototype.isElementIds = function(itemDamage) {
-    return  itemDamage.elementId < 0 ? this.subject().attackElements() : this.isSkillElements(itemDamage);
-};
-
-Game_Action.prototype.isSkillElements = function(itemDamage) {
-    return [itemDamage.elementId].concat(itemDamage.addElmIds, this.addTraitsElementId(itemDamage));
-};
-
-Game_Action.prototype.addTraitsElementId = function(itemDamage) {
-    var list = [];
-    var code = Game_BattlerBase.TRAIT_ATTACK_ELEMENT;
-    if (!itemDamage.itemElements) return list;
-    itemDamage.itemElements.forEach( function(type) {
-        switch (type) {
-            case 'Actor':
-                list = list.concat(this.edTraitsSet(code, this.actorData()));
-                break;
-            case 'Class':
-                list = list.concat(this.edTraitsSet(code, this.classData()));
-                break;
-            case 'Weapon':
-                list = list.concat(this.edTraitsALLSet(code, this.weaponsData()));
-                break;
-            case 'Armor':
-                list = list.concat(this.edTraitsALLSet(code, this.armorsData()));
-                break;
-            case 'States':
-                list = list.concat(this.edTraitsALLSet(code, this.statesData()));
-                break;
+    //書き換え
+    Game_Action.prototype.evalDamageFormula = function(target) {
+        var item = this.item();
+        FTKR.setGameData(this.subject(), target, item);
+        var value = FTKR.evalFormula(item.damage.formula);
+        if (value) {
+            var sign = ([3, 4].contains(item.damage.type) ? -1 : 1);
+            value = Math.max(value, 0) * sign;
         }
-    },this);
-    return list;
-};
+        return this.applyDamageRate(value);
+    };
 
-Game_Action.prototype.edTraitsALLSet = function(code, subjects) {
-    var list = [];
-    for (var i = 0; i < subjects.length; i++) {
-        list = list.concat(this.edTraitsSet(code, subjects[i]));
-    }
-    return list;
-};
+    Game_Action.prototype.applyDamageRate = function(damage) {
+        return damage * this.itemDamageRate() / 100;
+    };
 
-Game_Action.prototype.edTraitsSet = function(code, subject) {
-    var list = [];
-    subject.traits.forEach( function(trait) {
-        if (trait.code === code) list.push(trait.dataId);
-    });
-    return list;
-};
+    Game_Action.prototype.itemDamageRate = function() {
+        FTKR.gameData.item = this.itemBase();
+        return FTKR.evalFormula(this.itemDamage().rate)
+    };
 
-Game_Action.prototype.actorData = function() {
-    return this.subject() && this.subject().isActor() ? $dataActors[this.subject().actorId()] : false;
-};
+    //書き換え
+    Game_Action.prototype.applyCritical = function(damage) {
+        return damage * this.itemDamageCriticalRate() / 100;
+    };
 
-Game_Action.prototype.classData = function() {
-    return this.subject() && this.subject().isActor() ? this.subject().currentClass() : false;
-};
+    Game_Action.prototype.itemDamageCriticalRate = function() {
+        FTKR.gameData.item = this.itemBase();
+        return FTKR.evalFormula(this.itemDamage().criticalRate)
+    };
 
-Game_Action.prototype.weaponsData = function() {
-    return this.subject() && this.subject().isActor() ? this.subject().weapons() : false;
-};
+    /*-------------------------------------------------------------
+    属性有効度の計算の修正
+    -------------------------------------------------------------*/
+    //書き換え
+    Game_Action.prototype.calcElementRate = function(target) {
+        var elementIds = this.isElementIds(this.itemDamage());
+        switch (FTKR.EID.elementDamageCalc) {
+            case 1:
+            return this.elementsAverageRate(target, elementIds);
+            case 2:
+            return this.elementsAccumlateRate(target, elementIds);
+            case 3:
+            return this.elementsMinRate(target, elementIds);
+        }
+        return this.elementsMaxRate(target, elementIds);
+    };
 
-Game_Action.prototype.armorsData = function() {
-    return this.subject() && this.subject().isActor() ? this.subject().armors() : false;
-};
+    Game_Action.prototype.isElementIds = function(itemDamage) {
+        return  itemDamage.elementId < 0 ? this.subject().attackElements() : this.isSkillElements(itemDamage);
+    };
 
-Game_Action.prototype.statesData = function() {
-    return this.subject() ? this.subject().states() : false;
-};
+    Game_Action.prototype.isSkillElements = function(itemDamage) {
+        return [itemDamage.elementId].concat(itemDamage.addElmIds, this.addTraitsElementId(itemDamage));
+    };
 
-//書き換え
-Game_Action.prototype.elementsMaxRate = function(target, elements) {
-    if (elements.length > 0) {
+    Game_Action.prototype.addTraitsElementId = function(itemDamage) {
+        var list = [];
+        var code = Game_BattlerBase.TRAIT_ATTACK_ELEMENT;
+        if (!itemDamage.itemElements) return list;
+        itemDamage.itemElements.forEach( function(type) {
+            switch (type) {
+                case 'Actor':
+                    list = list.concat(this.edTraitsSet(code, this.actorData()));
+                    break;
+                case 'Class':
+                    list = list.concat(this.edTraitsSet(code, this.classData()));
+                    break;
+                case 'Weapon':
+                    list = list.concat(this.edTraitsALLSet(code, this.weaponsData()));
+                    break;
+                case 'Armor':
+                    list = list.concat(this.edTraitsALLSet(code, this.armorsData()));
+                    break;
+                case 'States':
+                    list = list.concat(this.edTraitsALLSet(code, this.statesData()));
+                    break;
+            }
+        },this);
+        return list;
+    };
+
+    Game_Action.prototype.edTraitsALLSet = function(code, subjects) {
+        var list = [];
+        for (var i = 0; i < subjects.length; i++) {
+            list = list.concat(this.edTraitsSet(code, subjects[i]));
+        }
+        return list;
+    };
+
+    Game_Action.prototype.edTraitsSet = function(code, subject) {
+        var list = [];
+        subject.traits.forEach( function(trait) {
+            if (trait.code === code) list.push(trait.dataId);
+        });
+        return list;
+    };
+
+    Game_Action.prototype.actorData = function() {
+        return this.subject() && this.subject().isActor() ? $dataActors[this.subject().actorId()] : false;
+    };
+
+    Game_Action.prototype.classData = function() {
+        return this.subject() && this.subject().isActor() ? this.subject().currentClass() : false;
+    };
+
+    Game_Action.prototype.weaponsData = function() {
+        return this.subject() && this.subject().isActor() ? this.subject().weapons() : false;
+    };
+
+    Game_Action.prototype.armorsData = function() {
+        return this.subject() && this.subject().isActor() ? this.subject().armors() : false;
+    };
+
+    Game_Action.prototype.statesData = function() {
+        return this.subject() ? this.subject().states() : false;
+    };
+
+    //書き換え
+    Game_Action.prototype.elementsMaxRate = function(target, elements) {
+        if (elements.length > 0) {
+            var exclude = 0;
+            var maxRate = Math.max.apply(null, elements.map(function(elementId) {
+                var rate = target.elementRate(elementId);
+                if (FTKR.EID.excludeElement && rate == 1) {
+                    exclude = 1;
+                    return null;
+                } else {
+                    return rate;
+                }
+            }, this));
+            return maxRate || exclude;
+        } else {
+            return 1;
+        }
+    };
+
+    Game_Action.prototype.elementsAverageRate = function(target, elements) {
+        if (!elements.length) return 1;
+        var value = 0;
         var exclude = 0;
-        var maxRate = Math.max.apply(null, elements.map(function(elementId) {
+        var count = 0;
+        elements.forEach(function(elementId) {
             var rate = target.elementRate(elementId);
             if (FTKR.EID.excludeElement && rate == 1) {
                 exclude = 1;
-                return null;
-            } else {
-                return rate;
+                count++
+                return;
             }
+            value += rate;
+        });
+        var calcElms = elements.length - count;
+        if (!calcElms) return 1;
+        if (!value) return exclude;
+        return value / calcElms;
+    };
+
+    Game_Action.prototype.elementsAccumlateRate = function(target, elements) {
+        if (!elements.length) return 1;
+        var value = 1;
+        elements.forEach(function(elementId) {
+            value *= target.elementRate(elementId);
+        });
+        return value;
+    };
+
+    Game_Action.prototype.elementsMinRate = function(target, elements) {
+        if (!elements.length) return 1;
+        return Math.min.apply(null, elements.map(function(elementId) {
+            return target.elementRate(elementId);
         }, this));
-        return maxRate || exclude;
-    } else {
-        return 1;
-    }
-};
+    };
 
-Game_Action.prototype.elementsAverageRate = function(target, elements) {
-    if (!elements.length) return 1;
-     var value = 0;
-     var exclude = 0;
-     var count = 0;
-     elements.forEach(function(elementId) {
-        var rate = target.elementRate(elementId);
-        if (FTKR.EID.excludeElement && rate == 1) {
-            exclude = 1;
-            count++
-            return;
-        }
-        value += rate;
-    });
-    var calcElms = elements.length - count;
-    if (!calcElms) return 1;
-    if (!value) return exclude;
-    return value / calcElms;
-};
+    //=============================================================================
+    // Game_Battler
+    //=============================================================================
 
-Game_Action.prototype.elementsAccumlateRate = function(target, elements) {
-    if (!elements.length) return 1;
-    var value = 1;
-    elements.forEach(function(elementId) {
-        value *= target.elementRate(elementId);
-    });
-    return value;
-};
+    //書き換え
+    Game_Battler.prototype.gainHp = function(value) {
+        this._result.hpDamage += -value;
+        this._result.hpAffected = true;
+        this.setHp(this.hp + value);
+    };
 
-Game_Action.prototype.elementsMinRate = function(target, elements) {
-    if (!elements.length) return 1;
-    return Math.min.apply(null, elements.map(function(elementId) {
-        return target.elementRate(elementId);
-    }, this));
-};
+    //書き換え
+    Game_Battler.prototype.gainMp = function(value) {
+        this._result.mpDamage += -value;
+        this.setMp(this.mp + value);
+    };
 
-//=============================================================================
-// Game_Battler
-//=============================================================================
+    //書き換え
+    Game_Battler.prototype.gainTp = function(value) {
+        this._result.tpDamage += -value;
+        this.setTp(this.tp + value);
+    };
 
-//書き換え
-Game_Battler.prototype.gainHp = function(value) {
-    this._result.hpDamage += -value;
-    this._result.hpAffected = true;
-    this.setHp(this.hp + value);
-};
-
-//書き換え
-Game_Battler.prototype.gainMp = function(value) {
-    this._result.mpDamage += -value;
-    this.setMp(this.mp + value);
-};
-
-//書き換え
-Game_Battler.prototype.gainTp = function(value) {
-    this._result.tpDamage += -value;
-    this.setTp(this.tp + value);
-};
+}());//FTKR_ExItemConfig_Damage.js END
