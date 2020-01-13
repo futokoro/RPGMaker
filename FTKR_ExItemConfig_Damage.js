@@ -4,8 +4,8 @@
 // プラグインNo : 18
 // 作成者     : フトコロ
 // 作成日     : 2017/04/14
-// 最終更新日 : 2020/01/11
-// バージョン : v1.1.1
+// 最終更新日 : 2020/01/13
+// バージョン : v1.1.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.EID = FTKR.EID || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.1.1 アイテムとスキルのダメージ処理を拡張するプラグイン
+ * @plugindesc v1.1.2 アイテムとスキルのダメージ処理を拡張するプラグイン
  * @author フトコロ
  *
  * @param ---属性ダメージ計算---
@@ -159,6 +159,7 @@ FTKR.EID = FTKR.EID || {};
  * 計算式は、ダメージ計算式のように、計算式を入力することで、固定値以外の値を
  * 使用することができます。以下のコードを使用できます。
  *  a.param - 使用者のパラメータを参照します。(a.atk で使用者の攻撃力)
+ *  b.param - 攻撃対象のパラメータを参照します。(b.atk で攻撃対象の攻撃力)
  *  s[x]    - スイッチID x の状態を参照します。
  *  v[x]    - 変数ID x の値を参照します。
  *  iv[x]   - アイテムのセルフ変数ID x の値を参照します。(*1)
@@ -184,7 +185,8 @@ FTKR.EID = FTKR.EID || {};
  * <Critical For Each>
  *    :クリティカルの判定を、ダメージID0 の最初の1回だけにするか、
  *    :それともダメージID毎に判定するか選べます。
- * 
+ *    :なお、「敵に会心」のメッセージを表示させるかどうかは、
+ *    :ダメージID0の結果で判定します。
  * 
  *-----------------------------------------------------------------------------
  * 属性ダメージの計算方法について
@@ -255,8 +257,13 @@ FTKR.EID = FTKR.EID || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.2 - 2020/01/13 : 不具合修正、機能追加
+ *    1. ダメージID1以降でダメージ倍率を0にした場合に、ダメージID0での
+ *       クリティカル判定の結果を問わず、会心メッセージを表示しない不具合を修正。
+ *    2. ダメージIDの計算式に攻撃対象のパラメータも参照できるように修正。
+ * 
  * v1.1.1 - 2020/01/11 : 不具合修正
- *    1. プラグインパラメータの読み取り部の不具合により、プラグインが正常に動作していなかった箇所を修正。
+ *    1. プラグインパラメータの読み取り部の不具合を修正。
  * 
  * v1.1.0 - 2018/08/05 : 機能追加
  *    1. 属性ダメージ計算時に100%の属性有効度を除外できる機能を追加。
@@ -529,6 +536,7 @@ FTKR.EID = FTKR.EID || {};
     var _EID_Game_Action_apply = Game_Action.prototype.apply;
     Game_Action.prototype.apply = function(target) {
         this._damageId = 0;
+        this._consoleCount = 0;
         _EID_Game_Action_apply.call(this, target);
         this.eidDamageIdApply(target);
     };
@@ -539,12 +547,12 @@ FTKR.EID = FTKR.EID || {};
         if (result.isHit() && len > 1) {
             for (var i = 1; i < len; i++) {
                 this._damageId = i;
-                if (this.item().damage.type > 0 && this.evalDamagesEnabled(this.itemBase())) {
+                if (this.item().damage.type > 0 && this.evalDamagesEnabled(this.itemBase(), target)) {
                     var critical = FTKR.EID.criticalForEach ? 
                         (Math.random() < this.itemCri(target)) :
                         result.critical;
                     var value = this.makeDamageValue(target, critical);
-                    this.executeDamage(target, value);
+                    this.executeEidDamage(target, value);
                     this.item().effects.forEach(function(effect) {
                         this.applyItemEffect(target, effect);
                     }, this);
@@ -559,8 +567,8 @@ FTKR.EID = FTKR.EID || {};
     ダメージ計算の修正
     -------------------------------------------------------------*/
 
-    Game_Action.prototype.evalDamagesEnabled = function(item) {
-        FTKR.setGameData(this.subject(), null, item);
+    Game_Action.prototype.evalDamagesEnabled = function(item, target) {
+        FTKR.setGameData(this.subject(), target, item);
         var enabled = item.damages[this._damageId].enabled;
         return !enabled ? true : FTKR.evalFormula(enabled);
     };
@@ -594,6 +602,14 @@ FTKR.EID = FTKR.EID || {};
     Game_Action.prototype.itemDamageCriticalRate = function() {
         FTKR.gameData.item = this.itemBase();
         return FTKR.evalFormula(this.itemDamage().criticalRate)
+    };
+
+    //ダメージID1以降でダメージ倍率を0にしても、ダメージID0でのクリティカル判定が無効にならないように修正。
+    Game_Action.prototype.executeEidDamage = function(target, value) {
+        var result = target.result();
+        var critical = result.critical;
+        this.executeDamage(target, value);
+        result.critical = critical;
     };
 
     /*-------------------------------------------------------------
