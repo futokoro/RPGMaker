@@ -206,7 +206,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
-| [FTKR_ExBattleEvent](FTKR_ExBattleEvent.js) | [あり](FTKR_ExBattleEvent.ja.md) | [v1.3.4](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExBattleEvent.js) | 2019/12/29 | バトルイベントを拡張する |
+| [FTKR_ExBattleEvent](FTKR_ExBattleEvent.js) | [あり](FTKR_ExBattleEvent.ja.md) | [v1.3.5](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExBattleEvent.js) | 2020/01/14 | バトルイベントを拡張する |
 | [FTKR_DisplayRegenerateMessage](FTKR_DisplayRegenerateMessage.js) | [あり](FTKR_DisplayRegenerateMessage.ja.md) | [v1.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_DisplayRegenerateMessage.js) | 2017/05/27 | HP再生量をバトルログに表示する |
 | [FTKR_ExBattleCommand](FTKR_ExBattleCommand.js) | [あり](FTKR_ExBattleCommand.ja.md) | [v2.2.2](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExBattleCommand.js) | 2020/01/03 | バトルコマンドを変更する |
 | [FTKR_FVActorAnimation](FTKR_FVActorAnimation.js) | なし | [v1.1.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_FVActorAnimation.js) | 2018/08/25 | フロントビューモードでアクター画像にアニメーションを表示する<br>別途アクター画像表示用のプラグインが必要 |
@@ -319,6 +319,9 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 # 更新情報
 
 2020/01の更新情報
+
+### 2020/01/14
+* [FTKR_ExBattleEvent](FTKR_ExBattleEvent.ja.md) v1.3.5
 
 ### 2020/01/13
 * [FTKR_ExItemConfig_Damage](FTKR_ExItemConfig_Damage.ja.md) v1.1.2

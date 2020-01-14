@@ -4,8 +4,8 @@
 // プラグインNo : 40
 // 作成者     : フトコロ
 // 作成日     : 2017/05/25
-// 最終更新日 : 2019/12/29
-// バージョン : v1.3.4
+// 最終更新日 : 2020/01/14
+// バージョン : v1.3.5
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ var FTKR = FTKR || {};
 FTKR.EBE = FTKR.EBE || {};
 
 /*:
- * @plugindesc v1.3.4 バトルイベントを拡張するプラグイン
+ * @plugindesc v1.3.5 バトルイベントを拡張するプラグイン
  * @author フトコロ
  * 
  * @param Battle Event
@@ -48,6 +48,10 @@ FTKR.EBE = FTKR.EBE || {};
  * @desc 戦闘敗北時に実行するコモンイベントID
  * 0 - 実行しない
  * @default 
+ * 
+ * @param Invalid Battle Phase
+ * @desc ここで規定したバトルフェーズ中に戦闘行動の強制が有効になる。複数規定する場合はカンマ(,)で区切る。
+ * @default action
  * 
  * @help 
  *-----------------------------------------------------------------------------
@@ -359,67 +363,7 @@ FTKR.EBE = FTKR.EBE || {};
  * イベントを組んでください。
  * 
  * 
- * ３．画面に数字をポップアップさせる
- * 　EBE_数字ポップアップ [スプライト番号] [設定内容]
- * 　EBE_POPUP_NUMBER [SPRITE_NUMBER] [SETTING]
- * 
- * 画面に数字をポップアップさせます。
- * スプライト番号を変えることで、複数の数字を表示できます。
- * 設定内容には以下を入力してください。(順不同)
- * なお、数値には \V[x] でゲーム内変数を指定できます。
- * 　
- * 　画像番号 [数値]
- * 　IMAGENUM [Number]
- * 　- 使用する画像は ダメージポップアップ用の img/system/damage.png です。
- * 　　上から 0番として、指定した列の数字スプライトを使用します。
- * 　　指定しない場合は、0番(白)を使用します。
- * 
- * 　表示内容 [数値]
- * 　VALUE [Number]
- * 　- 入力した数値を画面に表示します。
- * 
- * 　ポップアップ高さ [高さ] [差分]
- * 　POPUP_HEIGHT [Number] [Offset]
- * 　- ポップアップする高さを指定します。
- * 　　高さで、基準の高さを指定します。(デフォルト 40)
- * 　　差分で、桁毎の高さの差を指定します。(デフォルト 0.5)
- * 　　差分は変えたい場合にのみ指定してください。
- * 
- * 　表示時間 [数値]
- * 　DURATION [Number]
- * 　- スプライトを表示している時間を指定します。(デフォルト 30)
- * 　　実際の表示時間は、この値と表示する数字の桁数を掛けた値です。
- * 　　残り時間が10未満になると、画像の透明度が上がり、0で透明になります。
- * 
- * 　表示差 [数値]
- * 　DIFF_COUNT [Number]
- * 　- 数字の桁毎の表示タイミングのずれを指定します。(デフォルト 0)
- * 
- * 　表示座標 [X] [Y]
- * 　POSITION [X] [Y]
- * 　- スプライト画像を表示する位置を指定します。
- * 　　x座標とy座標両方を指定してください。
- * 　
- * 　消去しない
- * 　REMAIN
- * 　- この引数を入力すると透明度が変化せず、画面に表示しつづけます。
- * 
- * 　消去
- * 　ERASE
- * 　- この引数を入力すると、指定したスプライト番号の画像を消します。
- * 　
- * 　例)
- * 　　EBE_数字ポップアップ 1 表示内容 1234 表示座標 100 100
- * 　　EBE_POPUP_NUMBER 1 VALUE 1234 POSITION 100 100
- * 
- * 　　EBE_数字ポップアップ 2 画像番号 1 表示内容 12345 表示座標 100 100 消去しない
- * 　　EBE_POPUP_NUMBER 2 IMAGENUM 1 VALUE 12345 POSITION 100 100 REMAIN
- * 
- * 　　EBE_数字ポップアップ 1 消去
- * 　　EBE_POPUP_NUMBER 1 ERASE
- * 
- * 
- * ４．戦闘行動の設定
+ * ．戦闘行動の設定
  * 　EBE_敵キャラの戦闘行動の設定 [メンバーID]
  * 　EBE_BATTLE_ENEMY_ACTION [MEMBERID]
  * 
@@ -452,6 +396,9 @@ FTKR.EBE = FTKR.EBE || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.3.5 - 2020/01/15 : 不具合修正
+ *    1. 戦闘終了時イベントで「戦闘行動の強制」を実行できない不具合を修正。
  * 
  * v1.3.4 - 2019/12/29 : 仕様見直し
  *    1. 戦闘終了時イベントの実行処理を見直し。
@@ -588,6 +535,7 @@ FTKR.EBE.battleEnd = {
     customD : Number(parameters['Custom Defeat Event'] || 0),
     victory : Number(parameters['Victory Event'] || 0),
     defeat  : Number(parameters['Defeat Event'] || 0),
+    invalid : parameters['Invalid Battle Phase'] || '',
 };
 
 //=============================================================================
@@ -668,7 +616,6 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
             break;
         case '戦闘再開':
         case 'RESTART_BATTLE':
-//            BattleManager._isBattleEndEvent = false;
             BattleManager._checkEbeBattleEvent = false;
             break;
         case '数字ポップアップ':
@@ -754,7 +701,7 @@ BattleManager.initMembers = function() {
     this._checkEbeBattleEvent = false;
     this._battleEndPattern = 0;
     this._numberSprite = [];
-//    this._isBattleEndEvent = false;
+    this._invalidPhase = FTKR.EBE.battleEnd.invalid.split(',');
 };
 
 var _EBE_Game_Party_requestMotionRefresh = Game_Party.prototype.requestMotionRefresh;
@@ -765,13 +712,16 @@ Game_Party.prototype.requestMotionRefresh = function() {
 };
 
 BattleManager.isBattleEndEvent = function() {
-//    return $gameParty.inBattle() && this._isBattleEndEvent;
     return $gameParty.inBattle() && this._checkEbeBattleEvent;
+};
+
+BattleManager.isInvalidPhase = function() {
+    return this._invalidPhase.contains(this._phase);
 };
 
 var _EBE_BattleManager_updateEvent = BattleManager.updateEvent;
 BattleManager.updateEvent = function() {
-    if (this.isBattleEndEvent()) {
+    if (this.isBattleEndEvent() && !this.isInvalidPhase()) {
         if (this.isActionForced()) {
             this.processForcedAction();
             return true;
@@ -925,7 +875,6 @@ Game_Troop.prototype.setupEbeBattleEvent = function(condition, metacodes) {
             }
         }
         var event = $dataCommonEvents[FTKR.EBE.battleEnd[condition]];
-//        BattleManager._isBattleEndEvent = true;
         this._interpreter.setup(event.list, this.troop().id);
         return true;
     }
