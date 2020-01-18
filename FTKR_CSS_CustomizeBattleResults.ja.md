@@ -170,33 +170,48 @@ FTKR_CSS_CustomizeBattleResults.js
 
 ![画像](image/FTKR_CSS_CustomizeBattleResults/n06_001.png)
 
-### 表示するパーティーメンバー
+## 表示するパーティーメンバー
 `Displayed Members`の設定により、戦績ウィンドウに表示するメンバーを変更できます。
 
 * 0:バトルメンバー
 * 1:全パーティーメンバー(控え含む)
 
+控えメンバーはグレー表示になります。
+
 #### JS上級者向け
 パラメータ入力で「テキスト」を選択し、入力欄にスクリプトを記述することで、任意の対象を表示させることもできます。
 ただし、スクリプトは必ず配列データを入力してください。
 
-### 表示するステータス
+## 表示するステータス
 `actorStatusList` と `Actor Status Space In Text`の設定方法は、[FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md)と同じです。
 
-### 追加コード
+## メッセージ表示する
+
 当プラグインでは以下のコードをプラグインパラメータ`actorStatusList`の中の`text`に使用できます。
+
+### レベルアップを表示
+
+コード：`message`
+
+レベルアップ時に何レベル上がったのかをメッセージで表示します。（デフォルトで設定済み）
+
+表示する文章は、プラグインパラメータ`Display LevelUp Message`で設定（制御文字使用可能）します。
+
+### レベルアップとスキル習得を表示
 
 コード：`message2`
 
-デフォルトで設定している`message`コードから変更することで、レベルアップ時のスキル習得のメッセージを表示させることができます。
+レベルアップ時にレベルアップメッセージに加えて、スキル習得のメッセージも表示させることができます。
 変更する場合は、パラメータ入力で「テキスト」を選択し、入力欄に直接記述してください。
+
+スキル習得のメッセージは、プラグインパラメータ`Display NewSkill Message`で設定（制御文字使用可能）します。
 
 ![画像](image/FTKR_CSS_CustomizeBattleResults/n06_002.png)
 
 なお、表示行数が２行に変わる（アクター１人分の必要行数が増る）ため、使用する場合はプラグインパラメータ`Actor Cursor Lines`など設定の見直しが必要です。
 
-#### 設定例
-* `actorStatusList` 5行目 `text` = `message2`, `x` = 0
+### 設定例
+* `actorStatusList` 5行目 `text` = message2, `x` = 0
 * `Actor Cursor Lines` = 4
 * `Actor Max Cols` = 4
 * 他はデフォルトのまま
