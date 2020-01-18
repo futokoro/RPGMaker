@@ -215,10 +215,12 @@ FTKR_CSS_CustomizeBattleResults.js
 
 #### 纏めない場合
 ポーションを3個入手すると、それぞれ別に表示します。
+
 ![画像](image/FTKR_CSS_CustomizeBattleResults/n07_002.png)
 
 #### 纏める場合
 ポーションを3個入手すると、１行で表示します。
+
 ![画像](image/FTKR_CSS_CustomizeBattleResults/n07_003.png)
 
 ### ウィンドウ設定
