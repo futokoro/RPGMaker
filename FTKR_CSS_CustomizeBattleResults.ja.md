@@ -73,7 +73,9 @@ FTKR_CSS_CustomizeBattleResults.js
 
 # タイトルウィンドウの設定変更
 
-以下のプラグインパラメータで、タイトルウィンドウで表示する内容を設定します。
+以下のプラグインパラメータで、タイトルウィンドウの設定を変更できます。
+
+![画像](image/FTKR_CSS_CustomizeBattleResults/n03_001.png)
 
 ### 表示する文字列
 `Title Text`
@@ -89,15 +91,17 @@ FTKR_CSS_CustomizeBattleResults.js
 * 1 - 中央 (デフォルト)
 * 2 - 右寄せ
 
-その他のプラグインパラメータは、[ウィンドウ共通設定](#ウィンドウ共通設定)を参照してください。
+### ウィンドウ設定
 
-![画像](image/FTKR_CSS_CustomizeBattleResults/n03_001.png)
+その他のプラグインパラメータは、[ウィンドウ共通設定](#ウィンドウ共通設定)を参照してください。
 
 [目次に戻る](#目次)
 
 # 共通戦績ウィンドウの設定変更
 
-以下のプラグインパラメータで、タイトルウィンドウで表示する内容を設定します。
+以下のプラグインパラメータで、共通戦績ウィンドウの設定を変更できます。
+
+![画像](image/FTKR_CSS_CustomizeBattleResults/n04_001.png)
 
 ### 表示するステータス
 
@@ -113,15 +117,17 @@ FTKR_CSS_CustomizeBattleResults.js
 | 入手アイテムリスト(配列) | BattleManager._rewards.items |
 | 戦闘終了時のターン数 | $gameTroop._turnCount |
 
-その他のプラグインパラメータは、[ウィンドウ共通設定](#ウィンドウ共通設定)を参照してください。
+### ウィンドウ設定
 
-![画像](image/FTKR_CSS_CustomizeBattleResults/n04_001.png)
+その他のプラグインパラメータは、[ウィンドウ共通設定](#ウィンドウ共通設定)を参照してください。
 
 [目次に戻る](#目次)
 
 # コマンドウィンドウの設定変更
 
-以下のプラグインパラメータで、コマンドウィンドウで表示する内容を設定します。
+以下のプラグインパラメータで、コマンドウィンドウの設定を変更できます。
+
+![画像](image/FTKR_CSS_CustomizeBattleResults/n05_001.png)
 
 ### カーソル初期位置
 
@@ -156,13 +162,13 @@ FTKR_CSS_CustomizeBattleResults.js
 
 その他のプラグインパラメータは、[ウィンドウ共通設定](#ウィンドウ共通設定)を参照してください。
 
-![画像](image/FTKR_CSS_CustomizeBattleResults/n05_001.png)
-
 [目次に戻る](#目次)
 
 # アクター別戦績ウィンドウの設定変更
 
-以下のプラグインパラメータで、タイトルウィンドウで表示する内容を設定します。
+以下のプラグインパラメータで、アクター別戦績ウィンドウの設定を変更できます。
+
+![画像](image/FTKR_CSS_CustomizeBattleResults/n06_001.png)
 
 ### 表示するパーティーメンバー
 `Displayed Members`の設定により、戦績ウィンドウに表示するメンバーを変更できます。
@@ -193,11 +199,13 @@ FTKR_CSS_CustomizeBattleResults.js
 
 その他のプラグインパラメータは、[ウィンドウ共通設定](#ウィンドウ共通設定)を参照してください。
 
-![画像](image/FTKR_CSS_CustomizeBattleResults/n06_001.png)
-
 [目次に戻る](#目次)
 
 # アイテムウィンドウの設定変更
+
+以下のプラグインパラメータで、アイテムウィンドウの設定を変更できます。
+
+![画像](image/FTKR_CSS_CustomizeBattleResults/n07_001.png)
 
 ### アイテムを入手しなかった場合の表示
 `Enable Change Paint Opacity`
@@ -226,8 +234,6 @@ FTKR_CSS_CustomizeBattleResults.js
 ### ウィンドウ設定
 
 その他のプラグインパラメータは、[ウィンドウ共通設定](#ウィンドウ共通設定)を参照してください。
-
-![画像](image/FTKR_CSS_CustomizeBattleResults/n07_001.png)
 
 # ウィンドウ共通設定
 
