@@ -191,9 +191,20 @@ FTKR_CSS_CustomizeBattleResults.js
 デフォルトで設定している`message`コードから変更することで、レベルアップ時のスキル習得のメッセージを表示させることができます。
 変更する場合は、パラメータ入力で「テキスト」を選択し、入力欄に直接記述してください。
 
-なお、表示行数が２行に変わる（アクター１人分の必要行数が増る）ため、使用する場合はプラグインパラメータ`Actor Cursor Lines`の設定の見直しが必要です。
-
 ![画像](image/FTKR_CSS_CustomizeBattleResults/n06_002.png)
+
+なお、表示行数が２行に変わる（アクター１人分の必要行数が増る）ため、使用する場合はプラグインパラメータ`Actor Cursor Lines`など設定の見直しが必要です。
+
+#### 設定例
+* `actorStatusList` 5行目 `text` = `message2`, `x` = 0
+* `Actor Cursor Lines` = 4
+* `Actor Max Cols` = 4
+* 他はデフォルトのまま
+
+`Actor Cursor Lines`を増やすことで縦に表示可能なアクターが2人になるため、
+`Actor Max Cols`を変更して横に表示するアクターを増やすことで、１画面に表示可能な人数を増やしています。
+
+![画像](image/FTKR_CSS_CustomizeBattleResults/n06_003.png)
 
 ### ウィンドウ設定
 
@@ -247,7 +258,9 @@ FTKR_CSS_CustomizeBattleResults.js
 ### 横の列数
 `*** Max Cols`
 
-ウィンドウの横の列数を変更します。
+ウィンドウの横の列数を変更します。<br>
+アクター別戦績ウィンドウなら、横に並べるアクターの数を意味します。<br>
+アイテムウィンドウなら、横に並べる入手アイテムの数を意味します。
 
 ### カーソル高さの行数
 `*** Cursol Lines`
