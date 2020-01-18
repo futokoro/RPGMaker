@@ -89,7 +89,7 @@ FTKR_CSS_CustomizeBattleResults.js
 * 1 - 中央 (デフォルト)
 * 2 - 右寄せ
 
-その他のプラグインパラメータは、[共通設定](#共通設定)を参照してください。
+その他のプラグインパラメータは、[ウィンドウ共通設定](#ウィンドウ共通設定)を参照してください。
 
 ![画像](image/FTKR_CSS_CustomizeBattleResults/n03_001.png)
 
@@ -113,7 +113,7 @@ FTKR_CSS_CustomizeBattleResults.js
 | 入手アイテムリスト(配列) | BattleManager._rewards.items |
 | 戦闘終了時のターン数 | $gameTroop._turnCount |
 
-その他のプラグインパラメータは、[共通設定](#共通設定)を参照してください。
+その他のプラグインパラメータは、[ウィンドウ共通設定](#ウィンドウ共通設定)を参照してください。
 
 ![画像](image/FTKR_CSS_CustomizeBattleResults/n04_001.png)
 
@@ -141,7 +141,7 @@ FTKR_CSS_CustomizeBattleResults.js
 
 戦績画面を終了するコマンドの名前を設定します。
 
-その他のプラグインパラメータは、[共通設定](#共通設定)を参照してください。
+その他のプラグインパラメータは、[ウィンドウ共通設定](#ウィンドウ共通設定)を参照してください。
 
 ![画像](image/FTKR_CSS_CustomizeBattleResults/n05_001.png)
 
@@ -174,7 +174,7 @@ FTKR_CSS_CustomizeBattleResults.js
 ただし、表示行数が２行に変わるため、使用する場合はプラグインパラメータ`Actor Cursor Lines`の設定の見直しが必要です。
 
 
-その他のプラグインパラメータは、[共通設定](#共通設定)を参照してください。
+その他のプラグインパラメータは、[ウィンドウ共通設定](#ウィンドウ共通設定)を参照してください。
 
 ![画像](image/FTKR_CSS_CustomizeBattleResults/n06_001.png)
 
@@ -189,7 +189,7 @@ FTKR_CSS_CustomizeBattleResults.js
 * 0 - 纏めない(デフォルト)
 * 1 - 纏めて表示
 
-その他のプラグインパラメータは、[共通設定](#共通設定)を参照してください。
+その他のプラグインパラメータは、[ウィンドウ共通設定](#ウィンドウ共通設定)を参照してください。
 
 ![画像](image/FTKR_CSS_CustomizeBattleResults/n07_001.png)
 
