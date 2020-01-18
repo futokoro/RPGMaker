@@ -101,7 +101,7 @@ FTKR_CSS_CustomizeBattleResults.js
 
 ### 表示するステータス
 
-`Party Status Text1` から `Party Status Width Rate`の設定方法は、[FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md)と同じです。
+`partyStatusList` と `Party Status Space In Text`の設定方法は、[FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md)と同じです。
 
 なお、各コードで参照するアクターデータは、バトルメンバーの先頭キャラです。
 以下のスクリプトで、戦績データを取得できます。
@@ -123,9 +123,20 @@ FTKR_CSS_CustomizeBattleResults.js
 
 以下のプラグインパラメータで、コマンドウィンドウで表示する内容を設定します。
 
+### カーソル初期位置
+
 `Command Cursor Position`
 
 コマンドウィンドウのカーソル初期位置を設定します。
+
+### カーソル選択可否
+
+`Enable Select Command`
+
+終了コマンド以外（ステータス、アイテム）を選択できるようにするか設定します。
+
+画面に表示しているアクターの人数以上のメンバーがいる場合、「選択可」にしていないと、それらのキャラのステータスを見ることはできませんが、
+すべてのキャラを１画面に表示できる場合は、「選択可」にする必要はありません。
 
 ### コマンド名
 
@@ -140,6 +151,8 @@ FTKR_CSS_CustomizeBattleResults.js
 `Command Finish`
 
 戦績画面を終了するコマンドの名前を設定します。
+
+### ウィンドウ設定
 
 その他のプラグインパラメータは、[ウィンドウ共通設定](#ウィンドウ共通設定)を参照してください。
 
@@ -162,17 +175,21 @@ FTKR_CSS_CustomizeBattleResults.js
 ただし、スクリプトは必ず配列データを入力してください。
 
 ### 表示するステータス
-`Actor Status Text1` から `Actor Status Width Rate`の設定方法は、[FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md)と同じです。
+`actorStatusList` と `Actor Status Space In Text`の設定方法は、[FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md)と同じです。
 
 ### 追加コード
-当プラグインでは以下のコードをプラグインパラメータ`Actor Status Text*`に使用できます。
+当プラグインでは以下のコードをプラグインパラメータ`actorStatusList`の中の`text`に使用できます。
 
 コード：`message2`
 
 デフォルトで設定している`message`コードから変更することで、レベルアップ時のスキル習得のメッセージを表示させることができます。
+変更する場合は、パラメータ入力で「テキスト」を選択し、入力欄に直接記述してください。
 
-ただし、表示行数が２行に変わるため、使用する場合はプラグインパラメータ`Actor Cursor Lines`の設定の見直しが必要です。
+なお、表示行数が２行に変わる（アクター１人分の必要行数が増る）ため、使用する場合はプラグインパラメータ`Actor Cursor Lines`の設定の見直しが必要です。
 
+![画像](image/FTKR_CSS_CustomizeBattleResults/n06_002.png)
+
+### ウィンドウ設定
 
 その他のプラグインパラメータは、[ウィンドウ共通設定](#ウィンドウ共通設定)を参照してください。
 
@@ -182,12 +199,29 @@ FTKR_CSS_CustomizeBattleResults.js
 
 # アイテムウィンドウの設定変更
 
+### アイテムを入手しなかった場合の表示
+`Enable Change Paint Opacity`
+
+アイテムを入手しなかった場合に、コマンドをグレー表示にして選択できないようにするか設定できます。
+* 0 - 無効(デフォルト)
+* 1 - 有効
+
 ### 入手アイテムを纏めて表示
 `Combine Same Items`
 
-同じアイテムの場合に、纏めて表示するかどうか設定できます。
+同じアイテムを入手した場合に、纏めて表示するかどうか設定できます。
 * 0 - 纏めない(デフォルト)
 * 1 - 纏めて表示
+
+#### 纏めない場合
+ポーションを3個入手すると、それぞれ別に表示します。
+![画像](image/FTKR_CSS_CustomizeBattleResults/n07_002.png)
+
+#### 纏める場合
+ポーションを3個入手すると、１行で表示します。
+![画像](image/FTKR_CSS_CustomizeBattleResults/n07_003.png)
+
+### ウィンドウ設定
 
 その他のプラグインパラメータは、[ウィンドウ共通設定](#ウィンドウ共通設定)を参照してください。
 
