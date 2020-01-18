@@ -185,9 +185,7 @@ FTKR_CSS_CustomizeBattleResults.js
 ## 表示するステータス
 `actorStatusList` と `Actor Status Space In Text`の設定方法は、[FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.ja.md)と同じです。
 
-## メッセージ表示する
-
-当プラグインでは以下のコードをプラグインパラメータ`actorStatusList`の中の`text`に使用できます。
+当プラグインでは以下のコードを使用できます。
 
 ### レベルアップを表示
 
