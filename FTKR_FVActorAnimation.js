@@ -4,8 +4,8 @@
 // プラグインNo : 56
 // 作成者     : フトコロ
 // 作成日     : 2017/11/12
-// 最終更新日 : 2018/08/25
-// バージョン : v1.1.1
+// 最終更新日 : 2020/02/10
+// バージョン : v1.1.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.FAA = FTKR.FAA || {};
 
 //=============================================================================
 /*:ja
- * @plugindesc v1.1.1 フロントビューモードでアクター側にアニメーションを表示するプラグイン
+ * @plugindesc v1.1.2 フロントビューモードでアクター側にアニメーションを表示するプラグイン
  * @author フトコロ
  *
  * @param --アニメーション--
@@ -32,6 +32,14 @@ FTKR.FAA = FTKR.FAA || {};
  * @option カスタム画像
  * @value 2
  * @default 1
+ * 
+ * @param 味方全体対象のX座標ずれ
+ * @desc 味方全体対象のアニメーション表示位置のX座標のずれ
+ * @default 0
+ * 
+ * @param 味方全体対象のY座標ずれ
+ * @desc 味方全体対象のアニメーション表示位置のY座標のずれ
+ * @default 0
  * 
  * @param --ダメージポップアップ--
  * @desc 
@@ -201,6 +209,9 @@ FTKR.FAA = FTKR.FAA || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.1.2 - 2020/02/10 : 不具合修正
+ *    1. パーティー全体を対象とするアニメーションの表示位置調整。
+ * 
  * v1.1.1 - 2018/08/25 : 不具合修正、リファクタリング
  *    1. 味方対象のアニメーションが表示されない不具合を修正。
  * 
@@ -318,6 +329,10 @@ function Window_BattleSpriteStatus() {
 
     FTKR.FAA = {
         destination :Number(parameters['アニメーションの表示先'] || 0),
+        animation : {
+            offsetX :Number(parameters['味方全体対象のX座標ずれ'] || 0),
+            offsetY :Number(parameters['味方全体対象のY座標ずれ'] || 0),
+        },
         damage : {
             enable  :Number(parameters['ポップアップ表示'] || 0),
             offsetX :Number(parameters['X座標のずれ'] || 0),
@@ -685,8 +700,8 @@ function Window_BattleSpriteStatus() {
 
     Sprite_FaceAnimation.prototype.updatePosition = function() {
         if (this._animation.position === 3) {
-            this.x = this.parent.width / 2 - this._spriteWindow.x;
-            this.y = this.parent.height / 2 - this._spriteWindow.y;
+            this.x = this._spriteWindow.width / 2 + FTKR.FAA.animation.offsetX;
+            this.y = this._spriteWindow.height / 2 + FTKR.FAA.animation.offsetY;
         } else {
             var parent = this._target.parent;
             var grandparent = parent ? parent.parent : null;

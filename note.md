@@ -2,6 +2,26 @@
 
 # 過去の更新情報
 
+## 2020/01の更新情報
+
+### 2020/01/14
+* [FTKR_ExBattleEvent](FTKR_ExBattleEvent.ja.md) v1.3.5
+
+### 2020/01/13
+* [FTKR_ExItemConfig_Damage](FTKR_ExItemConfig_Damage.ja.md) v1.1.2
+
+### 2020/01/11
+* [FTKR_ExItemConfig_Damage](FTKR_ExItemConfig_Damage.ja.md) v1.1.1
+
+### 2020/01/10
+* [FTKR_CardGames](FTKR_CardGames.ja.md) v1.3.0
+
+### 2020/01/05
+* [FTKR_ItemSubCommand](FTKR_ItemSubCommand.ja.md) v1.7.3
+
+### 2020/01/03
+* [FTKR_ExBattleCommand](FTKR_ExBattleCommand.ja.md) v2.2.2
+
 ## 2019/12の更新情報
 
 ### 2019/12/29
