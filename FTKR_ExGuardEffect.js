@@ -4,8 +4,8 @@
 // プラグインNo : 79
 // 作成者     : フトコロ
 // 作成日     : 2018/04/15
-// 最終更新日 : 
-// バージョン : v1.0.0
+// 最終更新日 : 2020/02/11
+// バージョン : v1.0.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.EGF = FTKR.EGF || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.0 防御の効果を拡張するプラグイン
+ * @plugindesc v1.0.1 防御の効果を拡張するプラグイン
  * @author フトコロ
  *
  * @param Guard Effect Value
@@ -31,7 +31,7 @@ FTKR.EGF = FTKR.EGF || {};
  * @type boolean
  * @on 実行しない
  * @off 実行する
- * @default ture
+ * @default true
  *
  * @param Actor Guard Text
  * @desc アクターの防御が成功した時のバトルログの表示テキストを設定します。
@@ -50,6 +50,12 @@ FTKR.EGF = FTKR.EGF || {};
  * @desc エネミーの防御が成功した時のダメージSEを指定します。
  * @default {"name":"Damage4","volume":"90","pitch":"100","pan":"0"}
  * @type struct<sound>
+ * 
+ * @param TRAIT_GUARD_RATE
+ * @desc 他のプラグインと競合を起こす場合以外は変更しないでください。
+ * @default 101
+ * @type number
+ * @min 0
  * 
  * @help 
  *-----------------------------------------------------------------------------
@@ -111,7 +117,7 @@ FTKR.EGF = FTKR.EGF || {};
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
- * Copyright (c) 2018 Futokoro
+ * Copyright (c) 2020 Futokoro
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
@@ -122,6 +128,11 @@ FTKR.EGF = FTKR.EGF || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.1 - 2020/02/11 : 不具合修正
+ *      1. プラグインパラメータDisable Damage Motionの初期値を修正。
+ *      2. 防御率の設定値が2倍に計算される不具合を修正。
+ *      3. FTKR_ExSvMotionとの競合回避。
  * 
  * v1.0.0 - 2018/04/15 : 初版作成
  * 
@@ -258,6 +269,8 @@ FTKR.EGF = FTKR.EGF || {};
         enemyGuardDamageSe  : paramParse(parameters['Enemy Guard Damage SE']),
     };
 
+    Game_BattlerBase.TRAIT_GUARD_RATE = +(paramParse(parameters['TRAIT_GUARD_RATE']));
+
     //=============================================================================
     // DataManager
     //=============================================================================
@@ -273,6 +286,7 @@ FTKR.EGF = FTKR.EGF || {};
             this.egfEffectNoteTags($dataArmors);
             this.egfEffectNoteTags($dataEnemies);
             this.egfEffectNoteTags($dataStates);
+            _EGF_DatabaseLoaded = true;
         }
         return true;
     };
@@ -332,8 +346,6 @@ FTKR.EGF = FTKR.EGF || {};
     // Game_BattlerBase
     //=============================================================================
 
-    Game_BattlerBase.TRAIT_GUARD_RATE  = 101;
-
     Game_BattlerBase.prototype.guardRate = function() {
         return this.traitsSumAllEval(Game_BattlerBase.TRAIT_GUARD_RATE) / 100;
     };
@@ -352,6 +364,10 @@ FTKR.EGF = FTKR.EGF || {};
     Game_Battler.prototype.performGuardDamage = function() {
     };
 
+    Game_Battler.prototype.guardDamageMotion = function() {
+        return FTKR.EGF.disableDamageMotion ? 'guard' : 'damage';
+    };
+
     //=============================================================================
     // Game_Actor
     //=============================================================================
@@ -359,15 +375,12 @@ FTKR.EGF = FTKR.EGF || {};
     Game_Actor.prototype.performGuardDamage = function() {
         Game_Battler.prototype.performGuardDamage.call(this);
         if (this.isSpriteVisible()) {
-            var motion = FTKR.EGF.disableDamageMotion ?
-                'guardDamage' : 'damage';
+            var motion = this.guardDamageMotion();
             this.requestMotion(motion);
         }
         SoundManager.playActorGuardDamage();
     };
 
-    Sprite_Actor.MOTIONS.guardDamage = { index: 3,  loop: false };
-    
     //=============================================================================
     // Game_Enemy
     //=============================================================================

@@ -57,7 +57,8 @@
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.0.0](FTKR_ExGuardEffect.js) | 2018/04/15 | 初版公開 |
+| [ver1.0.1](FTKR_ExGuardEffect.js) | 2020/02/11 | プラグインパラメータDisable Damage Motionの初期値を修正<br>防御率の設定値が2倍に計算される不具合を修正<br>FTKR_ExSvMotionとの競合回避 |
+| ver1.0.0 | 2018/04/15 | 初版公開 |
 
 ## ライセンス
 
