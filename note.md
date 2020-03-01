@@ -2,6 +2,14 @@
 
 # 過去の更新情報
 
+## 2020/02の更新情報
+
+### 2020/02/11
+* [FTKR_ExGuardEffect](FTKR_ExGuardEffect.ja.md) v1.0.1
+
+### 2020/02/10
+* [FTKR_FVActorAnimation](FTKR_FVActorAnimation.js) v1.1.2
+
 ## 2020/01の更新情報
 
 ### 2020/01/14

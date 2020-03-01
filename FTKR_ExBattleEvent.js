@@ -4,8 +4,8 @@
 // プラグインNo : 40
 // 作成者     : フトコロ
 // 作成日     : 2017/05/25
-// 最終更新日 : 2020/01/14
-// バージョン : v1.3.5
+// 最終更新日 : 2020/03/02
+// バージョン : v1.3.6
 //=============================================================================
 
 var Imported = Imported || {};
@@ -15,7 +15,7 @@ var FTKR = FTKR || {};
 FTKR.EBE = FTKR.EBE || {};
 
 /*:
- * @plugindesc v1.3.5 バトルイベントを拡張するプラグイン
+ * @plugindesc v1.3.6 バトルイベントを拡張するプラグイン
  * @author フトコロ
  * 
  * @param Battle Event
@@ -29,11 +29,17 @@ FTKR.EBE = FTKR.EBE || {};
  * @param Custom Victory Event
  * @desc 戦闘勝利時の処理を変更できるようにするか
  * 0 - 変更しない, 1 - 変更する
+ * @type select
+ * @option 変更しない
+ * @value 0
+ * @option 変更する
+ * @value 1
  * @default 0
  * 
  * @param Victory Event
  * @desc 戦闘勝利時に実行するコモンイベントID
  * 0 - 実行しない
+ * @type common_event
  * @default 
  * 
  * @param --敗北時イベント--
@@ -42,12 +48,66 @@ FTKR.EBE = FTKR.EBE || {};
  * @param Custom Defeat Event
  * @desc 戦闘敗北時の処理を変更できるようにするか
  * 0 - 変更しない, 1 - 変更する
+ * @type select
+ * @option 変更しない
+ * @value 0
+ * @option 変更する
+ * @value 1
  * @default 0
  * 
  * @param Defeat Event
  * @desc 戦闘敗北時に実行するコモンイベントID
  * 0 - 実行しない
+ * @type common_event
  * @default 
+ * 
+ * @param --逃走時イベント--
+ * @desc 
+ * 
+ * @param Custom Escape Event
+ * @desc 戦闘逃走時の処理を変更できるようにするか
+ * 0 - 変更しない, 1 - 変更する
+ * @type select
+ * @option 変更しない
+ * @value 0
+ * @option 変更する
+ * @value 1
+ * @default 0
+ * 
+ * @param Escape Event
+ * @desc 戦闘逃走時に実行するコモンイベントID
+ * 0 - 実行しない
+ * @type common_event
+ * @default 
+ * 
+ * @param --中断時イベント--
+ * @desc 
+ * 
+ * @param Custom Abort Event
+ * @desc 戦闘中断時の処理を変更できるようにするか
+ * 0 - 変更しない, 1 - 変更する
+ * @type select
+ * @option 変更しない
+ * @value 0
+ * @option 変更する
+ * @value 1
+ * @default 0
+ * 
+ * @param Abort Event
+ * @desc 戦闘中断時に実行するコモンイベントID
+ * 0 - 実行しない
+ * @type common_event
+ * @default 
+ * 
+ * @param Abort BugFix
+ * @desc コアスクリプトにおける戦闘中断時のバグ修正を行う。他のプラグインと競合する場合は、無効にしてください。
+ * @type boolean
+ * @on 有効
+ * @off 無効
+ * @default true
+ * 
+ * @param --戦闘行動の強制--
+ * @desc 
  * 
  * @param Invalid Battle Phase
  * @desc ここで規定したバトルフェーズ中に戦闘行動の強制が有効になる。複数規定する場合はカンマ(,)で区切る。
@@ -57,20 +117,20 @@ FTKR.EBE = FTKR.EBE || {};
  *-----------------------------------------------------------------------------
  * 概要
  *-----------------------------------------------------------------------------
- * 本プラグインを実装することで、バトルイベントを拡張します。
+ * 本プラグインを実装することで、バトル終了時または中断時に
+ * 指定したイベントを実行します。
  * 
- * １．戦闘勝利時の処理(*1)の前に、コモンイベントまたは敵グループに
- * 　　設定したイベントを実行します。
- * 
- * ２．戦闘敗北時の処理(*1)の前に、コモンイベントまたは敵グループに
- * 　　設定したイベントを実行します。
- * 
- * ３．バトル中に、バトルイベントとしてコモンイベントを実行します。
- * 
- * (*1)戦闘終了時のステートの解除から、勝利等のメッセージ、戦闘報酬の処理など
- * 
+ * 実行可能なタイミング
+ *      １．勝利時（敵が全滅した後）
+ *      ２．敗北時（パーティーが全滅した後）
+ *      ３．逃走時（パーティーコマンド「逃げる」やスキルの逃げる効果使用後）
+ *      ４．中断時（イベントコマンド「バトルの中断」実行後）
  * 
  * 戦闘終了時のイベントの処理が終了すると、バトル画面が終了します。
+ * 
+ * 
+ * プラグインの使い方は、下のオンラインマニュアルページを見てください。
+ * https://github.com/futokoro/RPGMaker/blob/master/FTKR_ExBattleEvent.ja.md
  * 
  * 
  *-----------------------------------------------------------------------------
@@ -79,305 +139,14 @@ FTKR.EBE = FTKR.EBE || {};
  * 1.「プラグインマネージャー(プラグイン管理)」に、本プラグインを追加して
  *    ください。
  * 
- * 
- *-----------------------------------------------------------------------------
- * 戦闘勝利時のイベントの設定
- *-----------------------------------------------------------------------------
- * 戦闘勝利時の処理の前に、コモンイベントまたは敵グループに
- * 設定したイベントを実行します。
- * 
- * 実行するイベントは以下のいずれかです。
- * １．プラグインパラメータ<Victory Event>に設定したIDのコモンイベント
- * ２．敵グループのバトルイベントで、注釈で<EBE_戦闘勝利時>と記入したページ
- * 
- * １と２どちらもある場合は、バトルイベントを実行します。
- * 
- * バトルイベント内では、this._eventId で敵グループIdを取得できます。
- * 
- * なお、２のバトルイベントを実行させたい場合でも、１のコモンイベントは必ず設定してください。
- * 
- * 
- *-----------------------------------------------------------------------------
- * 戦闘勝利時の処理について
- *-----------------------------------------------------------------------------
- * プラグインパラメータ<Custom Victory Event>を 1 に設定していると
- * 戦闘終了時の処理を独自に設定することができます。
- * 
- * 通常、戦闘勝利時には以下の処理を実行しています。
- * 独自処理にする場合、これらの処理が必要な場合はイベント内で実行しなくては
- * いけません。
- * 
- * １．戦闘終了時のステート解除
- * パーティー内に、戦闘終了時に解除されるステートを受けている場合に
- * それを解除します。
- * 
- * プラグインコマンド
- * 　EBE_戦闘終了時ステート解除
- * 　EBE_REMOVE_BATTLE_STATES
- * 
- * 
- * ２．勝利モーションの実行
- * パーティーメンバーが、戦闘勝利モーションを実行します。
- * 
- * プラグインコマンド
- * 　EBE_勝利モーション実行
- * 　EBE_PREFORM_VICTORY
- * 
- * 
- * ３．勝利MEの演奏
- * データベースの[システム]-[音楽]で設定した勝利MEを演奏します。
- * 
- * プラグインコマンド
- * 　EBE_勝利ME演奏
- * 　EBE_PLAY_VICTORY_ME
- * 
- * 
- * ４．BGMBGSの再開
- * 戦闘前のBGMとBGSを再開します。
- * 
- * プラグインコマンド
- * 　EBE_BGMBGS再開
- * 　EBE_REPLAY_BGM_AND_BGS
- * 
- * 
- * ５．戦闘報酬の計算
- * 経験値やお金、アイテムの計算を行います。
- * 入手するアイテムはこのコマンドで選定されます。
- * 
- * プラグインコマンド
- * 　EBE_戦闘報酬計算
- * 　EBE_MAKE_REWARDS
- * 
- * 
- * ６．勝利メッセージの表示
- * データベースの[用語]-[メッセージ]で設定した勝利メッセージを表示します。
- * 半角スペースを空けて"-s"を付けると、メッセージを閉じるまでイベント処理を
- * 止めます。
- * 
- * プラグインコマンド
- * 　EBE_勝利メッセージ表示 (-s)
- * 　EBE_DISPLAY_VICTORY_MESSAGE (-s)
- * 
- * 
- * ７．戦闘報酬の表示
- * 戦闘報酬の計算結果に合わせて、データベースの[用語]-[メッセージ]で設定した
- * メッセージを表示します。
- * 半角スペースを空けて"-s"を付けると、メッセージを閉じるまでイベント処理を
- * 止めます。
- * 
- * プラグインコマンド
- * 　EBE_戦闘報酬表示 (-s)
- * 　EBE_DISPLAY_REWARDS (-s)
- * 
- * 　
- * ８．戦闘報酬の入手
- * 戦闘報酬の計算結果をパーティーメンバーに反映します。
- * このコマンドを実行しないと、経験値やお金アイテムは実際に入手できません。
- * 
- * プラグインコマンド
- * 　EBE_戦闘報酬入手
- * 　EBE_GAIN_REWARDS
- * 
- * 
- *-----------------------------------------------------------------------------
- * 戦闘敗北時のイベントの設定
- *-----------------------------------------------------------------------------
- * 戦闘敗北時の処理の前に、コモンイベントまたは敵グループに
- * 設定したイベントを実行します。
- * 
- * 実行するイベントは以下のいずれかです。
- * １．プラグインパラメータ<Defeat Event>に設定したIDのコモンイベント
- * ２．敵グループのバトルイベントで、注釈で<EBE_戦闘敗北時>と記入したページ
- * 
- * １と２どちらもある場合は、バトルイベントを実行します。
- * 
- * バトルイベント内では、this._eventId で敵グループIdを取得できます。
- * 
- * なお、２のバトルイベントを実行させたい場合でも、１のコモンイベントは必ず設定してください。
- * 
- *-----------------------------------------------------------------------------
- * 戦闘敗北時の処理について
- *-----------------------------------------------------------------------------
- * プラグインパラメータ<Custom Defeat Event>を 1 に設定していると
- * 戦闘終了時の処理を独自に設定することができます。
- * 
- * 通常、戦闘敗北時には以下の処理を実行しています。
- * 独自処理にする場合、これらの処理が必要な場合はイベント内で実行しなくては
- * いけません。
- * 
- * １．敗北メッセージの表示
- * データベースの[用語]-[メッセージ]で設定した敗北メッセージを表示します。
- * 半角スペースを空けて"-s"を付けると、メッセージを閉じるまでイベント処理を
- * 止めます。
- * 
- * プラグインコマンド
- * 　EBE_敗北メッセージ表示 (-s)
- * 　EBE_DISPLAY_DEFEAT_MESSAGE (-s)
- * 
- * 
- * ２．敗北MEの演奏
- * データベースの[システム]-[音楽]で設定した敗北MEを演奏します。
- * 
- * プラグインコマンド
- * 　EBE_敗北ME演奏
- * 　EBE_PLAY_DEFEAT_ME
- * 
- * 
- * ３．BGMBGSの再開　または　BGMの停止
- * 戦闘前のBGMとBGSを再開するか、またはBGMを停止します。
- * マップイベントで戦闘の敗北を許可しているかどうかで条件分岐します。
- * 
- * 戦闘の敗北フラグ
- * 　BattleManager._canLose
- * 
- * BGMBGSの再開のプラグインコマンド
- * 　EBE_BGMBGS再開
- * 　EBE_REPLAY_BGM_AND_BGS
- * 
- * BGMの停止のプラグインコマンド
- * 　EBE_BGM停止
- * 　EBE_STOP_BGM
- * 
- * 
- *-----------------------------------------------------------------------------
- * バトル中のコモンイベントについて
- *-----------------------------------------------------------------------------
- * 敵グループに設定するバトルイベントの替わりに、コモンイベントを実行します。
- * 
- * 実行するイベントは以下のとおりです。
- * １．プラグインパラメータ<Battle Event>に設定したIDのコモンイベントの中で
- * 　　実行条件を満たすイベント。
- * 
- * プラグインパラメータ<Battle Event>にはカンマ(,)とハイフン(-)を使うことで
- * 複数のコモンイベントIDを設定できます。
- * ハイフン(-)は、繋げた前後のIDの間のすべてのIDを登録します。
- * 
- * 入力例)
- * 　1, 4, 5, 10-15
- * 
- * 複数のイベントIDを入力した場合、入力した順番(左から)に実行条件を
- * 判定して、条件を満たしていればそのイベントを実行します。
- * 
- * 
- *-----------------------------------------------------------------------------
- * バトル中のコモンイベントの実行条件の設定
- *-----------------------------------------------------------------------------
- * コモンイベントに以下の注釈を入力することで、実行条件を設定できます。
- * 
- * <スパン: [タイミング]>
- * <SPAN: [TIMING]>
- * 実行回数に関する条件を設定します。
- * スパンを指定しない場合は、この設定を適用します。
- * [タイミング] には以下を入力してください。
- * 　バトル or BATTLE　　 - 戦闘中に１回だけ実行します。
- * 　ターン or TURN　　   - ターン中に１回だけ実行します。
- * 　モーメント or MOMENT - 条件を満たす度に実行します。
- * 
- * 
- * <ターン終了>
- * <TURNEND>
- * ターン終了時に実行します。
- * 
- * <ターン:a + b *X>
- * <TURN:a + b *X>
- * 指定したターンに実行します。
- * a と b に数値を入力してください。(* と X は半角, XはそのままXと入力)
- * 　a - 最初に実行するターン数
- * 　b - 次に何ターン後に実行するか(以降この値のターンが経過する毎に実行)
- * 　例)
- * 　　<ターン:1 + 2 *X>
- * 　　<TURN:2 + 4 *X>
- * 
- * <敵キャラHP: #a b %以下>
- * <ENEMY_HP: #a LESS THAN b %>
- * 指定した敵キャラのHP残量によって実行します。
- * a と b に数値を入力してください。(# と % は半角)
- * a と b の間には必ず半角スペースを入れてください。
- * 　a - 敵キャラの番号(グループに追加した順番)
- * 　b - 残りHPの割合値
- * 　例)
- * 　　<敵キャラHP: #1 50 %以下>
- * 　　<ENEMY_HP: #2 LESS THAN 70 %>
- * 
- * <アクターHP: #a b %以下>
- * <ACTOR_HP: #a LESS THAN b %>
- * 指定したアクターのHP残量によって実行します。
- * a と b に数値を入力してください。
- * a と b の間には必ず半角スペースを入れてください。
- * 　a - アクターID
- * 　b - 残りHPの割合値
- * 　例)
- * 　　<アクターHP: #1 50 %以下>
- * 　　<ACTOR_HP: #2 LESS THAN 70 %>
- * 
- * <スイッチ: a>
- * <SWITCH: a>
- * 指定したスイッチがONの時に実行します。
- * a に数値を入力してください。
- * 　a - スイッチID
- * 
- * <実行条件>
- * 条件式
- * </実行条件>
- * または
- * <Conditions>
- * code
- * </Conditions>
- * 条件式(code)で記述したJavaScript計算式を判定して実行します。
- * 
- * 
- *-----------------------------------------------------------------------------
- * プラグインコマンド
- *-----------------------------------------------------------------------------
- * バトルイベント用に以下のプラグインコマンドが使用できます。
- * 
- * １．パーティーメンバーに指定のモーションをとらせる
- * 　EBE_モーション実行 [モーション名] [対象メンバー]
- * 　EBE_REQUEST_MOTION [MOTION NAME] [TARGET MEMBER]
- * 
- * モーション名(MOTION NAME)には以下を入力してください。(要小文字)
- * 　walk, wait, chant, guard, damage, evade, thrust, swing,
- * 　missile, skill, spell, item, escape, victory, dying,
- * 　abnormal, sleep, dead,
- * 対象メンバーには以下を入力してください。
- * 空欄の場合は、すべてのメンバーを対象にします。
- * 　0~ - 先頭を 0番としたときの隊列順
- * 　全員 or ALL - すべてのメンバー
- * 
- * 例)
- * 　EBE_モーション実行 victory 1
- * 　EBE_REQUEST_MOTION wait ALL
- * 
- * 
- * ２．戦闘を再開する
- * 　EBE_戦闘再開
- * 　EBE_RESTART_BATTLE
- * 
- * 勝利イベントや敗北イベントはイベント終了時にバトルが終了しますが
- * このコマンドを実行することで、バトルを再開します。
- * ただし、エネミーが何もいない場合や、アクターが全員戦闘不能な場合は
- * バトルを再開しても、すぐに勝利イベントや敗北イベントを再度実行します。
- * 
- * このコマンドがイベント中常に実行する場合はバトルが終わりません。
- * バトルを終わらせる時に、条件分岐等で再開コマンドを実行しないように
- * イベントを組んでください。
- * 
- * 
- * ．戦闘行動の設定
- * 　EBE_敵キャラの戦闘行動の設定 [メンバーID]
- * 　EBE_BATTLE_ENEMY_ACTION [MEMBERID]
- * 
- * 　指定の敵キャラの戦闘行動を再設定します。
- * 　敵キャラがターン開始時に行動を設定してからターン中に行動する間に
- * 　このコマンドを実行することで、行動を変えることができます。
- * 
- * 　[メンバーID]の入力内容
- * 　0~ - 最初を 0番として、敵グループに追加した順番で敵キャラを指定します
- * 
- * 　(参考)
- * 　指定の敵キャラが行動済みかどうかを調べるスクリプト
- * 　BattleManager.isActedEnemy(メンバーID)
- * 
+ * 2. 以下のプラグインと組み合わせる場合は、プラグイン管理の順番に注意してください。
+ * 
+ *    FTKR_CSS_CustomizeBattleResults.js
+ *    ↑このプラグインよりも上に登録↑
+ *    FTKR_ExBattleEvent.js
+ *    ↓このプラグインよりも下に登録↓
+ *    FTKR_ExVariablesChange.js
+ *    
  * 
  *-----------------------------------------------------------------------------
  * 本プラグインのライセンスについて(License)
@@ -396,6 +165,9 @@ FTKR.EBE = FTKR.EBE || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.3.6 - 2020/03/02 : 機能追加
+ *    1. 逃走時と中断時に指定のイベントを実行する機能を追加。
  * 
  * v1.3.5 - 2020/01/15 : 不具合修正
  *    1. 戦闘終了時イベントで「戦闘行動の強制」を実行できない不具合を修正。
@@ -431,6 +203,18 @@ FTKR.EBE = FTKR.EBE || {};
  *-----------------------------------------------------------------------------
 */
 //=============================================================================
+
+var paramParse = function(obj) {
+    return JSON.parse(JSON.stringify(obj, paramReplace));
+}
+
+var paramReplace = function(key, value) {
+    try {
+        return JSON.parse(value || null);
+    } catch (e) {
+        return value;
+    }
+};
 
 var matchTextToRegs = function(test, regs) {
     return regs.some( function(reg){
@@ -531,10 +315,15 @@ var parameters = PluginManager.parameters('FTKR_ExBattleEvent');
 
 FTKR.EBE.battleEvents = splitConvertNumber(parameters['Battle Event']);
 FTKR.EBE.battleEnd = {
-    customV : Number(parameters['Custom Victory Event'] || 0),
-    customD : Number(parameters['Custom Defeat Event'] || 0),
-    victory : Number(parameters['Victory Event'] || 0),
-    defeat  : Number(parameters['Defeat Event'] || 0),
+    victory : paramParse(parameters['Victory Event'] || 0),
+    customV : paramParse(parameters['Custom Victory Event'] || 0),
+    defeat  : paramParse(parameters['Defeat Event'] || 0),
+    customD : paramParse(parameters['Custom Defeat Event'] || 0),
+    escape  : paramParse(parameters['Escape Event'] || 0),
+    customE : paramParse(parameters['Custom Escape Event'] || 0),
+    abort   : paramParse(parameters['Abort Event'] || 0),
+    customA : paramParse(parameters['Custom Abort Event'] || 0),
+    abortBF : paramParse(parameters['Abort BugFix'] || false),
     invalid : parameters['Invalid Battle Phase'] || '',
 };
 
@@ -742,9 +531,18 @@ BattleManager.checkBattleEnd = function() {
                 if (FTKR.EBE.battleEnd.customV) break;
                 _EBE_BattleManager_processVictory.call(this);
                 return true;
+            case 1: //逃走
+                if (FTKR.EBE.battleEnd.customE) break;
+                _EBE_BattleManager_processAbort.call(this);
+                return true;
             case 2: //敗北
                 if (FTKR.EBE.battleEnd.customD) break;
                 _EBE_BattleManager_processDefeat.call(this);
+                return true;
+            case 3: //中断
+                this._battleEndPattern = 1;
+                if (FTKR.EBE.battleEnd.customA) break;
+                _EBE_BattleManager_processAbort.call(this);
                 return true;
         }
         this.endBattle(this._battleEndPattern);
@@ -775,6 +573,42 @@ BattleManager.processDefeat = function() {
         return true;
     }
     _EBE_BattleManager_processDefeat.call(this);
+};
+
+var _EBE_BattleManager_checkAbort = BattleManager.checkAbort;
+BattleManager.checkAbort = function() {
+    if (FTKR.EBE.battleEnd.abortBF) {
+        if ($gameParty.isEmpty()) {
+            SoundManager.playEscape();
+            this._escaped = true;
+            this.processAbort();
+        } else if (this.isAborting()) {
+            this.processAbort();
+        }
+        return false;
+    } else {
+        _EBE_BattleManager_checkAbort.call(this);
+    }
+};
+
+var _EBE_BattleManager_processAbort = BattleManager.processAbort;
+BattleManager.processAbort = function() {
+    if (FTKR.EBE.battleEnd.abort && !this.isBattleEndEvent() && this.isAborting()) {
+        if ($gameTroop.setupEbeBattleEvent('abort', ['EBE_戦闘中断時'])) {
+            this._checkEbeBattleEvent = true;
+            this._battleEndPattern = 3;
+            this._phase = 'battleEnd';
+        }
+        return true;
+    } else if (FTKR.EBE.battleEnd.escape && !this.isBattleEndEvent()) {
+        if ($gameTroop.setupEbeBattleEvent('escape', ['EBE_戦闘逃走時'])) {
+            this._checkEbeBattleEvent = true;
+            this._battleEndPattern = 1;
+            this._phase = 'battleEnd';
+        }
+        return true;
+    }
+    _EBE_BattleManager_processAbort.call(this);
 };
 
 BattleManager.setupNumberPopup = function(index) {
