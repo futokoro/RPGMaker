@@ -104,7 +104,7 @@ FTKR.EBE = FTKR.EBE || {};
  * @type boolean
  * @on 有効
  * @off 無効
- * @default true
+ * @default false
  * 
  * @param --戦闘行動の強制--
  * @desc 
