@@ -583,6 +583,7 @@ BattleManager.checkAbort = function() {
             this._escaped = true;
             this.processAbort();
         } else if (this.isAborting()) {
+            this._escaped = true;
             this.processAbort();
         }
         return false;
