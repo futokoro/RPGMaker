@@ -4,8 +4,8 @@
 // プラグインNo : 46
 // 作成者     : フトコロ
 // 作成日     : 2017/06/17
-// 最終更新日 : 2019/12/16
-// バージョン : v1.7.0
+// 最終更新日 : 2020/03/21
+// バージョン : v1.7.1
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.OSW = FTKR.OSW || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.7.0 オリジナルのシーンやウィンドウを作成する
+ * @plugindesc v1.7.1 オリジナルのシーンやウィンドウを作成する
  * @author フトコロ
  *
  * @param --ウィンドウの共通設定--
@@ -225,6 +225,11 @@ FTKR.OSW = FTKR.OSW || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.7.1 - 2020/03/21 : 不具合修正
+ *    1. アクティブウィンドウ命令が正常に動作しない不具合を修正。
+ *    2. ウィンドウの高さと幅を個別に設定する機能を追加。
+ *    3. コマンドウィンドウの高さをコマンド数に寄らずに設定する機能を追加。
  * 
  * v1.7.0 - 2019/12/16 : 機能追加
  *    1. コモンウィンドウに対して、FTKR_CustomSimpleActorStatus.js の
@@ -561,6 +566,18 @@ function Game_OswScene() {
                     window.setSize(w, h);
                     i += window.isCommand() ? 1 : 2;
                     break;
+                case '幅':
+                case 'WIDTH':
+                    var w = setArgNum(args[i+1]);
+                    window.setWidth(w);
+                    i += 1;
+                    break;
+                case '高さ':
+                case 'HEIGHT':
+                    var h = setArgNum(args[i+1]);
+                    window.setHeight(h);
+                    i += 1;
+                    break;
                 case 'カーソル残す':
                 case 'LEAVE_CURSOR':
                     switch (setArgStr(args[i+1]).toUpperCase()) {
@@ -783,12 +800,13 @@ function Game_OswScene() {
                         var windowType = Game_OswBase.WINDOW_SELECTABLE;
                         break;
                 }
+                console.log(newwindow);
                 var windowId = Number(newwindow[1]);
                 var hide = Boolean(eval(newwindow[2]));
                 var deselect = Boolean(eval(newwindow[3]));
                 var varId = Number(newwindow[4]) || 0;
                 var action = windowType + ',' + windowId + ',' + hide + ',' + deselect+ ',' + varId;
-                return 'SceneManager._scene.changeActivateWindow.bind(SceneManager._scene, window,' + action + ')';
+                return 'SceneManager._scene.changeActivateWindow.bind(SceneManager._scene, this,' + action + ')';
             case 'シーン変更':
             case 'CHANGE_SCENE':
                 return 'SceneManager.push.bind(SceneManager,' + match[2] + ')';
@@ -883,6 +901,7 @@ function Game_OswScene() {
 
     Game_Interpreter.prototype.setOswSelectArgs = function(window, i, args) {
         var method = this.setOswMethod(args[i+1]);
+        console.log(method);
         switch (args[i].toUpperCase()) {
             case '決定':
             case 'OK':
@@ -1826,6 +1845,7 @@ function Game_OswScene() {
     Window_OswCommand.prototype.initialize = function(window) {
         this._window = window;
         this._width = window._width;
+        this._height = window._height;
         Window_Command.prototype.initialize.call(this, window._x, window._y);
         this._show = false;
         this.hide();
@@ -1840,6 +1860,10 @@ function Game_OswScene() {
 
     Window_OswCommand.prototype.windowWidth = function() {
         return this._width;
+    };
+
+    Window_OswCommand.prototype.windowHeight = function() {
+        return !!this._height ? this._height : this.fittingHeight(this.numVisibleRows());
     };
 
     Window_OswCommand.prototype.maxCols = function() {

@@ -1,7 +1,7 @@
 # RPGツクールMV プラグイン
 
 プラグインは逐次追加更新を行っています。最新情報は、[更新情報](#更新情報)を確認してください。<br>
-公開中のプラグインの数：94<br>
+公開中のプラグインの数：95<br>
 [対応するかもしれないプラグインのメモ](memo.md)
 
 # 目次
@@ -82,7 +82,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_DisplayCommandFrame](FTKR_DisplayCommandFrame.js) | [仮版](FTKR_DisplayCommandFrame.ja.md) | [v1.2.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_DisplayCommandFrame.js) | 2017/11/26 | コマンドに枠を付ける |
-| [FTKR_OriginalSceneWindow](FTKR_OriginalSceneWindow.js) | [仮版](FTKR_OriginalSceneWindow.ja.md) | [v1.7.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_OriginalSceneWindow.js) | 2019/12/16 | オリジナルのシーンおよびウィンドウを作成する |
+| [FTKR_OriginalSceneWindow](FTKR_OriginalSceneWindow.js) | [仮版](FTKR_OriginalSceneWindow.ja.md) | [v1.7.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_OriginalSceneWindow.js) | 2020/03/21 | オリジナルのシーンおよびウィンドウを作成する |
 | [FTKR_SceneBackImages](FTKR_SceneBackImages.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SceneBackImages.js) | 2018/02/24 | メニュー画面やショップ画面などに変数で切替可能な背景画像を設定する |
 | [FTKR_InterlockMouseAndWindow](FTKR_InterlockMouseAndWindow.js) | なし | [v1.1.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_InterlockMouseAndWindow.js) | 2018/04/30 | マウスポインタとウィンドウのカーソルを連動させる |
 | [FTKR_TitleScene](FTKR_TitleScene.js) | なし | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_TitleScene.js) | 2019/04/14 | タイトル画面のコマンドの表示変更や、クレジット画面を追加する。 |
@@ -322,6 +322,7 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 ### 2020/03/21
 * [FTKR_AddOriginalParameters](FTKR_AddOriginalParameters.ja.md) v1.3.0
+* [FTKR_OriginalSceneWindow](FTKR_OriginalSceneWindow.ja.md) v1.7.1
 
 ### 2020/03/18
 * [FTKR_ItemCompositionSystem](FTKR_ItemCompositionSystem.ja.md) v1.7.4(誤字修正のみ)
