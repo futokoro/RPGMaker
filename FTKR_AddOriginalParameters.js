@@ -4,8 +4,8 @@
 // プラグインNo : 3
 // 作成者     : フトコロ
 // 作成日     : 2017/02/16
-// 最終更新日 : 2018/10/16
-// バージョン : v1.2.1
+// 最終更新日 : 2020/03/21
+// バージョン : v1.3.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.AOP = FTKR.AOP || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.1 オリジナルのパラメータを追加するプラグイン
+ * @plugindesc v1.3.0 オリジナルのパラメータを追加するプラグイン
  * @author フトコロ
  *
  * @param Use Param Num
@@ -289,212 +289,12 @@ FTKR.AOP = FTKR.AOP || {};
  * 
  * 
  *-----------------------------------------------------------------------------
- * オリジナルパラメータの設定
- *-----------------------------------------------------------------------------
- * 以下のプラグインパラメータを設定することで、ダメージ計算式に使用できる
- * オリジナルのパラメータを、1～10個(*1)まで追加できます。
- * 
- * (*1) プラグインパラメータ<Use Param Num>の値を変更することで
- *      使用する数を設定できます。
- * 
- * <Parameter x Text>
- *    :コード名を設定します。
- *    :FTKR_CustomSimpleActorStatus とその拡張プラグインで表示する際の名称です。
- *
- * <Parameter x Code>
- *    :計算式等で使用するコード名を設定します。
- *
- * <Parameter x Current>
- *    :計算式等で使用する現在値用コード名を設定します。
- *
- * <Parameter x Max>
- *    :パラメータの最大値の設定します。
- *
- * <Parameter x Min>
- *    :パラメータの最小値の設定します。
- *    :現在値を使用する場合は、必ず1以上に設定してください。
- *
- * 
- * オリジナルのパラメータに対して、以下のタグを使用することができます。
- * 
- * [アクター、クラス]
- * <AOP Param x Level y Value: z (Rand r)>
- * <AOP 'code' Level y Value: z (Rand r)>
- *      :アクターのレベルが y の時のパラメータ x (または'code')の
- *      :増加量を z に設定する。
- *      :()内を追記した場合、z に対して ±r のランダム値を付加する。
- *      :y が 1 の場合は、初期値を意味します。
- * 
- * <AOP Param x Level y1 To y2 Value: z (Rand r)>
- * <AOP 'code' Level y1 To y2 Value: z (Rand r)>
- *      :アクターのレベルが y1 から y2 までの時のパラメータ x 
- *      :(または'code')の増加量を z に設定する。
- *      :()内を追記した場合、z に対して ±r のランダム値を付加する。
- * 
- * ランダム値を加算した場合に、増加量は 0 よりも小さな値になることはありません。
- * アクターとクラスの両方で設定した場合は、その合計値になります。
- * 
- * 例) Param 0 の code を str とした場合
- * <AOP Param 0 Level 1 Value: 10>
- * <AOP str Level 2 To 10 Value: 5 Rand 2>
- *      :パラメータ 0 (str)に対して、初期値を 10 として、Lv2 から Lv10 の間
- *      :レベルアップ毎に、3～7加算する。
- * 
- * 
- * [武器、防具、ステート]
- * <AOP Param x Plus: y>
- * <AOP 'code' Plus: y>
- *      :装備中、またはステート付加中、パラメータ x (または'code')に、
- *      :y 加算します。
- *      :y に負の数字を入れた場合、減算します。
- * 
- * <AOP Param x Rate: y>
- * <AOP 'code' Rate: y>
- *      :装備中、またはステート付加中、パラメータ x (または'code')を、
- *      :y 倍します。
- *      :y に負の数字を入れた場合、正の数と見なして積算します。
- *      :Plusで加算した後に、Rateの値で積算します。
- * 
- * <AOP Param x Grow: y>
- * <AOP 'code' Grow: y>
- *      :装備した状態でレベルが上がると、パラメータ x (または'code')を、
- *      :y 加算します。
- *      :この値は、装備を外しても有効です。
- *      :このタグは、ステートでは使用できません。
- * 
- * 
- * [エネミー]
- * <AOP Param x Value: y>
- * <AOP 'code' Value: y>
- *      :対象のエネミーのパラメータ x (または'code')を、y に設定します。
- * 
- * 
- * [アイテム、スキル]
- * <AOP Param x Get: y(%)>
- * <AOP 'code' Get: y(%)>
- *      :アイテムまたはスキルを使用すると、対象者のパラメータ x 
- *      :(または'code')の現在値に y 加算します。
- *      :y に負の数字を入れた場合、減算します。
- *      :y に'%'を付けた場合、パラメータ x (または'code')の最大値の
- *      :y% 分加算します。
- * 
- * 
- *-----------------------------------------------------------------------------
- * オリジナルパラメータを使用してできること
- *-----------------------------------------------------------------------------
- * 1. オリジナルパラメータは、ダメージ計算式に使用できます。
- *    使用する場合、ダメージ計算式には、プラグインパラメータで設定した'code'を
- *    記載してください。
- * 
- *    例) パラメータ0 の code を str とした場合、以下のように書きます。
- * 
- *               4 * (a.atk + a.str) - 2 * b.def
- * 
- * 
- * 2. オリジナルパラメータは、装備条件に使用できます。
- *    以下のタグを使用することで、装備するために必要な条件に、オリジナルパラメータを
- *    使用できます。
- * 
- * [武器、防具]
- * <AOP Param x Require: y>
- *      :パラメータ x が、y 以上ないと、装備することができなくなります。
- * 
- * 
- * 3. ゲーム内で、オリジナルパラメータの値を取得できます。
- *    以下のスクリプトを使用すると、取得できます。(*1)
- * 
- *    $gameActors.actor[x].aopParam(y)
- *    $gameActors.actor[x].code
- *      :アクター x の パラメータ y (または'code')の値を取得します。
- *      :'code'は、プラグインパラメータで設定したコード名です。
- * 
- *    取得した値は、$gameVariables.setValue()等を使って利用してください。
- * 
- *    (*1)$gameActors.actor[x]を$gameParty.members()[n]に変えると
- *     パーティーの並び順で先頭を n=0 としてパラメータを取得できます。
- * 
- * 4. ゲーム内で、オリジナルパラメータの現在値を操作できます。
- *    以下のスクリプトを使用できます。(*1)
- * 
- *    $gameActors.actor[x].setCAop(y, value)
- *      :アクター x の パラメータ y の現在値を value に変更します。
- * 
- *    $gameActors.actor[x].gainCAop(y, value)
- *      :アクター x の パラメータ y の現在値を value分加算します。
- *      :value が負の値ならば、減算します。
- * 
- * 
- *-----------------------------------------------------------------------------
- * プラグインコマンド
- *-----------------------------------------------------------------------------
- * 以下のプラグインコマンドを使用できます。
- * 
- * 1. パラメータの変更
- * 指定したアクターIDのパラメータ(最大値)を変更します。
- * 
- * AOP_パラメータ変更 アクター(x) コード名 演算方法 値
- * AOP_set_Parameters Actor(x) code CALCTYPE value
- * 
- * AOP_パラメータ変更 パーティー(n) コード名 演算方法 値
- * AOP_set_Parameters Party(n) code CALCTYPE value
- * 
- * x にはアクターIDを代入してください。
- * n にはパーティーの先頭を 0 とした並び順の番号を代入してください。
- * 
- * コード名には、プラグインパラメータで設定したコード名、または
- * パラメータIDを代入してください。
- * 演算方法には、代入(=)、加算(+)、減算(-)、積算(*)、除算(/)、剰余(%)を
- * 代入してください。
- * アクターID、パラメータID、代入する値には、ゲーム内変数を指定できます。
- * ゲーム内変数を使用する場合は、数値の変わりに v[n] を入力してください。
- * 
- * 入力例)
- * AOP_パラメータ変更 アクター(1) str 代入 v[5]
- * AOP_set_Parameters actor(1) str = v[5]
- *    :アクターID1 のパラメータ str にゲーム内変数ID5 の値を代入する
- * 
- * 
- * 2. パラメータの取得
- * 指定したアクターIDのパラメータ(最大値)を、ゲーム内変数に代入します。
- * 
- * AOP_パラメータ取得 ゲーム内変数ID アクター(x) コード名
- * AOP_GET_Parameters variableId Actor(x) code
- * 
- * AOP_パラメータ取得 ゲーム内変数ID パーティー(n) コード名
- * AOP_GET_Parameters variableId Party(n) code
- * 
- * x にはアクターIDを代入してください。
- * n にはパーティーの先頭を 0 とした並び順の番号を代入してください。
- * 
- * コード名には、プラグインパラメータで設定したコード名、または
- * パラメータIDを代入してください。
- * ゲーム内変数ID、アクターID、パラメータIDには、ゲーム内変数を指定できます。
- * ゲーム内変数を使用する場合は、数値の変わりに v[n] を入力してください。
- * 
- * 入力例)
- * AOP_パラメータ取得 5 アクター(1) str
- * AOP_GET_Parameters 5 actor(1) str
- *    :アクターID1 のパラメータ str の値を ゲーム内変数ID5 に代入する
- * 
- * 
- *-----------------------------------------------------------------------------
- * その他の設定
- *-----------------------------------------------------------------------------
- * 1. オリジナルパラメータの最大値は、プラグインパラメータ<Max Param>または、
- *    各パラメータの<Parameter x Max>の値の内、大きいほうを適用します。
- * 
- * 
- * 2. ランダム値は、ゲーム開始時にすべてのレベル帯の上昇量を決定する仕組みです。
- *    そのため、レベルアップをセーブ/ロードしたとしても、値は変わりません。
- * 
- * 
- *-----------------------------------------------------------------------------
  * 本プラグインのライセンスについて(License)
  *-----------------------------------------------------------------------------
  * 本プラグインはMITライセンスのもとで公開しています。
  * This plugin is released under the MIT License.
  * 
- * Copyright (c) 2017,2018 Futokoro
+ * Copyright (c) 2017 Futokoro
  * http://opensource.org/licenses/mit-license.php
  * 
  * 
@@ -505,6 +305,9 @@ FTKR.AOP = FTKR.AOP || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.3.0 - 2020/03/21 : 機能追加、プラグイン内マニュアル削除
+ *    1. アイテムやスキル使用時にパラメータを成長させる機能を追加。
  * 
  * v1.2.1 - 2018/10/16 : 機能追加
  *    1. オリジナルパラメータの入力ミス時のエラー表示機能を追加。(F12)
@@ -616,6 +419,7 @@ FTKR.AOP = FTKR.AOP || {};
     Game_BattlerBase.MAX_AOP_PARAMS = 10;
     Game_BattlerBase.TRAIT_AOPPARAM = 99;
     Game_Action.EFFECT_GET_AOP = 990;
+    Game_Action.EFFECT_GROW_AOP = 991;
 
     if (FTKR.AOP.useParamNum > Game_BattlerBase.MAX_AOP_PARAMS) {
         FTKR.AOP.useParamNum = Game_BattlerBase.MAX_AOP_PARAMS;
@@ -806,6 +610,9 @@ FTKR.AOP = FTKR.AOP || {};
         var note1 = /<(?:AOP)[ ](.+)[ ](?:GET):[ ]*(\d+)(?:%)>/i;
         var note2 = /<(?:AOP)[ ](.+)[ ](?:GET):[ ]*(\d+)>/i;
         var note3 = /<(?:AOP)[ ](.+)[ ](?:GET):[ ]*(?:-)(\d+)>/i;
+        var note4 = /<(?:AOP)[ ](.+)[ ](?:GROW):[ ]*(\d+)(?:%)>/i;
+        var note5 = /<(?:AOP)[ ](.+)[ ](?:GROW):[ ]*(\d+)>/i;
+        var note6 = /<(?:AOP)[ ](.+)[ ](?:GROW):[ ]*(?:-)(\d+)>/i;
         
         for (var n = 1; n < group.length; n++) {
             var obj = group[n];
@@ -827,6 +634,20 @@ FTKR.AOP = FTKR.AOP || {};
                     var paramId = this.getParamId(RegExp.$1, obj);
                     
                     obj.effects.push(this.setGetAopEffect(paramId, 0, -value));
+                } else if (line.match(note4)) {
+                    var value = Number(RegExp.$2) * 0.01;
+                    var paramId =this.getParamId(RegExp.$1, obj);
+                    obj.effects.push(this.setGrowAopEffect(paramId, value, 0));
+                } else if (line.match(note5)) {
+                    var value = Number(RegExp.$2);
+                    var paramId = this.getParamId(RegExp.$1, obj);
+                    
+                    obj.effects.push(this.setGrowAopEffect(paramId, 0, value));
+                } else if (line.match(note6)) {
+                    var value = Number(RegExp.$2);
+                    var paramId = this.getParamId(RegExp.$1, obj);
+                    
+                    obj.effects.push(this.setGrowAopEffect(paramId, 0, -value));
                 }
             }
         }
@@ -852,6 +673,10 @@ FTKR.AOP = FTKR.AOP || {};
 
     DataManager.setGetAopEffect = function(paramId, value1, value2) {
         return this.setEffect(Game_Action.EFFECT_GET_AOP, value1, value2, paramId);
+    };
+
+    DataManager.setGrowAopEffect = function(paramId, value1, value2) {
+        return this.setEffect(Game_Action.EFFECT_GROW_AOP, value1, value2, paramId);
     };
 
     DataManager.setEffect = function(code, value1, value2, dataId) {
@@ -961,9 +786,14 @@ FTKR.AOP = FTKR.AOP || {};
         switch (effect.code) {
             case Game_Action.EFFECT_GET_AOP:
                 this.itemEffectGetAop(target, effect);
-                break;
+                return;
+            case Game_Action.EFFECT_GROW_AOP:
+                this.itemEffectGrowAop(target, effect);
+                return;
+            default:
+                FTKR.AOP.Game_Action_applyItemEffect.call(this, target, effect);
+                return;
         }
-        FTKR.AOP.Game_Action_applyItemEffect.call(this, target, effect);
     };
 
     Game_Action.prototype.itemEffectGetAop = function(target, effect) {
@@ -978,12 +808,23 @@ FTKR.AOP = FTKR.AOP || {};
         }
     };
 
+    Game_Action.prototype.itemEffectGrowAop = function(target, effect) {
+        var value = target.aopParam(effect.dataId) * effect.value1 + effect.value2;
+        value = Math.floor(value);
+        if (value !== 0) {
+            target.addAopParamPlus(effect.dataId, value);
+            this.makeSuccess(target);
+        }
+    };
+
     FTKR.AOP.Game_Action_testItemEffect = Game_Action.prototype.testItemEffect;
     Game_Action.prototype.testItemEffect = function(target, effect) {
         switch (effect.code) {
         case Game_Action.EFFECT_GET_AOP:
             var paramId = effect.dataId;
             return target._aop[paramId] < target.aopParam(paramId) || effect.value1 < 0 || effect.value2 < 0;
+        case Game_Action.EFFECT_GROW_AOP:
+            return true;
         default:
             return FTKR.AOP.Game_Action_testItemEffect.call(this, target, effect);
         }
@@ -1009,27 +850,28 @@ FTKR.AOP = FTKR.AOP || {};
     // Game_BattlerBase
     //=============================================================================
     var prop = {};
-    prop[FTKR.AOP.params[0].code] = { get: function() { return this.aopParam(0); }, configurable: true };
-    prop[FTKR.AOP.params[1].code] = { get: function() { return this.aopParam(1); }, configurable: true };
-    prop[FTKR.AOP.params[2].code] = { get: function() { return this.aopParam(2); }, configurable: true };
-    prop[FTKR.AOP.params[3].code] = { get: function() { return this.aopParam(3); }, configurable: true };
-    prop[FTKR.AOP.params[4].code] = { get: function() { return this.aopParam(4); }, configurable: true };
-    prop[FTKR.AOP.params[5].code] = { get: function() { return this.aopParam(5); }, configurable: true };
-    prop[FTKR.AOP.params[6].code] = { get: function() { return this.aopParam(6); }, configurable: true };
-    prop[FTKR.AOP.params[7].code] = { get: function() { return this.aopParam(7); }, configurable: true };
-    prop[FTKR.AOP.params[8].code] = { get: function() { return this.aopParam(8); }, configurable: true };
-    prop[FTKR.AOP.params[9].code] = { get: function() { return this.aopParam(9); }, configurable: true };
 
-    prop[FTKR.AOP.params[0].current] = { get: function() { return this._aop[0]; }, configurable: true };
-    prop[FTKR.AOP.params[1].current] = { get: function() { return this._aop[1]; }, configurable: true };
-    prop[FTKR.AOP.params[2].current] = { get: function() { return this._aop[2]; }, configurable: true };
-    prop[FTKR.AOP.params[3].current] = { get: function() { return this._aop[3]; }, configurable: true };
-    prop[FTKR.AOP.params[4].current] = { get: function() { return this._aop[4]; }, configurable: true };
-    prop[FTKR.AOP.params[5].current] = { get: function() { return this._aop[5]; }, configurable: true };
-    prop[FTKR.AOP.params[6].current] = { get: function() { return this._aop[6]; }, configurable: true };
-    prop[FTKR.AOP.params[7].current] = { get: function() { return this._aop[7]; }, configurable: true };
-    prop[FTKR.AOP.params[8].current] = { get: function() { return this._aop[8]; }, configurable: true };
-    prop[FTKR.AOP.params[9].current] = { get: function() { return this._aop[9]; }, configurable: true };
+    prop[FTKR.AOP.params[0].code] = { get: function() { return Game_BattlerBase.prototype.aopParam.call(this, 0); }, configurable: true };
+    prop[FTKR.AOP.params[1].code] = { get: function() { return Game_BattlerBase.prototype.aopParam.call(this, 1); }, configurable: true };
+    prop[FTKR.AOP.params[2].code] = { get: function() { return Game_BattlerBase.prototype.aopParam.call(this, 2); }, configurable: true };
+    prop[FTKR.AOP.params[3].code] = { get: function() { return Game_BattlerBase.prototype.aopParam.call(this, 3); }, configurable: true };
+    prop[FTKR.AOP.params[4].code] = { get: function() { return Game_BattlerBase.prototype.aopParam.call(this, 4); }, configurable: true };
+    prop[FTKR.AOP.params[5].code] = { get: function() { return Game_BattlerBase.prototype.aopParam.call(this, 5); }, configurable: true };
+    prop[FTKR.AOP.params[6].code] = { get: function() { return Game_BattlerBase.prototype.aopParam.call(this, 6); }, configurable: true };
+    prop[FTKR.AOP.params[7].code] = { get: function() { return Game_BattlerBase.prototype.aopParam.call(this, 7); }, configurable: true };
+    prop[FTKR.AOP.params[8].code] = { get: function() { return Game_BattlerBase.prototype.aopParam.call(this, 8); }, configurable: true };
+    prop[FTKR.AOP.params[9].code] = { get: function() { return Game_BattlerBase.prototype.aopParam.call(this, 9); }, configurable: true };
+
+    prop[FTKR.AOP.params[0].current] = { get: function() { return Game_BattlerBase.prototype._aop[0]; }, configurable: true };
+    prop[FTKR.AOP.params[1].current] = { get: function() { return Game_BattlerBase.prototype._aop[1]; }, configurable: true };
+    prop[FTKR.AOP.params[2].current] = { get: function() { return Game_BattlerBase.prototype._aop[2]; }, configurable: true };
+    prop[FTKR.AOP.params[3].current] = { get: function() { return Game_BattlerBase.prototype._aop[3]; }, configurable: true };
+    prop[FTKR.AOP.params[4].current] = { get: function() { return Game_BattlerBase.prototype._aop[4]; }, configurable: true };
+    prop[FTKR.AOP.params[5].current] = { get: function() { return Game_BattlerBase.prototype._aop[5]; }, configurable: true };
+    prop[FTKR.AOP.params[6].current] = { get: function() { return Game_BattlerBase.prototype._aop[6]; }, configurable: true };
+    prop[FTKR.AOP.params[7].current] = { get: function() { return Game_BattlerBase.prototype._aop[7]; }, configurable: true };
+    prop[FTKR.AOP.params[8].current] = { get: function() { return Game_BattlerBase.prototype._aop[8]; }, configurable: true };
+    prop[FTKR.AOP.params[9].current] = { get: function() { return Game_BattlerBase.prototype._aop[9]; }, configurable: true };
 
     Object.defineProperties(Game_BattlerBase.prototype, prop);
 
@@ -1068,6 +910,12 @@ FTKR.AOP = FTKR.AOP || {};
 
     Game_BattlerBase.prototype.setAopParamPlus = function(paramId, value) {
         this._aopParamPlus[paramId] = value || 0;
+        this.refresh();
+    };
+
+    Game_BattlerBase.prototype.addAopParamPlus = function(paramId, value) {
+        if (!this._aopParamPlus[paramId]) this._aopParamPlus[paramId] = 0;
+        this._aopParamPlus[paramId] += value;
         this.refresh();
     };
 

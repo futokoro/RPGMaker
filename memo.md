@@ -4,6 +4,9 @@
 不具合についてはできる限り優先して対応しますが、それ以外の要望や他プラグインとの競合回避については、余裕がある時に気が向いたら対応します。
 
 ## 要望
+* FTKR_OriginalSceneWindow
+    * ウィンドウアクティブの命令の不具合修正
+    * コマンドウィンドウのウィンドウ高さ指定機能
 
 ## 要望はないがやりたいと思っていること
 * FTKR_SkillUpgradeSystem
@@ -17,6 +20,8 @@
     * FF12のガンビット的な機能も付けてみたい
 * FTKR_AddOriginalParameters
     * パラメータの追加方法をもう少し簡単にできないか⇒リメイク要
+* FTKR_OriginalSceneWindow
+    * マニュアルの改定(使い方の例を掲載)
 
 ## 保留
 * FTKR_SkillTreeSystem
@@ -28,6 +33,10 @@
     * 他プラグイン(YEP_X_BattleSysCBT)との競合回避⇒厳しいです。
 * FTKR_ExMessageWindow2
     * 他プラグイン(YEP_X_MessageBackLog)との競合回避⇒リメイク要のため保留
+* FTKR_CustomSimpleActorStatus
+    * パラメータの表示位置を、左揃えだけでなく、中央や右揃えにもできないか⇒大規模な改造が必要のため保留
+* FTKR_GDM_WindowEditor
+    * 選択肢周りの不具合対応⇒このプラグインを今後どうするか決めかねているため保留
 
 ## 対応済み
 * FTKR_CSS_EquipStatusを使うと処理が重くなる？
@@ -50,7 +59,8 @@
     * 通常能力値以外の各種能力値を表示する機能を追加
 * FTKR_ExItemConfig_Effect
     * 不具合)内容1/内容2 で設定した内容が反映されない？FTKR_ExStateEffectsと併用
-
+* FTKR_AddOriginalParameters
+    * アイテムやスキルの効果で、追加パラメータの永続加算ができるように
 
 [トップページに戻る](README.md)
 

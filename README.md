@@ -37,7 +37,7 @@
 
 | プラグイン | マニュアル | ダウンロード | 更新日 |  説明 |
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
-| [FTKR_AddOriginalParameters](FTKR_AddOriginalParameters.js) | [あり](FTKR_AddOriginalParameters.ja.md) | [v1.2.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AddOriginalParameters.js) | 2018/10/16 |オリジナルパラメータを追加する |
+| [FTKR_AddOriginalParameters](FTKR_AddOriginalParameters.js) | [あり](FTKR_AddOriginalParameters.ja.md) | [v1.3.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_AddOriginalParameters.js) | 2020/03/21 |オリジナルパラメータを追加する |
 | [FTKR_SearchPartyParam](FTKR_SearchPartyParam.js) | [あり](FTKR_SearchPartyParam.ja.md) | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_SearchPartyParam.js) | 2017/04/14 | パーティー内のパラメータに関するスクリプトを実装する |
 | [FTKR_ExSvMotion](FTKR_ExSvMotion.js) | [仮版](FTKR_ExSvMotion.ja.md) | [v1.4.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExSvMotion.js) | 2019/04/13 | SVキャラのモーションを拡張する |
 | [FTKR_FacialImageDifference](FTKR_FacialImageDifference.js) | [仮版](FTKR_FacialImageDifference.ja.md) | [v1.1.7](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_FacialImageDifference.js) | 2017/12/02 | アクターの状態によって顔画像を変える<br>顔画像にアニメーションを表示する |
@@ -314,11 +314,14 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 |:-----------|:-----------:|:-------------|:-------------|:-------------|
 | [FTKR_ActionGauge](FTKR_ActionGauge.js) | なし | [v0.7.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ActionGauge.js) | 2017/04/21 | アクションゲージ |
 | [FTKR_addon_TMShooting](FTKR_addon_TMShooting.js) | なし | [v0.2.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_addon_TMShooting.js) | 2018/05/09 | tomoakyさんのシューティングプラグインの機能拡張 |
-| [FTKR_GDM_WindowEditor](FTKR_GDM_WindowEditor.js) | [仮版](FTKR_GDM_WindowEditor.ja.md) | [v0.9.17](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_GDM_WindowEditor.js) | 2018/09/15 | トリアコンタンさんのGUI画面デザインプラグイン(GraphicalDesignMode.js)の機能拡張 |
+| [FTKR_GDM_WindowEditor](FTKR_GDM_WindowEditor.js) | [仮版](FTKR_GDM_WindowEditor.ja.md) | [v0.9.17](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_GDM_WindowEditor.js) | 2018/09/15 | トリアコンタンさんのGUI画面デザインプラグイン(GraphicalDesignMode.js)の機能拡張<br>不具合有 |
 
 # 更新情報
 
 2020/03の更新情報
+
+### 2020/03/21
+* [FTKR_AddOriginalParameters](FTKR_AddOriginalParameters.ja.md) v1.3.0
 
 ### 2020/03/18
 * [FTKR_ItemCompositionSystem](FTKR_ItemCompositionSystem.ja.md) v1.7.4(誤字修正のみ)
