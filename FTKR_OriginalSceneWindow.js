@@ -574,7 +574,12 @@ function Game_OswScene() {
                     break;
                 case '高さ':
                 case 'HEIGHT':
-                    var h = setArgNum(args[i+1]);
+                    var match = /(\d+)L/i.exec(args[i+1]);
+                    if(match) {
+                        var h = window._lineHeight * match[1] + window._padding * 2;
+                    } else {
+                        var h = setArgNum(args[i+1]);
+                    }
                     window.setHeight(h);
                     i += 1;
                     break;
