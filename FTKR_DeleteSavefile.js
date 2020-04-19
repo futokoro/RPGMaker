@@ -318,6 +318,7 @@ FTKR.DSF = FTKR.DSF || {};
         this._confCommandWindow.setHandler('cancel', this.onConfirmationCancel.bind(this));
         this.addWindow(this._confCommandWindow);
         this._confCommandWindow.hide();
+        this._confCommandWindow.deactivate();
     };
 
     Scene_File.prototype.onListOk = function() {
