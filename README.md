@@ -213,7 +213,7 @@ FTKR_CSS_GDMはFTKR_CustomSimpleActorStatusに統合しました
 | [FTKR_BattleAbortConditions](FTKR_BattleAbortConditions.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_BattleAbortConditions.js) | 2018/02/12 | 設定した条件を満たすと、バトルを中断して勝利または敗北する |
 | [FTKR_MaxBattleMembers](FTKR_MaxBattleMembers.js) | なし | [v1.0.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_MaxBattleMembers.js) | 2018/02/25 | バトルメンバーの最大人数を変数で管理する |
 | [FTKR_ChangeBattleSpeed](FTKR_ChangeBattleSpeed.js) | なし | [v1.0.3](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ChangeBattleSpeed.js) | 2019/04/07 | バトル中の各種速度を変数で管理する |
-| [FTKR_BattleWindowLayout](FTKR_BattleWindowLayout.js) | [あり](FTKR_BattleWindowLayout.ja.md) | [v1.2.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_BattleWindowLayout.js) | 2018/08/19 | 戦闘時のウィンドウ配置を変更する |
+| [FTKR_BattleWindowLayout](FTKR_BattleWindowLayout.js) | [あり](FTKR_BattleWindowLayout.ja.md) | [v1.3.0](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_BattleWindowLayout.js) | 2020/04/26 | 戦闘時のウィンドウ配置を変更する |
 | [FTKR_ExForceAction](FTKR_ExForceAction.js) | [あり](FTKR_ExForceAction.ja.md) | [v1.1.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExForceAction.js) | 2018/08/06 | 戦闘行動の強制コマンドの機能を拡張する |
 | [FTKR_ExGuardEffect](FTKR_ExGuardEffect.js) | [あり](FTKR_ExGuardEffect.ja.md) | [v1.0.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_ExGuardEffect.js) | 2020/02/11 | 防御の効果を拡張する |
 | [FTKR_DisplayEnemyParameters](FTKR_DisplayEnemyParameters.js) | [あり](FTKR_DisplayEnemyParameters.ja.md) | [v1.1.1](https://raw.githubusercontent.com/futokoro/RPGMaker/master/FTKR_DisplayEnemyParameters.js) | 2018/12/20 | 戦闘画面にエネミーのパラメータを表示する |
@@ -318,17 +318,10 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 # 更新情報
 
-2020/03の更新情報
+2020/04の更新情報
 
-### 2020/03/21
-* [FTKR_AddOriginalParameters](FTKR_AddOriginalParameters.ja.md) v1.3.0
-* [FTKR_OriginalSceneWindow](FTKR_OriginalSceneWindow.ja.md) v1.7.1
-
-### 2020/03/18
-* [FTKR_ItemCompositionSystem](FTKR_ItemCompositionSystem.ja.md) v1.7.4(誤字修正のみ)
-
-### 2020/03/02
-* [FTKR_ExBattleEvent](FTKR_ExBattleEvent.ja.md) v1.3.6
+### 2020/04/26
+* [FTKR_BattleWindowLayout](FTKR_BattleWindowLayout.ja.md) v1.3.0
 
 [過去の更新情報](note.md)
 

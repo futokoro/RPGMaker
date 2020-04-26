@@ -4,8 +4,8 @@
 // プラグインNo : 76
 // 作成者     : フトコロ
 // 作成日     : 2018/04/08
-// 最終更新日 : 2018/08/19
-// バージョン : v1.2.0
+// 最終更新日 : 2020/04/26
+// バージョン : v1.3.0
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.BWL = FTKR.BWL || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.0 戦闘時のウィンドウ配置を変更する
+ * @plugindesc v1.3.0 戦闘時のウィンドウ配置を変更する
  * @author フトコロ
  *
  * @param Show Actor Face
@@ -104,6 +104,26 @@ FTKR.BWL = FTKR.BWL || {};
  * @default {"width":"","height":"","background":"0"}
  * @parent Actor
  * 
+ * @param Status
+ * @text ステータスウィンドウの設定
+ * 
+ * @param Hide When Selecting Actor
+ * @parent Status
+ * @desc アクター選択時にステータスウィンドウを非表示にする
+ * @type boolean
+ * @on 有効
+ * @off 無効
+ * @default true
+ * 
+ * @param Hide When Selecting Enemy
+ * @parent Status
+ * @desc エネミー選択時にステータスウィンドウを非表示にする
+ * @type boolean
+ * @on 有効
+ * @off 無効
+ * @default true
+ * 
+ * 
  * @help 
  *-----------------------------------------------------------------------------
  * 概要
@@ -153,6 +173,10 @@ FTKR.BWL = FTKR.BWL || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.3.0 - 2020/04/26 : 機能追加
+ *    1. アクター選択時とエネミー選択時にステータスウィンドウを非表示にする機能を
+ *       プラグインパラメータでON/OFFできるように変更。
  * 
  * v1.2.0 - 2018/08/19 : 機能追加
  *    1. パーティーコマンドとアクターコマンドの設定機能を追加。
@@ -227,6 +251,9 @@ FTKR.BWL = FTKR.BWL || {};
         actorCmdWindow : paramParse(parameters['Actor Command Window']),
     };
 
+    var enabledStatusWhenSelectActor = paramParse(parameters['Hide When Selecting Actor']);
+    var enabledStatusWhenSelectEnemy = paramParse(parameters['Hide When Selecting Enemy']);
+
     //=============================================================================
     // Scene_Battle
     //=============================================================================
@@ -241,6 +268,7 @@ FTKR.BWL = FTKR.BWL || {};
         this._actorCommandWindow.refreshPosition();
     };
 
+    if (enabledStatusWhenSelectActor) {
     var _BWL_Scene_Battle_selectActorSelection = Scene_Battle.prototype.selectActorSelection;
     Scene_Battle.prototype.selectActorSelection = function() {
         _BWL_Scene_Battle_selectActorSelection.call(this);
@@ -258,7 +286,9 @@ FTKR.BWL = FTKR.BWL || {};
         _BWL_Scene_Battle_onActorCancel.call(this);
         this._statusWindow.show();
     };
+    };//enabledStatusWhenSelectActor
 
+    if (enabledStatusWhenSelectEnemy) {
     var _BWL_Scene_Battle_selectEnemySelection = Scene_Battle.prototype.selectEnemySelection;
     Scene_Battle.prototype.selectEnemySelection = function() {
         _BWL_Scene_Battle_selectEnemySelection.call(this);
@@ -276,6 +306,7 @@ FTKR.BWL = FTKR.BWL || {};
         _BWL_Scene_Battle_onEnemyCancel.call(this);
         this._statusWindow.show();
     };
+    };//enabledStatusWhenSelectEnemy
 
     //=============================================================================
     // Window_BattleStatus

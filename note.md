@@ -2,6 +2,18 @@
 
 # 過去の更新情報
 
+## 2020/03の更新情報
+
+### 2020/03/21
+* [FTKR_AddOriginalParameters](FTKR_AddOriginalParameters.ja.md) v1.3.0
+* [FTKR_OriginalSceneWindow](FTKR_OriginalSceneWindow.ja.md) v1.7.1
+
+### 2020/03/18
+* [FTKR_ItemCompositionSystem](FTKR_ItemCompositionSystem.ja.md) v1.7.4(誤字修正のみ)
+
+### 2020/03/02
+* [FTKR_ExBattleEvent](FTKR_ExBattleEvent.ja.md) v1.3.6
+
 ## 2020/02の更新情報
 
 ### 2020/02/11
