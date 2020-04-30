@@ -4,8 +4,8 @@
 // プラグインNo : 69
 // 作成者     : フトコロ
 // 作成日     : 2018/02/25
-// 最終更新日 : 2018/04/06
-// バージョン : v1.0.4
+// 最終更新日 : 2020/05/01
+// バージョン : v1.0.5
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.DSF = FTKR.DSF || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.4 セーブファイルを削除するコマンドを追加するプラグイン
+ * @plugindesc v1.0.5 セーブファイルを削除するコマンドを追加するプラグイン
  * @author フトコロ
  *
  * @param --コマンド名--
@@ -73,7 +73,7 @@ FTKR.DSF = FTKR.DSF || {};
  * @default false
  *
  * @param Conf Window Setting
- * @desc 確認用ウィンドウを設定します。
+ * @desc 確認用ウィンドウを設定します。<Enable Conf Window Setting>が有効の場合にこの設定を使用します。
  * @default 
  * @type struct<window>
  * 
@@ -116,6 +116,13 @@ FTKR.DSF = FTKR.DSF || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.5 - 2020/05/01 : 不具合修正
+ *    1. セーブデータロード時に決定キーを連打すると、カーソルを合わせていた
+ *       セーブデータが消える不具合を修正。(by elleonard氏)
+ *    2. <Enable Conf Window Setting>を無効にした場合に、確認用ウィンドウの
+ *       ウィンドウ枠が表示されない不具合を修正。
+ *    3. オーバーライドで定義していたメソッドを修正。
  * 
  * v1.0.4 - 2018/04/06 : 仕様変更
  *    1. プラグインパラメータが空欄だった場合の処理を一部見直し。
@@ -228,6 +235,10 @@ FTKR.DSF = FTKR.DSF || {};
     };
     FTKR.DSF.conf.setting.enabled = paramParse(parameters['Enable Conf Window Setting']) || false;
 
+    //=============================================================================
+    // SoundManager
+    //=============================================================================
+
     SoundManager.playDeleteSavefile = function() {
         var sound = FTKR.DSF.deleteSe;
         if (sound && sound.name) {
@@ -257,44 +268,43 @@ FTKR.DSF = FTKR.DSF || {};
     //=============================================================================
     // Scene_File
     //=============================================================================
-    //書き換え
+
+    var _DSF_Scene_File_create = Scene_File.prototype.create;
     Scene_File.prototype.create = function() {
-        Scene_MenuBase.prototype.create.call(this);
-        DataManager.loadAllSavefileImages();
-        this.createHelpWindow();
+        _DSF_Scene_File_create.call(this);
         this.createCommandWindow();
-        this.createListWindow();
+        this.changePositionWindow();
         if (FTKR.DSF.conf.enabled) {
             this.createDsdConfWindows();
         }
     };
 
+    //atWindowで指定したウィンドウの後に、addWindowで指定したウィンドウを_windowLayerのchildに加える。
+    Scene_File.prototype.addWindowAtW = function(addWindow, atWindow) {
+        this._windowLayer.children.some(function(wchild, i){
+            if (wchild === atWindow) {
+                windowIndex = i;
+                return true;
+            }
+        },this);
+        this._windowLayer.addChildAt(addWindow, windowIndex);
+    };
+
     Scene_File.prototype.createCommandWindow = function() {
-        var x = 0;
-        var y = this._helpWindow.height;
-        this._commandWindow = new Window_SavefileCommand(x, y, this.mode());
+        var wx = 0;
+        var wy = this._helpWindow.height;
+        this._commandWindow = new Window_SavefileCommand(wx, wy, this.mode());
         this._commandWindow.setHandler('list',   this.onListOk.bind(this));
         this._commandWindow.setHandler('delete', this.onDeleteOk.bind(this));
         this._commandWindow.setHandler('cancel', this.popScene.bind(this));
-        this.addWindow(this._commandWindow);
+        this.addWindowAtW(this._commandWindow, this._helpWindow);
     };
 
-    //書き換え
-    Scene_File.prototype.createListWindow = function() {
-        var x = 0;
-        var y = this._commandWindow.y + this._commandWindow.height;
-        var width = Graphics.boxWidth;
-        var height = Graphics.boxHeight - y;
-        this._listWindow = new Window_SavefileList(x, y, width, height);
-        this._listWindow.setHandler('ok',     this.onSavefileOk.bind(this));
-        this._listWindow.setHandler('cancel', this.onSavefileCancel.bind(this));
-        this._listWindow.select(this.firstSavefileIndex());
-        this._listWindow.setTopRow(this.firstSavefileIndex() - 2);
-        this._listWindow.setMode(this.mode());
-        this._listWindow.refresh();
+    Scene_File.prototype.changePositionWindow = function() {
+        this._listWindow.y = this._commandWindow.y + this._commandWindow.height;
+        this._listWindow.height = Graphics.boxHeight - this._listWindow.y;
         this._listWindow.deactivate();
         this._listWindow.deselect();
-        this.addWindow(this._listWindow);
     };
 
     Scene_File.prototype.createDsdConfWindows = function() {
@@ -303,7 +313,8 @@ FTKR.DSF = FTKR.DSF || {};
     }
 
     Scene_File.prototype.createDsdConfTitle = function() {
-        var wx = FTKR.DSF.conf.setting.enabled && FTKR.DSF.conf.setting.width ? (Graphics.boxWidth - FTKR.DSF.conf.setting.width) / 2 : Graphics.boxWidth / 6;
+        var wx = FTKR.DSF.conf.setting.enabled && FTKR.DSF.conf.setting.width ?
+                    (Graphics.boxWidth - FTKR.DSF.conf.setting.width) / 2 : Graphics.boxWidth / 6;
         var wy = Graphics.boxHeight / 2 - this._helpWindow.fittingHeight(1);
         this._confTitleWindow = new Window_DsdConfTitle(wx, wy);
         this.addWindow(this._confTitleWindow);
@@ -318,6 +329,7 @@ FTKR.DSF = FTKR.DSF || {};
         this._confCommandWindow.setHandler('cancel', this.onConfirmationCancel.bind(this));
         this.addWindow(this._confCommandWindow);
         this._confCommandWindow.hide();
+        this._confCommandWindow.deactivate();
     };
 
     Scene_File.prototype.onListOk = function() {
@@ -488,7 +500,9 @@ FTKR.DSF = FTKR.DSF || {};
     };
 
     Window_DsdConfTitle.prototype._refreshFrame = function() {
-        if (FTKR.DSF.conf.setting.enabled && FTKR.DSF.conf.setting.frame) Window.prototype._refreshFrame.call(this);
+        if (FTKR.DSF.conf.setting.enabled && FTKR.DSF.conf.setting.frame || !FTKR.DSF.conf.setting.enabled) {
+            Window.prototype._refreshFrame.call(this);
+        }
     };
 
     //=============================================================================
@@ -537,7 +551,9 @@ FTKR.DSF = FTKR.DSF || {};
     };
 
     Window_DsdConf.prototype._refreshFrame = function() {
-        if (FTKR.DSF.conf.setting.enabled && FTKR.DSF.conf.setting.frame) Window.prototype._refreshFrame.call(this);
+        if (FTKR.DSF.conf.setting.enabled && FTKR.DSF.conf.setting.frame || !FTKR.DSF.conf.setting.enabled) {
+            Window.prototype._refreshFrame.call(this);
+        }
     };
 
 }());//EOF

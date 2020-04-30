@@ -2,6 +2,11 @@
 
 # 過去の更新情報
 
+## 2020/04の更新情報
+
+### 2020/04/26
+* [FTKR_BattleWindowLayout](FTKR_BattleWindowLayout.ja.md) v1.3.0
+
 ## 2020/03の更新情報
 
 ### 2020/03/21
