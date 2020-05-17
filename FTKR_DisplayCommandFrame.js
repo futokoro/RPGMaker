@@ -4,7 +4,7 @@
 // プラグインNo : 8
 // 作成者     : フトコロ
 // 作成日     : 2017/03/08
-// 最終更新日 : 2017/11/26
+// 最終更新日 : 2020/05/17
 // バージョン : v1.2.1
 //=======↑本プラグインを改変した場合でも、この欄は消さないでください↑===============
 
@@ -16,7 +16,7 @@ FTKR.DCF = FTKR.DCF || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.2.1 コマンドに枠を付けるプラグイン
+ * @plugindesc v1.2.2 コマンドに枠を付けるプラグイン
  * @author フトコロ
  *
  * @param --Basic Setting--
@@ -468,6 +468,9 @@ FTKR.DCF = FTKR.DCF || {};
  * 変更来歴
  *-----------------------------------------------------------------------------
  * 
+ * v1.2.2 - 2020/05/17 : 不具合修正
+ *    1. 枠画像が初回時に表示されないことがある不具合を修正。(by emptybraces氏)
+ * 
  * v1.2.1 - 2017/11/24 : 不具合修正
  *    1. FTKR_ExBattleCommand.jsとの競合回避。
  * 
@@ -594,10 +597,10 @@ FTKR.DCF = FTKR.DCF || {};
     //=============================================================================
 
     //枠画像ファイルの事前ロード
-    var _DCF_DataManager_loadDatabase = DataManager.loadDatabase;
-    DataManager.loadDatabase = function(name, src) {
-        _DCF_DataManager_loadDatabase.call(this, name, src);
-        ImageManager.loadSystem(FTKR.DCF.frame.image.name);
+    var _Scene_Boot_loadSystemImages = Scene_Boot.loadSystemImages;
+    Scene_Boot.loadSystemImages = function() {
+        _Scene_Boot_loadSystemImages.call(this);
+        ImageManager.reserveSystem(FTKR.DCF.frame.image.name);
     };
 
     //=============================================================================

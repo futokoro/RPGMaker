@@ -320,6 +320,9 @@ FTKR_BattleCommandIconはFTKR_ExBattleCommandに統合しました
 
 2020/05の更新情報
 
+### 2020/05/17
+* [FTKR_DisplayCommandFrame](FTKR_DisplayCommandFrame.ja.md) v1.2.2
+
 ### 2020/05/01
 * [FTKR_DeleteSavefile](FTKR_DeleteSavefile.ja.md) v1.0.5
 

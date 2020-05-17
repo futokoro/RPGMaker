@@ -227,7 +227,8 @@ MV標準では、以下のウィンドウが相当します。
 
 | バージョン | 公開日 | 更新内容 |
 | --- | --- | --- |
-| [ver1.2.1](FTKR_DisplayCommandFrame.js) | 2017/11/26 | FTKR_ExBattleCommand.jsとの競合回避 |
+| [ver1.2.2](FTKR_DisplayCommandFrame.js) | 2020/05/17 | 枠画像が初回時に表示されないことがある不具合を修正。(by emptybraces氏) |
+| ver1.2.1 | 2017/11/26 | FTKR_ExBattleCommand.jsとの競合回避 |
 | ver1.2.0 | 2017/11/20 | スキルリストに枠を表示する機能を追加 |
 | ver1.1.1 | 2017/04/21 | 枠画像ディプロイメント対応 |
 | ver1.1.0 | 2017/03/31 | 仕様変更 |
