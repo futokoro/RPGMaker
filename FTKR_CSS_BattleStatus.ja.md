@@ -50,7 +50,7 @@ FTKR_CSS_BattleStatus.js
 本プラグインのステータス画面のレイアウト設定方法は、[FTKR_CustomSimpleActorStatus](FTKR_CustomSimpleActorStatus.js)と同じです。
 プラグインパラメータ名も同じものを使用しています。
 
-設定方法については、FTKR_CustomSimpleActorStatusの[マニュアル](#FTKR_CustomSimpleActorStatus.ja.md)を参照してください。
+設定方法については、FTKR_CustomSimpleActorStatusの[マニュアル](FTKR_CustomSimpleActorStatus.ja.md)を参照してください。
 
 ### SVキャラの表示について
 
