@@ -4,8 +4,8 @@
 // プラグインNo : 79
 // 作成者     : フトコロ
 // 作成日     : 2018/04/15
-// 最終更新日 : 2020/02/11
-// バージョン : v1.0.1
+// 最終更新日 : 2020/09/08
+// バージョン : v1.0.2
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,7 +16,7 @@ FTKR.EGF = FTKR.EGF || {};
 
 //=============================================================================
 /*:
- * @plugindesc v1.0.1 防御の効果を拡張するプラグイン
+ * @plugindesc v1.0.2 防御の効果を拡張するプラグイン
  * @author フトコロ
  *
  * @param Guard Effect Value
@@ -128,6 +128,9 @@ FTKR.EGF = FTKR.EGF || {};
  *-----------------------------------------------------------------------------
  * 変更来歴
  *-----------------------------------------------------------------------------
+ * 
+ * v1.0.2 - 2020/09/08 : 不具合修正
+ *      1. HP回復時にも防御を実行していた不具合を修正。
  * 
  * v1.0.1 - 2020/02/11 : 不具合修正
  *      1. プラグインパラメータDisable Damage Motionの初期値を修正。
@@ -319,15 +322,20 @@ FTKR.EGF = FTKR.EGF || {};
     //=============================================================================
     // Game_Action
     //=============================================================================
-    //書き換え
+
+    var _EGF_Game_Action_applyGuard = Game_Action.prototype.applyGuard;
     Game_Action.prototype.applyGuard = function(damage, target) {
         var result = target.result();
-        result.guarded = Math.random() < this.itemGuard(target);
+        result.guarded = this.canGuard(damage, target);
         if (result.guarded) {
             return this.makeGuardDamage(damage, target);
         } else {
-            return damage;
+            return _EGF_Game_Action_applyGuard.call(this, damage, target);
         }
+    };
+
+    Game_Action.prototype.canGuard = function(damage, target) {
+        return damage > 0 && Math.random() < this.itemGuard(target);
     };
 
     Game_Action.prototype.itemGuard = function(target) {
@@ -423,26 +431,13 @@ FTKR.EGF = FTKR.EGF || {};
         if (fmt) this.push('addText', fmt.format(target.name()));
     };
 
-    Window_BattleLog.prototype.performGuardDamage = function(target) {
-        target.performGuardDamage();
-    };
-
-    //書き換え
-    Window_BattleLog.prototype.displayHpDamage = function(target) {
-        if (target.result().hpAffected) {
-            if (target.result().hpDamage > 0 && !target.result().drain) {
-                if (target.result().guarded) {
-                    this.push('performGuardDamage', target);
-                } else {
-                    this.push('performDamage', target);
-                }
-            }
-            if (target.result().hpDamage < 0) {
-                this.push('performRecovery', target);
-            }
-            this.push('addText', this.makeHpDamageText(target));
+    var _EGF_Window_BattleLog_performDamage = Window_BattleLog.prototype.performDamage;
+    Window_BattleLog.prototype.performDamage = function(target) {
+        if (target.result().guarded) {
+            target.performGuardDamage();
+        } else {
+            _EGF_Window_BattleLog_performDamage.call(this, target);
         }
     };
-
-    
+   
 }());//EOF
